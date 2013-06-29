@@ -1,3 +1,4 @@
-name: opencloset
+name: OPENCLOSET
 pygments: true
 timezone: Asia/Seoul
+baseurl: /opencloset

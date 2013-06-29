@@ -7,25 +7,28 @@
     <meta name="viewport" content="width=device-width">
 
     <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="css/flat-ui.css">
+    <link rel="stylesheet" href="{{ site.baseurl }}/css/flat-ui.css">
 
     <!-- syntax highlighting CSS -->
-    <link rel="stylesheet" href="css/syntax.css">
+    <link rel="stylesheet" href="{{ site.baseurl }}/css/syntax.css">
 
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="{{ site.baseurl }}/css/main.css">
 
   </head>
   <body>
     <div class="container">
+      <form class="form-search">
+        <input type="text" placeholder="175/65" class="input-medium search-query">
+        <button type="submit" class="btn">Search in opencloset</button>
+      </form>
       <header>
-
         <div class="navbar">
           <div class="navbar-inner">
-            <a class="brand" href="index.html">{{ site.name }}</a>
+            <a class="brand" href="{{ site.baseurl }}/">{{ site.name }}</a>
             <ul class="nav">
-              <li class="active"><a href="index.html">Home</a></li>
-              <li><a href="clothes">Clothes</a></li>
+              <li class="active"><a href="{{ site.baseurl }}/">Home</a></li>
+              <li><a href="{{ site.baseurl }}/clothes/">Clothes</a></li>
             </ul>
           </div>
         </div>
