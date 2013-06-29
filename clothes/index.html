@@ -1,0 +1,90 @@
+---
+layout: default
+title: Clothes
+---
+
+<h1>Clothes</h1>
+
+<ul class="clothes-group">
+  {% for index in (1..10) %}
+  <li class="clothes-item">
+    <img src="{{ site.baseurl }}/images/clothes-sample.jpg" alt="sample">
+    <span class="label label-success">대여가능</span>
+    <p>
+      <em>MD1119</em> 기증자: <a href="#">한만일</a>
+    </p>
+    <p class="well">
+      옷에 대한 간략한 소개?
+    </p>
+    <table class="table table-bordered table-condensed">
+      <thead>
+        <tr>
+          <th></th>
+          <th>160</th>
+          <th>167</th>
+          <th>171</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th>58</th>
+          <td>
+            <span class="satisfaction-5">&nbsp;</span>
+            <span class="satisfaction-4">&nbsp;</span>
+            <span class="satisfaction-5">&nbsp;</span>
+            <span class="satisfaction-4">&nbsp;</span>
+            <span class="satisfaction-5">&nbsp;</span>
+          </td>
+          <td>
+          </td>
+          <td>
+          </td>
+        </tr>
+        <tr>
+          <th>64</th>
+          <td>
+            <span class="satisfaction-4">&nbsp;</span>
+            <span class="satisfaction-3">&nbsp;</span>
+            <span class="satisfaction-4">&nbsp;</span>
+            <span class="satisfaction-3">&nbsp;</span>
+            <span class="satisfaction-4">&nbsp;</span>
+          </td>
+          <td>
+            <span class="satisfaction-3">&nbsp;</span>
+            <span class="satisfaction-3">&nbsp;</span>
+            <span class="satisfaction-3">&nbsp;</span>
+            <span class="satisfaction-2">&nbsp;</span>
+            <span class="satisfaction-3">&nbsp;</span>
+          </td>
+          <td>
+            <span class="satisfaction-2">&nbsp;</span>
+            <span class="satisfaction-2">&nbsp;</span>
+            <span class="satisfaction-3">&nbsp;</span>
+            <span class="satisfaction-2">&nbsp;</span>
+            <span class="satisfaction-4">&nbsp;</span>
+          </td>
+        </tr>
+        <tr>
+          <th>73</th>
+          <td>
+          </td>
+          <td>
+            <span class="satisfaction-2">&nbsp;</span>
+            <span class="satisfaction-2">&nbsp;</span>
+            <span class="satisfaction-2">&nbsp;</span>
+            <span class="satisfaction-2">&nbsp;</span>
+            <span class="satisfaction-2">&nbsp;</span>
+          </td>
+          <td>
+            <span class="satisfaction-1">&nbsp;</span>
+            <span class="satisfaction-1">&nbsp;</span>
+            <span class="satisfaction-2">&nbsp;</span>
+            <span class="satisfaction-1">&nbsp;</span>
+            <span class="satisfaction-1">&nbsp;</span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  {% endfor %}
+</ul>

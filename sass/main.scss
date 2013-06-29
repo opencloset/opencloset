@@ -24,3 +24,30 @@ body {
       }
    }
 }
+
+.clothes-item {
+   &:hover {
+      outline: solid thick darken(white, 5%);
+      cursor: pointer;
+   }
+}
+
+$color: green;
+.satisfaction-1,.satisfaction-2,.satisfaction-3,.satisfaction-4,.satisfaction-5 {
+   display: block;
+}
+.satisfaction-1 {
+   background-color: darken($color, 15%);
+}
+.satisfaction-2 {
+   background-color: darken($color, 5%);
+}
+.satisfaction-3 {
+   background-color: $color;
+}
+.satisfaction-4 {
+   background-color: lighten($color, 5%);
+}
+.satisfaction-5 {
+   background-color: lighten($color, 15%);
+}

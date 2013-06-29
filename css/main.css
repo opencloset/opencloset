@@ -6,3 +6,17 @@ body { padding-top: 60px; position: relative; }
 .footer-links { margin: 10px 0; }
 .footer-links li { display: inline; padding: 0 2px; }
 .footer-links li:first-child { padding-left: 0; }
+
+.clothes-item:hover { outline: solid thick #f2f2f2; cursor: pointer; }
+
+.satisfaction-1, .satisfaction-2, .satisfaction-3, .satisfaction-4, .satisfaction-5 { display: block; }
+
+.satisfaction-1 { background-color: #003400; }
+
+.satisfaction-2 { background-color: #006700; }
+
+.satisfaction-3 { background-color: green; }
+
+.satisfaction-4 { background-color: #009a00; }
+
+.satisfaction-5 { background-color: #00cc00; }
