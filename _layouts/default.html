@@ -7,6 +7,8 @@
     <meta name="viewport" content="width=device-width">
 
     <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ site.baseurl }}/css/bootstrap-datetimepicker.min.css">
+    
     <link rel="stylesheet" href="{{ site.baseurl }}/css/flat-ui.css">
 
     <!-- syntax highlighting CSS -->
@@ -46,6 +48,16 @@
       </footer>
     </div>
 
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.0.2/jquery.min.js"></script>
     <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+    <script src="{{ site.baseurl }}/js/bootstrap-datetimepicker.min.js"></script>
+    <script type="text/javascript">
+  $(function() {
+    $('#datetimepicker1').datetimepicker({
+      language: 'pt-BR'
+    });
+  });
+    </script>
+
   </body>
 </html>

@@ -1,0 +1,79 @@
+---
+layout: default
+title: order 'M1701113'
+---
+
+<form class="form-horizontal">
+  <div class="control-group">
+    <label class="control-label" for="inputEmail">Email</label>
+    <div class="controls">
+      <input type="text" id="inputEmail" placeholder="Email">
+    </div>
+  </div>
+  <div class="control-group">
+    <label class="control-label" for="inputName">Name</label>
+    <div class="controls">
+      <input type="text" id="inputName" placeholder="Yourname">
+    </div>
+  </div>
+  <div class="control-group">
+    <label class="control-label" for="inputDate">Date</label>
+    <div class="controls">
+      <div id="datetimepicker1" class="input-append date">
+        <input data-format="dd/MM/yyyy hh:mm:ss" type="text"></input>
+        <span class="add-on">
+          <i data-time-icon="icon-time" data-date-icon="icon-calendar">
+          </i>
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <div class="control-group">
+    <label class="control-label" for="inputOthers">Others</label>
+    <div class="controls">
+      <textarea></textarea>
+    </div>
+  </div>
+
+  <div class="control-group">
+    <div class="controls">
+      <button type="submit" class="btn">대여</button>
+    </div>
+  </div>
+</form>
+
+
+<form>
+  <fieldset>
+    <legend>만족도조사</legend>
+    <label>키</label>
+    <input type="text" placeholder="cm">
+
+    <label>몸무게</label>
+    <input type="text" placeholder="kg">
+
+    <table class="table table-bordered table-condensed">
+      <thead>
+        <tr>
+          <th>가슴</th>
+          <th>팔길이</th>
+          <th>허리</th>
+          <th>상의</th>
+          <th>하의</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><input type="text"></td>
+          <td><input type="text"></td>
+          <td><input type="text"></td>
+          <td><input type="text"></td>
+          <td><input type="text"></td>
+       </tr>
+      </tbody>
+    </table>
+
+    <a href="#" class="btn">skip</a> or <button type="submit" class="btn btn-primary">Submit</button>
+  </fieldset>
+</form>
