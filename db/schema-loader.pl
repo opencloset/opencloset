@@ -24,7 +24,7 @@ my $DB_PASSWORD = $ENV{OPENCLOSET_PASSWORD} || '';
         custom_column_info        => sub {
             my ($table, $col_name, $col_info) = @_;
             if ($col_name =~ /_date$/) {
-                # set_on_create => 1, 
+                # set_on_create => 1,
                 return {%{$col_info}, inflate_datetime => 1};
             }
         }
