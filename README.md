@@ -1,6 +1,14 @@
 opencloset
 ==========
 
+### SETUP
+
+    $ export OPENCLOSET_DB=opencloset
+    $ export OPENCLOSET_USERNAME=username    # DB username
+    $ export OPENCLOSET_PASSWORD=password    # DB password
+    $ mysql -u $OPENCLOSET_USERNAME -p -e 'CREATE DATABASE opencloset'
+    $ mysql -u $OPENCLOSET_USERNAME -p $OPENCLOSET_DB < db/init.sql
+
 ### 이슈, 제안이나 의견
 
 팀과 커뮤니케이션이 필요할때에는, email 이나 전화를 주셔도 됩니다만,
