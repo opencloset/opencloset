@@ -9,7 +9,7 @@ title: Register
   <div class="control-group">
     <label class="control-label" for="inputName">성명</label>
     <div class="controls">
-      <input type="text" id="inputName" data-provide="typeahead" data-items="4" data-source='["01011111111 홍길동","01022222222 김개똥","01033333333 한만일","01044444444 김길동"]'>
+      <input type="text" id="inputName" data-provide="typeahead" data-items="4" data-source='["홍길동","김개똥","한만일","김길동"]'>
     </div>
   </div>
   <div class="control-group">
@@ -26,13 +26,14 @@ title: Register
   <div class="control-group">
     <label class="control-label" for="inputPhone">휴대폰</label>
     <div class="controls">
-      <input type="text" id="inputPhone" placeholder="Phone number">
+      <input type="text" id="inputPhone" data-provide="typeahead" data-items="4" data-source='["010-1111-1111","010-2222-2222","010-3333-3333","010-4444-4444"]'>
+      <button class="btn">인증</button>
     </div>
   </div>
   <div class="control-group">
     <label class="control-label" for="inputAddress">주소</label>
     <div class="controls">
-      <input type="text" id="inputAddress">
+      <textarea id="inputAddress"></textarea>
     </div>
   </div>
   <div class="control-group">
@@ -74,6 +75,18 @@ title: Register
     <label class="control-label" for="date">착용일자</label>
     <div class="controls">
       <input type="text" id="date" placeholder="YYYY-mm-dd">
+    </div>
+  </div>
+  <div class="control-group">
+    <label class="control-label" for="height">키</label>
+    <div class="controls">
+      <input type="text" id="height"> cm
+    </div>
+  </div>
+  <div class="control-group">
+    <label class="control-label" for="weight">몸무게</label>
+    <div class="controls">
+      <input type="text" id="weight"> kg
     </div>
   </div>
   <div class="control-group">
