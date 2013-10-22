@@ -11,6 +11,12 @@ title: order 'M1701113'
     </div>
   </div>
   <div class="control-group">
+    <label class="control-label" for="inputDiscount">에누리</label>
+    <div class="controls">
+      <input type="text" id="inputDiscount"> 원
+    </div>
+  </div>
+  <div class="control-group">
     <label class="control-label" for="inputDate">반납일</label>
     <div class="controls">
       <div id="datetimepicker1" class="input-append date">
@@ -20,6 +26,33 @@ title: order 'M1701113'
           </i>
         </span>
       </div>
+    </div>
+  </div>
+
+  <div class="control-group">
+    <label class="control-label">결제방법</label>
+    <div class="controls">
+      <label class="radio inline">
+        <input type="radio"> 현금
+      </label>
+      <label class="radio inline">
+        <input type="radio"> 카드
+      </label>
+      <label class="radio inline">
+        <input type="radio"> 현금 + 카드
+      </label>
+    </div>
+  </div>
+
+  <div class="control-group">
+    <label class="control-label">반납방법</label>
+    <div class="controls">
+      <label class="radio inline">
+        <input type="radio"> 직접방문
+      </label>
+      <label class="radio inline">
+        <input type="radio"> 택배
+      </label>
     </div>
   </div>
 
@@ -35,33 +68,4 @@ title: order 'M1701113'
       <button type="submit" class="btn">대여</button>
     </div>
   </div>
-</form>
-
-
-<form>
-  <fieldset>
-    <legend>만족도조사</legend>
-    <table class="table table-bordered table-condensed">
-      <thead>
-        <tr>
-          <th>가슴</th>
-          <th>팔길이</th>
-          <th>허리</th>
-          <th>상의</th>
-          <th>하의</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td><input type="text"></td>
-          <td><input type="text"></td>
-          <td><input type="text"></td>
-          <td><input type="text"></td>
-          <td><input type="text"></td>
-       </tr>
-      </tbody>
-    </table>
-
-    <a href="#" class="btn">skip</a> or <button type="submit" class="btn btn-primary">Submit</button>
-  </fieldset>
 </form>

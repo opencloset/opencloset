@@ -5,34 +5,66 @@ title: Register
 
 <h1>대여자 정보</h1>
 <h2>신체 치수</h2>
-<form class="form-horizontal">
-  <div class="control-group">
-    <label class="control-label" for="inputChest">가슴둘레</label>
-    <div class="controls">
-      <input type="text" id="inputChest" placeholder="cm">
-    </div>
+
+<div class="row">
+  <div class="span6">
+    <form class="form-horizontal">
+      <div class="control-group">
+        <label class="control-label" for="inputChest">가슴둘레</label>
+        <div class="controls">
+          <input type="text" id="inputChest" placeholder="cm">
+        </div>
+      </div>
+      <div class="control-group">
+        <label class="control-label" for="inputWaist">허리둘레</label>
+        <div class="controls">
+          <input type="text" id="inputWaist" placeholder="cm">
+        </div>
+      </div>
+      <div class="control-group">
+        <label class="control-label" for="inputArm">팔길이</label>
+        <div class="controls">
+          <input type="text" id="inputArm" placeholder="cm">
+        </div>
+      </div>
+      <div class="control-group">
+        <label class="control-label" for="inputLength">기장</label>
+        <div class="controls">
+          <input type="text" id="inputLength" placeholder="cm">
+        </div>
+      </div>
+      <div class="control-group">
+        <div class="controls">
+          <a href="{{ site.baseurl }}/search/" class="btn">검색</a>
+        </div>
+      </div>
+    </form>
   </div>
-  <div class="control-group">
-    <label class="control-label" for="inputWaist">허리둘레</label>
-    <div class="controls">
-      <input type="text" id="inputWaist" placeholder="cm">
-    </div>
+
+  <div class="span6">
+    <p>
+      성명: <a href="{{ site.baseurl }}/renter/">홍길동</a> <i class="icon-pencil"></i>
+    </p>
+    <p>
+      성별: 남
+    </p>
+    <p>
+      휴대폰: 010-1111-1111
+    </p>
+    <p>
+      주소: 서울시 광진구 화양동 123-123
+    </p>
+    <p>
+      생년월일: 1990-01-01
+    </p>
+    <p>
+      대여목적: 입사면접
+    </p>
+    <p>
+      키: 180 cm
+    </p>
+    <p>
+      몸무게: 70 kg
+    </p>
   </div>
-  <div class="control-group">
-    <label class="control-label" for="inputArm">팔길이</label>
-    <div class="controls">
-      <input type="text" id="inputArm" placeholder="cm">
-    </div>
-  </div>
-  <div class="control-group">
-    <label class="control-label" for="inputLength">기장</label>
-    <div class="controls">
-      <input type="text" id="inputLength" placeholder="cm">
-    </div>
-  </div>
-  <div class="control-group">
-    <div class="controls">
-      <a href="{{ site.baseurl }}/search/" class="btn">검색</a>
-    </div>
-  </div>
-</form>
+</div>
