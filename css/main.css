@@ -11,12 +11,12 @@ body { padding-top: 60px; position: relative; }
 
 .satisfaction-1, .satisfaction-2, .satisfaction-3, .satisfaction-4, .satisfaction-5 { display: block; }
 
-.satisfaction-1 { background-color: #003400; }
+.satisfaction-1 { background-color: #8b8989; }
 
-.satisfaction-2 { background-color: #006700; }
+.satisfaction-2 { background-color: #cdc9c9; }
 
 .satisfaction-3 { background-color: green; }
 
-.satisfaction-4 { background-color: #009a00; }
+.satisfaction-4 { background-color: #ff6347; }
 
-.satisfaction-5 { background-color: #00cc00; }
+.satisfaction-5 { background-color: #ff0000; }

@@ -37,17 +37,17 @@ $color: green;
    display: block;
 }
 .satisfaction-1 {
-   background-color: darken($color, 15%);
+   background-color: #8b8989;
 }
 .satisfaction-2 {
-   background-color: darken($color, 5%);
+   background-color: #cdc9c9;
 }
 .satisfaction-3 {
    background-color: $color;
 }
 .satisfaction-4 {
-   background-color: lighten($color, 5%);
+   background-color: #ff6347;
 }
 .satisfaction-5 {
-   background-color: lighten($color, 15%);
+   background-color: #ff0000;
 }
