@@ -3,7 +3,68 @@ layout: default
 title: welcome to opencloset
 ---
 
-<h1>소개</h1>
+<form class="form-inline">
+  <input type="text" class="input-large" placeholder="품번">
+  <a href="#" class="btn">Clear</a>
+</form>
+
+<ul>
+  <li>
+    <label>
+      <a href="{{ site.baseurl }}/order/history.html" class="btn btn-success btn-mini">반납</a>
+      <a href="{{ site.baseurl }}/clothes/item1.html">Jacket</a>
+      <span class="label">대여중</span> with 
+      <a href="{{ site.baseurl }}/clothes/item1.html">Pants</a>,
+      <a href="{{ site.baseurl }}/clothes/item1.html">Shirts</a>,
+      <a href="{{ site.baseurl }}/clothes/item1.html">Shoes</a>
+      <a href="{{ site.baseurl }}/order/history.html" class="history-link">10/29 ~ 10/31</a>
+    </label>
+  </li>
+  <li>
+    <label>
+      <a href="{{ site.baseurl }}/order/history.html" class="btn btn-success btn-mini">반납</a>
+      <a href="{{ site.baseurl }}/clothes/item2.html">Jacket</a> 
+      <span class="label label-important">연체중</span> with
+      <a href="{{ site.baseurl }}/clothes/item1.html">Pants</a>,
+      <a href="{{ site.baseurl }}/clothes/item1.html">Shoes</a>
+      <a href="{{ site.baseurl }}/order/history.html" class="history-link">10/25 ~ 10/28</a>
+      
+    </label>
+    <p class="muted">
+      연체료 <span class="text-error">10,000</span> 는 연체일(2) x 대여금액(25,000)의 20% 로 계산됩니다.
+    </p>
+  </li>
+  <li>
+    <label class="checkbox">
+      <input type="checkbox" checked="checked">
+      <a href="{{ site.baseurl }}/clothes/item1.html">Jacket</a>
+      <span class="label label-success">대여가능</span>
+    </label>
+  </li>
+  <li>
+    <label class="checkbox">
+      <input type="checkbox" checked="checked">
+      <a href="{{ site.baseurl }}/clothes/item1.html">Jacket</a>
+      <span class="label label-success">대여가능</span>
+    </label>
+  </li>
+  <li>
+    <label class="checkbox">
+      <input type="checkbox" checked="checked">
+      <a href="{{ site.baseurl }}/clothes/item1.html">Pants</a>
+      <span class="label label-success">대여가능</span>
+    </label>
+  </li>
+  <li>
+    <label class="checkbox">
+      <input type="checkbox" checked="checked">
+      <a href="{{ site.baseurl }}/clothes/item1.html">Jacket</a>
+      <span class="label label-success">대여가능</span>
+    </label>
+  </li>
+</ul>
+
 <div>
-  <a href="{{ site.baseurl }}/register.html" class="btn btn-primary btn-large">대여하기</a>
+  <a href="#" class="btn">세탁</a>
+  <a href="#" class="btn">분실</a>
 </div>

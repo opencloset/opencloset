@@ -3,6 +3,13 @@ layout: default
 title: order 'M1701113'
 ---
 
+<p>
+  <a href="{{ site.baseurl }}/clothes/item1.html">Jacket</a> with 
+  <a href="{{ site.baseurl }}/clothes/item1.html">Pants</a>,
+  <a href="{{ site.baseurl }}/clothes/item1.html">Shirts</a>,
+  <a href="{{ site.baseurl }}/clothes/item1.html">Shoes</a>
+</p>
+
 <form class="form-horizontal">
   <div class="control-group">
     <label class="control-label" for="inputPrice">가격</label>
@@ -45,18 +52,6 @@ title: order 'M1701113'
   </div>
 
   <div class="control-group">
-    <label class="control-label">반납방법</label>
-    <div class="controls">
-      <label class="radio inline">
-        <input type="radio"> 직접방문
-      </label>
-      <label class="radio inline">
-        <input type="radio"> 택배
-      </label>
-    </div>
-  </div>
-
-  <div class="control-group">
     <label class="control-label" for="inputOthers">Others</label>
     <div class="controls">
       <textarea></textarea>
@@ -65,7 +60,7 @@ title: order 'M1701113'
 
   <div class="control-group">
     <div class="controls">
-      <button type="submit" class="btn">대여</button>
+      <a href="{{ site.baseurl }}/order/history.html" class="btn">대여</a>
     </div>
   </div>
 </form>

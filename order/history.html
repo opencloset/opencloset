@@ -5,32 +5,48 @@ title: 대여이력
 
 <h2>2013-05-01 ~ 2013-05-03</h2>
 
-<div class="row">
-  <div class="span6">
-    <h3><a href="{{ site.baseurl }}/renter/">홍길동</a></h3>
-    <p>
-      가격: 30,000
-    </p>
-    <p>
-      에누리: 5,000
-    </p>
-    <p>
-      현금결제
-    </p>
-    <p>
-      택배반납
-    </p>
+<span class="label label-success">대여가능</span> <span class="label">반납</span> <span class="label">대여중</span> <span class="label label-important">연체중</span> <span class="label">분실</span>
+
+<p>
+  <a href="{{ site.baseurl }}/clothes/item1.html">Jacket</a> with 
+  <a href="{{ site.baseurl }}/clothes/item1.html">Pants</a>,
+  <a href="{{ site.baseurl }}/clothes/item1.html">Shirts</a>,
+  <a href="{{ site.baseurl }}/clothes/item1.html">Shoes</a>
+</p>
+
+
+<h3><a href="{{ site.baseurl }}/renter/">홍길동</a></h3>
+<p>
+  가격: 30,000
+</p>
+<p>
+  에누리: 5,000
+</p>
+<p>
+  현금결제
+</p>
+<p>
+  택배반납
+</p>
+<p>
+  연체료: 10,000
+</p>
+<form class="form-inline">
+  연체료: <input type="text" value="10000">
+  <p class="muted">
+    연체료 <span class="text-error">10,000</span> 는 연체일(2) x 대여금액(25,000)의 20% 로 계산됩니다.
+  </p>
+
+  <div class="controls">
+    <label class="radio inline">
+      <input type="radio"> 직접방문
+    </label>
+    <label class="radio inline">
+      <input type="radio"> 택배
+    </label>
   </div>
 
-  <div class="span6">
-    <ul>
-      <li><a href="{{ site.baseurl }}/clothes/item1.html">MJ1701113</a></li>
-      <li><a href="#">MP1701113</a></li>
-      <li><a href="#">셔츠</a></li>
-      <li><a href="#">구두</a></li>
-    </ul>
-  </div>
-</div>
+</form>
 
 <form>
   <fieldset>
@@ -56,6 +72,9 @@ title: 대여이력
       </tbody>
     </table>
 
-    <button type="submit" class="btn btn-primary">Submit</button>
+    (<button type="submit" class="btn">대여</button> or
+    <button type="submit" class="btn">반납</button>) and
+
+    <button type="submit" class="btn">분실</button>
   </fieldset>
 </form>
