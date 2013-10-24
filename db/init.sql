@@ -24,7 +24,7 @@ CREATE TABLE `guest` (
   `name`       VARCHAR(32) NOT NULL,
   `email`      VARCHAR(128) DEFAULT NULL,
   `phone`      VARCHAR(16) DEFAULT NULL COMMENT 'regex: [0-9]{10,11}',
-  `gender`     INT DEFAULT NULL,
+  `gender`     INT DEFAULT NULL COMMENT '0: male, 1: female',
   `address`    VARCHAR(255) DEFAULT NULL,
   `birth_date` DATETIME DEFAULT NULL,
   `purpose`    VARCHAR(32),
@@ -66,7 +66,7 @@ CREATE TABLE `status` (
   UNIQUE KEY (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-INSERT INTO `status` (`id`, `name`) VALUES (1, '대여가능'), (2, '대여중'), (3, '세탁'), (4, '수선'), (5, '대여불가'), (6, '분실');
+INSERT INTO `status` (`id`, `name`) VALUES (1, '대여가능'), (2, '대여중'), (3, '세탁'), (4, '수선'), (5, '대여불가'), (7, '분실');
 
 --
 -- clothe
