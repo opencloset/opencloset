@@ -100,9 +100,24 @@ __PACKAGE__->has_many(
   { cascade_copy => 0, cascade_delete => 0 },
 );
 
+=head2 orders
 
-# Created by DBIx::Class::Schema::Loader v0.07036 @ 2013-10-24 16:16:52
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:1+RfaTTyxOTdCzZPrh0x7w
+Type: has_many
+
+Related object: L<Opencloset::Schema::Result::Order>
+
+=cut
+
+__PACKAGE__->has_many(
+  "orders",
+  "Opencloset::Schema::Result::Order",
+  { "foreign.status_id" => "self.id" },
+  { cascade_copy => 0, cascade_delete => 0 },
+);
+
+
+# Created by DBIx::Class::Schema::Loader v0.07036 @ 2013-10-24 17:37:32
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:ccznL4FMyS1NtEJtnV60dg
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

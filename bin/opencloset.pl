@@ -1,6 +1,52 @@
 #!/usr/bin/env perl
 use Mojolicious::Lite;
 
+use Opencloset::Schema;
+
+my $DB_NAME     = $ENV{OPENCLOSET_DB}       || 'opencloset';
+my $DB_USERNAME = $ENV{OPENCLOSET_USERNAME} || 'root';
+my $DB_PASSWORD = $ENV{OPENCLOSET_PASSWORD} || '';
+
+my $schema = Opencloset::Schema->connect({
+    dsn               => "dbi:mysql:$DB_NAME:127.0.0.1",
+    user              => $DB_USERNAME,
+    password          => $DB_PASSWORD,
+    RaiseError        => 1,
+    AutoCommit        => 1,
+    mysql_enable_utf8 => 1,
+    quote_char        => q{`},
+    on_connect_do     => 'SET NAMES utf8'
+});
+
+helper error => sub {
+    my ($self, $status, $error) = @_;
+
+    my %error_map = (
+        400 => 'bad_request',
+        404 => 'not_found',
+    );
+
+    $self->respond_to(
+        json => { json => { error => $error || '' }, status => $status },
+        html => {
+            template => $error_map{$status},
+            error    => $error || '',
+            status   => $status
+        }
+    );
+};
+
+helper clothe2hr => sub {
+    my ($self, $row) = @_;
+
+    return {
+        $row->get_columns,
+        donor    => $row->donor->name,
+        category => $row->category->name,
+        status   => $row->status->name,
+    };
+};
+
 plugin 'haml_renderer';
 
 get '/' => sub {
@@ -13,14 +59,49 @@ get '/new' => sub {
     $self->render('new');
 };
 
+get '/clothes/:no' => sub {
+    my $self = shift;
+    my $no = $self->param('no');
+    my $clothe = $schema->resultset('Clothe')->find({ no => $no });
+    return $self->error(404, 'Not found') unless $clothe;
+
+    ### status_id => 2 : 대여중
+    ### 상수(Constants)로써 관리해야 할까?
+    my $co_rs = $clothe->clothe_orders->search(
+        { 'order.status_id' => 2 }, { join => 'order' }
+    )->next;
+
+    ### $co_rs 가 undef 라면 이상한 상황임
+    ### 빌린옷이 있는데 주문엔 빌려간 상태가 없을리가
+
+    my $order = $co_rs->order;
+
+    # join 해서 아직 반납 안된 것만..
+    my %columns = (
+        %{ $self->clothe2hr($clothe) },
+        rental_date => $order->rental_date,
+        target_date => $order->target_date,
+        with        => []
+    );
+
+    $self->respond_to(
+        json => { json => { %columns } },
+        html => { template => 'clothes/item' }
+        # html => sub { $self->render('clothes/item') }
+    );
+};
+
 app->start;
 __DATA__
 
 @@ index.html.haml
 - layout 'default';
 - title 'Opencloset, sharing clothes';
-%p
-  %button.btn.btn-large.btn-primary{:type => "button"} 대여
+
+%form.form-inline
+  .input-append
+    %input.input-large{:type => 'text', :placeholder => '품번'}
+    %button.btn{:type => 'button'} 검색
 
 @@ new.html.haml
 - layout 'default';
@@ -94,6 +175,19 @@ __DATA__
   .control-group
     .controls
       %button.btn{type => 'submit'} 다음
+
+@@ clothes/item.html.haml
+- layout 'default';
+- title 'clothes/item';
+
+%p clothes/item
+
+@@ not_found.html.haml
+- layout 'default';
+- title 'Not found';
+
+%h3 404 Not found
+%p= $error
 
 @@ layouts/default.html.haml
 !!! 5
