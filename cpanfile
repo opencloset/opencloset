@@ -6,3 +6,4 @@ requires 'Mojolicious::Plugin::HamlRenderer';
 requires 'Mojolicious::Plugin::Validator';
 requires 'Plack';
 requires 'Plack::Middleware::ReverseProxy';
+requires 'DateTime';
