@@ -2,10 +2,15 @@
 use Mojolicious::Lite;
 
 use Opencloset::Schema;
+use DateTime;
 
 my $DB_NAME     = $ENV{OPENCLOSET_DB}       || 'opencloset';
 my $DB_USERNAME = $ENV{OPENCLOSET_USERNAME} || 'root';
 my $DB_PASSWORD = $ENV{OPENCLOSET_PASSWORD} || '';
+
+app->defaults(
+    javascripts => [],
+);
 
 my $schema = Opencloset::Schema->connect({
     dsn               => "dbi:mysql:$DB_NAME:127.0.0.1",
@@ -47,6 +52,26 @@ helper clothe2hr => sub {
     };
 };
 
+helper overdue_calc => sub {
+    my ($self, $target_dt, $return_dt) = @_;
+
+    my $DAY_AS_SECONDS = 60 * 60 * 24;
+
+    my $epoch1 = $target_dt->epoch;
+    my $epoch2 = $return_dt->epoch;
+
+    my $dur = $epoch2 - $epoch1;
+    return 0 if $dur < 0;
+    return int($dur / $DAY_AS_SECONDS);
+};
+
+helper commify => sub {
+    my $self = shift;
+    local $_ = shift;
+    1 while s/((?:\A|[^.0-9])[-+]?\d+)(\d{3})/$1,$2/s;
+    return $_;
+};
+
 plugin 'haml_renderer';
 
 get '/' => sub {
@@ -65,29 +90,51 @@ get '/clothes/:no' => sub {
     my $clothe = $schema->resultset('Clothe')->find({ no => $no });
     return $self->error(404, 'Not found') unless $clothe;
 
-    ### status_id => 2 : 대여중
-    ### 상수(Constants)로써 관리해야 할까?
     my $co_rs = $clothe->clothe_orders->search(
-        { 'order.status_id' => 2 }, { join => 'order' }
+        { 'order.status_id' => 2 }, { join => 'order' }    # 2: 대여중
     )->next;
 
-    ### $co_rs 가 undef 라면 이상한 상황임
-    ### 빌린옷이 있는데 주문엔 빌려간 상태가 없을리가
+    unless ($co_rs) {
+        $self->respond_to(
+            json => { json => $self->clothe2hr($clothe) },
+            html => { template => 'clothes/item' }    # also, CODEREF is OK
+        );
+        return;
+    }
 
+    my @with;
     my $order = $co_rs->order;
+    for my $_clothe ($order->clothes) {
+        next if $_clothe->id == $clothe->id;
+        push @with, $self->clothe2hr($_clothe);
+    }
 
-    # join 해서 아직 반납 안된 것만..
+    my $overdue = $self->overdue_calc($order->target_date, DateTime->now);
     my %columns = (
         %{ $self->clothe2hr($clothe) },
-        rental_date => $order->rental_date,
-        target_date => $order->target_date,
-        with        => []
+        rental_date => {
+            raw => $order->rental_date,
+            md  => $order->rental_date->month . '/' . $order->rental_date->day,
+            ymd => $order->rental_date->ymd
+        },
+        target_date => {
+            raw => $order->target_date,
+            md  => $order->target_date->month . '/' . $order->target_date->day,
+            ymd => $order->target_date->ymd
+        },
+        order_id    => $order->id,
+        price       => $self->commify($order->price),
+        overdue     => $overdue,
+        late_fee    => $self->commify($order->price * 0.2 * $overdue),
+        clothes     => \@with,
     );
+
+    $columns{status} = $schema->resultset('Status')->find({ id => 6 })->name
+        if $overdue;    # 6: 연체중, 한글을 쓰면 `utf8` pragma 를 써줘야 해서..
 
     $self->respond_to(
         json => { json => { %columns } },
-        html => { template => 'clothes/item' }
-        # html => sub { $self->render('clothes/item') }
+        html => { template => 'clothes/item' }    # also, CODEREF is OK
     );
 };
 
@@ -95,13 +142,51 @@ app->start;
 __DATA__
 
 @@ index.html.haml
-- layout 'default';
+- layout 'default', javascripts => ['root-index.js'];
 - title 'Opencloset, sharing clothes';
 
-%form.form-inline
+%form#clothe-search-form.form-inline
   .input-append
-    %input.input-large{:type => 'text', :placeholder => '품번'}
-    %button.btn{:type => 'button'} 검색
+    %input.input-large{:type => 'text', :id => 'clothe-id', :placeholder => '품번'}
+    %button#btn-clothe-search.btn{:type => 'button'} 검색
+  %p.text-error
+
+%ul#clothes-list
+
+:plain
+  <script id="tpl-li" type="text/html">
+    <li>
+      <label>
+        <a class="btn btn-success btn-mini" href="/order/<%= order_id %>">주문서</a>
+        <a href="/clothe/<%= id %>"><%= category %></a>
+        <span class="order-status label"><%= status %></span> with
+        <% _.each(clothes, function(clothe) { %> <a href="/clothes/<%= clothe.id %>"><%= clothe.category %></a><% }); %>
+        <a class="history-link" href="/order/<%= order_id %>">
+          <time class="js-relative-date" datetime="<%= rental_date.raw %>" title="<%= rental_date.ymd %>"><%= rental_date.md %></time>
+          ~
+          <time class="js-relative-date" datetime="<%= target_date.raw %>" title="<%= target_date.ymd %>"><%= target_date.md %></time>
+        </a>
+      </label>
+    </li>
+  </script>
+
+:plain
+  <script id="tpl-overdue-paragraph" type="text/html">
+    <p class="muted">
+      연체료 <span class="text-error"><%= late_fee %></span> 는 연체일(<%= overdue %>) x 대여금액(<%= price %>)의 20% 로 계산됩니다.
+    </p>
+  </script>
+
+:plain
+  <script id="tpl-rent-available" type="text/html">
+    <li>
+      <label class="checkbox">
+        <input type="checkbox" checked="checked">
+        <a href="/clothes/<%= id %>"><%= category %></a>
+        <span class="label label-success"><%= status %></span>
+      </label>
+    </li>
+  </script>
 
 @@ new.html.haml
 - layout 'default';
@@ -216,6 +301,10 @@ __DATA__
             %a{:href => "#"} facebook
           %p
             %a{:href => "#"} twitter
-      %script{:src => "//cdnjs.cloudflare.com/ajax/libs/jquery/1.10.2/jquery.min.js"}
+      %script{:src => "/assets/lib/jquery/jquery-1.10.2.min.js"}
+      %script{:src => "/assets/lib/underscore/underscore-min.js"}
       %script{:src => "/assets/lib/datepicker/js/bootstrap-datepicker.js"}
       %script{:src => "/assets/js/bundle.js"}
+      - for my $js (@$javascripts) {
+      %script{:src => "/assets/js/#{$js}"}
+      - }
