@@ -1,26 +1,26 @@
 use utf8;
-package Opencloset::Web::Schema::Result::Order;
+package Opencloset::Schema::Result::Order;
 
 # Created by DBIx::Class::Schema::Loader
 # DO NOT MODIFY THE FIRST PART OF THIS FILE
 
 =head1 NAME
 
-Opencloset::Web::Schema::Result::Order
+Opencloset::Schema::Result::Order
 
 =cut
 
 use strict;
 use warnings;
 
-=head1 BASE CLASS: L<Opencloset::Web::Schema::Base>
+=head1 BASE CLASS: L<Opencloset::Schema::Base>
 
 =cut
 
 use Moose;
 use MooseX::NonMoose;
 use namespace::autoclean;
-extends 'Opencloset::Web::Schema::Base';
+extends 'Opencloset::Schema::Base';
 
 =head1 TABLE: C<order>
 
@@ -146,13 +146,13 @@ __PACKAGE__->set_primary_key("id");
 
 Type: has_many
 
-Related object: L<Opencloset::Web::Schema::Result::ClothesOrder>
+Related object: L<Opencloset::Schema::Result::ClothesOrder>
 
 =cut
 
 __PACKAGE__->has_many(
   "clothes_orders",
-  "Opencloset::Web::Schema::Result::ClothesOrder",
+  "Opencloset::Schema::Result::ClothesOrder",
   { "foreign.order_id" => "self.id" },
   { cascade_copy => 0, cascade_delete => 0 },
 );
@@ -161,13 +161,13 @@ __PACKAGE__->has_many(
 
 Type: belongs_to
 
-Related object: L<Opencloset::Web::Schema::Result::Guest>
+Related object: L<Opencloset::Schema::Result::Guest>
 
 =cut
 
 __PACKAGE__->belongs_to(
   "guest",
-  "Opencloset::Web::Schema::Result::Guest",
+  "Opencloset::Schema::Result::Guest",
   { id => "guest_id" },
   { is_deferrable => 1, on_delete => "CASCADE", on_update => "RESTRICT" },
 );
@@ -183,8 +183,8 @@ Composing rels: L</clothes_orders> -> clothe
 __PACKAGE__->many_to_many("clothes", "clothes_orders", "clothe");
 
 
-# Created by DBIx::Class::Schema::Loader v0.07036 @ 2013-10-23 04:06:03
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:wKnKzYEanyiytxtQpmKa6g
+# Created by DBIx::Class::Schema::Loader v0.07036 @ 2013-10-24 16:16:52
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:yJHF5KUGAWnVY5tHfrA5IA
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

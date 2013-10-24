@@ -1,36 +1,36 @@
 use utf8;
-package Opencloset::Web::Schema::Result::DonorClothe;
+package Opencloset::Schema::Result::Satisfaction;
 
 # Created by DBIx::Class::Schema::Loader
 # DO NOT MODIFY THE FIRST PART OF THIS FILE
 
 =head1 NAME
 
-Opencloset::Web::Schema::Result::DonorClothe
+Opencloset::Schema::Result::Satisfaction
 
 =cut
 
 use strict;
 use warnings;
 
-=head1 BASE CLASS: L<Opencloset::Web::Schema::Base>
+=head1 BASE CLASS: L<Opencloset::Schema::Base>
 
 =cut
 
 use Moose;
 use MooseX::NonMoose;
 use namespace::autoclean;
-extends 'Opencloset::Web::Schema::Base';
+extends 'Opencloset::Schema::Base';
 
-=head1 TABLE: C<donor_clothes>
+=head1 TABLE: C<satisfaction>
 
 =cut
 
-__PACKAGE__->table("donor_clothes");
+__PACKAGE__->table("satisfaction");
 
 =head1 ACCESSORS
 
-=head2 donor_id
+=head2 guest_id
 
   data_type: 'integer'
   extra: {unsigned => 1}
@@ -44,22 +44,35 @@ __PACKAGE__->table("donor_clothes");
   is_foreign_key: 1
   is_nullable: 0
 
-=head2 comment
+=head2 chest
 
-  data_type: 'text'
+  data_type: 'integer'
   is_nullable: 1
 
-=head2 donation_date
+=head2 waist
 
-  data_type: 'datetime'
-  datetime_undef_if_invalid: 1
-  inflate_datetime: 1
+  data_type: 'integer'
+  is_nullable: 1
+
+=head2 arm
+
+  data_type: 'integer'
+  is_nullable: 1
+
+=head2 top_fit
+
+  data_type: 'integer'
+  is_nullable: 1
+
+=head2 bottom_fit
+
+  data_type: 'integer'
   is_nullable: 1
 
 =cut
 
 __PACKAGE__->add_columns(
-  "donor_id",
+  "guest_id",
   {
     data_type => "integer",
     extra => { unsigned => 1 },
@@ -73,22 +86,23 @@ __PACKAGE__->add_columns(
     is_foreign_key => 1,
     is_nullable => 0,
   },
-  "comment",
-  { data_type => "text", is_nullable => 1 },
-  "donation_date",
-  {
-    data_type => "datetime",
-    datetime_undef_if_invalid => 1,
-    inflate_datetime => 1,
-    is_nullable => 1,
-  },
+  "chest",
+  { data_type => "integer", is_nullable => 1 },
+  "waist",
+  { data_type => "integer", is_nullable => 1 },
+  "arm",
+  { data_type => "integer", is_nullable => 1 },
+  "top_fit",
+  { data_type => "integer", is_nullable => 1 },
+  "bottom_fit",
+  { data_type => "integer", is_nullable => 1 },
 );
 
 =head1 PRIMARY KEY
 
 =over 4
 
-=item * L</donor_id>
+=item * L</guest_id>
 
 =item * L</clothes_id>
 
@@ -96,7 +110,7 @@ __PACKAGE__->add_columns(
 
 =cut
 
-__PACKAGE__->set_primary_key("donor_id", "clothes_id");
+__PACKAGE__->set_primary_key("guest_id", "clothes_id");
 
 =head1 RELATIONS
 
@@ -104,35 +118,35 @@ __PACKAGE__->set_primary_key("donor_id", "clothes_id");
 
 Type: belongs_to
 
-Related object: L<Opencloset::Web::Schema::Result::Clothe>
+Related object: L<Opencloset::Schema::Result::Clothe>
 
 =cut
 
 __PACKAGE__->belongs_to(
   "clothe",
-  "Opencloset::Web::Schema::Result::Clothe",
+  "Opencloset::Schema::Result::Clothe",
   { id => "clothes_id" },
   { is_deferrable => 1, on_delete => "CASCADE", on_update => "RESTRICT" },
 );
 
-=head2 donor
+=head2 guest
 
 Type: belongs_to
 
-Related object: L<Opencloset::Web::Schema::Result::Donor>
+Related object: L<Opencloset::Schema::Result::Guest>
 
 =cut
 
 __PACKAGE__->belongs_to(
-  "donor",
-  "Opencloset::Web::Schema::Result::Donor",
-  { id => "donor_id" },
+  "guest",
+  "Opencloset::Schema::Result::Guest",
+  { id => "guest_id" },
   { is_deferrable => 1, on_delete => "CASCADE", on_update => "RESTRICT" },
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07036 @ 2013-10-23 04:06:03
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:It94cpBIutdGGFZzXsx2Wg
+# Created by DBIx::Class::Schema::Loader v0.07036 @ 2013-10-24 16:16:52
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:ivQLNj5t8BkMyMy/hv5rhA
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

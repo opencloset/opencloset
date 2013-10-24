@@ -1,26 +1,26 @@
 use utf8;
-package Opencloset::Web::Schema::Result::Donor;
+package Opencloset::Schema::Result::Donor;
 
 # Created by DBIx::Class::Schema::Loader
 # DO NOT MODIFY THE FIRST PART OF THIS FILE
 
 =head1 NAME
 
-Opencloset::Web::Schema::Result::Donor
+Opencloset::Schema::Result::Donor
 
 =cut
 
 use strict;
 use warnings;
 
-=head1 BASE CLASS: L<Opencloset::Web::Schema::Base>
+=head1 BASE CLASS: L<Opencloset::Schema::Base>
 
 =cut
 
 use Moose;
 use MooseX::NonMoose;
 use namespace::autoclean;
-extends 'Opencloset::Web::Schema::Base';
+extends 'Opencloset::Schema::Base';
 
 =head1 TABLE: C<donor>
 
@@ -75,13 +75,13 @@ __PACKAGE__->set_primary_key("id");
 
 Type: has_many
 
-Related object: L<Opencloset::Web::Schema::Result::Clothe>
+Related object: L<Opencloset::Schema::Result::Clothe>
 
 =cut
 
 __PACKAGE__->has_many(
   "clothes",
-  "Opencloset::Web::Schema::Result::Clothe",
+  "Opencloset::Schema::Result::Clothe",
   { "foreign.donor_id" => "self.id" },
   { cascade_copy => 0, cascade_delete => 0 },
 );
@@ -90,20 +90,20 @@ __PACKAGE__->has_many(
 
 Type: has_many
 
-Related object: L<Opencloset::Web::Schema::Result::DonorClothe>
+Related object: L<Opencloset::Schema::Result::DonorClothe>
 
 =cut
 
 __PACKAGE__->has_many(
   "donor_clothes",
-  "Opencloset::Web::Schema::Result::DonorClothe",
+  "Opencloset::Schema::Result::DonorClothe",
   { "foreign.donor_id" => "self.id" },
   { cascade_copy => 0, cascade_delete => 0 },
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07036 @ 2013-10-24 15:22:00
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:3/Cox6rXeHg9xUoKO+4BwQ
+# Created by DBIx::Class::Schema::Loader v0.07036 @ 2013-10-24 16:16:52
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:sb+Ir299HIuuxeZKXU7/zQ
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

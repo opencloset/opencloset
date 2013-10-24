@@ -1,4 +1,4 @@
-package Opencloset::Web::Schema::Base;
+package Opencloset::Schema::Base;
 use Moose;
 use namespace::autoclean;
 

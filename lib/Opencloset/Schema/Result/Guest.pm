@@ -1,26 +1,26 @@
 use utf8;
-package Opencloset::Web::Schema::Result::Guest;
+package Opencloset::Schema::Result::Guest;
 
 # Created by DBIx::Class::Schema::Loader
 # DO NOT MODIFY THE FIRST PART OF THIS FILE
 
 =head1 NAME
 
-Opencloset::Web::Schema::Result::Guest
+Opencloset::Schema::Result::Guest
 
 =cut
 
 use strict;
 use warnings;
 
-=head1 BASE CLASS: L<Opencloset::Web::Schema::Base>
+=head1 BASE CLASS: L<Opencloset::Schema::Base>
 
 =cut
 
 use Moose;
 use MooseX::NonMoose;
 use namespace::autoclean;
-extends 'Opencloset::Web::Schema::Base';
+extends 'Opencloset::Schema::Base';
 
 =head1 TABLE: C<guest>
 
@@ -186,13 +186,13 @@ __PACKAGE__->set_primary_key("id");
 
 Type: has_many
 
-Related object: L<Opencloset::Web::Schema::Result::Order>
+Related object: L<Opencloset::Schema::Result::Order>
 
 =cut
 
 __PACKAGE__->has_many(
   "orders",
-  "Opencloset::Web::Schema::Result::Order",
+  "Opencloset::Schema::Result::Order",
   { "foreign.guest_id" => "self.id" },
   { cascade_copy => 0, cascade_delete => 0 },
 );
@@ -201,20 +201,20 @@ __PACKAGE__->has_many(
 
 Type: has_many
 
-Related object: L<Opencloset::Web::Schema::Result::Satisfaction>
+Related object: L<Opencloset::Schema::Result::Satisfaction>
 
 =cut
 
 __PACKAGE__->has_many(
   "satisfactions",
-  "Opencloset::Web::Schema::Result::Satisfaction",
+  "Opencloset::Schema::Result::Satisfaction",
   { "foreign.guest_id" => "self.id" },
   { cascade_copy => 0, cascade_delete => 0 },
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07036 @ 2013-10-23 04:06:03
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:TBES4Rg6lUir+VRy9Cyw2A
+# Created by DBIx::Class::Schema::Loader v0.07036 @ 2013-10-24 16:16:52
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:FLKaQFmcDCv66vw6vGMTUw
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

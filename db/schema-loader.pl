@@ -3,7 +3,7 @@ my $DB_USERNAME = $ENV{OPENCLOSET_USERNAME} || 'root';
 my $DB_PASSWORD = $ENV{OPENCLOSET_PASSWORD} || '';
 
 {
-    schema_class => "Opencloset::Web::Schema",
+    schema_class => "Opencloset::Schema",
     connect_info => {
         dsn               => "dbi:mysql:$DB_NAME:127.0.0.1",
         user              => $DB_USERNAME,
@@ -18,7 +18,7 @@ my $DB_PASSWORD = $ENV{OPENCLOSET_PASSWORD} || '';
         use_moose                 => 1,
         only_autoclean            => 1,
         col_collision_map         => 'column_%s',
-        result_base_class         => 'Opencloset::Web::Schema::Base',
+        result_base_class         => 'Opencloset::Schema::Base',
         overwrite_modifications   => 1,
         datetime_undef_if_invalid => 1,
         custom_column_info        => sub {

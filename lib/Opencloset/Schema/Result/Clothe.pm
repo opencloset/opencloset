@@ -1,26 +1,26 @@
 use utf8;
-package Opencloset::Web::Schema::Result::Clothe;
+package Opencloset::Schema::Result::Clothe;
 
 # Created by DBIx::Class::Schema::Loader
 # DO NOT MODIFY THE FIRST PART OF THIS FILE
 
 =head1 NAME
 
-Opencloset::Web::Schema::Result::Clothe
+Opencloset::Schema::Result::Clothe
 
 =cut
 
 use strict;
 use warnings;
 
-=head1 BASE CLASS: L<Opencloset::Web::Schema::Base>
+=head1 BASE CLASS: L<Opencloset::Schema::Base>
 
 =cut
 
 use Moose;
 use MooseX::NonMoose;
 use namespace::autoclean;
-extends 'Opencloset::Web::Schema::Base';
+extends 'Opencloset::Schema::Base';
 
 =head1 TABLE: C<clothes>
 
@@ -37,15 +37,21 @@ __PACKAGE__->table("clothes");
   is_auto_increment: 1
   is_nullable: 0
 
+=head2 no
+
+  data_type: 'varchar'
+  is_nullable: 0
+  size: 64
+
 =head2 chest
 
   data_type: 'integer'
-  is_nullable: 0
+  is_nullable: 1
 
 =head2 waist
 
   data_type: 'integer'
-  is_nullable: 0
+  is_nullable: 1
 
 =head2 arm
 
@@ -53,11 +59,6 @@ __PACKAGE__->table("clothes");
   is_nullable: 1
 
 =head2 pants_len
-
-  data_type: 'integer'
-  is_nullable: 1
-
-=head2 status
 
   data_type: 'integer'
   is_nullable: 1
@@ -90,6 +91,14 @@ __PACKAGE__->table("clothes");
   is_foreign_key: 1
   is_nullable: 1
 
+=head2 status_id
+
+  data_type: 'integer'
+  default_value: 1
+  extra: {unsigned => 1}
+  is_foreign_key: 1
+  is_nullable: 1
+
 =cut
 
 __PACKAGE__->add_columns(
@@ -100,15 +109,15 @@ __PACKAGE__->add_columns(
     is_auto_increment => 1,
     is_nullable => 0,
   },
+  "no",
+  { data_type => "varchar", is_nullable => 0, size => 64 },
   "chest",
-  { data_type => "integer", is_nullable => 0 },
+  { data_type => "integer", is_nullable => 1 },
   "waist",
-  { data_type => "integer", is_nullable => 0 },
+  { data_type => "integer", is_nullable => 1 },
   "arm",
   { data_type => "integer", is_nullable => 1 },
   "pants_len",
-  { data_type => "integer", is_nullable => 1 },
-  "status",
   { data_type => "integer", is_nullable => 1 },
   "category_id",
   {
@@ -138,6 +147,14 @@ __PACKAGE__->add_columns(
     is_foreign_key => 1,
     is_nullable => 1,
   },
+  "status_id",
+  {
+    data_type => "integer",
+    default_value => 1,
+    extra => { unsigned => 1 },
+    is_foreign_key => 1,
+    is_nullable => 1,
+  },
 );
 
 =head1 PRIMARY KEY
@@ -152,19 +169,33 @@ __PACKAGE__->add_columns(
 
 __PACKAGE__->set_primary_key("id");
 
+=head1 UNIQUE CONSTRAINTS
+
+=head2 C<no>
+
+=over 4
+
+=item * L</no>
+
+=back
+
+=cut
+
+__PACKAGE__->add_unique_constraint("no", ["no"]);
+
 =head1 RELATIONS
 
 =head2 bottom
 
 Type: belongs_to
 
-Related object: L<Opencloset::Web::Schema::Result::Clothe>
+Related object: L<Opencloset::Schema::Result::Clothe>
 
 =cut
 
 __PACKAGE__->belongs_to(
   "bottom",
-  "Opencloset::Web::Schema::Result::Clothe",
+  "Opencloset::Schema::Result::Clothe",
   { id => "bottom_id" },
   {
     is_deferrable => 1,
@@ -178,13 +209,13 @@ __PACKAGE__->belongs_to(
 
 Type: belongs_to
 
-Related object: L<Opencloset::Web::Schema::Result::Category>
+Related object: L<Opencloset::Schema::Result::Category>
 
 =cut
 
 __PACKAGE__->belongs_to(
   "category",
-  "Opencloset::Web::Schema::Result::Category",
+  "Opencloset::Schema::Result::Category",
   { id => "category_id" },
   { is_deferrable => 1, on_delete => "CASCADE", on_update => "RESTRICT" },
 );
@@ -193,13 +224,13 @@ __PACKAGE__->belongs_to(
 
 Type: has_many
 
-Related object: L<Opencloset::Web::Schema::Result::Clothe>
+Related object: L<Opencloset::Schema::Result::Clothe>
 
 =cut
 
 __PACKAGE__->has_many(
   "clothes_bottoms",
-  "Opencloset::Web::Schema::Result::Clothe",
+  "Opencloset::Schema::Result::Clothe",
   { "foreign.bottom_id" => "self.id" },
   { cascade_copy => 0, cascade_delete => 0 },
 );
@@ -208,13 +239,13 @@ __PACKAGE__->has_many(
 
 Type: has_many
 
-Related object: L<Opencloset::Web::Schema::Result::ClothesOrder>
+Related object: L<Opencloset::Schema::Result::ClothesOrder>
 
 =cut
 
 __PACKAGE__->has_many(
   "clothes_orders",
-  "Opencloset::Web::Schema::Result::ClothesOrder",
+  "Opencloset::Schema::Result::ClothesOrder",
   { "foreign.clothes_id" => "self.id" },
   { cascade_copy => 0, cascade_delete => 0 },
 );
@@ -223,13 +254,13 @@ __PACKAGE__->has_many(
 
 Type: has_many
 
-Related object: L<Opencloset::Web::Schema::Result::Clothe>
+Related object: L<Opencloset::Schema::Result::Clothe>
 
 =cut
 
 __PACKAGE__->has_many(
   "clothes_tops",
-  "Opencloset::Web::Schema::Result::Clothe",
+  "Opencloset::Schema::Result::Clothe",
   { "foreign.top_id" => "self.id" },
   { cascade_copy => 0, cascade_delete => 0 },
 );
@@ -238,13 +269,13 @@ __PACKAGE__->has_many(
 
 Type: belongs_to
 
-Related object: L<Opencloset::Web::Schema::Result::Donor>
+Related object: L<Opencloset::Schema::Result::Donor>
 
 =cut
 
 __PACKAGE__->belongs_to(
   "donor",
-  "Opencloset::Web::Schema::Result::Donor",
+  "Opencloset::Schema::Result::Donor",
   { id => "donor_id" },
   {
     is_deferrable => 1,
@@ -258,13 +289,13 @@ __PACKAGE__->belongs_to(
 
 Type: has_many
 
-Related object: L<Opencloset::Web::Schema::Result::DonorClothe>
+Related object: L<Opencloset::Schema::Result::DonorClothe>
 
 =cut
 
 __PACKAGE__->has_many(
   "donor_clothes",
-  "Opencloset::Web::Schema::Result::DonorClothe",
+  "Opencloset::Schema::Result::DonorClothe",
   { "foreign.clothes_id" => "self.id" },
   { cascade_copy => 0, cascade_delete => 0 },
 );
@@ -273,28 +304,48 @@ __PACKAGE__->has_many(
 
 Type: has_many
 
-Related object: L<Opencloset::Web::Schema::Result::Satisfaction>
+Related object: L<Opencloset::Schema::Result::Satisfaction>
 
 =cut
 
 __PACKAGE__->has_many(
   "satisfactions",
-  "Opencloset::Web::Schema::Result::Satisfaction",
+  "Opencloset::Schema::Result::Satisfaction",
   { "foreign.clothes_id" => "self.id" },
   { cascade_copy => 0, cascade_delete => 0 },
+);
+
+=head2 status
+
+Type: belongs_to
+
+Related object: L<Opencloset::Schema::Result::Status>
+
+=cut
+
+__PACKAGE__->belongs_to(
+  "status",
+  "Opencloset::Schema::Result::Status",
+  { id => "status_id" },
+  {
+    is_deferrable => 1,
+    join_type     => "LEFT",
+    on_delete     => "CASCADE",
+    on_update     => "RESTRICT",
+  },
 );
 
 =head2 top
 
 Type: belongs_to
 
-Related object: L<Opencloset::Web::Schema::Result::Clothe>
+Related object: L<Opencloset::Schema::Result::Clothe>
 
 =cut
 
 __PACKAGE__->belongs_to(
   "top",
-  "Opencloset::Web::Schema::Result::Clothe",
+  "Opencloset::Schema::Result::Clothe",
   { id => "top_id" },
   {
     is_deferrable => 1,
@@ -315,8 +366,8 @@ Composing rels: L</clothes_orders> -> order
 __PACKAGE__->many_to_many("orders", "clothes_orders", "order");
 
 
-# Created by DBIx::Class::Schema::Loader v0.07036 @ 2013-10-24 15:22:00
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:oVJ+xrF3uugUZoXnxmOU2Q
+# Created by DBIx::Class::Schema::Loader v0.07036 @ 2013-10-24 16:16:52
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:FzVtQGfA3xJt35G8uoR6bQ
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration
