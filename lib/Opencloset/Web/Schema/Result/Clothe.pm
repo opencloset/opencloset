@@ -83,6 +83,13 @@ __PACKAGE__->table("clothes");
   is_foreign_key: 1
   is_nullable: 1
 
+=head2 donor_id
+
+  data_type: 'integer'
+  extra: {unsigned => 1}
+  is_foreign_key: 1
+  is_nullable: 1
+
 =cut
 
 __PACKAGE__->add_columns(
@@ -118,6 +125,13 @@ __PACKAGE__->add_columns(
     is_nullable => 1,
   },
   "bottom_id",
+  {
+    data_type => "integer",
+    extra => { unsigned => 1 },
+    is_foreign_key => 1,
+    is_nullable => 1,
+  },
+  "donor_id",
   {
     data_type => "integer",
     extra => { unsigned => 1 },
@@ -220,6 +234,26 @@ __PACKAGE__->has_many(
   { cascade_copy => 0, cascade_delete => 0 },
 );
 
+=head2 donor
+
+Type: belongs_to
+
+Related object: L<Opencloset::Web::Schema::Result::Donor>
+
+=cut
+
+__PACKAGE__->belongs_to(
+  "donor",
+  "Opencloset::Web::Schema::Result::Donor",
+  { id => "donor_id" },
+  {
+    is_deferrable => 1,
+    join_type     => "LEFT",
+    on_delete     => "CASCADE",
+    on_update     => "RESTRICT",
+  },
+);
+
 =head2 donor_clothes
 
 Type: has_many
@@ -281,8 +315,8 @@ Composing rels: L</clothes_orders> -> order
 __PACKAGE__->many_to_many("orders", "clothes_orders", "order");
 
 
-# Created by DBIx::Class::Schema::Loader v0.07036 @ 2013-10-23 04:06:03
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:1QCE41Dur9NJfFc6lP84ZA
+# Created by DBIx::Class::Schema::Loader v0.07036 @ 2013-10-24 15:22:00
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:oVJ+xrF3uugUZoXnxmOU2Q
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

@@ -73,11 +73,13 @@ CREATE TABLE `clothes` (
   `category_id` INT UNSIGNED NOT NULL,
   `top_id`      INT UNSIGNED DEFAULT NULL,
   `bottom_id`   INT UNSIGNED DEFAULT NULL,
+  `donor_id`    INT UNSIGNED DEFAULT NULL,
 
   PRIMARY KEY (`id`),
   CONSTRAINT `fk_clothes1` FOREIGN KEY (`category_id`) REFERENCES `category` (`id`) ON DELETE CASCADE,
   CONSTRAINT `fk_clothes2` FOREIGN KEY (`top_id`) REFERENCES `clothes` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `fk_clothes3` FOREIGN KEY (`bottom_id`) REFERENCES `clothes` (`id`) ON DELETE CASCADE
+  CONSTRAINT `fk_clothes3` FOREIGN KEY (`bottom_id`) REFERENCES `clothes` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_clothes4` FOREIGN KEY (`donor_id`) REFERENCES `donor` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
@@ -87,6 +89,7 @@ CREATE TABLE `clothes` (
 CREATE TABLE `satisfaction` (
   -- 1: 매우작음, 2: 매우큼, 3: 작음, 4: 큼, 5: 맞음
   -- 높을 수록 좋은거(작은거 보단 큰게 낫다 by aanoaa)
+  -- 쟈켓만 해당함
 
   `guest_id`   INT UNSIGNED NOT NULL,
   `clothes_id` INT UNSIGNED NOT NULL,
