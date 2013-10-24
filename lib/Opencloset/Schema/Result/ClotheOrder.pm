@@ -1,12 +1,12 @@
 use utf8;
-package Opencloset::Schema::Result::Satisfaction;
+package Opencloset::Schema::Result::ClotheOrder;
 
 # Created by DBIx::Class::Schema::Loader
 # DO NOT MODIFY THE FIRST PART OF THIS FILE
 
 =head1 NAME
 
-Opencloset::Schema::Result::Satisfaction
+Opencloset::Schema::Result::ClotheOrder
 
 =cut
 
@@ -22,20 +22,13 @@ use MooseX::NonMoose;
 use namespace::autoclean;
 extends 'Opencloset::Schema::Base';
 
-=head1 TABLE: C<satisfaction>
+=head1 TABLE: C<clothe_order>
 
 =cut
 
-__PACKAGE__->table("satisfaction");
+__PACKAGE__->table("clothe_order");
 
 =head1 ACCESSORS
-
-=head2 guest_id
-
-  data_type: 'integer'
-  extra: {unsigned => 1}
-  is_foreign_key: 1
-  is_nullable: 0
 
 =head2 clothe_id
 
@@ -44,41 +37,16 @@ __PACKAGE__->table("satisfaction");
   is_foreign_key: 1
   is_nullable: 0
 
-=head2 chest
+=head2 order_id
 
   data_type: 'integer'
-  is_nullable: 1
-
-=head2 waist
-
-  data_type: 'integer'
-  is_nullable: 1
-
-=head2 arm
-
-  data_type: 'integer'
-  is_nullable: 1
-
-=head2 top_fit
-
-  data_type: 'integer'
-  is_nullable: 1
-
-=head2 bottom_fit
-
-  data_type: 'integer'
-  is_nullable: 1
+  extra: {unsigned => 1}
+  is_foreign_key: 1
+  is_nullable: 0
 
 =cut
 
 __PACKAGE__->add_columns(
-  "guest_id",
-  {
-    data_type => "integer",
-    extra => { unsigned => 1 },
-    is_foreign_key => 1,
-    is_nullable => 0,
-  },
   "clothe_id",
   {
     data_type => "integer",
@@ -86,31 +54,28 @@ __PACKAGE__->add_columns(
     is_foreign_key => 1,
     is_nullable => 0,
   },
-  "chest",
-  { data_type => "integer", is_nullable => 1 },
-  "waist",
-  { data_type => "integer", is_nullable => 1 },
-  "arm",
-  { data_type => "integer", is_nullable => 1 },
-  "top_fit",
-  { data_type => "integer", is_nullable => 1 },
-  "bottom_fit",
-  { data_type => "integer", is_nullable => 1 },
+  "order_id",
+  {
+    data_type => "integer",
+    extra => { unsigned => 1 },
+    is_foreign_key => 1,
+    is_nullable => 0,
+  },
 );
 
 =head1 PRIMARY KEY
 
 =over 4
 
-=item * L</guest_id>
-
 =item * L</clothe_id>
+
+=item * L</order_id>
 
 =back
 
 =cut
 
-__PACKAGE__->set_primary_key("guest_id", "clothe_id");
+__PACKAGE__->set_primary_key("clothe_id", "order_id");
 
 =head1 RELATIONS
 
@@ -129,24 +94,24 @@ __PACKAGE__->belongs_to(
   { is_deferrable => 1, on_delete => "CASCADE", on_update => "RESTRICT" },
 );
 
-=head2 guest
+=head2 order
 
 Type: belongs_to
 
-Related object: L<Opencloset::Schema::Result::Guest>
+Related object: L<Opencloset::Schema::Result::Order>
 
 =cut
 
 __PACKAGE__->belongs_to(
-  "guest",
-  "Opencloset::Schema::Result::Guest",
-  { id => "guest_id" },
+  "order",
+  "Opencloset::Schema::Result::Order",
+  { id => "order_id" },
   { is_deferrable => 1, on_delete => "CASCADE", on_update => "RESTRICT" },
 );
 
 
 # Created by DBIx::Class::Schema::Loader v0.07036 @ 2013-10-24 16:50:56
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:z5nA+O7gmNByvcqbH5UOlg
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:W9mb/49FNjugdAWdUEG+Yw
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

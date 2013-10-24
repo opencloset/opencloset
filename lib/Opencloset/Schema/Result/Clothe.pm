@@ -22,11 +22,11 @@ use MooseX::NonMoose;
 use namespace::autoclean;
 extends 'Opencloset::Schema::Base';
 
-=head1 TABLE: C<clothes>
+=head1 TABLE: C<clothe>
 
 =cut
 
-__PACKAGE__->table("clothes");
+__PACKAGE__->table("clothe");
 
 =head1 ACCESSORS
 
@@ -220,7 +220,7 @@ __PACKAGE__->belongs_to(
   { is_deferrable => 1, on_delete => "CASCADE", on_update => "RESTRICT" },
 );
 
-=head2 clothes_bottoms
+=head2 clothe_bottoms
 
 Type: has_many
 
@@ -229,28 +229,28 @@ Related object: L<Opencloset::Schema::Result::Clothe>
 =cut
 
 __PACKAGE__->has_many(
-  "clothes_bottoms",
+  "clothe_bottoms",
   "Opencloset::Schema::Result::Clothe",
   { "foreign.bottom_id" => "self.id" },
   { cascade_copy => 0, cascade_delete => 0 },
 );
 
-=head2 clothes_orders
+=head2 clothe_orders
 
 Type: has_many
 
-Related object: L<Opencloset::Schema::Result::ClothesOrder>
+Related object: L<Opencloset::Schema::Result::ClotheOrder>
 
 =cut
 
 __PACKAGE__->has_many(
-  "clothes_orders",
-  "Opencloset::Schema::Result::ClothesOrder",
-  { "foreign.clothes_id" => "self.id" },
+  "clothe_orders",
+  "Opencloset::Schema::Result::ClotheOrder",
+  { "foreign.clothe_id" => "self.id" },
   { cascade_copy => 0, cascade_delete => 0 },
 );
 
-=head2 clothes_tops
+=head2 clothe_tops
 
 Type: has_many
 
@@ -259,7 +259,7 @@ Related object: L<Opencloset::Schema::Result::Clothe>
 =cut
 
 __PACKAGE__->has_many(
-  "clothes_tops",
+  "clothe_tops",
   "Opencloset::Schema::Result::Clothe",
   { "foreign.top_id" => "self.id" },
   { cascade_copy => 0, cascade_delete => 0 },
@@ -296,7 +296,7 @@ Related object: L<Opencloset::Schema::Result::DonorClothe>
 __PACKAGE__->has_many(
   "donor_clothes",
   "Opencloset::Schema::Result::DonorClothe",
-  { "foreign.clothes_id" => "self.id" },
+  { "foreign.clothe_id" => "self.id" },
   { cascade_copy => 0, cascade_delete => 0 },
 );
 
@@ -311,7 +311,7 @@ Related object: L<Opencloset::Schema::Result::Satisfaction>
 __PACKAGE__->has_many(
   "satisfactions",
   "Opencloset::Schema::Result::Satisfaction",
-  { "foreign.clothes_id" => "self.id" },
+  { "foreign.clothe_id" => "self.id" },
   { cascade_copy => 0, cascade_delete => 0 },
 );
 
@@ -359,15 +359,15 @@ __PACKAGE__->belongs_to(
 
 Type: many_to_many
 
-Composing rels: L</clothes_orders> -> order
+Composing rels: L</clothe_orders> -> order
 
 =cut
 
-__PACKAGE__->many_to_many("orders", "clothes_orders", "order");
+__PACKAGE__->many_to_many("orders", "clothe_orders", "order");
 
 
-# Created by DBIx::Class::Schema::Loader v0.07036 @ 2013-10-24 16:16:52
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:FzVtQGfA3xJt35G8uoR6bQ
+# Created by DBIx::Class::Schema::Loader v0.07036 @ 2013-10-24 16:50:56
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:U5YSdtfEDwutFjvUALwgwQ
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

@@ -69,10 +69,10 @@ CREATE TABLE `status` (
 INSERT INTO `status` (`id`, `name`) VALUES (1, '대여가능'), (2, '대여중'), (3, '세탁'), (4, '수선'), (5, '대여불가'), (6, '분실');
 
 --
--- clothes
+-- clothe
 --
 
-CREATE TABLE `clothes` (
+CREATE TABLE `clothe` (
   `id`          INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `no`          VARCHAR(64) NOT NULL,  -- 바코드 품번
   `chest`       INT DEFAULT NULL,
@@ -88,11 +88,11 @@ CREATE TABLE `clothes` (
 
   PRIMARY KEY (`id`),
   UNIQUE KEY (`no`),
-  CONSTRAINT `fk_clothes1` FOREIGN KEY (`category_id`) REFERENCES `category` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `fk_clothes2` FOREIGN KEY (`top_id`) REFERENCES `clothes` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `fk_clothes3` FOREIGN KEY (`bottom_id`) REFERENCES `clothes` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `fk_clothes4` FOREIGN KEY (`donor_id`) REFERENCES `donor` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `fk_clothes5` FOREIGN KEY (`status_id`) REFERENCES `status` (`id`) ON DELETE CASCADE
+  CONSTRAINT `fk_clothe1` FOREIGN KEY (`category_id`) REFERENCES `category` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_clothe2` FOREIGN KEY (`top_id`) REFERENCES `clothe` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_clothe3` FOREIGN KEY (`bottom_id`) REFERENCES `clothe` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_clothe4` FOREIGN KEY (`donor_id`) REFERENCES `donor` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_clothe5` FOREIGN KEY (`status_id`) REFERENCES `status` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
@@ -105,16 +105,16 @@ CREATE TABLE `satisfaction` (
   -- 쟈켓만 해당함
 
   `guest_id`   INT UNSIGNED NOT NULL,
-  `clothes_id` INT UNSIGNED NOT NULL,
+  `clothe_id` INT UNSIGNED NOT NULL,
   `chest`      INT DEFAULT NULL,
   `waist`      INT DEFAULT NULL,
   `arm`        INT DEFAULT NULL,
   `top_fit`    INT DEFAULT NULL,
   `bottom_fit` INT DEFAULT NULL,
 
-  PRIMARY KEY (`guest_id`, `clothes_id`),
+  PRIMARY KEY (`guest_id`, `clothe_id`),
   CONSTRAINT `fk_satisfaction1` FOREIGN KEY (`guest_id`) REFERENCES `guest` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `fk_satisfaction2` FOREIGN KEY (`clothes_id`) REFERENCES `clothes` (`id`) ON DELETE CASCADE
+  CONSTRAINT `fk_satisfaction2` FOREIGN KEY (`clothe_id`) REFERENCES `clothe` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
@@ -137,29 +137,29 @@ CREATE TABLE `order` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
--- clothes_order
+-- clothe_order
 --
 
-CREATE TABLE `clothes_order` (
-  `clothes_id` INT UNSIGNED NOT NULL,
+CREATE TABLE `clothe_order` (
+  `clothe_id` INT UNSIGNED NOT NULL,
   `order_id`   INT UNSIGNED NOT NULL,
 
-  PRIMARY KEY (`clothes_id`, `order_id`),
-  CONSTRAINT `fk_clothes_order1` FOREIGN KEY (`clothes_id`) REFERENCES `clothes` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `fk_clothes_order2` FOREIGN KEY (`order_id`) REFERENCES `order` (`id`) ON DELETE CASCADE
+  PRIMARY KEY (`clothe_id`, `order_id`),
+  CONSTRAINT `fk_clothe_order1` FOREIGN KEY (`clothe_id`) REFERENCES `clothe` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_clothe_order2` FOREIGN KEY (`order_id`) REFERENCES `order` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
--- donor_clothes
+-- donor_clothe
 --
 
-CREATE TABLE `donor_clothes` (
+CREATE TABLE `donor_clothe` (
   `donor_id`      INT UNSIGNED NOT NULL,
-  `clothes_id`    INT UNSIGNED NOT NULL,
+  `clothe_id`    INT UNSIGNED NOT NULL,
   `comment`       TEXT DEFAULT NULL,
   `donation_date` DATETIME DEFAULT NULL,
 
-  PRIMARY KEY (`donor_id`, `clothes_id`),
-  CONSTRAINT `fk_donor_clothes1` FOREIGN KEY (`donor_id`) REFERENCES `donor` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `fk_donor_clothes2` FOREIGN KEY (`clothes_id`) REFERENCES `clothes` (`id`) ON DELETE CASCADE
+  PRIMARY KEY (`donor_id`, `clothe_id`),
+  CONSTRAINT `fk_donor_clothe1` FOREIGN KEY (`donor_id`) REFERENCES `donor` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_donor_clothe2` FOREIGN KEY (`clothe_id`) REFERENCES `clothe` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;

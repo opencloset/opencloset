@@ -22,11 +22,11 @@ use MooseX::NonMoose;
 use namespace::autoclean;
 extends 'Opencloset::Schema::Base';
 
-=head1 TABLE: C<donor_clothes>
+=head1 TABLE: C<donor_clothe>
 
 =cut
 
-__PACKAGE__->table("donor_clothes");
+__PACKAGE__->table("donor_clothe");
 
 =head1 ACCESSORS
 
@@ -37,7 +37,7 @@ __PACKAGE__->table("donor_clothes");
   is_foreign_key: 1
   is_nullable: 0
 
-=head2 clothes_id
+=head2 clothe_id
 
   data_type: 'integer'
   extra: {unsigned => 1}
@@ -66,7 +66,7 @@ __PACKAGE__->add_columns(
     is_foreign_key => 1,
     is_nullable => 0,
   },
-  "clothes_id",
+  "clothe_id",
   {
     data_type => "integer",
     extra => { unsigned => 1 },
@@ -90,13 +90,13 @@ __PACKAGE__->add_columns(
 
 =item * L</donor_id>
 
-=item * L</clothes_id>
+=item * L</clothe_id>
 
 =back
 
 =cut
 
-__PACKAGE__->set_primary_key("donor_id", "clothes_id");
+__PACKAGE__->set_primary_key("donor_id", "clothe_id");
 
 =head1 RELATIONS
 
@@ -111,7 +111,7 @@ Related object: L<Opencloset::Schema::Result::Clothe>
 __PACKAGE__->belongs_to(
   "clothe",
   "Opencloset::Schema::Result::Clothe",
-  { id => "clothes_id" },
+  { id => "clothe_id" },
   { is_deferrable => 1, on_delete => "CASCADE", on_update => "RESTRICT" },
 );
 
@@ -131,8 +131,8 @@ __PACKAGE__->belongs_to(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07036 @ 2013-10-24 16:16:52
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:zTPLRGJURbARXPjuM9Lcuw
+# Created by DBIx::Class::Schema::Loader v0.07036 @ 2013-10-24 16:50:56
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:qE1tKyJg7kSL7gSclSicwA
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration
