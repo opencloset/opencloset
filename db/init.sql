@@ -26,9 +26,8 @@ CREATE TABLE `guest` (
   `phone`      VARCHAR(16) DEFAULT NULL COMMENT 'regex: [0-9]{10,11}',
   `gender`     INT DEFAULT NULL COMMENT '0: male, 1: female',
   `address`    VARCHAR(255) DEFAULT NULL,
-  `birth_date` DATETIME DEFAULT NULL,
+  `age`        INT DEFAULT NULL,
   `purpose`    VARCHAR(32),
-  `d_date`     DATETIME DEFAULT NULL,
 
   `chest`      INT NOT NULL,     -- 가슴둘레(cm)
   `waist`      INT NOT NULL,     -- 허리둘레(cm)
@@ -37,7 +36,9 @@ CREATE TABLE `guest` (
   `height`     INT DEFAULT NULL, -- cm
   `weight`     INT DEFAULT NULL, -- kg
 
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  UNIQUE KEY (`email`),
+  UNIQUE KEY (`phone`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --

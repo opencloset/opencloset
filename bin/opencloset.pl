@@ -26,11 +26,12 @@ my $schema = Opencloset::Schema->connect({
 helper error => sub {
     my ($self, $status, $error) = @_;
 
-    ## TODO: should create `ok`, `bad_request` template
+    ## TODO: `ok.haml.html`, `bad_request.haml.html`, `internal_error.haml.html`
     my %error_map = (
         200 => 'ok',
         400 => 'bad_request',
         404 => 'not_found',
+        500 => 'internal_error',
     );
 
     $self->respond_to(
@@ -74,7 +75,18 @@ helper commify => sub {
     return $_;
 };
 
+helper create_guest => sub {
+    my $self = shift;
+
+    my %params;
+    map { $params{$_} = $self->param($_) } qw/name gender phone address age email purpose height weight/;
+
+    return $schema->resultset('Guest')->create(\%params);
+};
+
+plugin 'validator';
 plugin 'haml_renderer';
+plugin 'FillInFormLite';
 
 get '/' => sub {
     my $self = shift;
@@ -83,7 +95,81 @@ get '/' => sub {
 
 get '/new' => sub {
     my $self = shift;
-    $self->render('new');
+
+    my $query = $self->param('query');
+    my $guest = $schema->resultset('Guest')->search({
+        id => $self->param('q')
+    });
+
+    $guest = $schema->resultset('Guest')->search({
+        phone => $self->param('q')
+    }) unless $guest;
+
+    $guest = $schema->resultset('Guest')->search({
+        name => $self->param('q')
+    }) unless $guest;
+
+    if ($guest->count == 1) {
+        my %columns;
+        %columns = $guest->next->get_columns;
+        $self->render_fillinform({ %columns });
+    } else {
+        $self->stash(candidate => $guest);
+    }
+} => 'new';
+
+post '/guests' => sub {
+    my $self = shift;
+
+    my $validator = $self->create_validator;
+    $validator->field('name')->required(1);
+    $validator->field('phone')->regexp(qr/^\d{10,11}$/);
+
+    return $self->error(400, 'invalid request')
+        unless $self->validate($validator);
+
+    my $guest = $self->create_guest;
+    return $self->error(500, 'failed to create a new guest') unless $guest;
+
+    $self->res->headers->header('Location' => $self->url_for('/guest/' . $guest->id));
+    $self->respond_to(
+        json => { json => { $guest->get_columns }, status => 201 },
+        html => sub {
+            $self->redirect_to('/guests/' . $guest->id . '/size');
+        }
+    );
+};
+
+get '/guests/:id/size' => sub {
+    my $self  = shift;
+    my $guest = $schema->resultset('Guest')->find({ id => $self->param('id') });
+    $self->stash(guest => $guest);
+    $self->render_fillinform({ $guest->get_columns });
+} => 'guest-size';
+
+post '/guests/:id/size' => sub {
+    my $self  = shift;
+
+    my $validator = $self->create_validator;
+    my @fields = qw/chest waist arm pants_len/;
+    $validator->field([@fields])
+        ->each(sub { shift->required(1)->regexp(qr/^\d+$/) });
+
+    return $self->error(400, 'failed to validate')
+        unless $self->validate($validator);
+
+    my $guest = $schema->resultset('Guest')->find({ id => $self->param('id') });
+    map { $guest->$_($self->param($_)) } @fields;
+    $guest->update;
+    my ($chest, $waist, $arm) = ($guest->chest - 3, $guest->waist - 1, $guest->arm);
+    $self->respond_to(
+        json => { json => { $guest->get_columns } },
+        html => sub {
+            $self->redirect_to('/search', {
+                q => "$chest/$waist/$arm"
+            });
+        }
+    );
 };
 
 put '/clothes' => sub {
@@ -171,7 +257,7 @@ __DATA__
 
 @@ index.html.haml
 - layout 'default', javascripts => ['root-index.js'];
-- title 'Opencloset, sharing clothes';
+- title 'Opencloset, sharing clothes - 열린옷장';
 
 %form#clothe-search-form.form-inline
   .input-append
@@ -223,17 +309,24 @@ __DATA__
 
 @@ new.html.haml
 - layout 'default';
-- title 'type the new guest information';
+- title '새로 오신 손님 - 열린옷장';
+
+- if ($candidate) {
+%ul
+  - while(my $g = $candidate->next) {
+  %li= $g->name
+  - }
+- }
 
 %p.text-warning
   %strong 작성하시기전, 직원에게 언제 입으실 건지 알려주세요
 
 .pull-right
-  %form.form-search
-    %input.input-medium.search-query{:type => 'text', :id => 'search-query', :placeholder => '이름 또는 휴대폰번호'}
+  %form.form-search{:method => 'get', :action => ''}
+    %input.input-medium.search-query{:type => 'text', :id => 'search-query', :name => 'q', :placeholder => '이름 또는 휴대폰번호'}
     %button.btn{:type => 'submit'} Search
 
-%form.form-horizontal
+%form.form-horizontal{:method => 'post', :action => '/guests'}
   %legend
     대여자 기본 정보
   .control-group
@@ -294,15 +387,64 @@ __DATA__
     .controls
       %button.btn{type => 'submit'} 다음
 
+@@ guest-size.html.haml
+- layout 'default';
+- title '신체치수 - 열린옷장';
+
+.row
+  .span6
+    %h3= $guest->purpose
+    %ul
+      %li
+        %i.icon-user
+        %a{:href => "#{url_for('/guests/' . $guest->id)}"} #{$guest->name}
+        %span (#{$guest->age})
+      %li
+        %i.icon-map-marker
+        = $guest->address
+      %li
+        %i.icon-envelope
+        %a{:href => "mailto:#{$guest->email}"}= $guest->email
+      %li= $guest->phone
+      %li
+        %span #{$guest->height} cm,
+        %span #{$guest->weight} kg
+  .span6
+    %form.form-horizontal{:method => 'POST', :action => "#{url_for('')}"}
+      %legend 대여자 치수 정보
+      .control-group
+        %label.control-label{:for => 'input-chest'} 가슴
+        .controls
+          %input{:type => 'text', :id => 'input-chest', :name => 'chest'}
+            cm
+      .control-group
+        %label.control-label{:for => 'input-waist'} 허리
+        .controls
+          %input{:type => 'text', :id => 'input-waist', :name => 'waist'}
+            cm
+      .control-group
+        %label.control-label{:for => 'input-arm'} 팔
+        .controls
+          %input{:type => 'text', :id => 'input-arm', :name => 'arm'}
+            cm
+      .control-group
+        %label.control-label{:for => 'input-pants-len'} 기장
+        .controls
+          %input{:type => 'text', :id => 'input-pants-len', :name => 'pants_len'}
+            cm
+      .control-group
+        .controls
+          %input.btn.btn-primary{:type => 'submit', :value => '저장'}
+
 @@ clothes/item.html.haml
 - layout 'default';
-- title 'clothes/item';
+- title 'clothes/item - 열린옷장';
 
 %p clothes/item
 
 @@ not_found.html.haml
 - layout 'default';
-- title 'Not found';
+- title 'Not found - 열린옷장';
 
 %h3 404 Not found
 %p= $error
@@ -325,7 +467,9 @@ __DATA__
           %a.brand{:href => "/"} OPEN-CLOSET
           %ul.nav
             %li
-              %a{:href => "/new"} 대여
+              %a{:href => "/"} Home
+            %li
+              %a{:href => "/new"} 새로 오신 손님
       .content
         = content
       %footer.footer

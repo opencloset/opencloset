@@ -62,17 +62,17 @@ regex: [0-9]{10,11}
   data_type: 'integer'
   is_nullable: 1
 
+0: male, 1: female
+
 =head2 address
 
   data_type: 'varchar'
   is_nullable: 1
   size: 255
 
-=head2 birth_date
+=head2 age
 
-  data_type: 'datetime'
-  datetime_undef_if_invalid: 1
-  inflate_datetime: 1
+  data_type: 'integer'
   is_nullable: 1
 
 =head2 purpose
@@ -80,13 +80,6 @@ regex: [0-9]{10,11}
   data_type: 'varchar'
   is_nullable: 1
   size: 32
-
-=head2 d_date
-
-  data_type: 'datetime'
-  datetime_undef_if_invalid: 1
-  inflate_datetime: 1
-  is_nullable: 1
 
 =head2 chest
 
@@ -138,22 +131,10 @@ __PACKAGE__->add_columns(
   { data_type => "integer", is_nullable => 1 },
   "address",
   { data_type => "varchar", is_nullable => 1, size => 255 },
-  "birth_date",
-  {
-    data_type => "datetime",
-    datetime_undef_if_invalid => 1,
-    inflate_datetime => 1,
-    is_nullable => 1,
-  },
+  "age",
+  { data_type => "integer", is_nullable => 1 },
   "purpose",
   { data_type => "varchar", is_nullable => 1, size => 32 },
-  "d_date",
-  {
-    data_type => "datetime",
-    datetime_undef_if_invalid => 1,
-    inflate_datetime => 1,
-    is_nullable => 1,
-  },
   "chest",
   { data_type => "integer", is_nullable => 0 },
   "waist",
@@ -179,6 +160,32 @@ __PACKAGE__->add_columns(
 =cut
 
 __PACKAGE__->set_primary_key("id");
+
+=head1 UNIQUE CONSTRAINTS
+
+=head2 C<email>
+
+=over 4
+
+=item * L</email>
+
+=back
+
+=cut
+
+__PACKAGE__->add_unique_constraint("email", ["email"]);
+
+=head2 C<phone>
+
+=over 4
+
+=item * L</phone>
+
+=back
+
+=cut
+
+__PACKAGE__->add_unique_constraint("phone", ["phone"]);
 
 =head1 RELATIONS
 
@@ -213,8 +220,8 @@ __PACKAGE__->has_many(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07036 @ 2013-10-24 16:16:52
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:FLKaQFmcDCv66vw6vGMTUw
+# Created by DBIx::Class::Schema::Loader v0.07036 @ 2013-10-25 16:18:34
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:UdeSjnF7WhLQIsgHDuXDuQ
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration
