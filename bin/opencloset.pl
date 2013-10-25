@@ -26,7 +26,9 @@ my $schema = Opencloset::Schema->connect({
 helper error => sub {
     my ($self, $status, $error) = @_;
 
+    ## TODO: should create `ok`, `bad_request` template
     my %error_map = (
+        200 => 'ok',
         400 => 'bad_request',
         404 => 'not_found',
     );
@@ -84,11 +86,37 @@ get '/new' => sub {
     $self->render('new');
 };
 
+put '/clothes' => sub {
+    my $self = shift;
+    my $clothes = $self->param('clothes');
+    return $self->error(400, 'Nothing to change') unless $clothes;
+
+    my $status = $schema->resultset('Status')->find({ name => $self->param('status') });
+    return $self->error(400, 'Invalid status') unless $status;
+
+    my $rs    = $schema->resultset('Clothe')->search({ 'me.id' => { -in => $clothes } });
+    my $guard = $schema->txn_scope_guard;
+    my @rows;
+    # BEGIN TRANSACTION ~
+    while (my $clothe = $rs->next) {
+        $clothe->status_id($status->id);
+        $clothe->update;
+        push @rows, { $clothe->get_columns };
+    }
+    # ~ COMMIT
+    $guard->commit;
+
+    $self->respond_to(
+        json => { json => [@rows] },
+        html => { template => 'clothes' }    # TODO: `clothe.html.haml`
+    );
+};
+
 get '/clothes/:no' => sub {
     my $self = shift;
     my $no = $self->param('no');
     my $clothe = $schema->resultset('Clothe')->find({ no => $no });
-    return $self->error(404, 'Not found') unless $clothe;
+    return $self->error(404, "Not found `$no`") unless $clothe;
 
     my $co_rs = $clothe->clothe_orders->search(
         { 'order.status_id' => 2 }, { join => 'order' }    # 2: 대여중
@@ -149,13 +177,18 @@ __DATA__
   .input-append
     %input.input-large{:type => 'text', :id => 'clothe-id', :placeholder => '품번'}
     %button#btn-clothe-search.btn{:type => 'button'} 검색
-  %p.text-error
+  %button#btn-clear.btn{:type => 'button'} Clear
 
-%ul#clothes-list
+#clothes-list
+  %ul
+  #action-buttons{:style => 'display: none'}
+    %button.btn.btn-mini{:type => 'button', :data-status => '세탁'} 세탁
+    %button.btn.btn-mini{:type => 'button', :data-status => '대여가능'} 반납
+    %button.btn.btn-mini{:type => 'button', :data-status => '분실'} 분실
 
 :plain
-  <script id="tpl-li" type="text/html">
-    <li>
+  <script id="tpl-row" type="text/html">
+    <li data-order-id="<%= order_id %>">
       <label>
         <a class="btn btn-success btn-mini" href="/order/<%= order_id %>">주문서</a>
         <a href="/clothe/<%= id %>"><%= category %></a>
@@ -178,12 +211,12 @@ __DATA__
   </script>
 
 :plain
-  <script id="tpl-rent-available" type="text/html">
-    <li>
+  <script id="tpl-row-checkbox" type="text/html">
+    <li class="row-checkbox" data-clothe-id="<%= id %>">
       <label class="checkbox">
-        <input type="checkbox" checked="checked">
+        <input type="checkbox" checked="checked" data-clothe-id="<%= id %>">
         <a href="/clothes/<%= id %>"><%= category %></a>
-        <span class="label label-success"><%= status %></span>
+        <span class="order-status label"><%= status %></span>
       </label>
     </li>
   </script>
