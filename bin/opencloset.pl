@@ -3,6 +3,7 @@ use Mojolicious::Lite;
 
 use Opencloset::Schema;
 use DateTime;
+use Data::Pageset;
 
 my $DB_NAME     = $ENV{OPENCLOSET_DB}       || 'opencloset';
 my $DB_USERNAME = $ENV{OPENCLOSET_USERNAME} || 'root';
@@ -94,29 +95,19 @@ get '/' => sub {
 };
 
 get '/new' => sub {
-    my $self = shift;
-
-    my $query = $self->param('query');
-    my $guest = $schema->resultset('Guest')->search({
-        id => $self->param('q')
+    my $self   = shift;
+    my $q      = $self->param('q');
+    my $guests = $schema->resultset('Guest')->search({
+        -or => [
+            id    => $q,
+            name  => $q,
+            phone => $q,
+            email => $q
+        ],
     });
 
-    $guest = $schema->resultset('Guest')->search({
-        phone => $self->param('q')
-    }) unless $guest;
-
-    $guest = $schema->resultset('Guest')->search({
-        name => $self->param('q')
-    }) unless $guest;
-
-    if ($guest->count == 1) {
-        my %columns;
-        %columns = $guest->next->get_columns;
-        $self->render_fillinform({ %columns });
-    } else {
-        $self->stash(candidate => $guest);
-    }
-} => 'new';
+    $self->render('new', candidates => $guests);
+};
 
 post '/guests' => sub {
     my $self = shift;
@@ -145,7 +136,7 @@ get '/guests/:id/size' => sub {
     my $guest = $schema->resultset('Guest')->find({ id => $self->param('id') });
     $self->stash(guest => $guest);
     $self->render_fillinform({ $guest->get_columns });
-} => 'guest-size';
+} => 'guests/size';
 
 post '/guests/:id/size' => sub {
     my $self  = shift;
@@ -161,13 +152,15 @@ post '/guests/:id/size' => sub {
     my $guest = $schema->resultset('Guest')->find({ id => $self->param('id') });
     map { $guest->$_($self->param($_)) } @fields;
     $guest->update;
-    my ($chest, $waist, $arm) = ($guest->chest - 3, $guest->waist - 1, $guest->arm);
+    my ($chest, $waist) = ($guest->chest + 3, $guest->waist - 1);
     $self->respond_to(
         json => { json => { $guest->get_columns } },
         html => sub {
-            $self->redirect_to('/search', {
-                q => "$chest/$waist/$arm"
-            });
+            $self->redirect_to(
+                # ignore $guest->arm for wide search result
+                $self->url_for('/search')
+                    ->query(q => "$chest/$waist/", gid => $guest->id)
+            );
         }
     );
 };
@@ -252,6 +245,45 @@ get '/clothes/:no' => sub {
     );
 };
 
+get '/search' => sub {
+    my $self  = shift;
+    my $q     = $self->param('q')   || '';
+    my $gid   = $self->param('gid') || '';
+    my $guest = $gid ? $schema->resultset('Guest')->find({ id => $gid }) : undef;
+
+    my $c_jacket = $schema->resultset('Category')->find({ name => 'jacket' });
+    my $cond = { category_id => $c_jacket->id };
+    my ($chest, $waist, $arm) = split /\//, $q;
+    $cond->{chest} = { '>=' => $chest } if $chest;
+    $cond->{waist} = { '>=' => $waist } if $waist;
+    $cond->{arm}   = { '>=' => $arm   } if $arm;
+
+    ### row, current_page, count
+    my $ENTRIES_PER_PAGE = 10;
+    my $clothes = $schema->resultset('Clothe')->search(
+        $cond,
+        {
+            page     => $self->param('p') || 1,
+            rows     => $ENTRIES_PER_PAGE,
+            order_by => [qw/chest waist arm/],
+        }
+    );
+
+    my $pageset = Data::Pageset->new({
+        total_entries    => $clothes->pager->total_entries,
+        entries_per_page => $ENTRIES_PER_PAGE,
+        current_page     => $self->param('p') || 1,
+        mode             => 'fixed'
+    });
+
+    $self->render(
+        'search',
+        guest   => $guest,
+        clothes => $clothes,
+        pageset => $pageset,
+    );
+};
+
 app->start;
 __DATA__
 
@@ -308,23 +340,27 @@ __DATA__
   </script>
 
 @@ new.html.haml
-- layout 'default';
+- layout 'default', javascripts => ['new.js'];
 - title '새로 오신 손님 - 열린옷장';
-
-- if ($candidate) {
-%ul
-  - while(my $g = $candidate->next) {
-  %li= $g->name
-  - }
-- }
-
-%p.text-warning
-  %strong 작성하시기전, 직원에게 언제 입으실 건지 알려주세요
 
 .pull-right
   %form.form-search{:method => 'get', :action => ''}
-    %input.input-medium.search-query{:type => 'text', :id => 'search-query', :name => 'q', :placeholder => '이름 또는 휴대폰번호'}
-    %button.btn{:type => 'submit'} Search
+    %input.input-medium.search-query{:type => 'text', :id => 'search-query', :name => 'q', :placeholder => '이메일, 이름 또는 휴대폰번호'}
+    %button.btn{:type => 'submit'} 검색
+
+%ul
+  - while(my $g = $candidates->next) {
+  %li
+    %a{:href => "/guests/#{$g->id}/size"} #{$g->name} (#{$g->email})
+    %p.muted
+      %span= $g->address
+      - if ($g->visit_date) {
+        %time , #{$g->visit_date->ymd} #{$g->purpose} (으)로 방문
+      - }
+  - }
+
+%p.text-warning
+  %strong 작성하시기전, 직원에게 언제 입으실 건지 알려주세요
 
 %form.form-horizontal{:method => 'post', :action => '/guests'}
   %legend
@@ -381,13 +417,13 @@ __DATA__
   .control-group
     .controls
       %label.checkbox.inline
-        %input{:type => 'checkbox'}
+        %input{:type => 'checkbox' :checked => 'checked'}
           정확한 의류선택과 편리한 이용관리를 위한 개인정보와 신체치수 수집에 동의 하십니까?
   .control-group
     .controls
       %button.btn{type => 'submit'} 다음
 
-@@ guest-size.html.haml
+@@ guests/size.html.haml
 - layout 'default';
 - title '신체치수 - 열린옷장';
 
@@ -434,13 +470,128 @@ __DATA__
             cm
       .control-group
         .controls
-          %input.btn.btn-primary{:type => 'submit', :value => '저장'}
+          %input.btn.btn-primary{:type => 'submit', :value => '다음'}
+
+@@ guests/breadcrumb.html.haml
+%p
+  %a{:href => '/guests/#{$guest->id}'}= $guest->name
+  님
+  %strong= $guest->purpose
+  %span (으)로 방문
+  %div
+    %span.label.label-info.search-label
+      %a{:href => '#{url_with->query([q => $guest->chest])}//'}= $guest->chest
+    %span.label.label-info.search-label
+      %a{:href => "#{url_with->query([q => '/' . $guest->waist . '/'])}"}= $guest->waist
+    %span.label.label-info.search-label
+      %a{:href => "#{url_with->query([q => '//' . $guest->arm])}"}= $guest->arm
+    %span.label= $guest->pants_len
+    %span.label= $guest->height
+    %span.label= $guest->weight
+
+@@ search.html.haml
+- layout 'default';
+- title '검색 - 열린옷장';
+
+.pull-right
+  %p
+    %span.badge.badge-inverse 매우작음
+    %span.badge 작음
+    %span.badge.badge-success 맞음
+    %span.badge.badge-warning 큼
+    %span.badge.badge-important 매우큼
+
+  %form.form-search{:method => 'get', :action => ''}
+    %input{:type => 'hidden', :name => 'gid', :value => "#{param('gid')}"}
+    %input.input-medium.search-query{:type => 'text', :id => 'search-query', :name => 'q', :placeholder => '가슴/허리/팔', :value => "#{param('q')}"}
+    %button.btn{:type => 'submit'} 검색
+
+- if (param 'q') { 
+  %p
+    %strong= param 'q'
+    %span.muted 의 검색결과
+- }
+
+%div= include 'guests/breadcrumb', guest => $guest if $guest
+%div= include 'pagination'
+
+%ul
+  - while (my $c = $clothes->next) {
+    %li= include 'clothes/preview', clothe => $c
+  - }
+
+%div= include 'pagination'
+
+@@ clothes/preview.html.haml
+%span
+  %a{:href => '/clothes/#{$clothe->id}'}= $clothe->no
+%div
+  %p
+    %a{:href => '/clothes/#{$clothe->id}'}
+      %img{:src => 'http://placehold.it/75x75', :alt => '#{$clothe->no}'}
+    %span.label.label-info.search-label
+      %a{:href => "#{url_with->query([q => $clothe->chest . '//'])}"}= $clothe->chest
+    %span.label.label-info.search-label
+      %a{:href => "#{url_with->query([q => '/' . $clothe->waist . '/'])}"}= $clothe->waist
+    %span.label.label-info.search-label
+      %a{:href => "#{url_with->query([q => '//' . $clothe->arm])}"}= $clothe->arm
+    - if ($clothe->status->name eq '대여가능') {
+      %span.label.label-success= $clothe->status->name
+    - } elsif ($clothe->status->name eq '대여중') {
+      %span.label.label-important= $clothe->status->name
+    - } else {
+      %span.label= $clothe->status->name
+    - }
+    %ul
+      - for my $s ($clothe->satisfactions({}, { rows => 5, order_by => { -desc => [qw/create_date/] } })) {
+        %li
+          %span.badge{:class => 'satisfaction-#{$s->chest}'}= $s->guest->chest
+          %span.badge{:class => 'satisfaction-#{$s->waist}'}= $s->guest->waist
+          %span.badge{:class => 'satisfaction-#{$s->arm}'}=   $s->guest->arm
+          %span.badge{:class => 'satisfaction-#{$s->top_fit}'}    상의fit
+          %span.badge{:class => 'satisfaction-#{$s->bottom_fit}'} 하의fit
+          - if ($guest && $s->guest->id == $guest->id) {
+            %i.icon-star{:title => '대여한적 있음'}
+          - }
+      - }
 
 @@ clothes/item.html.haml
 - layout 'default';
 - title 'clothes/item - 열린옷장';
 
 %p clothes/item
+
+@@ pagination.html.haml
+.pagination
+  %div
+    %ul
+      %li.previous
+        %a{:href => '#{url_with->query([p => $pageset->first_page])}'}= '&laquo;&laquo;'
+      - if ($pageset->previous_set) {
+        %li.previous
+          %a{:href => '#{url_with->query([p => $pageset->previous_set])}'}= '&laquo;'
+      - } else {
+        %li.previous.disabled
+          %a= '&laquo;'
+      - }
+      - for my $p (@{ $pageset->pages_in_set }) {
+        - if ($p == $pageset->current_page) {
+          %li.active
+            %a{:href => '#'}= $p
+        - } else {
+          %li
+            %a{:href => '#{url_with->query([p => $p])}'}= $p
+        - }
+      - }
+      - if ($pageset->next_set) {
+        %li.next
+          %a{:href => '#{url_with->query([p => $pageset->next_set])}'}= '&raquo;'
+      - } else {
+        %li.next.disabled
+          %a= '&raquo;'
+      - }
+      %li.next
+        %a{:href => '#{url_with->query([p => $pageset->last_page])}'}= '&raquo;&raquo;'
 
 @@ not_found.html.haml
 - layout 'default';
@@ -470,6 +621,8 @@ __DATA__
               %a{:href => "/"} Home
             %li
               %a{:href => "/new"} 새로 오신 손님
+            %li
+              %a{:href => "/search"} 정장 검색
       .content
         = content
       %footer.footer
