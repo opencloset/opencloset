@@ -3,3 +3,16 @@ body { padding-top: 60px; }
 .clickable { cursor: pointer; }
 
 .history-link { background-color: #ffffcc; }
+
+.search-label a { color: inherit; }
+.search-label :hover, .search-label :focus { color: none; }
+
+.satisfaction-1 { background-color: #333333; }
+
+.satisfaction-2 { background-color: #999999; }
+
+.satisfaction-3 { background-color: #468847; }
+
+.satisfaction-4 { background-color: #F89406; }
+
+.satisfaction-5 { background-color: #B94A48; }

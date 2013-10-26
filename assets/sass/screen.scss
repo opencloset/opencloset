@@ -7,3 +7,26 @@ body {
 .history-link {
    background-color: lighten(yellow, 40%);
 }
+.search-label {
+   a {
+      color: inherit;
+   }
+   :hover, :focus {
+      color: none;
+   }
+}
+.satisfaction-1 {
+   background-color: #333333;
+}
+.satisfaction-2 {
+   background-color: #999999;
+}
+.satisfaction-3 {
+   background-color: #468847;
+}
+.satisfaction-4 {
+   background-color: #F89406;
+}
+.satisfaction-5 {
+   background-color: #B94A48;
+}
