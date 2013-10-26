@@ -20,21 +20,23 @@ CREATE TABLE `donor` (
 --
 
 CREATE TABLE `guest` (
-  `id`         INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `name`       VARCHAR(32) NOT NULL,
-  `email`      VARCHAR(128) DEFAULT NULL,
-  `phone`      VARCHAR(16) DEFAULT NULL COMMENT 'regex: [0-9]{10,11}',
-  `gender`     INT DEFAULT NULL COMMENT '0: male, 1: female',
-  `address`    VARCHAR(255) DEFAULT NULL,
-  `age`        INT DEFAULT NULL,
-  `purpose`    VARCHAR(32),
+  `id`          INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `name`        VARCHAR(32) NOT NULL,
+  `email`       VARCHAR(128) DEFAULT NULL,
+  `phone`       VARCHAR(16) DEFAULT NULL COMMENT 'regex: [0-9]{10,11}',
+  `gender`      INT DEFAULT NULL COMMENT '0: male, 1: female',
+  `address`     VARCHAR(255) DEFAULT NULL,
+  `age`         INT DEFAULT NULL,
+  `purpose`     VARCHAR(32),
 
-  `chest`      INT NOT NULL,     -- 가슴둘레(cm)
-  `waist`      INT NOT NULL,     -- 허리둘레(cm)
-  `arm`        INT DEFAULT NULL, -- 팔길이(cm)
-  `pants_len`  INT DEFAULT NULL, -- 기장(cm)
-  `height`     INT DEFAULT NULL, -- cm
-  `weight`     INT DEFAULT NULL, -- kg
+  `chest`       INT NOT NULL,     -- 가슴둘레(cm)
+  `waist`       INT NOT NULL,     -- 허리둘레(cm)
+  `arm`         INT DEFAULT NULL, -- 팔길이(cm)
+  `pants_len`   INT DEFAULT NULL, -- 기장(cm)
+  `height`      INT DEFAULT NULL, -- cm
+  `weight`      INT DEFAULT NULL, -- kg
+  `create_date` DATETIME DEFAULT NULL,
+  `visit_date`  DATETIME DEFAULT NULL, -- latest visit
 
   PRIMARY KEY (`id`),
   UNIQUE KEY (`email`),
@@ -89,6 +91,10 @@ CREATE TABLE `clothe` (
 
   PRIMARY KEY (`id`),
   UNIQUE KEY (`no`),
+  INDEX (`chest`),
+  INDEX (`waist`),
+  INDEX (`arm`),
+  INDEX (`pants_len`),
   CONSTRAINT `fk_clothe1` FOREIGN KEY (`category_id`) REFERENCES `category` (`id`) ON DELETE CASCADE,
   CONSTRAINT `fk_clothe2` FOREIGN KEY (`top_id`) REFERENCES `clothe` (`id`) ON DELETE CASCADE,
   CONSTRAINT `fk_clothe3` FOREIGN KEY (`bottom_id`) REFERENCES `clothe` (`id`) ON DELETE CASCADE,
@@ -105,13 +111,14 @@ CREATE TABLE `satisfaction` (
   -- 높을 수록 좋은거(작은거 보단 큰게 낫다 by aanoaa)
   -- 쟈켓만 해당함
 
-  `guest_id`   INT UNSIGNED NOT NULL,
-  `clothe_id` INT UNSIGNED NOT NULL,
-  `chest`      INT DEFAULT NULL,
-  `waist`      INT DEFAULT NULL,
-  `arm`        INT DEFAULT NULL,
-  `top_fit`    INT DEFAULT NULL,
-  `bottom_fit` INT DEFAULT NULL,
+  `guest_id`    INT UNSIGNED NOT NULL,
+  `clothe_id`   INT UNSIGNED NOT NULL,
+  `chest`       INT DEFAULT NULL,
+  `waist`       INT DEFAULT NULL,
+  `arm`         INT DEFAULT NULL,
+  `top_fit`     INT DEFAULT NULL,
+  `bottom_fit`  INT DEFAULT NULL,
+  `create_date` DATETIME DEFAULT NULL,
 
   PRIMARY KEY (`guest_id`, `clothe_id`),
   CONSTRAINT `fk_satisfaction1` FOREIGN KEY (`guest_id`) REFERENCES `guest` (`id`) ON DELETE CASCADE,
