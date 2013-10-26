@@ -204,7 +204,7 @@ get '/clothes/:no' => sub {
     unless ($co_rs) {
         $self->respond_to(
             json => { json => $self->clothe2hr($clothe) },
-            html => { template => 'clothes/item' }    # also, CODEREF is OK
+            html => { template => 'clothes/no', clothe => $clothe }    # also, CODEREF is OK
         );
         return;
     }
@@ -241,7 +241,7 @@ get '/clothes/:no' => sub {
 
     $self->respond_to(
         json => { json => { %columns } },
-        html => { template => 'clothes/item' }    # also, CODEREF is OK
+        html => { template => 'clothes/no', clothe => $clothe }    # also, CODEREF is OK
     );
 };
 
@@ -309,9 +309,9 @@ __DATA__
     <li data-order-id="<%= order_id %>">
       <label>
         <a class="btn btn-success btn-mini" href="/order/<%= order_id %>">주문서</a>
-        <a href="/clothe/<%= id %>"><%= category %></a>
+        <a href="/clothes/<%= no %>"><%= category %></a>
         <span class="order-status label"><%= status %></span> with
-        <% _.each(clothes, function(clothe) { %> <a href="/clothes/<%= clothe.id %>"><%= clothe.category %></a><% }); %>
+        <% _.each(clothes, function(clothe) { %> <a href="/clothes/<%= clothe.no %>"><%= clothe.category %></a><% }); %>
         <a class="history-link" href="/order/<%= order_id %>">
           <time class="js-relative-date" datetime="<%= rental_date.raw %>" title="<%= rental_date.ymd %>"><%= rental_date.md %></time>
           ~
@@ -333,7 +333,7 @@ __DATA__
     <li class="row-checkbox" data-clothe-id="<%= id %>">
       <label class="checkbox">
         <input type="checkbox" checked="checked" data-clothe-id="<%= id %>">
-        <a href="/clothes/<%= id %>"><%= category %></a>
+        <a href="/clothes/<%= no %>"><%= category %></a>
         <span class="order-status label"><%= status %></span>
       </label>
     </li>
@@ -429,6 +429,13 @@ __DATA__
 
 .row
   .span6
+    - if (my $order = $guest->orders({ status_id => 2 })->next) {
+      - if (overdue_calc($order->target_date, DateTime->now())) {
+        %span.label.label-important 연체중
+      - } else {
+        %span.label.label-warning= $order->status->name
+      - }
+    - }
     %h3= $guest->purpose
     %ul
       %li
@@ -524,10 +531,10 @@ __DATA__
 
 @@ clothes/preview.html.haml
 %span
-  %a{:href => '/clothes/#{$clothe->id}'}= $clothe->no
+  %a{:href => '/clothes/#{$clothe->no}'}= $clothe->no
 %div
   %p
-    %a{:href => '/clothes/#{$clothe->id}'}
+    %a{:href => '/clothes/#{$clothe->no}'}
       %img{:src => 'http://placehold.it/75x75', :alt => '#{$clothe->no}'}
     %span.label.label-info.search-label
       %a{:href => "#{url_with->query([q => $clothe->chest . '//'])}"}= $clothe->chest
@@ -555,11 +562,65 @@ __DATA__
           - }
       - }
 
-@@ clothes/item.html.haml
+@@ clothes/no.html.haml
 - layout 'default';
-- title 'clothes/item - 열린옷장';
+- title 'clothes/' . $clothe->no . ' - 열린옷장';
 
-%p clothes/item
+%h1
+  %a{:href => ''}= $clothe->no
+  %span - #{$clothe->category->name}
+
+.row
+  .span8
+    - if ($clothe->status->name eq '대여가능') {
+      %span.label.label-success= $clothe->status->name
+    - } elsif ($clothe->status->name eq '대여중') {
+      %span.label.label-important= $clothe->status->name
+    - } else {
+      %span.label= $clothe->status->name
+    - }
+
+    %span
+      - if ($clothe->top) {
+        %a{:href => '/clothes/#{$clothe->top->no}'}= $clothe->top->no
+      - }
+      - if ($clothe->bottom) {
+        %a{:href => '/clothes/#{$clothe->bottom->no}'}= $clothe->bottom->no
+      - }
+
+    %div
+      %img.img-polaroid{:src => 'http://placehold.it/200x200', :alt => '#{$clothe->no}'}
+
+    %div
+      %span.label.label-info.search-label
+        %a{:href => "#{url_for('/search')->query([q => $clothe->chest])}//"}= $clothe->chest
+      %span.label.label-info.search-label
+        %a{:href => "#{url_for('/search')->query([q => '/' . $clothe->waist . '/'])}"}= $clothe->waist
+      %span.label.label-info.search-label
+        %a{:href => "#{url_for('/search')->query([q => '//' . $clothe->arm])}"}= $clothe->arm
+      %span.label= $clothe->pants_len
+
+    - if ($clothe->donor) {
+      %h3= $clothe->donor->name
+      %p.muted 님께서 기증하셨습니다
+    - }
+  .span4
+    %ul
+      - for my $order ($clothe->orders({}, { order_by => { -desc => [qw/rental_date/] } })) {
+        %li
+          %a{:href => '/guests/#{$order->guest->id}/size'}= $order->guest->name
+          님
+          - if ($order->status->name eq '대여중') {
+            - if (overdue_calc($order->target_date, DateTime->now())) {
+              %span.label.label-important 연체중
+            - } else {
+              %span.label.label-important= $order->status->name
+            - }
+          - } else {
+            %span.label= $order->status->name
+          - }
+          %time{:title => '대여일'}= $order->rental_date->ymd
+      - }
 
 @@ pagination.html.haml
 .pagination
