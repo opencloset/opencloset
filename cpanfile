@@ -1,10 +1,11 @@
 requires 'DBIx::Class';
 requires 'DBIx::Class::EncodedColumn';
 requires 'DBIx::Class::Schema::Loader';
+requires 'Data::Pageset';
+requires 'DateTime';
 requires 'Mojolicious::Lite';
+requires 'Mojolicious::Plugin::FillInFormLite';
 requires 'Mojolicious::Plugin::HamlRenderer';
 requires 'Mojolicious::Plugin::Validator';
-requires 'Mojolicious::Plugin::FillInFormLite';
 requires 'Plack';
 requires 'Plack::Middleware::ReverseProxy';
-requires 'DateTime';
