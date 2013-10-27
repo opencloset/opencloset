@@ -1,9 +1,10 @@
 #!/usr/bin/env perl
 use Mojolicious::Lite;
 
-use Opencloset::Schema;
-use DateTime;
 use Data::Pageset;
+use DateTime;
+use Opencloset::Schema;
+use Try::Tiny;
 
 my $DB_NAME     = $ENV{OPENCLOSET_DB}       || 'opencloset';
 my $DB_USERNAME = $ENV{OPENCLOSET_USERNAME} || 'root';
@@ -46,13 +47,28 @@ helper error => sub {
 };
 
 helper clothe2hr => sub {
-    my ($self, $row) = @_;
+    my ($self, $clothe) = @_;
 
     return {
-        $row->get_columns,
-        donor    => $row->donor->name,
-        category => $row->category->name,
-        status   => $row->status->name,
+        $clothe->get_columns,
+        donor    => $clothe->donor->name,
+        category => $clothe->category->name,
+        price    => $self->commify($clothe->category->price),
+        status   => $clothe->status->name,
+    };
+};
+
+helper order2hr => sub {
+    my ($self, $order) = @_;
+
+    my @clothes;
+    for my $clothe ($order->clothes) {
+        push @clothes, $self->clothe2hr($clothe);
+    }
+
+    return {
+        $order->get_columns,
+        clothes => [@clothes],
     };
 };
 
@@ -82,7 +98,7 @@ helper create_guest => sub {
     my %params;
     map { $params{$_} = $self->param($_) } qw/name gender phone address age email purpose height weight/;
 
-    return $schema->resultset('Guest')->create(\%params);
+    return $schema->resultset('Guest')->find_or_create(\%params);
 };
 
 plugin 'validator';
@@ -122,7 +138,7 @@ post '/guests' => sub {
     my $guest = $self->create_guest;
     return $self->error(500, 'failed to create a new guest') unless $guest;
 
-    $self->res->headers->header('Location' => $self->url_for('/guest/' . $guest->id));
+    $self->res->headers->header('Location' => $self->url_for('/guests/' . $guest->id));
     $self->respond_to(
         json => { json => { $guest->get_columns }, status => 201 },
         html => sub {
@@ -284,6 +300,111 @@ get '/search' => sub {
     );
 };
 
+get '/orders/new' => sub {
+    my $self = shift;
+
+    my $today = DateTime->now;
+    $today->set_hour(0);
+    $today->set_minute(0);
+    $today->set_second(0);
+
+    my $q      = $self->param('q');
+    my @guests = $schema->resultset('Guest')->search({
+        -or => [
+            id    => $q,
+            name  => $q,
+            phone => $q,
+            email => $q
+        ],
+    });
+
+    ### DBIx::Class::Storage::DBI::_gen_sql_bind(): DateTime objects passed to search() are not
+    ### supported properly (InflateColumn::DateTime formats and settings are not respected.)
+    ### See "Formatting DateTime objects in queries" in DBIx::Class::Manual::Cookbook.
+    ### To disable this warning for good set $ENV{DBIC_DT_SEARCH_OK} to true
+    ###
+    ### DateTime object 를 search 에 바로 사용하지 말고 parser 를 이용하라능 - @aanoaa
+    my $dt_parser = $schema->storage->datetime_parser;
+    push @guests, $schema->resultset('Guest')->search({
+        -or => [
+            create_date => { '>=' => $dt_parser->format_datetime($today) },
+            visit_date  => { '>=' => $dt_parser->format_datetime($today) },
+        ],
+    }, {
+        order_by => { -desc => 'create_date' },
+    });
+
+    $self->stash(guests => \@guests);
+} => 'orders/new';
+
+post '/orders' => sub {
+    my $self = shift;
+
+    my $validator = $self->create_validator;
+    $validator->field([qw/gid clothe-id/])
+        ->each(sub { shift->required(1)->regexp(qr/^\d+$/) });
+
+    return $self->error(400, 'failed to validate')
+        unless $self->validate($validator);
+
+    my $guest   = $schema->resultset('Guest')->find({ id => $self->param('gid') });
+    my @clothes = $schema->resultset('Clothe')->search({ 'me.id' => { -in => [$self->param('clothe-id')] } });
+
+    return $self->error(400, 'invalid request') unless $guest || @clothes;
+
+    my $guard = $schema->txn_scope_guard;
+    my $order;
+    try {
+        # BEGIN TRANSACTION ~
+        $order = $schema->resultset('Order')->create({
+            guest_id  => $guest->id,
+        });
+
+        for my $clothe (@clothes) {
+            $order->create_related('clothe_orders', { clothe_id => $clothe->id });
+        }
+        $guard->commit;
+        # ~ COMMIT
+    } catch {
+        # ROLLBACK
+        my $error = shift;
+        $self->app->log->error("Failed to create `order`: $error");
+        return $self->error(500, "Failed to create `order`: $error") unless $order;
+    };
+
+    $self->res->headers->header('Location' => $self->url_for('/orders/' . $guest->id));
+    $self->respond_to(
+        json => { json => $self->order2hr($order), status => 201 },
+        html => sub {
+            $self->redirect_to('/orders/' . $order->id);
+        }
+    );
+};
+
+get '/orders/:id' => sub {
+    my $self = shift;
+
+    my $order = $schema->resultset('Order')->find({ id => $self->param('id') });
+    $self->error(404, "Not found") unless $order;
+
+    my @clothes = $order->clothes;
+    my $price = 0;
+    for my $clothe (@clothes) {
+        $price += $clothe->category->price;
+    }
+
+    $self->stash(
+        order   => $order,
+        clothes => [@clothes],
+        price   => $price,
+    );
+
+    my %fillinform = $order->get_columns;
+    $fillinform{price} = $price unless $fillinform{price};
+
+    $self->render_fillinform({ %fillinform });
+} => 'orders/id';
+
 app->start;
 __DATA__
 
@@ -293,7 +414,7 @@ __DATA__
 
 %form#clothe-search-form.form-inline
   .input-append
-    %input.input-large{:type => 'text', :id => 'clothe-id', :placeholder => '품번'}
+    %input#clothe-id.input-large{:type => 'text', :placeholder => '품번'}
     %button#btn-clothe-search.btn{:type => 'button'} 검색
   %button#btn-clear.btn{:type => 'button'} Clear
 
@@ -496,6 +617,25 @@ __DATA__
     %span.label= $guest->height
     %span.label= $guest->weight
 
+@@ guests/breadcrumb/radio.html.haml
+%label.radio.inline
+  %input{:type => 'radio', :name => 'gid', :value => '#{$guest->id}'}
+  %a{:href => '/guests/#{$guest->id}'}= $guest->name
+  님
+  %strong.history-link= $guest->purpose
+  %span (으)로 방문
+%div
+  %i.icon-envelope
+  %a{:href => "mailto:#{$guest->email}"}= $guest->email
+%div.muted= $guest->phone
+%div
+  %span.label.label-info= $guest->chest
+  %span.label.label-info= $guest->waist
+  %span.label.label-info= $guest->arm
+  %span.label= $guest->pants_len
+  %span.label= $guest->height
+  %span.label= $guest->weight
+
 @@ search.html.haml
 - layout 'default';
 - title '검색 - 열린옷장';
@@ -606,11 +746,11 @@ __DATA__
     - }
   .span4
     %ul
-      - for my $order ($clothe->orders({}, { order_by => { -desc => [qw/rental_date/] } })) {
+      - for my $order ($clothe->orders({ status_id => 'NOT NULL'}, { order_by => { -desc => [qw/rental_date/] } })) {
         %li
           %a{:href => '/guests/#{$order->guest->id}/size'}= $order->guest->name
           님
-          - if ($order->status->name eq '대여중') {
+          - if ($order->status && $order->status->name eq '대여중') {
             - if (overdue_calc($order->target_date, DateTime->now())) {
               %span.label.label-important 연체중
             - } else {
@@ -658,8 +798,7 @@ __DATA__
 - layout 'default';
 - title 'Not found - 열린옷장';
 
-%h3 404 Not found
-%p= $error
+%h1 404 Not found
 
 @@ layouts/default.html.haml
 !!! 5
@@ -670,7 +809,7 @@ __DATA__
     %meta{:content => "", :name => "description"}/
     %meta{:content => "", :name => "author"}/
     %link{:href => "/assets/css/bootstrap.css", :rel => "stylesheet"}/
-    %link{:href => "/assets/lib/datepicker/css/datepicker.css", :rel => "stylesheet"}/
+    %link{:href => "/assets/lib/datepicker-1.2.0/css/datepicker.css", :rel => "stylesheet"}/
     %link{:href => "/assets/css/screen.css", :rel => "stylesheet"}/
   %body
     .container
@@ -683,6 +822,8 @@ __DATA__
             %li
               %a{:href => "/new"} 새로 오신 손님
             %li
+              %a{:href => "/orders/new"} 대여
+            %li
               %a{:href => "/search"} 정장 검색
       .content
         = content
@@ -694,8 +835,116 @@ __DATA__
             %a{:href => "#"} twitter
       %script{:src => "/assets/lib/jquery/jquery-1.10.2.min.js"}
       %script{:src => "/assets/lib/underscore/underscore-min.js"}
-      %script{:src => "/assets/lib/datepicker/js/bootstrap-datepicker.js"}
+      %script{:src => "/assets/lib/datepicker-1.2.0/js/bootstrap-datepicker.js"}
+      %script{:src => "/assets/lib/datepicker-1.2.0/js/locales/bootstrap-datepicker.kr.js"}
       %script{:src => "/assets/js/bundle.js"}
       - for my $js (@$javascripts) {
       %script{:src => "/assets/js/#{$js}"}
       - }
+
+@@ orders/new.html.haml
+- layout 'default', javascripts => ['orders-new.js'];
+- title '대여 - 열린옷장';
+
+.pull-right
+  %form.form-search{:method => 'get', :action => ''}
+    %input.input-medium.search-query{:type => 'text', :id => 'search-query', :name => 'q', :placeholder => '이메일, 이름 또는 휴대폰번호'}
+    %button.btn{:type => 'submit'} 검색
+
+%form#clothe-search-form.form-inline
+  .input-append
+    %input#clothe-id.input-large{:type => 'text', :placeholder => '품번'}
+    %button#btn-clothe-search.btn{:type => 'button'} 검색
+  %button#btn-clear.btn{:type => 'button'} Clear
+
+%form#order-form{:method => 'post', :action => '/orders'}
+  .row
+    .span8
+      #clothes-list
+        %ul
+        #action-buttons{:style => 'display: none'}
+          %button.btn{:type => 'button'} 주문서 확인
+    .span4
+      %ul
+        - for my $g (@$guests) {
+          %li= include 'guests/breadcrumb/radio', guest => $g
+        - }
+
+:plain
+  <script id="tpl-row-checkbox" type="text/html">
+    <li class="row-checkbox" data-clothe-id="<%= id %>">
+      <% if (!/^대여가능/.test(status)) { %>
+      <label>
+        <a href="/clothes/<%= no %>"><%= category %></a>
+        <% if (/^(대여중|연체중)/.test(status)) { %>
+        <span class="order-status label label-important"><%= status %></span>
+        <% } else { %>
+        <span class="order-status label"><%= status %></span>
+        <% } %>
+      </label>
+      <% } else { %>
+      <label class="checkbox">
+        <input type="checkbox" name="clothe-id" value="<%= id %>" checked="checked" data-clothe-id="<%= id %>">
+        <a href="/clothes/<%= no %>"><%= category %></a>
+        <span class="order-status label"><%= status %></span>
+        <strong><%= price %></strong>
+      </label>
+      <% } %>
+    </li>
+  </script>
+
+@@ orders/id.html.haml
+- layout 'default', javascripts => ['orders-id.js'];
+- title '주문확인 - 열린옷장';
+
+%span.label= $order->status->name if $order->status
+%div.pull-right= include 'guests/breadcrumb', guest => $order->guest
+%form.form-horizontal{:method => 'post', :action => ''}
+  %legend
+    - my $loop = 0;
+    - for my $clothe (@$clothes) {
+      - $loop++;
+      - if ($loop == 1) {
+        %span
+          %a{:href => '/clothes/#{$clothe->no}'}= $clothe->category->name
+      - } elsif ($loop == 2) {
+        %span
+          with
+          %a{:href => '/clothes/#{$clothe->no}'}= $clothe->category->name
+      - } else {
+        %span
+          ,
+          %a{:href => '/clothes/#{$clothe->no}'}= $clothe->category->name
+      - }
+    - }
+  .control-group
+    %label.control-label{:for => 'input-price'} 가격
+    .controls
+      %input{:type => 'text', :id => 'input-price', :name => 'price', :value => '#{$price}'}
+      원
+  .control-group
+    %label.control-label{:for => 'input-discount'} 에누리
+    .controls
+      %input{:type => 'text', :id => 'input-discount', :name => 'discount'}
+      원
+  .control-group
+    %label.control-label{:for => 'input-target-date'} 반납예정일
+    .controls
+      %input#input-target-date{:type => 'text'}
+  .control-group
+    %label.control-label{:for => 'input-comment'} Comment
+    .controls
+      %textarea{:id => 'input-comment', :name => 'comment'}
+  .control-group
+    .controls
+      %input.btn.btn-primary{:type => 'submit', :value => '대여완료'}
+
+
+
+
+
+
+
+
+
+

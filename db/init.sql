@@ -48,14 +48,15 @@ CREATE TABLE `guest` (
 --
 
 CREATE TABLE `category` (
-  `id`   INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `name` VARCHAR (64) NOT NULL,
+  `id`    INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `name`  VARCHAR (64) NOT NULL,
+  `price` INT DEFAULT 0,
 
   PRIMARY KEY (`id`),
   UNIQUE KEY (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-INSERT INTO `category` (`id`, `name`) VALUES (1, 'Jacket'), (2, 'Pants'), (3, 'Shirts'), (4, 'Shoes'), (5, 'Hat');
+INSERT INTO `category` (`id`, `name`, `price`) VALUES (1, 'Jacket', 10000), (2, 'Pants', 10000), (3, 'Shirts', 5000), (4, 'Shoes', 5000), (5, 'Hat', 0), (6, 'Tie', 0);
 
 --
 -- status

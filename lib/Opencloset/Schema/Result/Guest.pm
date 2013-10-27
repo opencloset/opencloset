@@ -125,6 +125,8 @@ regex: [0-9]{10,11}
   datetime_undef_if_invalid: 1
   inflate_datetime: 1
   is_nullable: 1
+  set_on_create: 1
+  set_on_update: 1
 
 =cut
 
@@ -172,10 +174,12 @@ __PACKAGE__->add_columns(
   },
   "visit_date",
   {
-    data_type => "datetime",
+    data_type                 => "datetime",
     datetime_undef_if_invalid => 1,
-    inflate_datetime => 1,
-    is_nullable => 1,
+    inflate_datetime          => 1,
+    is_nullable               => 1,
+    set_on_create             => 1,
+    set_on_update             => 1,
   },
 );
 
@@ -250,8 +254,8 @@ __PACKAGE__->has_many(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07036 @ 2013-10-26 11:41:47
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:VSCgivBP19UmNOS6hPYhNA
+# Created by DBIx::Class::Schema::Loader v0.07036 @ 2013-10-27 23:30:50
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:Wx5UMm8TThn0yVHK6BmUtw
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

@@ -43,6 +43,12 @@ __PACKAGE__->table("category");
   is_nullable: 0
   size: 64
 
+=head2 price
+
+  data_type: 'integer'
+  default_value: 0
+  is_nullable: 1
+
 =cut
 
 __PACKAGE__->add_columns(
@@ -55,6 +61,8 @@ __PACKAGE__->add_columns(
   },
   "name",
   { data_type => "varchar", is_nullable => 0, size => 64 },
+  "price",
+  { data_type => "integer", default_value => 0, is_nullable => 1 },
 );
 
 =head1 PRIMARY KEY
@@ -101,8 +109,8 @@ __PACKAGE__->has_many(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07036 @ 2013-10-24 16:16:52
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:pE4VZttE8WQ45JWfEghSFQ
+# Created by DBIx::Class::Schema::Loader v0.07036 @ 2013-10-28 00:39:59
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:4ufndF13kOh5DO8h30QUOQ
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

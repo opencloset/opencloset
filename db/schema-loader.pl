@@ -26,6 +26,9 @@ my $DB_PASSWORD = $ENV{OPENCLOSET_PASSWORD} || '';
             if ($col_name eq 'create_date') {
                 return {%{$col_info}, set_on_create => 1, inflate_datetime => 1};
             }
+            elsif ($col_name eq 'visit_date') {
+                return {%{$col_info}, set_on_create => 1, set_on_update => 1, inflate_datetime => 1};
+            }
             elsif ($col_name =~ /_date$/) {
                 return {%{$col_info}, inflate_datetime => 1};
             }

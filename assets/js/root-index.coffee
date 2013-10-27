@@ -1,11 +1,4 @@
 $ ->
-  alert = (cls, msg) ->
-    # error, success, info
-    $("<div class=\"alert alert-#{cls}\">#{msg}</div>")
-      .insertAfter('#clothe-search-form')
-    setTimeout ->
-      $('.alert').remove()
-    , 3000
   $('#clothe-id').focus()
   $('#btn-clear').click (e) ->
     e.preventDefault()
