@@ -189,7 +189,7 @@ put '/clothes' => sub {
     my $status = $schema->resultset('Status')->find({ name => $self->param('status') });
     return $self->error(400, 'Invalid status') unless $status;
 
-    my $rs    = $schema->resultset('Clothe')->search({ 'me.id' => { -in => $clothes } });
+    my $rs    = $schema->resultset('Clothe')->search({ 'me.id' => { -in => [split(/,/, $clothes)] } });
     my $guard = $schema->txn_scope_guard;
     my @rows;
     # BEGIN TRANSACTION ~
@@ -385,7 +385,7 @@ get '/orders/:id' => sub {
     my $self = shift;
 
     my $order = $schema->resultset('Order')->find({ id => $self->param('id') });
-    $self->error(404, "Not found") unless $order;
+    return $self->error(404, "Not found") unless $order;
 
     my @clothes = $order->clothes;
     my $price = 0;
@@ -393,17 +393,117 @@ get '/orders/:id' => sub {
         $price += $clothe->category->price;
     }
 
+    my $overdue  = $order->target_date ? $self->overdue_calc($order->target_date, DateTime->now()) : 0;
+    my $late_fee = $order->price * 0.2 * $overdue;
+
+    my $c_jacket = $schema->resultset('Category')->find({ name => 'jacket' });
+    my $cond = { category_id => $c_jacket->id };
+    my $clothe = $order->clothes($cond)->next;
+
+    my $satisfaction = $clothe->satisfactions({
+        clothe_id => $clothe->id,
+        guest_id  => $order->guest->id,
+    })->next;
+
     $self->stash(
-        order   => $order,
-        clothes => [@clothes],
-        price   => $price,
+        order        => $order,
+        clothes      => [@clothes],
+        price        => $price,
+        overdue      => $overdue,
+        late_fee     => $late_fee,
+        satisfaction => $satisfaction,
     );
 
     my %fillinform = $order->get_columns;
     $fillinform{price} = $price unless $fillinform{price};
+    $fillinform{late_fee} = $late_fee;
 
+    $self->stash(template => 'orders/id/nil_status');
+    $self->stash(template => 'orders/id') if ($order->status);
     $self->render_fillinform({ %fillinform });
-} => 'orders/id';
+};
+
+any [qw/post put patch/] => '/orders/:id' => sub {
+    my $self = shift;
+
+    # repeat codes; use `under`?
+    my $order = $schema->resultset('Order')->find({ id => $self->param('id') });
+    return $self->error(404, "Not found") unless $order;
+
+    my $validator = $self->create_validator;
+    $validator->field([qw/price discount late_fee l_discount/])
+        ->each(sub { shift->regexp(qr/^\d+$/) });
+    $validator->field([qw/chest waist arm top_fit bottom_fit/])
+        ->each(sub { shift->regexp(qr/^[12345]$/) });
+
+    return $self->error(400, 'failed to validate')
+        unless $self->validate($validator);
+
+    ## Note: target_date INSERT as string likes '2013-01-01',
+    ##       maybe should convert to DateTime object
+    map {
+        $order->$_($self->param($_)) if defined $self->param($_);
+    } qw/price discount target_date comment return_method late_fee l_discount/;
+    my %status_to_be = (
+        0 => 2,    # NULL   -> 대여중
+        2 => 8,    # 대여중 -> 반납
+        # TODO: consider `분실`
+    );
+
+    my $guard = $schema->txn_scope_guard;
+    # BEGIN TRANSACTION ~
+    $order->status_id($status_to_be{$order->status_id || 0});
+    my $dt_parser = $schema->storage->datetime_parser;
+    $order->rental_date($dt_parser->format_datetime(DateTime->now));
+    $order->update;
+
+    for my $clothe ($order->clothes) {
+        if ($order->status_id == 2) {
+            $clothe->status_id(2);
+        } else {
+            if ($clothe->category_id == 4) {
+                $clothe->status_id(1);    # Shoes, 대여가능
+            } else {
+                $clothe->status_id(3);    # otherwise, 세탁
+            }
+        }
+        $clothe->update;
+    }
+    $guard->commit;
+    # ~ COMMIT
+
+    my %satisfaction;
+    map { $satisfaction{$_} = $self->param($_) } qw/chest waist arm top_fit bottom_fit/;
+
+    if (values %satisfaction) {
+        # $order
+        my $c_jacket = $schema->resultset('Category')->find({ name => 'jacket' });
+        my $cond = { category_id => $c_jacket->id };
+        my $clothe = $order->clothes($cond)->next;
+        if ($clothe) {
+            $schema->resultset('Satisfaction')->update_or_create({
+                %satisfaction,
+                guest_id  => $order->guest_id,
+                clothe_id => $clothe->id,
+            });
+        }
+    }
+
+    $self->respond_to(
+        json => { json => $self->order2hr($order) },
+        html => sub {
+            $self->redirect_to($self->url_for);
+        }
+    );
+};
+
+get '/satisfactions/new' => sub {
+    my $self  = shift;
+    my $order = $schema->resultset('Order')->find({ id => $self->param('oid') });
+    return $self->error(400, "Unknown order") unless $order;
+
+    $self->stash(order => $order);
+} => 'satisfactions/new';
 
 app->start;
 __DATA__
@@ -429,11 +529,11 @@ __DATA__
   <script id="tpl-row" type="text/html">
     <li data-order-id="<%= order_id %>">
       <label>
-        <a class="btn btn-success btn-mini" href="/order/<%= order_id %>">주문서</a>
+        <a class="btn btn-success btn-mini" href="/orders/<%= order_id %>">주문서</a>
         <a href="/clothes/<%= no %>"><%= category %></a>
         <span class="order-status label"><%= status %></span> with
         <% _.each(clothes, function(clothe) { %> <a href="/clothes/<%= clothe.no %>"><%= clothe.category %></a><% }); %>
-        <a class="history-link" href="/order/<%= order_id %>">
+        <a class="history-link" href="/orders/<%= order_id %>">
           <time class="js-relative-date" datetime="<%= rental_date.raw %>" title="<%= rental_date.ymd %>"><%= rental_date.md %></time>
           ~
           <time class="js-relative-date" datetime="<%= target_date.raw %>" title="<%= target_date.ymd %>"><%= target_date.md %></time>
@@ -799,6 +899,18 @@ __DATA__
 - title 'Not found - 열린옷장';
 
 %h1 404 Not found
+- if ($error) {
+  %p.text-error= $error
+- }
+
+@@ bad_request.html.haml
+- layout 'default';
+- title 'Bad request - 열린옷장';
+
+%h1 400 Bad request
+- if ($error) {
+  %p.text-error= $error
+- }
 
 @@ layouts/default.html.haml
 !!! 5
@@ -893,11 +1005,10 @@ __DATA__
     </li>
   </script>
 
-@@ orders/id.html.haml
+@@ orders/id/nil_status.html.haml
 - layout 'default', javascripts => ['orders-id.js'];
 - title '주문확인 - 열린옷장';
 
-%span.label= $order->status->name if $order->status
 %div.pull-right= include 'guests/breadcrumb', guest => $order->guest
 %form.form-horizontal{:method => 'post', :action => ''}
   %legend
@@ -930,21 +1041,152 @@ __DATA__
   .control-group
     %label.control-label{:for => 'input-target-date'} 반납예정일
     .controls
-      %input#input-target-date{:type => 'text'}
+      %input#input-target-date{:type => 'text', :name => 'target_date'}
   .control-group
     %label.control-label{:for => 'input-comment'} Comment
     .controls
       %textarea{:id => 'input-comment', :name => 'comment'}
   .control-group
+    %label.control-label 만족도
     .controls
-      %input.btn.btn-primary{:type => 'submit', :value => '대여완료'}
+      %input.span1{:type => 'text', :name => 'chest', :placeholder => '가슴'}
+      %input.span1{:type => 'text', :name => 'waist', :placeholder => '허리'}
+      %input.span1{:type => 'text', :name => 'arm', :placeholder => '팔'}
+      %input.span1{:type => 'text', :name => 'top_fit', :placeholder => '상의'}
+      %input.span1{:type => 'text', :name => 'bottom_fit', :placeholder => '하의'}
+  .control-group
+    .controls
+      %input.btn.btn-success{:type => 'submit', :value => '대여완료'}
 
+@@ orders/id.html.haml
+- layout 'default', javascripts => ['orders-id.js'];
+- title '주문확인 - 열린옷장';
 
+%p
+  - if ($order->status_id == 8) {
+    %span.label{:class => 'status-#{$order->status_id}'}= $order->status->name
+  - } elsif ($overdue) {
+    %span.label{:class => 'status-#{$order->status_id}'} 연체중
+  - } else {
+    %span.label{:class => 'status-#{$order->status_id}'}= $order->status->name
+  - }
+%div.pull-right= include 'guests/breadcrumb', guest => $order->guest
+%div
+  - my $loop = 0;
+  - for my $clothe (@$clothes) {
+    - $loop++;
+    - if ($loop == 1) {
+      %span
+        %a{:href => '/clothes/#{$clothe->no}'}= $clothe->category->name
+    - } elsif ($loop == 2) {
+      %span
+        with
+        %a{:href => '/clothes/#{$clothe->no}'}= $clothe->category->name
+    - } else {
+      %span
+        ,
+        %a{:href => '/clothes/#{$clothe->no}'}= $clothe->category->name
+    - }
+  - }
 
+- if ($order->rental_date) {
+  %h3
+    %time.highlight= $order->rental_date->ymd . ' ~ '
+    %time.highlight= $order->return_date->ymd if $order->return_date
+  %p.muted= '반납예정일: ' . $order->target_date->ymd if $order->target_date
+- }
 
+%h3
+  %span.highlight= commify($order->price - $order->discount)
+%p.muted= commify($order->discount) . '원 할인'
 
+- if ($overdue) {
+  %p.muted
+    %span 연체료
+    %strong.text-error= commify($late_fee)
+    는 연체일(#{ $overdue }) x 대여금액(#{ commify($order->price) })의 20% 로 계산됩니다
+- }
 
+- if ($order->status_id == 8) {
+  %p= commify($order->late_fee)
+  %p= $order->return_method
+- } else {
+  %form.form-inline{:method => 'post', :action => "#{url_for('')}"}
+    %fieldset
+      %legend 연체료 및 반납방법
+      %input#input-late_fee.input-mini{:type => 'text', :name => 'late_fee', :placeholder => '연체료'}
+      %label.radio
+        %input{:type => 'radio', :name => 'return_method', :value => '방문'}
+        방문
+      %label.radio
+        %input{:type => 'radio', :name => 'return_method', :value => '택배'}
+        택배
+      %button.btn.btn-success{:type => 'submit'} 반납
+- }
 
+%h5 만족도
+- if ($satisfaction) {
+  %p
+    %span.badge{:class => 'satisfaction-#{$satisfaction->chest}'} 가슴
+    %span.badge{:class => 'satisfaction-#{$satisfaction->waist}'} 허리
+    %span.badge{:class => 'satisfaction-#{$satisfaction->arm}'} 팔길이
+    %span.badge{:class => 'satisfaction-#{$satisfaction->top_fit}'} 상의fit
+    %span.badge{:class => 'satisfaction-#{$satisfaction->bottom_fit}'} 하의fit
+- }
 
+@@ satisfactions/new.html.haml
+- layout 'default';
+- title '만족도조사 - 열린옷장';
 
+- my $overdue = 0;
+%p
+  - if ($overdue = overdue_calc($order->target_date, DateTime->now())) {
+    %span.label{:class => 'status-#{$order->status_id}'} 연체중
+  - } else {
+    %span.label{:class => 'status-#{$order->status_id}'}= $order->status->name
+  - }
 
+%form.form-inline
+  %input.span1{:type => 'text', :placeholder => '가슴'}
+  %input.span1{:type => 'text', :placeholder => '허리'}
+  %input.span1{:type => 'text', :placeholder => '팔'}
+  %input.span1{:type => 'text', :placeholder => '상의'}
+  %input.span1{:type => 'text', :placeholder => '하의'}
+  %button.btn.btn-success{:type => 'submit'} update
+
+%div.pull-right= include 'guests/breadcrumb', guest => $order->guest
+%div
+  - my $loop = 0;
+  - for my $clothe ($order->clothes) {
+    - $loop++;
+    - if ($loop == 1) {
+      %span
+        %a{:href => '/clothes/#{$clothe->no}'}= $clothe->category->name
+    - } elsif ($loop == 2) {
+      %span
+        with
+        %a{:href => '/clothes/#{$clothe->no}'}= $clothe->category->name
+    - } else {
+      %span
+        ,
+        %a{:href => '/clothes/#{$clothe->no}'}= $clothe->category->name
+    - }
+  - }
+
+- if ($order->rental_date) {
+  %h3
+    %time.highlight= $order->rental_date->ymd . ' ~ '
+    %time.highlight= $order->return_date->ymd if $order->return_date
+  %p.muted= '반납예정일: ' . $order->target_date->ymd if $order->target_date
+- }
+
+%h3
+  %span.highlight= commify($order->price - $order->discount)
+%p.muted= commify($order->discount) . '원 할인'
+
+- if ($overdue) {
+  %p.muted
+    %span 연체료
+    %strong.text-error= commify($order->price * 0.2 * $overdue)
+    는 연체일(#{ $overdue }) x 대여금액(#{ commify($order->price) })의 20% 로 계산됩니다
+- }

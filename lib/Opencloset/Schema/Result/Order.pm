@@ -72,6 +72,12 @@ __PACKAGE__->table("order");
   inflate_datetime: 1
   is_nullable: 1
 
+=head2 return_method
+
+  data_type: 'varchar'
+  is_nullable: 1
+  size: 32
+
 =head2 price
 
   data_type: 'integer'
@@ -79,6 +85,18 @@ __PACKAGE__->table("order");
   is_nullable: 1
 
 =head2 discount
+
+  data_type: 'integer'
+  default_value: 0
+  is_nullable: 1
+
+=head2 late_fee
+
+  data_type: 'integer'
+  default_value: 0
+  is_nullable: 1
+
+=head2 l_discount
 
   data_type: 'integer'
   default_value: 0
@@ -134,9 +152,15 @@ __PACKAGE__->add_columns(
     inflate_datetime => 1,
     is_nullable => 1,
   },
+  "return_method",
+  { data_type => "varchar", is_nullable => 1, size => 32 },
   "price",
   { data_type => "integer", default_value => 0, is_nullable => 1 },
   "discount",
+  { data_type => "integer", default_value => 0, is_nullable => 1 },
+  "late_fee",
+  { data_type => "integer", default_value => 0, is_nullable => 1 },
+  "l_discount",
   { data_type => "integer", default_value => 0, is_nullable => 1 },
   "comment",
   { data_type => "text", is_nullable => 1 },
@@ -217,8 +241,8 @@ Composing rels: L</clothe_orders> -> clothe
 __PACKAGE__->many_to_many("clothes", "clothe_orders", "clothe");
 
 
-# Created by DBIx::Class::Schema::Loader v0.07036 @ 2013-10-24 17:37:32
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:SqlmzCXdW9FbSimYv68r5g
+# Created by DBIx::Class::Schema::Loader v0.07036 @ 2013-10-28 17:56:38
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:zvK/3OvResX9rOpgNaZuNg
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

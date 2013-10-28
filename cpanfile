@@ -1,6 +1,7 @@
 requires 'DBIx::Class';
 requires 'DBIx::Class::EncodedColumn';
 requires 'DBIx::Class::Schema::Loader';
+requires 'DBIx::Class::TimeStamp';
 requires 'Data::Pageset';
 requires 'DateTime';
 requires 'DateTime::Format::MySQL';
