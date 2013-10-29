@@ -9,10 +9,16 @@ USE `opencloset`;
 --
 
 CREATE TABLE `donor` (
-  `id`   INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `name` VARCHAR(32) NOT NULL,
+  `id`          INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `name`        VARCHAR(32) NOT NULL,
+  `email`       VARCHAR(128) DEFAULT NULL,
+  `phone`       VARCHAR(16) DEFAULT NULL COMMENT 'regex: [0-9]{10,11}',
+  `comment`     TEXT DEFAULT NULL,
+  `create_date` DATETIME DEFAULT NULL,
 
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  UNIQUE KEY (`email`),
+  UNIQUE KEY (`phone`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --

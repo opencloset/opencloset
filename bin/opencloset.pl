@@ -51,7 +51,7 @@ helper clothe2hr => sub {
 
     return {
         $clothe->get_columns,
-        donor    => $clothe->donor->name,
+        donor    => $clothe->donor ? $clothe->donor->name : '',
         category => $clothe->category->name,
         price    => $self->commify($clothe->category->price),
         status   => $clothe->status->name,
@@ -101,6 +101,61 @@ helper create_guest => sub {
     return $schema->resultset('Guest')->find_or_create(\%params);
 };
 
+helper create_donor => sub {
+    my $self = shift;
+
+    my %params;
+    map { $params{$_} = $self->param($_) } qw/name phone email comment/;
+
+    return $schema->resultset('Donor')->find_or_create(\%params);
+};
+
+helper create_clothe => sub {
+    my ($self, $category_id) = @_;
+
+    ## generate no
+    my $category = $schema->resultset('Category')->find({ id => $category_id });
+    return unless $category;
+
+    my $clothe = $schema->resultset('Clothe')->search({
+        category_id => $category_id
+    }, {
+        order_by => { -desc => 'no' }
+    })->next;
+
+    my %prefix_map = (
+        1 => 'Jck',
+        2 => 'Pts',
+        3 => 'Shr',
+        4 => 'Sho',
+        5 => 'Hat',
+        6 => 'Tie'
+    );
+
+    my $index = 1;
+    if ($clothe) {
+        $index = substr $clothe->no, -5, 5;
+        $index =~ s/^0+//;
+        $index++;
+    }
+
+    my $no = sprintf "%s%05d", $prefix_map{$category_id}, $index;
+
+    my %params;
+    if ($category_id == 1) {
+        map { $params{$_} = $self->param($_) } qw/chest arm/;       # Jacket
+    } elsif ($category_id == 2) {
+        map { $params{$_} = $self->param($_) } qw/waist pants_len/; # Pants
+    }
+
+    $params{no}          = $no;
+    $params{donor_id}    = $self->param('donor_id');
+    $params{category_id} = $category_id;
+    $params{status_id}   = 1;
+
+    return $schema->resultset('Clothe')->find_or_create(\%params);
+};
+
 plugin 'validator';
 plugin 'haml_renderer';
 plugin 'FillInFormLite';
@@ -112,7 +167,7 @@ get '/' => sub {
 
 get '/new' => sub {
     my $self   = shift;
-    my $q      = $self->param('q');
+    my $q      = $self->param('q') || '';
     my $guests = $schema->resultset('Guest')->search({
         -or => [
             id    => $q,
@@ -131,6 +186,7 @@ post '/guests' => sub {
     my $validator = $self->create_validator;
     $validator->field('name')->required(1);
     $validator->field('phone')->regexp(qr/^\d{10,11}$/);
+    $validator->field('email')->email;
 
     return $self->error(400, 'invalid request')
         unless $self->validate($validator);
@@ -181,6 +237,71 @@ post '/guests/:id/size' => sub {
     );
 };
 
+post '/clothes' => sub {
+    my $self = shift;
+    my $validator = $self->create_validator;
+    $validator->field('category_id')->required(1);
+    # Jacket
+    $validator->when('category_id')->regexp(qr/^-?1$/)
+        ->then(sub { shift->field('chest')->required(1) });
+    $validator->when('category_id')->regexp(qr/^-?1$/)
+        ->then(sub { shift->field('arm')->required(1) });
+
+    # Pants
+    $validator->when('category_id')->regexp(qr/^(-1|2)$/)
+        ->then(sub { shift->field('waist')->required(1) });
+    $validator->when('category_id')->regexp(qr/^(-1|2)$/)
+        ->then(sub { shift->field('pants_len')->required(1) });
+
+    my @fields = qw/chest waist arm pants_len/;
+    $validator->field([@fields])
+        ->each(sub { shift->required(1)->regexp(qr/^\d+$/) });
+
+    unless ($self->validate($validator)) {
+        my $errors_hashref = $validator->errors;
+        return $self->error(400, 'invalid request')
+    }
+
+    my $cid      = $self->param('category_id');
+    my $donor_id = $self->param('donor_id');
+
+    my $clothe;
+    my $guard = $schema->txn_scope_guard;
+    # BEGIN TRANSACTION ~
+    if ($cid == -1) {
+        my $top = $self->create_clothe(1);
+        my $bot = $self->create_clothe(2);
+        return $self->error(500, 'failed to create a new clothe') unless ($top && $bot);
+
+        if ($donor_id) {
+            $top->create_related('donor_clothes', { donor_id => $donor_id });
+            $bot->create_related('donor_clothes', { donor_id => $donor_id });
+        }
+        $top->bottom_id($bot->id);
+        $bot->top_id($top->id);
+        $top->update;
+        $bot->update;
+        $clothe = $top;
+    } else {
+        $clothe = $self->create_clothe($cid);
+        return $self->error(500, 'failed to create a new clothe') unless $clothe;
+
+        if ($donor_id) {
+            $clothe->create_related('donor_clothes', { donor_id => $donor_id });
+        }
+    }
+    # ~ COMMIT
+    $guard->commit;
+
+    $self->res->headers->header('Location' => $self->url_for('/clothes/' . $clothe->no));
+    $self->respond_to(
+        json => { json => $self->clothe2hr($clothe), status => 201 },
+        html => sub {
+            $self->redirect_to('/clothes/' . $clothe->no);
+        }
+    );
+};
+
 put '/clothes' => sub {
     my $self = shift;
     my $clothes = $self->param('clothes');
@@ -206,6 +327,27 @@ put '/clothes' => sub {
         html => { template => 'clothes' }    # TODO: `clothe.html.haml`
     );
 };
+
+get '/clothes/new' => sub {
+    my $self   = shift;
+    my $q      = $self->param('q') || '';
+    my $donors = [$schema->resultset('Donor')->search({
+        -or => [
+            id    => $q,
+            name  => $q,
+            phone => $q,
+            email => $q
+        ],
+    })];
+
+    my @categories = $schema->resultset('Category')->search;
+
+    $self->render(
+        'clothes/new',
+        donors     => $donors,
+        categories => [@categories],
+    );
+} => 'clothes/new';
 
 get '/clothes/:no' => sub {
     my $self = shift;
@@ -497,13 +639,44 @@ any [qw/post put patch/] => '/orders/:id' => sub {
     );
 };
 
-get '/satisfactions/new' => sub {
-    my $self  = shift;
-    my $order = $schema->resultset('Order')->find({ id => $self->param('oid') });
-    return $self->error(400, "Unknown order") unless $order;
+get '/donors/new' => sub {
+    my $self   = shift;
+    my $q      = $self->param('q') || '';
+    my $donors = $schema->resultset('Donor')->search({
+        -or => [
+            id    => $q,
+            name  => $q,
+            phone => $q,
+            email => $q
+        ],
+    });
 
-    $self->stash(order => $order);
-} => 'satisfactions/new';
+    $self->render('donors/new', candidates => $donors);
+};
+
+post '/donors' => sub {
+    my $self   = shift;
+    my $validator = $self->create_validator;
+    $validator->field('name')->required(1);
+    $validator->field('phone')->regexp(qr/^\d{10,11}$/);
+    $validator->field('email')->email;
+
+    return $self->error(400, 'invalid request')
+        unless $self->validate($validator);
+
+    my $donor = $self->create_donor;
+    return $self->error(500, 'failed to create a new donor') unless $donor;
+
+    $self->res->headers->header('Location' => $self->url_for('/donors/' . $donor->id));
+    $self->respond_to(
+        json => { json => { $donor->get_columns }, status => 201 },
+        html => sub {
+            $self->redirect_to(
+                $self->url_for('/clothes/new')->query->([q => $donor->id])
+            );
+        }
+    );
+};
 
 app->start;
 __DATA__
@@ -736,6 +909,19 @@ __DATA__
   %span.label= $guest->height
   %span.label= $guest->weight
 
+@@ donors/breadcrumb/radio.html.haml
+%input{:type => 'radio', :name => 'donor_id', :value => '#{$donor->id}'}
+%a{:href => '/donors/#{$donor->id}'}= $donor->name
+님
+%div
+  - if ($donor->email) {
+    %i.icon-envelope
+    %a{:href => "mailto:#{$donor->email}"}= $donor->email
+  - }
+  - if ($donor->phone) {
+    %div.muted= $donor->phone
+  - }
+
 @@ search.html.haml
 - layout 'default';
 - title '검색 - 열린옷장';
@@ -937,6 +1123,8 @@ __DATA__
               %a{:href => "/orders/new"} 대여
             %li
               %a{:href => "/search"} 정장 검색
+            %li
+              %a{:href => "/donors/new"} 기증
       .content
         = content
       %footer.footer
@@ -1134,59 +1322,86 @@ __DATA__
     %span.badge{:class => 'satisfaction-#{$satisfaction->bottom_fit}'} 하의fit
 - }
 
-@@ satisfactions/new.html.haml
+@@ donors/new.html.haml
 - layout 'default';
-- title '만족도조사 - 열린옷장';
+- title '기증 - 열린옷장';
 
-- my $overdue = 0;
-%p
-  - if ($overdue = overdue_calc($order->target_date, DateTime->now())) {
-    %span.label{:class => 'status-#{$order->status_id}'} 연체중
-  - } else {
-    %span.label{:class => 'status-#{$order->status_id}'}= $order->status->name
+.pull-right
+  %form.form-search{:method => 'get', :action => ''}
+    %input#search-query.input-medium.search-query{:type => 'text', :name => 'q', :placeholder => '이메일, 이름 또는 휴대폰번호'}
+    %button.btn{:type => 'submit'} 검색
+
+%ul
+  - while(my $d = $candidates->next) {
+  %li
+    %a{:href => "#{url_for('/clothes/new')->query([q => $d->id])}"}= $d->name
+    %span.muted= $d->email
+    %span.muted= $d->phone
   - }
 
-%form.form-inline
-  %input.span1{:type => 'text', :placeholder => '가슴'}
-  %input.span1{:type => 'text', :placeholder => '허리'}
-  %input.span1{:type => 'text', :placeholder => '팔'}
-  %input.span1{:type => 'text', :placeholder => '상의'}
-  %input.span1{:type => 'text', :placeholder => '하의'}
-  %button.btn.btn-success{:type => 'submit'} update
+%form.form-horizontal{:method => 'post', :action => '/donors'}
+  %legend
+    기증자 기본 정보
+  .control-group
+    %label.control-label{:for => 'input-name'} 이름
+    .controls
+      %input{:type => 'text', :id => 'input-name', :name => 'name'}
+  .control-group
+    %label.control-label{:for => 'input-phone'} 휴대폰
+    .controls
+      %input{:type => 'text', :id => 'input-phone', :name => 'phone'}
+  .control-group
+    %label.control-label{:for => 'input-email'} 이메일
+    .controls
+      %input{:type => 'text', :id => 'input-email', :name => 'email'}
+  .control-group
+    .controls
+      %button.btn{type => 'submit'} 다음
 
-%div.pull-right= include 'guests/breadcrumb', guest => $order->guest
-%div
-  - my $loop = 0;
-  - for my $clothe ($order->clothes) {
-    - $loop++;
-    - if ($loop == 1) {
-      %span
-        %a{:href => '/clothes/#{$clothe->no}'}= $clothe->category->name
-    - } elsif ($loop == 2) {
-      %span
-        with
-        %a{:href => '/clothes/#{$clothe->no}'}= $clothe->category->name
-    - } else {
-      %span
-        ,
-        %a{:href => '/clothes/#{$clothe->no}'}= $clothe->category->name
-    - }
-  - }
+@@ clothes/new.html.haml
+- layout 'default';
+- title '새로운 옷 - 열린옷장';
 
-- if ($order->rental_date) {
-  %h3
-    %time.highlight= $order->rental_date->ymd . ' ~ '
-    %time.highlight= $order->return_date->ymd if $order->return_date
-  %p.muted= '반납예정일: ' . $order->target_date->ymd if $order->target_date
-- }
+.pull-right
+  %form.form-search{:method => 'get', :action => ''}
+    %input#search-query.input-medium.search-query{:type => 'text', :name => 'q', :placeholder => '이메일, 이름 또는 휴대폰번호'}
+    %button.btn{:type => 'submit'} 검색
 
-%h3
-  %span.highlight= commify($order->price - $order->discount)
-%p.muted= commify($order->discount) . '원 할인'
+%p.text-warning
+  %strong Shirts 나 Shoes 와 같은 비주류는 종류만 있으면 됩니다
 
-- if ($overdue) {
-  %p.muted
-    %span 연체료
-    %strong.text-error= commify($order->price * 0.2 * $overdue)
-    는 연체일(#{ $overdue }) x 대여금액(#{ commify($order->price) })의 20% 로 계산됩니다
-- }
+%form.form-horizontal{:method => 'post', :action => '/clothes'}
+  %legend 새로운 옷
+  .control-group
+    %label.control-label{:for => 'input-category'} 기증해주신 분
+    .controls
+      - for my $donor (@$donors) {
+        %label.radio.inline= include 'donors/breadcrumb/radio', donor => $donor
+      - }
+  .control-group
+    %label.control-label 종류
+    .controls
+      %select{:name => 'category_id'}
+        %option{:value => '-1'} Jacket & Pants
+        - for my $c (@$categories) {
+          %option{:value => '#{$c->id}'}= $c->name
+        - }
+  .control-group
+    %label.control-label{:for => 'input-chest'} 가슴
+    .controls
+      %input{:type => 'text', :id => 'input-chest', :name => 'chest'}
+  .control-group
+    %label.control-label{:for => 'input-waist'} 허리
+    .controls
+      %input{:type => 'text', :id => 'input-waist', :name => 'waist'}
+  .control-group
+    %label.control-label{:for => 'input-arm'} 팔길이
+    .controls
+      %input{:type => 'text', :id => 'input-arm', :name => 'arm'}
+  .control-group
+    %label.control-label{:for => 'input-pants-len'} 기장
+    .controls
+      %input{:type => 'text', :id => 'input-pants-len', :name => 'pants_len'}
+  .control-group
+    .controls
+      %button.btn{type => 'submit'} 다음

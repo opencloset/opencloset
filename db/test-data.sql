@@ -1,5 +1,5 @@
 START TRANSACTION;
-INSERT INTO `donor` (`id`, `name`) VALUES (1, '한만일'),(2, '김소령');
+INSERT INTO `donor` (`id`, `name`,`email`,`phone`,`comment`) VALUES (1,'한만일',NULL,NULL,'안녕~'),(2,'김소령',NULL,NULL,'(*-*)b');
 INSERT INTO `clothe` (`id`,`no`,`chest`,`waist`,`arm`,`pants_len`,`category_id`,`top_id`,`bottom_id`,`donor_id`,`status_id`) VALUES (1,'J00001', 94, 78, 51, NULL, 1, NULL, NULL, 1, 1), (2,'P00001', NULL, NULL, NULL, 102, 2, NULL, NULL, 1, 1);
 UPDATE `clothe` SET `bottom_id`=2 WHERE `id`=1;
 UPDATE `clothe` SET `top_id`=1 WHERE `id`=2;
