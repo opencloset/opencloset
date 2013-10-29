@@ -1,14 +1,13 @@
 package Opencloset::Schema::Base;
-use Moose;
-use namespace::autoclean;
 
-extends 'DBIx::Class::Core';
+use strict;
+use warnings;
+
+use base 'DBIx::Class::Core';
 
 __PACKAGE__->load_components(qw/
     InflateColumn::DateTime
     TimeStamp
 /);
-
-__PACKAGE__->meta->make_immutable(inline_constructor => 0);
 
 1;

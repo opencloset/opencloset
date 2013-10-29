@@ -17,10 +17,7 @@ use warnings;
 
 =cut
 
-use Moose;
-use MooseX::NonMoose;
-use namespace::autoclean;
-extends 'Opencloset::Schema::Base';
+use base 'Opencloset::Schema::Base';
 
 =head1 TABLE: C<order>
 
@@ -241,10 +238,9 @@ Composing rels: L</clothe_orders> -> clothe
 __PACKAGE__->many_to_many("clothes", "clothe_orders", "clothe");
 
 
-# Created by DBIx::Class::Schema::Loader v0.07036 @ 2013-10-28 17:56:38
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:zvK/3OvResX9rOpgNaZuNg
+# Created by DBIx::Class::Schema::Loader v0.07036 @ 2013-10-29 19:10:07
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:HysY24O05FIW6LqHF/uKBg
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration
-__PACKAGE__->meta->make_immutable;
 1;

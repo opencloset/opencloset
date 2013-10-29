@@ -15,8 +15,6 @@ my $DB_PASSWORD = $ENV{OPENCLOSET_PASSWORD} || '';
         naming                    => { ALL => 'v8' },
         skip_load_external        => 1,
         relationships             => 1,
-        use_moose                 => 1,
-        only_autoclean            => 1,
         col_collision_map         => 'column_%s',
         result_base_class         => 'Opencloset::Schema::Base',
         overwrite_modifications   => 1,

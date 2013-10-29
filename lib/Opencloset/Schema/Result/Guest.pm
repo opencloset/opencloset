@@ -17,10 +17,7 @@ use warnings;
 
 =cut
 
-use Moose;
-use MooseX::NonMoose;
-use namespace::autoclean;
-extends 'Opencloset::Schema::Base';
+use base 'Opencloset::Schema::Base';
 
 =head1 TABLE: C<guest>
 
@@ -254,10 +251,9 @@ __PACKAGE__->has_many(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07036 @ 2013-10-27 23:30:50
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:Wx5UMm8TThn0yVHK6BmUtw
+# Created by DBIx::Class::Schema::Loader v0.07036 @ 2013-10-29 19:10:07
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:oZsC/B6FjQeD2ja5Ml6Czg
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration
-__PACKAGE__->meta->make_immutable;
 1;

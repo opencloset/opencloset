@@ -17,10 +17,7 @@ use warnings;
 
 =cut
 
-use Moose;
-use MooseX::NonMoose;
-use namespace::autoclean;
-extends 'Opencloset::Schema::Base';
+use base 'Opencloset::Schema::Base';
 
 =head1 TABLE: C<clothe_order>
 
@@ -110,10 +107,9 @@ __PACKAGE__->belongs_to(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07036 @ 2013-10-24 16:50:56
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:W9mb/49FNjugdAWdUEG+Yw
+# Created by DBIx::Class::Schema::Loader v0.07036 @ 2013-10-29 19:10:07
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:W5baS9U3CCWIrN9fwLZEsw
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration
-__PACKAGE__->meta->make_immutable;
 1;
