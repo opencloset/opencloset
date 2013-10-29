@@ -225,7 +225,7 @@ post '/guests/:id/size' => sub {
             $self->redirect_to(
                 # ignore $guest->arm for wide search result
                 $self->url_for('/search')
-                    ->query(q => "$chest/$waist/", gid => $guest->id)
+                    ->query(q => "$chest/$waist//1", gid => $guest->id)
             );
         }
     );
@@ -405,10 +405,11 @@ get '/search' => sub {
 
     my $c_jacket = $DB->resultset('Category')->find({ name => 'jacket' });
     my $cond = { category_id => $c_jacket->id };
-    my ($chest, $waist, $arm) = split /\//, $q;
-    $cond->{chest} = { '>=' => $chest } if $chest;
-    $cond->{waist} = { '>=' => $waist } if $waist;
-    $cond->{arm}   = { '>=' => $arm   } if $arm;
+    my ($chest, $waist, $arm, $status_id) = split /\//, $q;
+    $cond->{chest}     = { '>=' => $chest } if $chest;
+    $cond->{waist}     = { '>=' => $waist } if $waist;
+    $cond->{arm}       = { '>=' => $arm   } if $arm;
+    $cond->{status_id} = $status_id if $status_id;
 
     ### row, current_page, count
     my $ENTRIES_PER_PAGE = 10;
@@ -430,9 +431,10 @@ get '/search' => sub {
 
     $self->render(
         'search',
-        guest   => $guest,
-        clothes => $clothes,
-        pageset => $pageset,
+        guest     => $guest,
+        clothes   => $clothes,
+        pageset   => $pageset,
+        status_id => $status_id || '',
     );
 };
 
@@ -878,11 +880,11 @@ __DATA__
   %span (으)로 방문
   %div
     %span.label.label-info.search-label
-      %a{:href => '#{url_with->query([q => $guest->chest])}//'}= $guest->chest
+      %a{:href => '#{url_with->query([q => $guest->chest])}///#{$status_id}'}= $guest->chest
     %span.label.label-info.search-label
-      %a{:href => "#{url_with->query([q => '/' . $guest->waist . '/'])}"}= $guest->waist
+      %a{:href => "#{url_with->query([q => '/' . $guest->waist . '//' . $status_id])}"}= $guest->waist
     %span.label.label-info.search-label
-      %a{:href => "#{url_with->query([q => '//' . $guest->arm])}"}= $guest->arm
+      %a{:href => "#{url_with->query([q => '//' . $guest->arm])}/#{$status_id}"}= $guest->arm
     %span.label= $guest->pants_len
     %span.label= $guest->height
     %span.label= $guest->weight
@@ -933,13 +935,17 @@ __DATA__
     %span.badge.badge-success 맞음
     %span.badge.badge-warning 큼
     %span.badge.badge-important 매우큼
+  %p.muted
+    %span.text-info 상태
+    1: 대여가능, 2: 대여불가, 3: 세탁, 4: 수선, 5: 대여불가, 7: 분실
 
   %form.form-search{:method => 'get', :action => ''}
     %input{:type => 'hidden', :name => 'gid', :value => "#{param('gid')}"}
-    %input.input-medium.search-query{:type => 'text', :id => 'search-query', :name => 'q', :placeholder => '가슴/허리/팔', :value => "#{param('q')}"}
+    %input.input-medium.search-query{:type => 'text', :id => 'search-query', :name => 'q', :placeholder => '가슴/허리/팔/상태', :value => "#{param('q')}"}
     %button.btn{:type => 'submit'} 검색
+    %span.muted 가슴/허리/팔길이/상태
 
-- if (param 'q') { 
+- if (param 'q') {
   %p
     %strong= param 'q'
     %span.muted 의 검색결과
@@ -964,11 +970,11 @@ __DATA__
     %a{:href => '/clothes/#{$clothe->no}'}
       %img{:src => 'http://placehold.it/75x75', :alt => '#{$clothe->no}'}
     %span.label.label-info.search-label
-      %a{:href => "#{url_with->query([q => $clothe->chest . '//'])}"}= $clothe->chest
+      %a{:href => "#{url_with->query([q => $clothe->chest . '///' . $status_id])}"}= $clothe->chest
     %span.label.label-info.search-label
-      %a{:href => "#{url_with->query([q => '/' . $clothe->waist . '/'])}"}= $clothe->waist
+      %a{:href => "#{url_with->query([q => '/' . $clothe->waist . '//' . $status_id])}"}= $clothe->waist
     %span.label.label-info.search-label
-      %a{:href => "#{url_with->query([q => '//' . $clothe->arm])}"}= $clothe->arm
+      %a{:href => "#{url_with->query([q => '//' . $clothe->arm . '/' . $status_id])}"}= $clothe->arm
     - if ($clothe->status->name eq '대여가능') {
       %span.label.label-success= $clothe->status->name
     - } elsif ($clothe->status->name eq '대여중') {
