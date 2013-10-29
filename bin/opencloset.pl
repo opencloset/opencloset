@@ -10,7 +10,7 @@ app->defaults( %{ plugin 'Config' => { default => {
     javascripts => [],
 }}});
 
-my $schema = Opencloset::Schema->connect({
+my $DB = Opencloset::Schema->connect({
     dsn               => app->config->{database}{dsn},
     user              => app->config->{database}{user},
     password          => app->config->{database}{pass},
@@ -90,7 +90,7 @@ helper create_guest => sub {
     my %params;
     map { $params{$_} = $self->param($_) } qw/name gender phone address age email purpose height weight/;
 
-    return $schema->resultset('Guest')->find_or_create(\%params);
+    return $DB->resultset('Guest')->find_or_create(\%params);
 };
 
 helper create_donor => sub {
@@ -99,17 +99,17 @@ helper create_donor => sub {
     my %params;
     map { $params{$_} = $self->param($_) } qw/name phone email comment/;
 
-    return $schema->resultset('Donor')->find_or_create(\%params);
+    return $DB->resultset('Donor')->find_or_create(\%params);
 };
 
 helper create_clothe => sub {
     my ($self, $category_id) = @_;
 
     ## generate no
-    my $category = $schema->resultset('Category')->find({ id => $category_id });
+    my $category = $DB->resultset('Category')->find({ id => $category_id });
     return unless $category;
 
-    my $clothe = $schema->resultset('Clothe')->search({
+    my $clothe = $DB->resultset('Clothe')->search({
         category_id => $category_id
     }, {
         order_by => { -desc => 'no' }
@@ -145,7 +145,7 @@ helper create_clothe => sub {
     $params{category_id} = $category_id;
     $params{status_id}   = 1;
 
-    return $schema->resultset('Clothe')->find_or_create(\%params);
+    return $DB->resultset('Clothe')->find_or_create(\%params);
 };
 
 plugin 'validator';
@@ -160,7 +160,7 @@ get '/' => sub {
 get '/new' => sub {
     my $self   = shift;
     my $q      = $self->param('q') || '';
-    my $guests = $schema->resultset('Guest')->search({
+    my $guests = $DB->resultset('Guest')->search({
         -or => [
             id    => $q,
             name  => $q,
@@ -197,7 +197,7 @@ post '/guests' => sub {
 
 get '/guests/:id/size' => sub {
     my $self  = shift;
-    my $guest = $schema->resultset('Guest')->find({ id => $self->param('id') });
+    my $guest = $DB->resultset('Guest')->find({ id => $self->param('id') });
     $self->stash(guest => $guest);
     $self->render_fillinform({ $guest->get_columns });
 } => 'guests/size';
@@ -213,7 +213,7 @@ post '/guests/:id/size' => sub {
     return $self->error(400, 'failed to validate')
         unless $self->validate($validator);
 
-    my $guest = $schema->resultset('Guest')->find({ id => $self->param('id') });
+    my $guest = $DB->resultset('Guest')->find({ id => $self->param('id') });
     map { $guest->$_($self->param($_)) } @fields;
     $guest->update;
     my ($chest, $waist) = ($guest->chest + 3, $guest->waist - 1);
@@ -258,7 +258,7 @@ post '/clothes' => sub {
     my $donor_id = $self->param('donor_id');
 
     my $clothe;
-    my $guard = $schema->txn_scope_guard;
+    my $guard = $DB->txn_scope_guard;
     # BEGIN TRANSACTION ~
     if ($cid == -1) {
         my $top = $self->create_clothe(1);
@@ -299,11 +299,11 @@ put '/clothes' => sub {
     my $clothes = $self->param('clothes');
     return $self->error(400, 'Nothing to change') unless $clothes;
 
-    my $status = $schema->resultset('Status')->find({ name => $self->param('status') });
+    my $status = $DB->resultset('Status')->find({ name => $self->param('status') });
     return $self->error(400, 'Invalid status') unless $status;
 
-    my $rs    = $schema->resultset('Clothe')->search({ 'me.id' => { -in => [split(/,/, $clothes)] } });
-    my $guard = $schema->txn_scope_guard;
+    my $rs    = $DB->resultset('Clothe')->search({ 'me.id' => { -in => [split(/,/, $clothes)] } });
+    my $guard = $DB->txn_scope_guard;
     my @rows;
     # BEGIN TRANSACTION ~
     while (my $clothe = $rs->next) {
@@ -323,7 +323,7 @@ put '/clothes' => sub {
 get '/clothes/new' => sub {
     my $self   = shift;
     my $q      = $self->param('q') || '';
-    my $donors = [$schema->resultset('Donor')->search({
+    my $donors = [$DB->resultset('Donor')->search({
         -or => [
             id    => $q,
             name  => $q,
@@ -332,7 +332,7 @@ get '/clothes/new' => sub {
         ],
     })];
 
-    my @categories = $schema->resultset('Category')->search;
+    my @categories = $DB->resultset('Category')->search;
 
     $self->render(
         'clothes/new',
@@ -344,7 +344,7 @@ get '/clothes/new' => sub {
 get '/clothes/:no' => sub {
     my $self = shift;
     my $no = $self->param('no');
-    my $clothe = $schema->resultset('Clothe')->find({ no => $no });
+    my $clothe = $DB->resultset('Clothe')->find({ no => $no });
     return $self->error(404, "Not found `$no`") unless $clothe;
 
     my $co_rs = $clothe->clothe_orders->search(
@@ -386,7 +386,7 @@ get '/clothes/:no' => sub {
         clothes     => \@with,
     );
 
-    $columns{status} = $schema->resultset('Status')->find({ id => 6 })->name
+    $columns{status} = $DB->resultset('Status')->find({ id => 6 })->name
         if $overdue;    # 6: 연체중, 한글을 쓰면 `utf8` pragma 를 써줘야 해서..
 
     $self->respond_to(
@@ -399,9 +399,9 @@ get '/search' => sub {
     my $self  = shift;
     my $q     = $self->param('q')   || '';
     my $gid   = $self->param('gid') || '';
-    my $guest = $gid ? $schema->resultset('Guest')->find({ id => $gid }) : undef;
+    my $guest = $gid ? $DB->resultset('Guest')->find({ id => $gid }) : undef;
 
-    my $c_jacket = $schema->resultset('Category')->find({ name => 'jacket' });
+    my $c_jacket = $DB->resultset('Category')->find({ name => 'jacket' });
     my $cond = { category_id => $c_jacket->id };
     my ($chest, $waist, $arm) = split /\//, $q;
     $cond->{chest} = { '>=' => $chest } if $chest;
@@ -410,7 +410,7 @@ get '/search' => sub {
 
     ### row, current_page, count
     my $ENTRIES_PER_PAGE = 10;
-    my $clothes = $schema->resultset('Clothe')->search(
+    my $clothes = $DB->resultset('Clothe')->search(
         $cond,
         {
             page     => $self->param('p') || 1,
@@ -443,7 +443,7 @@ get '/orders/new' => sub {
     $today->set_second(0);
 
     my $q      = $self->param('q');
-    my @guests = $schema->resultset('Guest')->search({
+    my @guests = $DB->resultset('Guest')->search({
         -or => [
             id    => $q,
             name  => $q,
@@ -458,8 +458,8 @@ get '/orders/new' => sub {
     ### To disable this warning for good set $ENV{DBIC_DT_SEARCH_OK} to true
     ###
     ### DateTime object 를 search 에 바로 사용하지 말고 parser 를 이용하라능 - @aanoaa
-    my $dt_parser = $schema->storage->datetime_parser;
-    push @guests, $schema->resultset('Guest')->search({
+    my $dt_parser = $DB->storage->datetime_parser;
+    push @guests, $DB->resultset('Guest')->search({
         -or => [
             create_date => { '>=' => $dt_parser->format_datetime($today) },
             visit_date  => { '>=' => $dt_parser->format_datetime($today) },
@@ -481,16 +481,16 @@ post '/orders' => sub {
     return $self->error(400, 'failed to validate')
         unless $self->validate($validator);
 
-    my $guest   = $schema->resultset('Guest')->find({ id => $self->param('gid') });
-    my @clothes = $schema->resultset('Clothe')->search({ 'me.id' => { -in => [$self->param('clothe-id')] } });
+    my $guest   = $DB->resultset('Guest')->find({ id => $self->param('gid') });
+    my @clothes = $DB->resultset('Clothe')->search({ 'me.id' => { -in => [$self->param('clothe-id')] } });
 
     return $self->error(400, 'invalid request') unless $guest || @clothes;
 
-    my $guard = $schema->txn_scope_guard;
+    my $guard = $DB->txn_scope_guard;
     my $order;
     try {
         # BEGIN TRANSACTION ~
-        $order = $schema->resultset('Order')->create({
+        $order = $DB->resultset('Order')->create({
             guest_id  => $guest->id,
         });
 
@@ -518,7 +518,7 @@ post '/orders' => sub {
 get '/orders/:id' => sub {
     my $self = shift;
 
-    my $order = $schema->resultset('Order')->find({ id => $self->param('id') });
+    my $order = $DB->resultset('Order')->find({ id => $self->param('id') });
     return $self->error(404, "Not found") unless $order;
 
     my @clothes = $order->clothes;
@@ -530,7 +530,7 @@ get '/orders/:id' => sub {
     my $overdue  = $order->target_date ? $self->overdue_calc($order->target_date, DateTime->now()) : 0;
     my $late_fee = $order->price * 0.2 * $overdue;
 
-    my $c_jacket = $schema->resultset('Category')->find({ name => 'jacket' });
+    my $c_jacket = $DB->resultset('Category')->find({ name => 'jacket' });
     my $cond = { category_id => $c_jacket->id };
     my $clothe = $order->clothes($cond)->next;
 
@@ -561,7 +561,7 @@ any [qw/post put patch/] => '/orders/:id' => sub {
     my $self = shift;
 
     # repeat codes; use `under`?
-    my $order = $schema->resultset('Order')->find({ id => $self->param('id') });
+    my $order = $DB->resultset('Order')->find({ id => $self->param('id') });
     return $self->error(404, "Not found") unless $order;
 
     my $validator = $self->create_validator;
@@ -584,10 +584,10 @@ any [qw/post put patch/] => '/orders/:id' => sub {
         # TODO: consider `분실`
     );
 
-    my $guard = $schema->txn_scope_guard;
+    my $guard = $DB->txn_scope_guard;
     # BEGIN TRANSACTION ~
     $order->status_id($status_to_be{$order->status_id || 0});
-    my $dt_parser = $schema->storage->datetime_parser;
+    my $dt_parser = $DB->storage->datetime_parser;
     $order->rental_date($dt_parser->format_datetime(DateTime->now));
     $order->update;
 
@@ -611,11 +611,11 @@ any [qw/post put patch/] => '/orders/:id' => sub {
 
     if (values %satisfaction) {
         # $order
-        my $c_jacket = $schema->resultset('Category')->find({ name => 'jacket' });
+        my $c_jacket = $DB->resultset('Category')->find({ name => 'jacket' });
         my $cond = { category_id => $c_jacket->id };
         my $clothe = $order->clothes($cond)->next;
         if ($clothe) {
-            $schema->resultset('Satisfaction')->update_or_create({
+            $DB->resultset('Satisfaction')->update_or_create({
                 %satisfaction,
                 guest_id  => $order->guest_id,
                 clothe_id => $clothe->id,
@@ -634,7 +634,7 @@ any [qw/post put patch/] => '/orders/:id' => sub {
 get '/donors/new' => sub {
     my $self   = shift;
     my $q      = $self->param('q') || '';
-    my $donors = $schema->resultset('Donor')->search({
+    my $donors = $DB->resultset('Donor')->search({
         -or => [
             id    => $q,
             name  => $q,
