@@ -1,0 +1,20 @@
+.clickable { cursor: pointer; }
+
+.highlight, .history-link { background-color: #ffffcc; }
+
+.search-label a { color: inherit; }
+.search-label :hover, .search-label :focus { color: none; }
+
+.satisfaction-1 { background-color: #333333; }
+
+.satisfaction-2 { background-color: #999999; }
+
+.satisfaction-3 { background-color: #468847; }
+
+.satisfaction-4 { background-color: #F89406; }
+
+.satisfaction-5 { background-color: #B94A48; }
+
+.status-1 { background-color: #468847; }
+
+.status-2, .status-5, .status-6 { background-color: #b94a48; }

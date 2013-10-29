@@ -7,7 +7,9 @@ use Opencloset::Schema;
 use Try::Tiny;
 
 app->defaults( %{ plugin 'Config' => { default => {
-    javascripts => [],
+    jses        => [],
+    breadcrumbs => [],
+    active_id   => q{},
 }}});
 
 my $DB = Opencloset::Schema->connect({
@@ -671,11 +673,12 @@ post '/donors' => sub {
 };
 
 app->start;
+
 __DATA__
 
 @@ index.html.haml
-- layout 'default', javascripts => ['root-index.js'];
-- title 'Opencloset, sharing clothes - 열린옷장';
+- layout 'default', jses => ['root-index.js'];
+- title 'Opencloset, sharing clothes';
 
 %form#clothe-search-form.form-inline
   .input-append
@@ -725,9 +728,10 @@ __DATA__
     </li>
   </script>
 
+
 @@ new.html.haml
-- layout 'default', javascripts => ['new.js'];
-- title '새로 오신 손님 - 열린옷장';
+- layout 'default', jses => ['new.js'];
+- title '새로 오신 손님'
 
 .pull-right
   %form.form-search{:method => 'get', :action => ''}
@@ -809,9 +813,10 @@ __DATA__
     .controls
       %button.btn{type => 'submit'} 다음
 
+
 @@ guests/size.html.haml
 - layout 'default';
-- title '신체치수 - 열린옷장';
+- title '신체치수';
 
 .row
   .span6
@@ -865,6 +870,7 @@ __DATA__
         .controls
           %input.btn.btn-primary{:type => 'submit', :value => '다음'}
 
+
 @@ guests/breadcrumb.html.haml
 %p
   %a{:href => '/guests/#{$guest->id}'}= $guest->name
@@ -881,6 +887,7 @@ __DATA__
     %span.label= $guest->pants_len
     %span.label= $guest->height
     %span.label= $guest->weight
+
 
 @@ guests/breadcrumb/radio.html.haml
 %label.radio.inline
@@ -901,6 +908,7 @@ __DATA__
   %span.label= $guest->height
   %span.label= $guest->weight
 
+
 @@ donors/breadcrumb/radio.html.haml
 %input{:type => 'radio', :name => 'donor_id', :value => '#{$donor->id}'}
 %a{:href => '/donors/#{$donor->id}'}= $donor->name
@@ -914,9 +922,10 @@ __DATA__
     %div.muted= $donor->phone
   - }
 
+
 @@ search.html.haml
 - layout 'default';
-- title '검색 - 열린옷장';
+- title '검색';
 
 .pull-right
   %p
@@ -946,6 +955,7 @@ __DATA__
   - }
 
 %div= include 'pagination'
+
 
 @@ clothes/preview.html.haml
 %span
@@ -980,9 +990,10 @@ __DATA__
           - }
       - }
 
+
 @@ clothes/no.html.haml
 - layout 'default';
-- title 'clothes/' . $clothe->no . ' - 열린옷장';
+- title 'clothes/' . $clothe->no;
 
 %h1
   %a{:href => ''}= $clothe->no
@@ -1040,6 +1051,7 @@ __DATA__
           %time{:title => '대여일'}= $order->rental_date->ymd
       - }
 
+
 @@ pagination.html.haml
 .pagination
   %div
@@ -1072,71 +1084,20 @@ __DATA__
       %li.next
         %a{:href => '#{url_with->query([p => $pageset->last_page])}'}= '&raquo;&raquo;'
 
-@@ not_found.html.haml
-- layout 'default';
-- title 'Not found - 열린옷장';
-
-%h1 404 Not found
-- if ($error) {
-  %p.text-error= $error
-- }
 
 @@ bad_request.html.haml
 - layout 'default';
-- title 'Bad request - 열린옷장';
+- title 'Bad request';
 
 %h1 400 Bad request
 - if ($error) {
   %p.text-error= $error
 - }
 
-@@ layouts/default.html.haml
-!!! 5
-%html{:lang => "ko"}
-  %head
-    %meta{:charset => "utf-8"}/
-    %title= title
-    %meta{:content => "", :name => "description"}/
-    %meta{:content => "", :name => "author"}/
-    %link{:href => "/assets/css/bootstrap.css", :rel => "stylesheet"}/
-    %link{:href => "/assets/lib/datepicker-1.2.0/css/datepicker.css", :rel => "stylesheet"}/
-    %link{:href => "/assets/css/screen.css", :rel => "stylesheet"}/
-  %body
-    .container
-      .navbar
-        .navbar-inner
-          %a.brand{:href => "/"} OPEN-CLOSET
-          %ul.nav
-            %li
-              %a{:href => "/"} Home
-            %li
-              %a{:href => "/new"} 새로 오신 손님
-            %li
-              %a{:href => "/orders/new"} 대여
-            %li
-              %a{:href => "/search"} 정장 검색
-            %li
-              %a{:href => "/donors/new"} 기증
-      .content
-        = content
-      %footer.footer
-        .container
-          %p
-            %a{:href => "#"} facebook
-          %p
-            %a{:href => "#"} twitter
-      %script{:src => "/assets/lib/jquery/jquery-1.10.2.min.js"}
-      %script{:src => "/assets/lib/underscore/underscore-min.js"}
-      %script{:src => "/assets/lib/datepicker-1.2.0/js/bootstrap-datepicker.js"}
-      %script{:src => "/assets/lib/datepicker-1.2.0/js/locales/bootstrap-datepicker.kr.js"}
-      %script{:src => "/assets/js/bundle.js"}
-      - for my $js (@$javascripts) {
-      %script{:src => "/assets/js/#{$js}"}
-      - }
 
 @@ orders/new.html.haml
-- layout 'default', javascripts => ['orders-new.js'];
-- title '대여 - 열린옷장';
+- layout 'default', jses => ['orders-new.js'];
+- title '대여';
 
 .pull-right
   %form.form-search{:method => 'get', :action => ''}
@@ -1185,9 +1146,10 @@ __DATA__
     </li>
   </script>
 
+
 @@ orders/id/nil_status.html.haml
-- layout 'default', javascripts => ['orders-id.js'];
-- title '주문확인 - 열린옷장';
+- layout 'default', jses => ['orders-id.js'];
+- title '주문확인';
 
 %div.pull-right= include 'guests/breadcrumb', guest => $order->guest
 %form.form-horizontal{:method => 'post', :action => ''}
@@ -1238,9 +1200,10 @@ __DATA__
     .controls
       %input.btn.btn-success{:type => 'submit', :value => '대여완료'}
 
+
 @@ orders/id.html.haml
-- layout 'default', javascripts => ['orders-id.js'];
-- title '주문확인 - 열린옷장';
+- layout 'default', jses => ['orders-id.js'];
+- title '주문확인';
 
 %p
   - if ($order->status_id == 8) {
@@ -1314,9 +1277,10 @@ __DATA__
     %span.badge{:class => 'satisfaction-#{$satisfaction->bottom_fit}'} 하의fit
 - }
 
+
 @@ donors/new.html.haml
 - layout 'default';
-- title '기증 - 열린옷장';
+- title '기증';
 
 .pull-right
   %form.form-search{:method => 'get', :action => ''}
@@ -1350,9 +1314,10 @@ __DATA__
     .controls
       %button.btn{type => 'submit'} 다음
 
+
 @@ clothes/new.html.haml
 - layout 'default';
-- title '새로운 옷 - 열린옷장';
+- title '새로운 옷';
 
 .pull-right
   %form.form-search{:method => 'get', :action => ''}
@@ -1397,3 +1362,923 @@ __DATA__
   .control-group
     .controls
       %button.btn{type => 'submit'} 다음
+
+
+@@ layouts/default.html.haml
+!!! 5
+%html{:lang => "ko"}
+  %head
+    %title= title . ' - ' . $site->{name}
+    = include 'layouts/default/meta'
+    = include 'layouts/default/before-css'
+    = include 'layouts/default/before-js'
+    = include 'layouts/default/theme'
+    = include 'layouts/default/after-css'
+    = include 'layouts/default/after-js'
+
+  %body
+    = include 'layouts/default/navbar'
+    #main-container.main-container
+      .main-container-inner
+        %a#menu-toggler.menu-toggler{:href = '#'}
+          %span.menu-text
+        = include 'layouts/default/sidebar'
+        .main-content
+          = include 'layouts/default/breadcrumbs'
+          .page-content
+            .page-header
+              %h1
+                = $sidebar->{meta}{$active_id}{text} // q{}
+                %small
+                  %i.icon-double-angle-right
+                  = $sidebar->{meta}{$active_id}{desc} // q{}
+            .row
+              .col-xs-12
+                / PAGE CONTENT BEGINS
+                = content
+                / PAGE CONTENT ENDS
+    = include 'layouts/default/body-js'
+    = include 'layouts/default/body-theme'
+
+
+@@ layouts/default/meta.html.haml
+/ META
+    %meta{:charset => "utf-8"}
+    %meta{:content => "width=device-width, initial-scale=1.0", :name => "viewport"}
+
+
+@@ layouts/default/before-css.html.haml
+/ CSS
+    %link{:rel => "stylesheet", :href => "/lib/bootstrap/css/bootstrap.min.css"}
+    %link{:rel => "stylesheet", :href => "/lib/bootstrap/css/bootstrap-responsive.min.css"}
+    %link{:rel => "stylesheet", :href => "/lib/font-awesome/css/font-awesome.min.css"}
+    /[if IE 7]
+      %link{:rel => "stylesheet", :href => "/lib/font-awesome/css/font-awesome-ie7.min.css"}
+    %link{:rel => "stylesheet", :href => "/lib/prettify/css/prettify.css"}
+
+
+@@ layouts/default/after-css.html.haml
+/ CSS
+    %link{:rel => "stylesheet", :href => "/css/font-nanum.css"}
+    %link{:rel => "stylesheet", :href => "/css/screen.css"}
+
+
+@@ layouts/default/before-js.html.haml
+/ JS
+
+
+@@ layouts/default/after-js.html.haml
+/ JS
+    /[if lt IE 9]>
+      %script{:src => "/lib/html5shiv/html5shiv.min.js"}
+      %script{:src => "/lib/respond/respond.min.js"}
+
+
+@@ layouts/default/body-js.html.ep
+<!-- body-js -->
+    <!-- Le javascript -->
+    <!-- Placed at the end of the document so the pages load faster -->
+
+    <!-- jQuery -->
+    <!--[if !IE]> -->
+      <script type="text/javascript">
+        window.jQuery
+          || document.write("<script src='/lib/jquery/js/jquery-2.0.3.min.js'>"+"<"+"/script>");
+      </script>
+    <!-- <![endif]-->
+
+    <!--[if IE]>
+      <script type="text/javascript">
+        window.jQuery
+          || document.write("<script src='/lib/jquery/js/jquery-1.10.2.min.js'>"+"<"+"/script>");
+      </script>
+    <![endif]-->
+
+    <script type="text/javascript">
+      if ("ontouchend" in document)
+        document.write("<script src='/lib/jquery/js/jquery.mobile.custom.min.js'>"+"<"+"/script>");
+    </script>
+
+    <!-- bootstrap -->
+    <script src="/lib/bootstrap/js/bootstrap.min.js"></script>
+
+    <!--[if lte IE 8]>
+      <script src="/lib/excanvas/excanvas.min.js"></script>
+    <![endif]-->
+
+    <!-- prettify -->
+    <script src="/lib/prettify/js/prettify.js"></script>
+
+    <!-- underscore -->
+    <script src="/lib/underscore/underscore-min.js"></script>
+
+    <!-- bundle -->
+    <script src="/js/bundle.js"></script>
+
+    <!-- page specific -->
+    % push @$jses, "$active_id.js" if $active_id;
+    % for my $js (@$jses) {
+      <script type="text/javascript" src="/js/<%= $js %>"></script>
+    % }
+
+
+@@ layouts/default/theme.html.ep
+<!-- theme -->
+    <link rel="stylesheet" href="/theme/<%= $theme %>/css/<%= $theme %>-fonts.css" />
+    <link rel="stylesheet" href="/theme/<%= $theme %>/css/<%= $theme %>.min.css" />
+    <link rel="stylesheet" href="/theme/<%= $theme %>/css/<%= $theme %>-rtl.min.css" />
+    <link rel="stylesheet" href="/theme/<%= $theme %>/css/<%= $theme %>-skins.min.css" />
+    <!--[if lte IE 8]>
+      <link rel="stylesheet" href="/theme/<%= $theme %>/css/<%= $theme %>-ie.min.css" />
+    <![endif]-->
+    <script src="/theme/<%= $theme %>/js/<%= $theme %>-extra.min.js"></script>
+
+
+@@ layouts/default/body-theme.html.ep
+<!-- body theme -->
+    <script src="/theme/<%= $theme %>/js/<%= $theme %>-elements.min.js"></script>
+    <script src="/theme/<%= $theme %>/js/<%= $theme %>.min.js"></script>
+
+
+@@ layouts/default/navbar.html.ep
+<!-- navbar -->
+    <div class="navbar navbar-default" id="navbar">
+      <div class="navbar-container" id="navbar-container">
+        <div class="navbar-header pull-left">
+          <a href="#" class="navbar-brand">
+            <small> <i class="<%= $site->{icon} ? "icon-$site->{icon}" : q{} %>"></i> <%= $site->{name} %> </small>
+          </a><!-- /.brand -->
+        </div><!-- /.navbar-header -->
+
+        <div class="navbar-header pull-right" role="navigation">
+          <ul class="nav <%= $theme %>-nav">
+            <li class="grey">
+              <a data-toggle="dropdown" class="dropdown-toggle" href="#">
+                <i class="icon-tasks"></i>
+                <span class="badge badge-grey">4</span>
+              </a>
+
+              <ul class="pull-right dropdown-navbar dropdown-menu dropdown-caret dropdown-close">
+                <li class="dropdown-header">
+                  <i class="icon-ok"></i> 4 Tasks to complete
+                </li>
+
+                <li>
+                  <a href="#">
+                    <div class="clearfix">
+                      <span class="pull-left">Software Update</span>
+                      <span class="pull-right">65%</span>
+                    </div>
+
+                    <div class="progress progress-mini ">
+                      <div style="width:65%" class="progress-bar "></div>
+                    </div>
+                  </a>
+                </li>
+
+                <li>
+                  <a href="#">
+                    <div class="clearfix">
+                      <span class="pull-left">Hardware Upgrade</span>
+                      <span class="pull-right">35%</span>
+                    </div>
+
+                    <div class="progress progress-mini ">
+                      <div style="width:35%" class="progress-bar progress-bar-danger"></div>
+                    </div>
+                  </a>
+                </li>
+
+                <li>
+                  <a href="#">
+                    <div class="clearfix">
+                      <span class="pull-left">Unit Testing</span>
+                      <span class="pull-right">15%</span>
+                    </div>
+
+                    <div class="progress progress-mini ">
+                      <div style="width:15%" class="progress-bar progress-bar-warning"></div>
+                    </div>
+                  </a>
+                </li>
+
+                <li>
+                  <a href="#">
+                    <div class="clearfix">
+                      <span class="pull-left">Bug Fixes</span>
+                      <span class="pull-right">90%</span>
+                    </div>
+
+                    <div class="progress progress-mini progress-striped active">
+                      <div style="width:90%" class="progress-bar progress-bar-success"></div>
+                    </div>
+                  </a>
+                </li>
+
+                <li>
+                  <a href="#">
+                    See tasks with details
+                    <i class="icon-arrow-right"></i>
+                  </a>
+                </li>
+
+              </ul>
+
+              </li> <!-- grey -->
+
+              <li class="purple">
+                <a data-toggle="dropdown" class="dropdown-toggle" href="#">
+                  <i class="icon-bell-alt icon-animated-bell"></i>
+                  <span class="badge badge-important">8</span>
+                </a>
+
+                <ul class="pull-right dropdown-navbar navbar-pink dropdown-menu dropdown-caret dropdown-close">
+                  <li class="dropdown-header">
+                    <i class="icon-warning-sign"></i>
+                    8 Notifications
+                  </li>
+
+                  <li>
+                    <a href="#">
+                      <div class="clearfix">
+                        <span class="pull-left">
+                          <i class="btn btn-xs no-hover btn-pink icon-comment"></i>
+                          New Comments
+                        </span>
+                        <span class="pull-right badge badge-info">+12</span>
+                      </div>
+                    </a>
+                  </li>
+
+                  <li>
+                    <a href="#">
+                      <i class="btn btn-xs btn-primary icon-user"></i>
+                      Bob just signed up as an editor ...
+                    </a>
+                  </li>
+
+                  <li>
+                    <a href="#">
+                      <div class="clearfix">
+                        <span class="pull-left">
+                          <i class="btn btn-xs no-hover btn-success icon-shopping-cart"></i>
+                          New Orders
+                        </span>
+                        <span class="pull-right badge badge-success">+8</span>
+                      </div>
+                    </a>
+                  </li>
+
+                  <li>
+                    <a href="#">
+                      <div class="clearfix">
+                        <span class="pull-left">
+                          <i class="btn btn-xs no-hover btn-info icon-twitter"></i>
+                          Followers
+                        </span>
+                        <span class="pull-right badge badge-info">+11</span>
+                      </div>
+                    </a>
+                  </li>
+
+                  <li>
+                    <a href="#">
+                      See all notifications
+                      <i class="icon-arrow-right"></i>
+                    </a>
+                  </li>
+                </ul>
+                </li> <!-- purple -->
+
+                <li class="green">
+                  <a data-toggle="dropdown" class="dropdown-toggle" href="#">
+                    <i class="icon-envelope icon-animated-vertical"></i>
+                    <span class="badge badge-success">5</span>
+                  </a>
+
+                  <ul class="pull-right dropdown-navbar dropdown-menu dropdown-caret dropdown-close">
+                    <li class="dropdown-header">
+                      <i class="icon-envelope-alt"></i>
+                      5 Messages
+                    </li>
+
+                    <li>
+                      <a href="#">
+                        <img src="https://pbs.twimg.com/profile_images/1814758551/keedi_bigger.jpg" class="msg-photo" alt="Alex's Avatar" />
+                        <span class="msg-body">
+                          <span class="msg-title">
+                            <span class="blue">Alex:</span>
+                            Ciao sociis natoque penatibus et auctor ...
+                          </span>
+
+                          <span class="msg-time">
+                            <i class="icon-time"></i>
+                            <span>a moment ago</span>
+                          </span>
+                        </span>
+                      </a>
+                    </li>
+
+                    <li>
+                      <a href="#">
+                        <img src="https://pbs.twimg.com/profile_images/576748805/life.jpg" class="msg-photo" alt="Susan's Avatar" />
+                        <span class="msg-body">
+                          <span class="msg-title">
+                            <span class="blue">Susan:</span>
+                            Vestibulum id ligula porta felis euismod ...
+                          </span>
+
+                          <span class="msg-time">
+                            <i class="icon-time"></i>
+                            <span>20 minutes ago</span>
+                          </span>
+                        </span>
+                      </a>
+                    </li>
+
+                    <li>
+                      <a href="#">
+                        <img src="https://pbs.twimg.com/profile_images/684939202/__0019_3441_.jpg" class="msg-photo" alt="Bob's Avatar" />
+                        <span class="msg-body">
+                          <span class="msg-title">
+                            <span class="blue">Bob:</span>
+                            Nullam quis risus eget urna mollis ornare ...
+                          </span>
+
+                          <span class="msg-time">
+                            <i class="icon-time"></i>
+                            <span>3:15 pm</span>
+                          </span>
+                        </span>
+                      </a>
+                    </li>
+
+                    <li>
+                      <a href="#">
+                        <img src="https://pbs.twimg.com/profile_images/96856366/img_9494_doldolshadow.jpg" class="msg-photo" alt="Bob's Avatar" />
+                        <span class="msg-body">
+                          <span class="msg-title">
+                            <span class="blue">Bob:</span>
+                            Nullam quis risus eget urna mollis ornare ...
+                          </span>
+
+                          <span class="msg-time">
+                            <i class="icon-time"></i>
+                            <span>3:15 pm</span>
+                          </span>
+                        </span>
+                      </a>
+                    </li>
+
+                    <li>
+                      <a href="inbox.html">
+                        See all messages
+                        <i class="icon-arrow-right"></i>
+                      </a>
+                    </li>
+                  </ul>
+                </li> <!-- green -->
+
+                <li class="light-blue">
+                  <a data-toggle="dropdown" href="#" class="dropdown-toggle">
+                    <img class="nav-user-photo" src="https://pbs.twimg.com/profile_images/1814758551/keedi_bigger.jpg" alt="Keedi's Photo" />
+                    <span class="user-info"> <small>Welcome,</small> Keedi </span>
+                    <i class="icon-caret-down"></i>
+                  </a>
+
+                  <ul class="user-menu pull-right dropdown-menu dropdown-yellow dropdown-caret dropdown-close">
+                    <li> <a href="#"> <i class="icon-cog"></i> 설정 </a> </li>
+                    <li> <a href="#"> <i class="icon-user"></i> 프로필 </a> </li>
+                    <li class="divider"></li>
+                    <li> <a href="#"> <i class="icon-off"></i> 로그아웃 </a> </li>
+                  </ul>
+                </li> <!-- light-blue -->
+
+          </ul><!-- /.<%= $theme %>-nav -->
+        </div><!-- /.navbar-header -->
+      </div><!-- /.container -->
+    </div>
+
+
+@@ layouts/default/sidebar.html.ep
+<!-- SIDEBAR -->
+        <div class="sidebar" id="sidebar">
+          <div class="sidebar-shortcuts" id="sidebar-shortcuts">
+            <div class="sidebar-shortcuts-large" id="sidebar-shortcuts-large">
+              <button class="btn btn-success"> <i class="icon-signal"></i> </button>
+              <button class="btn btn-info"   > <i class="icon-pencil"></i> </button>
+              <button class="btn btn-warning"> <i class="icon-group" ></i> </button>
+              <button class="btn btn-danger" > <i class="icon-cogs"  ></i> </button>
+            </div>
+
+            <div class="sidebar-shortcuts-mini" id="sidebar-shortcuts-mini">
+              <span class="btn btn-success"></span>
+              <span class="btn btn-info"   ></span>
+              <span class="btn btn-warning"></span>
+              <span class="btn btn-danger" ></span>
+            </div>
+          </div><!-- #sidebar-shortcuts -->
+
+          % my $menu = begin
+          %   my ( $m, $items, $active_id, $level ) = @_;
+          %   my $space = $level ? q{  } x ( $level * 2 ) : q{};
+          %
+          <%= $space %><ul class="<%= $level ? "submenu" : "nav nav-list" %>">
+          %
+          %   for my $item (@$items) {
+          %     my $meta  = $sidebar->{meta}{$item->{id}};
+          %     my $icon  = $meta->{icon} ? "icon-$meta->{icon}" : $level ? "icon-double-angle-right" : q{};
+          %     my $link  = $meta->{link} // $item->{id};
+          %
+          %     if ( $item->{id} eq $active_id ) {
+          %       if ( $item->{items} ) {
+          %
+            <%= $space %><li class="active">
+              <%= $space %><a href="<%= $link %>" class="dropdown-toggle">
+                <%= $space %><i class="<%= $icon %>"></i>
+                <%= $space %><span class="menu-text"> <%= $meta->{text} %> </span>
+                <%= $space %><b class="arrow icon-angle-down"></b>
+              <%= $space %></a>
+              %== $m->( $m, $item->{items}, $active_id, $level + 1 );
+            <%= $space %></li>
+          %
+          %       }
+          %       else {
+          %
+            <%= $space %><li class="active">
+              <%= $space %><a href="<%= $link %>">
+                <%= $space %><i class="<%= $icon %>"></i>
+                <%= $space %><span class="menu-text"> <%= $meta->{text} %> </span>
+              <%= $space %></a>
+            <%= $space %></li>
+          %
+          %       }
+          %     }
+          %     else {
+          %       if ( $item->{items} ) {
+          %
+            <%= $space %><li>
+              <%= $space %><a href="<%= $link %>" class="dropdown-toggle">
+                <%= $space %><i class="<%= $icon %>"></i>
+                <%= $space %><span class="menu-text"> <%= $meta->{text} %> </span>
+                <%= $space %><b class="arrow icon-angle-down"></b>
+              <%= $space %></a>
+              %== $m->( $m, $item->{items}, $active_id, $level + 1 );
+            <%= $space %></li>
+          %
+          %       }
+          %       else {
+          %
+            <%= $space %><li>
+              <%= $space %><a href="<%= $link %>">
+                <%= $space %><i class="<%= $icon %>"></i>
+                <%= $space %><span class="menu-text"> <%= $meta->{text} %> </span>
+              <%= $space %></a>
+            <%= $space %></li>
+          %
+          %       }
+          %     }
+          %   }
+          %
+          <%= $space %></ul> <!-- <%= $level ? "submenu" : "nav-list" %> -->
+          %
+          % end
+          %
+          %== $menu->( $menu, $sidebar->{items}, $active_id, 0 );
+          %
+
+          <div class="sidebar-collapse" id="sidebar-collapse">
+            <i class="icon-double-angle-left" data-icon1="icon-double-angle-left" data-icon2="icon-double-angle-right"></i>
+          </div>
+        </div> <!-- sidebar -->
+
+
+@@ layouts/default/breadcrumbs.html.ep
+<!-- BREADCRUMBS -->
+          <div class="breadcrumbs" id="breadcrumbs">
+            <ul class="breadcrumb">
+            % if (@$breadcrumbs) {
+              <li> <i class="icon-home home-icon"></i> <a href="/">첫 화면</a> </li>
+            %   for my $i ( 0 .. $#$breadcrumbs ) {
+            %     my $b = $breadcrumbs->[$i];
+            %     if ( $i < $#$breadcrumbs ) {
+            %       if ( $b->{link} ) {
+              <li> <a href="<%= $b->{link} %>"><%= $b->{text} %></a> </li>
+            %       }
+            %       else {
+              <li> <%= $b->{text} %> </li>
+            %       }
+            %     }
+            %     else {
+              <li class="active"> <%= $b->{text} %> </li>
+            %     }
+            %   }
+            % }
+            % else {
+              <li class="active"> <i class="icon-home home-icon"></i>첫 화면</li>
+            % }
+            </ul><!-- .breadcrumb -->
+
+            <div class="nav-search" id="nav-search">
+              <form class="form-search">
+                <span class="input-icon">
+                  <input type="text" placeholder="검색 ..." class="nav-search-input" id="nav-search-input" autocomplete="off" />
+                  <i class="icon-search nav-search-icon"></i>
+                </span>
+              </form>
+            </div><!-- #nav-search -->
+          </div> <!-- breadcrumbs -->
+
+
+@@ not_found.html.ep
+% layout 'error',
+%   breadcrumbs => [
+%     { text => 'Other Pages' },
+%     { text => 'Error 404' },
+%   ];
+% title '404 Error Page';
+<!-- 404 NOT FOUND -->
+                <div class="error-container">
+                  <div class="well">
+                    <h1 class="grey lighter smaller">
+                      <span class="blue bigger-125">
+                        <i class="icon-sitemap"></i>
+                        404
+                      </span>
+                      Page Not Found
+                    </h1>
+
+                    <hr />
+                    <h3 class="lighter smaller">We looked everywhere but we couldn't find it!</h3>
+
+                    <div>
+                      <form class="form-search">
+                        <span class="input-icon align-middle">
+                          <i class="icon-search"></i>
+
+                          <input type="text" class="search-query" placeholder="Give it a search..." />
+                        </span>
+                        <button class="btn btn-sm" onclick="return false;">Go!</button>
+                      </form>
+
+                      <div class="space"></div>
+                      <h4 class="smaller">Try one of the following:</h4>
+
+                      <ul class="list-unstyled spaced inline bigger-110 margin-15">
+                        <li>
+                          <i class="icon-hand-right blue"></i>
+                          Re-check the url for typos
+                        </li>
+
+                        <li>
+                          <i class="icon-hand-right blue"></i>
+                          Read the faq
+                        </li>
+
+                        <li>
+                          <i class="icon-hand-right blue"></i>
+                          Tell us about it
+                        </li>
+                      </ul>
+                    </div>
+
+                    <hr />
+                    <div class="space"></div>
+
+                    <div class="center">
+                      <a href="#" class="btn btn-grey">
+                        <i class="icon-arrow-left"></i>
+                        Go Back
+                      </a>
+
+                      <a href="#" class="btn btn-primary">
+                        <i class="icon-dashboard"></i>
+                        Dashboard
+                      </a>
+                    </div>
+                  </div>
+                </div>
+
+
+@@ exception.html.ep
+% layout 'error',
+%   breadcrumbs => [
+%     { text => 'Other Pages' },
+%     { text => 'Error 500' },
+%   ];
+% title '500 Error Page';
+<!-- 500 EXCEPTIONS -->
+                <div class="error-container">
+                  <div class="well">
+                    <h1 class="grey lighter smaller">
+                      <span class="blue bigger-125">
+                        <i class="icon-random"></i>
+                        500
+                      </span>
+                      <%= $exception->message %>
+                    </h1>
+
+                    <hr />
+                    <h3 class="lighter smaller">
+                      But we are working
+                      <i class="icon-wrench icon-animated-wrench bigger-125"></i>
+                      on it!
+                    </h3>
+
+                    <div class="space"></div>
+
+                    <div>
+                      <h4 class="lighter smaller">Meanwhile, try one of the following:</h4>
+
+                      <ul class="list-unstyled spaced inline bigger-110 margin-15">
+                        <li>
+                          <i class="icon-hand-right blue"></i>
+                          Read the faq
+                        </li>
+
+                        <li>
+                          <i class="icon-hand-right blue"></i>
+                          Give us more info on how this specific error occurred!
+                        </li>
+                      </ul>
+                    </div>
+
+                    <hr />
+                    <div class="space"></div>
+
+                    <div class="center">
+                      <a href="#" class="btn btn-grey">
+                        <i class="icon-arrow-left"></i>
+                        Go Back
+                      </a>
+
+                      <a href="#" class="btn btn-primary">
+                        <i class="icon-dashboard"></i>
+                        Dashboard
+                      </a>
+                    </div>
+                  </div>
+                </div>
+
+
+@@ layouts/login.html.haml
+!!! 5
+%html
+  %head
+    %title= title . ' - ' . $site->{name}
+    = include 'layouts/default/meta'
+    = include 'layouts/default/before-css'
+    = include 'layouts/default/before-js'
+    = include 'layouts/default/theme'
+    = include 'layouts/default/after-css'
+    = include 'layouts/default/after-js'
+
+  %body.login-layout
+    .main-container
+      .main-content
+        .row
+          .col-sm-10.col-sm-offset-1
+            .login-container
+              .center
+                %h1
+                  != $site->{icon} ? qq[<i class="icon-$site->{icon} orange"></i>] : q{};
+                  %span.white= $site->{name}
+              .center
+                %h1
+                %h4.blue= "&copy; $company_name"
+              .space-6
+              .position-relative
+                = include 'layouts/login/login-box'
+                = include 'layouts/login/forgot-box'
+                = include 'layouts/login/signup-box'
+    = include 'layouts/default/body-js'
+    = include 'layouts/login/body-js'
+    = include 'layouts/default/body-theme'
+
+
+@@ layouts/login/body-js.html.ep
+    <script type="text/javascript">
+      function show_box(id) {
+        jQuery('.widget-box.visible').removeClass('visible');
+        jQuery('#'+id).addClass('visible');
+      }
+    </script>
+
+
+@@ layouts/login/login-box.html.ep
+<!-- LOGIN-BOX -->
+                <div id="login-box" class="login-box visible widget-box no-border">
+                  <div class="widget-body">
+                    <div class="widget-main">
+                      <h4 class="header blue lighter bigger">
+                        <i class="icon-coffee green"></i>
+                        정보를 입력해주세요
+                      </h4>
+
+                      <div class="space-6"></div>
+
+                      <form>
+                        <fieldset>
+                          <label class="block clearfix">
+                            <span class="block input-icon input-icon-right">
+                              <input type="text" class="form-control" placeholder="Username" />
+                              <i class="icon-user"></i>
+                            </span>
+                          </label>
+
+                          <label class="block clearfix">
+                            <span class="block input-icon input-icon-right">
+                              <input type="password" class="form-control" placeholder="Password" />
+                              <i class="icon-lock"></i>
+                            </span>
+                          </label>
+
+                          <div class="space"></div>
+
+                          <div class="clearfix">
+                            <label class="inline">
+                              <input type="checkbox" class="<%= $theme %>" />
+                              <span class="lbl"> 기억하기</span>
+                            </label>
+
+                            <button type="button" class="width-35 pull-right btn btn-sm btn-primary">
+                              <i class="icon-key"></i>
+                              로그인
+                            </button>
+                          </div>
+
+                          <div class="space-4"></div>
+                        </fieldset>
+                      </form>
+                    </div><!-- /widget-main -->
+
+                    <div class="toolbar clearfix">
+                      <div>
+                        <a href="#" onclick="show_box('forgot-box'); return false;" class="forgot-password-link">
+                          <i class="icon-arrow-left"></i>
+                          암호를 잊어버렸어요
+                        </a>
+                      </div>
+
+                      <div>
+                        <a href="#" onclick="show_box('signup-box'); return false;" class="user-signup-link">
+                          가입할래요
+                          <i class="icon-arrow-right"></i>
+                        </a>
+                      </div>
+                    </div>
+                  </div><!-- /widget-body -->
+                </div><!-- /login-box -->
+
+
+@@ layouts/login/forgot-box.html.ep
+<!-- FORGOT-BOX -->
+                <div id="forgot-box" class="forgot-box widget-box no-border">
+                  <div class="widget-body">
+                    <div class="widget-main">
+                      <h4 class="header red lighter bigger">
+                        <i class="icon-key"></i>
+                        Retrieve Password
+                      </h4>
+
+                      <div class="space-6"></div>
+                      <p>
+                        Enter your email and to receive instructions
+                      </p>
+
+                      <form>
+                        <fieldset>
+                          <label class="block clearfix">
+                            <span class="block input-icon input-icon-right">
+                              <input type="email" class="form-control" placeholder="Email" />
+                              <i class="icon-envelope"></i>
+                            </span>
+                          </label>
+
+                          <div class="clearfix">
+                            <button type="button" class="width-35 pull-right btn btn-sm btn-danger">
+                              <i class="icon-lightbulb"></i>
+                              Send Me!
+                            </button>
+                          </div>
+                        </fieldset>
+                      </form>
+                    </div><!-- /widget-main -->
+
+                    <div class="toolbar center">
+                      <a href="#" onclick="show_box('login-box'); return false;" class="back-to-login-link">
+                        Back to login
+                        <i class="icon-arrow-right"></i>
+                      </a>
+                    </div>
+                  </div><!-- /widget-body -->
+                </div><!-- /forgot-box -->
+
+
+@@ layouts/error.html.haml
+!!! 5
+%html
+  %head
+    %title= title . ' - ' . $site->{name}
+    = include 'layouts/default/meta'
+    = include 'layouts/default/before-css'
+    = include 'layouts/default/before-js'
+    = include 'layouts/default/theme'
+    = include 'layouts/default/after-css'
+    = include 'layouts/default/after-js'
+
+  %body
+    = include 'layouts/default/navbar'
+    #main-container.main-container
+      .main-container-inner
+        %a#menu-toggler.menu-toggler{:href = '#'}
+          %span.menu-text
+        = include 'layouts/default/sidebar'
+        .main-content
+          = include 'layouts/default/breadcrumbs'
+          .page-content
+            .row
+              .col-xs-12
+                / PAGE CONTENT BEGINS
+                = content
+                / PAGE CONTENT ENDS
+    = include 'layouts/default/body-js'
+    = include 'layouts/default/body-theme'
+
+
+@@ layouts/login/signup-box.html.ep
+<!-- SIGNUP-BOX -->
+                <div id="signup-box" class="signup-box widget-box no-border">
+                  <div class="widget-body">
+                    <div class="widget-main">
+                      <h4 class="header green lighter bigger">
+                        <i class="icon-group blue"></i>
+                        New User Registration
+                      </h4>
+
+                      <div class="space-6"></div>
+                      <p> Enter your details to begin: </p>
+
+                      <form>
+                        <fieldset>
+                          <label class="block clearfix">
+                            <span class="block input-icon input-icon-right">
+                              <input type="email" class="form-control" placeholder="Email" />
+                              <i class="icon-envelope"></i>
+                            </span>
+                          </label>
+
+                          <label class="block clearfix">
+                            <span class="block input-icon input-icon-right">
+                              <input type="text" class="form-control" placeholder="Username" />
+                              <i class="icon-user"></i>
+                            </span>
+                          </label>
+
+                          <label class="block clearfix">
+                            <span class="block input-icon input-icon-right">
+                              <input type="password" class="form-control" placeholder="Password" />
+                              <i class="icon-lock"></i>
+                            </span>
+                          </label>
+
+                          <label class="block clearfix">
+                            <span class="block input-icon input-icon-right">
+                              <input type="password" class="form-control" placeholder="Repeat password" />
+                              <i class="icon-retweet"></i>
+                            </span>
+                          </label>
+
+                          <label class="block">
+                            <input type="checkbox" class="<%= $theme %>" />
+                            <span class="lbl">
+                              I accept the
+                              <a href="#">User Agreement</a>
+                            </span>
+                          </label>
+
+                          <div class="space-24"></div>
+
+                          <div class="clearfix">
+                            <button type="reset" class="width-30 pull-left btn btn-sm">
+                              <i class="icon-refresh"></i>
+                              Reset
+                            </button>
+
+                            <button type="button" class="width-65 pull-right btn btn-sm btn-success">
+                              Register
+                              <i class="icon-arrow-right icon-on-right"></i>
+                            </button>
+                          </div>
+                        </fieldset>
+                      </form>
+                    </div>
+
+                    <div class="toolbar center">
+                      <a href="#" onclick="show_box('login-box'); return false;" class="back-to-login-link">
+                        <i class="icon-arrow-left"></i>
+                        Back to login
+                      </a>
+                    </div>
+                  </div><!-- /widget-body -->
+                </div><!-- /signup-box -->

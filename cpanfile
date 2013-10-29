@@ -11,6 +11,4 @@ requires 'Mojolicious::Plugin::FillInFormLite';
 requires 'Mojolicious::Plugin::HamlRenderer';
 requires 'Mojolicious::Plugin::Validator';
 requires 'Path::Tiny';
-requires 'Plack';
-requires 'Plack::Middleware::ReverseProxy';
 requires 'Try::Tiny';
