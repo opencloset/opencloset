@@ -23,6 +23,9 @@ MySQL 데이터베이스에 접속하며 `opencloset` 데이터베이스에
     $ export OPENCLOSET_DATABASE_PASS=opencloset
     $ export OPENCLOSET_DATABASE_OPTS='{ "mysql_enable_utf8": 1, "on_connect_do": "SET NAMES utf8", "quote_char": "`" }'
 
+    # 설정파일 위치와 Project Root에 대한 환경변수를 설정합니다
+    $ export MOJO_CONFIG=app.conf
+    $ export MOJO_HOME=.
 
 ### RUN
 
