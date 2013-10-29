@@ -555,6 +555,9 @@ get '/orders/:id' => sub {
     my %fillinform = $order->get_columns;
     $fillinform{price} = $price unless $fillinform{price};
     $fillinform{late_fee} = $late_fee;
+    unless ($fillinform{target_date}) {
+        $fillinform{target_date} = DateTime->now()->add(days => 3)->ymd;
+    }
 
     $self->stash(template => 'orders/id/nil_status');
     $self->stash(template => 'orders/id') if ($order->status);
@@ -1162,7 +1165,7 @@ __DATA__
 - layout 'default', jses => ['orders-id.js'];
 - title '주문확인';
 
-%div.pull-right= include 'guests/breadcrumb', guest => $order->guest
+%div.pull-right= include 'guests/breadcrumb', guest => $order->guest, status_id => ''
 %form.form-horizontal{:method => 'post', :action => ''}
   %legend
     - my $loop = 0;
@@ -1224,7 +1227,7 @@ __DATA__
   - } else {
     %span.label{:class => 'status-#{$order->status_id}'}= $order->status->name
   - }
-%div.pull-right= include 'guests/breadcrumb', guest => $order->guest
+%div.pull-right= include 'guests/breadcrumb', guest => $order->guest, status_id => ''
 %div
   - my $loop = 0;
   - for my $clothe (@$clothes) {
