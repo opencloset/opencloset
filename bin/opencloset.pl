@@ -6,23 +6,15 @@ use DateTime;
 use Opencloset::Schema;
 use Try::Tiny;
 
-my $DB_NAME     = $ENV{OPENCLOSET_DB}       || 'opencloset';
-my $DB_USERNAME = $ENV{OPENCLOSET_USERNAME} || 'root';
-my $DB_PASSWORD = $ENV{OPENCLOSET_PASSWORD} || '';
-
-app->defaults(
+app->defaults( %{ plugin 'Config' => { default => {
     javascripts => [],
-);
+}}});
 
 my $schema = Opencloset::Schema->connect({
-    dsn               => "dbi:mysql:$DB_NAME:127.0.0.1",
-    user              => $DB_USERNAME,
-    password          => $DB_PASSWORD,
-    RaiseError        => 1,
-    AutoCommit        => 1,
-    mysql_enable_utf8 => 1,
-    quote_char        => q{`},
-    on_connect_do     => 'SET NAMES utf8'
+    dsn               => app->config->{database}{dsn},
+    user              => app->config->{database}{user},
+    password          => app->config->{database}{pass},
+    %{ app->config->{database}{opts} },
 });
 
 helper error => sub {

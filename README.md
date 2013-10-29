@@ -1,24 +1,34 @@
 opencloset
 ==========
 
-### SETUP
+### 데이터베이스 초기화
 
-    $ export OPENCLOSET_DB=opencloset
-    $ export OPENCLOSET_USERNAME=username    # DB username
-    $ export OPENCLOSET_PASSWORD=password    # DB password
-    $ mysql -u $OPENCLOSET_USERNAME -p -e 'CREATE DATABASE opencloset'
-    $ mysql -u $OPENCLOSET_USERNAME -p $OPENCLOSET_DB < db/init.sql
+MySQL을 사용해서 데이터베이스를 `opencloset`, 사용자 이름 `opencloset`,
+비밀번호 `opencloset`으로 설정하려면 다음 명령을 이용합니다.
+
+    $ mysql -u root -p -e 'GRANT ALL PRIVILEGES ON `opencloset`.* TO opencloset@localhost IDENTIFIED by "opencloset";'
+    $ mysql -u opencloset -p -e 'CREATE DATABASE `opencloset` DEFAULT CHARACTER SET utf8;'
+    $ mysql -u opencloset -p opencloset < db/init.sql
+
+
+### 환경 변수 설정
+
+MySQL 데이터베이스에 접속하며 `opencloset` 데이터베이스에
+아이디 `opencloset`, 비밀번호 `opencloset`으로 접속하는 것이 기본 설정입니다.
+설정을 변경하려면 다음 환경 변수를 조정합니다.
+다음 예시는 기본 값으로 설정되어 있는 값입니다.
+
+    $ export OPENCLOSET_DATABASE_DSN="dbi:mysql:opencloset:127.0.0.1"
+    $ export OPENCLOSET_DATABASE_USER=opencloset
+    $ export OPENCLOSET_DATABASE_PASS=opencloset
+    $ export OPENCLOSET_DATABASE_OPTS='{ "mysql_enable_utf8": 1, "on_connect_do": "SET NAMES utf8", "quote_char": "`" }'
+
 
 ### RUN
 
-    ## set env
-    $ export OPENCLOSET_DB=opencloset
-    $ export OPENCLOSET_USERNAME=username
-    $ export OPENCLOSET_PASSWORD=password
-
-    ## run!
     $ plackup                         # or
     $ DBIC_TRACE=1 plackup -R bin/    # for development
+
 
 ### 이슈, 제안이나 의견
 

@@ -1,14 +1,22 @@
-my $DB_NAME     = $ENV{OPENCLOSET_DB}       || 'opencloset';
-my $DB_USERNAME = $ENV{OPENCLOSET_USERNAME} || 'root';
-my $DB_PASSWORD = $ENV{OPENCLOSET_PASSWORD} || '';
+use strict;
+use warnings;
+
+use Path::Tiny;
+
+#
+# load from app.conf
+#
+my $conf_file = 'app.conf';
+die "cannot find config file" unless -e $conf_file;
+my $conf = eval path($conf_file)->slurp_utf8;
 
 {
     schema_class => "Opencloset::Schema",
     connect_info => {
-        dsn               => "dbi:mysql:$DB_NAME:127.0.0.1",
-        user              => $DB_USERNAME,
-        pass              => $DB_PASSWORD,
-        mysql_enable_utf8 => 1,
+        dsn  => $conf->{database}{dsn},
+        user => $conf->{database}{user},
+        pass => $conf->{database}{pass},
+        %{ $conf->{database}{opts} },
     },
     loader_options => {
         dump_directory            => 'lib',
