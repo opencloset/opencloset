@@ -806,9 +806,8 @@ __DATA__
         kg
   .control-group
     .controls
-      %label.checkbox.inline
-        %input{:type => 'checkbox' :checked => 'checked'}
-          정확한 의류선택과 편리한 이용관리를 위한 개인정보와 신체치수 수집에 동의 하십니까?
+      %label.text-info
+        열린옷장은 정확한 의류선택과 편리한 이용관리만을 위해 개인정보와 신체치수를 수집 합니다.
   .control-group
     .controls
       %button.btn{type => 'submit'} 다음
