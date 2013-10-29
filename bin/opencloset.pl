@@ -1279,8 +1279,8 @@ __DATA__
 
 
 @@ donors/new.html.haml
-- layout 'default';
-- title '기증';
+- layout 'default', jses => ['donors-new.js'];
+- title '기증 - 열린옷장';
 
 .pull-right
   %form.form-search{:method => 'get', :action => ''}

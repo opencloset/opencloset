@@ -13,3 +13,17 @@ $ ->
   pathname = location.pathname
   $('.navbar .nav > li').each (i, el) ->
     if pathname is $(el).children('a').attr('href') then $(el).addClass('active')
+
+$.fn.ForceNumericOnly = ->
+  @each ->
+    $(@).keydown (e) ->
+      console.log e.keyCode
+      key = e.charCode or e.keyCode or 0
+      key == 8 ||
+      key == 9 ||
+      key == 46 ||
+      key == 110 ||
+      key == 190 ||
+      (key >= 35 && key <= 40) ||
+      (key >= 48 && key <= 57) ||
+      (key >= 96 && key <= 105)
