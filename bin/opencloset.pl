@@ -218,7 +218,7 @@ post '/guests/:id/size' => sub {
     my $guest = $DB->resultset('Guest')->find({ id => $self->param('id') });
     map { $guest->$_($self->param($_)) } @fields;
     $guest->update;
-    my ($chest, $waist) = ($guest->chest + 3, $guest->waist - 1);
+    my ($chest, $waist) = ($guest->chest + 3, $guest->waist);
     $self->respond_to(
         json => { json => { $guest->get_columns } },
         html => sub {
