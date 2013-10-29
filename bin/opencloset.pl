@@ -937,7 +937,7 @@ __DATA__
     %span.badge.badge-important 매우큼
   %p.muted
     %span.text-info 상태
-    1: 대여가능, 2: 대여불가, 3: 세탁, 4: 수선, 5: 대여불가, 7: 분실
+    1: 대여가능, 2: 대여중, 3: 세탁, 4: 수선, 5: 대여불가, 7: 분실
 
   %form.form-search{:method => 'get', :action => ''}
     %input{:type => 'hidden', :name => 'gid', :value => "#{param('gid')}"}
@@ -979,6 +979,9 @@ __DATA__
       %span.label.label-success= $clothe->status->name
     - } elsif ($clothe->status->name eq '대여중') {
       %span.label.label-important= $clothe->status->name
+      - if (my $order = $clothe->orders({ status_id => 2 })->next) {
+        %small.muted{:title => '반납예정일'}= $order->target_date->ymd if $order->target_date
+      - }
     - } else {
       %span.label= $clothe->status->name
     - }
@@ -1010,6 +1013,9 @@ __DATA__
       %span.label.label-success= $clothe->status->name
     - } elsif ($clothe->status->name eq '대여중') {
       %span.label.label-important= $clothe->status->name
+      - if (my $order = $clothe->orders({ status_id => 2 })->next) {
+        %small.muted{:title => '반납예정일'}= $order->target_date->ymd if $order->target_date
+      - }
     - } else {
       %span.label= $clothe->status->name
     - }
