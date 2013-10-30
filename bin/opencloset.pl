@@ -572,6 +572,10 @@ any [qw/post put patch/] => '/orders/:id' => sub {
     return $self->error(404, "Not found") unless $order;
 
     my $validator = $self->create_validator;
+    $validator->field('target_date')->required(1) unless $order->status_id;
+    if ($order->status_id && $order->status_id == 2) {
+        $validator->field('return_method')->required(1);
+    }
     $validator->field([qw/price discount late_fee l_discount/])
         ->each(sub { shift->regexp(qr/^\d+$/) });
     $validator->field([qw/chest waist arm top_fit bottom_fit/])
@@ -593,9 +597,11 @@ any [qw/post put patch/] => '/orders/:id' => sub {
 
     my $guard = $DB->txn_scope_guard;
     # BEGIN TRANSACTION ~
-    $order->status_id($status_to_be{$order->status_id || 0});
+    my $status_id = $status_to_be{$order->status_id || 0};
+    $order->status_id($status_id);
     my $dt_parser = $DB->storage->datetime_parser;
-    $order->rental_date($dt_parser->format_datetime(DateTime->now));
+    $order->return_date($dt_parser->format_datetime(DateTime->now())) if $status_id == 8;
+    $order->rental_date($dt_parser->format_datetime(DateTime->now)) if $status_id == 2;
     $order->update;
 
     for my $clothe ($order->clothes) {
