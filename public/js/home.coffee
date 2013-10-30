@@ -54,7 +54,7 @@ $ ->
       success: (data, textStatus, jqXHR) ->
         $('#clothes-list input:checked').each (i, el) ->
           $(el).closest('.row-checkbox').remove()
-        unless $('#clothes-list .row-checkbox')
+        unless $('#clothes-list .row-checkbox').length
           $('#action-buttons').hide()
         alert('success', "#{clothes.length}개의 항목이 #{status} (으)로 변경되었습니다")
       error: (jqXHR, textStatus, errorThrown) ->

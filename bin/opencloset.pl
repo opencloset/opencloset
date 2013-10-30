@@ -702,9 +702,11 @@ __DATA__
 #clothes-list
   %ul
   #action-buttons{:style => 'display: none'}
+    %span 선택한 항목을
     %button.btn.btn-mini{:type => 'button', :data-status => '세탁'} 세탁
-    %button.btn.btn-mini{:type => 'button', :data-status => '대여가능'} 반납
+    %button.btn.btn-mini{:type => 'button', :data-status => '대여가능'} 대여가능
     %button.btn.btn-mini{:type => 'button', :data-status => '분실'} 분실
+    %span (으)로 변경 합니다
 
 :plain
   <script id="tpl-row" type="text/html">
@@ -1194,14 +1196,17 @@ __DATA__
       - if ($loop == 1) {
         %span
           %a{:href => '/clothes/#{$clothe->no}'}= $clothe->category->name
+          %small.highlight= commify($clothe->category->price)
       - } elsif ($loop == 2) {
         %span
           with
           %a{:href => '/clothes/#{$clothe->no}'}= $clothe->category->name
+          %small.highlight= commify($clothe->category->price)
       - } else {
         %span
           ,
           %a{:href => '/clothes/#{$clothe->no}'}= $clothe->category->name
+          %small.highlight= commify($clothe->category->price)
       - }
     - }
   .control-group
@@ -1255,14 +1260,17 @@ __DATA__
     - if ($loop == 1) {
       %span
         %a{:href => '/clothes/#{$clothe->no}'}= $clothe->category->name
+        %small.highlight= commify($clothe->category->price)
     - } elsif ($loop == 2) {
       %span
         with
         %a{:href => '/clothes/#{$clothe->no}'}= $clothe->category->name
+        %small.highlight= commify($clothe->category->price)
     - } else {
       %span
         ,
         %a{:href => '/clothes/#{$clothe->no}'}= $clothe->category->name
+        %small.highlight= commify($clothe->category->price)
     - }
   - }
 
