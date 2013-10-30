@@ -17,7 +17,6 @@ $ ->
 $.fn.ForceNumericOnly = ->
   @each ->
     $(@).keydown (e) ->
-      console.log e.keyCode
       key = e.charCode or e.keyCode or 0
       key == 8 ||
       key == 9 ||
