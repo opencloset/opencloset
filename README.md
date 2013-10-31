@@ -19,6 +19,10 @@ MySQL을 사용해서 데이터베이스를 `opencloset`, 사용자 이름 `open
     $ cp app.conf.sample app.conf
     $ ... edit app.conf ...
 
+현재 개발 중이고 `app.conf.sample` 파일을 수정해서 반영하고 있다면 심볼릭 링크를 걸도록 합니다.
+
+    $ ln -sf app.conf.sample app.conf
+
 
 ### 환경 변수 설정
 
