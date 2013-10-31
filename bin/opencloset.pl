@@ -6,6 +6,7 @@ use Data::Pageset;
 use DateTime;
 use Try::Tiny;
 
+use Opencloset::Constant;
 use Opencloset::Schema;
 
 plugin 'validator';
@@ -572,8 +573,11 @@ any [qw/post put patch/] => '/orders/:id' => sub {
     return $self->error(404, "Not found") unless $order;
 
     my $validator = $self->create_validator;
-    $validator->field('target_date')->required(1) unless $order->status_id;
-    if ($order->status_id && $order->status_id == 2) {
+    unless ($order->status_id) {
+        $validator->field('target_date')->required(1);
+        $validator->field('payment_method')->required(1);
+    }
+    if ($order->status_id && $order->status_id == $Opencloset::Constant::STATUS_RENT) {
         $validator->field('return_method')->required(1);
     }
     $validator->field([qw/price discount late_fee l_discount/])
@@ -588,10 +592,10 @@ any [qw/post put patch/] => '/orders/:id' => sub {
     ##       maybe should convert to DateTime object
     map {
         $order->$_($self->param($_)) if defined $self->param($_);
-    } qw/price discount target_date comment return_method late_fee l_discount/;
+    } qw/price discount target_date comment return_method late_fee l_discount payment_method/;
     my %status_to_be = (
-        0 => 2,    # NULL   -> 대여중
-        2 => 8,    # 대여중 -> 반납
+        0 => $Opencloset::Constant::STATUS_RENT,
+        $Opencloset::Constant::STATUS_RENT => $Opencloset::Constant::STATUS_RETURN,
         # TODO: consider `분실`
     );
 
@@ -600,18 +604,20 @@ any [qw/post put patch/] => '/orders/:id' => sub {
     my $status_id = $status_to_be{$order->status_id || 0};
     $order->status_id($status_id);
     my $dt_parser = $DB->storage->datetime_parser;
-    $order->return_date($dt_parser->format_datetime(DateTime->now())) if $status_id == 8;
-    $order->rental_date($dt_parser->format_datetime(DateTime->now)) if $status_id == 2;
+    $order->return_date($dt_parser->format_datetime(DateTime->now()))
+        if $status_id == $Opencloset::Constant::STATUS_RETURN;
+    $order->rental_date($dt_parser->format_datetime(DateTime->now))
+        if $status_id == $Opencloset::Constant::STATUS_RENT;
     $order->update;
 
     for my $clothe ($order->clothes) {
-        if ($order->status_id == 2) {
-            $clothe->status_id(2);
+        if ($order->status_id == $Opencloset::Constant::STATUS_RENT) {
+            $clothe->status_id($Opencloset::Constant::STATUS_RENT);
         } else {
-            if ($clothe->category_id == 4) {
-                $clothe->status_id(1);    # Shoes, 대여가능
+            if ($clothe->category_id == $Opencloset::Constant::CATEOGORY_SHOES) {
+                $clothe->status_id($Opencloset::Constant::STATUS_AVAILABLE);    # Shoes
             } else {
-                $clothe->status_id(3);    # otherwise, 세탁
+                $clothe->status_id($Opencloset::Constant::STATUS_WASHING);    # otherwise
             }
         }
         $clothe->update;
@@ -1220,6 +1226,18 @@ __DATA__
       %input{:type => 'text', :id => 'input-discount', :name => 'discount'}
       원
   .control-group
+    %label.control-label 결제방법
+    .controls
+      %label.radio.inline
+        %input{:type => 'radio', :name => 'payment_method', :value => '현금'}
+          현금
+      %label.radio.inline
+        %input{:type => 'radio', :name => 'payment_method', :value => '카드'}
+          카드
+      %label.radio.inline
+        %input{:type => 'radio', :name => 'payment_method', :value => '현금+카드'}
+          현금 + 카드
+  .control-group
     %label.control-label{:for => 'input-target-date'} 반납예정일
     .controls
       %input#input-target-date{:type => 'text', :name => 'target_date'}
@@ -1245,9 +1263,7 @@ __DATA__
 - title '주문확인';
 
 %p
-  - if ($order->status_id == 8) {
-    %span.label{:class => 'status-#{$order->status_id}'}= $order->status->name
-  - } elsif ($overdue) {
+  - if ($overdue) {
     %span.label{:class => 'status-#{$order->status_id}'} 연체중
   - } else {
     %span.label{:class => 'status-#{$order->status_id}'}= $order->status->name
@@ -1285,6 +1301,8 @@ __DATA__
   %span.highlight= commify($order->price - $order->discount)
 %p.muted= commify($order->discount) . '원 할인'
 
+%p= $order->payment_method
+
 - if ($overdue) {
   %p.muted
     %span 연체료
@@ -1292,21 +1310,41 @@ __DATA__
     는 연체일(#{ $overdue }) x 대여금액(#{ commify($order->price) })의 20% 로 계산됩니다
 - }
 
-- if ($order->status_id == 8) {
+- if ($order->status_id == $Opencloset::Constant::STATUS_RETURN) {
   %p= commify($order->late_fee)
   %p= $order->return_method
 - } else {
-  %form.form-inline{:method => 'post', :action => "#{url_for('')}"}
+  %form.form-horizontal{:method => 'post', :action => "#{url_for('')}"}
     %fieldset
       %legend 연체료 및 반납방법
-      %input#input-late_fee.input-mini{:type => 'text', :name => 'late_fee', :placeholder => '연체료'}
-      %label.radio
-        %input{:type => 'radio', :name => 'return_method', :value => '방문'}
-        방문
-      %label.radio
-        %input{:type => 'radio', :name => 'return_method', :value => '택배'}
-        택배
-      %button.btn.btn-success{:type => 'submit'} 반납
+      .control-group
+        %label 연체료
+        .controls
+          %input#input-late_fee.input-mini{:type => 'text', :name => 'late_fee', :placeholder => '연체료'}
+      .control-group
+        %label 반납방법
+        .controls
+          %label.radio.inline
+            %input{:type => 'radio', :name => 'return_method', :value => '방문'}
+            방문
+          %label.radio.inline
+            %input{:type => 'radio', :name => 'return_method', :value => '택배'}
+            택배
+      .control-group
+        %label 결제방법
+        .controls
+          %label.radio.inline
+            %input{:type => 'radio', :name => 'l_payment_method', :value => '현금'}
+            현금
+          %label.radio.inline
+            %input{:type => 'radio', :name => 'l_payment_method', :value => '카드'}
+            카드
+          %label.radio.inline
+            %input{:type => 'radio', :name => 'l_payment_method', :value => '현금+카드'}
+            현금+카드
+      .control-group
+        .controls
+          %button.btn.btn-success{:type => 'submit'} 반납
 - }
 
 %h5 만족도
