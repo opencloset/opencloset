@@ -10,7 +10,7 @@
     }).on('changeDate', function(e) {
       return console.log(overdue_calc(new Date(), $('#input-target-date').datepicker('getDate')));
     });
-    return overdue_calc = function(target_dt, return_dt) {
+    overdue_calc = function(target_dt, return_dt) {
       var DAY_AS_SECONDS, dur;
       DAY_AS_SECONDS = 60 * 60 * 24;
       dur = return_dt.getTime() - target_dt.getTime();
@@ -19,6 +19,25 @@
       }
       return parseInt(dur / 1000);
     };
+    return $('#btn-order-cancel:not(.disabled)').click(function(e) {
+      var $this;
+      e.preventDefault();
+      $this = $(this);
+      $this.addClass('disabled');
+      return $.ajax("" + ($this.attr('href')) + ".json", {
+        type: 'DELETE',
+        dataType: 'json',
+        success: function(data, textStatus, jqXHR) {
+          return location.href = '/';
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+          return alert('error', jqXHR.responseJSON.error);
+        },
+        complete: function(jqXHR, textStatus) {
+          return $this.removeClass('disabled');
+        }
+      });
+    });
   });
 
 }).call(this);

@@ -12,3 +12,17 @@ $ ->
     dur = return_dt.getTime() - target_dt.getTime()
     return 0 if dur < 0
     parseInt(dur / 1000)
+
+  $('#btn-order-cancel:not(.disabled)').click (e) ->
+    e.preventDefault()
+    $this = $(@)
+    $this.addClass('disabled')
+    $.ajax "#{$this.attr('href')}.json",
+      type: 'DELETE'
+      dataType: 'json'
+      success: (data, textStatus, jqXHR) ->
+        location.href = '/'
+      error: (jqXHR, textStatus, errorThrown) ->
+        alert('error', jqXHR.responseJSON.error)
+      complete: (jqXHR, textStatus) ->
+        $this.removeClass('disabled')

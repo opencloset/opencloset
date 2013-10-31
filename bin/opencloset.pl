@@ -653,6 +653,24 @@ any [qw/post put patch/] => '/orders/:id' => sub {
     );
 };
 
+del '/orders/:id' => sub {
+    my $self = shift;
+
+    my $order = $DB->resultset('Order')->find({ id => $self->param('id') });
+    return $self->error(404, "Not found") unless $order;
+
+    for my $clothe ($order->clothes) {
+        $clothe->status_id($Opencloset::Constant::STATUS_AVAILABLE);
+        $clothe->update;
+    }
+
+    $order->delete;
+
+    $self->respond_to(
+        json => { json => {} },    # just 200 OK
+    );
+};
+
 get '/donors/new' => sub {
     my $self   = shift;
     my $q      = $self->param('q') || '';
@@ -1348,6 +1366,7 @@ __DATA__
       .control-group
         .controls
           %button.btn.btn-success{:type => 'submit'} 반납
+          %a#btn-order-cancel.btn.btn-danger{:href => '#{url_for()}'} 주문취소
 - }
 
 %h5 만족도
