@@ -1,5 +1,8 @@
 _site
 .sass-cache/
 
+# application config file
+app.conf
+
 # editor swap files
 *.swp

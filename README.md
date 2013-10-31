@@ -11,6 +11,15 @@ MySQL을 사용해서 데이터베이스를 `opencloset`, 사용자 이름 `open
     $ mysql -u opencloset -p opencloset < db/init.sql
 
 
+### 설정 파일 생성
+
+저장소에 `app.conf.sample` 파일이 있습니다.
+이 파일을 `app.conf`로 복사한 후 자신의 설정에 맞도록 값을 변경합니다.
+
+    $ cp app.conf.sample app.conf
+    $ ... edit app.conf ...
+
+
 ### 환경 변수 설정
 
 MySQL 데이터베이스에 접속하며 `opencloset` 데이터베이스에
@@ -26,6 +35,7 @@ MySQL 데이터베이스에 접속하며 `opencloset` 데이터베이스에
     # 설정파일 위치와 Project Root에 대한 환경변수를 설정합니다
     $ export MOJO_CONFIG=app.conf
     $ export MOJO_HOME=.
+
 
 ### RUN
 
