@@ -1,4 +1,5 @@
 $ ->
+  Window::_alert = Window::alert
   Window::alert = (cls, msg) ->
     unless msg
       msg = cls

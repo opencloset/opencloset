@@ -2,6 +2,7 @@
 (function() {
   $(function() {
     var pathname;
+    Window.prototype._alert = Window.prototype.alert;
     Window.prototype.alert = function(cls, msg) {
       if (!msg) {
         msg = cls;

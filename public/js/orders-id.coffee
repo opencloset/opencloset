@@ -21,6 +21,7 @@ $ ->
       type: 'DELETE'
       dataType: 'json'
       success: (data, textStatus, jqXHR) ->
+        _alert('주문이 취소 되었습니다')
         location.href = '/'
       error: (jqXHR, textStatus, errorThrown) ->
         alert('error', jqXHR.responseJSON.error)

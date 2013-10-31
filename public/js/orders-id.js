@@ -28,6 +28,7 @@
         type: 'DELETE',
         dataType: 'json',
         success: function(data, textStatus, jqXHR) {
+          _alert('주문이 취소 되었습니다');
           return location.href = '/';
         },
         error: function(jqXHR, textStatus, errorThrown) {
