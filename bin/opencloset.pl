@@ -1331,6 +1331,8 @@ __DATA__
     는 연체일(#{ $overdue }) x 대여금액(#{ commify($order->price) })의 20% 로 계산됩니다
 - }
 
+%p.well= $order->comment
+
 - if ($order->status_id == $Opencloset::Constant::STATUS_RETURN) {
   %p= commify($order->late_fee)
   %p= $order->return_method
