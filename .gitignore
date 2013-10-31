@@ -1,6 +1,9 @@
 _site
 .sass-cache/
 
+# commercial theme
+public/theme/ace
+
 # application config file
 app.conf
 
