@@ -7,7 +7,7 @@
         msg = cls;
         cls = 'info';
       }
-      $("<div class=\"alert alert-" + cls + "\">" + msg + "</div>").insertAfter('#clothe-search-form');
+      $('.main-content').prepend("<div class=\"alert alert-" + cls + "\">" + msg + "</div>");
       return setTimeout(function() {
         return $('.alert').remove();
       }, 3000);

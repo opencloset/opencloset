@@ -4,8 +4,7 @@ $ ->
       msg = cls
       cls = 'info'
     # error, success, info
-    $("<div class=\"alert alert-#{cls}\">#{msg}</div>")
-      .insertAfter('#clothe-search-form')
+    $('.main-content').prepend("<div class=\"alert alert-#{cls}\">#{msg}</div>")
     setTimeout ->
       $('.alert').remove()
     , 3000
