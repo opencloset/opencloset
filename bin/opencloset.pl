@@ -539,10 +539,13 @@ get '/orders/:id' => sub {
     my $cond = { category_id => $c_jacket->id };
     my $clothe = $order->clothes($cond)->next;
 
-    my $satisfaction = $clothe->satisfactions({
-        clothe_id => $clothe->id,
-        guest_id  => $order->guest->id,
-    })->next;
+    my $satisfaction;
+    if ($clothe) {
+        $satisfaction = $clothe->satisfactions({
+            clothe_id => $clothe->id,
+            guest_id  => $order->guest->id,
+        })->next;
+    }
 
     $self->stash(
         order        => $order,
