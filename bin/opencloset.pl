@@ -1531,6 +1531,7 @@ __DATA__
 @@ layouts/default/before-js.html.haml
 / JS
 
+
 @@ layouts/default/after-js.html.haml
 / JS
     /[if lt IE 9]>
