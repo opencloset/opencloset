@@ -1519,6 +1519,7 @@ __DATA__
     /[if IE 7]
       %link{:rel => "stylesheet", :href => "/lib/font-awesome/css/font-awesome-ie7.min.css"}
     %link{:rel => "stylesheet", :href => "/lib/prettify/css/prettify.css"}
+    %link{:rel => "stylesheet", :href => "/lib/datepicker/css/datepicker.css"}
 
 
 @@ layouts/default/after-css.html.haml
@@ -1529,7 +1530,6 @@ __DATA__
 
 @@ layouts/default/before-js.html.haml
 / JS
-
 
 @@ layouts/default/after-js.html.haml
 / JS
@@ -1575,6 +1575,10 @@ __DATA__
 
     <!-- underscore -->
     <script src="/lib/underscore/underscore-min.js"></script>
+
+    <!-- datepicker -->
+    <script src="/lib/datepicker/js/bootstrap-datepicker.js"></script>
+    <script src="/lib/datepicker/js/locales/bootstrap-datepicker.kr.js"></script>
 
     <!-- bundle -->
     <script src="/js/bundle.js"></script>
