@@ -137,19 +137,20 @@ CREATE TABLE `satisfaction` (
 --
 
 CREATE TABLE `order` (
-  `id`          INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `guest_id`    INT UNSIGNED NOT NULL,
-  `status_id`   INT UNSIGNED DEFAULT NULL,
-
-  `rental_date`   DATETIME DEFAULT NULL,
-  `target_date`   DATETIME DEFAULT NULL,
-  `return_date`   DATETIME DEFAULT NULL,
-  `return_method` VARCHAR(32) DEFAULT NULL,
-  `price`         INT DEFAULT 0,
-  `discount`      INT DEFAULT 0,
-  `late_fee`      INT DEFAULT 0,
-  `l_discount`    INT DEFAULT 0, -- late_fee discount
-  `comment`       TEXT DEFAULT NULL,
+  `id`               INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `guest_id`         INT UNSIGNED NOT NULL,
+  `status_id`        INT UNSIGNED DEFAULT NULL,
+  `rental_date`      DATETIME DEFAULT NULL,
+  `target_date`      DATETIME DEFAULT NULL,
+  `return_date`      DATETIME DEFAULT NULL,
+  `return_method`    VARCHAR(32) DEFAULT NULL,
+  `payment_method`   VARCHAR(32) DEFAULT NULL,
+  `price`            INT DEFAULT 0,
+  `discount`         INT DEFAULT 0,
+  `late_fee`         INT DEFAULT 0,
+  `l_discount`       INT DEFAULT 0, -- late_fee discount
+  `l_payment_method` VARCHAR(32) DEFAULT NULL,
+  `comment`          TEXT DEFAULT NULL,
 
   PRIMARY KEY (`id`),
   CONSTRAINT `fk_order1` FOREIGN KEY (`guest_id`) REFERENCES `guest` (`id`) ON DELETE CASCADE,
@@ -162,7 +163,7 @@ CREATE TABLE `order` (
 
 CREATE TABLE `clothe_order` (
   `clothe_id` INT UNSIGNED NOT NULL,
-  `order_id`   INT UNSIGNED NOT NULL,
+  `order_id`  INT UNSIGNED NOT NULL,
 
   PRIMARY KEY (`clothe_id`, `order_id`),
   CONSTRAINT `fk_clothe_order1` FOREIGN KEY (`clothe_id`) REFERENCES `clothe` (`id`) ON DELETE CASCADE,

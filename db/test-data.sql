@@ -13,7 +13,7 @@ INSERT INTO `donor_clothe` (`donor_id`, `clothe_id`, `comment`, `donation_date`)
 
 INSERT INTO `guest` (`id`,`name`,`email`,`phone`,`gender`,`address`,`age`,`purpose`,`chest`,`waist`,`arm`,`pants_len`,`height`,`weight`,`create_date`,`visit_date`) VALUES (1,'홍형석','aanoaa@gmail.com','01031820000',0,'서울시 동작구 사당동',32,'입사면접',93,78,51,102,168,59,'2013-01-03','2013-01-03');
 
-INSERT INTO `order` (`id`,`guest_id`,`status_id`,`rental_date`,`target_date`,`return_date`,`price`,`discount`,`comment`) VALUES (1,1,2,'2013-10-18','2013-10-21',NULL,20000,0,NULL);
+INSERT INTO `order` (`id`,`guest_id`,`status_id`,`rental_date`,`target_date`,`return_date`,`price`,`discount`,`comment`,`payment_method`) VALUES (1,1,2,'2013-10-18','2013-10-21',NULL,20000,0,NULL,'현금');
 
 INSERT INTO `clothe_order` (`clothe_id`,`order_id`) VALUES (3,1), (4,1);
 
