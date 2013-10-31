@@ -441,7 +441,7 @@ get '/search' => sub {
     );
 };
 
-get '/orders/new' => sub {
+get '/rental' => sub {
     my $self = shift;
 
     my $today = DateTime->now;
@@ -476,7 +476,7 @@ get '/orders/new' => sub {
     });
 
     $self->stash(guests => \@guests);
-} => 'orders/new';
+} => 'rental';
 
 post '/orders' => sub {
     my $self = shift;
@@ -1118,9 +1118,15 @@ __DATA__
 - }
 
 
-@@ orders/new.html.haml
-- layout 'default', jses => ['orders-new.js'];
-- title '대여';
+@@ rental.html.haml
+- my $id   = 'rental';
+- my $meta = $sidebar->{meta};
+- layout 'default',
+-   active_id   => $id,
+-   breadcrumbs => [
+-     { text => $meta->{$id}{text} },
+-   ];
+- title $meta->{$id}{text};
 
 .pull-right
   %form.form-search{:method => 'get', :action => ''}
