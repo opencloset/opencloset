@@ -198,6 +198,20 @@ post '/guests' => sub {
     );
 };
 
+get '/guests/:id' => sub {
+    my $self   = shift;
+    my $guest  = $DB->resultset('Guest')->find({ id => $self->param('id') });
+    my @orders = $DB->resultset('Order')->search({
+        guest_id => $self->param('id')
+    }, {
+        order_by => { -desc => 'rental_date' }
+    });
+    $self->stash(
+        guest  => $guest,
+        orders => [@orders],
+    );
+} => 'guests/id';
+
 get '/guests/:id/size' => sub {
     my $self  = shift;
     my $guest = $DB->resultset('Guest')->find({ id => $self->param('id') });
@@ -861,6 +875,53 @@ __DATA__
       %button.btn{type => 'submit'} 다음
 
 
+@@ guests/status.html.haml
+%h3= $guest->purpose
+%ul
+  %li
+    %i.icon-user
+    %a{:href => "#{url_for('/guests/' . $guest->id)}"} #{$guest->name}
+    %span (#{$guest->age})
+  %li
+    %i.icon-map-marker
+    = $guest->address
+  %li
+    %i.icon-envelope
+    %a{:href => "mailto:#{$guest->email}"}= $guest->email
+  %li= $guest->phone
+  %li
+    %span #{$guest->height} cm,
+    %span #{$guest->weight} kg
+
+
+
+@@ guests/id.html.haml
+- layout 'default';
+- title $guest->name . '님';
+
+%div= include 'guests/status', guest => $guest
+%h3 주문내역
+%ul
+  - for my $order (@$orders) {
+      %li
+        %a{:href => "#{url_for('/orders/' . $order->id)}"}
+          - if ($order->status && $order->status->name eq '대여중') {
+            - if (overdue_calc($order->target_date, DateTime->now())) {
+              %span.label.label-important 연체중
+            - } else {
+              %span.label.label-important= $order->status->name
+            - }
+            %span.highlight{:title => '대여일'}= $order->rental_date->ymd
+            ~
+            %span{:title => '반납예정일'}= $order->target_date->ymd
+          - } else {
+            %span.label= $order->status->name
+            %span.highlight{:title => '대여일'}= $order->rental_date->ymd
+            ~
+            %span.highlight{:title => '반납일'}= $order->return_date->ymd
+          - }
+  - }
+
 @@ guests/size.html.haml
 - layout 'default';
 - title '신체치수';
@@ -874,22 +935,7 @@ __DATA__
         %span.label.label-warning= $order->status->name
       - }
     - }
-    %h3= $guest->purpose
-    %ul
-      %li
-        %i.icon-user
-        %a{:href => "#{url_for('/guests/' . $guest->id)}"} #{$guest->name}
-        %span (#{$guest->age})
-      %li
-        %i.icon-map-marker
-        = $guest->address
-      %li
-        %i.icon-envelope
-        %a{:href => "mailto:#{$guest->email}"}= $guest->email
-      %li= $guest->phone
-      %li
-        %span #{$guest->height} cm,
-        %span #{$guest->weight} kg
+    %div= include 'guests/status', guest => $guest
   .span6
     %form.form-horizontal{:method => 'POST', :action => "#{url_for('')}"}
       %legend 대여자 치수 정보
