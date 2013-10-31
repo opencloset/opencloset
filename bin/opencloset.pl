@@ -175,7 +175,7 @@ get '/new-borrower' => sub {
     });
 
     $self->stash( candidates => $guests );
-};
+} => 'new-borrower';
 
 post '/guests' => sub {
     my $self = shift;
@@ -737,7 +737,7 @@ __DATA__
   </script>
 
 
-@@ newborrower.html.haml
+@@ new-borrower.html.haml
 - my $id   = 'new-borrower';
 - my $meta = $sidebar->{meta};
 - layout 'default',
