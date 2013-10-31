@@ -156,10 +156,7 @@ helper create_clothe => sub {
     return $DB->resultset('Clothe')->find_or_create(\%params);
 };
 
-get '/' => sub {
-    my $self = shift;
-    $self->render('index');
-};
+get '/' => 'home';
 
 get '/new-borrower' => sub {
     my $self = shift;
@@ -684,9 +681,11 @@ app->start;
 
 __DATA__
 
-@@ index.html.haml
-- layout 'default', jses => ['root-index.js'];
-- title 'Opencloset, sharing clothes';
+@@ home.html.haml
+- my $id   = 'home';
+- my $meta = $sidebar->{meta};
+- layout 'default', active_id => $id;
+- title $meta->{$id}{text};
 
 %form#clothe-search-form.form-inline
   .input-append
