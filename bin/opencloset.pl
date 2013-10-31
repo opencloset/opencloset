@@ -1,10 +1,16 @@
 #!/usr/bin/env perl
+
 use Mojolicious::Lite;
 
 use Data::Pageset;
 use DateTime;
-use Opencloset::Schema;
 use Try::Tiny;
+
+use Opencloset::Schema;
+
+plugin 'validator';
+plugin 'haml_renderer';
+plugin 'FillInFormLite';
 
 app->defaults( %{ plugin 'Config' => { default => {
     jses        => [],
@@ -13,9 +19,9 @@ app->defaults( %{ plugin 'Config' => { default => {
 }}});
 
 my $DB = Opencloset::Schema->connect({
-    dsn               => app->config->{database}{dsn},
-    user              => app->config->{database}{user},
-    password          => app->config->{database}{pass},
+    dsn      => app->config->{database}{dsn},
+    user     => app->config->{database}{user},
+    password => app->config->{database}{pass},
     %{ app->config->{database}{opts} },
 });
 
@@ -149,10 +155,6 @@ helper create_clothe => sub {
 
     return $DB->resultset('Clothe')->find_or_create(\%params);
 };
-
-plugin 'validator';
-plugin 'haml_renderer';
-plugin 'FillInFormLite';
 
 get '/' => sub {
     my $self = shift;
