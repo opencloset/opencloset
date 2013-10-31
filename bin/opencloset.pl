@@ -1505,8 +1505,9 @@ __DATA__
     <script src="/js/bundle.js"></script>
 
     <!-- page specific -->
-    % push @$jses, "$active_id.js" if $active_id;
-    % for my $js (@$jses) {
+    % my @include_jses = @$jses;
+    % push @include_jses, "$active_id.js" if $active_id;
+    % for my $js (@include_jses) {
       <script type="text/javascript" src="/js/<%= $js %>"></script>
     % }
 
