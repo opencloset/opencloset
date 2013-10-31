@@ -738,7 +738,7 @@ __DATA__
 
 @@ new.html.haml
 - layout 'default', jses => ['new.js'];
-- title '새로 오신 손님'
+- title '새로 오신 손님';
 
 .pull-right
   %form.form-search{:method => 'get', :action => ''}
