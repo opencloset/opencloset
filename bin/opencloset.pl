@@ -161,8 +161,9 @@ get '/' => sub {
     $self->render('index');
 };
 
-get '/new' => sub {
-    my $self   = shift;
+get '/new-borrower' => sub {
+    my $self = shift;
+
     my $q      = $self->param('q') || '';
     my $guests = $DB->resultset('Guest')->search({
         -or => [
@@ -173,7 +174,7 @@ get '/new' => sub {
         ],
     });
 
-    $self->render('new', candidates => $guests);
+    $self->stash( candidates => $guests );
 };
 
 post '/guests' => sub {
@@ -736,9 +737,15 @@ __DATA__
   </script>
 
 
-@@ new.html.haml
-- layout 'default', jses => ['new.js'];
-- title '새로 오신 손님';
+@@ newborrower.html.haml
+- my $id   = 'new-borrower';
+- my $meta = $sidebar->{meta};
+- layout 'default',
+-   active_id   => $id,
+-   breadcrumbs => [
+-     { text => $meta->{$id}{text} },
+-   ];
+- title $meta->{$id}{text};
 
 .pull-right
   %form.form-search{:method => 'get', :action => ''}
