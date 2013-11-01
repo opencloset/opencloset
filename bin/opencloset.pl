@@ -445,14 +445,13 @@ get '/search' => sub {
         mode             => 'fixed'
     });
 
-    $self->render(
-        'search',
+    $self->stash(
         q         => $q,
         gid       => $gid,
         guest     => $guest,
         clothes   => $clothes,
         pageset   => $pageset,
-        status_id => $status_id || '',
+        status_id => $status_id || q{},
     );
 };
 
