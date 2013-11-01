@@ -2281,7 +2281,7 @@ __DATA__
                             </label>
 
                             <button type="button" class="width-35 pull-right btn btn-sm btn-primary">
-                              <i class="icon-key"></i>
+                              <i class="icon-unlock"></i>
                               로그인
                             </button>
                           </div>
