@@ -265,7 +265,7 @@ post '/clothes' => sub {
 
     my @fields = qw/chest waist arm pants_len/;
     $validator->field([@fields])
-        ->each(sub { shift->required(1)->regexp(qr/^\d+$/) });
+        ->each(sub { shift->regexp(qr/^\d+$/) });
 
     unless ($self->validate($validator)) {
         my $errors_hashref = $validator->errors;
