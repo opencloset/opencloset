@@ -39,10 +39,11 @@ $db_opts->{AutoCommit} //= 1;
     sidebar      => {
         meta => {
             'home'         => { text => '첫 화면',       icon => 'home',     desc => '열린 옷장 재고 관리 시스템입니다.', link => '/' },
-            'new-borrower' => { text => '새로운 대여자', icon => 'edit',     desc => '손님이 처음 오셨나요?'  },
-            'rental'       => { text => '대여',          icon => 'share',    desc => '어떤 옷을 빌려가나요?', },
+            'new-borrower' => { text => '새로운 대여자', icon => 'edit',     desc => '손님이 처음 오셨나요?' },
+            'rental'       => { text => '대여',          icon => 'share',    desc => '어떤 옷을 빌려가나요?' },
             'new-cloth'    => { text => '새 옷',         icon => 'suitcase', link => '/search',     },
             'new-giver'    => { text => '새로운 기증자', icon => 'gift',     link => '/donors/new', },
+            'search'       => { text => '검색',          icon => 'search',   desc => '무엇을 찾으세요?'      },
         },
         items => [
             { id => 'home'         },
@@ -50,6 +51,7 @@ $db_opts->{AutoCommit} //= 1;
             { id => 'rental'       },
             { id => 'new-cloth'    },
             { id => 'new-giver'    },
+            { id => 'search'       },
         ],
     },
 };

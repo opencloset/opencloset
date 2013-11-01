@@ -447,6 +447,8 @@ get '/search' => sub {
 
     $self->render(
         'search',
+        q         => $q,
+        gid       => $gid,
         guest     => $guest,
         clothes   => $clothes,
         pageset   => $pageset,
@@ -1020,8 +1022,14 @@ __DATA__
 
 
 @@ search.html.haml
-- layout 'default';
-- title '검색';
+- my $id   = 'search';
+- my $meta = $sidebar->{meta};
+- layout 'default',
+-   active_id   => $id,
+-   breadcrumbs => [
+-     { text => $meta->{$id}{text} },
+-   ];
+- title $meta->{$id}{text};
 
 .pull-right
   %p
@@ -1035,14 +1043,14 @@ __DATA__
     1: 대여가능, 2: 대여중, 3: 세탁, 4: 수선, 5: 대여불가, 7: 분실
 
   %form.form-search{:method => 'get', :action => ''}
-    %input{:type => 'hidden', :name => 'gid', :value => "#{param('gid')}"}
-    %input.input-medium.search-query{:type => 'text', :id => 'search-query', :name => 'q', :placeholder => '가슴/허리/팔/상태', :value => "#{param('q')}"}
+    %input{:type => 'hidden', :name => 'gid', :value => "#{$gid}"}
+    %input.input-medium.search-query{:type => 'text', :id => 'search-query', :name => 'q', :placeholder => '가슴/허리/팔/상태', :value => "#{$q}"}
     %button.btn{:type => 'submit'} 검색
     %span.muted 가슴/허리/팔길이/상태
 
-- if (param 'q') {
+- if ($q) {
   %p
-    %strong= param 'q'
+    %strong= $q
     %span.muted 의 검색결과
 - }
 
