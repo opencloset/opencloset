@@ -419,12 +419,12 @@ get '/search' => sub {
     my $guest = $gid ? $DB->resultset('Guest')->find({ id => $gid }) : undef;
 
     my $c_jacket = $DB->resultset('Category')->find({ name => 'jacket' });
-    my $cond = { category_id => $c_jacket->id };
+    my $cond = { 'me.category_id' => $c_jacket->id };
     my ($chest, $waist, $arm, $status_id) = split /\//, $q;
-    $cond->{chest}     = { '>=' => $chest } if $chest;
-    $cond->{waist}     = { '>=' => $waist } if $waist;
-    $cond->{arm}       = { '>=' => $arm   } if $arm;
-    $cond->{status_id} = $status_id if $status_id;
+    $cond->{'me.chest'}     = { '>=' => $chest } if $chest;
+    $cond->{'bottom.waist'} = { '>=' => $waist } if $waist;
+    $cond->{'me.arm'}       = { '>=' => $arm   } if $arm;
+    $cond->{'me.status_id'} = $status_id if $status_id;
 
     ### row, current_page, count
     my $ENTRIES_PER_PAGE = 10;
@@ -433,7 +433,8 @@ get '/search' => sub {
         {
             page     => $self->param('p') || 1,
             rows     => $ENTRIES_PER_PAGE,
-            order_by => [qw/chest waist arm/],
+            order_by => [qw/chest bottom.waist arm/],
+            join     => 'bottom',
         }
     );
 
@@ -1066,7 +1067,7 @@ __DATA__
     %span.label.label-info.search-label
       %a{:href => "#{url_with->query([q => $clothe->chest . '///' . $status_id])}"}= $clothe->chest
     %span.label.label-info.search-label
-      %a{:href => "#{url_with->query([q => '/' . $clothe->waist . '//' . $status_id])}"}= $clothe->waist
+      %a{:href => "#{url_with->query([q => '/' . $clothe->bottom->waist . '//' . $status_id])}"}= $clothe->bottom->waist
     %span.label.label-info.search-label
       %a{:href => "#{url_with->query([q => '//' . $clothe->arm . '/' . $status_id])}"}= $clothe->arm
     - if ($clothe->status->name eq '대여가능') {
@@ -1129,14 +1130,16 @@ __DATA__
       %img.img-polaroid{:src => 'http://placehold.it/200x200', :alt => '#{$clothe->no}'}
 
     %div
-      %span.label.label-info.search-label
-        %a{:href => "#{url_for('/search')->query([q => $clothe->chest])}//"}= $clothe->chest
-      %span.label.label-info.search-label
-        %a{:href => "#{url_for('/search')->query([q => '/' . $clothe->waist . '/'])}"}= $clothe->waist
-      %span.label.label-info.search-label
-        %a{:href => "#{url_for('/search')->query([q => '//' . $clothe->arm])}"}= $clothe->arm
-      %span.label= $clothe->pants_len
-
+      - if ($clothe->category_id == $Opencloset::Constant::CATEOGORY_JACKET) {
+        %span.label.label-info.search-label
+          %a{:href => "#{url_for('/search')->query([q => $clothe->chest])}//"}= $clothe->chest
+        %span.label.label-info.search-label
+          %a{:href => "#{url_for('/search')->query([q => '//' . $clothe->arm])}"}= $clothe->arm
+      - } elsif ($clothe->category_id == $Opencloset::Constant::CATEOGORY_PANTS) {
+        %span.label.label-info.search-label
+          %a{:href => "#{url_for('/search')->query([q => '/' . $clothe->waist . '/'])}"}= $clothe->waist
+        %span.label= $clothe->pants_len
+      - }
     - if ($clothe->donor) {
       %h3= $clothe->donor->name
       %p.muted 님께서 기증하셨습니다
@@ -1453,6 +1456,8 @@ __DATA__
 %form.form-horizontal{:method => 'post', :action => '/donors'}
   %legend
     기증자 기본 정보
+    %small
+      %a{:href => '/clothes/new'} 기증자모름
   .control-group
     %label.control-label{:for => 'input-name'} 이름
     .controls
