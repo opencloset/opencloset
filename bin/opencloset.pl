@@ -269,7 +269,11 @@ post '/clothes' => sub {
 
     unless ($self->validate($validator)) {
         my $errors_hashref = $validator->errors;
-        return $self->error(400, 'invalid request')
+        my @errors;
+        while (my ($key, $value) = each %$errors_hashref) {
+            push @errors, "$key: $value";
+        }
+        return $self->error(400, join(', ', @errors));
     }
 
     my $cid      = $self->param('category_id');
