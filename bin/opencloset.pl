@@ -157,7 +157,8 @@ helper create_clothe => sub {
     return $DB->resultset('Clothe')->find_or_create(\%params);
 };
 
-get '/' => 'home';
+get '/'      => 'home';
+get '/login';
 
 get '/new-borrower' => sub {
     my $self = shift;
@@ -729,6 +730,11 @@ post '/donors' => sub {
 app->start;
 
 __DATA__
+
+@@ login.html.haml
+- layout 'login';
+- title $sidebar->{meta}{login}{text};
+
 
 @@ home.html.haml
 - my $id   = 'home';
@@ -2244,8 +2250,8 @@ __DATA__
                   <div class="widget-body">
                     <div class="widget-main">
                       <h4 class="header blue lighter bigger">
-                        <i class="icon-coffee green"></i>
-                        정보를 입력해주세요
+                        <i class="icon-lock green"></i>
+                        정보를 입력해주세요.
                       </h4>
 
                       <div class="space-6"></div>
@@ -2254,15 +2260,15 @@ __DATA__
                         <fieldset>
                           <label class="block clearfix">
                             <span class="block input-icon input-icon-right">
-                              <input type="text" class="form-control" placeholder="Username" />
+                              <input type="text" class="form-control" placeholder="사용자 이름" />
                               <i class="icon-user"></i>
                             </span>
                           </label>
 
                           <label class="block clearfix">
                             <span class="block input-icon input-icon-right">
-                              <input type="password" class="form-control" placeholder="Password" />
-                              <i class="icon-lock"></i>
+                              <input type="password" class="form-control" placeholder="비밀번호" />
+                              <i class="icon-key"></i>
                             </span>
                           </label>
 
@@ -2311,19 +2317,20 @@ __DATA__
                     <div class="widget-main">
                       <h4 class="header red lighter bigger">
                         <i class="icon-key"></i>
-                        Retrieve Password
+                        비밀번호를 초기화합니다.
                       </h4>
 
                       <div class="space-6"></div>
                       <p>
-                        Enter your email and to receive instructions
+                        비밀번호를 새로 설정하는 방법을 이메일로 전달드립니다.
+                        이메일 주소를 입력하세요.
                       </p>
 
                       <form>
                         <fieldset>
                           <label class="block clearfix">
                             <span class="block input-icon input-icon-right">
-                              <input type="email" class="form-control" placeholder="Email" />
+                              <input type="email" class="form-control" placeholder="이메일" />
                               <i class="icon-envelope"></i>
                             </span>
                           </label>
@@ -2331,7 +2338,7 @@ __DATA__
                           <div class="clearfix">
                             <button type="button" class="width-35 pull-right btn btn-sm btn-danger">
                               <i class="icon-lightbulb"></i>
-                              Send Me!
+                              보내주세요!
                             </button>
                           </div>
                         </fieldset>
@@ -2340,7 +2347,7 @@ __DATA__
 
                     <div class="toolbar center">
                       <a href="#" onclick="show_box('login-box'); return false;" class="back-to-login-link">
-                        Back to login
+                        로그인 페이지로 돌아가기
                         <i class="icon-arrow-right"></i>
                       </a>
                     </div>
@@ -2386,38 +2393,38 @@ __DATA__
                     <div class="widget-main">
                       <h4 class="header green lighter bigger">
                         <i class="icon-group blue"></i>
-                        New User Registration
+                        새로운 사용자 등록하기
                       </h4>
 
                       <div class="space-6"></div>
-                      <p> Enter your details to begin: </p>
+                      <p> 등록을 위해 다음 내용을 입력해주세요. </p>
 
                       <form>
                         <fieldset>
                           <label class="block clearfix">
                             <span class="block input-icon input-icon-right">
-                              <input type="email" class="form-control" placeholder="Email" />
+                              <input type="email" class="form-control" placeholder="이메일" />
                               <i class="icon-envelope"></i>
                             </span>
                           </label>
 
                           <label class="block clearfix">
                             <span class="block input-icon input-icon-right">
-                              <input type="text" class="form-control" placeholder="Username" />
+                              <input type="text" class="form-control" placeholder="사용자 이름" />
                               <i class="icon-user"></i>
                             </span>
                           </label>
 
                           <label class="block clearfix">
                             <span class="block input-icon input-icon-right">
-                              <input type="password" class="form-control" placeholder="Password" />
+                              <input type="password" class="form-control" placeholder="비밀번호" />
                               <i class="icon-lock"></i>
                             </span>
                           </label>
 
                           <label class="block clearfix">
                             <span class="block input-icon input-icon-right">
-                              <input type="password" class="form-control" placeholder="Repeat password" />
+                              <input type="password" class="form-control" placeholder="비밀번호 확인" />
                               <i class="icon-retweet"></i>
                             </span>
                           </label>
@@ -2425,8 +2432,7 @@ __DATA__
                           <label class="block">
                             <input type="checkbox" class="<%= $theme %>" />
                             <span class="lbl">
-                              I accept the
-                              <a href="#">User Agreement</a>
+                              <a href="#">사용자 약관</a>에 동의합니다.
                             </span>
                           </label>
 
@@ -2435,11 +2441,11 @@ __DATA__
                           <div class="clearfix">
                             <button type="reset" class="width-30 pull-left btn btn-sm">
                               <i class="icon-refresh"></i>
-                              Reset
+                              새로 쓰기
                             </button>
 
                             <button type="button" class="width-65 pull-right btn btn-sm btn-success">
-                              Register
+                              등록하기
                               <i class="icon-arrow-right icon-on-right"></i>
                             </button>
                           </div>
@@ -2450,7 +2456,7 @@ __DATA__
                     <div class="toolbar center">
                       <a href="#" onclick="show_box('login-box'); return false;" class="back-to-login-link">
                         <i class="icon-arrow-left"></i>
-                        Back to login
+                        로그인 페이지로 돌아가기
                       </a>
                     </div>
                   </div><!-- /widget-body -->
