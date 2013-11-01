@@ -1108,7 +1108,10 @@ __DATA__
     - } elsif ($clothe->status->name eq '대여중') {
       %span.label.label-important= $clothe->status->name
       - if (my $order = $clothe->orders({ status_id => 2 })->next) {
-        %small.muted{:title => '반납예정일'}= $order->target_date->ymd if $order->target_date
+        - if ($order->target_date) {
+          %small.highlight{:title => '반납예정일'}
+            %a{:href => "/orders/#{$order->id}"}= $order->target_date->ymd
+        - }
       - }
     - } else {
       %span.label= $clothe->status->name
