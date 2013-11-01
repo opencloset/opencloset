@@ -11,7 +11,6 @@
     }).on('changeDate', function(e) {
       var additional_days, additional_fee;
       additional_days = overdue_calc(new Date(), $('#input-target-date').datepicker('getDate'));
-      console.log(additional_days);
       additional_fee = additional_days * origin_fee * 0.2;
       return $('#input-price').val(parseInt(origin_fee) + parseInt(additional_fee));
     });
