@@ -38,19 +38,21 @@ sub run {
 
     my $ua = LWP::UserAgent->new;
 
-    $ua->add_handler(
-        'request_prepare' => sub {
-            my ($req, $ua, $h) = @_;
-            say $req->as_string if $ENV{DEBUG};
-        }
-    );
+    if ( $ENV{DEBUG} ) {
+        $ua->add_handler(
+            'request_prepare' => sub {
+                my ($req, $ua, $h) = @_;
+                say $req->as_string;
+            }
+        );
 
-    $ua->add_handler(
-        'response_done' => sub {
-            my ($res, $ua, $h) = @_;
-            say $res->as_string if $ENV{DEBUG};
-        }
-    );
+        $ua->add_handler(
+            'response_done' => sub {
+                my ($res, $ua, $h) = @_;
+                say $res->as_string;
+            }
+        );
+    }
 
     my $loop = 1;
     my ($success, $fail) = (0, 0);
