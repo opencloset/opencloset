@@ -365,7 +365,7 @@ get '/clothes/:no' => sub {
     return $self->error(404, "Not found `$no`") unless $clothe;
 
     my $co_rs = $clothe->clothe_orders->search(
-        { 'order.status_id' => 2 }, { join => 'order' }    # 2: 대여중
+        { 'order.status_id' => $Opencloset::Constant::STATUS_RENT }, { join => 'order' }
     )->next;
 
     unless ($co_rs) {
