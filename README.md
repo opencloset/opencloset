@@ -57,18 +57,24 @@ MySQL 데이터베이스에 접속하며 `opencloset` 데이터베이스에
     $ sudo apt-get install npm
 
 `npm`을 설치한 후에는 커피스크립트 모듈을 설치해야 합니다.
-프로젝트 루트 디렉터리에서 다음 명령을 실행합니다.
+전역으로 설치한다면 다음 명령을 실행합니다.
 
-    $ npm install coffee-script
-    $ npm install -g coffee-script    # 또는 -g(global) 옵션을 줘서 전역으로 설치
+    $ sudo npm install -g coffee-script    # 또는 -g(global) 옵션을 줘서 전역으로 설치
 
-아무런 설정없이 앞의 명령을 실행하면 `node_modules` 디렉터리가 생기고
-그 하부에 커피스크립트 관련 파일이 설치됩니다.
 별도의 터미널에서 다음 명령을 실행시켜 수정하는 커피스크립트가
 자바스크립트로 바로바로 변환되도록 한 후 개발을 진행합니다.
 
-    $ node_modules/.bin/coffee --compile --watch public/js/
     $ coffee --compile --watch public/js/
+
+루트 권한이 없거나 사용자 디렉터리에서 커피스크립트를 관리하고 싶다면
+프로젝트 루트 디렉터리에서 다음 명령을 실행합니다.
+
+    $ npm install coffee-script
+
+아무런 설정없이 앞의 명령을 실행하면 `node_modules` 디렉터리가 생기고
+그 하부에 커피스크립트 관련 파일이 설치되므로 실행 방법은 다음과 같습니다.
+
+    $ node_modules/.bin/coffee --compile --watch public/js/
 
 
 ### 이슈, 제안이나 의견
