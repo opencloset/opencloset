@@ -1,8 +1,8 @@
 START TRANSACTION;
 INSERT INTO `donor` (`id`, `name`,`email`,`phone`,`comment`) VALUES (1,'한만일',NULL,NULL,'안녕~'),(2,'김소령',NULL,NULL,'(*-*)b');
 INSERT INTO `clothe` (`id`,`no`,`chest`,`waist`,`arm`,`pants_len`,`category_id`,`top_id`,`bottom_id`,`donor_id`,`status_id`) VALUES 
-(1,'Jck00001', 94, 78, 51, NULL, 1, NULL, NULL, 1, 1),
-(2,'Pts00001', NULL, NULL, NULL, 102, 2, NULL, NULL, 1, 1),
+(1,'Jck00001', 94, NULL, 51, NULL, 1, NULL, NULL, 1, 1),
+(2,'Pts00001', NULL, 79, NULL, 102, 2, NULL, NULL, 1, 1),
 (3,'Shr00001', NULL, NULL, NULL, NULL, 3, NULL, NULL, 1, 1),
 (4,'Sho00001', NULL, NULL, NULL, NULL, 4, NULL, NULL, 1, 1),
 (5,'Tie00001', NULL, NULL, NULL, NULL, 6, NULL, NULL, 1, 1);
@@ -11,7 +11,7 @@ UPDATE `clothe` SET `top_id`=1 WHERE `id`=2;
 INSERT INTO `donor_clothe` (`donor_id`, `clothe_id`, `comment`, `donation_date`) VALUES (1, 1, '필요없어서 했습니다', NOW()), (1, 2, '', NOW());
 
 -- 대여중인거
-INSERT INTO `clothe` (`id`,`no`,`chest`,`waist`,`arm`,`pants_len`,`category_id`,`top_id`,`bottom_id`,`donor_id`,`status_id`) VALUES (6,'Jck00002', 99, 82, 55, NULL, 1, NULL, NULL, 1, 2), (7,'Pts00002', NULL, NULL, NULL, 112, 2, NULL, NULL, 1, 2);
+INSERT INTO `clothe` (`id`,`no`,`chest`,`waist`,`arm`,`pants_len`,`category_id`,`top_id`,`bottom_id`,`donor_id`,`status_id`) VALUES (6,'Jck00002', 99, NULL, 55, NULL, 1, NULL, NULL, 1, 2), (7,'Pts00002', NULL, 82, NULL, 112, 2, NULL, NULL, 1, 2);
 UPDATE `clothe` SET `bottom_id`=7 WHERE `id`=6;
 UPDATE `clothe` SET `top_id`=6 WHERE `id`=7;
 INSERT INTO `donor_clothe` (`donor_id`, `clothe_id`, `comment`, `donation_date`) VALUES (1, 3, '남아서..', NOW()), (1, 4, '', NOW());
