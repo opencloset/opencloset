@@ -1678,7 +1678,7 @@ __DATA__
     <div class="navbar navbar-default" id="navbar">
       <div class="navbar-container" id="navbar-container">
         <div class="navbar-header pull-left">
-          <a href="#" class="navbar-brand">
+          <a href="/" class="navbar-brand">
             <small> <i class="<%= $site->{icon} ? "icon-$site->{icon}" : q{} %>"></i> <%= $site->{name} %> </small>
           </a><!-- /.brand -->
         </div><!-- /.navbar-header -->
@@ -1961,7 +1961,7 @@ __DATA__
           %   for my $item (@$items) {
           %     my $meta  = $sidebar->{meta}{$item->{id}};
           %     my $icon  = $meta->{icon} ? "icon-$meta->{icon}" : $level ? "icon-double-angle-right" : q{};
-          %     my $link  = $meta->{link} // $item->{id};
+          %     my $link  = $meta->{link} // "/$item->{id}";
           %
           %     if ( $item->{id} eq $active_id ) {
           %       if ( $item->{items} ) {
@@ -2031,7 +2031,7 @@ __DATA__
           <div class="breadcrumbs" id="breadcrumbs">
             <ul class="breadcrumb">
             % if (@$breadcrumbs) {
-              <li> <i class="icon-home home-icon"></i> <a href="/">첫 화면</a> </li>
+              <li> <i class="icon-home home-icon"></i> <a href="/"><%= $sidebar->{meta}{home}{text} %></a> </li>
             %   for my $i ( 0 .. $#$breadcrumbs ) {
             %     my $b = $breadcrumbs->[$i];
             %     if ( $i < $#$breadcrumbs ) {
@@ -2048,7 +2048,7 @@ __DATA__
             %   }
             % }
             % else {
-              <li class="active"> <i class="icon-home home-icon"></i>첫 화면</li>
+              <li class="active"> <i class="icon-home home-icon"></i> <a href="/"><%= $sidebar->{meta}{home}{text} %></a> </li>
             % }
             </ul><!-- .breadcrumb -->
 
