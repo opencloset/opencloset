@@ -38,7 +38,7 @@ sub run {
 
     my $ua = LWP::UserAgent->new;
 
-    if ( $ENV{DEBUG} ) {
+    if ( $ENV{OPENCLOSET_DEBUG} ) {
         $ua->add_handler(
             'request_prepare' => sub {
                 my ($req, $ua, $h) = @_;
