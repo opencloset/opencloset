@@ -1,14 +1,17 @@
 #!/usr/bin/env perl
+
+use v5.14;
 use utf8;
 use strict;
 use warnings;
-use LWP::UserAgent;
-use HTTP::Request;
-use Text::CSV;
+
 use Getopt::Long;
-use Pod::Usage;
 use HTTP::Request::Common;
+use HTTP::Request;
 use JSON;
+use LWP::UserAgent;
+use Pod::Usage;
+use Text::CSV;
 
 my %options;
 GetOptions(\%options, "--help");
@@ -38,14 +41,14 @@ sub run {
     $ua->add_handler(
         'request_prepare' => sub {
             my ($req, $ua, $h) = @_;
-            print $req->as_string, "\n" if $ENV{DEBUG};
+            say $req->as_string if $ENV{DEBUG};
         }
     );
 
     $ua->add_handler(
         'response_done' => sub {
             my ($res, $ua, $h) = @_;
-            print $res->as_string, "\n" if $ENV{DEBUG};
+            say $res->as_string if $ENV{DEBUG};
         }
     );
 
@@ -56,12 +59,15 @@ sub run {
         my $category_id;
         if ($row->{'가슴둘레'} && $row->{'허리둘레'}) {
             $category_id = -1;
-        } elsif ($row->{'가슴둘레'}) {
+        }
+        elsif ($row->{'가슴둘레'}) {
             $category_id = 1;
-        } elsif ($row->{'허리둘레'}) {
+        }
+        elsif ($row->{'허리둘레'}) {
             $category_id = 2;
-        } else {
-            print STDERR "[$loop] NOT FOUND category\n";
+        }
+        else {
+            say STDERR "[$loop] NOT FOUND category";
             next;
         }
 
@@ -79,14 +85,15 @@ sub run {
         my $data = decode_json($res->content);
         if ($res->is_success) {
             $success++;
-        } else {
+        }
+        else {
             $fail++;
-            print STDERR $data->{error}, "\n";
+            say STDERR $data->{error};
         }
     }
 
-    print "SUCCESS: $success\n";
-    print "FAIL   : $fail\n";
+    say "SUCCESS: $success";
+    say "FAIL   : $fail";
 }
 
 __END__
