@@ -1083,8 +1083,10 @@ __DATA__
       %img{:src => 'http://placehold.it/75x75', :alt => '#{$clothe->no}'}
     %span.label.label-info.search-label
       %a{:href => "#{url_with->query([q => $clothe->chest . '///' . $status_id])}"}= $clothe->chest
-    %span.label.label-info.search-label
-      %a{:href => "#{url_with->query([q => '/' . $clothe->bottom->waist . '//' . $status_id])}"}= $clothe->bottom->waist
+    - if ($clothe->bottom) {
+      %span.label.label-info.search-label
+        %a{:href => "#{url_with->query([q => '/' . $clothe->bottom->waist . '//' . $status_id])}"}= $clothe->bottom->waist
+    - }
     %span.label.label-info.search-label
       %a{:href => "#{url_with->query([q => '//' . $clothe->arm . '/' . $status_id])}"}= $clothe->arm
     - if ($clothe->status->name eq '대여가능') {
