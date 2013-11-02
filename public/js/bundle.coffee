@@ -26,3 +26,14 @@ $.fn.ForceNumericOnly = ->
       (key >= 35 && key <= 40) ||
       (key >= 48 && key <= 57) ||
       (key >= 96 && key <= 105)
+
+$.extend
+  putUrlVars: (hashes) ->
+    vars = ''
+    unless hashes.legnth is 0
+      params = []
+      regex = /^\d+$/
+      for key of hashes
+        params.push key + "=" + hashes[key]  unless regex.test(key)
+      vars += params.join("&")
+    vars

@@ -632,6 +632,9 @@ any [qw/post put patch/] => '/orders/:id' => sub {
         # TODO: consider `분실`
     );
 
+    # missing_clothes 를 고려해야한다
+    # my $missing_clothes = $self->param('missing_clothes') || '';
+
     my $guard = $DB->txn_scope_guard;
     # BEGIN TRANSACTION ~
     my $status_id = $status_to_be{$order->status_id || 0};
@@ -1427,7 +1430,7 @@ __DATA__
       - }
 %div= include 'partial/order_info'
 
-%form.form-horizontal{:method => 'post', :action => "#{url_for('')}"}
+%form#form-return.form-horizontal{:method => 'post', :action => "#{url_for('')}"}
   %fieldset
     %legend 연체료 및 반납방법
     .control-group
