@@ -629,7 +629,7 @@ any [qw/post put patch/] => '/orders/:id' => sub {
     ##       maybe should convert to DateTime object
     map {
         $order->$_($self->param($_)) if defined $self->param($_);
-    } qw/price discount target_date comment return_method late_fee l_discount payment_method/;
+    } qw/price discount target_date comment return_method late_fee l_discount payment_method staff_name/;
     my %status_to_be = (
         0 => $Opencloset::Constant::STATUS_RENT,
         $Opencloset::Constant::STATUS_RENT => $Opencloset::Constant::STATUS_RETURN,
@@ -1388,6 +1388,10 @@ __DATA__
     .controls
       %input#input-target-date{:type => 'text', :name => 'target_date'}
   .control-group
+    %label.control-label{:for => 'input-staff'} staff
+    .controls
+      %input#input-staff{:type => 'text', :name => 'staff_name'}
+  .control-group
     %label.control-label{:for => 'input-comment'} Comment
     .controls
       %textarea{:id => 'input-comment', :name => 'comment'}
@@ -1423,6 +1427,7 @@ __DATA__
 %p.muted= commify($order->discount) . '원 할인'
 
 %p= $order->payment_method
+%p= $order->staff_name
 
 - if ($overdue) {
   %p.muted
