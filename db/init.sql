@@ -76,7 +76,7 @@ CREATE TABLE `status` (
   UNIQUE KEY (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-INSERT INTO `status` (`id`, `name`) VALUES (1, '대여가능'), (2, '대여중'), (3, '세탁'), (4, '수선'), (5, '대여불가'), (6, '연체중'), (7, '분실'), (8, '반납');
+INSERT INTO `status` (`id`, `name`) VALUES (1, '대여가능'), (2, '대여중'), (3, '세탁'), (4, '수선'), (5, '대여불가'), (6, '연체중'), (7, '분실'), (8,'반납'),(9,'부분반납');
 
 --
 -- clothe
@@ -150,6 +150,7 @@ CREATE TABLE `order` (
   `late_fee`         INT DEFAULT 0,
   `l_discount`       INT DEFAULT 0, -- late_fee discount
   `l_payment_method` VARCHAR(32) DEFAULT NULL,
+  `staff_name`       VARCHAR(32) DEFAULT NULL,
   `comment`          TEXT DEFAULT NULL,
 
   PRIMARY KEY (`id`),

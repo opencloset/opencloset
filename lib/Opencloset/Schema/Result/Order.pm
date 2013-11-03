@@ -111,6 +111,12 @@ __PACKAGE__->table("order");
   is_nullable: 1
   size: 32
 
+=head2 staff_name
+
+  data_type: 'varchar'
+  is_nullable: 1
+  size: 32
+
 =head2 comment
 
   data_type: 'text'
@@ -174,6 +180,8 @@ __PACKAGE__->add_columns(
   "l_discount",
   { data_type => "integer", default_value => 0, is_nullable => 1 },
   "l_payment_method",
+  { data_type => "varchar", is_nullable => 1, size => 32 },
+  "staff_name",
   { data_type => "varchar", is_nullable => 1, size => 32 },
   "comment",
   { data_type => "text", is_nullable => 1 },
@@ -254,8 +262,8 @@ Composing rels: L</clothe_orders> -> clothe
 __PACKAGE__->many_to_many("clothes", "clothe_orders", "clothe");
 
 
-# Created by DBIx::Class::Schema::Loader v0.07036 @ 2013-10-31 14:13:02
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:TDMzYtf571m0BgNFF/HbMA
+# Created by DBIx::Class::Schema::Loader v0.07036 @ 2013-11-03 16:49:01
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:aGMxWeLMXbMB02ecJUqoaw
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

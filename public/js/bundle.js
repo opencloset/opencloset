@@ -31,4 +31,22 @@
     });
   };
 
+  $.extend({
+    putUrlVars: function(hashes) {
+      var key, params, regex, vars;
+      vars = '';
+      if (hashes.legnth !== 0) {
+        params = [];
+        regex = /^\d+$/;
+        for (key in hashes) {
+          if (!regex.test(key)) {
+            params.push(key + "=" + hashes[key]);
+          }
+        }
+        vars += params.join("&");
+      }
+      return vars;
+    }
+  });
+
 }).call(this);
