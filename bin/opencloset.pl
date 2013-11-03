@@ -543,6 +543,17 @@ post '/orders' => sub {
     );
 };
 
+get '/orders' => sub {
+    my $self = shift;
+
+    my $q      = $self->param('q') || '';
+    my $cond;
+    $cond->{status_id} = $q if $q;
+    my $orders = $DB->resultset('Order')->search($cond);
+
+    $self->stash( orders => $orders );
+} => 'orders';
+
 get '/orders/:id' => sub {
     my $self = shift;
 
@@ -1320,6 +1331,33 @@ __DATA__
       <% } %>
     </li>
   </script>
+
+
+@@ orders.html.haml
+- layout 'default';
+- title '주문서 목록';
+%ul
+  - while(my $order = $orders->next) {
+      - if ($order->status) {
+        %li
+          %a{:href => "#{url_for('/orders/' . $order->id)}"}
+            - if ($order->status->name eq '대여중') {
+              - if (overdue_calc($order->target_date, DateTime->now())) {
+                %span.label.label-important 연체중
+              - } else {
+                %span.label.label-important= $order->status->name
+              - }
+              %span.highlight{:title => '대여일'}= $order->rental_date->ymd
+              ~
+              %span{:title => '반납예정일'}= $order->target_date->ymd
+            - } else {
+              %span.label= $order->status->name
+              %span.highlight{:title => '대여일'}= $order->rental_date->ymd
+              ~
+              %span.highlight{:title => '반납일'}= $order->return_date->ymd
+            - }
+      - }
+  - }
 
 
 @@ orders/id/nil_status.html.haml
