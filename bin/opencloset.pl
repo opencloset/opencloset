@@ -369,9 +369,11 @@ get '/clothes/:no' => sub {
     my $clothe = $DB->resultset('Clothe')->find({ no => $no });
     return $self->error(404, "Not found `$no`") unless $clothe;
 
-    my $co_rs = $clothe->clothe_orders->search(
-        { 'order.status_id' => $Opencloset::Constant::STATUS_RENT }, { join => 'order' }
-    )->next;
+    my $co_rs = $clothe->clothe_orders->search({
+        'order.status_id' => { -in => [$Opencloset::Constant::STATUS_RENT, $clothe->status_id] },
+    }, {
+        join => 'order'
+    })->next;
 
     unless ($co_rs) {
         $self->respond_to(
@@ -590,6 +592,8 @@ get '/orders/:id' => sub {
             $self->stash(template => 'orders/id/status_rent');
         } elsif ($status_id == $Opencloset::Constant::STATUS_RETURN) {
             $self->stash(template => 'orders/id/status_return');
+        } elsif ($status_id == $Opencloset::Constant::STATUS_PARTIAL_RETURN) {
+            $self->stash(template => 'orders/id/status_partial_return');
         }
     } else {
         $self->stash(template => 'orders/id/nil_status');
@@ -629,19 +633,29 @@ any [qw/post put patch/] => '/orders/:id' => sub {
     my %status_to_be = (
         0 => $Opencloset::Constant::STATUS_RENT,
         $Opencloset::Constant::STATUS_RENT => $Opencloset::Constant::STATUS_RETURN,
-        # TODO: consider `분실`
+        $Opencloset::Constant::STATUS_PARTIAL_RETURN => $Opencloset::Constant::STATUS_RETURN,
     );
-
-    # missing_clothes 를 고려해야한다
-    # my $missing_clothes = $self->param('missing_clothes') || '';
 
     my $guard = $DB->txn_scope_guard;
     # BEGIN TRANSACTION ~
     my $status_id = $status_to_be{$order->status_id || 0};
+    my @missing_clothes;
+    if ($status_id == $Opencloset::Constant::STATUS_RETURN) {
+        my $missing_clothes = $self->param('missing_clothes') || '';
+        if ($missing_clothes) {
+            $status_id = $Opencloset::Constant::STATUS_PARTIAL_RETURN;
+            @missing_clothes = $DB->resultset('Clothe')->search({
+                'me.no' => { -in => [split(/,/, $missing_clothes)] }
+            });
+        }
+    }
+
     $order->status_id($status_id);
     my $dt_parser = $DB->storage->datetime_parser;
-    $order->return_date($dt_parser->format_datetime(DateTime->now()))
-        if $status_id == $Opencloset::Constant::STATUS_RETURN;
+    if ($status_id == $Opencloset::Constant::STATUS_RETURN ||
+            $status_id == $Opencloset::Constant::STATUS_PARTIAL_RETURN) {
+        $order->return_date($dt_parser->format_datetime(DateTime->now()));
+    }
     $order->rental_date($dt_parser->format_datetime(DateTime->now))
         if $status_id == $Opencloset::Constant::STATUS_RENT;
     $order->update;
@@ -650,12 +664,24 @@ any [qw/post put patch/] => '/orders/:id' => sub {
         if ($order->status_id == $Opencloset::Constant::STATUS_RENT) {
             $clothe->status_id($Opencloset::Constant::STATUS_RENT);
         } else {
-            if ($clothe->category_id == $Opencloset::Constant::CATEOGORY_SHOES) {
-                $clothe->status_id($Opencloset::Constant::STATUS_AVAILABLE);    # Shoes
+            next if grep { $clothe->id == $_->id } @missing_clothes;
+            if ($clothe->category_id == $Opencloset::Constant::CATEOGORY_SHOES ||
+                  $clothe->category_id == $Opencloset::Constant::CATEOGORY_TIE ||
+                  $clothe->category_id == $Opencloset::Constant::CATEOGORY_HAT) {
+                $clothe->status_id($Opencloset::Constant::STATUS_AVAILABLE);    # Shoes, Tie, Hat
             } else {
-                $clothe->status_id($Opencloset::Constant::STATUS_WASHING);    # otherwise
+                # otherwise
+                if ($clothe->status_id != $Opencloset::Constant::STATUS_AVAILABLE) {
+                    $clothe->status_id($Opencloset::Constant::STATUS_WASHING);
+                }
             }
         }
+        $clothe->update;
+    }
+
+    for my $clothe (@missing_clothes) {
+        $self->app->log->debug('##########' . $clothe->no);
+        $clothe->status_id($Opencloset::Constant::STATUS_PARTIAL_RETURN);
         $clothe->update;
     }
     $guard->commit;
@@ -1365,7 +1391,7 @@ __DATA__
       %input.btn.btn-success{:type => 'submit', :value => '대여완료'}
 
 @@ partial/status_label.html.haml
-- if ($overdue) {
+- if ($overdue && $order->status_id == $Opencloset::Constant::STATUS_RENT) {
   %span.label{:class => 'status-#{$order->status_id}'} 연체중
 - } else {
   %span.label{:class => 'status-#{$order->status_id}'}= $order->status->name
@@ -1398,15 +1424,14 @@ __DATA__
 
 
 @@ partial/satisfaction.html.haml
-- if ($s) {
-  %h5 만족도
-  %p
-    %span.badge{:class => 'satisfaction-#{$s->chest}'} 가슴
-    %span.badge{:class => 'satisfaction-#{$s->waist}'} 허리
-    %span.badge{:class => 'satisfaction-#{$s->arm}'} 팔길이
-    %span.badge{:class => 'satisfaction-#{$s->top_fit}'} 상의fit
-    %span.badge{:class => 'satisfaction-#{$s->bottom_fit}'} 하의fit
-- }
+%h5 만족도
+- my ($c, $w, $a, $t, $b) = ($s->chest || 0, $s->waist || 0, $s->arm || 0, $s->top_fit || 0, $s->bottom_fit || 0);
+%p
+  %span.badge{:class => "satisfaction-#{$c}"} 가슴
+  %span.badge{:class => "satisfaction-#{$w}"} 허리
+  %span.badge{:class => "satisfaction-#{$a}"} 팔길이
+  %span.badge{:class => "satisfaction-#{$t}"} 상의fit
+  %span.badge{:class => "satisfaction-#{$b}"} 하의fit
 
 
 @@ orders/id/status_rent.html.haml
@@ -1465,15 +1490,56 @@ __DATA__
 
 %p= include 'partial/satisfaction', s => $satisfaction
 
+
 @@ orders/id/status_return.html.haml
 - layout 'default', jses => ['orders-id.js'];
 - title '주문확인 - 반납';
 
 %p= include 'partial/status_label'
 %div.pull-right= include 'guests/breadcrumb', guest => $order->guest, status_id => ''
+
+- for my $clothe (@$clothes) {
+  %p
+    %a{:href => '/clothes/#{$clothe->no}'}= $clothe->category->name
+    %small.highlight= commify($clothe->category->price)
+- }
+
 %div= include 'partial/order_info'
 %p= commify($order->late_fee)
 %p= $order->return_method
+%p= include 'partial/satisfaction', s => $satisfaction
+
+
+@@ orders/id/status_partial_return.html.haml
+- layout 'default', jses => ['orders-id.js'];
+- title '주문확인 - 부분반납';
+
+%p= include 'partial/status_label'
+%div.pull-right= include 'guests/breadcrumb', guest => $order->guest, status_id => ''
+#clothes-category
+  %form#form-clothe-no
+    %fieldset
+      .input-append
+        %input#input-clothe-no.input-large{:type => 'text', :placeholder => '품번'}
+        %button#btn-clothe-no.btn{:type => 'button'} 입력
+      - for my $clothe (@$clothes) {
+        %label.checkbox
+          - if ($clothe->status_id != $Opencloset::Constant::STATUS_PARTIAL_RETURN) {
+            %input.input-clothe{:type => 'checkbox', :checked => 'checked', :data-clothe-no => '#{$clothe->no}'}
+          - } else {
+            %input.input-clothe{:type => 'checkbox', :data-clothe-no => '#{$clothe->no}'}
+          - }
+          %a{:href => '/clothes/#{$clothe->no}'}= $clothe->category->name
+          %small.highlight= commify($clothe->category->price)
+      - }
+%div= include 'partial/order_info'
+%p= commify($order->late_fee)
+%p= $order->return_method
+%form#form-return.form-horizontal{:method => 'post', :action => "#{url_for('')}"}
+  %fieldset
+    .control-group
+      .controls
+        %button.btn.btn-success{:type => 'submit'} 반납
 %p= include 'partial/satisfaction', s => $satisfaction
 
 

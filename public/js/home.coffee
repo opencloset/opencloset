@@ -16,7 +16,7 @@ $ ->
       type: 'GET'
       dataType: 'json'
       success: (data, textStatus, jqXHR) ->
-        unless /^(대여중|연체중)/.test(data.status)
+        unless /^(대여중|연체중|부분반납)/.test(data.status)
           return if $("#clothes-list li[data-clothe-id='#{data.id}']").length
           compiled = _.template($('#tpl-row-checkbox').html())
           $html = $(compiled(data))

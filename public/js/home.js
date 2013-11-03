@@ -24,7 +24,7 @@
         dataType: 'json',
         success: function(data, textStatus, jqXHR) {
           var $html, compiled, html;
-          if (!/^(대여중|연체중)/.test(data.status)) {
+          if (!/^(대여중|연체중|부분반납)/.test(data.status)) {
             if ($("#clothes-list li[data-clothe-id='" + data.id + "']").length) {
               return;
             }
