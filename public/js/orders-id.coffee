@@ -1,5 +1,27 @@
 $ ->
-  origin_fee = $('#input-price').val() or 0
+  origin_fee = parseInt($('#input-price').val() or 0)
+  additional_fee = 0
+  discount_fee = parseInt($('input[name=discount]').val() or 0)
+  total_fee = origin_fee + additional_fee - discount_fee
+
+  commify = (fee) ->
+    fee += ''
+    regex = /(^[+-]?\d+)(\d{3})/
+    while (regex.test(fee))
+      fee = fee.replace(regex, '$1' + ',' + '$2')
+    return fee
+
+  refresh_total_fee = ->
+    discount_fee = parseInt($('input[name=discount]').val() or 0)
+    total_fee = origin_fee + additional_fee - discount_fee
+    $('#total_fee').text(commify(total_fee))
+    $('#origin_fee').text(commify(origin_fee))
+    $('#additional_fee').text(commify(additional_fee))
+    $('#discount_fee').text(commify(discount_fee))
+
+  do refresh_total_fee
+  $('input[name=discount],input[name=price]').ForceNumericOnly()
+
   $('#input-target-date').datepicker
     format: 'yyyy-mm-dd'
     autoclose: true
@@ -7,8 +29,12 @@ $ ->
     language: 'kr'
   .on 'changeDate', (e) ->
     additional_days = overdue_calc(new Date(), $('#input-target-date').datepicker('getDate'))
-    additional_fee = additional_days * origin_fee * 0.2
-    $('#input-price').val(parseInt(origin_fee) + parseInt(additional_fee))
+    additional_fee = parseInt(additional_days * origin_fee * 0.2)
+    $('#input-price').val(origin_fee + additional_fee)
+    do refresh_total_fee
+
+  $('input[name=discount]').keyup (e) ->
+    do refresh_total_fee
 
   overdue_calc = (target_dt, return_dt) ->
     DAY_AS_SECONDS = 60 * 60 * 24

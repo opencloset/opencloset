@@ -1327,6 +1327,19 @@ __DATA__
 - title '주문확인';
 
 %div.pull-right= include 'guests/breadcrumb', guest => $order->guest, status_id => ''
+
+%div
+  %p.muted
+    최종금액 = 정상가 + 추가금액 - 에누리금액
+  %p#total_price
+    %strong#total_fee{:title => '최종금액'}
+    %span =
+    %span#origin_fee{:title => '정상가'}
+    %span +
+    %span#additional_fee{:title => '추가금액'}
+    %span -
+    %span#discount_fee{:title => '에누리금액'}
+
 %form.form-horizontal{:method => 'post', :action => ''}
   %legend
     - my $loop = 0;
