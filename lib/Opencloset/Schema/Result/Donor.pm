@@ -59,7 +59,7 @@ regex: [0-9]{10,11}
   data_type: 'integer'
   is_nullable: 1
 
-0: male, 1: female
+1: male, 2: female
 
 =head2 address
 
@@ -190,8 +190,8 @@ __PACKAGE__->has_many(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07036 @ 2013-11-04 13:16:09
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:yFrfxTrSaASjfAUr5c9Jmg
+# Created by DBIx::Class::Schema::Loader v0.07036 @ 2013-11-04 15:07:15
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:h2djDOsQuTAxkYsiO1BTfg
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

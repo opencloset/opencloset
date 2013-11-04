@@ -59,7 +59,7 @@ regex: [0-9]{10,11}
   data_type: 'integer'
   is_nullable: 1
 
-0: male, 1: female
+1: male, 2: female
 
 =head2 address
 
@@ -93,7 +93,7 @@ regex: [0-9]{10,11}
   data_type: 'integer'
   is_nullable: 1
 
-=head2 pants_len
+=head2 length
 
   data_type: 'integer'
   is_nullable: 1
@@ -155,7 +155,7 @@ __PACKAGE__->add_columns(
   { data_type => "integer", is_nullable => 0 },
   "arm",
   { data_type => "integer", is_nullable => 1 },
-  "pants_len",
+  "length",
   { data_type => "integer", is_nullable => 1 },
   "height",
   { data_type => "integer", is_nullable => 1 },
@@ -251,8 +251,8 @@ __PACKAGE__->has_many(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07036 @ 2013-10-29 19:10:07
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:oZsC/B6FjQeD2ja5Ml6Czg
+# Created by DBIx::Class::Schema::Loader v0.07036 @ 2013-11-04 15:22:01
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:lktl1Sx9cFHQvD6q9pIJeA
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

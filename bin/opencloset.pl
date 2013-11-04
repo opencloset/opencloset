@@ -124,15 +124,6 @@ helper create_clothe => sub {
         order_by => { -desc => 'no' }
     })->next;
 
-    my %prefix_map = (
-        1 => 'Jck',
-        2 => 'Pts',
-        3 => 'Shr',
-        4 => 'Sho',
-        5 => 'Hat',
-        6 => 'Tie'
-    );
-
     my $index = 1;
     if ($clothe) {
         $index = substr $clothe->no, -5, 5;
@@ -140,13 +131,17 @@ helper create_clothe => sub {
         $index++;
     }
 
-    my $no = sprintf "%s%05d", $prefix_map{$category_id}, $index;
+    my $no = sprintf "%s%05d", $category->abbr, $index;
 
     my %params;
-    if ($category_id == 1) {
-        map { $params{$_} = $self->param($_) } qw/chest arm/;       # Jacket
-    } elsif ($category_id == 2) {
-        map { $params{$_} = $self->param($_) } qw/waist pants_len/; # Pants
+    if ($category->which eq 'top') {
+        map { $params{$_} = $self->param($_) } qw/chest arm/;
+    } elsif ($category->which eq 'bottom') {
+        map { $params{$_} = $self->param($_) } qw/waist length/;
+    } elsif ($category->which eq 'onepiece') {
+        map { $params{$_} = $self->param($_) } qw/chest waist length/;
+    } elsif ($category->which eq 'foot') {
+        map { $params{$_} = $self->param($_) } qw/foot/;
     }
 
     $params{no}          = $no;
@@ -224,7 +219,7 @@ post '/guests/:id/size' => sub {
     my $self  = shift;
 
     my $validator = $self->create_validator;
-    my @fields = qw/chest waist arm pants_len/;
+    my @fields = qw/chest waist arm length/;
     $validator->field([@fields])
         ->each(sub { shift->required(1)->regexp(qr/^\d+$/) });
 
@@ -261,9 +256,15 @@ post '/clothes' => sub {
     $validator->when('category_id')->regexp(qr/^(-1|2)$/)
         ->then(sub { shift->field('waist')->required(1) });
     $validator->when('category_id')->regexp(qr/^(-1|2)$/)
-        ->then(sub { shift->field('pants_len')->required(1) });
+        ->then(sub { shift->field('length')->required(1) });
 
-    my @fields = qw/chest waist arm pants_len/;
+    # Shoes
+    $validator->when('category_id')->regexp(qr/^4$/)
+        ->then(sub { shift->field('foot')->required(1) });
+
+    ## 나머지는 강제하지 않는다
+
+    my @fields = qw/chest waist arm length foot/;
     $validator->field([@fields])
         ->each(sub { shift->regexp(qr/^\d+$/) });
 
@@ -1023,7 +1024,7 @@ __DATA__
       .control-group
         %label.control-label{:for => 'input-pants-len'} 기장
         .controls
-          %input{:type => 'text', :id => 'input-pants-len', :name => 'pants_len'}
+          %input{:type => 'text', :id => 'input-pants-len', :name => 'length'}
             cm
       .control-group
         .controls
@@ -1043,7 +1044,7 @@ __DATA__
       %a{:href => "#{url_with->query([q => '/' . $guest->waist . '//' . $status_id])}"}= $guest->waist
     %span.label.label-info.search-label
       %a{:href => "#{url_with->query([q => '//' . $guest->arm])}/#{$status_id}"}= $guest->arm
-    %span.label= $guest->pants_len
+    %span.label= $guest->length
     %span.label= $guest->height
     %span.label= $guest->weight
 
@@ -1063,7 +1064,7 @@ __DATA__
   %span.label.label-info= $guest->chest
   %span.label.label-info= $guest->waist
   %span.label.label-info= $guest->arm
-  %span.label= $guest->pants_len
+  %span.label= $guest->length
   %span.label= $guest->height
   %span.label= $guest->weight
 
@@ -1207,7 +1208,7 @@ __DATA__
       - } elsif ($clothe->category_id == $Opencloset::Constant::CATEOGORY_PANTS) {
         %span.label.label-info.search-label
           %a{:href => "#{url_for('/search')->query([q => '/' . $clothe->waist . '/'])}"}= $clothe->waist
-        %span.label= $clothe->pants_len
+        %span.label= $clothe->length
       - }
     - if ($clothe->donor) {
       %h3= $clothe->donor->name
@@ -1716,22 +1717,31 @@ __DATA__
   .control-group
     %label.control-label{:for => 'input-chest'} 가슴
     .controls
-      %input{:type => 'text', :id => 'input-chest', :name => 'chest'}
+      %input#input-chest{:type => 'text', :name => 'chest'}
+      cm
   .control-group
     %label.control-label{:for => 'input-waist'} 허리
     .controls
-      %input{:type => 'text', :id => 'input-waist', :name => 'waist'}
+      %input#input-waist{:type => 'text', :name => 'waist'}
+      cm
   .control-group
     %label.control-label{:for => 'input-arm'} 팔길이
     .controls
-      %input{:type => 'text', :id => 'input-arm', :name => 'arm'}
+      %input#input-arm{:type => 'text', :name => 'arm'}
+      cm
   .control-group
-    %label.control-label{:for => 'input-pants-len'} 기장
+    %label.control-label{:for => 'input-length'} 기장
     .controls
-      %input{:type => 'text', :id => 'input-pants-len', :name => 'pants_len'}
+      %input#input-length{:type => 'text', :name => 'length'}
+      cm
+  .control-group
+    %label.control-label{:for => 'input-foot'} 발크기
+    .controls
+      %input#input-foot{:type => 'text', :name => 'foot'}
+      mm
   .control-group
     .controls
-      %button.btn{type => 'submit'} 다음
+      %button.btn{:type => 'submit'} 다음
 
 
 @@ layouts/default.html.haml

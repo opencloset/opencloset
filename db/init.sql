@@ -41,7 +41,7 @@ CREATE TABLE `guest` (
   `chest`       INT NOT NULL,     -- 가슴둘레(cm)
   `waist`       INT NOT NULL,     -- 허리둘레(cm)
   `arm`         INT DEFAULT NULL, -- 팔길이(cm)
-  `pants_len`   INT DEFAULT NULL, -- 기장(cm)
+  `length`      INT DEFAULT NULL, -- 기장(cm)
   `height`      INT DEFAULT NULL, -- cm
   `weight`      INT DEFAULT NULL, -- kg
   `create_date` DATETIME DEFAULT NULL,
@@ -58,14 +58,17 @@ CREATE TABLE `guest` (
 
 CREATE TABLE `category` (
   `id`    INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `name`  VARCHAR (64) NOT NULL,
+  `name`  VARCHAR(64) NOT NULL,
   `price` INT DEFAULT 0,
+  `which` VARCHAR(32) DEFAULT NULL,  -- top, bottom, foot, head, hand, onepiece, back, neck
+  `abbr`  VARCHAR(32) NOT NULL, -- clothe-no 을 만들때 사용됨
 
   PRIMARY KEY (`id`),
-  UNIQUE KEY (`name`)
+  UNIQUE KEY (`name`),
+  UNIQUE KEY (`abbr`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-INSERT INTO `category` (`id`, `name`, `price`) VALUES (1, 'Jacket', 10000), (2, 'Pants', 10000), (3, 'Shirts', 5000), (4, 'Shoes', 5000), (5, 'Hat', 0), (6, 'Tie', 0);
+INSERT INTO `category` (`id`, `name`, `price`,`which`,`abbr`) VALUES (1, 'Jacket', 10000,'top','Jck'), (2, 'Pants', 10000,'bottom','Pts'), (3, 'Shirts', 5000,'top','Shr'), (4, 'Shoes', 5000,'foot','Sho'), (5, 'Hat', 0,'head','Hat'), (6, 'Tie', 0,'neck','Tie'),(7,'Waistcoat',5000,'top','Wct'),(8,'Coat',15000,'top','Cot'),(9,'Onepiece',15000,'onepiece','Opc'),(10,'Skirt',10000,'bottom','Skt'),(11,'Blouse',5000,'top','Bls');
 
 --
 -- status
@@ -91,7 +94,8 @@ CREATE TABLE `clothe` (
   `chest`       INT DEFAULT NULL,
   `waist`       INT DEFAULT NULL,
   `arm`         INT DEFAULT NULL, -- 팔길이(cm)
-  `pants_len`   INT DEFAULT NULL, -- 기장(cm)
+  `length`      INT DEFAULT NULL, -- 기장(cm)
+  `foot`        INT DEFAULT NULL, -- 발크기(mm)
 
   `category_id` INT UNSIGNED NOT NULL,
   `top_id`      INT UNSIGNED DEFAULT NULL,
@@ -104,7 +108,7 @@ CREATE TABLE `clothe` (
   INDEX (`chest`),
   INDEX (`waist`),
   INDEX (`arm`),
-  INDEX (`pants_len`),
+  INDEX (`length`),
   CONSTRAINT `fk_clothe1` FOREIGN KEY (`category_id`) REFERENCES `category` (`id`) ON DELETE CASCADE,
   CONSTRAINT `fk_clothe2` FOREIGN KEY (`top_id`) REFERENCES `clothe` (`id`) ON DELETE CASCADE,
   CONSTRAINT `fk_clothe3` FOREIGN KEY (`bottom_id`) REFERENCES `clothe` (`id`) ON DELETE CASCADE,

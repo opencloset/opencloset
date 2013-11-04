@@ -10,11 +10,16 @@ our $STATUS_MISSING        = 7;
 our $STATUS_RETURN         = 8;
 our $STATUS_PARTIAL_RETURN = 9;
 
-our $CATEOGORY_JACKET = 1;
-our $CATEOGORY_PANTS  = 2;
-our $CATEOGORY_SHIRTS = 3;
-our $CATEOGORY_SHOES  = 4;
-our $CATEOGORY_HAT    = 5;
-our $CATEOGORY_TIE    = 6;
+our $CATEOGORY_JACKET    = 1;
+our $CATEOGORY_PANTS     = 2;
+our $CATEOGORY_SHIRTS    = 3;
+our $CATEOGORY_SHOES     = 4;
+our $CATEOGORY_HAT       = 5;
+our $CATEOGORY_TIE       = 6;
+our $CATEOGORY_WAISTCOAT = 7;
+our $CATEOGORY_COAT      = 8;
+our $CATEOGORY_ONEPIECE  = 9;
+our $CATEOGORY_SKIRT     = 10;
+our $CATEOGORY_BLOUSE    = 11;
 
 1;
