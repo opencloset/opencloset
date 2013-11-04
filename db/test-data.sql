@@ -1,5 +1,5 @@
 START TRANSACTION;
-INSERT INTO `donor` (`id`, `name`,`email`,`phone`,`comment`) VALUES (1,'한만일',NULL,NULL,'안녕~'),(2,'김소령',NULL,NULL,'(*-*)b');
+INSERT INTO `donor` (`id`, `name`,`email`,`phone`,`comment`,`gender`,`address`,`message`) VALUES (1,'한만일','10001if@opencloset.net','01011118282',NULL,0,'인천','안녕~'),(2,'김소령','commander@opencloset.net','01000001111',NULL,1,'서울 신사동','(*-*)b');
 INSERT INTO `clothe` (`id`,`no`,`chest`,`waist`,`arm`,`pants_len`,`category_id`,`top_id`,`bottom_id`,`donor_id`,`status_id`) VALUES 
 (1,'Jck00001', 94, NULL, 51, NULL, 1, NULL, NULL, 1, 1),
 (2,'Pts00001', NULL, 79, NULL, 102, 2, NULL, NULL, 1, 1),

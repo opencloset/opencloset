@@ -54,6 +54,24 @@ __PACKAGE__->table("donor");
 
 regex: [0-9]{10,11}
 
+=head2 gender
+
+  data_type: 'integer'
+  is_nullable: 1
+
+0: male, 1: female
+
+=head2 address
+
+  data_type: 'varchar'
+  is_nullable: 1
+  size: 255
+
+=head2 message
+
+  data_type: 'text'
+  is_nullable: 1
+
 =head2 comment
 
   data_type: 'text'
@@ -83,6 +101,12 @@ __PACKAGE__->add_columns(
   { data_type => "varchar", is_nullable => 1, size => 128 },
   "phone",
   { data_type => "varchar", is_nullable => 1, size => 16 },
+  "gender",
+  { data_type => "integer", is_nullable => 1 },
+  "address",
+  { data_type => "varchar", is_nullable => 1, size => 255 },
+  "message",
+  { data_type => "text", is_nullable => 1 },
   "comment",
   { data_type => "text", is_nullable => 1 },
   "create_date",
@@ -166,8 +190,8 @@ __PACKAGE__->has_many(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07036 @ 2013-10-31 13:44:27
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:BBpWhK8W0HINJOl4xslSxw
+# Created by DBIx::Class::Schema::Loader v0.07036 @ 2013-11-04 13:16:09
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:yFrfxTrSaASjfAUr5c9Jmg
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

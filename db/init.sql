@@ -13,6 +13,9 @@ CREATE TABLE `donor` (
   `name`        VARCHAR(32) NOT NULL,
   `email`       VARCHAR(128) DEFAULT NULL,
   `phone`       VARCHAR(16) DEFAULT NULL COMMENT 'regex: [0-9]{10,11}',
+  `gender`      INT DEFAULT NULL COMMENT '1: male, 2: female',
+  `address`     VARCHAR(255) DEFAULT NULL,
+  `message`     TEXT DEFAULT NULL,
   `comment`     TEXT DEFAULT NULL,
   `create_date` DATETIME DEFAULT NULL,
 
@@ -30,7 +33,7 @@ CREATE TABLE `guest` (
   `name`        VARCHAR(32) NOT NULL,
   `email`       VARCHAR(128) DEFAULT NULL,
   `phone`       VARCHAR(16) DEFAULT NULL COMMENT 'regex: [0-9]{10,11}',
-  `gender`      INT DEFAULT NULL COMMENT '0: male, 1: female',
+  `gender`      INT DEFAULT NULL COMMENT '1: male, 2: female',
   `address`     VARCHAR(255) DEFAULT NULL,
   `age`         INT DEFAULT NULL,
   `purpose`     VARCHAR(32),
