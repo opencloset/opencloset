@@ -1211,7 +1211,19 @@ __DATA__
       %img.img-polaroid{:src => 'http://placehold.it/200x200', :alt => '#{$clothe->no}'}
 
     %div
-      - for my $column (qw/chest waist arm length foot/) {
+      - if ($clothe->chest) {
+        %span.label.label-info.search-label
+          %a{:href => "#{url_with('/search')->query([q => $clothe->chest])}///1"}= $clothe->chest
+      - }
+      - if ($clothe->waist) {
+        %span.label.label-info.search-label
+          %a{:href => "#{url_with('/search')->query([q => '/' . $clothe->waist . '//1'])}"}= $clothe->waist
+      - }
+      - if ($clothe->arm) {
+        %span.label.label-info.search-label
+          %a{:href => "#{url_with('/search')->query([q => '//' . $clothe->arm])}/1"}= $clothe->arm
+      - }
+      - for my $column (qw/length foot/) {
         - if ($clothe->$column) {
           %span.label.label-info.search-label{:class => 'category-#{$column}'}= $clothe->$column
         - }
