@@ -46,6 +46,18 @@ __PACKAGE__->table("category");
   default_value: 0
   is_nullable: 1
 
+=head2 which
+
+  data_type: 'varchar'
+  is_nullable: 1
+  size: 32
+
+=head2 abbr
+
+  data_type: 'varchar'
+  is_nullable: 0
+  size: 32
+
 =cut
 
 __PACKAGE__->add_columns(
@@ -60,6 +72,10 @@ __PACKAGE__->add_columns(
   { data_type => "varchar", is_nullable => 0, size => 64 },
   "price",
   { data_type => "integer", default_value => 0, is_nullable => 1 },
+  "which",
+  { data_type => "varchar", is_nullable => 1, size => 32 },
+  "abbr",
+  { data_type => "varchar", is_nullable => 0, size => 32 },
 );
 
 =head1 PRIMARY KEY
@@ -75,6 +91,18 @@ __PACKAGE__->add_columns(
 __PACKAGE__->set_primary_key("id");
 
 =head1 UNIQUE CONSTRAINTS
+
+=head2 C<abbr>
+
+=over 4
+
+=item * L</abbr>
+
+=back
+
+=cut
+
+__PACKAGE__->add_unique_constraint("abbr", ["abbr"]);
 
 =head2 C<name>
 
@@ -106,8 +134,8 @@ __PACKAGE__->has_many(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07036 @ 2013-10-29 19:10:07
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:GCIu6EbXWgPZzwMBGa0/mw
+# Created by DBIx::Class::Schema::Loader v0.07036 @ 2013-11-04 15:16:54
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:VFv7ugJ5WA3+jYIqJHIdPw
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration
