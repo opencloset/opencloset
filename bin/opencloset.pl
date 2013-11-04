@@ -1130,13 +1130,13 @@ __DATA__
     %a{:href => '/clothes/#{$clothe->no}'}
       %img{:src => 'http://placehold.it/75x75', :alt => '#{$clothe->no}'}
     %span.label.label-info.search-label
-      %a{:href => "#{url_with->query([q => $clothe->chest . '///' . $status_id])}"}= $clothe->chest
+      %a{:href => "#{url_with->query([p => 1, q => $clothe->chest . '///' . $status_id])}"}= $clothe->chest
     - if ($clothe->bottom) {
       %span.label.label-info.search-label
-        %a{:href => "#{url_with->query([q => '/' . $clothe->bottom->waist . '//' . $status_id])}"}= $clothe->bottom->waist
+        %a{:href => "#{url_with->query([p => 1, q => '/' . $clothe->bottom->waist . '//' . $status_id])}"}= $clothe->bottom->waist
     - }
     %span.label.label-info.search-label
-      %a{:href => "#{url_with->query([q => '//' . $clothe->arm . '/' . $status_id])}"}= $clothe->arm
+      %a{:href => "#{url_with->query([p => 1, q => '//' . $clothe->arm . '/' . $status_id])}"}= $clothe->arm
     - if ($clothe->status->name eq '대여가능') {
       %span.label.label-success= $clothe->status->name
     - } elsif ($clothe->status->name eq '대여중') {
