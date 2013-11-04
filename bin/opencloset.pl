@@ -975,6 +975,7 @@ __DATA__
 - title $guest->name . '님';
 
 %div= include 'guests/status', guest => $guest
+%div= include 'guests/breadcrumb', guest => $guest, status_id => 1;
 %h3 주문내역
 %ul
   - for my $order (@$orders) {
@@ -1049,11 +1050,11 @@ __DATA__
   %span (으)로 방문
   %div
     %span.label.label-info.search-label
-      %a{:href => "#{url_with->query([q => $guest->chest])}///#{$status_id}"}= $guest->chest
+      %a{:href => "#{url_with('/search')->query([q => $guest->chest])}///#{$status_id}"}= $guest->chest
     %span.label.label-info.search-label
-      %a{:href => "#{url_with->query([q => '/' . $guest->waist . '//' . $status_id])}"}= $guest->waist
+      %a{:href => "#{url_with('/search')->query([q => '/' . $guest->waist . '//' . $status_id])}"}= $guest->waist
     %span.label.label-info.search-label
-      %a{:href => "#{url_with->query([q => '//' . $guest->arm])}/#{$status_id}"}= $guest->arm
+      %a{:href => "#{url_with('/search')->query([q => '//' . $guest->arm])}/#{$status_id}"}= $guest->arm
     %span.label= $guest->length
     %span.label= $guest->height
     %span.label= $guest->weight
@@ -1221,7 +1222,7 @@ __DATA__
     - }
   .span4
     %ul
-      - for my $order ($clothe->orders({ status_id => 'NOT NULL'}, { order_by => { -desc => [qw/rental_date/] } })) {
+      - for my $order ($clothe->orders({ status_id => { '!=' => undef } }, { order_by => { -desc => [qw/rental_date/] } })) {
         %li
           %a{:href => '/guests/#{$order->guest->id}/size'}= $order->guest->name
           님
@@ -1234,7 +1235,8 @@ __DATA__
           - } else {
             %span.label= $order->status->name
           - }
-          %time{:title => '대여일'}= $order->rental_date->ymd
+          %a.highlight{:href => '/orders/#{$order->id}'}
+            %time{:title => '대여일'}= $order->rental_date->ymd
       - }
 
 
