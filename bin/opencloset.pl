@@ -1132,7 +1132,7 @@ __DATA__
 %div.row.center
   = include 'pagination'
 
-.row
+.row-fluid
   %ul.ace-thumbnails
     - while (my $c = $clothes->next) {
       %li
