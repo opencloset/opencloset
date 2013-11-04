@@ -1739,6 +1739,7 @@ __DATA__
     .controls
       %select{:name => 'category_id'}
         %option{:value => '-1'} Jacket & Pants
+        %option{:value => '-2'} Jacket & Skirts
         - for my $c (@$categories) {
           %option{:value => '#{$c->id}'}= $c->name
         - }
