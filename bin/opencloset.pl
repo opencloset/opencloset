@@ -1222,7 +1222,7 @@ __DATA__
     - }
   .span4
     %ul
-      - for my $order ($clothe->orders({ status_id => 'NOT NULL'}, { order_by => { -desc => [qw/rental_date/] } })) {
+      - for my $order ($clothe->orders({ status_id => { '!=' => undef } }, { order_by => { -desc => [qw/rental_date/] } })) {
         %li
           %a{:href => '/guests/#{$order->guest->id}/size'}= $order->guest->name
           님
@@ -1235,7 +1235,8 @@ __DATA__
           - } else {
             %span.label= $order->status->name
           - }
-          %time{:title => '대여일'}= $order->rental_date->ymd
+          %a.highlight{:href => '/orders/#{$order->id}'}
+            %time{:title => '대여일'}= $order->rental_date->ymd
       - }
 
 
