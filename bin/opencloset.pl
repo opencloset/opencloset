@@ -421,11 +421,13 @@ get '/clothes/:no' => sub {
 };
 
 get '/search' => sub {
-    my $self  = shift;
-    my $q     = $self->param('q')   || '';
-    my $gid   = $self->param('gid') || '';
-    my $guest = $gid ? $DB->resultset('Guest')->find({ id => $gid }) : undef;
+    my $self = shift;
 
+    my $q                = $self->param('q')                || q{};
+    my $gid              = $self->param('gid')              || q{};
+    my $entries_per_page = $self->param('entries_per_page') || 10;
+
+    my $guest    = $gid ? $DB->resultset('Guest')->find({ id => $gid }) : undef;
     my $c_jacket = $DB->resultset('Category')->find({ name => 'jacket' });
     my $cond = { 'me.category_id' => $c_jacket->id };
     my ($chest, $waist, $arm, $status_id) = split /\//, $q;
@@ -435,12 +437,11 @@ get '/search' => sub {
     $cond->{'me.status_id'} = $status_id if $status_id;
 
     ### row, current_page, count
-    my $ENTRIES_PER_PAGE = 10;
     my $clothes = $DB->resultset('Clothe')->search(
         $cond,
         {
             page     => $self->param('p') || 1,
-            rows     => $ENTRIES_PER_PAGE,
+            rows     => $entries_per_page,
             order_by => [qw/chest bottom.waist arm/],
             join     => 'bottom',
         }
@@ -448,7 +449,7 @@ get '/search' => sub {
 
     my $pageset = Data::Pageset->new({
         total_entries    => $clothes->pager->total_entries,
-        entries_per_page => $ENTRIES_PER_PAGE,
+        entries_per_page => $entries_per_page,
         current_page     => $self->param('p') || 1,
         mode             => 'fixed'
     });
@@ -1128,51 +1129,49 @@ __DATA__
 - }
 
 %div= include 'guests/breadcrumb', guest => $guest if $guest
-= include 'pagination'
-%ul
-  - while (my $c = $clothes->next) {
-    %li= include 'clothes/preview', clothe => $c
-  - }
-= include 'pagination'
+%div.row.center
+  = include 'pagination'
 
+.row
+  %ul.ace-thumbnails
+    - while (my $c = $clothes->next) {
+      %li
+        %a{:href => '/clothes/#{$c->no}'}
+          %img{:src => 'http://placehold.it/160x160', :alt => '#{$c->no}'}
 
-@@ clothes/preview.html.haml
-%span
-  %a{:href => '/clothes/#{$clothe->no}'}= $clothe->no
-%div
-  %p
-    %a{:href => '/clothes/#{$clothe->no}'}
-      %img{:src => 'http://placehold.it/75x75', :alt => '#{$clothe->no}'}
-    %span.label.label-info.search-label
-      %a{:href => "#{url_with->query([p => 1, q => $clothe->chest . '///' . $status_id])}"}= $clothe->chest
-    - if ($clothe->bottom) {
-      %span.label.label-info.search-label
-        %a{:href => "#{url_with->query([p => 1, q => '/' . $clothe->bottom->waist . '//' . $status_id])}"}= $clothe->bottom->waist
-    - }
-    %span.label.label-info.search-label
-      %a{:href => "#{url_with->query([p => 1, q => '//' . $clothe->arm . '/' . $status_id])}"}= $clothe->arm
-    - if ($clothe->status->name eq '대여가능') {
-      %span.label.label-success= $clothe->status->name
-    - } elsif ($clothe->status->name eq '대여중') {
-      %span.label.label-important= $clothe->status->name
-      - if (my $order = $clothe->orders({ status_id => 2 })->next) {
-        %small.muted{:title => '반납예정일'}= $order->target_date->ymd if $order->target_date
-      - }
-    - } else {
-      %span.label= $clothe->status->name
-    - }
-    %ul
-      - for my $s ($clothe->satisfactions({}, { rows => 5, order_by => { -desc => [qw/create_date/] } })) {
-        %li
-          %span.badge{:class => 'satisfaction-#{$s->chest}'}= $s->guest->chest
-          %span.badge{:class => 'satisfaction-#{$s->waist}'}= $s->guest->waist
-          %span.badge{:class => 'satisfaction-#{$s->arm}'}=   $s->guest->arm
-          %span.badge{:class => 'satisfaction-#{$s->top_fit}'}    상의fit
-          %span.badge{:class => 'satisfaction-#{$s->bottom_fit}'} 하의fit
-          - if ($guest && $s->guest->id == $guest->id) {
-            %i.icon-star{:title => '대여한적 있음'}
-          - }
-      - }
+        .tags-top-ltr
+          %span.label-holder
+            %span.label.label-warning.search-label
+              %a{:href => '/clothes/#{$c->no}'}= $c->no
+
+        .tags
+          %span.label-holder
+            %span.label.label-info.search-label
+              %a{:href => "#{url_with->query([p => 1, q => $c->chest . '///' . $status_id])}"}= $c->chest
+            - if ($c->bottom) {
+              %span.label.label-info.search-label
+                %a{:href => "#{url_with->query([p => 1, q => '/' . $c->bottom->waist . '//' . $status_id])}"}= $c->bottom->waist
+            - }
+            %span.label.label-info.search-label
+              %a{:href => "#{url_with->query([p => 1, q => '//' . $c->arm . '/' . $status_id])}"}= $c->arm
+
+          %span.label-holder
+            - if ($c->status->name eq '대여가능') {
+              %span.label.label-success= $c->status->name
+            - }
+            - elsif ($c->status->name eq '대여중') {
+              %span.label.label-important= $c->status->name
+              - if (my $order = $c->orders({ status_id => 2 })->next) {
+                %small.muted{:title => '반납예정일'}= $order->target_date->ymd if $order->target_date
+              - }
+            - }
+            - else {
+              %span.label= $c->status->name
+            - }
+    - } # end of while
+
+%div.row.center
+  = include 'pagination'
 
 
 @@ clothes/no.html.haml
@@ -1253,62 +1252,60 @@ __DATA__
 
 
 @@ pagination.html.ep
-<div>
-  <ul class="pagination">
-    <li class="previous">
-      <a href="<%= url_with->query([p => $pageset->first_page]) %>">
-        <i class="icon-double-angle-left"></i>
-        <i class="icon-double-angle-left"></i>
-      </a>
-    </li>
+<ul class="pagination">
+  <li class="previous">
+    <a href="<%= url_with->query([p => $pageset->first_page]) %>">
+      <i class="icon-double-angle-left"></i>
+      <i class="icon-double-angle-left"></i>
+    </a>
+  </li>
 
-    % if ( $pageset->previous_set ) {
-    <li class="previous">
-      <a href="<%= url_with->query([p => $pageset->previous_set]) %>">
-        <i class="icon-double-angle-left"></i>
-      </a>
-    </li>
-    % }
-    % else {
-    <li class="previous disabled">
-      <a href="#">
-        <i class="icon-double-angle-left"></i>
-      </a>
-    </li>
-    % }
+  % if ( $pageset->previous_set ) {
+  <li class="previous">
+    <a href="<%= url_with->query([p => $pageset->previous_set]) %>">
+      <i class="icon-double-angle-left"></i>
+    </a>
+  </li>
+  % }
+  % else {
+  <li class="previous disabled">
+    <a href="#">
+      <i class="icon-double-angle-left"></i>
+    </a>
+  </li>
+  % }
 
-    % for my $p ( @{$pageset->pages_in_set} ) {
-    %   if ( $p == $pageset->current_page ) {
-    <li class="active"> <a href="#"> <%= $p %> </a> </li>
-    %   }
-    %   else {
-    <li> <a href="<%= url_with->query([p => $p]) %>"> <%= $p %> </a> </li>
-    %   }
-    % }
+  % for my $p ( @{$pageset->pages_in_set} ) {
+  %   if ( $p == $pageset->current_page ) {
+  <li class="active"> <a href="#"> <%= $p %> </a> </li>
+  %   }
+  %   else {
+  <li> <a href="<%= url_with->query([p => $p]) %>"> <%= $p %> </a> </li>
+  %   }
+  % }
 
-    % if ( $pageset->next_set ) {
-    <li class="previous">
-      <a href="<%= url_with->query([p => $pageset->next_set]) %>">
-        <i class="icon-double-angle-right"></i>
-      </a>
-    </li>
-    % }
-    % else {
-    <li class="previous disabled">
-      <a href="#">
-        <i class="icon-double-angle-right"></i>
-      </a>
-    </li>
-    % }
+  % if ( $pageset->next_set ) {
+  <li class="previous">
+    <a href="<%= url_with->query([p => $pageset->next_set]) %>">
+      <i class="icon-double-angle-right"></i>
+    </a>
+  </li>
+  % }
+  % else {
+  <li class="previous disabled">
+    <a href="#">
+      <i class="icon-double-angle-right"></i>
+    </a>
+  </li>
+  % }
 
-    <li class="next">
-      <a href="<%= url_with->query([p => $pageset->last_page]) %>">
-        <i class="icon-double-angle-right"></i>
-        <i class="icon-double-angle-right"></i>
-      </a>
-    </li>
-  </ul>
-</div>
+  <li class="next">
+    <a href="<%= url_with->query([p => $pageset->last_page]) %>">
+      <i class="icon-double-angle-right"></i>
+      <i class="icon-double-angle-right"></i>
+    </a>
+  </li>
+</ul>
 
 
 @@ bad_request.html.haml
