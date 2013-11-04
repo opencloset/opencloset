@@ -106,7 +106,7 @@ helper create_donor => sub {
     my $self = shift;
 
     my %params;
-    map { $params{$_} = $self->param($_) } qw/name phone email comment/;
+    map { $params{$_} = $self->param($_) } qw/name phone email comment gender address message comment/;
 
     return $DB->resultset('Donor')->find_or_create(\%params);
 };
@@ -758,10 +758,12 @@ get '/donors/new' => sub {
 
 post '/donors' => sub {
     my $self   = shift;
+
     my $validator = $self->create_validator;
     $validator->field('name')->required(1);
     $validator->field('phone')->regexp(qr/^\d{10,11}$/);
     $validator->field('email')->email;
+    $validator->field('gender')->regexp(qr/^[12]$/);
 
     return $self->error(400, 'invalid request')
         unless $self->validate($validator);
@@ -774,7 +776,7 @@ post '/donors' => sub {
         json => { json => { $donor->get_columns }, status => 201 },
         html => sub {
             $self->redirect_to(
-                $self->url_for('/clothes/new')->query->([q => $donor->id])
+                $self->url_for('/clothes/new')->query(q => $donor->id)
             );
         }
     );
@@ -1657,6 +1659,27 @@ __DATA__
     %label.control-label{:for => 'input-email'} 이메일
     .controls
       %input{:type => 'text', :id => 'input-email', :name => 'email'}
+  .control-group
+    %label.control-label 성별
+    .controls
+      %label.radio.inline
+        %input{:type => 'radio', :name => 'gender', :value => '1'}
+          남
+      %label.radio.inline
+        %input{:type => 'radio', :name => 'gender', :value => '2'}
+          여
+  .control-group
+    %label.control-label{:for => 'input-address'} 주소
+    .controls
+      %textarea#input-address{:name => 'address'}
+  .control-group
+    %label.control-label{:for => 'input-message'} 전하실 말
+    .controls
+      %textarea#input-message{:name => 'message'}
+  .control-group
+    %label.control-label{:for => 'input-comment'} Comment
+    .controls
+      %textarea#input-comment{:name => 'comment'}
   .control-group
     .controls
       %button.btn{type => 'submit'} 다음
