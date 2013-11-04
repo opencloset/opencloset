@@ -1129,8 +1129,6 @@ __DATA__
 - }
 
 %div= include 'guests/breadcrumb', guest => $guest if $guest
-%div.row.center
-  = include 'pagination'
 
 .row-fluid
   %ul.ace-thumbnails
