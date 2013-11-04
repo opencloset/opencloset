@@ -78,6 +78,12 @@ regex: [0-9]{10,11}
   is_nullable: 1
   size: 32
 
+=head2 domain
+
+  data_type: 'varchar'
+  is_nullable: 1
+  size: 64
+
 =head2 chest
 
   data_type: 'integer'
@@ -125,6 +131,13 @@ regex: [0-9]{10,11}
   set_on_create: 1
   set_on_update: 1
 
+=head2 target_date
+
+  data_type: 'datetime'
+  datetime_undef_if_invalid: 1
+  inflate_datetime: 1
+  is_nullable: 1
+
 =cut
 
 __PACKAGE__->add_columns(
@@ -149,6 +162,8 @@ __PACKAGE__->add_columns(
   { data_type => "integer", is_nullable => 1 },
   "purpose",
   { data_type => "varchar", is_nullable => 1, size => 32 },
+  "domain",
+  { data_type => "varchar", is_nullable => 1, size => 64 },
   "chest",
   { data_type => "integer", is_nullable => 0 },
   "waist",
@@ -177,6 +192,13 @@ __PACKAGE__->add_columns(
     is_nullable               => 1,
     set_on_create             => 1,
     set_on_update             => 1,
+  },
+  "target_date",
+  {
+    data_type => "datetime",
+    datetime_undef_if_invalid => 1,
+    inflate_datetime => 1,
+    is_nullable => 1,
   },
 );
 
@@ -251,8 +273,8 @@ __PACKAGE__->has_many(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07036 @ 2013-11-04 15:22:01
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:lktl1Sx9cFHQvD6q9pIJeA
+# Created by DBIx::Class::Schema::Loader v0.07036 @ 2013-11-04 16:51:15
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:bVmOrViI/nwQ2xmE+PoO6g
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

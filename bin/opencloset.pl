@@ -97,7 +97,7 @@ helper create_guest => sub {
     my $self = shift;
 
     my %params;
-    map { $params{$_} = $self->param($_) } qw/name gender phone address age email purpose height weight/;
+    map { $params{$_} = $self->param($_) } qw/name gender phone address age email purpose height weight target_date domain/;
 
     return $DB->resultset('Guest')->find_or_create(\%params);
 };
@@ -883,6 +883,10 @@ __DATA__
   %legend
     대여자 기본 정보
   .control-group
+    %label.control-label{:for => 'input-target-date'} 착용일자
+    .controls
+      %input#input-target-date{:type => 'text', :name => 'target_date'}
+  .control-group
     %label.control-label{:for => 'input-name'} 이름
     .controls
       %input{:type => 'text', :id => 'input-name', :name => 'name'}
@@ -922,6 +926,10 @@ __DATA__
         %span.label.clickable 결혼식
         %span.label.clickable 장례식
   .control-group
+    %label.control-label{:for => 'input-domain'} 응시기업 및 분야
+    .controls
+      %input#input-domain{:type => 'text', :name => 'domain'}
+  .control-group
     %label.control-label{:for => 'input-height'} 키
     .controls
       %input{:type => 'text', :id => 'input-height', :name => 'height'}
@@ -957,7 +965,9 @@ __DATA__
   %li
     %span #{$guest->height} cm,
     %span #{$guest->weight} kg
-
+  - if ($guest->target_date) {
+    %li= $guest->target_date->ymd . ' 착용'
+  - }
 
 
 @@ guests/id.html.haml

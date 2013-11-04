@@ -37,6 +37,7 @@ CREATE TABLE `guest` (
   `address`     VARCHAR(255) DEFAULT NULL,
   `age`         INT DEFAULT NULL,
   `purpose`     VARCHAR(32),
+  `domain`      VARCHAR(64),
 
   `chest`       INT NOT NULL,     -- 가슴둘레(cm)
   `waist`       INT NOT NULL,     -- 허리둘레(cm)
@@ -46,6 +47,7 @@ CREATE TABLE `guest` (
   `weight`      INT DEFAULT NULL, -- kg
   `create_date` DATETIME DEFAULT NULL,
   `visit_date`  DATETIME DEFAULT NULL, -- latest visit
+  `target_date` DATETIME DEFAULT NULL, -- 착용일
 
   PRIMARY KEY (`id`),
   UNIQUE KEY (`email`),

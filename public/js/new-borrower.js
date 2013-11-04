@@ -2,8 +2,14 @@
 (function() {
   $(function() {
     $('#input-phone').ForceNumericOnly();
-    return $('.clickable.label').click(function() {
+    $('.clickable.label').click(function() {
       return $('#input-purpose').val($(this).text());
+    });
+    return $('#input-target-date').datepicker({
+      startDate: "-0d",
+      language: 'kr',
+      format: 'yyyy-mm-dd',
+      autoclose: true
     });
   });
 
