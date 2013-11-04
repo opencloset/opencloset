@@ -1200,15 +1200,10 @@ __DATA__
       %img.img-polaroid{:src => 'http://placehold.it/200x200', :alt => '#{$clothe->no}'}
 
     %div
-      - if ($clothe->category_id == $Opencloset::Constant::CATEOGORY_JACKET) {
-        %span.label.label-info.search-label
-          %a{:href => "#{url_for('/search')->query([q => $clothe->chest])}//"}= $clothe->chest
-        %span.label.label-info.search-label
-          %a{:href => "#{url_for('/search')->query([q => '//' . $clothe->arm])}"}= $clothe->arm
-      - } elsif ($clothe->category_id == $Opencloset::Constant::CATEOGORY_PANTS) {
-        %span.label.label-info.search-label
-          %a{:href => "#{url_for('/search')->query([q => '/' . $clothe->waist . '/'])}"}= $clothe->waist
-        %span.label= $clothe->length
+      - for my $column (qw/chest waist arm length foot/) {
+        - if ($clothe->$column) {
+          %span.label.label-info.search-label{:class => 'category-#{$column}'}= $clothe->$column
+        - }
       - }
     - if ($clothe->donor) {
       %h3= $clothe->donor->name
