@@ -1114,14 +1114,12 @@ __DATA__
 - }
 
 %div= include 'guests/breadcrumb', guest => $guest if $guest
-%div= include 'pagination'
-
+= include 'pagination'
 %ul
   - while (my $c = $clothes->next) {
     %li= include 'clothes/preview', clothe => $c
   - }
-
-%div= include 'pagination'
+= include 'pagination'
 
 
 @@ clothes/preview.html.haml
@@ -1232,37 +1230,63 @@ __DATA__
       - }
 
 
-@@ pagination.html.haml
-.pagination
-  %div
-    %ul
-      %li.previous
-        %a{:href => '#{url_with->query([p => $pageset->first_page])}'}= '&laquo;&laquo;'
-      - if ($pageset->previous_set) {
-        %li.previous
-          %a{:href => '#{url_with->query([p => $pageset->previous_set])}'}= '&laquo;'
-      - } else {
-        %li.previous.disabled
-          %a= '&laquo;'
-      - }
-      - for my $p (@{ $pageset->pages_in_set }) {
-        - if ($p == $pageset->current_page) {
-          %li.active
-            %a{:href => '#'}= $p
-        - } else {
-          %li
-            %a{:href => '#{url_with->query([p => $p])}'}= $p
-        - }
-      - }
-      - if ($pageset->next_set) {
-        %li.next
-          %a{:href => '#{url_with->query([p => $pageset->next_set])}'}= '&raquo;'
-      - } else {
-        %li.next.disabled
-          %a= '&raquo;'
-      - }
-      %li.next
-        %a{:href => '#{url_with->query([p => $pageset->last_page])}'}= '&raquo;&raquo;'
+@@ pagination.html.ep
+<div>
+  <ul class="pagination">
+    <li class="previous">
+      <a href="<%= url_with->query([p => $pageset->first_page]) %>">
+        <i class="icon-double-angle-left"></i>
+        <i class="icon-double-angle-left"></i>
+      </a>
+    </li>
+
+    % if ( $pageset->previous_set ) {
+    <li class="previous">
+      <a href="<%= url_with->query([p => $pageset->previous_set]) %>">
+        <i class="icon-double-angle-left"></i>
+      </a>
+    </li>
+    % }
+    % else {
+    <li class="previous disabled">
+      <a href="#">
+        <i class="icon-double-angle-left"></i>
+      </a>
+    </li>
+    % }
+
+    % for my $p ( @{$pageset->pages_in_set} ) {
+    %   if ( $p == $pageset->current_page ) {
+    <li class="active"> <a href="#"> <%= $p %> </a> </li>
+    %   }
+    %   else {
+    <li> <a href="<%= url_with->query([p => $p]) %>"> <%= $p %> </a> </li>
+    %   }
+    % }
+
+    % if ( $pageset->next_set ) {
+    <li class="previous">
+      <a href="<%= url_with->query([p => $pageset->next_set]) %>">
+        <i class="icon-double-angle-right"></i>
+      </a>
+    </li>
+    % }
+    % else {
+    <li class="previous disabled">
+      <a href="#">
+        <i class="icon-double-angle-right"></i>
+      </a>
+    </li>
+    % }
+
+    <li class="next">
+      <a href="<%= url_with->query([p => $pageset->last_page]) %>">
+        <i class="icon-double-angle-right"></i>
+        <i class="icon-double-angle-right"></i>
+      </a>
+    </li>
+  </ul>
+</div>
 
 
 @@ bad_request.html.haml
