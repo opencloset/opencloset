@@ -74,3 +74,5 @@
     margin: 0 0 1px;
     opacity: 0.92;
     text-align: right; }
+    .ace-thumbnails > li .tags-top-ltr > .label-holder span.label {
+      padding-top: 3px; }
