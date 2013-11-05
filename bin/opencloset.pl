@@ -1580,6 +1580,10 @@ __DATA__
       .controls
         %input#input-late_fee.input-mini{:type => 'text', :name => 'late_fee', :placeholder => '연체료'}
     .control-group
+      %label{:for => '#input-ldiscount'} 연체료의 에누리
+      .controls
+        %input#input-ldiscount.input-mini{:type => 'text', :name => 'l_discount', :placeholder => '연체료의 에누리'}
+    .control-group
       %label 반납방법
       .controls
         %label.radio.inline
@@ -1624,6 +1628,7 @@ __DATA__
 %div= include 'partial/order_info'
 %p= commify($order->late_fee)
 %p= $order->return_method
+%p= '연체료 ' . commify($order->l_discount) . ' 원 할인'
 %p= include 'partial/satisfaction', s => $satisfaction
 
 
