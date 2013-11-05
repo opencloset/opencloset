@@ -773,8 +773,14 @@ post '/donors' => sub {
     $validator->field('email')->email;
     $validator->field('gender')->regexp(qr/^[12]$/);
 
-    return $self->error(400, 'invalid request')
-        unless $self->validate($validator);
+    unless ($self->validate($validator)) {
+        my $errors_hashref = $validator->errors;
+        my @errors;
+        while (my ($key, $value) = each %$errors_hashref) {
+            push @errors, "$key: $value";
+        }
+        return $self->error(400, join(', ', @errors));
+    }
 
     my $donor = $self->create_donor;
     return $self->error(500, 'failed to create a new donor') unless $donor;
