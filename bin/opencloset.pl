@@ -806,13 +806,17 @@ __DATA__
 - layout 'default', active_id => $id;
 - title $meta->{$id}{text};
 
-%form#clothe-search-form.form-inline
-  .input-append
-    %input#clothe-id.input-large{:type => 'text', :placeholder => '품번'}
-    %button#btn-clothe-search.btn{:type => 'button'} 검색
-  %button#btn-clear.btn{:type => 'button'} Clear
+.row
+  %form#clothe-search-form.form-inline
+    .input-group.col-sm-3
+      %input#clothe-id.form-control{ :type => 'text', :placeholder => '품번' }
+      %span.input-group-btn
+        %button#btn-clothe-search.btn.btn-sm.btn-default{ :type => 'button' }
+          %i.icon-search.bigger-110 검색
+        %button#btn-clear.btn.btn.btn-sm.btn-default{:type => 'button'}
+          %i.icon-eraser.bigger-110 지우기
 
-#clothes-list
+.row#clothes-list
   %ul
   #action-buttons{:style => 'display: none'}
     %span 선택한 항목을
