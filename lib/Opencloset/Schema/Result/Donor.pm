@@ -159,39 +159,39 @@ __PACKAGE__->add_unique_constraint("phone", ["phone"]);
 
 =head1 RELATIONS
 
-=head2 clothes
+=head2 cloths
 
 Type: has_many
 
-Related object: L<Opencloset::Schema::Result::Clothe>
+Related object: L<Opencloset::Schema::Result::Cloth>
 
 =cut
 
 __PACKAGE__->has_many(
-  "clothes",
-  "Opencloset::Schema::Result::Clothe",
+  "cloths",
+  "Opencloset::Schema::Result::Cloth",
   { "foreign.donor_id" => "self.id" },
   { cascade_copy => 0, cascade_delete => 0 },
 );
 
-=head2 donor_clothes
+=head2 donor_cloths
 
 Type: has_many
 
-Related object: L<Opencloset::Schema::Result::DonorClothe>
+Related object: L<Opencloset::Schema::Result::DonorCloth>
 
 =cut
 
 __PACKAGE__->has_many(
-  "donor_clothes",
-  "Opencloset::Schema::Result::DonorClothe",
+  "donor_cloths",
+  "Opencloset::Schema::Result::DonorCloth",
   { "foreign.donor_id" => "self.id" },
   { cascade_copy => 0, cascade_delete => 0 },
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07036 @ 2013-11-04 15:07:15
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:h2djDOsQuTAxkYsiO1BTfg
+# Created by DBIx::Class::Schema::Loader v0.07036 @ 2013-11-05 11:48:52
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:wTZsR8WK4j+mp82+j5pgkQ
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

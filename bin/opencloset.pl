@@ -47,15 +47,15 @@ helper error => sub {
     );
 };
 
-helper clothe2hr => sub {
-    my ($self, $clothe) = @_;
+helper cloth2hr => sub {
+    my ($self, $cloth) = @_;
 
     return {
-        $clothe->get_columns,
-        donor    => $clothe->donor ? $clothe->donor->name : '',
-        category => $clothe->category->name,
-        price    => $self->commify($clothe->category->price),
-        status   => $clothe->status->name,
+        $cloth->get_columns,
+        donor    => $cloth->donor ? $cloth->donor->name : '',
+        category => $cloth->category->name,
+        price    => $self->commify($cloth->category->price),
+        status   => $cloth->status->name,
     };
 };
 
@@ -63,8 +63,8 @@ helper order2hr => sub {
     my ($self, $order) = @_;
 
     my @clothes;
-    for my $clothe ($order->clothes) {
-        push @clothes, $self->clothe2hr($clothe);
+    for my $cloth ($order->cloths) {
+        push @clothes, $self->cloth2hr($cloth);
     }
 
     return {
@@ -111,22 +111,22 @@ helper create_donor => sub {
     return $DB->resultset('Donor')->find_or_create(\%params);
 };
 
-helper create_clothe => sub {
+helper create_cloth => sub {
     my ($self, $category_id) = @_;
 
     ## generate no
     my $category = $DB->resultset('Category')->find({ id => $category_id });
     return unless $category;
 
-    my $clothe = $DB->resultset('Clothe')->search({
+    my $cloth = $DB->resultset('Cloth')->search({
         category_id => $category_id
     }, {
         order_by => { -desc => 'no' }
     })->next;
 
     my $index = 1;
-    if ($clothe) {
-        $index = substr $clothe->no, -5, 5;
+    if ($cloth) {
+        $index = substr $cloth->no, -5, 5;
         $index =~ s/^0+//;
         $index++;
     }
@@ -150,7 +150,7 @@ helper create_clothe => sub {
     $params{status_id}      = $Opencloset::Constant::STATUS_AVAILABLE;
     $params{designated_for} = $self->param('designated_for');
 
-    return $DB->resultset('Clothe')->find_or_create(\%params);
+    return $DB->resultset('Cloth')->find_or_create(\%params);
 };
 
 get '/'      => 'home';
@@ -283,16 +283,16 @@ post '/clothes' => sub {
     my $cid      = $self->param('category_id');
     my $donor_id = $self->param('donor_id');
 
-    my $clothe;
+    my $cloth;
     my $guard = $DB->txn_scope_guard;
     # BEGIN TRANSACTION ~
     if ($cid == $Opencloset::Constant::CATEOGORY_JACKET_PANTS ||
             $cid == $Opencloset::Constant::CATEOGORY_JACKET_SKIRTS) {
-        my $top = $self->create_clothe($Opencloset::Constant::CATEOGORY_JACKET);
+        my $top = $self->create_cloth($Opencloset::Constant::CATEOGORY_JACKET);
         my $bot_category_id = $cid == $Opencloset::Constant::CATEOGORY_JACKET_PANTS ?
-            $Opencloset::Constant::CATEOGORY_PANTS : $Opencloset::Constant::CATEOGORY_SKIRTS;
-        my $bot = $self->create_clothe($bot_category_id);
-        return $self->error(500, 'failed to create a new clothe') unless ($top && $bot);
+            $Opencloset::Constant::CATEOGORY_PANTS : $Opencloset::Constant::CATEOGORY_SKIRT;
+        my $bot = $self->create_cloth($bot_category_id);
+        return $self->error(500, 'failed to create a new cloth') unless ($top && $bot);
 
         if ($donor_id) {
             $top->create_related('donor_clothes', { donor_id => $donor_id });
@@ -302,23 +302,23 @@ post '/clothes' => sub {
         $bot->top_id($top->id);
         $top->update;
         $bot->update;
-        $clothe = $top;
+        $cloth = $top;
     } else {
-        $clothe = $self->create_clothe($cid);
-        return $self->error(500, 'failed to create a new clothe') unless $clothe;
+        $cloth = $self->create_cloth($cid);
+        return $self->error(500, 'failed to create a new cloth') unless $cloth;
 
         if ($donor_id) {
-            $clothe->create_related('donor_clothes', { donor_id => $donor_id });
+            $cloth->create_related('donor_clothes', { donor_id => $donor_id });
         }
     }
     # ~ COMMIT
     $guard->commit;
 
-    $self->res->headers->header('Location' => $self->url_for('/clothes/' . $clothe->no));
+    $self->res->headers->header('Location' => $self->url_for('/clothes/' . $cloth->no));
     $self->respond_to(
-        json => { json => $self->clothe2hr($clothe), status => 201 },
+        json => { json => $self->cloth2hr($cloth), status => 201 },
         html => sub {
-            $self->redirect_to('/clothes/' . $clothe->no);
+            $self->redirect_to('/clothes/' . $cloth->no);
         }
     );
 };
@@ -331,21 +331,21 @@ put '/clothes' => sub {
     my $status = $DB->resultset('Status')->find({ name => $self->param('status') });
     return $self->error(400, 'Invalid status') unless $status;
 
-    my $rs    = $DB->resultset('Clothe')->search({ 'me.id' => { -in => [split(/,/, $clothes)] } });
+    my $rs    = $DB->resultset('Cloth')->search({ 'me.id' => { -in => [split(/,/, $clothes)] } });
     my $guard = $DB->txn_scope_guard;
     my @rows;
     # BEGIN TRANSACTION ~
-    while (my $clothe = $rs->next) {
-        $clothe->status_id($status->id);
-        $clothe->update;
-        push @rows, { $clothe->get_columns };
+    while (my $cloth = $rs->next) {
+        $cloth->status_id($status->id);
+        $cloth->update;
+        push @rows, { $cloth->get_columns };
     }
     # ~ COMMIT
     $guard->commit;
 
     $self->respond_to(
         json => { json => [@rows] },
-        html => { template => 'clothes' }    # TODO: `clothe.html.haml`
+        html => { template => 'clothes' }    # TODO: `cloth.html.haml`
     );
 };
 
@@ -373,33 +373,33 @@ get '/clothes/new' => sub {
 get '/clothes/:no' => sub {
     my $self = shift;
     my $no = $self->param('no');
-    my $clothe = $DB->resultset('Clothe')->find({ no => $no });
-    return $self->error(404, "Not found `$no`") unless $clothe;
+    my $cloth = $DB->resultset('Cloth')->find({ no => $no });
+    return $self->error(404, "Not found `$no`") unless $cloth;
 
-    my $co_rs = $clothe->clothe_orders->search({
-        'order.status_id' => { -in => [$Opencloset::Constant::STATUS_RENT, $clothe->status_id] },
+    my $co_rs = $cloth->cloth_orders->search({
+        'order.status_id' => { -in => [$Opencloset::Constant::STATUS_RENT, $cloth->status_id] },
     }, {
         join => 'order'
     })->next;
 
     unless ($co_rs) {
         $self->respond_to(
-            json => { json => $self->clothe2hr($clothe) },
-            html => { template => 'clothes/no', clothe => $clothe }    # also, CODEREF is OK
+            json => { json => $self->cloth2hr($cloth) },
+            html => { template => 'clothes/no', cloth => $cloth }    # also, CODEREF is OK
         );
         return;
     }
 
     my @with;
     my $order = $co_rs->order;
-    for my $_clothe ($order->clothes) {
-        next if $_clothe->id == $clothe->id;
-        push @with, $self->clothe2hr($_clothe);
+    for my $_cloth ($order->cloths) {
+        next if $_cloth->id == $cloth->id;
+        push @with, $self->cloth2hr($_cloth);
     }
 
     my $overdue = $self->overdue_calc($order->target_date, DateTime->now);
     my %columns = (
-        %{ $self->clothe2hr($clothe) },
+        %{ $self->cloth2hr($cloth) },
         rental_date => {
             raw => $order->rental_date,
             md  => $order->rental_date->month . '/' . $order->rental_date->day,
@@ -422,7 +422,7 @@ get '/clothes/:no' => sub {
 
     $self->respond_to(
         json => { json => { %columns } },
-        html => { template => 'clothes/no', clothe => $clothe }    # also, CODEREF is OK
+        html => { template => 'clothes/no', cloth => $cloth }    # also, CODEREF is OK
     );
 };
 
@@ -443,7 +443,7 @@ get '/search' => sub {
     $cond->{'me.status_id'} = $status_id if $status_id;
 
     ### row, current_page, count
-    my $clothes = $DB->resultset('Clothe')->search(
+    my $clothes = $DB->resultset('Cloth')->search(
         $cond,
         {
             page     => $self->param('p') || 1,
@@ -511,14 +511,14 @@ post '/orders' => sub {
     my $self = shift;
 
     my $validator = $self->create_validator;
-    $validator->field([qw/gid clothe-id/])
+    $validator->field([qw/gid cloth-id/])
         ->each(sub { shift->required(1)->regexp(qr/^\d+$/) });
 
     return $self->error(400, 'failed to validate')
         unless $self->validate($validator);
 
     my $guest   = $DB->resultset('Guest')->find({ id => $self->param('gid') });
-    my @clothes = $DB->resultset('Clothe')->search({ 'me.id' => { -in => [$self->param('clothe-id')] } });
+    my @clothes = $DB->resultset('Cloth')->search({ 'me.id' => { -in => [$self->param('cloth-id')] } });
 
     return $self->error(400, 'invalid request') unless $guest || @clothes;
 
@@ -530,8 +530,8 @@ post '/orders' => sub {
             guest_id  => $guest->id,
         });
 
-        for my $clothe (@clothes) {
-            $order->create_related('clothe_orders', { clothe_id => $clothe->id });
+        for my $cloth (@clothes) {
+            $order->create_related('cloth_orders', { cloth_id => $cloth->id });
         }
         $guard->commit;
         # ~ COMMIT
@@ -568,10 +568,10 @@ get '/orders/:id' => sub {
     my $order = $DB->resultset('Order')->find({ id => $self->param('id') });
     return $self->error(404, "Not found") unless $order;
 
-    my @clothes = $order->clothes;
+    my @clothes = $order->cloths;
     my $price = 0;
-    for my $clothe (@clothes) {
-        $price += $clothe->category->price;
+    for my $cloth (@clothes) {
+        $price += $cloth->category->price;
     }
 
     my $overdue  = $order->target_date ? $self->overdue_calc($order->target_date, DateTime->now()) : 0;
@@ -579,12 +579,12 @@ get '/orders/:id' => sub {
 
     my $c_jacket = $DB->resultset('Category')->find({ name => 'jacket' });
     my $cond = { category_id => $c_jacket->id };
-    my $clothe = $order->clothes($cond)->next;
+    my $cloth = $order->cloths($cond)->next;
 
     my $satisfaction;
-    if ($clothe) {
-        $satisfaction = $clothe->satisfactions({
-            clothe_id => $clothe->id,
+    if ($cloth) {
+        $satisfaction = $cloth->satisfactions({
+            cloth_id => $cloth->id,
             guest_id  => $order->guest->id,
         })->next;
     }
@@ -663,7 +663,7 @@ any [qw/post put patch/] => '/orders/:id' => sub {
         my $missing_clothes = $self->param('missing_clothes') || '';
         if ($missing_clothes) {
             $status_id = $Opencloset::Constant::STATUS_PARTIAL_RETURN;
-            @missing_clothes = $DB->resultset('Clothe')->search({
+            @missing_clothes = $DB->resultset('Cloth')->search({
                 'me.no' => { -in => [split(/,/, $missing_clothes)] }
             });
         }
@@ -679,29 +679,29 @@ any [qw/post put patch/] => '/orders/:id' => sub {
         if $status_id == $Opencloset::Constant::STATUS_RENT;
     $order->update;
 
-    for my $clothe ($order->clothes) {
+    for my $cloth ($order->cloths) {
         if ($order->status_id == $Opencloset::Constant::STATUS_RENT) {
-            $clothe->status_id($Opencloset::Constant::STATUS_RENT);
+            $cloth->status_id($Opencloset::Constant::STATUS_RENT);
         } else {
-            next if grep { $clothe->id == $_->id } @missing_clothes;
-            if ($clothe->category_id == $Opencloset::Constant::CATEOGORY_SHOES ||
-                  $clothe->category_id == $Opencloset::Constant::CATEOGORY_TIE ||
-                  $clothe->category_id == $Opencloset::Constant::CATEOGORY_HAT) {
-                $clothe->status_id($Opencloset::Constant::STATUS_AVAILABLE);    # Shoes, Tie, Hat
+            next if grep { $cloth->id == $_->id } @missing_clothes;
+            if ($cloth->category_id == $Opencloset::Constant::CATEOGORY_SHOES ||
+                  $cloth->category_id == $Opencloset::Constant::CATEOGORY_TIE ||
+                  $cloth->category_id == $Opencloset::Constant::CATEOGORY_HAT) {
+                $cloth->status_id($Opencloset::Constant::STATUS_AVAILABLE);    # Shoes, Tie, Hat
             } else {
                 # otherwise
-                if ($clothe->status_id != $Opencloset::Constant::STATUS_AVAILABLE) {
-                    $clothe->status_id($Opencloset::Constant::STATUS_WASHING);
+                if ($cloth->status_id != $Opencloset::Constant::STATUS_AVAILABLE) {
+                    $cloth->status_id($Opencloset::Constant::STATUS_WASHING);
                 }
             }
         }
-        $clothe->update;
+        $cloth->update;
     }
 
-    for my $clothe (@missing_clothes) {
-        $self->app->log->debug('##########' . $clothe->no);
-        $clothe->status_id($Opencloset::Constant::STATUS_PARTIAL_RETURN);
-        $clothe->update;
+    for my $cloth (@missing_clothes) {
+        $self->app->log->debug('##########' . $cloth->no);
+        $cloth->status_id($Opencloset::Constant::STATUS_PARTIAL_RETURN);
+        $cloth->update;
     }
     $guard->commit;
     # ~ COMMIT
@@ -713,12 +713,12 @@ any [qw/post put patch/] => '/orders/:id' => sub {
         # $order
         my $c_jacket = $DB->resultset('Category')->find({ name => 'jacket' });
         my $cond = { category_id => $c_jacket->id };
-        my $clothe = $order->clothes($cond)->next;
-        if ($clothe) {
+        my $cloth = $order->cloths($cond)->next;
+        if ($cloth) {
             $DB->resultset('Satisfaction')->update_or_create({
                 %satisfaction,
                 guest_id  => $order->guest_id,
-                clothe_id => $clothe->id,
+                cloth_id => $cloth->id,
             });
         }
     }
@@ -737,9 +737,9 @@ del '/orders/:id' => sub {
     my $order = $DB->resultset('Order')->find({ id => $self->param('id') });
     return $self->error(404, "Not found") unless $order;
 
-    for my $clothe ($order->clothes) {
-        $clothe->status_id($Opencloset::Constant::STATUS_AVAILABLE);
-        $clothe->update;
+    for my $cloth ($order->cloths) {
+        $cloth->status_id($Opencloset::Constant::STATUS_AVAILABLE);
+        $cloth->update;
     }
 
     $order->delete;
@@ -807,11 +807,11 @@ __DATA__
 - title $meta->{$id}{text};
 
 .row
-  %form#clothe-search-form.form-inline
+  %form#cloth-search-form.form-inline
     .input-group.col-sm-3
-      %input#clothe-id.form-control{ :type => 'text', :placeholder => '품번' }
+      %input#cloth-id.form-control{ :type => 'text', :placeholder => '품번' }
       %span.input-group-btn
-        %button#btn-clothe-search.btn.btn-sm.btn-default{ :type => 'button' }
+        %button#btn-cloth-search.btn.btn-sm.btn-default{ :type => 'button' }
           %i.icon-search.bigger-110 검색
         %button#btn-clear.btn.btn.btn-sm.btn-default{:type => 'button'}
           %i.icon-eraser.bigger-110 지우기
@@ -832,7 +832,7 @@ __DATA__
         <a class="btn btn-success btn-mini" href="/orders/<%= order_id %>">주문서</a>
         <a href="/clothes/<%= no %>"><%= category %></a>
         <span class="order-status label"><%= status %></span> with
-        <% _.each(clothes, function(clothe) { %> <a href="/clothes/<%= clothe.no %>"><%= clothe.category %></a><% }); %>
+        <% _.each(clothes, function(cloth) { %> <a href="/clothes/<%= cloth.no %>"><%= cloth.category %></a><% }); %>
         <a class="history-link" href="/orders/<%= order_id %>">
           <time class="js-relative-date" datetime="<%= rental_date.raw %>" title="<%= rental_date.ymd %>"><%= rental_date.md %></time>
           ~
@@ -851,9 +851,9 @@ __DATA__
 
 :plain
   <script id="tpl-row-checkbox" type="text/html">
-    <li class="row-checkbox" data-clothe-id="<%= id %>">
+    <li class="row-checkbox" data-cloth-id="<%= id %>">
       <label class="checkbox">
-        <input type="checkbox" checked="checked" data-clothe-id="<%= id %>">
+        <input type="checkbox" checked="checked" data-cloth-id="<%= id %>">
         <a href="/clothes/<%= no %>"><%= category %></a>
         <span class="order-status label"><%= status %></span>
       </label>
@@ -1184,64 +1184,64 @@ __DATA__
 
 @@ clothes/no.html.haml
 - layout 'default';
-- title 'clothes/' . $clothe->no;
+- title 'clothes/' . $cloth->no;
 
 %h1
-  %a{:href => ''}= $clothe->no
-  %span - #{$clothe->category->name}
+  %a{:href => ''}= $cloth->no
+  %span - #{$cloth->category->name}
 
 .row
   .span8
-    - if ($clothe->status->name eq '대여가능') {
-      %span.label.label-success= $clothe->status->name
-    - } elsif ($clothe->status->name eq '대여중') {
-      %span.label.label-important= $clothe->status->name
-      - if (my $order = $clothe->orders({ status_id => 2 })->next) {
+    - if ($cloth->status->name eq '대여가능') {
+      %span.label.label-success= $cloth->status->name
+    - } elsif ($cloth->status->name eq '대여중') {
+      %span.label.label-important= $cloth->status->name
+      - if (my $order = $cloth->orders({ status_id => 2 })->next) {
         - if ($order->target_date) {
           %small.highlight{:title => '반납예정일'}
             %a{:href => "/orders/#{$order->id}"}= $order->target_date->ymd
         - }
       - }
     - } else {
-      %span.label= $clothe->status->name
+      %span.label= $cloth->status->name
     - }
 
     %span
-      - if ($clothe->top) {
-        %a{:href => '/clothes/#{$clothe->top->no}'}= $clothe->top->no
+      - if ($cloth->top) {
+        %a{:href => '/clothes/#{$cloth->top->no}'}= $cloth->top->no
       - }
-      - if ($clothe->bottom) {
-        %a{:href => '/clothes/#{$clothe->bottom->no}'}= $clothe->bottom->no
+      - if ($cloth->bottom) {
+        %a{:href => '/clothes/#{$cloth->bottom->no}'}= $cloth->bottom->no
       - }
 
     %div
-      %img.img-polaroid{:src => 'http://placehold.it/200x200', :alt => '#{$clothe->no}'}
+      %img.img-polaroid{:src => 'http://placehold.it/200x200', :alt => '#{$cloth->no}'}
 
     %div
-      - if ($clothe->chest) {
+      - if ($cloth->chest) {
         %span.label.label-info.search-label
-          %a{:href => "#{url_with('/search')->query([q => $clothe->chest])}///1"}= $clothe->chest
+          %a{:href => "#{url_with('/search')->query([q => $cloth->chest])}///1"}= $cloth->chest
       - }
-      - if ($clothe->waist) {
+      - if ($cloth->waist) {
         %span.label.label-info.search-label
-          %a{:href => "#{url_with('/search')->query([q => '/' . $clothe->waist . '//1'])}"}= $clothe->waist
+          %a{:href => "#{url_with('/search')->query([q => '/' . $cloth->waist . '//1'])}"}= $cloth->waist
       - }
-      - if ($clothe->arm) {
+      - if ($cloth->arm) {
         %span.label.label-info.search-label
-          %a{:href => "#{url_with('/search')->query([q => '//' . $clothe->arm])}/1"}= $clothe->arm
+          %a{:href => "#{url_with('/search')->query([q => '//' . $cloth->arm])}/1"}= $cloth->arm
       - }
       - for my $column (qw/length foot/) {
-        - if ($clothe->$column) {
-          %span.label.label-info.search-label{:class => 'category-#{$column}'}= $clothe->$column
+        - if ($cloth->$column) {
+          %span.label.label-info.search-label{:class => 'category-#{$column}'}= $cloth->$column
         - }
       - }
-    - if ($clothe->donor) {
-      %h3= $clothe->donor->name
+    - if ($cloth->donor) {
+      %h3= $cloth->donor->name
       %p.muted 님께서 기증하셨습니다
     - }
   .span4
     %ul
-      - for my $order ($clothe->orders({ status_id => { '!=' => undef } }, { order_by => { -desc => [qw/rental_date/] } })) {
+      - for my $order ($cloth->orders({ status_id => { '!=' => undef } }, { order_by => { -desc => [qw/rental_date/] } })) {
         %li
           %a{:href => '/guests/#{$order->guest->id}/size'}= $order->guest->name
           님
@@ -1341,10 +1341,10 @@ __DATA__
     %input.input-medium.search-query{:type => 'text', :id => 'search-query', :name => 'q', :placeholder => '이메일, 이름 또는 휴대폰번호'}
     %button.btn{:type => 'submit'} 검색
 
-%form#clothe-search-form.form-inline
+%form#cloth-search-form.form-inline
   .input-append
-    %input#clothe-id.input-large{:type => 'text', :placeholder => '품번'}
-    %button#btn-clothe-search.btn{:type => 'button'} 검색
+    %input#cloth-id.input-large{:type => 'text', :placeholder => '품번'}
+    %button#btn-cloth-search.btn{:type => 'button'} 검색
   %button#btn-clear.btn{:type => 'button'} Clear
 
 %form#order-form{:method => 'post', :action => '/orders'}
@@ -1362,7 +1362,7 @@ __DATA__
 
 :plain
   <script id="tpl-row-checkbox" type="text/html">
-    <li class="row-checkbox" data-clothe-id="<%= id %>">
+    <li class="row-checkbox" data-cloth-id="<%= id %>">
       <% if (!/^대여가능/.test(status)) { %>
       <label>
         <a href="/clothes/<%= no %>"><%= category %></a>
@@ -1374,7 +1374,7 @@ __DATA__
       </label>
       <% } else { %>
       <label class="checkbox">
-        <input type="checkbox" name="clothe-id" value="<%= id %>" checked="checked" data-clothe-id="<%= id %>">
+        <input type="checkbox" name="cloth-id" value="<%= id %>" checked="checked" data-cloth-id="<%= id %>">
         <a href="/clothes/<%= no %>"><%= category %></a>
         <span class="order-status label"><%= status %></span>
         <strong><%= price %></strong>
@@ -1432,22 +1432,22 @@ __DATA__
 %form.form-horizontal{:method => 'post', :action => ''}
   %legend
     - my $loop = 0;
-    - for my $clothe (@$clothes) {
+    - for my $cloth (@$clothes) {
       - $loop++;
       - if ($loop == 1) {
         %span
-          %a{:href => '/clothes/#{$clothe->no}'}= $clothe->category->name
-          %small.highlight= commify($clothe->category->price)
+          %a{:href => '/clothes/#{$cloth->no}'}= $cloth->category->name
+          %small.highlight= commify($cloth->category->price)
       - } elsif ($loop == 2) {
         %span
           with
-          %a{:href => '/clothes/#{$clothe->no}'}= $clothe->category->name
-          %small.highlight= commify($clothe->category->price)
+          %a{:href => '/clothes/#{$cloth->no}'}= $cloth->category->name
+          %small.highlight= commify($cloth->category->price)
       - } else {
         %span
           ,
-          %a{:href => '/clothes/#{$clothe->no}'}= $clothe->category->name
-          %small.highlight= commify($clothe->category->price)
+          %a{:href => '/clothes/#{$cloth->no}'}= $cloth->category->name
+          %small.highlight= commify($cloth->category->price)
       - }
     - }
   .control-group
@@ -1549,16 +1549,16 @@ __DATA__
 %div.pull-right= include 'guests/breadcrumb', guest => $order->guest, status_id => ''
 %p.text-info 반납품목을 확인해주세요
 #clothes-category
-  %form#form-clothe-no
+  %form#form-cloth-no
     %fieldset
       .input-append
-        %input#input-clothe-no.input-large{:type => 'text', :placeholder => '품번'}
-        %button#btn-clothe-no.btn{:type => 'button'} 입력
-      - for my $clothe (@$clothes) {
+        %input#input-cloth-no.input-large{:type => 'text', :placeholder => '품번'}
+        %button#btn-cloth-no.btn{:type => 'button'} 입력
+      - for my $cloth (@$clothes) {
         %label.checkbox
-          %input.input-clothe{:type => 'checkbox', :data-clothe-no => '#{$clothe->no}'}
-          %a{:href => '/clothes/#{$clothe->no}'}= $clothe->category->name
-          %small.highlight= commify($clothe->category->price)
+          %input.input-cloth{:type => 'checkbox', :data-cloth-no => '#{$cloth->no}'}
+          %a{:href => '/clothes/#{$cloth->no}'}= $cloth->category->name
+          %small.highlight= commify($cloth->category->price)
       - }
 %div= include 'partial/order_info'
 
@@ -1605,10 +1605,10 @@ __DATA__
 %p= include 'partial/status_label'
 %div.pull-right= include 'guests/breadcrumb', guest => $order->guest, status_id => ''
 
-- for my $clothe (@$clothes) {
+- for my $cloth (@$clothes) {
   %p
-    %a{:href => '/clothes/#{$clothe->no}'}= $clothe->category->name
-    %small.highlight= commify($clothe->category->price)
+    %a{:href => '/clothes/#{$cloth->no}'}= $cloth->category->name
+    %small.highlight= commify($cloth->category->price)
 - }
 
 %div= include 'partial/order_info'
@@ -1624,20 +1624,20 @@ __DATA__
 %p= include 'partial/status_label'
 %div.pull-right= include 'guests/breadcrumb', guest => $order->guest, status_id => ''
 #clothes-category
-  %form#form-clothe-no
+  %form#form-cloth-no
     %fieldset
       .input-append
-        %input#input-clothe-no.input-large{:type => 'text', :placeholder => '품번'}
-        %button#btn-clothe-no.btn{:type => 'button'} 입력
-      - for my $clothe (@$clothes) {
+        %input#input-cloth-no.input-large{:type => 'text', :placeholder => '품번'}
+        %button#btn-cloth-no.btn{:type => 'button'} 입력
+      - for my $cloth (@$clothes) {
         %label.checkbox
-          - if ($clothe->status_id != $Opencloset::Constant::STATUS_PARTIAL_RETURN) {
-            %input.input-clothe{:type => 'checkbox', :checked => 'checked', :data-clothe-no => '#{$clothe->no}'}
+          - if ($cloth->status_id != $Opencloset::Constant::STATUS_PARTIAL_RETURN) {
+            %input.input-cloth{:type => 'checkbox', :checked => 'checked', :data-cloth-no => '#{$cloth->no}'}
           - } else {
-            %input.input-clothe{:type => 'checkbox', :data-clothe-no => '#{$clothe->no}'}
+            %input.input-cloth{:type => 'checkbox', :data-cloth-no => '#{$cloth->no}'}
           - }
-          %a{:href => '/clothes/#{$clothe->no}'}= $clothe->category->name
-          %small.highlight= commify($clothe->category->price)
+          %a{:href => '/clothes/#{$cloth->no}'}= $cloth->category->name
+          %small.highlight= commify($cloth->category->price)
       - }
 %div= include 'partial/order_info'
 %p= commify($order->late_fee)

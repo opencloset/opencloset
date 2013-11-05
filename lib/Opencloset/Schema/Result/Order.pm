@@ -201,17 +201,17 @@ __PACKAGE__->set_primary_key("id");
 
 =head1 RELATIONS
 
-=head2 clothe_orders
+=head2 cloth_orders
 
 Type: has_many
 
-Related object: L<Opencloset::Schema::Result::ClotheOrder>
+Related object: L<Opencloset::Schema::Result::ClothOrder>
 
 =cut
 
 __PACKAGE__->has_many(
-  "clothe_orders",
-  "Opencloset::Schema::Result::ClotheOrder",
+  "cloth_orders",
+  "Opencloset::Schema::Result::ClothOrder",
   { "foreign.order_id" => "self.id" },
   { cascade_copy => 0, cascade_delete => 0 },
 );
@@ -251,19 +251,19 @@ __PACKAGE__->belongs_to(
   },
 );
 
-=head2 clothes
+=head2 cloths
 
 Type: many_to_many
 
-Composing rels: L</clothe_orders> -> clothe
+Composing rels: L</cloth_orders> -> cloth
 
 =cut
 
-__PACKAGE__->many_to_many("clothes", "clothe_orders", "clothe");
+__PACKAGE__->many_to_many("cloths", "cloth_orders", "cloth");
 
 
-# Created by DBIx::Class::Schema::Loader v0.07036 @ 2013-11-03 16:49:01
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:aGMxWeLMXbMB02ecJUqoaw
+# Created by DBIx::Class::Schema::Loader v0.07036 @ 2013-11-05 11:48:52
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:wGhWI9/5yP+QMDJN9IFGCw
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

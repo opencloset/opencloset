@@ -1,23 +1,23 @@
 $ ->
-  $('#clothe-id').focus()
+  $('#cloth-id').focus()
   $('#btn-clear').click (e) ->
     e.preventDefault()
     $('#clothes-list ul li').remove()
     $('#action-buttons').hide()
-    $('#clothe-id').focus()
-  $('#btn-clothe-search').click (e) ->
-    $('#clothe-search-form').trigger('submit')
-  $('#clothe-search-form').submit (e) ->
+    $('#cloth-id').focus()
+  $('#btn-cloth-search').click (e) ->
+    $('#cloth-search-form').trigger('submit')
+  $('#cloth-search-form').submit (e) ->
     e.preventDefault()
-    clothe_id = $('#clothe-id').val()
-    $('#clothe-id').val('').focus()
-    return unless clothe_id
-    $.ajax "/clothes/#{clothe_id}.json",
+    cloth_id = $('#cloth-id').val()
+    $('#cloth-id').val('').focus()
+    return unless cloth_id
+    $.ajax "/clothes/#{cloth_id}.json",
       type: 'GET'
       dataType: 'json'
       success: (data, textStatus, jqXHR) ->
         unless /^(대여중|연체중|부분반납)/.test(data.status)
-          return if $("#clothes-list li[data-clothe-id='#{data.id}']").length
+          return if $("#clothes-list li[data-cloth-id='#{data.id}']").length
           compiled = _.template($('#tpl-row-checkbox').html())
           $html = $(compiled(data))
           if /대여가능/.test(data.status)
@@ -45,7 +45,7 @@ $ ->
     status  = $this.data('status')
     clothes = []
     $('#clothes-list input:checked').each (i, el) ->
-      clothes.push($(el).data('clothe-id'))
+      clothes.push($(el).data('cloth-id'))
     clothes = _.uniq(clothes)
     $.ajax "/clothes.json",
       type: 'PUT'
@@ -61,4 +61,4 @@ $ ->
         alert('error', jqXHR.responseJSON.error)
       complete: (jqXHR, textStatus) ->
         $this.removeClass('disabled')
-    $('#clothe-id').focus()
+    $('#cloth-id').focus()

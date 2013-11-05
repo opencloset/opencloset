@@ -70,36 +70,36 @@
       });
     });
     clothes = [];
-    $('.input-clothe').each(function(i, el) {
-      return clothes.push($(el).data('clothe-no'));
+    $('.input-cloth').each(function(i, el) {
+      return clothes.push($(el).data('cloth-no'));
     });
-    $('#input-clothe-no').focus();
-    $('#btn-clothe-no').click(function(e) {
-      return $('#form-clothe-no').trigger('submit');
+    $('#input-cloth-no').focus();
+    $('#btn-cloth-no').click(function(e) {
+      return $('#form-cloth-no').trigger('submit');
     });
-    $('#form-clothe-no').submit(function(e) {
-      var clothe_no, found;
+    $('#form-cloth-no').submit(function(e) {
+      var cloth_no, found;
       e.preventDefault();
-      clothe_no = $('#input-clothe-no').val();
-      $('#input-clothe-no').val('').focus();
+      cloth_no = $('#input-cloth-no').val();
+      $('#input-cloth-no').val('').focus();
       found = _.find(clothes, function(val) {
-        return val === clothe_no;
+        return val === cloth_no;
       });
       if (!found) {
-        return alert("Not found " + clothe_no);
+        return alert("Not found " + cloth_no);
       }
-      return $(".input-clothe[data-clothe-no=" + found + "]").attr('checked', true);
+      return $(".input-cloth[data-cloth-no=" + found + "]").attr('checked', true);
     });
     return $('#form-return').submit(function(e) {
       var action, clothes_no;
       clothes_no = [];
-      $('.input-clothe:not(:checked)').each(function(i, el) {
-        return clothes_no.push($(el).data('clothe-no'));
+      $('.input-cloth:not(:checked)').each(function(i, el) {
+        return clothes_no.push($(el).data('cloth-no'));
       });
       console.log($.putUrlVars({
         clothes: clothes_no.join()
       }));
-      if ($('.input-clothe').length !== $('.input-clothe:checked').length) {
+      if ($('.input-cloth').length !== $('.input-cloth:checked').length) {
         if (confirm('반납품목이 제대로 체크 되지 않았습니다. 계속하시겠습니까?')) {
           action = $('#form-return').attr('action');
           $('#form-return').attr('action', "" + action + "?" + ($.putUrlVars({

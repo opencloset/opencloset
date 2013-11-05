@@ -68,7 +68,7 @@ sub run {
         my $category_id;
         my $designated_for;
         if ($opt->{category} == $Opencloset::Constant::CATEOGORY_JACKET_PANTS) {
-            $designated_for = $Opencloset::Constant::CLOTHE_DESIGNATED_FOR_MAN;
+            $designated_for = $Opencloset::Constant::CLOTH_DESIGNATED_FOR_MAN;
             if ($row->{'가슴둘레'} && $row->{'허리둘레'}) {
                 $category_id = $Opencloset::Constant::CATEOGORY_JACKET_PANTS;
             }
@@ -83,7 +83,7 @@ sub run {
                 next;
             }
         } elsif ($opt->{category} == $Opencloset::Constant::CATEOGORY_JACKET_SKIRTS) {
-            $designated_for = $Opencloset::Constant::CLOTHE_DESIGNATED_FOR_WOMAN;
+            $designated_for = $Opencloset::Constant::CLOTH_DESIGNATED_FOR_WOMAN;
             if ($row->{'가슴둘레'} && $row->{'허리둘레'}) {
                 $category_id = $Opencloset::Constant::CATEOGORY_JACKET_SKIRTS;
             }
@@ -91,7 +91,7 @@ sub run {
                 $category_id = $Opencloset::Constant::CATEOGORY_JACKET;
             }
             elsif ($row->{'허리둘레'}) {
-                $category_id = $Opencloset::Constant::CATEOGORY_SKIRTS;
+                $category_id = $Opencloset::Constant::CATEOGORY_SKIRT;
             }
             else {
                 say STDERR "[$loop] NOT FOUND category";
@@ -99,8 +99,8 @@ sub run {
             }
         } elsif ($opt->{category} == $Opencloset::Constant::CATEOGORY_SHOES) {
             $designated_for = $row->{'성별'} eq 'M' ?
-                $Opencloset::Constant::CLOTHE_DESIGNATED_FOR_MAN :
-                $Opencloset::Constant::CLOTHE_DESIGNATED_FOR_WOMAN;
+                $Opencloset::Constant::CLOTH_DESIGNATED_FOR_MAN :
+                $Opencloset::Constant::CLOTH_DESIGNATED_FOR_WOMAN;
             $row->{FootSize} = $row->{'사이즈'};
         }
 

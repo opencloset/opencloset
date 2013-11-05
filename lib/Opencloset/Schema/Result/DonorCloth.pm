@@ -1,12 +1,12 @@
 use utf8;
-package Opencloset::Schema::Result::ClotheOrder;
+package Opencloset::Schema::Result::DonorCloth;
 
 # Created by DBIx::Class::Schema::Loader
 # DO NOT MODIFY THE FIRST PART OF THIS FILE
 
 =head1 NAME
 
-Opencloset::Schema::Result::ClotheOrder
+Opencloset::Schema::Result::DonorCloth
 
 =cut
 
@@ -19,44 +19,65 @@ use warnings;
 
 use base 'Opencloset::Schema::Base';
 
-=head1 TABLE: C<clothe_order>
+=head1 TABLE: C<donor_cloth>
 
 =cut
 
-__PACKAGE__->table("clothe_order");
+__PACKAGE__->table("donor_cloth");
 
 =head1 ACCESSORS
 
-=head2 clothe_id
+=head2 donor_id
 
   data_type: 'integer'
   extra: {unsigned => 1}
   is_foreign_key: 1
   is_nullable: 0
 
-=head2 order_id
+=head2 cloth_id
 
   data_type: 'integer'
   extra: {unsigned => 1}
   is_foreign_key: 1
   is_nullable: 0
+
+=head2 comment
+
+  data_type: 'text'
+  is_nullable: 1
+
+=head2 donation_date
+
+  data_type: 'datetime'
+  datetime_undef_if_invalid: 1
+  inflate_datetime: 1
+  is_nullable: 1
 
 =cut
 
 __PACKAGE__->add_columns(
-  "clothe_id",
+  "donor_id",
   {
     data_type => "integer",
     extra => { unsigned => 1 },
     is_foreign_key => 1,
     is_nullable => 0,
   },
-  "order_id",
+  "cloth_id",
   {
     data_type => "integer",
     extra => { unsigned => 1 },
     is_foreign_key => 1,
     is_nullable => 0,
+  },
+  "comment",
+  { data_type => "text", is_nullable => 1 },
+  "donation_date",
+  {
+    data_type => "datetime",
+    datetime_undef_if_invalid => 1,
+    inflate_datetime => 1,
+    is_nullable => 1,
   },
 );
 
@@ -64,51 +85,51 @@ __PACKAGE__->add_columns(
 
 =over 4
 
-=item * L</clothe_id>
+=item * L</donor_id>
 
-=item * L</order_id>
+=item * L</cloth_id>
 
 =back
 
 =cut
 
-__PACKAGE__->set_primary_key("clothe_id", "order_id");
+__PACKAGE__->set_primary_key("donor_id", "cloth_id");
 
 =head1 RELATIONS
 
-=head2 clothe
+=head2 cloth
 
 Type: belongs_to
 
-Related object: L<Opencloset::Schema::Result::Clothe>
+Related object: L<Opencloset::Schema::Result::Cloth>
 
 =cut
 
 __PACKAGE__->belongs_to(
-  "clothe",
-  "Opencloset::Schema::Result::Clothe",
-  { id => "clothe_id" },
+  "cloth",
+  "Opencloset::Schema::Result::Cloth",
+  { id => "cloth_id" },
   { is_deferrable => 1, on_delete => "CASCADE", on_update => "RESTRICT" },
 );
 
-=head2 order
+=head2 donor
 
 Type: belongs_to
 
-Related object: L<Opencloset::Schema::Result::Order>
+Related object: L<Opencloset::Schema::Result::Donor>
 
 =cut
 
 __PACKAGE__->belongs_to(
-  "order",
-  "Opencloset::Schema::Result::Order",
-  { id => "order_id" },
+  "donor",
+  "Opencloset::Schema::Result::Donor",
+  { id => "donor_id" },
   { is_deferrable => 1, on_delete => "CASCADE", on_update => "RESTRICT" },
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07036 @ 2013-10-29 19:10:07
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:W5baS9U3CCWIrN9fwLZEsw
+# Created by DBIx::Class::Schema::Loader v0.07036 @ 2013-11-05 11:48:52
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:vDhWVNMANRdk6c7f7E5FdA
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration
