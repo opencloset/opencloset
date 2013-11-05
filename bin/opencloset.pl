@@ -871,10 +871,13 @@ __DATA__
 -   ];
 - title $meta->{$id}{text};
 
-.pull-right
-  %form.form-search{:method => 'get', :action => ''}
-    %input.input-medium.search-query{:type => 'text', :id => 'search-query', :name => 'q', :placeholder => '이메일, 이름 또는 휴대폰번호'}
-    %button.btn{:type => 'submit'} 검색
+.row
+  %form.form-search.form-inline{ :method => 'get', :action => '' }
+    .input-group.col-sm-4
+      %input#q.form-control{ :type => 'text', :placeholder => '이름 또는 이메일, 휴대전화 번호' }
+      %span.input-group-btn
+        %button#btn-cloth-search.btn.btn-sm.btn-default{ :type => 'submit' }
+          %i.icon-search.bigger-110 검색
 
 %ul
   - while(my $g = $candidates->next) {
