@@ -144,10 +144,11 @@ helper create_clothe => sub {
         map { $params{$_} = $self->param($_) } qw/foot/;
     }
 
-    $params{no}          = $no;
-    $params{donor_id}    = $self->param('donor_id');
-    $params{category_id} = $category_id;
-    $params{status_id}   = 1;
+    $params{no}             = $no;
+    $params{donor_id}       = $self->param('donor_id');
+    $params{category_id}    = $category_id;
+    $params{status_id}      = $Opencloset::Constant::STATUS_AVAILABLE;
+    $params{designated_for} = $self->param('designated_for');
 
     return $DB->resultset('Clothe')->find_or_create(\%params);
 };
@@ -246,16 +247,18 @@ post '/clothes' => sub {
     my $self = shift;
     my $validator = $self->create_validator;
     $validator->field('category_id')->required(1);
+    $validator->field('designated_for')->required(1)->regexp(qr/^[123]$/);
+
     # Jacket
-    $validator->when('category_id')->regexp(qr/^-?1$/)
+    $validator->when('category_id')->regexp(qr/^(-1|-2|1)$/)
         ->then(sub { shift->field('chest')->required(1) });
-    $validator->when('category_id')->regexp(qr/^-?1$/)
+    $validator->when('category_id')->regexp(qr/^(-1|-2|1)$/)
         ->then(sub { shift->field('arm')->required(1) });
 
-    # Pants
-    $validator->when('category_id')->regexp(qr/^(-1|2)$/)
+    # Pants, Skirts
+    $validator->when('category_id')->regexp(qr/^(-1|-2|2|10)$/)
         ->then(sub { shift->field('waist')->required(1) });
-    $validator->when('category_id')->regexp(qr/^(-1|2)$/)
+    $validator->when('category_id')->regexp(qr/^(-1|-2|2|10)$/)
         ->then(sub { shift->field('length')->required(1) });
 
     # Shoes
@@ -283,9 +286,12 @@ post '/clothes' => sub {
     my $clothe;
     my $guard = $DB->txn_scope_guard;
     # BEGIN TRANSACTION ~
-    if ($cid == -1) {
-        my $top = $self->create_clothe(1);
-        my $bot = $self->create_clothe(2);
+    if ($cid == $Opencloset::Constant::CATEOGORY_JACKET_PANTS ||
+            $cid == $Opencloset::Constant::CATEOGORY_JACKET_SKIRTS) {
+        my $top = $self->create_clothe($Opencloset::Constant::CATEOGORY_JACKET);
+        my $bot_category_id = $cid == $Opencloset::Constant::CATEOGORY_JACKET_PANTS ?
+            $Opencloset::Constant::CATEOGORY_PANTS : $Opencloset::Constant::CATEOGORY_SKIRTS;
+        my $bot = $self->create_clothe($bot_category_id);
         return $self->error(500, 'failed to create a new clothe') unless ($top && $bot);
 
         if ($donor_id) {
@@ -1715,6 +1721,17 @@ __DATA__
 %form.form-horizontal{:method => 'post', :action => '/clothes'}
   %legend 새로운 옷
   .control-group
+    .controls
+      %label.radio.inline
+        %input{:type => 'radio', :name => 'designated_for', :value => '1'}
+        남성용
+      %label.radio.inline
+        %input{:type => 'radio', :name => 'designated_for', :value => '2'}
+        여성용
+      %label.radio.inline
+        %input{:type => 'radio', :name => 'designated_for', :value => '3'}
+        남여공용
+  .control-group
     %label.control-label{:for => 'input-category'} 기증해주신 분
     .controls
       - for my $donor (@$donors) {
@@ -1725,6 +1742,7 @@ __DATA__
     .controls
       %select{:name => 'category_id'}
         %option{:value => '-1'} Jacket & Pants
+        %option{:value => '-2'} Jacket & Skirts
         - for my $c (@$categories) {
           %option{:value => '#{$c->id}'}= $c->name
         - }

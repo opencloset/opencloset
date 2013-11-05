@@ -65,6 +65,11 @@ __PACKAGE__->table("clothe");
   data_type: 'integer'
   is_nullable: 1
 
+=head2 designated_for
+
+  data_type: 'integer'
+  is_nullable: 1
+
 =head2 category_id
 
   data_type: 'integer'
@@ -122,6 +127,8 @@ __PACKAGE__->add_columns(
   "length",
   { data_type => "integer", is_nullable => 1 },
   "foot",
+  { data_type => "integer", is_nullable => 1 },
+  "designated_for",
   { data_type => "integer", is_nullable => 1 },
   "category_id",
   {
@@ -370,8 +377,8 @@ Composing rels: L</clothe_orders> -> order
 __PACKAGE__->many_to_many("orders", "clothe_orders", "order");
 
 
-# Created by DBIx::Class::Schema::Loader v0.07036 @ 2013-11-04 15:29:44
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:4q/OOQXuSQBJNSoNmu5nyQ
+# Created by DBIx::Class::Schema::Loader v0.07036 @ 2013-11-04 21:09:06
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:NAohGeUrjqkEKjZ//2xQKA
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

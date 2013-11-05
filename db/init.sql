@@ -99,6 +99,8 @@ CREATE TABLE `clothe` (
   `length`      INT DEFAULT NULL, -- 기장(cm)
   `foot`        INT DEFAULT NULL, -- 발크기(mm)
 
+  `designated_for` INT DEFAULT NULL, -- 1: man, 2: woman, 3: unisex
+
   `category_id` INT UNSIGNED NOT NULL,
   `top_id`      INT UNSIGNED DEFAULT NULL,
   `bottom_id`   INT UNSIGNED DEFAULT NULL,
