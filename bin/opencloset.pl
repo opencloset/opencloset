@@ -808,7 +808,7 @@ __DATA__
 
 .row
   %form#cloth-search-form.form-inline
-    .input-group.col-sm-3
+    .input-group.col-sm-6
       %input#cloth-id.form-control{ :type => 'text', :placeholder => '품번' }
       %span.input-group-btn
         %button#btn-cloth-search.btn.btn-sm.btn-default{ :type => 'button' }
