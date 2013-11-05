@@ -91,13 +91,13 @@ sub run {
             when ('woman') {
                 $designated_for = $Opencloset::Constant::CLOTH_DESIGNATED_FOR_WOMAN;
                 if ($row->{'가슴둘레'} && $row->{'허리둘레'}) {
-                    $category_id = $Opencloset::Constant::CATEOGORY_JACKET_SKIRTS;
+                    $category_id = $Opencloset::Constant::CATEOGORY_JACKET_SKIRT;
                 }
                 elsif ($row->{'가슴둘레'}) {
                     $category_id = $Opencloset::Constant::CATEOGORY_JACKET;
                 }
                 elsif ($row->{'허리둘레'}) {
-                    $category_id = $Opencloset::Constant::CATEOGORY_SKIRTS;
+                    $category_id = $Opencloset::Constant::CATEOGORY_SKIRT;
                 }
                 else {
                     say STDERR "[$loop] NOT FOUND category";

@@ -287,7 +287,7 @@ post '/clothes' => sub {
     my $guard = $DB->txn_scope_guard;
     # BEGIN TRANSACTION ~
     if ($cid == $Opencloset::Constant::CATEOGORY_JACKET_PANTS ||
-            $cid == $Opencloset::Constant::CATEOGORY_JACKET_SKIRTS) {
+            $cid == $Opencloset::Constant::CATEOGORY_JACKET_SKIRT) {
         my $top = $self->create_cloth($Opencloset::Constant::CATEOGORY_JACKET);
         my $bot_category_id = $cid == $Opencloset::Constant::CATEOGORY_JACKET_PANTS ?
             $Opencloset::Constant::CATEOGORY_PANTS : $Opencloset::Constant::CATEOGORY_SKIRT;
