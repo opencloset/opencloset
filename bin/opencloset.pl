@@ -425,7 +425,7 @@ get '/search' => sub {
 
     my $q                = $self->param('q')                || q{};
     my $gid              = $self->param('gid')              || q{};
-    my $entries_per_page = $self->param('entries_per_page') || 10;
+    my $entries_per_page = $self->param('entries_per_page') || app->config->{entries_per_page};
 
     my $guest    = $gid ? $DB->resultset('Guest')->find({ id => $gid }) : undef;
     my $c_jacket = $DB->resultset('Category')->find({ name => 'jacket' });

@@ -56,4 +56,9 @@ $db_opts->{AutoCommit} //= 1;
             { id => 'search'       },
         ],
     },
+
+    #
+    # page
+    #
+    entries_per_page => 20,
 };
