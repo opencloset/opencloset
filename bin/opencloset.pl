@@ -1105,7 +1105,7 @@ __DATA__
 -   ];
 - title $meta->{$id}{text};
 
-.pull-right
+%div
   %p
     %span.badge.badge-inverse 매우작음
     %span.badge 작음
@@ -1130,7 +1130,7 @@ __DATA__
 
 %div= include 'guests/breadcrumb', guest => $guest if $guest
 
-.row-fluid
+.row
   %ul.ace-thumbnails
     - while (my $c = $clothes->next) {
       %li
@@ -1168,7 +1168,7 @@ __DATA__
             - }
     - } # end of while
 
-%div.row.center
+.row.center
   = include 'pagination'
 
 
@@ -1804,7 +1804,6 @@ __DATA__
 @@ layouts/default/before-css.html.haml
 / CSS
     %link{:rel => "stylesheet", :href => "/lib/bootstrap/css/bootstrap.min.css"}
-    %link{:rel => "stylesheet", :href => "/lib/bootstrap/css/bootstrap-responsive.min.css"}
     %link{:rel => "stylesheet", :href => "/lib/font-awesome/css/font-awesome.min.css"}
     /[if IE 7]
       %link{:rel => "stylesheet", :href => "/lib/font-awesome/css/font-awesome-ie7.min.css"}
