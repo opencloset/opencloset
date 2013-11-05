@@ -812,17 +812,18 @@ __DATA__
 - layout 'default', active_id => $id;
 - title $meta->{$id}{text};
 
-.row
-  %form#cloth-search-form.form-inline
-    .input-group.col-sm-6
+.search
+  %form#cloth-search-form
+    .input-group
       %input#cloth-id.form-control{ :type => 'text', :placeholder => '품번' }
       %span.input-group-btn
         %button#btn-cloth-search.btn.btn-sm.btn-default{ :type => 'button' }
           %i.icon-search.bigger-110 검색
+      %span.input-group-btn
         %button#btn-clear.btn.btn.btn-sm.btn-default{:type => 'button'}
           %i.icon-eraser.bigger-110 지우기
 
-.row#clothes-list
+#clothes-list
   %ul
   #action-buttons{:style => 'display: none'}
     %span 선택한 항목을
@@ -877,9 +878,9 @@ __DATA__
 -   ];
 - title $meta->{$id}{text};
 
-.row
-  %form.form-search.form-inline{ :method => 'get', :action => '' }
-    .input-group.col-sm-4
+.search
+  %form{ :method => 'get', :action => '' }
+    .input-group
       %input#q.form-control{ :type => 'text', :name => 'q', :placeholder => '이름 또는 이메일, 휴대전화 번호' }
       %span.input-group-btn
         %button#btn-cloth-search.btn.btn-sm.btn-default{ :type => 'submit' }
@@ -1123,73 +1124,83 @@ __DATA__
 - title $meta->{$id}{text};
 
 .row
-  %p
-    %span.badge.badge-inverse 매우작음
-    %span.badge 작음
-    %span.badge.badge-success 맞음
-    %span.badge.badge-warning 큼
-    %span.badge.badge-important 매우큼
-  %p.muted
-    %span.text-info 상태
-    1: 대여가능, 2: 대여중, 3: 세탁, 4: 수선, 5: 대여불가, 7: 분실
+  .col-xs-12
+    %p
+      %span.badge.badge-inverse 매우작음
+      %span.badge 작음
+      %span.badge.badge-success 맞음
+      %span.badge.badge-warning 큼
+      %span.badge.badge-important 매우큼
+    %p.muted
+      %span.text-info 상태
+      1: 대여가능, 2: 대여중, 3: 세탁, 4: 수선, 5: 대여불가, 7: 분실
 
 .row
-  %form.form-search.form-inline{ :method => 'get', :action => '' }
-    .input-group.col-sm-3
-      %input{:type => 'hidden', :name => 'gid', :value => "#{$gid}"}
-      %input#q.form-control{ :type => 'text', :placeholder => '가슴/허리/팔/상태', :name => 'q', :value => "#{$q}" }
-      %span.input-group-btn
-        %button#btn-cloth-search.btn.btn-sm.btn-default{ :type => 'submit' }
-          %i.icon-search.bigger-110 검색
-
-- if ($q) {
-  %p
-    %strong= $q
-    %span.muted 의 검색결과
-- }
-
-%div= include 'guests/breadcrumb', guest => $guest if $guest
+  .col-xs-12
+    .search
+      %form{ :method => 'get', :action => '' }
+        .input-group
+          %input#gid{:type => 'hidden', :name => 'gid', :value => "#{$gid}"}
+          %input#q.form-control{ :type => 'text', :placeholder => '가슴/허리/팔/상태', :name => 'q', :value => "#{$q}" }
+          %span.input-group-btn
+            %button#btn-cloth-search.btn.btn-sm.btn-default{ :type => 'submit' }
+              %i.icon-search.bigger-110 검색
 
 .row
-  %ul.ace-thumbnails
-    - while (my $c = $clothes->next) {
-      %li
-        %a{:href => '/clothes/#{$c->no}'}
-          %img{:src => 'http://placehold.it/160x160', :alt => '#{$c->no}'}
+  .col-xs-12
+    - if ($q) {
+      %p
+        %strong= $q
+        %span.muted 의 검색결과
+    - }
 
-        .tags-top-ltr
-          %span.label-holder
-            %span.label.label-warning.search-label
-              %a{:href => '/clothes/#{$c->no}'}= $c->no
+.row
+  .col-xs-12
+    = include 'guests/breadcrumb', guest => $guest if $guest
 
-        .tags
-          %span.label-holder
-            %span.label.label-info.search-label
-              %a{:href => "#{url_with->query([p => 1, q => $c->chest . '///' . $status_id])}"}= $c->chest
-            - if ($c->bottom) {
+.row
+  .col-xs-12
+    %ul.ace-thumbnails
+      - while (my $c = $clothes->next) {
+        %li
+          %a{:href => '/clothes/#{$c->no}'}
+            %img{:src => 'http://placehold.it/160x160', :alt => '#{$c->no}'}
+
+          .tags-top-ltr
+            %span.label-holder
+              %span.label.label-warning.search-label
+                %a{:href => '/clothes/#{$c->no}'}= $c->no
+
+          .tags
+            %span.label-holder
               %span.label.label-info.search-label
-                %a{:href => "#{url_with->query([p => 1, q => '/' . $c->bottom->waist . '//' . $status_id])}"}= $c->bottom->waist
-            - }
-            %span.label.label-info.search-label
-              %a{:href => "#{url_with->query([p => 1, q => '//' . $c->arm . '/' . $status_id])}"}= $c->arm
-
-          %span.label-holder
-            - if ($c->status->name eq '대여가능') {
-              %span.label.label-success= $c->status->name
-            - }
-            - elsif ($c->status->name eq '대여중') {
-              %span.label.label-important= $c->status->name
-              - if (my $order = $c->orders({ status_id => 2 })->next) {
-                %small.muted{:title => '반납예정일'}= $order->target_date->ymd if $order->target_date
+                %a{:href => "#{url_with->query([p => 1, q => $c->chest . '///' . $status_id])}"}= $c->chest
+              - if ($c->bottom) {
+                %span.label.label-info.search-label
+                  %a{:href => "#{url_with->query([p => 1, q => '/' . $c->bottom->waist . '//' . $status_id])}"}= $c->bottom->waist
               - }
-            - }
-            - else {
-              %span.label= $c->status->name
-            - }
-    - } # end of while
+              %span.label.label-info.search-label
+                %a{:href => "#{url_with->query([p => 1, q => '//' . $c->arm . '/' . $status_id])}"}= $c->arm
 
-.row.center
-  = include 'pagination'
+            %span.label-holder
+              - if ($c->status->name eq '대여가능') {
+                %span.label.label-success= $c->status->name
+              - }
+              - elsif ($c->status->name eq '대여중') {
+                %span.label.label-important= $c->status->name
+                - if (my $order = $c->orders({ status_id => 2 })->next) {
+                  %small.muted{:title => '반납예정일'}= $order->target_date->ymd if $order->target_date
+                - }
+              - }
+              - else {
+                %span.label= $c->status->name
+              - }
+      - } # end of while
+
+.row
+  .col-xs-12
+    .center
+      = include 'pagination'
 
 
 @@ clothes/no.html.haml
@@ -1351,11 +1362,16 @@ __DATA__
     %input.input-medium.search-query{:type => 'text', :id => 'search-query', :name => 'q', :placeholder => '이메일, 이름 또는 휴대폰번호'}
     %button.btn{:type => 'submit'} 검색
 
-%form#cloth-search-form.form-inline
-  .input-append
-    %input#cloth-id.input-large{:type => 'text', :placeholder => '품번'}
-    %button#btn-cloth-search.btn{:type => 'button'} 검색
-  %button#btn-clear.btn{:type => 'button'} Clear
+.search
+  %form#cloth-search-form
+    .input-group
+      %input#cloth-id.form-control{ :type => 'text', :placeholder => '품번' }
+      %span.input-group-btn
+        %button#btn-cloth-search.btn.btn-sm.btn-default{ :type => 'button' }
+          %i.icon-search.bigger-110 검색
+      %span.input-group-btn
+        %button#btn-clear.btn.btn.btn-sm.btn-default{:type => 'button'}
+          %i.icon-eraser.bigger-110 지우기
 
 %form#order-form{:method => 'post', :action => '/orders'}
   .row
