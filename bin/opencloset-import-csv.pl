@@ -11,6 +11,7 @@ use HTTP::Request;
 use JSON;
 use LWP::UserAgent;
 use Text::CSV;
+use Opencloset::Constant;
 
 my ( $opt, $usage ) = do {
     my $URL = $ENV{OPENCLOSET_URL} || 'http://localhost:5000';
@@ -20,6 +21,7 @@ my ( $opt, $usage ) = do {
         [ 'url=s',  "opencloset url (default: $URL)", { default => $URL } ],
         [],
         [ 'help|h', 'print usage message and exit' ],
+        [ 'category=s', '-1: Jacket & Pants, -2: Jacket & Skirts, 4: Shoes' ],
     );
 };
 
@@ -39,21 +41,6 @@ sub run {
 
     my @headers = map { s/(^\s+|\s+$)//g; $_ } @{ $csv->getline($fh) };
     $csv->column_names(@headers);
-
-    ## 남성정장 - 가슴둘레, 허리둘레, 팔길이, 바지기장
-    ## , 코드번호, , 성별, 복종, 번호, 가슴둘레, 팔길이, 허리둘레, 바지기장, 밑단 (인치), 색상, 패턴, 계절, 상의허리, 어깨, 소매통, 상의총길이, 엉덩이둘레, 허벅지둘레, 밑위, , , 기증자, 기증일시, 기증벌수, 연락처, 이메일, 주소, SNS, 기증벌수, 기증내역, 기증메세지, 경험공유여부,
-
-    ## 구두 - 성별(M|W), 사이즈
-    ## 코드번호,성별,색상,번호,사이즈,브랜드,특징,기증자,기증일시
-
-    ## 여성정장 상의 - 성별, 가슴둘레, 소매길이
-    ## ,코드번호,성별,복종,번호,어깨넓이,가슴둘레,허리둘레,기장,색상,패턴,계절,상의허리,소매길이,소매통,상의총길이,엉덩이둘레 ,밑단,허벅지둘레,밑위,,기증자,기증일시,기증벌수,연락처,이메일,주소 ,SNS,기증벌수,기증내역,기증메세지,경험공유여부
-
-    ## 여성정장 - 가슴둘레, 팔길이, 허리둘레, 기장
-    ## ,코드번호,,성별,복종,번호,사이즈,가슴둘레,팔길이,허리둘레,기장,색상,패턴,계절,상의허리,어깨넓이,소매통,상의총길이,엉덩이둘레 ,밑단,허벅지둘레,밑위,,기증자,서울시민열린옷장,기증일시,기증벌수,연락처,이메일,주소 ,SNS,기증벌수,기증내역,기증메세지,경험공유여부
-
-    ## 여성정장 하의 - 성별, 허리둘레, 기장
-    ## 코드번호,성별,복종,번호,어깨넓이,가슴둘레,허리둘레,기장,색상,패턴,계절,상의허리,소매길이,소매통,상의총길이,엉덩이둘레 ,밑단,허벅지둘레,밑위,,기증자,기증일시,기증벌수,연락처,이메일,주소 ,SNS,기증벌수,기증내역,기증메세지,경험공유여부
 
     my $ua = LWP::UserAgent->new;
 
@@ -77,29 +64,56 @@ sub run {
     my ( $success, $fail ) = ( 0, 0 );
     while (my $row = $csv->getline_hr($fh)) {
         $loop++;
+
         my $category_id;
-        if ($row->{'가슴둘레'} && $row->{'허리둘레'}) {
-            $category_id = -1;
-        }
-        elsif ($row->{'가슴둘레'}) {
-            $category_id = 1;
-        }
-        elsif ($row->{'허리둘레'}) {
-            $category_id = 2;
-        }
-        else {
-            say STDERR "[$loop] NOT FOUND category";
-            next;
+        my $designated_for;
+        if ($opt->{category} == $Opencloset::Constant::CATEOGORY_JACKET_PANTS) {
+            $designated_for = $Opencloset::Constant::CLOTHE_DESIGNATED_FOR_MAN;
+            if ($row->{'가슴둘레'} && $row->{'허리둘레'}) {
+                $category_id = $Opencloset::Constant::CATEOGORY_JACKET_PANTS;
+            }
+            elsif ($row->{'가슴둘레'}) {
+                $category_id = $Opencloset::Constant::CATEOGORY_JACKET;
+            }
+            elsif ($row->{'허리둘레'}) {
+                $category_id = $Opencloset::Constant::CATEOGORY_PANTS;
+            }
+            else {
+                say STDERR "[$loop] NOT FOUND category";
+                next;
+            }
+        } elsif ($opt->{category} == $Opencloset::Constant::CATEOGORY_JACKET_SKIRTS) {
+            $designated_for = $Opencloset::Constant::CLOTHE_DESIGNATED_FOR_WOMAN;
+            if ($row->{'가슴둘레'} && $row->{'허리둘레'}) {
+                $category_id = $Opencloset::Constant::CATEOGORY_JACKET_SKIRTS;
+            }
+            elsif ($row->{'가슴둘레'}) {
+                $category_id = $Opencloset::Constant::CATEOGORY_JACKET;
+            }
+            elsif ($row->{'허리둘레'}) {
+                $category_id = $Opencloset::Constant::CATEOGORY_SKIRTS;
+            }
+            else {
+                say STDERR "[$loop] NOT FOUND category";
+                next;
+            }
+        } elsif ($opt->{category} == $Opencloset::Constant::CATEOGORY_SHOES) {
+            $designated_for = $row->{'성별'} eq 'M' ?
+                $Opencloset::Constant::CLOTHE_DESIGNATED_FOR_MAN :
+                $Opencloset::Constant::CLOTHE_DESIGNATED_FOR_WOMAN;
+            $row->{FootSize} = $row->{'사이즈'};
         }
 
         my $res = $ua->request(
             POST $opt->url . '/clothes.json',
             [
-                chest       => $row->{'가슴둘레'},
-                waist       => $row->{'허리둘레'},
-                arm         => $row->{'팔길이'},
-                pants_len   => $row->{'바지기장'},
-                category_id => $category_id,
+                chest          => $row->{'가슴둘레'},
+                waist          => $row->{'허리둘레'},
+                arm            => $row->{'팔길이'} || $row->{'소매길이'},
+                pants_len      => $row->{'바지기장'},
+                foot           => $row->{FootSize} || '',
+                category_id    => $category_id || $opt->{category},
+                designated_for => $designated_for,
             ]
         );
 
@@ -118,3 +132,5 @@ sub run {
     say "SUCCESS: $success";
     say "FAIL   : $fail";
 }
+
+__END__
