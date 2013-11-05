@@ -880,7 +880,7 @@ __DATA__
 .row
   %form.form-search.form-inline{ :method => 'get', :action => '' }
     .input-group.col-sm-4
-      %input#q.form-control{ :type => 'text', :placeholder => '이름 또는 이메일, 휴대전화 번호' }
+      %input#q.form-control{ :type => 'text', :name => 'q', :placeholder => '이름 또는 이메일, 휴대전화 번호' }
       %span.input-group-btn
         %button#btn-cloth-search.btn.btn-sm.btn-default{ :type => 'submit' }
           %i.icon-search.bigger-110 검색
@@ -895,9 +895,6 @@ __DATA__
         %time , #{$g->visit_date->ymd} #{$g->purpose} (으)로 방문
       - }
   - }
-
-%p.text-warning
-  %strong 작성하시기전, 직원에게 언제 입으실 건지 알려주세요
 
 %form.form-horizontal{:method => 'post', :action => '/guests'}
   %legend
@@ -945,6 +942,7 @@ __DATA__
         %span.label.clickable 사진촬영
         %span.label.clickable 결혼식
         %span.label.clickable 장례식
+        %span.label.clickable 학교행사
   .control-group
     %label.control-label{:for => 'input-domain'} 응시기업 및 분야
     .controls
@@ -1582,6 +1580,10 @@ __DATA__
       .controls
         %input#input-late_fee.input-mini{:type => 'text', :name => 'late_fee', :placeholder => '연체료'}
     .control-group
+      %label{:for => '#input-ldiscount'} 연체료의 에누리
+      .controls
+        %input#input-ldiscount.input-mini{:type => 'text', :name => 'l_discount', :placeholder => '연체료의 에누리'}
+    .control-group
       %label 반납방법
       .controls
         %label.radio.inline
@@ -1626,6 +1628,7 @@ __DATA__
 %div= include 'partial/order_info'
 %p= commify($order->late_fee)
 %p= $order->return_method
+%p= '연체료 ' . commify($order->l_discount) . ' 원 할인'
 %p= include 'partial/satisfaction', s => $satisfaction
 
 
