@@ -1115,7 +1115,7 @@ __DATA__
 -   ];
 - title $meta->{$id}{text};
 
-%div
+.row
   %p
     %span.badge.badge-inverse 매우작음
     %span.badge 작음
@@ -1126,11 +1126,14 @@ __DATA__
     %span.text-info 상태
     1: 대여가능, 2: 대여중, 3: 세탁, 4: 수선, 5: 대여불가, 7: 분실
 
-  %form.form-search{:method => 'get', :action => ''}
-    %input{:type => 'hidden', :name => 'gid', :value => "#{$gid}"}
-    %input.input-medium.search-query{:type => 'text', :id => 'search-query', :name => 'q', :placeholder => '가슴/허리/팔/상태', :value => "#{$q}"}
-    %button.btn{:type => 'submit'} 검색
-    %span.muted 가슴/허리/팔길이/상태
+.row
+  %form.form-search.form-inline{ :method => 'get', :action => '' }
+    .input-group.col-sm-3
+      %input{:type => 'hidden', :name => 'gid', :value => "#{$gid}"}
+      %input#q.form-control{ :type => 'text', :placeholder => '가슴/허리/팔/상태', :name => 'q', :value => "#{$q}" }
+      %span.input-group-btn
+        %button#btn-cloth-search.btn.btn-sm.btn-default{ :type => 'submit' }
+          %i.icon-search.bigger-110 검색
 
 - if ($q) {
   %p
