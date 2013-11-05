@@ -11,6 +11,7 @@ use HTTP::Request;
 use JSON;
 use LWP::UserAgent;
 use Text::CSV;
+
 use Opencloset::Constant;
 
 my ( $opt, $usage ) = do {
@@ -18,10 +19,10 @@ my ( $opt, $usage ) = do {
 
     describe_options(
         "%c %o [csv file]",
-        [ 'url=s',  "opencloset url (default: $URL)", { default => $URL } ],
+        [ 'url=s',      "opencloset url (default: $URL)", { default => $URL } ],
+        [ 'category=s', 'man/woman/shoes' ],
         [],
-        [ 'help|h', 'print usage message and exit' ],
-        [ 'category=s', '-1: Jacket & Pants, -2: Jacket & Skirts, 4: Shoes' ],
+        [ 'help|h',     'print usage message and exit' ],
     );
 };
 
@@ -32,6 +33,7 @@ sub run {
 
     print($usage->text), exit                        if     $opt->help;
     print($usage->text), die("csv file is needed\n") unless @args >= 1;
+    print($usage->text), die("category is needed\n") unless $opt->category && $opt->category =~ m/^(man|woman|shoes)$/;
 
     binmode STDOUT, ":utf8";
     binmode STDERR, ":utf8";
@@ -67,41 +69,51 @@ sub run {
 
         my $category_id;
         my $designated_for;
-        if ($opt->{category} == $Opencloset::Constant::CATEOGORY_JACKET_PANTS) {
-            $designated_for = $Opencloset::Constant::CLOTH_DESIGNATED_FOR_MAN;
-            if ($row->{'가슴둘레'} && $row->{'허리둘레'}) {
-                $category_id = $Opencloset::Constant::CATEOGORY_JACKET_PANTS;
+
+        no warnings 'experimental::smartmatch';
+        given ($opt->category) {
+            when ('man') {
+                $designated_for = $Opencloset::Constant::CLOTH_DESIGNATED_FOR_MAN;
+                if ($row->{'가슴둘레'} && $row->{'허리둘레'}) {
+                    $category_id = $Opencloset::Constant::CATEOGORY_JACKET_PANTS;
+                }
+                elsif ($row->{'가슴둘레'}) {
+                    $category_id = $Opencloset::Constant::CATEOGORY_JACKET;
+                }
+                elsif ($row->{'허리둘레'}) {
+                    $category_id = $Opencloset::Constant::CATEOGORY_PANTS;
+                }
+                else {
+                    say STDERR "[$loop] NOT FOUND category";
+                    next;
+                }
             }
-            elsif ($row->{'가슴둘레'}) {
-                $category_id = $Opencloset::Constant::CATEOGORY_JACKET;
+            when ('woman') {
+                $designated_for = $Opencloset::Constant::CLOTH_DESIGNATED_FOR_WOMAN;
+                if ($row->{'가슴둘레'} && $row->{'허리둘레'}) {
+                    $category_id = $Opencloset::Constant::CATEOGORY_JACKET_SKIRTS;
+                }
+                elsif ($row->{'가슴둘레'}) {
+                    $category_id = $Opencloset::Constant::CATEOGORY_JACKET;
+                }
+                elsif ($row->{'허리둘레'}) {
+                    $category_id = $Opencloset::Constant::CATEOGORY_SKIRTS;
+                }
+                else {
+                    say STDERR "[$loop] NOT FOUND category";
+                    next;
+                }
             }
-            elsif ($row->{'허리둘레'}) {
-                $category_id = $Opencloset::Constant::CATEOGORY_PANTS;
+            when ('shoes') {
+                $designated_for = $row->{'성별'} eq 'M' ?
+                    $Opencloset::Constant::CLOTH_DESIGNATED_FOR_MAN :
+                    $Opencloset::Constant::CLOTH_DESIGNATED_FOR_WOMAN;
+                $row->{FootSize} = $row->{'사이즈'};
             }
-            else {
-                say STDERR "[$loop] NOT FOUND category";
+            default {
+                say STDERR "[$loop] unknwon category";
                 next;
             }
-        } elsif ($opt->{category} == $Opencloset::Constant::CATEOGORY_JACKET_SKIRTS) {
-            $designated_for = $Opencloset::Constant::CLOTH_DESIGNATED_FOR_WOMAN;
-            if ($row->{'가슴둘레'} && $row->{'허리둘레'}) {
-                $category_id = $Opencloset::Constant::CATEOGORY_JACKET_SKIRTS;
-            }
-            elsif ($row->{'가슴둘레'}) {
-                $category_id = $Opencloset::Constant::CATEOGORY_JACKET;
-            }
-            elsif ($row->{'허리둘레'}) {
-                $category_id = $Opencloset::Constant::CATEOGORY_SKIRT;
-            }
-            else {
-                say STDERR "[$loop] NOT FOUND category";
-                next;
-            }
-        } elsif ($opt->{category} == $Opencloset::Constant::CATEOGORY_SHOES) {
-            $designated_for = $row->{'성별'} eq 'M' ?
-                $Opencloset::Constant::CLOTH_DESIGNATED_FOR_MAN :
-                $Opencloset::Constant::CLOTH_DESIGNATED_FOR_WOMAN;
-            $row->{FootSize} = $row->{'사이즈'};
         }
 
         my $res = $ua->request(
