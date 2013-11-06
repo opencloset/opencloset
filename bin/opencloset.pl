@@ -455,6 +455,23 @@ get '/clothes/:no' => sub {
     );
 };
 
+any [qw/put patch/] => '/clothes/:no' => sub {
+    my $self = shift;
+    my $no = $self->param('no');
+    my $cloth = $DB->resultset('Cloth')->find({ no => $no });
+    return $self->error(404, "Not found `$no`") unless $cloth;
+
+    map {
+        $cloth->$_($self->param($_)) if defined $self->param($_);
+    } qw/chest waist arm length foot/;
+
+    $cloth->update;
+    $self->respond_to(
+        json => { json => $self->cloth2hr($cloth) },
+        html => { template => 'clothes/no', cloth => $cloth }    # also, CODEREF is OK
+    );
+};
+
 get '/search' => sub {
     my $self = shift;
 
@@ -1300,12 +1317,27 @@ __DATA__
 
 
 @@ clothes/no.html.haml
-- layout 'default';
+- layout 'default', jses => ['clothes-no.js'];
 - title 'clothes/' . $cloth->no;
 
 %h1
   %a{:href => ''}= $cloth->no
   %span - #{$cloth->category->name}
+
+%form#edit
+  %a#btn-edit.btn.btn-sm{:href => '#'} edit
+  #input-edit{:style => 'display: none'}
+    - if ($cloth->category->which eq 'top') {
+      %input{:type => 'text', :name => 'chest', :value => '#{$cloth->chest}', :placeholder => '가슴둘레'}
+      %input{:type => 'text', :name => 'arm', :value => '#{$cloth->arm}', :placeholder => '팔길이'}
+    - } elsif ($cloth->category->which eq 'bottom') {
+      %input{:type => 'text', :name => 'waist', :value => '#{$cloth->waist}', :placeholder => '허리둘레'}
+      %input{:type => 'text', :name => 'length', :value => '#{$cloth->length}', :placeholder => '기장'}
+    - } elsif ($cloth->category->which eq 'foot') {
+      %input{:type => 'text', :name => 'foot', :value => '#{$cloth->foot}', :placeholder => '발크기'}
+    - }
+    %input#btn-submit.btn.btn-sm{:type => 'submit', :value => 'Save Changes'}
+    %a#btn-cancel.btn.btn-sm{:href => '#'} Cancel
 
 %h4= $cloth->compatible_code
 
