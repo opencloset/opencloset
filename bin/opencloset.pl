@@ -853,7 +853,8 @@ app->start;
 __DATA__
 
 @@ login.html.haml
-- layout 'login';
+- my $id = 'login';
+- layout 'login', active_id => $id;
 - title $sidebar->{meta}{login}{text};
 
 
@@ -1979,7 +1980,8 @@ __DATA__
                 = content
                 / PAGE CONTENT ENDS
     = include 'layouts/default/body-js'
-    = include 'layouts/default/body-theme'
+    = include 'layouts/default/body-js-theme'
+    = include 'layouts/default/body-js-page'
 
 
 @@ layouts/default/meta.html.haml
@@ -2060,11 +2062,19 @@ __DATA__
     <!-- bundle -->
     <script src="/js/bundle.js"></script>
 
+
+@@ layouts/default/body-js-page.html.ep
+<!-- body-js-page -->
     <!-- page specific -->
     % my @include_jses = @$jses;
     % push @include_jses, "$active_id.js" if $active_id;
     % for my $js (@include_jses) {
-      <script type="text/javascript" src="/js/<%= $js %>"></script>
+    %   if ( $js =~ m{^/} ) {
+          <script type="text/javascript" src="<%= $js %>"></script>
+    %   }
+    %   else {
+          <script type="text/javascript" src="/js/<%= $js %>"></script>
+    %   }
     % }
 
 
@@ -2080,8 +2090,8 @@ __DATA__
     <script src="/theme/<%= $theme %>/js/<%= $theme %>-extra.min.js"></script>
 
 
-@@ layouts/default/body-theme.html.ep
-<!-- body theme -->
+@@ layouts/default/body-js-theme.html.ep
+<!-- body js theme -->
     <script src="/theme/<%= $theme %>/js/<%= $theme %>-elements.min.js"></script>
     <script src="/theme/<%= $theme %>/js/<%= $theme %>.min.js"></script>
 
@@ -2638,17 +2648,8 @@ __DATA__
                 = include 'layouts/login/forgot-box'
                 = include 'layouts/login/signup-box'
     = include 'layouts/default/body-js'
-    = include 'layouts/login/body-js'
-    = include 'layouts/default/body-theme'
-
-
-@@ layouts/login/body-js.html.ep
-    <script type="text/javascript">
-      function show_box(id) {
-        jQuery('.widget-box.visible').removeClass('visible');
-        jQuery('#'+id).addClass('visible');
-      }
-    </script>
+    = include 'layouts/default/body-js-theme'
+    = include 'layouts/default/body-js-page'
 
 
 @@ layouts/login/login-box.html.ep
