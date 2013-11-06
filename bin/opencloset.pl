@@ -144,11 +144,13 @@ helper create_cloth => sub {
         map { $params{$_} = $self->param($_) } qw/foot/;
     }
 
-    $params{no}             = $no;
-    $params{donor_id}       = $self->param('donor_id');
-    $params{category_id}    = $category_id;
-    $params{status_id}      = $Opencloset::Constant::STATUS_AVAILABLE;
-    $params{designated_for} = $self->param('designated_for');
+    $params{no}              = $no;
+    $params{donor_id}        = $self->param('donor_id');
+    $params{category_id}     = $category_id;
+    $params{status_id}       = $Opencloset::Constant::STATUS_AVAILABLE;
+    $params{designated_for}  = $self->param('designated_for');
+    $params{color}           = $self->param('color');
+    $params{compatible_code} = $self->param('compatible_code');
 
     return $DB->resultset('Cloth')->find_or_create(\%params);
 };

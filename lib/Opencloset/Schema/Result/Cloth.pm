@@ -65,6 +65,12 @@ __PACKAGE__->table("cloth");
   data_type: 'integer'
   is_nullable: 1
 
+=head2 color
+
+  data_type: 'varchar'
+  is_nullable: 1
+  size: 32
+
 =head2 designated_for
 
   data_type: 'integer'
@@ -106,6 +112,12 @@ __PACKAGE__->table("cloth");
   is_foreign_key: 1
   is_nullable: 1
 
+=head2 compatible_code
+
+  data_type: 'varchar'
+  is_nullable: 1
+  size: 32
+
 =cut
 
 __PACKAGE__->add_columns(
@@ -128,6 +140,8 @@ __PACKAGE__->add_columns(
   { data_type => "integer", is_nullable => 1 },
   "foot",
   { data_type => "integer", is_nullable => 1 },
+  "color",
+  { data_type => "varchar", is_nullable => 1, size => 32 },
   "designated_for",
   { data_type => "integer", is_nullable => 1 },
   "category_id",
@@ -166,6 +180,8 @@ __PACKAGE__->add_columns(
     is_foreign_key => 1,
     is_nullable => 1,
   },
+  "compatible_code",
+  { data_type => "varchar", is_nullable => 1, size => 32 },
 );
 
 =head1 PRIMARY KEY
@@ -377,8 +393,8 @@ Composing rels: L</cloth_orders> -> order
 __PACKAGE__->many_to_many("orders", "cloth_orders", "order");
 
 
-# Created by DBIx::Class::Schema::Loader v0.07036 @ 2013-11-05 11:48:52
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:D5kT5PwhvxRgzbgoccUN/A
+# Created by DBIx::Class::Schema::Loader v0.07036 @ 2013-11-06 13:44:12
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:62x2nKDh+N/qbc+RTmPKCA
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration
