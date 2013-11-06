@@ -98,6 +98,7 @@ CREATE TABLE `cloth` (
   `arm`         INT DEFAULT NULL, -- 팔길이(cm)
   `length`      INT DEFAULT NULL, -- 기장(cm)
   `foot`        INT DEFAULT NULL, -- 발크기(mm)
+  `color`       VARCHAR(32) DEFAULT NULL,
 
   `designated_for` INT DEFAULT NULL, -- 1: man, 2: woman, 3: unisex
 
@@ -106,6 +107,8 @@ CREATE TABLE `cloth` (
   `bottom_id`   INT UNSIGNED DEFAULT NULL,
   `donor_id`    INT UNSIGNED DEFAULT NULL,
   `status_id`   INT UNSIGNED DEFAULT 1,
+
+  `compatible_code` VARCHAR(32) DEFAULT NULL,
 
   PRIMARY KEY (`id`),
   UNIQUE KEY (`no`),
