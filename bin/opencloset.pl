@@ -463,13 +463,14 @@ get '/search' => sub {
     my $entries_per_page = $self->param('entries_per_page') || app->config->{entries_per_page};
 
     my $guest    = $gid ? $DB->resultset('Guest')->find({ id => $gid }) : undef;
-    my $c_jacket = $DB->resultset('Category')->find({ name => 'jacket' });
-    my $cond = { 'me.category_id' => $c_jacket->id };
-    my ($chest, $waist, $arm, $status_id) = split /\//, $q;
-    $cond->{'me.chest'}     = { '>=' => $chest } if $chest;
-    $cond->{'bottom.waist'} = { '>=' => $waist } if $waist;
-    $cond->{'me.arm'}       = { '>=' => $arm   } if $arm;
-    $cond->{'me.status_id'} = $status_id if $status_id;
+    my $cond = {};
+    my ($chest, $waist, $arm, $status_id, $category_id) = split /\//, $q;
+    $category_id = $Opencloset::Constant::CATEOGORY_JACKET unless $category_id;
+    $cond->{'me.category_id'} = $category_id;
+    $cond->{'me.chest'}       = { '>=' => $chest } if $chest;
+    $cond->{'bottom.waist'}   = { '>=' => $waist } if $waist;
+    $cond->{'me.arm'}         = { '>=' => $arm   } if $arm;
+    $cond->{'me.status_id'}   = $status_id         if $status_id;
 
     ### row, current_page, count
     my $clothes = $DB->resultset('Cloth')->search(
@@ -490,12 +491,13 @@ get '/search' => sub {
     });
 
     $self->stash(
-        q         => $q,
-        gid       => $gid,
-        guest     => $guest,
-        clothes   => $clothes,
-        pageset   => $pageset,
-        status_id => $status_id || q{},
+        q           => $q,
+        gid         => $gid,
+        guest       => $guest,
+        clothes     => $clothes,
+        pageset     => $pageset,
+        status_id   => $status_id || q{},
+        category_id => $category_id,
     );
 };
 
@@ -1192,7 +1194,25 @@ __DATA__
       %span.badge.badge-important 매우큼
     %p.muted
       %span.text-info 상태
-      1: 대여가능, 2: 대여중, 3: 세탁, 4: 수선, 5: 대여불가, 7: 분실
+      %span{:class => "#{$status_id == 1 ? 'highlight' : ''}"} 1: 대여가능
+      %span{:class => "#{$status_id == 2 ? 'highlight' : ''}"} 2: 대여중
+      %span{:class => "#{$status_id == 3 ? 'highlight' : ''}"} 3: 세탁
+      %span{:class => "#{$status_id == 4 ? 'highlight' : ''}"} 4: 수선
+      %span{:class => "#{$status_id == 5 ? 'highlight' : ''}"} 5: 대여불가
+      %span{:class => "#{$status_id == 7 ? 'highlight' : ''}"} 7: 분실
+    %p.muted
+      %span.text-info 종류
+      %span{:class => "#{$category_id == 1 ? 'highlight' : ''}"} 1: Jacket
+      %span{:class => "#{$category_id == 2 ? 'highlight' : ''}"} 2: Pants
+      %span{:class => "#{$category_id == 3 ? 'highlight' : ''}"} 3: Shirts
+      %span{:class => "#{$category_id == 4 ? 'highlight' : ''}"} 4: Shoes
+      %span{:class => "#{$category_id == 5 ? 'highlight' : ''}"} 5: Hat
+      %span{:class => "#{$category_id == 6 ? 'highlight' : ''}"} 6: Tie
+      %span{:class => "#{$category_id == 7 ? 'highlight' : ''}"} 7: Waistcoat
+      %span{:class => "#{$category_id == 8 ? 'highlight' : ''}"} 8: Coat
+      %span{:class => "#{$category_id == 9 ? 'highlight' : ''}"} 9: Onepiece
+      %span{:class => "#{$category_id == 10 ? 'highlight' : ''}"} 10: Skirt
+      %span{:class => "#{$category_id == 11 ? 'highlight' : ''}"} 11: Bluse
 
 .row
   .col-xs-12
@@ -1200,7 +1220,7 @@ __DATA__
       %form{ :method => 'get', :action => '' }
         .input-group
           %input#gid{:type => 'hidden', :name => 'gid', :value => "#{$gid}"}
-          %input#q.form-control{ :type => 'text', :placeholder => '가슴/허리/팔/상태', :name => 'q', :value => "#{$q}" }
+          %input#q.form-control{ :type => 'text', :placeholder => '가슴/허리/팔/상태/종류', :name => 'q', :value => "#{$q}" }
           %span.input-group-btn
             %button#btn-cloth-search.btn.btn-sm.btn-default{ :type => 'submit' }
               %i.icon-search.bigger-110 검색
