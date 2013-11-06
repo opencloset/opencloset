@@ -70,7 +70,7 @@ CREATE TABLE `category` (
   UNIQUE KEY (`abbr`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-INSERT INTO `category` (`id`, `name`, `price`,`which`,`abbr`) VALUES (1, 'Jacket', 10000,'top','Jck'), (2, 'Pants', 10000,'bottom','Pts'), (3, 'Shirts', 5000,'top','Shr'), (4, 'Shoes', 5000,'foot','Sho'), (5, 'Hat', 0,'head','Hat'), (6, 'Tie', 0,'neck','Tie'),(7,'Waistcoat',5000,'top','Wct'),(8,'Coat',15000,'top','Cot'),(9,'Onepiece',15000,'onepiece','Opc'),(10,'Skirt',10000,'bottom','Skt'),(11,'Blouse',5000,'top','Bls');
+INSERT INTO `category` (`id`, `name`, `price`,`which`,`abbr`) VALUES (1, 'Jacket', 10000,'top','JCK'), (2, 'Pants', 10000,'bottom','PTS'), (3, 'Shirts', 5000,'top','SHR'), (4, 'Shoes', 5000,'foot','SHO'), (5, 'Hat', 0,'head','HAT'), (6, 'Tie', 0,'neck','TIE'),(7,'Waistcoat',5000,'top','WCT'),(8,'Coat',15000,'top','COT'),(9,'Onepiece',15000,'onepiece','OPC'),(10,'Skirt',10000,'bottom','SKT'),(11,'Blouse',5000,'top','BLS');
 
 --
 -- status
