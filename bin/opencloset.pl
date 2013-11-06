@@ -1252,14 +1252,21 @@ __DATA__
 
           .tags
             %span.label-holder
-              %span.label.label-info.search-label
-                %a{:href => "#{url_with->query([p => 1, q => $c->chest . '///' . $status_id])}"}= $c->chest
-              - if ($c->bottom) {
+              - if ($c->chest) {
                 %span.label.label-info.search-label
-                  %a{:href => "#{url_with->query([p => 1, q => '/' . $c->bottom->waist . '//' . $status_id])}"}= $c->bottom->waist
+                  %a{:href => "#{url_with->query([p => 1, q => $c->chest . '///' . $status_id])}"}= $c->chest
+                - if ($c->bottom) {
+                  %span.label.label-info.search-label
+                    %a{:href => "#{url_with->query([p => 1, q => '/' . $c->bottom->waist . '//' . $status_id])}"}= $c->bottom->waist
+                - }
               - }
-              %span.label.label-info.search-label
-                %a{:href => "#{url_with->query([p => 1, q => '//' . $c->arm . '/' . $status_id])}"}= $c->arm
+              - if ($c->arm) {
+                %span.label.label-info.search-label
+                  %a{:href => "#{url_with->query([p => 1, q => '//' . $c->arm . '/' . $status_id])}"}= $c->arm
+              - }
+              - if ($c->foot) {
+                %span.label.label-info.search-label= $c->foot
+              - }
 
             %span.label-holder
               - if ($c->status->name eq '대여가능') {
