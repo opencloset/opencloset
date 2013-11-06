@@ -460,6 +460,7 @@ get '/search' => sub {
 
     my $q                = $self->param('q')                || q{};
     my $gid              = $self->param('gid')              || q{};
+    my $color            = $self->param('color')            || q{};
     my $entries_per_page = $self->param('entries_per_page') || app->config->{entries_per_page};
 
     my $guest    = $gid ? $DB->resultset('Guest')->find({ id => $gid }) : undef;
@@ -471,6 +472,7 @@ get '/search' => sub {
     $cond->{'bottom.waist'}   = { '>=' => $waist } if $waist;
     $cond->{'me.arm'}         = { '>=' => $arm   } if $arm;
     $cond->{'me.status_id'}   = $status_id         if $status_id;
+    $cond->{'me.color'}       = $color             if $color;
 
     ### row, current_page, count
     my $clothes = $DB->resultset('Cloth')->search(
@@ -498,6 +500,7 @@ get '/search' => sub {
         pageset     => $pageset,
         status_id   => $status_id || q{},
         category_id => $category_id,
+        color       => $color || q{},
     );
 };
 
@@ -1224,6 +1227,13 @@ __DATA__
           %span.input-group-btn
             %button#btn-cloth-search.btn.btn-sm.btn-default{ :type => 'submit' }
               %i.icon-search.bigger-110 검색
+        %div
+          %a.btn.btn-sm.btn-black{:href => "#{url_with->query([color => 'B'])}"} Black
+          %a.btn.btn-sm.btn-navy{:href => "#{url_with->query([color => 'N'])}"} Navy
+          %a.btn.btn-sm.btn-gray{:href => "#{url_with->query([color => 'G'])}"} Gray
+          %a.btn.btn-sm.btn-red{:href => "#{url_with->query([color => 'R'])}"} Red
+          %a.btn.btn-sm.btn-whites{:href => "#{url_with->query([color => 'W'])}"} White
+          %a.btn.btn-sm.btn-whites{:href => "#{url_with->query([color => ''])}"} ALL
 
 .row
   .col-xs-12

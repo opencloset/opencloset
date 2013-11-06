@@ -31,3 +31,13 @@
 .page-content #cloth-table table th:first-child { width: 50px; }
 .page-content #cloth-table table th:nth-child(2) { width: 80px; }
 .page-content #cloth-table table th:nth-child(3) { width: 160px; }
+
+.btn-black { background-color: black !important; border-color: black; }
+
+.btn-navy { background-color: #000080 !important; border-color: #000080; }
+
+.btn-gray { background-color: #708090 !important; border-color: #708090; }
+
+.btn-red { background-color: #f00 !important; border-color: #f00; }
+
+.btn-whites { background-color: #d3d3d3 !important; border-color: #d3d3d3 !important; }
