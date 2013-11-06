@@ -1212,7 +1212,7 @@ __DATA__
       %span{:class => "#{$category_id == 8 ? 'highlight' : ''}"} 8: Coat
       %span{:class => "#{$category_id == 9 ? 'highlight' : ''}"} 9: Onepiece
       %span{:class => "#{$category_id == 10 ? 'highlight' : ''}"} 10: Skirt
-      %span{:class => "#{$category_id == 11 ? 'highlight' : ''}"} 11: Bluse
+      %span{:class => "#{$category_id == 11 ? 'highlight' : ''}"} 11: Blouse
 
 .row
   .col-xs-12
