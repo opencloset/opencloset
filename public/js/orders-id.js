@@ -2,6 +2,9 @@
 (function() {
   $(function() {
     var additional_fee, clothes, commify, discount_fee, origin_fee, overdue_calc, refresh_total_fee, total_fee;
+    $('.clickable.label').click(function() {
+      return $('#input-staff').val($(this).text());
+    });
     origin_fee = parseInt($('#input-price').val() || 0);
     additional_fee = 0;
     discount_fee = parseInt($('input[name=discount]').val() || 0);

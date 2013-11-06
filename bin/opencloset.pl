@@ -1604,6 +1604,10 @@ __DATA__
     %label.control-label{:for => 'input-staff'} staff
     .controls
       %input#input-staff{:type => 'text', :name => 'staff_name'}
+      %p
+        %span.label.clickable 한만일
+        %span.label.clickable 김소령
+        %span.label.clickable 서동건
   .control-group
     %label.control-label{:for => 'input-comment'} Comment
     .controls
