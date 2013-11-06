@@ -74,15 +74,15 @@ sub run {
         my $res = $ua->request(
             POST $opt->url . '/clothes.json',
             [
-                chest          => $row->{chest},
-                waist          => $row->{waist},
-                arm            => $row->{arm},
-                length         => $row->{length},
-                foot           => $foot,
-                category_id    => $row->{category},
-                designated_for => $designated_for_map{$designated_for},
-                code           => $row->{code},
-                color          => $row->{color},
+                chest           => $row->{chest},
+                waist           => $row->{waist},
+                arm             => $row->{arm},
+                length          => $row->{length},
+                foot            => $foot,
+                category_id     => $row->{category},
+                designated_for  => $designated_for_map{$designated_for},
+                compatible_code => $row->{code},
+                color           => $row->{color},
             ]
         );
 

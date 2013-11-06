@@ -152,7 +152,34 @@ helper create_cloth => sub {
     $params{color}           = $self->param('color');
     $params{compatible_code} = $self->param('compatible_code');
 
-    return $DB->resultset('Cloth')->find_or_create(\%params);
+    my $new_cloth = $DB->resultset('Cloth')->find_or_create(\%params);
+    return unless $new_cloth;
+    return $new_cloth unless $new_cloth->compatible_code;
+
+    my $compatible_code = $new_cloth->compatible_code;
+    $compatible_code =~ s/[A-Z]/_/g;
+    my $top_or_bottom = $DB->resultset('Cloth')->search({
+        category_id     => { '!=' => $new_cloth->category_id },
+        compatible_code => { like => $compatible_code },
+    })->next;
+
+    if ($top_or_bottom && $top_or_bottom->category->which) {
+        my $which = $top_or_bottom->category->which;
+        if ($which eq 'top') {
+            $new_cloth->top_id($top_or_bottom->id);
+            $top_or_bottom->bottom_id($new_cloth->id);
+            $new_cloth->update;
+            $top_or_bottom->update;
+        }
+        elsif ($which eq 'bottom') {
+            $new_cloth->bottom_id($top_or_bottom->id);
+            $top_or_bottom->top_id($new_cloth->id);
+            $new_cloth->update;
+            $top_or_bottom->update;
+        }
+    }
+
+    return $new_cloth;
 };
 
 get '/'      => 'home';
@@ -1242,6 +1269,8 @@ __DATA__
 %h1
   %a{:href => ''}= $cloth->no
   %span - #{$cloth->category->name}
+
+%h4= $cloth->compatible_code
 
 .row
   .span8
