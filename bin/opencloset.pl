@@ -455,21 +455,41 @@ get '/clothes/:no' => sub {
     );
 };
 
+any [qw/put patch/] => '/clothes/:no' => sub {
+    my $self = shift;
+    my $no = $self->param('no');
+    my $cloth = $DB->resultset('Cloth')->find({ no => $no });
+    return $self->error(404, "Not found `$no`") unless $cloth;
+
+    map {
+        $cloth->$_($self->param($_)) if defined $self->param($_);
+    } qw/chest waist arm length foot/;
+
+    $cloth->update;
+    $self->respond_to(
+        json => { json => $self->cloth2hr($cloth) },
+        html => { template => 'clothes/no', cloth => $cloth }    # also, CODEREF is OK
+    );
+};
+
 get '/search' => sub {
     my $self = shift;
 
     my $q                = $self->param('q')                || q{};
     my $gid              = $self->param('gid')              || q{};
+    my $color            = $self->param('color')            || q{};
     my $entries_per_page = $self->param('entries_per_page') || app->config->{entries_per_page};
 
     my $guest    = $gid ? $DB->resultset('Guest')->find({ id => $gid }) : undef;
-    my $c_jacket = $DB->resultset('Category')->find({ name => 'jacket' });
-    my $cond = { 'me.category_id' => $c_jacket->id };
-    my ($chest, $waist, $arm, $status_id) = split /\//, $q;
-    $cond->{'me.chest'}     = { '>=' => $chest } if $chest;
-    $cond->{'bottom.waist'} = { '>=' => $waist } if $waist;
-    $cond->{'me.arm'}       = { '>=' => $arm   } if $arm;
-    $cond->{'me.status_id'} = $status_id if $status_id;
+    my $cond = {};
+    my ($chest, $waist, $arm, $status_id, $category_id) = split /\//, $q;
+    $category_id = $Opencloset::Constant::CATEOGORY_JACKET unless $category_id;
+    $cond->{'me.category_id'} = $category_id;
+    $cond->{'me.chest'}       = { '>=' => $chest } if $chest;
+    $cond->{'bottom.waist'}   = { '>=' => $waist } if $waist;
+    $cond->{'me.arm'}         = { '>=' => $arm   } if $arm;
+    $cond->{'me.status_id'}   = $status_id         if $status_id;
+    $cond->{'me.color'}       = $color             if $color;
 
     ### row, current_page, count
     my $clothes = $DB->resultset('Cloth')->search(
@@ -490,12 +510,14 @@ get '/search' => sub {
     });
 
     $self->stash(
-        q         => $q,
-        gid       => $gid,
-        guest     => $guest,
-        clothes   => $clothes,
-        pageset   => $pageset,
-        status_id => $status_id || q{},
+        q           => $q,
+        gid         => $gid,
+        guest       => $guest,
+        clothes     => $clothes,
+        pageset     => $pageset,
+        status_id   => $status_id || q{},
+        category_id => $category_id,
+        color       => $color || q{},
     );
 };
 
@@ -1192,7 +1214,25 @@ __DATA__
       %span.badge.badge-important 매우큼
     %p.muted
       %span.text-info 상태
-      1: 대여가능, 2: 대여중, 3: 세탁, 4: 수선, 5: 대여불가, 7: 분실
+      %span{:class => "#{$status_id == 1 ? 'highlight' : ''}"} 1: 대여가능
+      %span{:class => "#{$status_id == 2 ? 'highlight' : ''}"} 2: 대여중
+      %span{:class => "#{$status_id == 3 ? 'highlight' : ''}"} 3: 세탁
+      %span{:class => "#{$status_id == 4 ? 'highlight' : ''}"} 4: 수선
+      %span{:class => "#{$status_id == 5 ? 'highlight' : ''}"} 5: 대여불가
+      %span{:class => "#{$status_id == 7 ? 'highlight' : ''}"} 7: 분실
+    %p.muted
+      %span.text-info 종류
+      %span{:class => "#{$category_id == 1 ? 'highlight' : ''}"} 1: Jacket
+      %span{:class => "#{$category_id == 2 ? 'highlight' : ''}"} 2: Pants
+      %span{:class => "#{$category_id == 3 ? 'highlight' : ''}"} 3: Shirts
+      %span{:class => "#{$category_id == 4 ? 'highlight' : ''}"} 4: Shoes
+      %span{:class => "#{$category_id == 5 ? 'highlight' : ''}"} 5: Hat
+      %span{:class => "#{$category_id == 6 ? 'highlight' : ''}"} 6: Tie
+      %span{:class => "#{$category_id == 7 ? 'highlight' : ''}"} 7: Waistcoat
+      %span{:class => "#{$category_id == 8 ? 'highlight' : ''}"} 8: Coat
+      %span{:class => "#{$category_id == 9 ? 'highlight' : ''}"} 9: Onepiece
+      %span{:class => "#{$category_id == 10 ? 'highlight' : ''}"} 10: Skirt
+      %span{:class => "#{$category_id == 11 ? 'highlight' : ''}"} 11: Blouse
 
 .row
   .col-xs-12
@@ -1200,10 +1240,17 @@ __DATA__
       %form{ :method => 'get', :action => '' }
         .input-group
           %input#gid{:type => 'hidden', :name => 'gid', :value => "#{$gid}"}
-          %input#q.form-control{ :type => 'text', :placeholder => '가슴/허리/팔/상태', :name => 'q', :value => "#{$q}" }
+          %input#q.form-control{ :type => 'text', :placeholder => '가슴/허리/팔/상태/종류', :name => 'q', :value => "#{$q}" }
           %span.input-group-btn
             %button#btn-cloth-search.btn.btn-sm.btn-default{ :type => 'submit' }
               %i.icon-search.bigger-110 검색
+        %div
+          %a.btn.btn-sm.btn-black{:href => "#{url_with->query([color => 'B'])}"} Black
+          %a.btn.btn-sm.btn-navy{:href => "#{url_with->query([color => 'N'])}"} Navy
+          %a.btn.btn-sm.btn-gray{:href => "#{url_with->query([color => 'G'])}"} Gray
+          %a.btn.btn-sm.btn-red{:href => "#{url_with->query([color => 'R'])}"} Red
+          %a.btn.btn-sm.btn-whites{:href => "#{url_with->query([color => 'W'])}"} White
+          %a.btn.btn-sm.btn-whites{:href => "#{url_with->query([color => ''])}"} ALL
 
 .row
   .col-xs-12
@@ -1232,14 +1279,21 @@ __DATA__
 
           .tags
             %span.label-holder
-              %span.label.label-info.search-label
-                %a{:href => "#{url_with->query([p => 1, q => $c->chest . '///' . $status_id])}"}= $c->chest
-              - if ($c->bottom) {
+              - if ($c->chest) {
                 %span.label.label-info.search-label
-                  %a{:href => "#{url_with->query([p => 1, q => '/' . $c->bottom->waist . '//' . $status_id])}"}= $c->bottom->waist
+                  %a{:href => "#{url_with->query([p => 1, q => $c->chest . '///' . $status_id])}"}= $c->chest
+                - if ($c->bottom) {
+                  %span.label.label-info.search-label
+                    %a{:href => "#{url_with->query([p => 1, q => '/' . $c->bottom->waist . '//' . $status_id])}"}= $c->bottom->waist
+                - }
               - }
-              %span.label.label-info.search-label
-                %a{:href => "#{url_with->query([p => 1, q => '//' . $c->arm . '/' . $status_id])}"}= $c->arm
+              - if ($c->arm) {
+                %span.label.label-info.search-label
+                  %a{:href => "#{url_with->query([p => 1, q => '//' . $c->arm . '/' . $status_id])}"}= $c->arm
+              - }
+              - if ($c->foot) {
+                %span.label.label-info.search-label= $c->foot
+              - }
 
             %span.label-holder
               - if ($c->status->name eq '대여가능') {
@@ -1263,12 +1317,27 @@ __DATA__
 
 
 @@ clothes/no.html.haml
-- layout 'default';
+- layout 'default', jses => ['clothes-no.js'];
 - title 'clothes/' . $cloth->no;
 
 %h1
   %a{:href => ''}= $cloth->no
   %span - #{$cloth->category->name}
+
+%form#edit
+  %a#btn-edit.btn.btn-sm{:href => '#'} edit
+  #input-edit{:style => 'display: none'}
+    - if ($cloth->category->which eq 'top') {
+      %input{:type => 'text', :name => 'chest', :value => '#{$cloth->chest}', :placeholder => '가슴둘레'}
+      %input{:type => 'text', :name => 'arm', :value => '#{$cloth->arm}', :placeholder => '팔길이'}
+    - } elsif ($cloth->category->which eq 'bottom') {
+      %input{:type => 'text', :name => 'waist', :value => '#{$cloth->waist}', :placeholder => '허리둘레'}
+      %input{:type => 'text', :name => 'length', :value => '#{$cloth->length}', :placeholder => '기장'}
+    - } elsif ($cloth->category->which eq 'foot') {
+      %input{:type => 'text', :name => 'foot', :value => '#{$cloth->foot}', :placeholder => '발크기'}
+    - }
+    %input#btn-submit.btn.btn-sm{:type => 'submit', :value => 'Save Changes'}
+    %a#btn-cancel.btn.btn-sm{:href => '#'} Cancel
 
 %h4= $cloth->compatible_code
 
@@ -1567,6 +1636,10 @@ __DATA__
     %label.control-label{:for => 'input-staff'} staff
     .controls
       %input#input-staff{:type => 'text', :name => 'staff_name'}
+      %p
+        %span.label.clickable 한만일
+        %span.label.clickable 김소령
+        %span.label.clickable 서동건
   .control-group
     %label.control-label{:for => 'input-comment'} Comment
     .controls

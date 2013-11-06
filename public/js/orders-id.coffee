@@ -1,4 +1,7 @@
 $ ->
+  $('.clickable.label').click ->
+    $('#input-staff').val($(@).text())
+
   origin_fee = parseInt($('#input-price').val() or 0)
   additional_fee = 0
   discount_fee = parseInt($('input[name=discount]').val() or 0)
