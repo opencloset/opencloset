@@ -823,7 +823,19 @@ __DATA__
         %button#btn-clear.btn.btn.btn-sm.btn-default{:type => 'button'}
           %i.icon-eraser.bigger-110 지우기
 
-#clothes-list
+#cloth-table
+  %table.table.table-striped.table-bordered.table-hover
+    %thead
+      %tr
+        %th.center
+          %label
+            %input.ace{ :type => 'checkbox' }
+            %span.lbl
+        %th 옷
+        %th 상태
+        %th 묶음
+        %th 기타
+    %tbody
   %ul
   #action-buttons{:style => 'display: none'}
     %span 선택한 항목을
@@ -833,38 +845,56 @@ __DATA__
     %span (으)로 변경 합니다
 
 :plain
-  <script id="tpl-row" type="text/html">
-    <li data-order-id="<%= order_id %>">
-      <label>
-        <a class="btn btn-success btn-mini" href="/orders/<%= order_id %>">주문서</a>
-        <a href="/clothes/<%= no %>"><%= category %></a>
-        <span class="order-status label"><%= status %></span> with
-        <% _.each(clothes, function(cloth) { %> <a href="/clothes/<%= cloth.no %>"><%= cloth.category %></a><% }); %>
-        <a class="history-link" href="/orders/<%= order_id %>">
+  <script id="tpl-row-checkbox-disabled" type="text/html">
+    <tr data-order-id="<%= order_id %>">
+      <td class="center">
+        <label>
+          <input class="ace" type="checkbox" disabled>
+          <span class="lbl"></span>
+        </label>
+      </td>
+      <td> <a href="/clothes/<%= no %>"> <%= no %> </a> </td> <!-- 옷 -->
+      <td>
+        <span class="order-status label">
+          <%= status %>
+          <span class="late-fee"><%= late_fee ? late_fee + '원' : '' %></span>
+        </span>
+      </td> <!-- 상태 -->
+      <td>
+        <% _.each(clothes, function(cloth) { %> <a href="/clothes/<%= cloth.no %>"><%= cloth.no %></a><% }); %>
+      </td> <!-- 묶음 -->
+      <td>
+        <a href="/orders/<%= order_id %>"><span class="label label-info arrowed-right arrowed-in">
+          <strong>주문서</strong>
           <time class="js-relative-date" datetime="<%= rental_date.raw %>" title="<%= rental_date.ymd %>"><%= rental_date.md %></time>
           ~
           <time class="js-relative-date" datetime="<%= target_date.raw %>" title="<%= target_date.ymd %>"><%= target_date.md %></time>
-        </a>
-      </label>
-    </li>
+        </span></a>
+      </td> <!-- 기타 -->
+    </tr>
   </script>
 
 :plain
   <script id="tpl-overdue-paragraph" type="text/html">
-    <p class="muted">
-      연체료 <span class="text-error"><%= late_fee %></span> 는 연체일(<%= overdue %>) x 대여금액(<%= price %>)의 20% 로 계산됩니다.
-    </p>
+    <span>
+      연체료 <%= late_fee %>원 = <%= price %>원 x <%= overdue %>일 x 20%
+    </span>
   </script>
 
 :plain
-  <script id="tpl-row-checkbox" type="text/html">
-    <li class="row-checkbox" data-cloth-id="<%= id %>">
-      <label class="checkbox">
-        <input type="checkbox" checked="checked" data-cloth-id="<%= id %>">
-        <a href="/clothes/<%= no %>"><%= category %></a>
-        <span class="order-status label"><%= status %></span>
-      </label>
-    </li>
+  <script id="tpl-row-checkbox-enabled" type="text/html">
+    <tr class="row-checkbox" data-cloth-id="<%= id %>">
+      <td class="center">
+        <label>
+          <input class="ace" type="checkbox" data-cloth-id="<%= id %>">
+          <span class="lbl"></span>
+        </label>
+      </td>
+      <td> <a href="/clothes/<%= no %>"> <%= no %> </a> </td> <!-- 옷 -->
+      <td> <span class="order-status label"><%= status %></span> </td> <!-- 상태 -->
+      <td> </td> <!-- 묶음 -->
+      <td> </td> <!-- 기타 -->
+    </tr>
   </script>
 
 

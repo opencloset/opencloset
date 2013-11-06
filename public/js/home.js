@@ -4,7 +4,7 @@
     $('#cloth-id').focus();
     $('#btn-clear').click(function(e) {
       e.preventDefault();
-      $('#clothes-list ul li').remove();
+      $('#cloth-table table tbody tr').remove();
       $('#action-buttons').hide();
       return $('#cloth-id').focus();
     });
@@ -25,21 +25,21 @@
         success: function(data, textStatus, jqXHR) {
           var $html, compiled, html;
           if (!/^(대여중|연체중|부분반납)/.test(data.status)) {
-            if ($("#clothes-list li[data-cloth-id='" + data.id + "']").length) {
+            if ($("#cloth-table table tbody tr[data-cloth-id='" + data.id + "']").length) {
               return;
             }
-            compiled = _.template($('#tpl-row-checkbox').html());
+            compiled = _.template($('#tpl-row-checkbox-enabled').html());
             $html = $(compiled(data));
             if (/대여가능/.test(data.status)) {
               $html.find('.order-status').addClass('label-success');
             }
-            $('#clothes-list ul').append($html);
+            $('#cloth-table table tbody').append($html);
             return $('#action-buttons').show();
           } else {
-            if ($("#clothes-list li[data-order-id='" + data.order_id + "']").length) {
+            if ($("#cloth-table table tbody tr[data-order-id='" + data.order_id + "']").length) {
               return;
             }
-            compiled = _.template($('#tpl-row').html());
+            compiled = _.template($('#tpl-row-checkbox-disabled').html());
             $html = $(compiled(data));
             if (/연체중/.test(data.status)) {
               $html.find('.order-status').addClass('label-important');
@@ -47,9 +47,9 @@
             if (data.overdue) {
               compiled = _.template($('#tpl-overdue-paragraph').html());
               html = compiled(data);
-              $html.append(html);
+              $html.find("td:last-child").append(html);
             }
-            return $('#clothes-list ul').append($html);
+            return $("#cloth-table table tbody").append($html);
           }
         },
         error: function(jqXHR, textStatus, errorThrown) {
@@ -64,9 +64,13 @@
       $this.addClass('disabled');
       status = $this.data('status');
       clothes = [];
-      $('#clothes-list input:checked').each(function(i, el) {
-        return clothes.push($(el).data('cloth-id'));
+      alert('hello');
+      $('#cloth-table input:checked').each(function(i, el) {
+        clothes.push($(el).data('cloth-id'));
+        console.log($(el));
+        return console.log($(i));
       });
+      alert('world');
       clothes = _.uniq(clothes);
       $.ajax("/clothes.json", {
         type: 'PUT',

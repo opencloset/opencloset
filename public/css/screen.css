@@ -27,4 +27,7 @@
 .ace-thumbnails > li .tags-top-ltr > .label-holder { direction: rtl; display: table; margin: 0 0 1px; opacity: 0.92; text-align: right; }
 .ace-thumbnails > li .tags-top-ltr > .label-holder span.label { padding-top: 3px; }
 
-.page-content div.search { width: 400px; margin-bottom: 20px; }
+.page-content .search { width: 400px; margin-bottom: 20px; }
+.page-content #cloth-table table th:first-child { width: 50px; }
+.page-content #cloth-table table th:nth-child(2) { width: 80px; }
+.page-content #cloth-table table th:nth-child(3) { width: 160px; }
