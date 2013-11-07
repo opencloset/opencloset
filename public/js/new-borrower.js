@@ -5,11 +5,36 @@
     $('.clickable.label').click(function() {
       return $('#input-purpose').val($(this).text());
     });
-    return $('#input-target-date').datepicker({
+    $('#input-target-date').datepicker({
       startDate: "-0d",
       language: 'kr',
       format: 'yyyy-mm-dd',
       autoclose: true
+    });
+    return $('#btn-sendsms:not(.disabled)').click(function(e) {
+      var $this, to;
+      e.preventDefault();
+      $this = $(this);
+      $this.addClass('disabled');
+      to = $('#input-phone').val();
+      if (!to) {
+        return;
+      }
+      return $.ajax("/sms.json", {
+        type: 'POST',
+        data: {
+          to: to
+        },
+        success: function(data, textStatus, jqXHR) {
+          return alert('success', "" + to + " 번호로 SMS 가 발송되었습니다");
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+          return alert('error', jqXHR.responseJSON.error);
+        },
+        complete: function(jqXHR, textStatus) {
+          return $this.removeClass('disabled');
+        }
+      });
     });
   });
 

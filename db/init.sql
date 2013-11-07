@@ -199,3 +199,12 @@ CREATE TABLE `donor_cloth` (
   CONSTRAINT `fk_donor_cloth1` FOREIGN KEY (`donor_id`) REFERENCES `donor` (`id`) ON DELETE CASCADE,
   CONSTRAINT `fk_donor_cloth2` FOREIGN KEY (`cloth_id`) REFERENCES `cloth` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE `short_message` (
+  `id`        INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `from`      VARCHAR(32) NOT NULL,
+  `to`        VARCHAR(32) NOT NULL,
+  `msg`       VARCHAR(128) DEFAULT NULL,
+  `sent_date` DATETIME DEFAULT NULL,
+  PRIMARY KEY (`id`)
+);

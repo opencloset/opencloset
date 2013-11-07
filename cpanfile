@@ -11,4 +11,5 @@ requires 'Mojolicious::Plugin::FillInFormLite';
 requires 'Mojolicious::Plugin::HamlRenderer';
 requires 'Mojolicious::Plugin::Validator';
 requires 'Path::Tiny';
+requires 'SMS::Send::KR::CoolSMS';
 requires 'Try::Tiny';
