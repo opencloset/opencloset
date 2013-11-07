@@ -73,18 +73,17 @@ sub run {
         }
         $row->{'전화번호'} =~ s/-//g if $row->{'전화번호'};
 
-        my $res = $ua->request(
-            POST $opt->url . '/donors.json',
-            [
-                name    => $row->{'기증자'},
-                gender  => $gender,
-                phone   => $row->{'전화번호'},
-                email   => $row->{'이메일'},
-                address => $row->{'주소'},
-                message => $row->{'기증자메세지'},
-                comment => $row->{'비고'},
-            ]
+        my %post_data = (
+            name    => $row->{'기증자'},
+            gender  => $gender,
+            phone   => $row->{'전화번호'},
+            email   => $row->{'이메일'},
+            address => $row->{'주소'},
+            message => $row->{'기증자메세지'},
+            comment => $row->{'비고'},
         );
+
+        my $res = $ua->request( POST $opt->url . '/donors.json', [ %post_data ] );
 
         my $data = decode_json($res->content);
         if ($res->is_success) {
@@ -92,7 +91,8 @@ sub run {
         }
         else {
             $fail++;
-            say STDERR $data->{error};
+            say STDERR "row($loop): $post_data{name}: $data->{error}{str}";
+            say STDERR "  $_ => $post_data{$_}" for keys %{ $data->{error}{data} };
         }
     }
 

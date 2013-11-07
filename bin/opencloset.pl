@@ -850,16 +850,15 @@ post '/donors' => sub {
     $validator->field('gender')->regexp(qr/^[12]$/);
 
     unless ($self->validate($validator)) {
-        my $errors_hashref = $validator->errors;
-        my @errors;
-        while (my ($key, $value) = each %$errors_hashref) {
-            push @errors, "$key: $value";
+        my @error_str;
+        while ( my ($k, $v) = each %{ $validator->errors } ) {
+            push @error_str, "$k:$v";
         }
-        return $self->error(400, join(', ', @errors));
+        return $self->error( 400, { str => join(',', @error_str), data => $validator->errors } );
     }
 
     my $donor = $self->create_donor;
-    return $self->error(500, 'failed to create a new donor') unless $donor;
+    return $self->error( 500, { str => 'failed to create a new donor' } ) unless $donor;
 
     $self->res->headers->header('Location' => $self->url_for('/donors/' . $donor->id));
     $self->respond_to(
