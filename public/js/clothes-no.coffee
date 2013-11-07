@@ -24,3 +24,9 @@ $ ->
         alert('error', jqXHR.responseJSON.error)
       complete: (jqXHR, textStatus) ->
         $this.removeClass('disabled')
+
+  $('body').keypress (e) ->
+    ESC = 27
+    key = e.charCode or e.keyCode or 0
+    return if key isnt ESC
+    $('#btn-cancel').trigger('click')
