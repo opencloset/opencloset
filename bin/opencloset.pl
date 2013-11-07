@@ -1094,7 +1094,10 @@ __DATA__
         %span.label.clickable 사진촬영
         %span.label.clickable 결혼식
         %span.label.clickable 장례식
-        %span.label.clickable 학교행사
+        %span.label.clickable 입학식
+        %span.label.clickable 졸업식
+        %span.label.clickable 세미나
+        %span.label.clickable 발표
   .control-group
     %label.control-label{:for => 'input-domain'} 응시기업 및 분야
     .controls
@@ -1133,21 +1136,26 @@ __DATA__
             <ul class="wizard-steps">
               <li class="active" data-target="#step1">
                 <span class="step">1</span>
-                <span class="title">개인 정보</span>
+                <span class="title">대여자 검색</span>
               </li>
 
               <li data-target="#step2" class="">
                 <span class="step">2</span>
-                <span class="title">신체 치수</span>
+                <span class="title">개인 정보</span>
               </li>
 
               <li data-target="#step3" class="">
                 <span class="step">3</span>
-                <span class="title">대여 목적</span>
+                <span class="title">신체 치수</span>
               </li>
 
               <li data-target="#step4" class="">
                 <span class="step">4</span>
+                <span class="title">대여 목적</span>
+              </li>
+
+              <li data-target="#step5" class="">
+                <span class="step">5</span>
                 <span class="title">등록 완료</span>
               </li>
             </ul>
@@ -1156,7 +1164,106 @@ __DATA__
           <hr>
 
           <div id="step-container" class="step-content row-fluid position-relative">
+
             <div id="step1" class="step-pane active">
+              <h3 class="lighter block green">이전에 방문했던 적이 있나요?</h3>
+
+              <div class="form-horizontal">
+
+                <div class="form-group has-info">
+                  <label class="control-label col-xs-12 col-sm-3 no-padding-right">대여자 검색:</label>
+
+                  <div class="col-xs-12 col-sm-9">
+                    <div class="search">
+                      <div class='input-group'>
+                        <input class='form-control' id='guest-search' type='text' name='guest-search' placeholder='이름 또는 이메일, 휴대전화 번호' />
+                        <span class='input-group-btn'>
+                          <button class='btn btn-default btn-sm' id='btn-guest-search' type='submit'>
+                            <i class='bigger-110 icon-search'>검색</i>
+                          </button>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="form-group has-info">
+                  <label class="control-label col-xs-12 col-sm-3 no-padding-right">대여자 선택:</label>
+
+                  <div class="col-xs-12 col-sm-9">
+                    <div id="guest-search-list">
+                      <div>
+                        <label class="blue">
+                          <input type="radio" class="ace valid" name="guest-id" value="0" data-guest-id="0">
+                          <span class="lbl"> 처음 방문했습니다.</span>
+                        </label>
+                      </div>
+                    </div>
+
+                    <script id="tpl-new-borrower-guest-id" type="text/html">
+                      <div>
+                        <label class="blue">
+                          <input type="radio" class="ace valid" name="guest-id" value="<%%= guest_id %>" data-guest-id="<%%= guest_id %>">
+                          <span class="lbl"> <%%= guest_name %></span>
+                        </label>
+                      </div>
+                    </script>
+                  </div>
+                </div>
+
+                <div class="hr hr-dotted"></div>
+              </div>
+
+              <form method="get" id="validation-form" class="form-horizontal" novalidate="novalidate">
+
+                <div class="form-group has-info">
+                  <label class="control-label col-xs-12 col-sm-3 no-padding-right">동의:</label>
+
+                  <div class="col-xs-12 col-sm-9">
+                    <div>
+                      <strong><%= $company_name %></strong>은 정확한 의류 선택 및
+                      대여 관리를 위해 개인 정보와 신체 치수를 수집합니다.
+                      수집한 정보는 <strong><%= $company_name %></strong>의
+                      대여 서비스 품질을 높이기 위한 통계 목적으로만 사용합니다.
+
+                      <div class="space-4"></div>
+
+                      <div class="subscription">
+                        <label>
+                          <input type="checkbox" class="ace valid" value="1" name="subscription">
+                          <span class="lbl">
+                            위의 내용에 동의합니다.
+                          </span>
+                        </label>
+                      </div>
+                    </div>
+
+                    <div class="space-8"></div>
+
+                    <div>
+                      <strong><%= $company_name %></strong>은 대여자의 반납 편의를 돕거나
+                      <strong><%= $company_name %></strong> 관련 유용한 정보를 알려드리기 위해
+                      기재된 연락처로 휴대폰 단문 메시지 또는 전자우편을 보내거나 전화를 드립니다.
+
+                      <div class="space-4"></div>
+
+                      <div class="subscription">
+                        <label>
+                          <input type="checkbox" class="ace valid" value="2" name="subscription">
+                          <span class="lbl">
+                            위의 내용에 동의합니다.
+                          </span>
+                        </label>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+
+              </form>
+            </div>
+
+            <div id="step2" class="step-pane">
               <h3 class="lighter block green">다음 개인 정보를 입력해주세요.</h3>
 
               <form method="get" id="validation-form" class="form-horizontal" novalidate="novalidate">
@@ -1256,48 +1363,10 @@ __DATA__
                   </div>
                 </div>
 
-                <div class="hr hr-dotted"></div>
-
-                <div class="form-group has-info">
-                  <label class="control-label col-xs-12 col-sm-3 no-padding-right">동의:</label>
-
-                  <div class="col-xs-12 col-sm-9">
-                    <div>
-                      <%= $company_name %>은 정확한 의류 선택 및 대여 관리를 위해 개인 정보와 신체 치수를 수집합니다.
-
-                      <div class="subscription">
-                        <label>
-                          <input type="checkbox" class="ace valid" value="1" name="subscription">
-                          <span class="lbl">
-                            위의 내용에 동의합니다.
-                          </span>
-                        </label>
-                      </div>
-                    </div>
-
-                    <div class="space-4"></div>
-
-                    <div>
-                      <%= $company_name %>은 대여 후 대여자의 반납 편의를 돕기 위해
-                      기재된 연락처로 휴대폰 단문 또는 전자우편을 보내거나 전화를 드립니다.
-
-                      <div class="subscription">
-                        <label>
-                          <input type="checkbox" class="ace valid" value="2" name="subscription">
-                          <span class="lbl">
-                            위의 내용에 동의합니다.
-                          </span>
-                        </label>
-                      </div>
-                    </div>
-
-                  </div>
-                </div>
-
               </form>
             </div>
 
-            <div id="step2" class="step-pane">
+            <div id="step3" class="step-pane">
               <h3 class="lighter block green">다음 신체 치수를 입력해주세요.</h3>
 
               <form method="get" id="validation-form" class="form-horizontal" novalidate="novalidate">
@@ -1380,7 +1449,7 @@ __DATA__
               </form>
             </div>
 
-            <div id="step3" class="step-pane">
+            <div id="step4" class="step-pane">
               <h3 class="lighter block green">대여 목적을 입력해주세요.</h3>
 
               <form method="get" id="validation-form" class="form-horizontal" novalidate="novalidate">
@@ -1390,13 +1459,16 @@ __DATA__
 
                   <div class="col-xs-12 col-sm-7">
                     <div class="guest-why">
-                      <input type="text" class="valid" id="guest-why" name="tags" data-provide="tag" value="입사면접" placeholder="대여 목적을 입력하세요...">
+                      <input type="text" class="valid" id="guest-why" name="tags" data-provide="tag" value="" placeholder="대여 목적을 선택하거나 입력하세요...">
                       <p>
-                        <span class="label clickable"> 입사면접 </span>
-                        <span class="label clickable"> 사진촬영 </span>
-                        <span class="label clickable"> 결혼식 </span>
-                        <span class="label clickable"> 장례식 </span>
-                        <span class="label clickable"> 학교행사 </span>
+                        <span class="label label-info clickable"> 입사면접 </span>
+                        <span class="label label-info clickable"> 사진촬영 </span>
+                        <span class="label label-info clickable"> 결혼식 </span>
+                        <span class="label label-info clickable"> 장례식 </span>
+                        <span class="label label-info clickable"> 입학식 </span>
+                        <span class="label label-info clickable"> 졸업식 </span>
+                        <span class="label label-info clickable"> 세미나 </span>
+                        <span class="label label-info clickable"> 발표 </span>
                       </p>
                     </div>
                   </div>
@@ -1429,7 +1501,7 @@ __DATA__
               </form>
             </div>
 
-            <div id="step4" class="step-pane">
+            <div id="step5" class="step-pane">
               <h3 class="lighter block green">등록이 완료되었습니다!</h3>
             </div>
           </div>

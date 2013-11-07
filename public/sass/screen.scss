@@ -108,7 +108,6 @@
 .page-content {
     .search {
         width: 400px;
-        margin-bottom: 20px;
     }
     #cloth-table table th {
         &:first-child {
@@ -127,7 +126,7 @@
                 width: inherit;
             }
             .tags {
-                width: inherit;
+                width: 100%;
             }
         }
     }
