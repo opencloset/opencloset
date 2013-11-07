@@ -28,6 +28,8 @@
 .ace-thumbnails > li .tags-top-ltr > .label-holder span.label { padding-top: 3px; }
 .ace-thumbnails > li .tags { bottom: 60px; }
 .ace-thumbnails > li .satisfaction { height: 60px; }
+.ace-thumbnails > li .satisfaction ul { margin-left: 5px; }
+.ace-thumbnails > li .satisfaction li { list-style-type: none; }
 
 .page-content .search { width: 400px; margin-bottom: 20px; }
 .page-content #cloth-table table th:first-child { width: 50px; }

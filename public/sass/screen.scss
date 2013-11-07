@@ -95,6 +95,12 @@
         }
         .satisfaction {
             height: 60px;
+            ul {
+                margin-left: 5px;
+            }
+            li {
+                list-style-type: none;
+            }
         }
     }
 }

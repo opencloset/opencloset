@@ -1398,7 +1398,18 @@ __DATA__
                 %span.label= $c->status->name
               - }
           .satisfaction
-            = '만족도'
+            %ul
+              - for my $s ($c->satisfactions({}, { rows => 5, order_by => { -desc => [qw/create_date/] } })) {
+                %li
+                  %span.badge{:class => 'satisfaction-#{$s->chest}'}= $s->guest->chest
+                  %span.badge{:class => 'satisfaction-#{$s->waist}'}= $s->guest->waist
+                  %span.badge{:class => 'satisfaction-#{$s->arm}'}=   $s->guest->arm
+                  %span.badge{:class => 'satisfaction-#{$s->top_fit}'}    상
+                  %span.badge{:class => 'satisfaction-#{$s->bottom_fit}'} 하
+                  - if ($guest && $s->guest->id == $guest->id) {
+                    %i.icon-star{:title => '대여한적 있음'}
+                  - }
+              - }
       - } # end of while
 
 .row
