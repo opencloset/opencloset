@@ -1328,13 +1328,18 @@ __DATA__
           %span.input-group-btn
             %button#btn-cloth-search.btn.btn-sm.btn-default{ :type => 'submit' }
               %i.icon-search.bigger-110 검색
-        %div
-          %a.btn.btn-sm.btn-black{:href => "#{url_with->query([color => 'B'])}"} Black
-          %a.btn.btn-sm.btn-navy{:href => "#{url_with->query([color => 'N'])}"} Navy
-          %a.btn.btn-sm.btn-gray{:href => "#{url_with->query([color => 'G'])}"} Gray
-          %a.btn.btn-sm.btn-red{:href => "#{url_with->query([color => 'R'])}"} Red
-          %a.btn.btn-sm.btn-whites{:href => "#{url_with->query([color => 'W'])}"} White
-          %a.btn.btn-sm.btn-whites{:href => "#{url_with->query([color => ''])}"} ALL
+
+    .space-10
+
+    .col-xs-12.col-lg-10
+      %a.btn.btn-sm.btn-info{:href => "#{url_with->query([color => ''])}"} 모두 보기
+      %a.btn.btn-sm.btn-black{:href => "#{url_with->query([color => 'B'])}"} 검정(B)
+      %a.btn.btn-sm.btn-navy{:href => "#{url_with->query([color => 'N'])}"} 감청(N)
+      %a.btn.btn-sm.btn-gray{:href => "#{url_with->query([color => 'G'])}"} 회색(G)
+      %a.btn.btn-sm.btn-red{:href => "#{url_with->query([color => 'R'])}"} 빨강(R)
+      %a.btn.btn-sm.btn-whites{:href => "#{url_with->query([color => 'W'])}"} 흰색(W)
+
+.space-10
 
 .row
   .col-xs-12
