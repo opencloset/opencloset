@@ -182,6 +182,23 @@ helper create_cloth => sub {
     return $new_cloth;
 };
 
+helper _q => sub {
+    my ($self, %params) = @_;
+
+    my $q = $self->param('q') || q{};
+    my ($chest, $waist, $arm, $status_id, $category_id) = split /\//, $q;
+    my %q = (
+        chest    => $chest       || '',
+        waist    => $waist       || '',
+        arm      => $arm         || '',
+        status   => $status_id   || '',
+        category => $category_id || '',
+        %params,
+    );
+
+    return join('/', ($q{chest}, $q{waist}, $q{arm}, $q{status}, $q{category}));
+};
+
 get '/'      => 'home';
 get '/login';
 
@@ -1215,25 +1232,42 @@ __DATA__
       %span.badge.badge-important 매우큼
     %p.muted
       %span.text-info 상태
-      %span{:class => "#{$status_id == 1 ? 'highlight' : ''}"} 1: 대여가능
-      %span{:class => "#{$status_id == 2 ? 'highlight' : ''}"} 2: 대여중
-      %span{:class => "#{$status_id == 3 ? 'highlight' : ''}"} 3: 세탁
-      %span{:class => "#{$status_id == 4 ? 'highlight' : ''}"} 4: 수선
-      %span{:class => "#{$status_id == 5 ? 'highlight' : ''}"} 5: 대여불가
-      %span{:class => "#{$status_id == 7 ? 'highlight' : ''}"} 7: 분실
+      %span{:class => "#{$status_id == 1 ? 'highlight' : ''}"}
+        %a{:href => "#{url_with->query(q => _q(status => 1))}"} 1: 대여가능
+      %span{:class => "#{$status_id == 2 ? 'highlight' : ''}"}
+        %a{:href => "#{url_with->query(q => _q(status => 2))}"} 2: 대여중
+      %span{:class => "#{$status_id == 3 ? 'highlight' : ''}"}
+        %a{:href => "#{url_with->query(q => _q(status => 3))}"} 3: 세탁
+      %span{:class => "#{$status_id == 4 ? 'highlight' : ''}"}
+        %a{:href => "#{url_with->query(q => _q(status => 4))}"} 4: 수선
+      %span{:class => "#{$status_id == 5 ? 'highlight' : ''}"}
+        %a{:href => "#{url_with->query(q => _q(status => 5))}"} 5: 대여불가
+      %span{:class => "#{$status_id == 7 ? 'highlight' : ''}"}
+        %a{:href => "#{url_with->query(q => _q(status => 7))}"} 7: 분실
     %p.muted
       %span.text-info 종류
-      %span{:class => "#{$category_id == 1 ? 'highlight' : ''}"} 1: Jacket
-      %span{:class => "#{$category_id == 2 ? 'highlight' : ''}"} 2: Pants
-      %span{:class => "#{$category_id == 3 ? 'highlight' : ''}"} 3: Shirts
-      %span{:class => "#{$category_id == 4 ? 'highlight' : ''}"} 4: Shoes
-      %span{:class => "#{$category_id == 5 ? 'highlight' : ''}"} 5: Hat
-      %span{:class => "#{$category_id == 6 ? 'highlight' : ''}"} 6: Tie
-      %span{:class => "#{$category_id == 7 ? 'highlight' : ''}"} 7: Waistcoat
-      %span{:class => "#{$category_id == 8 ? 'highlight' : ''}"} 8: Coat
-      %span{:class => "#{$category_id == 9 ? 'highlight' : ''}"} 9: Onepiece
-      %span{:class => "#{$category_id == 10 ? 'highlight' : ''}"} 10: Skirt
-      %span{:class => "#{$category_id == 11 ? 'highlight' : ''}"} 11: Blouse
+      %span{:class => "#{$category_id == 1 ? 'highlight' : ''}"}
+        %a{:href => "#{url_with->query(q => _q(category => 1))}"} 1: Jacket
+      %span{:class => "#{$category_id == 2 ? 'highlight' : ''}"}
+        %a{:href => "#{url_with->query(q => _q(category => 2))}"} 2: Pants
+      %span{:class => "#{$category_id == 3 ? 'highlight' : ''}"}
+        %a{:href => "#{url_with->query(q => _q(category => 3))}"} 3: Shirts
+      %span{:class => "#{$category_id == 4 ? 'highlight' : ''}"}
+        %a{:href => "#{url_with->query(q => _q(category => 4))}"} 4: Shoes
+      %span{:class => "#{$category_id == 5 ? 'highlight' : ''}"}
+        %a{:href => "#{url_with->query(q => _q(category => 5))}"} 5: Hat
+      %span{:class => "#{$category_id == 6 ? 'highlight' : ''}"}
+        %a{:href => "#{url_with->query(q => _q(category => 6))}"} 6: Tie
+      %span{:class => "#{$category_id == 7 ? 'highlight' : ''}"}
+        %a{:href => "#{url_with->query(q => _q(category => 7))}"} 7: Waistcoat
+      %span{:class => "#{$category_id == 8 ? 'highlight' : ''}"}
+        %a{:href => "#{url_with->query(q => _q(category => 8))}"} 8: Coat
+      %span{:class => "#{$category_id == 9 ? 'highlight' : ''}"}
+        %a{:href => "#{url_with->query(q => _q(category => 9))}"} 9: Onepiece
+      %span{:class => "#{$category_id == 10 ? 'highlight' : ''}"}
+        %a{:href => "#{url_with->query(q => _q(category => 10))}"} 10: Skirt
+      %span{:class => "#{$category_id == 11 ? 'highlight' : ''}"}
+        %a{:href => "#{url_with->query(q => _q(category => 11))}"} 11: Blouse
 
 .row
   .col-xs-12
