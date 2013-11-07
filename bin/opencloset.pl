@@ -1392,6 +1392,8 @@ __DATA__
               - else {
                 %span.label= $c->status->name
               - }
+          .satisfaction
+            = '만족도'
       - } # end of while
 
 .row

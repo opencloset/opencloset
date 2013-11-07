@@ -26,6 +26,8 @@
 .ace-thumbnails > li .tags-top-ltr { background-color: rgba(0, 0, 0, 0); border: 0 none; top: 0; direction: ltr; display: inline-block; height: auto; left: 0; margin: 0; overflow: visible; padding: 0; position: absolute; right: 0; vertical-align: inherit; width: auto; }
 .ace-thumbnails > li .tags-top-ltr > .label-holder { direction: rtl; display: table; margin: 0 0 1px; margin-top: -1px; opacity: 0.92; text-align: right; }
 .ace-thumbnails > li .tags-top-ltr > .label-holder span.label { padding-top: 3px; }
+.ace-thumbnails > li .tags { bottom: 60px; }
+.ace-thumbnails > li .satisfaction { height: 60px; }
 
 .page-content .search { width: 400px; margin-bottom: 20px; }
 .page-content #cloth-table table th:first-child { width: 50px; }
