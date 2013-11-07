@@ -2,8 +2,8 @@
 (function() {
   $(function() {
     return Window.prototype.show_box = function(id) {
-      jQuery('.widget-box.visible').removeClass('visible');
-      jQuery('#' + id).addClass('visible');
+      $('.widget-box.visible').removeClass('visible');
+      return $("#" + id).addClass('visible');
     };
   });
 

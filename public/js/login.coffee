@@ -1,5 +1,4 @@
 $ ->
   Window::show_box = (id) ->
-    jQuery('.widget-box.visible').removeClass('visible')
-    jQuery('#'+id).addClass('visible')
-    return
+    $('.widget-box.visible').removeClass('visible')
+    $("##{id}").addClass('visible')
