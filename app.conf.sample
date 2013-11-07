@@ -61,4 +61,14 @@ $db_opts->{AutoCommit} //= 1;
     # page
     #
     entries_per_page => 20,
+
+    #
+    # SMS
+    #
+    sms => {
+        sender   => '07075837521',
+        text     => '[열린옷장]에서 보내는 본인확인용 문자입니다. :)',
+        username => $ENV{OPENCLOSET_COOLSMS_USER} || 'opencloset',
+        password => $ENV{OPENCLOSET_COOLSMS_PASS} || '',
+    },
 };
