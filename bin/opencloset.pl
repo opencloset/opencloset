@@ -1675,6 +1675,8 @@ __DATA__
         %span.label.clickable 한만일
         %span.label.clickable 김소령
         %span.label.clickable 서동건
+        %span.label.clickable 정선경
+        %span.label.clickable 김기리
   .control-group
     %label.control-label{:for => 'input-comment'} Comment
     .controls
