@@ -2049,7 +2049,7 @@ __DATA__
     = include 'layouts/default/navbar'
     #main-container.main-container
       .main-container-inner
-        %a#menu-toggler.menu-toggler{:href = '#'}
+        %a#menu-toggler.menu-toggler{:href => '#'}
           %span.menu-text
         = include 'layouts/default/sidebar'
         .main-content
