@@ -121,6 +121,16 @@
             width: 160px;
         }
     }
+    #new-borrower {
+        form {
+            .input-group {
+                width: inherit;
+            }
+            .tags {
+                width: inherit;
+            }
+        }
+    }
 }
 
 .btn-black {

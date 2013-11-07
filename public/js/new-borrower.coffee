@@ -25,3 +25,26 @@ $ ->
         alert('error', jqXHR.responseJSON.error)
       complete: (jqXHR, textStatus) ->
         $this.removeClass('disabled')
+
+  validation = false
+  $('#fuelux-wizard').ace_wizard()
+    .on 'change', (e, info) ->
+      if info.step is 1 && validation
+        return false unless $('#validation-form').valid()
+    .on 'finished', (e) ->
+      false
+    .on 'stepclick', (e) ->
+      #false
+
+  why = $('#guest-why').tag({
+    placeholder: $('#guest-why').attr('placeholder'),
+    source: [
+      "입사면접",
+      "사진촬영",
+      "결혼식",
+      "장례식",
+      "학교행사",
+    ],
+  })
+  $('.guest-why .clickable.label').click ->
+    why.add( $(@).text() )
