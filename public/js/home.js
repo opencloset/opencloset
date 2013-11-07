@@ -58,7 +58,7 @@
         complete: function(jqXHR, textStatus) {}
       });
     });
-    return $('#action-buttons').on('click', 'button:not(.disabled)', function(e) {
+    $('#action-buttons').on('click', 'button:not(.disabled)', function(e) {
       var $this, clothes, status;
       $this = $(this);
       $this.addClass('disabled');
@@ -96,6 +96,9 @@
         }
       });
       return $('#cloth-id').focus();
+    });
+    return $('#input-check-all').click(function(e) {
+      return $(this).closest('thead').next().find('.ace:checkbox').trigger('click');
     });
   });
 

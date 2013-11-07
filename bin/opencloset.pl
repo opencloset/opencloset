@@ -881,7 +881,7 @@ __DATA__
       %tr
         %th.center
           %label
-            %input.ace{ :type => 'checkbox' }
+            %input#input-check-all.ace{ :type => 'checkbox' }
             %span.lbl
         %th 옷
         %th 상태

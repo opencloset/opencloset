@@ -66,3 +66,6 @@ $ ->
       complete: (jqXHR, textStatus) ->
         $this.removeClass('disabled')
     $('#cloth-id').focus()
+
+  $('#input-check-all').click (e) ->
+    $(@).closest('thead').next().find('.ace:checkbox').trigger('click')
