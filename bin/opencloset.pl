@@ -1401,6 +1401,31 @@ __DATA__
                     </div>
                   </div>
                 </div>
+
+                <div class="space-2"></div>
+
+                <div class="form-group has-info">
+                  <label for="guest-company" class="control-label col-xs-12 col-sm-3 no-padding-right">응시 기업:</label>
+
+                  <div class="col-xs-12 col-sm-9">
+                    <div class="clearfix">
+                      <input type="text" class="col-xs-12 col-sm-4 valid" id="guest-company" name="guest-company">
+                    </div>
+                  </div>
+                </div>
+
+                <div class="space-2"></div>
+
+                <div class="form-group has-info">
+                  <label for="guest-domain" class="control-label col-xs-12 col-sm-3 no-padding-right">응시 분야:</label>
+
+                  <div class="col-xs-12 col-sm-9">
+                    <div class="clearfix">
+                      <input type="text" class="col-xs-12 col-sm-4 valid" id="guest-domain" name="guest-domain">
+                    </div>
+                  </div>
+                </div>
+
               </form>
             </div>
 
