@@ -52,7 +52,12 @@
       source: ["입사면접", "사진촬영", "결혼식", "장례식", "학교행사"]
     });
     return $('.guest-why .clickable.label').click(function() {
-      return why.add($(this).text());
+      var e, text;
+      text = $(this).text();
+      e = $.Event('keydown', {
+        keyCode: 13
+      });
+      return why.next().val(text).trigger(e);
     });
   });
 

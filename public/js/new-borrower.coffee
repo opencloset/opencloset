@@ -47,4 +47,6 @@ $ ->
     ],
   })
   $('.guest-why .clickable.label').click ->
-    why.add( $(@).text() )
+    text = $(@).text()
+    e = $.Event('keydown', { keyCode: 13 })
+    why.next().val(text).trigger(e)
