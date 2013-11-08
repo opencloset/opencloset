@@ -1389,7 +1389,7 @@ __DATA__
                   <div class="col-xs-12 col-sm-5">
                     <div class="input-group">
                       <input type="text" class="valid form-control" id="guest-weight" name="guest-weight">
-                      <span class="input-group-addon"> <i>cm</i> </span>
+                      <span class="input-group-addon"> <i>kg</i> </span>
                     </div>
                   </div>
                 </div>
