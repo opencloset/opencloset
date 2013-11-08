@@ -1,6 +1,7 @@
 #!/usr/bin/env perl
 
 use v5.14;
+use utf8;
 use strict;
 use warnings;
 
@@ -30,6 +31,9 @@ sub run {
 
     print($usage->text), exit                        if     $opt->help;
     print($usage->text), die("csv file is needed\n") unless @args >= 1;
+
+    binmode STDOUT, ":utf8";
+    binmode STDERR, ":utf8";
 
     my $csv = Text::CSV->new( { binary => 1, auto_diag => 1 } );
     open my $fh, "<:encoding(utf8)", "$args[0]" or die "$args[0]: $!";
@@ -71,20 +75,20 @@ sub run {
         if ($row->{category} == $Opencloset::Constant::CATEOGORY_SHOES) {
             $foot = $row->{donor_id};
         }
-        my $res = $ua->request(
-            POST $opt->url . '/clothes.json',
-            [
-                chest           => $row->{chest},
-                waist           => $row->{waist},
-                arm             => $row->{arm},
-                length          => $row->{length},
-                foot            => $foot,
-                category_id     => $row->{category},
-                designated_for  => $designated_for_map{$designated_for},
-                compatible_code => $row->{code},
-                color           => $row->{color},
-            ]
+
+        my %post_data = (
+            chest           => $row->{chest},
+            waist           => $row->{waist},
+            arm             => $row->{arm},
+            length          => $row->{length},
+            foot            => $foot,
+            category_id     => $row->{category},
+            designated_for  => $designated_for_map{$designated_for},
+            compatible_code => $row->{code},
+            color           => $row->{color},
         );
+
+        my $res = $ua->request( POST $opt->url . '/clothes.json', [ %post_data ] );
 
         my $data = decode_json($res->content);
         if ($res->is_success) {
@@ -92,7 +96,9 @@ sub run {
         }
         else {
             $fail++;
-            say STDERR $data->{error};
+            my $cloth_data = join q{,}, @post_data{ qw/ chest waist arm length foot category_id designated_for compatible_code color / };
+            say STDERR "row($loop): data($cloth_data): $data->{error}{str}";
+            say STDERR "  $_ => $post_data{$_}" for keys %{ $data->{error}{data} };
         }
     }
 

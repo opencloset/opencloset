@@ -326,12 +326,11 @@ post '/clothes' => sub {
         ->each(sub { shift->regexp(qr/^\d+$/) });
 
     unless ($self->validate($validator)) {
-        my $errors_hashref = $validator->errors;
-        my @errors;
-        while (my ($key, $value) = each %$errors_hashref) {
-            push @errors, "$key: $value";
+        my @error_str;
+        while ( my ($k, $v) = each %{ $validator->errors } ) {
+            push @error_str, "$k:$v";
         }
-        return $self->error(400, join(', ', @errors));
+        return $self->error( 400, { str => join(',', @error_str), data => $validator->errors } );
     }
 
     my $cid      = $self->param('category_id');
