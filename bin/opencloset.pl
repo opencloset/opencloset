@@ -1561,25 +1561,25 @@ __DATA__
 %h3 주문내역
 %ul
   - for my $order (@$orders) {
-      - if ($order->status) {
-        %li
-          %a{:href => "#{url_for('/orders/' . $order->id)}"}
-            - if ($order->status->name eq '대여중') {
-              - if (overdue_calc($order->target_date, DateTime->now())) {
-                %span.label.label-important 연체중
-              - } else {
-                %span.label.label-important= $order->status->name
-              - }
-              %span.highlight{:title => '대여일'}= $order->rental_date->ymd
-              ~
-              %span{:title => '반납예정일'}= $order->target_date->ymd
+    - if ($order->status) {
+      %li
+        %a{:href => "#{url_for('/orders/' . $order->id)}"}
+          - if ($order->status->name eq '대여중') {
+            - if (overdue_calc($order->target_date, DateTime->now())) {
+              %span.label.label-important 연체중
             - } else {
-              %span.label= $order->status->name
-              %span.highlight{:title => '대여일'}= $order->rental_date->ymd
-              ~
-              %span.highlight{:title => '반납일'}= $order->return_date->ymd
+              %span.label.label-important= $order->status->name
             - }
-      - }
+            %span.highlight{:title => '대여일'}= $order->rental_date->ymd
+            ~
+            %span{:title => '반납예정일'}= $order->target_date->ymd
+          - } else {
+            %span.label= $order->status->name
+            %span.highlight{:title => '대여일'}= $order->rental_date->ymd
+            ~
+            %span.highlight{:title => '반납일'}= $order->return_date->ymd
+          - }
+    - }
   - }
 
 @@ guests/size.html.haml
