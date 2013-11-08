@@ -12,4 +12,5 @@ requires 'Mojolicious::Plugin::HamlRenderer';
 requires 'Mojolicious::Plugin::Validator';
 requires 'Path::Tiny';
 requires 'SMS::Send::KR::CoolSMS';
+requires 'Text::Haml', '0.990112';
 requires 'Try::Tiny';
