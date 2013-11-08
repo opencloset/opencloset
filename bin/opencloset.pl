@@ -1182,14 +1182,34 @@ __DATA__
 
                   <div class="col-xs-12 col-sm-9">
                     <div class="search">
-                      <div class='input-group'>
-                        <input class='form-control' id='guest-search' type='text' name='guest-search' placeholder='이름 또는 이메일, 휴대전화 번호' />
-                        <span class='input-group-btn'>
-                          <button class='btn btn-default btn-sm' id='btn-guest-search' type='submit'>
-                            <i class='bigger-110 icon-search'>검색</i>
-                          </button>
-                        </span>
-                      </div>
+                      <ul>
+                        <% while(my $g = $candidates->next) { %>
+                        <li>
+                          <a href='<%= url_for("/guests/@{[$g->id]}/size") %>'>
+                            %= "@{[$g->name]}(@{[$g->email]})"
+                          </a>
+                          <p class="muted">
+                            <span><%= $g->address %></span>
+                            <% if ($g->visit_date) { %>
+                            ,
+                            <time class="highlight"><%= $g->visit_date->ymd %></time>
+                            일 방문
+                            <% } %>
+                          </p>
+                        </li>
+                        <% } %>
+                      </ul>
+
+                      <form action="<%= url_for() %>" method="post">
+                        <div class='input-group'>
+                          <input class='form-control' id='guest-search' type='text' name='q' placeholder='이름 또는 이메일, 휴대전화 번호' />
+                          <span class='input-group-btn'>
+                            <button class='btn btn-default btn-sm' id='btn-guest-search' type='submit'>
+                              <i class='bigger-110 icon-search'>검색</i>
+                            </button>
+                          </span>
+                        </div>
+                      </form>
                     </div>
                   </div>
                 </div>
@@ -1228,9 +1248,9 @@ __DATA__
 
                   <div class="col-xs-12 col-sm-9">
                     <div>
-                      <strong><%= $company_name %></strong>은 정확한 의류 선택 및
+                      <strong class="co-name"><%= $company_name %></strong>은 정확한 의류 선택 및
                       대여 관리를 위해 개인 정보와 신체 치수를 수집합니다.
-                      수집한 정보는 <strong><%= $company_name %></strong>의
+                      수집한 정보는 <strong class="co-name"><%= $company_name %></strong>의
                       대여 서비스 품질을 높이기 위한 통계 목적으로만 사용합니다.
 
                       <div class="space-4"></div>
@@ -1248,8 +1268,8 @@ __DATA__
                     <div class="space-8"></div>
 
                     <div>
-                      <strong><%= $company_name %></strong>은 대여자의 반납 편의를 돕거나
-                      <strong><%= $company_name %></strong> 관련 유용한 정보를 알려드리기 위해
+                      <strong class="co-name"><%= $company_name %></strong>은 대여자의 반납 편의를 돕거나
+                      <strong class="co-name"><%= $company_name %></strong> 관련 유용한 정보를 알려드리기 위해
                       기재된 연락처로 휴대폰 단문 메시지 또는 전자우편을 보내거나 전화를 드립니다.
 
                       <div class="space-4"></div>
