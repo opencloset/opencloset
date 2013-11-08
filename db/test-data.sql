@@ -1,17 +1,17 @@
 START TRANSACTION;
 INSERT INTO `donor` (`id`, `name`,`email`,`phone`,`comment`,`gender`,`address`,`message`) VALUES (1,'한만일','10001if@opencloset.net','01011118282',NULL,0,'인천','안녕~'),(2,'김소령','commander@opencloset.net','01000001111',NULL,1,'서울 신사동','(*-*)b');
 INSERT INTO `cloth` (`id`,`no`,`chest`,`waist`,`arm`,`length`,`category_id`,`top_id`,`bottom_id`,`donor_id`,`status_id`,`designated_for`,`color`,`compatible_code`) VALUES 
-(1,'Jck00001', 94, NULL, 51, NULL, 1, NULL, NULL, 1, 1, 1,'B',NULL),
-(2,'Pts00001', NULL, 79, NULL, 102, 2, NULL, NULL, 1, 1, 1,'B',NULL),
-(3,'Shr00001', NULL, NULL, NULL, NULL, 3, NULL, NULL, 1, 1, 1,'B',NULL),
-(4,'Sho00001', NULL, NULL, NULL, NULL, 4, NULL, NULL, 1, 1, 1,'B',NULL),
-(5,'Tie00001', NULL, NULL, NULL, NULL, 6, NULL, NULL, 1, 1, 1,'B',NULL);
+(1,'JCK00001', 94, NULL, 51, NULL, 1, NULL, NULL, 1, 1, 1,'B',NULL),
+(2,'PTS00001', NULL, 79, NULL, 102, 2, NULL, NULL, 1, 1, 1,'B',NULL),
+(3,'SHR00001', NULL, NULL, NULL, NULL, 3, NULL, NULL, 1, 1, 1,'B',NULL),
+(4,'SHO00001', NULL, NULL, NULL, NULL, 4, NULL, NULL, 1, 1, 1,'B',NULL),
+(5,'TIE00001', NULL, NULL, NULL, NULL, 6, NULL, NULL, 1, 1, 1,'B',NULL);
 UPDATE `cloth` SET `bottom_id`=2 WHERE `id`=1;
 UPDATE `cloth` SET `top_id`=1 WHERE `id`=2;
 INSERT INTO `donor_cloth` (`donor_id`, `cloth_id`, `comment`, `donation_date`) VALUES (1, 1, '필요없어서 했습니다', NOW()), (1, 2, '', NOW());
 
 -- 대여중인거
-INSERT INTO `cloth` (`id`,`no`,`chest`,`waist`,`arm`,`length`,`category_id`,`top_id`,`bottom_id`,`donor_id`,`status_id`) VALUES (6,'Jck00002', 99, NULL, 55, NULL, 1, NULL, NULL, 1, 2), (7,'Pts00002', NULL, 82, NULL, 112, 2, NULL, NULL, 1, 2);
+INSERT INTO `cloth` (`id`,`no`,`chest`,`waist`,`arm`,`length`,`category_id`,`top_id`,`bottom_id`,`donor_id`,`status_id`) VALUES (6,'JCK00002', 99, NULL, 55, NULL, 1, NULL, NULL, 1, 2), (7,'PTS00002', NULL, 82, NULL, 112, 2, NULL, NULL, 1, 2);
 UPDATE `cloth` SET `bottom_id`=7 WHERE `id`=6;
 UPDATE `cloth` SET `top_id`=6 WHERE `id`=7;
 INSERT INTO `donor_cloth` (`donor_id`, `cloth_id`, `comment`, `donation_date`) VALUES (1, 3, '남아서..', NOW()), (1, 4, '', NOW());
