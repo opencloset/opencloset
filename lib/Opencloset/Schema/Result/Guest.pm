@@ -54,6 +54,18 @@ __PACKAGE__->table("guest");
 
 regex: [0-9]{10,11}
 
+=head2 password
+
+  data_type: 'char'
+  encode_args: {algorithm => "SHA-1",format => "hex",salt_length => 10}
+  encode_check_method: 'check_password'
+  encode_class: 'Digest'
+  encode_column: 1
+  is_nullable: 0
+  size: 50
+
+first 40 length for digest, after 10 length for salt(random)
+
 =head2 gender
 
   data_type: 'integer'
@@ -148,6 +160,16 @@ __PACKAGE__->add_columns(
   { data_type => "varchar", is_nullable => 1, size => 128 },
   "phone",
   { data_type => "varchar", is_nullable => 1, size => 16 },
+  "password",
+  {
+    data_type           => "char",
+    encode_args         => { algorithm => "SHA-1", format => "hex", salt_length => 10 },
+    encode_check_method => "check_password",
+    encode_class        => "Digest",
+    encode_column       => 1,
+    is_nullable         => 0,
+    size                => 50,
+  },
   "gender",
   { data_type => "integer", is_nullable => 1 },
   "address",
@@ -265,8 +287,8 @@ __PACKAGE__->has_many(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07036 @ 2013-11-08 11:32:26
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:rBg0U67AMPjXGRIKQhs/Hw
+# Created by DBIx::Class::Schema::Loader v0.07036 @ 2013-11-08 19:03:21
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:GmDhBLu0AkAmLURn7ZaYlQ
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration
