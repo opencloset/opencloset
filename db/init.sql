@@ -36,7 +36,6 @@ CREATE TABLE `guest` (
   `gender`      INT DEFAULT NULL COMMENT '1: male, 2: female',
   `address`     VARCHAR(255) DEFAULT NULL,
   `age`         INT DEFAULT NULL,
-  `purpose`     VARCHAR(32),
   `domain`      VARCHAR(64),
 
   `chest`       INT NOT NULL,     -- 가슴둘레(cm)
@@ -159,6 +158,7 @@ CREATE TABLE `order` (
   `return_date`      DATETIME DEFAULT NULL,
   `return_method`    VARCHAR(32) DEFAULT NULL,
   `payment_method`   VARCHAR(32) DEFAULT NULL,
+  `purpose`          VARCHAR(32),
   `price`            INT DEFAULT 0,
   `discount`         INT DEFAULT 0,
   `late_fee`         INT DEFAULT 0,
@@ -166,6 +166,12 @@ CREATE TABLE `order` (
   `l_payment_method` VARCHAR(32) DEFAULT NULL,
   `staff_name`       VARCHAR(32) DEFAULT NULL,
   `comment`          TEXT DEFAULT NULL,
+
+  -- guest's size
+  `chest`            INT DEFAULT NULL,
+  `waist`            INT DEFAULT NULL,
+  `arm`              INT DEFAULT NULL,
+  `length`           INT DEFAULT NULL,
 
   PRIMARY KEY (`id`),
   CONSTRAINT `fk_order1` FOREIGN KEY (`guest_id`) REFERENCES `guest` (`id`) ON DELETE CASCADE,

@@ -16,9 +16,9 @@ UPDATE `cloth` SET `bottom_id`=7 WHERE `id`=6;
 UPDATE `cloth` SET `top_id`=6 WHERE `id`=7;
 INSERT INTO `donor_cloth` (`donor_id`, `cloth_id`, `comment`, `donation_date`) VALUES (1, 3, '남아서..', NOW()), (1, 4, '', NOW());
 
-INSERT INTO `guest` (`id`,`name`,`email`,`phone`,`gender`,`address`,`age`,`purpose`,`chest`,`waist`,`arm`,`length`,`height`,`weight`,`create_date`,`visit_date`,`domain`,`target_date`) VALUES (1,'홍형석','aanoaa@gmail.com','01031820000',0,'서울시 동작구 사당동',32,'입사면접',93,78,51,102,168,59,'2013-01-03','2013-01-03','silex - 컴퓨터프로그램','2013-01-04');
+INSERT INTO `guest` (`id`,`name`,`email`,`phone`,`gender`,`address`,`age`,`chest`,`waist`,`arm`,`length`,`height`,`weight`,`create_date`,`visit_date`,`domain`,`target_date`) VALUES (1,'홍형석','aanoaa@gmail.com','01031820000',0,'서울시 동작구 사당동',32,93,78,51,102,168,59,'2013-01-03','2013-01-03','silex - 컴퓨터프로그램','2013-01-04');
 
-INSERT INTO `order` (`id`,`guest_id`,`status_id`,`rental_date`,`target_date`,`return_date`,`price`,`discount`,`comment`,`payment_method`,`staff_name`) VALUES (1,1,2,'2013-10-18','2013-10-21',NULL,20000,0,NULL,'현금','김소령');
+INSERT INTO `order` (`id`,`guest_id`,`status_id`,`rental_date`,`target_date`,`return_date`,`price`,`discount`,`comment`,`payment_method`,`staff_name`,`purpose`,`chest`,`waist`,`arm`,`length`) VALUES (1,1,2,'2013-10-18','2013-10-21',NULL,20000,0,NULL,'현금','김소령','입사면접',95,78,60,105);
 
 INSERT INTO `cloth_order` (`cloth_id`,`order_id`) VALUES (6,1), (7,1);
 

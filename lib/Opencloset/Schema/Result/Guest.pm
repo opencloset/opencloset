@@ -72,12 +72,6 @@ regex: [0-9]{10,11}
   data_type: 'integer'
   is_nullable: 1
 
-=head2 purpose
-
-  data_type: 'varchar'
-  is_nullable: 1
-  size: 32
-
 =head2 domain
 
   data_type: 'varchar'
@@ -160,8 +154,6 @@ __PACKAGE__->add_columns(
   { data_type => "varchar", is_nullable => 1, size => 255 },
   "age",
   { data_type => "integer", is_nullable => 1 },
-  "purpose",
-  { data_type => "varchar", is_nullable => 1, size => 32 },
   "domain",
   { data_type => "varchar", is_nullable => 1, size => 64 },
   "chest",
@@ -273,8 +265,8 @@ __PACKAGE__->has_many(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07036 @ 2013-11-04 16:51:15
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:bVmOrViI/nwQ2xmE+PoO6g
+# Created by DBIx::Class::Schema::Loader v0.07036 @ 2013-11-08 11:32:26
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:rBg0U67AMPjXGRIKQhs/Hw
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

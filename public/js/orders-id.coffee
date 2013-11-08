@@ -1,6 +1,6 @@
 $ ->
   $('.clickable.label').click ->
-    $('#input-staff').val($(@).text())
+    $(@).parent().prev().val($(@).text())
 
   origin_fee = parseInt($('#input-price').val() or 0)
   additional_fee = 0

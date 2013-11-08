@@ -105,7 +105,7 @@ helper create_guest => sub {
     my $self = shift;
 
     my %params;
-    map { $params{$_} = $self->param($_) } qw/name gender phone address age email purpose height weight target_date domain/;
+    map { $params{$_} = $self->param($_) } qw/name gender phone address age email height weight target_date domain/;
 
     return $DB->resultset('Guest')->find_or_create(\%params);
 };
@@ -604,11 +604,18 @@ post '/orders' => sub {
         # BEGIN TRANSACTION ~
         $order = $DB->resultset('Order')->create({
             guest_id  => $guest->id,
+            chest     => $guest->chest,
+            waist     => $guest->waist,
+            arm       => $guest->arm,
+            length    => $guest->length,
         });
 
         for my $cloth (@clothes) {
             $order->create_related('cloth_orders', { cloth_id => $cloth->id });
         }
+        my $dt_parser = $DB->storage->datetime_parser;
+        $guest->visit_date($dt_parser->format_datetime(DateTime->now()));
+        $guest->update;    # refresh `visit_date`
         $guard->commit;
         # ~ COMMIT
     } catch {
@@ -694,6 +701,7 @@ get '/orders/:id' => sub {
         $self->stash(template => 'orders/id/nil_status');
     }
 
+    map { delete $fillinform{$_} } qw/chest waist arm length/;
     $self->render_fillinform({ %fillinform });
 };
 
@@ -724,7 +732,7 @@ any [qw/post put patch/] => '/orders/:id' => sub {
     ##       maybe should convert to DateTime object
     map {
         $order->$_($self->param($_)) if defined $self->param($_);
-    } qw/price discount target_date comment return_method late_fee l_discount payment_method staff_name/;
+    } qw/price discount target_date comment return_method late_fee l_discount payment_method staff_name purpose/;
     my %status_to_be = (
         0 => $Opencloset::Constant::STATUS_RENT,
         $Opencloset::Constant::STATUS_RENT => $Opencloset::Constant::STATUS_RETURN,
@@ -1040,7 +1048,7 @@ __DATA__
     %p.muted
       %span= $g->address
       - if ($g->visit_date) {
-        %time , #{$g->visit_date->ymd} #{$g->purpose} (으)로 방문
+        %time , #{$g->visit_date->ymd} 일 방문
       - }
   - }
 
@@ -1082,16 +1090,6 @@ __DATA__
     .controls
       %input{:type => 'text', :id => 'input-email', :name => 'email'}
   .control-group
-    %label.control-label{:for => 'input-purpose'} 대여목적
-    .controls
-      %input{:type => 'text', :id => 'input-purpose', :name => 'purpose', :placeholder => '선택하거나 입력'}
-      %p
-        %span.label.clickable 입사면접
-        %span.label.clickable 사진촬영
-        %span.label.clickable 결혼식
-        %span.label.clickable 장례식
-        %span.label.clickable 학교행사
-  .control-group
     %label.control-label{:for => 'input-domain'} 응시기업 및 분야
     .controls
       %input#input-domain{:type => 'text', :name => 'domain'}
@@ -1115,7 +1113,6 @@ __DATA__
 
 
 @@ guests/status.html.haml
-%h3= $guest->purpose
 %ul
   %li
     %i.icon-user
@@ -1212,8 +1209,10 @@ __DATA__
 %p
   %a{:href => '/guests/#{$guest->id}'}= $guest->name
   님
-  %strong= $guest->purpose
-  %span (으)로 방문
+  - if ($guest->visit_date) {
+    %strong= $guest->visit_date->ymd
+    %span 일 방문
+  - }
   %div
     %span.label.label-info.search-label
       %a{:href => "#{url_with('/search')->query([q => $guest->chest])}///#{$status_id}"}= $guest->chest
@@ -1231,8 +1230,10 @@ __DATA__
   %input{:type => 'radio', :name => 'gid', :value => '#{$guest->id}'}
   %a{:href => '/guests/#{$guest->id}'}= $guest->name
   님
-  %strong.history-link= $guest->purpose
-  %span (으)로 방문
+  - if ($guest->visit_date) {
+    %strong= $guest->visit_date->ymd
+    %span 일 방문
+  - }
 %div
   %i.icon-envelope
   %a{:href => "mailto:#{$guest->email}"}= $guest->email
@@ -1741,6 +1742,16 @@ __DATA__
     .controls
       %input#input-target-date{:type => 'text', :name => 'target_date'}
   .control-group
+    %label.control-label{:for => 'input-purpose'} 대여목적
+    .controls
+      %input{:type => 'text', :id => 'input-purpose', :name => 'purpose', :placeholder => '선택하거나 입력'}
+      %p
+        %span.label.clickable 입사면접
+        %span.label.clickable 사진촬영
+        %span.label.clickable 결혼식
+        %span.label.clickable 장례식
+        %span.label.clickable 학교행사
+  .control-group
     %label.control-label{:for => 'input-staff'} staff
     .controls
       %input#input-staff{:type => 'text', :name => 'staff_name'}
@@ -1772,6 +1783,9 @@ __DATA__
 - } else {
   %span.label{:class => 'status-#{$order->status_id}'}= $order->status->name
 - }
+%p
+  %span.highlight= $order->purpose
+  으로 방문
 
 @@ partial/order_info.html.haml
 - if ($order->rental_date) {

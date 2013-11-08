@@ -2,9 +2,6 @@
 (function() {
   $(function() {
     $('#input-phone').ForceNumericOnly();
-    $('.clickable.label').click(function() {
-      return $('#input-purpose').val($(this).text());
-    });
     $('#input-target-date').datepicker({
       startDate: "-0d",
       language: 'kr',
