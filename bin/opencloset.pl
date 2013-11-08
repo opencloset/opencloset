@@ -1642,8 +1642,15 @@ __DATA__
 
 
 @@ orders.html.haml
-- layout 'default';
-- title '주문서 목록';
+- my $id   = 'orders';
+- my $meta = $sidebar->{meta};
+- layout 'default',
+-   active_id   => $id,
+-   breadcrumbs => [
+-     { text => $meta->{$id}{text} },
+-   ];
+- title $meta->{$id}{text};
+
 %ul
   - while(my $order = $orders->next) {
       - if ($order->status) {
