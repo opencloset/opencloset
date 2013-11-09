@@ -4,22 +4,53 @@
     var add_registered_guest, validation, why;
     $('#input-phone').ForceNumericOnly();
     add_registered_guest = function() {
-      var compiled, data, html, query;
+      var query;
       query = $('#guest-search').val();
-      data = {
-        guest_id: query.length,
-        guest_name: query
-      };
       if (!query) {
         return;
       }
-      if ($("#guest-search-list input[data-guest-id='" + data.guest_id + "']").length) {
-        return;
-      }
-      compiled = _.template($('#tpl-new-borrower-guest-id').html());
-      html = $(compiled(data));
-      return $("#guest-search-list").append(html);
+      return $.ajax("/new-borrower.json", {
+        type: 'GET',
+        data: {
+          q: query
+        },
+        success: function(guests, textStatus, jqXHR) {
+          var compiled;
+          compiled = _.template($('#tpl-new-borrower-guest-id').html());
+          return _.each(guests, function(guest) {
+            var $html;
+            if (!$("#guest-search-list input[data-guest-id='" + guest.id + "']").length) {
+              $html = $(compiled(guest));
+              $html.find('input').attr('data-json', JSON.stringify(guest));
+              return $("#guest-search-list").prepend($html);
+            }
+          });
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+          return alert('error', jqXHR.responseJSON.error);
+        },
+        complete: function(jqXHR, textStatus) {}
+      });
     };
+    $('#guest-search-list').on('click', ':radio', function(e) {
+      var g;
+      g = JSON.parse($(this).attr('data-json'));
+      return _.each(['name', 'email', 'gender', 'phone', 'address', 'height', 'weight', 'chest', 'waist', 'arm', 'length'], function(name) {
+        var $input;
+        $input = $("input[name=" + name + "]");
+        if ($input.attr('type') === 'radio' || $input.attr('type') === 'checkbox') {
+          return $input.each(function(i, el) {
+            if ($(el).val() === g[name]) {
+              return $(el).attr('checked', true);
+            }
+          });
+        } else {
+          if (!$input.val()) {
+            return $input.val(g[name]);
+          }
+        }
+      });
+    });
     $('#guest-search').keypress(function(e) {
       if (e.keyCode === 13) {
         return add_registered_guest();

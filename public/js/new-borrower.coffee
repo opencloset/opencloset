@@ -7,17 +7,33 @@ $ ->
   add_registered_guest = ->
     query = $('#guest-search').val()
 
-    # sample data - TODO get real data using ajax
-    data =
-      guest_id: query.length,
-      guest_name: query,
-
     return unless query
-    return if     $("#guest-search-list input[data-guest-id='#{data.guest_id}']").length
 
-    compiled = _.template($('#tpl-new-borrower-guest-id').html())
-    html = $(compiled(data))
-    $("#guest-search-list").append(html)
+    $.ajax "/new-borrower.json",
+      type: 'GET'
+      data: { q: query }
+      success: (guests, textStatus, jqXHR) ->
+        compiled = _.template($('#tpl-new-borrower-guest-id').html())
+        _.each guests, (guest) ->
+          unless $("#guest-search-list input[data-guest-id='#{guest.id}']").length
+            $html = $(compiled(guest))
+            $html.find('input').attr('data-json', JSON.stringify(guest))
+            $("#guest-search-list").prepend($html)
+      error: (jqXHR, textStatus, errorThrown) ->
+        alert('error', jqXHR.responseJSON.error)
+      complete: (jqXHR, textStatus) ->
+
+  $('#guest-search-list').on 'click', ':radio', (e) ->
+    g = JSON.parse($(@).attr('data-json'))
+    _.each ['name','email','gender','phone',
+            'address','height','weight',
+            'chest','waist','arm','length'], (name) ->
+      $input = $("input[name=#{name}]")
+      if $input.attr('type') is 'radio' or $input.attr('type') is 'checkbox'
+        $input.each (i, el) ->
+          $(el).attr('checked', true) if $(el).val() is g[name]
+      else
+        $input.val(g[name]) unless $input.val()
 
   $('#guest-search').keypress (e) -> add_registered_guest() if e.keyCode is 13
   $('#btn-guest-search').click -> add_registered_guest()

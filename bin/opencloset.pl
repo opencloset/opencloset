@@ -81,6 +81,12 @@ helper sms2hr => sub {
     return { $sms->get_columns };
 };
 
+helper guest2hr => sub {
+    my ($self, $guest) = @_;
+
+    return { $guest->get_columns };
+};
+
 helper overdue_calc => sub {
     my ($self, $target_dt, $return_dt) = @_;
 
@@ -223,8 +229,18 @@ get '/new-borrower' => sub {
         ],
     });
 
+    my @candidates;
+    while (my $g = $guests->next) {
+        push @candidates, $self->guest2hr($g);
+    }
+
     $self->stash( candidates => $guests );
-} => 'new-borrower';
+
+    $self->respond_to(
+        json => { json => [@candidates] },
+        html => { template => 'new-borrower' }
+    );
+};
 
 post '/guests' => sub {
     my $self = shift;
