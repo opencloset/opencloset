@@ -649,6 +649,7 @@ post '/orders' => sub {
     );
 };
 
+            purpose   => $guest->purpose,
 get '/orders' => sub {
     my $self = shift;
 
@@ -747,7 +748,7 @@ any [qw/post put patch/] => '/orders/:id' => sub {
     ##       maybe should convert to DateTime object
     map {
         $order->$_($self->param($_)) if defined $self->param($_);
-    } qw/price discount target_date comment return_method late_fee l_discount payment_method staff_name purpose/;
+    } qw/price discount target_date comment return_method late_fee l_discount payment_method staff_name/;
     my %status_to_be = (
         0 => $Opencloset::Constant::STATUS_RENT,
         $Opencloset::Constant::STATUS_RENT => $Opencloset::Constant::STATUS_RETURN,

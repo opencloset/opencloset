@@ -36,6 +36,7 @@ CREATE TABLE `guest` (
   `gender`      INT DEFAULT NULL COMMENT '1: male, 2: female',
   `address`     VARCHAR(255) DEFAULT NULL,
   `age`         INT DEFAULT NULL,
+  `purpose`     VARCHAR(32),
   `domain`      VARCHAR(64),
 
   `chest`       INT NOT NULL,     -- 가슴둘레(cm)
