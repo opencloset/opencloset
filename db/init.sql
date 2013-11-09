@@ -33,7 +33,6 @@ CREATE TABLE `guest` (
   `name`        VARCHAR(32) NOT NULL,
   `email`       VARCHAR(128) DEFAULT NULL,
   `phone`       VARCHAR(16) DEFAULT NULL COMMENT 'regex: [0-9]{10,11}',
-  `password`    CHAR(50) NOT NULL COMMENT 'first 40 length for digest, after 10 length for salt(random)',
   `gender`      INT DEFAULT NULL COMMENT '1: male, 2: female',
   `address`     VARCHAR(255) DEFAULT NULL,
   `age`         INT DEFAULT NULL,
