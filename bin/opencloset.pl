@@ -1260,25 +1260,13 @@ __DATA__
               <form method="get" id="validation-form" class="form-horizontal" novalidate="novalidate">
 
                 <div class="form-group has-info">
-                  <label class="control-label col-xs-12 col-sm-3 no-padding-right">동의:</label>
-
+                  <label class="control-label col-xs-12 col-sm-3 no-padding-right"></label>
                   <div class="col-xs-12 col-sm-9">
                     <div>
                       <strong class="co-name"><%= $company_name %></strong>은 정확한 의류 선택 및
                       대여 관리를 위해 개인 정보와 신체 치수를 수집합니다.
                       수집한 정보는 <strong class="co-name"><%= $company_name %></strong>의
                       대여 서비스 품질을 높이기 위한 통계 목적으로만 사용합니다.
-
-                      <div class="space-4"></div>
-
-                      <div class="subscription">
-                        <label>
-                          <input type="checkbox" class="ace valid" value="1" name="subscription">
-                          <span class="lbl">
-                            위의 내용에 동의합니다.
-                          </span>
-                        </label>
-                      </div>
                     </div>
 
                     <div class="space-8"></div>
@@ -1287,17 +1275,6 @@ __DATA__
                       <strong class="co-name"><%= $company_name %></strong>은 대여자의 반납 편의를 돕거나
                       <strong class="co-name"><%= $company_name %></strong> 관련 유용한 정보를 알려드리기 위해
                       기재된 연락처로 휴대폰 단문 메시지 또는 전자우편을 보내거나 전화를 드립니다.
-
-                      <div class="space-4"></div>
-
-                      <div class="subscription">
-                        <label>
-                          <input type="checkbox" class="ace valid" value="2" name="subscription">
-                          <span class="lbl">
-                            위의 내용에 동의합니다.
-                          </span>
-                        </label>
-                      </div>
                     </div>
 
                   </div>
@@ -1388,7 +1365,7 @@ __DATA__
                       <input type="tel" name="phone" id="phone" class="valid form-control">
 
                       <span class="input-group-btn">
-                        <button class="btn btn-sm btn-default"> <i class="icon-phone"></i> 인증 </button>
+                        <button class="btn btn-sm btn-default btn-sendsms"> <i class="icon-phone"></i> 인증 </button>
                       </span>
                     </div>
                   </div>
@@ -1418,7 +1395,7 @@ __DATA__
 
                   <div class="col-xs-12 col-sm-5">
                     <div class="input-group">
-                      <input type="text" class="valid form-control" id="guest-height" name="guest-height">
+                      <input type="text" class="valid form-control" id="guest-height" name="height">
                       <span class="input-group-addon"> <i>cm</i> </span>
                     </div>
                   </div>
@@ -1431,7 +1408,7 @@ __DATA__
 
                   <div class="col-xs-12 col-sm-5">
                     <div class="input-group">
-                      <input type="text" class="valid form-control" id="guest-weight" name="guest-weight">
+                      <input type="text" class="valid form-control" id="guest-weight" name="weight">
                       <span class="input-group-addon"> <i>kg</i> </span>
                     </div>
                   </div>
@@ -1444,7 +1421,7 @@ __DATA__
 
                   <div class="col-xs-12 col-sm-5">
                     <div class="input-group">
-                      <input type="text" class="valid form-control" id="guest-bust" name="guest-bust">
+                      <input type="text" class="valid form-control" id="guest-chest" name="chest">
                       <span class="input-group-addon"> <i>cm</i> </span>
                     </div>
                   </div>
@@ -1457,7 +1434,7 @@ __DATA__
 
                   <div class="col-xs-12 col-sm-5">
                     <div class="input-group">
-                      <input type="text" class="valid form-control" id="guest-waist" name="guest-waist">
+                      <input type="text" class="valid form-control" id="guest-waist" name="waist">
                       <span class="input-group-addon"> <i>cm</i> </span>
                     </div>
                   </div>
@@ -1470,7 +1447,7 @@ __DATA__
 
                   <div class="col-xs-12 col-sm-5">
                     <div class="input-group">
-                      <input type="text" class="valid form-control" id="guest-arm" name="guest-arm">
+                      <input type="text" class="valid form-control" id="guest-arm" name="arm">
                       <span class="input-group-addon"> <i>cm</i> </span>
                     </div>
                   </div>
@@ -1479,11 +1456,11 @@ __DATA__
                 <div class="space-2"></div>
 
                 <div class="form-group has-info">
-                  <label for="guest-leg" class="control-label col-xs-12 col-sm-3 no-padding-right">다리 길이:</label>
+                  <label for="guest-length" class="control-label col-xs-12 col-sm-3 no-padding-right">다리 길이:</label>
 
                   <div class="col-xs-12 col-sm-5">
                     <div class="input-group">
-                      <input type="text" class="valid form-control" id="guest-leg" name="guest-leg">
+                      <input type="text" class="valid form-control" id="guest-length" name="length">
                       <span class="input-group-addon"> <i>cm</i> </span>
                     </div>
                   </div>
@@ -1520,11 +1497,11 @@ __DATA__
                 <div class="space-2"></div>
 
                 <div class="form-group has-info">
-                  <label for="guest-company" class="control-label col-xs-12 col-sm-3 no-padding-right">응시 기업:</label>
+                  <label for="guest-domain" class="control-label col-xs-12 col-sm-3 no-padding-right">응시 기업 및 분야:</label>
 
                   <div class="col-xs-12 col-sm-9">
                     <div class="clearfix">
-                      <input type="text" class="col-xs-12 col-sm-4 valid" id="guest-company" name="guest-company">
+                      <input type="text" class="col-xs-12 col-sm-4 valid" id="guest-domain" name="domain">
                     </div>
                   </div>
                 </div>
