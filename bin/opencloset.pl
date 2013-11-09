@@ -107,11 +107,29 @@ helper commify => sub {
     return $_;
 };
 
+helper validate_guest => sub {
+    my $self = shift;
+
+    my $validator = $self->create_validator;
+    $validator->field('name')->required(1);
+    $validator->field('phone')->regexp(qr/^01\d{8,9}$/);
+    $validator->field('email')->email;
+
+    my @fields = qw/chest waist arm length/;
+    $validator->field([@fields])
+        ->each(sub { shift->required(1)->regexp(qr/^\d+$/) });
+
+    return unless $self->validate($validator);
+    return 1;
+};
+
 helper create_guest => sub {
     my $self = shift;
 
     my %params;
-    map { $params{$_} = $self->param($_) } qw/name gender phone address age email height weight target_date domain/;
+    map {
+        $params{$_} = $self->param($_) if defined $self->param($_)
+    } qw/name gender phone address age email height weight target_date purpose domain chest waist arm length/;
 
     return $DB->resultset('Guest')->find_or_create(\%params);
 };
@@ -245,13 +263,7 @@ get '/new-borrower' => sub {
 post '/guests' => sub {
     my $self = shift;
 
-    my $validator = $self->create_validator;
-    $validator->field('name')->required(1);
-    $validator->field('phone')->regexp(qr/^\d{10,11}$/);
-    $validator->field('email')->email;
-
-    return $self->error(400, 'invalid request')
-        unless $self->validate($validator);
+    return $self->error(400, 'invalid request') unless $self->validate_guest;
 
     my $guest = $self->create_guest;
     return $self->error(500, 'failed to create a new guest') unless $guest;
@@ -278,6 +290,20 @@ get '/guests/:id' => sub {
         orders => [@orders],
     );
 } => 'guests/id';
+
+any [qw/put patch/] => '/guests/:id' => sub {
+    my $self  = shift;
+
+    return $self->error(400, 'invalid request') unless $self->validate_guest;
+
+    my $rs = $DB->resultset('Guest');
+    my $guest = $rs->find({ id => $self->param('id') });
+    map { $guest->$_($self->param($_)) } $rs->result_source->columns;
+    $guest->update;
+    $self->respond_to(
+        json => { json => { $guest->get_columns } },
+    );
+};
 
 get '/guests/:id/size' => sub {
     my $self  = shift;
@@ -623,6 +649,7 @@ post '/orders' => sub {
             waist     => $guest->waist,
             arm       => $guest->arm,
             length    => $guest->length,
+            purpose   => $guest->purpose,
         });
 
         for my $cloth (@clothes) {
@@ -649,7 +676,6 @@ post '/orders' => sub {
     );
 };
 
-            purpose   => $guest->purpose,
 get '/orders' => sub {
     my $self = shift;
 
@@ -1053,97 +1079,6 @@ __DATA__
 #new-borrower
   = include 'new-borrower-inner'
 
-.search
-  %form{ :method => 'get', :action => '' }
-    .input-group
-      %input#q.form-control{ :type => 'text', :name => 'q', :placeholder => '이름 또는 이메일, 휴대전화 번호' }
-      %span.input-group-btn
-        %button#btn-cloth-search.btn.btn-sm.btn-default{ :type => 'submit' }
-          %i.icon-search.bigger-110 검색
-
-%ul
-  - while(my $g = $candidates->next) {
-  %li
-    %a{:href => "/guests/#{$g->id}/size"} #{$g->name} (#{$g->email})
-    %p.muted
-      %span= $g->address
-      - if ($g->visit_date) {
-        %time , #{$g->visit_date->ymd} 일 방문
-      - }
-  - }
-
-%form.form-horizontal{:method => 'post', :action => '/guests'}
-  %legend
-    대여자 기본 정보
-  .control-group
-    %label.control-label{:for => 'input-target-date'} 착용일자
-    .controls
-      %input#input-target-date{:type => 'text', :name => 'target_date'}
-  .control-group
-    %label.control-label{:for => 'input-name'} 이름
-    .controls
-      %input{:type => 'text', :id => 'input-name', :name => 'name'}
-  .control-group
-    %label.control-label 성별
-    .controls
-      %label.radio.inline
-        %input{:type => 'radio', :name => 'gender', :value => '1'}
-          남
-      %label.radio.inline
-        %input{:type => 'radio', :name => 'gender', :value => '2'}
-          여
-  .control-group
-    %label.control-label{:for => 'input-phone'} 휴대폰
-    .controls
-      %input{:type => 'text', :id => 'input-phone', :name => 'phone'}
-      %button#btn-sendsms.btn{:type => 'button'} 본인확인
-  .control-group
-    %label.control-label{:for => 'input-address'} 주소
-    .controls
-      %textarea{:id => 'input-address', :name => 'address'}
-  .control-group
-    %label.control-label{:for => 'input-age'} 나이
-    .controls
-      %input{:type => 'text', :id => 'input-age', :name => 'age'}
-  .control-group
-    %label.control-label{:for => 'input-email'} 이메일
-    .controls
-      %input{:type => 'text', :id => 'input-email', :name => 'email'}
-  .control-group
-    %label.control-label{:for => 'input-purpose'} 대여목적
-    .controls
-      %input{:type => 'text', :id => 'input-purpose', :name => 'purpose', :placeholder => '선택하거나 입력'}
-      %p
-        %span.label.clickable 입사면접
-        %span.label.clickable 사진촬영
-        %span.label.clickable 결혼식
-        %span.label.clickable 장례식
-        %span.label.clickable 입학식
-        %span.label.clickable 졸업식
-        %span.label.clickable 세미나
-        %span.label.clickable 발표
-  .control-group
-    %label.control-label{:for => 'input-domain'} 응시기업 및 분야
-    .controls
-      %input#input-domain{:type => 'text', :name => 'domain'}
-  .control-group
-    %label.control-label{:for => 'input-height'} 키
-    .controls
-      %input{:type => 'text', :id => 'input-height', :name => 'height'}
-        cm
-  .control-group
-    %label.control-label{:for => 'input-weight'} 몸무게
-    .controls
-      %input{:type => 'text', :id => 'input-weight', :name => 'weight'}
-        kg
-  .control-group
-    .controls
-      %label.text-info
-        열린옷장은 정확한 의류선택과 편리한 이용관리만을 위해 개인정보와 신체치수를 수집 합니다.
-  .control-group
-    .controls
-      %button.btn{type => 'submit'} 다음
-
 
 @@ new-borrower-inner.html.ep
 <div class="row-fluid">
@@ -1180,7 +1115,7 @@ __DATA__
 
               <li data-target="#step5" class="">
                 <span class="step">5</span>
-                <span class="title">등록 완료</span>
+                <span class="title">완료</span>
               </li>
             </ul>
           </div>
@@ -1287,30 +1222,6 @@ __DATA__
                   </div>
                 </div>
 
-                <div class="space-2"></div>
-
-                <div class="form-group has-info">
-                  <label for="password" class="control-label col-xs-12 col-sm-3 no-padding-right">비밀번호:</label>
-
-                  <div class="col-xs-12 col-sm-9">
-                    <div class="clearfix">
-                      <input type="password" class="col-xs-12 col-sm-4 valid" id="password" name="password">
-                    </div>
-                  </div>
-                </div>
-
-                <div class="space-2"></div>
-
-                <div class="form-group has-info">
-                  <label for="password2" class="control-label col-xs-12 col-sm-3 no-padding-right">비밀번호 확인:</label>
-
-                  <div class="col-xs-12 col-sm-9">
-                    <div class="clearfix">
-                      <input type="password" class="col-xs-12 col-sm-4 valid" id="password2" name="password2">
-                    </div>
-                  </div>
-                </div>
-
                 <div class="hr hr-dotted"></div>
 
                 <div class="form-group has-info">
@@ -1319,6 +1230,18 @@ __DATA__
                   <div class="col-xs-12 col-sm-9">
                     <div class="clearfix">
                       <input type="text" class="col-xs-12 col-sm-4 valid" name="name" id="name">
+                    </div>
+                  </div>
+                </div>
+
+                <div class="space-2"></div>
+
+                <div class="form-group has-info">
+                  <label for="age" class="control-label col-xs-12 col-sm-3 no-padding-right">나이:</label>
+
+                  <div class="col-xs-12 col-sm-9">
+                    <div class="clearfix">
+                      <input type="text" class="col-xs-12 col-sm-4 valid" name="age" id="age">
                     </div>
                   </div>
                 </div>
@@ -1348,14 +1271,14 @@ __DATA__
                 <div class="space-2"></div>
 
                 <div class="form-group has-info">
-                  <label for="phone" class="control-label col-xs-12 col-sm-3 no-padding-right">휴대전화:</label>
+                  <label for="input-phone" class="control-label col-xs-12 col-sm-3 no-padding-right">휴대전화:</label>
 
                   <div class="col-xs-12 col-sm-7">
                     <div class="input-group">
-                      <input type="tel" name="phone" id="phone" class="valid form-control">
+                      <input type="tel" name="phone" id="input-phone" class="valid form-control">
 
                       <span class="input-group-btn">
-                        <button class="btn btn-sm btn-default btn-sendsms"> <i class="icon-phone"></i> 인증 </button>
+                        <button id="btn-sendsms" class="btn btn-sm btn-default"> <i class="icon-phone"></i> 인증 </button>
                       </span>
                     </div>
                   </div>
@@ -1469,7 +1392,7 @@ __DATA__
 
                   <div class="col-xs-12 col-sm-7">
                     <div class="guest-why">
-                      <input type="text" class="valid" id="guest-why" name="tags" data-provide="tag" value="" placeholder="대여 목적을 선택하거나 입력하세요...">
+                      <input type="text" class="valid" id="guest-why" name="purpose" data-provide="tag" value="" placeholder="대여 목적을 선택하거나 입력하세요...">
                       <p>
                         <span class="label label-info clickable"> 입사면접 </span>
                         <span class="label label-info clickable"> 사진촬영 </span>
@@ -1492,18 +1415,6 @@ __DATA__
                   <div class="col-xs-12 col-sm-9">
                     <div class="clearfix">
                       <input type="text" class="col-xs-12 col-sm-4 valid" id="guest-domain" name="domain">
-                    </div>
-                  </div>
-                </div>
-
-                <div class="space-2"></div>
-
-                <div class="form-group has-info">
-                  <label for="guest-domain" class="control-label col-xs-12 col-sm-3 no-padding-right">응시 분야:</label>
-
-                  <div class="col-xs-12 col-sm-9">
-                    <div class="clearfix">
-                      <input type="text" class="col-xs-12 col-sm-4 valid" id="guest-domain" name="guest-domain">
                     </div>
                   </div>
                 </div>

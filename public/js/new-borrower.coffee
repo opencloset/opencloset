@@ -24,10 +24,11 @@ $ ->
       complete: (jqXHR, textStatus) ->
 
   $('#guest-search-list').on 'click', ':radio', (e) ->
+    return if $(@).val() is '0'
     g = JSON.parse($(@).attr('data-json'))
-    _.each ['name','email','gender','phone',
-            'address','height','weight',
-            'chest','waist','arm','length'], (name) ->
+    _.each ['name','email','gender','phone','age',
+            'address','height','weight','purpose',
+            'chest','waist','arm','length','domain'], (name) ->
       $input = $("input[name=#{name}]")
       if $input.attr('type') is 'radio' or $input.attr('type') is 'checkbox'
         $input.each (i, el) ->
@@ -72,10 +73,35 @@ $ ->
     .on 'change', (e, info) ->
       if info.step is 1 && validation
         return false unless $('#validation-form').valid()
+
+      return if info.step isnt 4
+
+      type = 'POST'
+      path = '/guests.json'
+      guestID = $('input[name=guest-id]:checked').val()
+
+      if guestID and guestID isnt '0'
+        type = 'PUT'
+        path = "/guests/#{guestID}.json"
+
+      $.ajax path,
+        type: type
+        data: $('form').serialize()
+        success: (data, textStatus, jqXHR) ->
+          return true
+        error: (jqXHR, textStatus, errorThrown) ->
+          alert('error', jqXHR.responseJSON.error)
+          return false
+        complete: (jqXHR, textStatus) ->
+        
     .on 'finished', (e) ->
+      e.preventDefault()
+      guestID = $('input[name=guest-id]:checked').val()
+      chest = $("input[name=chest]").val()
+      waist = $("input[name=waist]").val()
+      location.href = "/search?q=#{parseInt(chest) + 3}/#{waist}//1/&gid=#{guestID}"
       false
-    .on 'stepclick', (e) ->
-      #false
+    .on 'stepclick', (e, step) ->
 
   why = $('#guest-why').tag({
     placeholder: $('#guest-why').attr('placeholder'),
