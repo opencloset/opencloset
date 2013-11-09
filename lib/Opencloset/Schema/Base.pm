@@ -6,6 +6,7 @@ use warnings;
 use base 'DBIx::Class::Core';
 
 __PACKAGE__->load_components(qw/
+    EncodedColumn
     InflateColumn::DateTime
     TimeStamp
 /);

@@ -38,6 +38,16 @@ my $conf = eval path($conf_file)->slurp_utf8;
             elsif ($col_name =~ /_date$/) {
                 return {%{$col_info}, inflate_datetime => 1};
             }
+
+            if ($col_name eq 'password') {
+                return {
+                    %{$col_info},
+                    encode_column => 1,
+                    encode_class  => 'Digest',
+                    encode_args   => { algorithm => 'SHA-1', format => 'hex', salt_length => 10 },
+                    encode_check_method => 'check_password',
+                };
+            }
         }
     },
 }
