@@ -1216,16 +1216,14 @@ __DATA__
                         <% } %>
                       </ul>
 
-                      <form action="<%= url_for() %>" method="post">
-                        <div class='input-group'>
-                          <input class='form-control' id='guest-search' type='text' name='q' placeholder='이름 또는 이메일, 휴대전화 번호' />
-                          <span class='input-group-btn'>
-                            <button class='btn btn-default btn-sm' id='btn-guest-search' type='submit'>
-                              <i class='bigger-110 icon-search'>검색</i>
-                            </button>
-                          </span>
-                        </div>
-                      </form>
+                      <div class='input-group'>
+                        <input class='form-control' id='guest-search' type='text' name='q' placeholder='이름 또는 이메일, 휴대전화 번호' />
+                        <span class='input-group-btn'>
+                          <button class='btn btn-default btn-sm' id='btn-guest-search' type='submit'>
+                            <i class='bigger-110 icon-search'>검색</i>
+                          </button>
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -1242,15 +1240,6 @@ __DATA__
                         </label>
                       </div>
                     </div>
-
-                    <script id="tpl-new-borrower-guest-id" type="text/html">
-                      <div>
-                        <label class="blue">
-                          <input type="radio" class="ace valid" name="guest-id" value="<%%= guest_id %>" data-guest-id="<%%= guest_id %>">
-                          <span class="lbl"> <%%= guest_name %></span>
-                        </label>
-                      </div>
-                    </script>
                   </div>
                 </div>
 
@@ -1542,6 +1531,16 @@ __DATA__
     </div>
   </div>
 </div>
+
+<script id="tpl-new-borrower-guest-id" type="text/html">
+  <div>
+    <label class="blue highlight">
+      <input type="radio" class="ace valid" name="guest-id" value="<%%= id %>" data-guest-id="<%%= id %>">
+      <span class="lbl"> <%%= name %> (<%%= email %>)</span>
+      <span><%%= address %></span>
+    </label>
+  </div>
+</script>
 
 
 @@ guests/status.html.haml
