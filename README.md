@@ -48,6 +48,10 @@ MySQL 데이터베이스에 접속하며 `opencloset` 데이터베이스에
     $ plackup                         # or
     $ DBIC_TRACE=1 plackup -R bin/    # for development
 
+`morbo`를 이용해서 실행할 명령을 한번에 입력하려면 다음처럼 명령을 실행합니다.
+
+    $ PERL5LIB=lib:$PERL5LIB MOJO_HOME=. MOJO_CONFIG=app.conf morbo -w app.conf -w lib app.psgi
+
 
 ### 자바스크립트 수정
 
@@ -77,6 +81,26 @@ MySQL 데이터베이스에 접속하며 `opencloset` 데이터베이스에
 그 하부에 커피스크립트 관련 파일이 설치되므로 실행 방법은 다음과 같습니다.
 
     $ node_modules/.bin/coffee --compile --watch public/js/
+
+
+### 스타일시트 수정
+
+열린옷장 프로젝트의 스타일시트는 SASS를 이용해서 작성합니다.
+스타일시트를 수정해야 하면 `public/sass/*.sass` 파일을 수정해주세요.
+SASS 파일을 수정한 후 CSS로 빌드하기 위해서는 `sass`나 `compass`
+유틸리티가 필요합니다. 다음 명령을 실행해서 `sass`나 `compass`를 설치합니다.
+
+    $ gem install sass
+    $ gem install compass
+
+`sass`를 이용하는 경우 프로젝트 루트 디렉터리에서 다음 명령을 실행합니다.
+
+    $ sass --style=compact --watch public/sass:public/css
+
+`compass`를 이용하는 경우 `public` 디렉터리 하부로 들어간 후 다음 명령을 실행합니다.
+
+    $ cd public
+    $ compass watch
 
 
 ### 이슈, 제안이나 의견
