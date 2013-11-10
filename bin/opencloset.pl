@@ -2540,6 +2540,7 @@ __DATA__
       %link{:rel => "stylesheet", :href => "/lib/font-awesome/css/font-awesome-ie7.min.css"}
     %link{:rel => "stylesheet", :href => "/lib/prettify/css/prettify.css"}
     %link{:rel => "stylesheet", :href => "/lib/datepicker/css/datepicker.css"}
+    %link{:rel => "stylesheet", :href => "/lib/select2/select2.css"}
 
 
 @@ layouts/default/after-css.html.haml
@@ -2601,6 +2602,10 @@ __DATA__
     <!-- datepicker -->
     <script src="/lib/datepicker/js/bootstrap-datepicker.js"></script>
     <script src="/lib/datepicker/js/locales/bootstrap-datepicker.kr.js"></script>
+
+    <!-- select2 -->
+    <script src="/lib/select2/select2.min.js"></script>
+    <script src="/lib/select2/select2_locale_ko.js"></script>
 
     <!-- bundle -->
     <script src="/js/bundle.js"></script>
