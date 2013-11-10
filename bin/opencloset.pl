@@ -17,6 +17,7 @@ plugin 'FillInFormLite';
 
 app->defaults( %{ plugin 'Config' => { default => {
     jses        => [],
+    csses       => [],
     breadcrumbs => [],
     active_id   => q{},
 }}});
@@ -2497,6 +2498,7 @@ __DATA__
     = include 'layouts/default/before-css'
     = include 'layouts/default/before-js'
     = include 'layouts/default/theme'
+    = include 'layouts/default/css-page'
     = include 'layouts/default/after-css'
     = include 'layouts/default/after-js'
 
@@ -2558,6 +2560,21 @@ __DATA__
     /[if lt IE 9]>
       %script{:src => "/lib/html5shiv/html5shiv.min.js"}
       %script{:src => "/lib/respond/respond.min.js"}
+
+
+@@ layouts/default/css-page.html.ep
+<!-- css-page -->
+    <!-- page specific -->
+    % my @include_csses = @$csses;
+    % #push @include_csses, "$active_id.css" if $active_id;
+    % for my $css (@include_csses) {
+    %   if ( $css =~ m{^/} ) {
+          <link rel="stylesheet" href="<%= $css %>" />
+    %   }
+    %   else {
+          <link rel="stylesheet" href="/css/<%= $css %>" />
+    %   }
+    % }
 
 
 @@ layouts/default/body-js.html.ep
@@ -3174,6 +3191,7 @@ __DATA__
     = include 'layouts/default/before-css'
     = include 'layouts/default/before-js'
     = include 'layouts/default/theme'
+    = include 'layouts/default/css-page'
     = include 'layouts/default/after-css'
     = include 'layouts/default/after-js'
 
