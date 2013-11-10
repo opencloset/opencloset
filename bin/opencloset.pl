@@ -17,6 +17,7 @@ plugin 'FillInFormLite';
 
 app->defaults( %{ plugin 'Config' => { default => {
     jses        => [],
+    csses       => [],
     breadcrumbs => [],
     active_id   => q{},
 }}});
@@ -444,26 +445,7 @@ put '/clothes' => sub {
     );
 };
 
-get '/clothes/new' => sub {
-    my $self   = shift;
-    my $q      = $self->param('q') || '';
-    my $donors = [$DB->resultset('Donor')->search({
-        -or => [
-            id    => $q,
-            name  => $q,
-            phone => $q,
-            email => $q
-        ],
-    })];
-
-    my @categories = $DB->resultset('Category')->search;
-
-    $self->render(
-        'clothes/new',
-        donors     => $donors,
-        categories => [@categories],
-    );
-} => 'clothes/new';
+get '/new-cloth' => 'new-cloth';
 
 get '/clothes/:no' => sub {
     my $self = shift;
@@ -875,21 +857,6 @@ del '/orders/:id' => sub {
     );
 };
 
-get '/donors/new' => sub {
-    my $self   = shift;
-    my $q      = $self->param('q') || '';
-    my $donors = $DB->resultset('Donor')->search({
-        -or => [
-            id    => $q,
-            name  => $q,
-            phone => $q,
-            email => $q
-        ],
-    });
-
-    $self->render('donors/new', candidates => $donors);
-};
-
 post '/donors' => sub {
     my $self   = shift;
 
@@ -913,11 +880,6 @@ post '/donors' => sub {
     $self->res->headers->header('Location' => $self->url_for('/donors/' . $donor->id));
     $self->respond_to(
         json => { json => { $donor->get_columns }, status => 201 },
-        html => sub {
-            $self->redirect_to(
-                $self->url_for('/clothes/new')->query(q => $donor->id)
-            );
-        }
     );
 };
 
@@ -2282,134 +2244,181 @@ __DATA__
 %p= include 'partial/satisfaction', s => $satisfaction
 
 
-@@ donors/new.html.haml
-- layout 'default', jses => ['donors-new.js'];
-- title '기증 - 열린옷장';
+@@ new-cloth.html.haml
+- my $id   = 'new-cloth';
+- my $meta = $sidebar->{meta};
+- layout 'default',
+-   active_id   => $id,
+-   breadcrumbs => [
+-     { text => $meta->{$id}{text} },
+-   ],
+-   jses => [
+-     '/lib/bootstrap/js/fuelux/fuelux.wizard.min.js',
+-   ];
+- title $meta->{$id}{text};
 
-.pull-right
-  %form.form-search{:method => 'get', :action => ''}
-    %input#search-query.input-medium.search-query{:type => 'text', :name => 'q', :placeholder => '이메일, 이름 또는 휴대폰번호'}
-    %button.btn{:type => 'submit'} 검색
+#new-cloth
+  .row-fluid
+    .span12
+      .widget-box
+        .widget-header.widget-header-blue.widget-header-flat
+          %h4.lighter 새 옷 등록
 
-%ul
-  - while(my $d = $candidates->next) {
-  %li
-    %a{:href => "#{url_for('/clothes/new')->query([q => $d->id])}"}= $d->name
-    %span.muted= $d->email
-    %span.muted= $d->phone
-  - }
+        .widget-body
+          .widget-main
+            /
+            / step navigation
+            /
+            #fuelux-wizard.row-fluid{ "data-target" => '#step-container' }
+              %ul.wizard-steps
+                %li.active{ "data-target" => "#step1" }
+                  %span.step  1
+                  %span.title 기증자 검색
+                %li{ "data-target" => "#step2" }
+                  %span.step  2
+                  %span.title 새 옷 등록
+                %li{ "data-target" => "#step3" }
+                  %span.step  3
+                  %span.title 등록 완료
 
-%form.form-horizontal{:method => 'post', :action => '/donors'}
-  %legend
-    기증자 기본 정보
-    %small
-      %a{:href => '/clothes/new'} 기증자모름
-  .control-group
-    %label.control-label{:for => 'input-name'} 이름
-    .controls
-      %input{:type => 'text', :id => 'input-name', :name => 'name'}
-  .control-group
-    %label.control-label{:for => 'input-phone'} 휴대폰
-    .controls
-      %input{:type => 'text', :id => 'input-phone', :name => 'phone'}
-  .control-group
-    %label.control-label{:for => 'input-email'} 이메일
-    .controls
-      %input{:type => 'text', :id => 'input-email', :name => 'email'}
-  .control-group
-    %label.control-label 성별
-    .controls
-      %label.radio.inline
-        %input{:type => 'radio', :name => 'gender', :value => '1'}
-          남
-      %label.radio.inline
-        %input{:type => 'radio', :name => 'gender', :value => '2'}
-          여
-  .control-group
-    %label.control-label{:for => 'input-address'} 주소
-    .controls
-      %textarea#input-address{:name => 'address'}
-  .control-group
-    %label.control-label{:for => 'input-message'} 전하실 말
-    .controls
-      %textarea#input-message{:name => 'message'}
-  .control-group
-    %label.control-label{:for => 'input-comment'} Comment
-    .controls
-      %textarea#input-comment{:name => 'comment'}
-  .control-group
-    .controls
-      %button.btn{type => 'submit'} 다음
+            %hr
 
+            #step-container.step-content.row-fluid.position-relative
+              /
+              / step1
+              /
+              #step1.step-pane.active
+                %h3.lighter.block.green 새 옷을 기증해주신 분이 누구신가요?
+                .form-horizontal
+                  /
+                  / 대여자 검색
+                  /
+                  .form-group.has-info
+                    %label.control-label.no-padding-right.col-xs-12.col-sm-3 대여자 검색:
+                    .col-xs-12.col-sm-9
+                      .search
+                        .input-group
+                          %input#giver-search.form-control{ :name => 'giver-search' :type => 'text', :placeholder => '이름 또는 이메일, 휴대전화 번호' }
+                          %span.input-group-btn
+                            %button#btn-giver-search.btn.btn-default.btn-sm{ :type => 'submit' }
+                              %i.icon-search.bigger-110 검색
+                  /
+                  / 대여자 선택
+                  /
+                  .form-group.has-info
+                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => "email" } 대여자 선택:
+                    .col-xs-12.col-sm-9
+                      #giver-search-list
+                        %div
+                          %label.blue
+                            %input.ace.valid{ :name => 'giver-id', :type => 'radio', 'data-giver-id' => '0', :value => '0' }
+                            %span.lbl= ' 기증자를 모릅니다.'
+                      :plain
+                        <script id="tpl-new-cloth-giver-id" type="text/html">
+                          <div>
+                            <label class="blue">
+                              <input type="radio" class="ace valid" name="giver-id" value="<%= giver_id %>" data-giver-id="<%= giver_id %>">
+                              <span class="lbl"> <%= giver_name %></span>
+                            </label>
+                          </div>
+                        </script>
+              /
+              / step2
+              /
+              #step2.step-pane
+                %h3.lighter.block.green 새로운 옷의 종류와 치수를 입력하세요.
 
-@@ clothes/new.html.haml
-- layout 'default';
-- title '새로운 옷';
+                %form#validation-form.form-horizontal{ :method => "get", :novalidate => "novalidate" }
+                  .form-group.has-info
+                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'cloth-type' } 종류:
+                    .col-xs-12.col-sm-7
+                      .input-group
+                        %select#cloth-type{ :name => 'cloth-type', 'data-placeholder' => '옷의 종류를 선택하세요' }
+                          %option{ :value => '0'  }= ' '
+                          %option{ :value => '-1' }  Jacket & Pants
+                          %option{ :value => '-2' }  Jacket & Skirts
+                          %option{ :value => '1'  }  Jacket
+                          %option{ :value => '2'  }  Pants
+                          %option{ :value => '3'  }  Shirts
+                          %option{ :value => '4'  }  Shoes
+                          %option{ :value => '5'  }  Hat
+                          %option{ :value => '6'  }  Tie
+                          %option{ :value => '7'  }  Waistcoat
+                          %option{ :value => '8'  }  Coat
+                          %option{ :value => '9'  }  Onepiece
+                          %option{ :value => '10' }  Skirt
+                          %option{ :value => '11' }  Blouse
 
-.pull-right
-  %form.form-search{:method => 'get', :action => ''}
-    %input#search-query.input-medium.search-query{:type => 'text', :name => 'q', :placeholder => '이메일, 이름 또는 휴대폰번호'}
-    %button.btn{:type => 'submit'} 검색
+                  #display-cloth-bust
+                    .space-2
 
-%p.text-warning
-  %strong Shirts 나 Shoes 와 같은 비주류는 종류만 있으면 됩니다
+                    .form-group.has-info
+                      %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'cloth-bust' } 가슴:
+                      .col-xs-12.col-sm-5
+                        .input-group
+                          %input#cloth-bust.valid.form-control{ :name => 'cloth-bust', :type => 'text' }
+                          %span.input-group-addon
+                            %i cm
 
-%form.form-horizontal{:method => 'post', :action => '/clothes'}
-  %legend 새로운 옷
-  .control-group
-    .controls
-      %label.radio.inline
-        %input{:type => 'radio', :name => 'designated_for', :value => '1'}
-        남성용
-      %label.radio.inline
-        %input{:type => 'radio', :name => 'designated_for', :value => '2'}
-        여성용
-      %label.radio.inline
-        %input{:type => 'radio', :name => 'designated_for', :value => '3'}
-        남여공용
-  .control-group
-    %label.control-label{:for => 'input-category'} 기증해주신 분
-    .controls
-      - for my $donor (@$donors) {
-        %label.radio.inline= include 'donors/breadcrumb/radio', donor => $donor
-      - }
-  .control-group
-    %label.control-label 종류
-    .controls
-      %select{:name => 'category_id'}
-        %option{:value => '-1'} Jacket & Pants
-        %option{:value => '-2'} Jacket & Skirts
-        - for my $c (@$categories) {
-          %option{:value => '#{$c->id}'}= $c->name
-        - }
-  .control-group
-    %label.control-label{:for => 'input-chest'} 가슴
-    .controls
-      %input#input-chest{:type => 'text', :name => 'chest'}
-      cm
-  .control-group
-    %label.control-label{:for => 'input-waist'} 허리
-    .controls
-      %input#input-waist{:type => 'text', :name => 'waist'}
-      cm
-  .control-group
-    %label.control-label{:for => 'input-arm'} 팔길이
-    .controls
-      %input#input-arm{:type => 'text', :name => 'arm'}
-      cm
-  .control-group
-    %label.control-label{:for => 'input-length'} 기장
-    .controls
-      %input#input-length{:type => 'text', :name => 'length'}
-      cm
-  .control-group
-    %label.control-label{:for => 'input-foot'} 발크기
-    .controls
-      %input#input-foot{:type => 'text', :name => 'foot'}
-      mm
-  .control-group
-    .controls
-      %button.btn{:type => 'submit'} 다음
+                  #display-cloth-waist
+                    .space-2
+
+                    .form-group.has-info
+                      %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'cloth-waist' } 허리:
+                      .col-xs-12.col-sm-5
+                        .input-group
+                          %input#cloth-waist.valid.form-control{ :name => 'cloth-waist', :type => 'text' }
+                          %span.input-group-addon
+                            %i cm
+
+                  #display-cloth-arm
+                    .space-2
+
+                    .form-group.has-info
+                      %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'cloth-arm' } 팔 길이:
+                      .col-xs-12.col-sm-5
+                        .input-group
+                          %input#cloth-arm.valid.form-control{ :name => 'cloth-arm', :type => 'text' }
+                          %span.input-group-addon
+                            %i cm
+
+                  #display-cloth-leg
+                    .space-2
+
+                    .form-group.has-info
+                      %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'cloth-leg' } 다리 길이:
+                      .col-xs-12.col-sm-5
+                        .input-group
+                          %input#cloth-leg.valid.form-control{ :name => 'cloth-leg', :type => 'text' }
+                          %span.input-group-addon
+                            %i cm
+
+                  #display-cloth-foot
+                    .space-2
+
+                    .form-group.has-info
+                      %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'cloth-foot' } 발 크기:
+                      .col-xs-12.col-sm-5
+                        .input-group
+                          %input#cloth-foot.valid.form-control{ :name => 'cloth-foot', :type => 'text' }
+                          %span.input-group-addon
+                            %i mm
+
+              /
+              / step3
+              /
+              #step3.step-pane
+                %h3.lighter.block.green 등록이 완료되었습니다!
+
+            %hr
+
+            .wizard-actions.row-fluid
+              %button.btn.btn-prev{ :disabled => "disabled" }
+                %i.icon-arrow-left
+                이전
+              %button.btn.btn-next.btn-success{ "data-last" => "완료 " }
+                %i.icon-arrow-right.icon-on-right
+                다음
 
 
 @@ layouts/default.html.haml
@@ -2421,6 +2430,7 @@ __DATA__
     = include 'layouts/default/before-css'
     = include 'layouts/default/before-js'
     = include 'layouts/default/theme'
+    = include 'layouts/default/css-page'
     = include 'layouts/default/after-css'
     = include 'layouts/default/after-js'
 
@@ -2464,6 +2474,7 @@ __DATA__
       %link{:rel => "stylesheet", :href => "/lib/font-awesome/css/font-awesome-ie7.min.css"}
     %link{:rel => "stylesheet", :href => "/lib/prettify/css/prettify.css"}
     %link{:rel => "stylesheet", :href => "/lib/datepicker/css/datepicker.css"}
+    %link{:rel => "stylesheet", :href => "/lib/select2/select2.css"}
 
 
 @@ layouts/default/after-css.html.haml
@@ -2481,6 +2492,21 @@ __DATA__
     /[if lt IE 9]>
       %script{:src => "/lib/html5shiv/html5shiv.min.js"}
       %script{:src => "/lib/respond/respond.min.js"}
+
+
+@@ layouts/default/css-page.html.ep
+<!-- css-page -->
+    <!-- page specific -->
+    % my @include_csses = @$csses;
+    % #push @include_csses, "$active_id.css" if $active_id;
+    % for my $css (@include_csses) {
+    %   if ( $css =~ m{^/} ) {
+          <link rel="stylesheet" href="<%= $css %>" />
+    %   }
+    %   else {
+          <link rel="stylesheet" href="/css/<%= $css %>" />
+    %   }
+    % }
 
 
 @@ layouts/default/body-js.html.ep
@@ -2525,6 +2551,10 @@ __DATA__
     <!-- datepicker -->
     <script src="/lib/datepicker/js/bootstrap-datepicker.js"></script>
     <script src="/lib/datepicker/js/locales/bootstrap-datepicker.kr.js"></script>
+
+    <!-- select2 -->
+    <script src="/lib/select2/select2.min.js"></script>
+    <script src="/lib/select2/select2_locale_ko.js"></script>
 
     <!-- bundle -->
     <script src="/js/bundle.js"></script>
@@ -3093,6 +3123,7 @@ __DATA__
     = include 'layouts/default/before-css'
     = include 'layouts/default/before-js'
     = include 'layouts/default/theme'
+    = include 'layouts/default/css-page'
     = include 'layouts/default/after-css'
     = include 'layouts/default/after-js'
 
