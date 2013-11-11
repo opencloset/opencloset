@@ -318,9 +318,13 @@ any [qw/put patch/] => '/users/:id' => sub {
 post '/guests' => sub {
     my $self = shift;
 
-    return $self->error(400, 'invalid request') unless $self->validate_guest;
+    return $self->error(400, 'invalid request')
+        unless ($self->validate_guest && $self->param('user_id'));
 
-    my $guest = $self->create_guest;
+    my $user = $DB->resultset('User')->find({ id => $self->param('user_id') });
+    return $self->error(404, 'not found user') unless $user;
+
+    my $guest = $self->create_guest($user->id);
     return $self->error(500, 'failed to create a new guest') unless $guest;
 
     $self->res->headers->header('Location' => $self->url_for('/guests/' . $guest->id));
@@ -335,6 +339,8 @@ post '/guests' => sub {
 get '/guests/:id' => sub {
     my $self   = shift;
     my $guest  = $DB->resultset('Guest')->find({ id => $self->param('id') });
+    return $self->error(404, 'not found guest') unless $guest;
+
     my @orders = $DB->resultset('Order')->search({
         guest_id => $self->param('id')
     }, {
@@ -344,7 +350,12 @@ get '/guests/:id' => sub {
         guest  => $guest,
         orders => [@orders],
     );
-} => 'guests/id';
+
+    $self->respond_to(
+        json => { json => { $guest->get_columns } },
+        html => { template => 'guests/id' }
+    );
+};
 
 any [qw/put patch/] => '/guests/:id' => sub {
     my $self  = shift;
@@ -353,10 +364,11 @@ any [qw/put patch/] => '/guests/:id' => sub {
 
     my $rs = $DB->resultset('Guest');
     my $guest = $rs->find({ id => $self->param('id') });
-
     return $self->error(404, 'not found') unless $guest;
 
-    map { $guest->$_($self->param($_)) } $rs->result_source->columns;
+    map {
+        $guest->$_($self->param($_)) if defined $self->param($_);
+    } $rs->result_source->columns;
     $guest->update;
     $self->respond_to(
         json => { json => { $guest->get_columns } },
