@@ -34,7 +34,7 @@ $ ->
         $input.each (i, el) ->
           $(el).attr('checked', true) if $(el).val() is g[name]
       else
-        $input.val(g[name]) unless $input.val()
+        $input.val(g[name])
 
   $('#guest-search').keypress (e) -> add_registered_guest() if e.keyCode is 13
   $('#btn-guest-search').click -> add_registered_guest()

@@ -48,9 +48,7 @@
             }
           });
         } else {
-          if (!$input.val()) {
-            return $input.val(g[name]);
-          }
+          return $input.val(g[name]);
         }
       });
     });
