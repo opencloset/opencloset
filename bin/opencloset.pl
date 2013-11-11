@@ -2494,9 +2494,9 @@ __DATA__
                   #display-cloth-list
 
               /
-              / step3
+              / step4
               /
-              #step3.step-pane
+              #step4.step-pane
                 %h3.lighter.block.green 등록이 완료되었습니다!
 
             %hr
