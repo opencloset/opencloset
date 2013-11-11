@@ -2276,9 +2276,12 @@ __DATA__
                   %span.title 기증자 검색
                 %li{ "data-target" => "#step2" }
                   %span.step  2
-                  %span.title 새 옷 등록
+                  %span.title 기증자 정보
                 %li{ "data-target" => "#step3" }
                   %span.step  3
+                  %span.title 새 옷 등록
+                %li{ "data-target" => "#step4" }
+                  %span.step  4
                   %span.title 등록 완료
 
             %hr
@@ -2326,6 +2329,82 @@ __DATA__
               / step2
               /
               #step2.step-pane
+                %h3.lighter.block.green 기증자의 정보를 입력하세요.
+                %form#giver-info.form-horizontal{ :method => 'get' :novalidate="novalidate" }
+                  /
+                  / 이름
+                  /
+                  .form-group.has-info
+                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'giver-name' } 이름:
+                    .col-xs-12.col-sm-9
+                      .clearfix
+                        %input#giver-name.valid.col-xs-12.col-sm-6{ :name => 'giver-name', :type => 'text' }
+
+                  .space-2
+
+                  /
+                  / 전자우편
+                  /
+                  .form-group.has-info
+                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'giver-email' } 전자우편:
+                    .col-xs-12.col-sm-9
+                      .clearfix
+                        %input#giver-email.valid.col-xs-12.col-sm-6{ :name => 'giver-email', :type => 'text' }
+
+                  .space-2
+
+                  /
+                  / 나이
+                  /
+                  .form-group.has-info
+                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'giver-age' } 나이:
+                    .col-xs-12.col-sm-9
+                      .clearfix
+                        %input#giver-age.valid.col-xs-12.col-sm-3{ :name => 'giver-age', :type => 'text' }
+
+                  .space-2
+
+                  /
+                  / 성별
+                  /
+                  .form-group.has-info
+                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'giver-gender' } 성별:
+                    .col-xs-12.col-sm-9
+                      %div
+                        %label.blue
+                          %input.ace.valid{ :name => 'giver-gender', :type => 'radio', :value => '1' }
+                          %span.lbl= ' 남자'
+                      %div
+                        %label.blue
+                          %input.ace.valid{ :name => 'giver-gender', :type => 'radio', :value => '2' }
+                          %span.lbl= ' 여자'
+
+                  .space-2
+
+                  /
+                  / 휴대전화
+                  /
+                  .form-group.has-info
+                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'giver-phone' } 휴대전화:
+                    .col-xs-12.col-sm-9
+                      .clearfix
+                        %input#giver-phone.valid.col-xs-12.col-sm-6{ :name => 'giver-phone', :type => 'text' }
+
+                  .space-2
+
+                  /
+                  / 주소
+                  /
+                  .form-group.has-info
+                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'giver-address' } 주소:
+                    .col-xs-12.col-sm-9
+                      .clearfix
+                        %input#giver-address.valid.col-xs-12.col-sm-8{ :name => 'giver-address', :type => 'text' }
+
+              /
+              / step3
+              /
+              #step3.step-pane
                 %h3.lighter.block.green 새로운 옷의 종류와 치수를 입력하세요.
 
                 %form#validation-form.form-horizontal{ :method => "get", :novalidate => "novalidate" }
