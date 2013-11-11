@@ -2407,26 +2407,25 @@ __DATA__
               #step3.step-pane
                 %h3.lighter.block.green 새로운 옷의 종류와 치수를 입력하세요.
 
-                %form#validation-form.form-horizontal{ :method => "get", :novalidate => "novalidate" }
+                .form-horizontal
                   .form-group.has-info
                     %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'cloth-type' } 종류:
                     .col-xs-12.col-sm-7
-                      .input-group
-                        %select#cloth-type{ :name => 'cloth-type', 'data-placeholder' => '옷의 종류를 선택하세요' }
-                          %option{ :value => '0'  }= ' '
-                          %option{ :value => '-1' }  Jacket & Pants
-                          %option{ :value => '-2' }  Jacket & Skirts
-                          %option{ :value => '1'  }  Jacket
-                          %option{ :value => '2'  }  Pants
-                          %option{ :value => '3'  }  Shirts
-                          %option{ :value => '4'  }  Shoes
-                          %option{ :value => '5'  }  Hat
-                          %option{ :value => '6'  }  Tie
-                          %option{ :value => '7'  }  Waistcoat
-                          %option{ :value => '8'  }  Coat
-                          %option{ :value => '9'  }  Onepiece
-                          %option{ :value => '10' }  Skirt
-                          %option{ :value => '11' }  Blouse
+                      %select#cloth-type{ :name => 'cloth-type', 'data-placeholder' => '옷의 종류를 선택하세요' }
+                        %option{ :value => '0'  }= ' '
+                        %option{ :value => '-1' }  Jacket & Pants
+                        %option{ :value => '-2' }  Jacket & Skirts
+                        %option{ :value => '1'  }  Jacket
+                        %option{ :value => '2'  }  Pants
+                        %option{ :value => '3'  }  Shirts
+                        %option{ :value => '4'  }  Shoes
+                        %option{ :value => '5'  }  Hat
+                        %option{ :value => '6'  }  Tie
+                        %option{ :value => '7'  }  Waistcoat
+                        %option{ :value => '8'  }  Coat
+                        %option{ :value => '9'  }  Onepiece
+                        %option{ :value => '10' }  Skirt
+                        %option{ :value => '11' }  Blouse
 
                   #display-cloth-bust
                     .space-2
@@ -2482,6 +2481,17 @@ __DATA__
                           %input#cloth-foot.valid.form-control{ :name => 'cloth-foot', :type => 'text' }
                           %span.input-group-addon
                             %i mm
+
+                  .form-group.has-info
+                    %label.control-label.no-padding-right.col-xs-12.col-sm-3= ' '
+                    .col-xs-12.col-sm-5
+                      .input-group
+                        %button.btn.btn-default 지움
+                        %button.btn.btn-primary 추가
+
+                  .hr.hr-dotted
+
+                  #display-cloth-list
 
               /
               / step3

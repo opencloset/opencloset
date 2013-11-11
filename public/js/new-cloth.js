@@ -27,6 +27,16 @@
     $('#btn-giver-search').click(function() {
       return add_registered_giver();
     });
+    $('#display-cloth-bust').show();
+    $('#display-cloth-waist').show();
+    $('#display-cloth-arm').show();
+    $('#display-cloth-leg').show();
+    $('#display-cloth-foot').show();
+    $('#cloth-bust').prop('disabled', true);
+    $('#cloth-waist').prop('disabled', true);
+    $('#cloth-arm').prop('disabled', true);
+    $('#cloth-leg').prop('disabled', true);
+    $('#cloth-foot').prop('disabled', true);
     $("#cloth-type").select2().on('change', function(e) {
       switch (e.val) {
         case "-1":
@@ -36,7 +46,12 @@
           $('#display-cloth-waist').show();
           $('#display-cloth-arm').show();
           $('#display-cloth-leg').show();
-          return $('#display-cloth-foot').hide();
+          $('#display-cloth-foot').hide();
+          $('#cloth-bust').prop('disabled', false);
+          $('#cloth-waist').prop('disabled', false);
+          $('#cloth-arm').prop('disabled', false);
+          $('#cloth-leg').prop('disabled', false);
+          return $('#cloth-foot').prop('disabled', true);
         case "1":
         case "7":
         case "8":
@@ -44,40 +59,70 @@
           $('#display-cloth-waist').show();
           $('#display-cloth-arm').show();
           $('#display-cloth-leg').hide();
-          return $('#display-cloth-foot').hide();
+          $('#display-cloth-foot').hide();
+          $('#cloth-bust').prop('disabled', false);
+          $('#cloth-waist').prop('disabled', false);
+          $('#cloth-arm').prop('disabled', false);
+          $('#cloth-leg').prop('disabled', true);
+          return $('#cloth-foot').prop('disabled', true);
         case "3":
         case "11":
           $('#display-cloth-bust').show();
           $('#display-cloth-waist').show();
           $('#display-cloth-arm').show();
           $('#display-cloth-leg').hide();
-          return $('#display-cloth-foot').hide();
+          $('#display-cloth-foot').hide();
+          $('#cloth-bust').prop('disabled', false);
+          $('#cloth-waist').prop('disabled', false);
+          $('#cloth-arm').prop('disabled', false);
+          $('#cloth-leg').prop('disabled', true);
+          return $('#cloth-foot').prop('disabled', true);
         case "2":
         case "10":
           $('#display-cloth-bust').hide();
           $('#display-cloth-waist').show();
           $('#display-cloth-arm').hide();
           $('#display-cloth-leg').show();
-          return $('#display-cloth-foot').hide();
+          $('#display-cloth-foot').hide();
+          $('#cloth-bust').prop('disabled', true);
+          $('#cloth-waist').prop('disabled', false);
+          $('#cloth-arm').prop('disabled', true);
+          $('#cloth-leg').prop('disabled', fase);
+          return $('#cloth-foot').prop('disabled', true);
         case "4":
           $('#display-cloth-bust').hide();
           $('#display-cloth-waist').hide();
           $('#display-cloth-arm').hide();
           $('#display-cloth-leg').hide();
-          return $('#display-cloth-foot').show();
+          $('#display-cloth-foot').show();
+          $('#cloth-bust').prop('disabled', true);
+          $('#cloth-waist').prop('disabled', true);
+          $('#cloth-arm').prop('disabled', true);
+          $('#cloth-leg').prop('disabled', true);
+          return $('#cloth-foot').prop('disabled', false);
         case "5":
         case "6":
           $('#display-cloth-bust').hide();
           $('#display-cloth-waist').hide();
           $('#display-cloth-arm').hide();
           $('#display-cloth-leg').hide();
-          return $('#display-cloth-foot').hide();
+          $('#display-cloth-foot').hide();
+          $('#cloth-bust').prop('disabled', true);
+          $('#cloth-waist').prop('disabled', true);
+          $('#cloth-arm').prop('disabled', true);
+          $('#cloth-leg').prop('disabled', true);
+          return $('#cloth-foot').prop('disabled', true);
         default:
           $('#display-cloth-bust').hide();
           $('#display-cloth-waist').hide();
           $('#display-cloth-arm').hide();
           $('#display-cloth-leg').hide();
-          return $('#display-cloth-foot').hide();
+          $('#display-cloth-foot').hide();
+          $('#cloth-bust').prop('disabled', true);
+          $('#cloth-waist').prop('disabled', true);
+          $('#cloth-arm').prop('disabled', true);
+          $('#cloth-leg').prop('disabled', true);
+          return $('#cloth-foot').prop('disabled', true);
       }
     });
     validation = false;

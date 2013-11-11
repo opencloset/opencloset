@@ -23,6 +23,23 @@ $ ->
   #
   # step2 - 의류 종류 선택 콤보박스
   #
+
+  #$('#display-cloth-bust').show().attr('disabled', true)
+  #$('#display-cloth-bust').show().removeAttr('disabled')
+
+
+  $('#display-cloth-bust').show()
+  $('#display-cloth-waist').show()
+  $('#display-cloth-arm').show()
+  $('#display-cloth-leg').show()
+  $('#display-cloth-foot').show()
+
+  $('#cloth-bust').prop('disabled', true)
+  $('#cloth-waist').prop('disabled', true)
+  $('#cloth-arm').prop('disabled', true)
+  $('#cloth-leg').prop('disabled', true)
+  $('#cloth-foot').prop('disabled', true)
+
   $("#cloth-type").select2()
     .on 'change', (e) ->
       switch e.val
@@ -32,42 +49,84 @@ $ ->
           $('#display-cloth-arm').show()
           $('#display-cloth-leg').show()
           $('#display-cloth-foot').hide()
+
+          $('#cloth-bust').prop('disabled', false)
+          $('#cloth-waist').prop('disabled', false)
+          $('#cloth-arm').prop('disabled', false)
+          $('#cloth-leg').prop('disabled', false)
+          $('#cloth-foot').prop('disabled', true)
         when "1", "7", "8"
           $('#display-cloth-bust').show()
           $('#display-cloth-waist').show()
           $('#display-cloth-arm').show()
           $('#display-cloth-leg').hide()
           $('#display-cloth-foot').hide()
+
+          $('#cloth-bust').prop('disabled', false)
+          $('#cloth-waist').prop('disabled', false)
+          $('#cloth-arm').prop('disabled', false)
+          $('#cloth-leg').prop('disabled', true)
+          $('#cloth-foot').prop('disabled', true)
         when "3", "11"
           $('#display-cloth-bust').show()
           $('#display-cloth-waist').show()
           $('#display-cloth-arm').show()
           $('#display-cloth-leg').hide()
           $('#display-cloth-foot').hide()
+
+          $('#cloth-bust').prop('disabled', false)
+          $('#cloth-waist').prop('disabled', false)
+          $('#cloth-arm').prop('disabled', false)
+          $('#cloth-leg').prop('disabled', true)
+          $('#cloth-foot').prop('disabled', true)
         when "2", "10"
           $('#display-cloth-bust').hide()
           $('#display-cloth-waist').show()
           $('#display-cloth-arm').hide()
           $('#display-cloth-leg').show()
           $('#display-cloth-foot').hide()
+
+          $('#cloth-bust').prop('disabled', true)
+          $('#cloth-waist').prop('disabled', false)
+          $('#cloth-arm').prop('disabled', true)
+          $('#cloth-leg').prop('disabled', fase)
+          $('#cloth-foot').prop('disabled', true)
         when "4"
           $('#display-cloth-bust').hide()
           $('#display-cloth-waist').hide()
           $('#display-cloth-arm').hide()
           $('#display-cloth-leg').hide()
           $('#display-cloth-foot').show()
+
+          $('#cloth-bust').prop('disabled', true)
+          $('#cloth-waist').prop('disabled', true)
+          $('#cloth-arm').prop('disabled', true)
+          $('#cloth-leg').prop('disabled', true)
+          $('#cloth-foot').prop('disabled', false)
         when "5", "6"
           $('#display-cloth-bust').hide()
           $('#display-cloth-waist').hide()
           $('#display-cloth-arm').hide()
           $('#display-cloth-leg').hide()
           $('#display-cloth-foot').hide()
+
+          $('#cloth-bust').prop('disabled', true)
+          $('#cloth-waist').prop('disabled', true)
+          $('#cloth-arm').prop('disabled', true)
+          $('#cloth-leg').prop('disabled', true)
+          $('#cloth-foot').prop('disabled', true)
         else
           $('#display-cloth-bust').hide()
           $('#display-cloth-waist').hide()
           $('#display-cloth-arm').hide()
           $('#display-cloth-leg').hide()
           $('#display-cloth-foot').hide()
+
+          $('#cloth-bust').prop('disabled', true)
+          $('#cloth-waist').prop('disabled', true)
+          $('#cloth-arm').prop('disabled', true)
+          $('#cloth-leg').prop('disabled', true)
+          $('#cloth-foot').prop('disabled', true)
 
   #
   # 마법사 위젯

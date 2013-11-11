@@ -38,7 +38,7 @@
 .page-content #new-borrower form .input-group { width: inherit; }
 .page-content #new-borrower form .tags { width: 100%; }
 .page-content #new-cloth form .input-group { width: inherit; }
-.page-content #new-cloth form #s2id_cloth-type { width: inherit !important; }
+.page-content #new-cloth #s2id_cloth-type { width: inherit !important; }
 
 .btn-black { background-color: black !important; border-color: black; }
 
