@@ -2410,22 +2410,34 @@ __DATA__
                 .form-horizontal
                   .form-group.has-info
                     %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'cloth-type' } 종류:
-                    .col-xs-12.col-sm-7
-                      %select#cloth-type{ :name => 'cloth-type', 'data-placeholder' => '옷의 종류를 선택하세요' }
-                        %option{ :value => '0'  }= ' '
-                        %option{ :value => '-1' }  Jacket & Pants
-                        %option{ :value => '-2' }  Jacket & Skirts
-                        %option{ :value => '1'  }  Jacket
-                        %option{ :value => '2'  }  Pants
-                        %option{ :value => '3'  }  Shirts
-                        %option{ :value => '4'  }  Shoes
-                        %option{ :value => '5'  }  Hat
-                        %option{ :value => '6'  }  Tie
-                        %option{ :value => '7'  }  Waistcoat
-                        %option{ :value => '8'  }  Coat
-                        %option{ :value => '9'  }  Onepiece
-                        %option{ :value => '10' }  Skirt
-                        %option{ :value => '11' }  Blouse
+                    .col-xs-12.col-sm-6
+                      %select#cloth-type{ :name => 'cloth-type', 'data-placeholder' => '옷의 종류를 선택하세요', :size => '14' }
+                        %option{ :value => '-1' } Jacket & Pants
+                        %option{ :value => '-2' } Jacket & Skirts
+                        %option{ :value => '1'  } Jacket
+                        %option{ :value => '2'  } Pants
+                        %option{ :value => '3'  } Shirts
+                        %option{ :value => '4'  } Shoes
+                        %option{ :value => '5'  } Hat
+                        %option{ :value => '6'  } Tie
+                        %option{ :value => '7'  } Waistcoat
+                        %option{ :value => '8'  } Coat
+                        %option{ :value => '9'  } Onepiece
+                        %option{ :value => '10' } Skirt
+                        %option{ :value => '11' } Blouse
+
+                  #display-cloth-color
+                    .space-2
+
+                    .form-group.has-info
+                      %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'cloth-color' } 색상:
+                      .col-xs-12.col-sm-4
+                        %select#cloth-color{ :name => 'cloth-color', 'data-placeholder' => '옷의 색상을 선택하세요', :size => '6' }
+                          %option{ :value => 'B' } 검정(B)
+                          %option{ :value => 'N' } 감청(N)
+                          %option{ :value => 'G' } 회색(G)
+                          %option{ :value => 'R' } 빨강(R)
+                          %option{ :value => 'W' } 흰색(W)
 
                   #display-cloth-bust
                     .space-2
@@ -2435,17 +2447,6 @@ __DATA__
                       .col-xs-12.col-sm-5
                         .input-group
                           %input#cloth-bust.valid.form-control{ :name => 'cloth-bust', :type => 'text' }
-                          %span.input-group-addon
-                            %i cm
-
-                  #display-cloth-waist
-                    .space-2
-
-                    .form-group.has-info
-                      %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'cloth-waist' } 허리:
-                      .col-xs-12.col-sm-5
-                        .input-group
-                          %input#cloth-waist.valid.form-control{ :name => 'cloth-waist', :type => 'text' }
                           %span.input-group-addon
                             %i cm
 
@@ -2460,14 +2461,36 @@ __DATA__
                           %span.input-group-addon
                             %i cm
 
-                  #display-cloth-leg
+                  #display-cloth-waist
                     .space-2
 
                     .form-group.has-info
-                      %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'cloth-leg' } 다리 길이:
+                      %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'cloth-waist' } 허리:
                       .col-xs-12.col-sm-5
                         .input-group
-                          %input#cloth-leg.valid.form-control{ :name => 'cloth-leg', :type => 'text' }
+                          %input#cloth-waist.valid.form-control{ :name => 'cloth-waist', :type => 'text' }
+                          %span.input-group-addon
+                            %i cm
+
+                  #display-cloth-hip
+                    .space-2
+
+                    .form-group.has-info
+                      %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'cloth-hip' } 엉덩이:
+                      .col-xs-12.col-sm-5
+                        .input-group
+                          %input#cloth-hip.valid.form-control{ :name => 'cloth-hip', :type => 'text' }
+                          %span.input-group-addon
+                            %i cm
+
+                  #display-cloth-length
+                    .space-2
+
+                    .form-group.has-info
+                      %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'cloth-length' } 기장:
+                      .col-xs-12.col-sm-5
+                        .input-group
+                          %input#cloth-length.valid.form-control{ :name => 'cloth-length', :type => 'text' }
                           %span.input-group-addon
                             %i cm
 
@@ -2486,12 +2509,47 @@ __DATA__
                     %label.control-label.no-padding-right.col-xs-12.col-sm-3= ' '
                     .col-xs-12.col-sm-5
                       .input-group
-                        %button.btn.btn-default 지움
-                        %button.btn.btn-primary 추가
+                        %button#btn-cloth-reset.btn.btn-default 지움
+                        %button#btn-cloth-add.btn.btn-primary 추가
 
                   .hr.hr-dotted
 
-                  #display-cloth-list
+                  %form.form-horizontal{ :method => 'get', :novalidate => 'novalidate' }
+                    .form-group.has-info
+                      %label.control-label.no-padding-right.col-xs-12.col-sm-3 추가할 의류 선택:
+                      .col-xs-12.col-sm-9
+                        #display-cloth-list
+                        :plain
+                          <script id="tpl-new-cloth-cloth-item" type="text/html">
+                            <div>
+                              <label>
+                                <input type="checkbox" class="ace valid" name="cloth-list"
+                                  value="<%= [ cloth_type, cloth_color, cloth_bust, cloth_waist, cloth_hip, cloth_arm, cloth_length, cloth_foot ].join('-') %>"
+                                  data-cloth-type="<%= cloth_type %>"
+                                  data-cloth-color="<%= cloth_color %>"
+                                  data-cloth-bust="<%= cloth_bust %>"
+                                  data-cloth-arm="<%= cloth_arm %>"
+                                  data-cloth-waist="<%= cloth_waist %>"
+                                  data-cloth-hip="<%= cloth_hip %>"
+                                  data-cloth-length="<%= cloth_length %>"
+                                  data-cloth-foot="<%= cloth_foot %>"
+                                />
+                                <%
+                                  var cloth_detail = []
+                                  typeof yourvar != 'undefined'
+                                  if ( typeof cloth_color != 'undefined') { cloth_detail.push( "색상("    + cloth_color_str + ")"   ) }
+                                  if ( cloth_bust         >  0          ) { cloth_detail.push( "가슴("    + cloth_bust      + "cm)" ) }
+                                  if ( cloth_arm          >  0          ) { cloth_detail.push( "팔 길이(" + cloth_arm       + "cm)" ) }
+                                  if ( cloth_waist        >  0          ) { cloth_detail.push( "허리("    + cloth_waist     + "cm)" ) }
+                                  if ( cloth_hip          >  0          ) { cloth_detail.push( "엉덩이("  + cloth_hip       + "cm)" ) }
+                                  if ( cloth_length       >  0          ) { cloth_detail.push( "기장("    + cloth_length    + "cm)" ) }
+                                  if ( cloth_foot         >  0          ) { cloth_detail.push( "발 크기(" + cloth_foot      + "mm)" ) }
+                                %>
+                                <span class="lbl"> &nbsp; <%= cloth_type_str %>: <%= cloth_detail.join(', ') %> </span>
+                              </label>
+                            </div>
+                            <div class="space-4"></div>
+                          </script>
 
               /
               / step4
@@ -2506,8 +2564,8 @@ __DATA__
                 %i.icon-arrow-left
                 이전
               %button.btn.btn-next.btn-success{ "data-last" => "완료 " }
-                %i.icon-arrow-right.icon-on-right
                 다음
+                %i.icon-arrow-right.icon-on-right
 
 
 @@ layouts/default.html.haml

@@ -136,10 +136,15 @@
                 width: inherit;
             }
         }
-        #s2id_cloth-type {
+        #s2id_cloth-type,
+        #s2id_cloth-color {
             width: inherit !important;
         }
     }
+}
+
+.bigdrop .select2-results {
+    max-height: 400px;
 }
 
 .btn-black {
