@@ -2291,10 +2291,10 @@ __DATA__
                 %h3.lighter.block.green 새 옷을 기증해주신 분이 누구신가요?
                 .form-horizontal
                   /
-                  / 대여자 검색
+                  / 기증자 검색
                   /
                   .form-group.has-info
-                    %label.control-label.no-padding-right.col-xs-12.col-sm-3 대여자 검색:
+                    %label.control-label.no-padding-right.col-xs-12.col-sm-3 기증자 검색:
                     .col-xs-12.col-sm-9
                       .search
                         .input-group
@@ -2303,10 +2303,10 @@ __DATA__
                             %button#btn-giver-search.btn.btn-default.btn-sm{ :type => 'submit' }
                               %i.icon-search.bigger-110 검색
                   /
-                  / 대여자 선택
+                  / 기증자 선택
                   /
                   .form-group.has-info
-                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => "email" } 대여자 선택:
+                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => "email" } 기증자 선택:
                     .col-xs-12.col-sm-9
                       #giver-search-list
                         %div
