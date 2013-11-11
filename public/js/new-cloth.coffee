@@ -23,11 +23,6 @@ $ ->
   #
   # step2 - 의류 종류 선택 콤보박스
   #
-
-  #$('#display-cloth-bust').show().attr('disabled', true)
-  #$('#display-cloth-bust').show().removeAttr('disabled')
-
-
   $('#display-cloth-bust').show()
   $('#display-cloth-waist').show()
   $('#display-cloth-arm').show()
