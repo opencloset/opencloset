@@ -74,25 +74,28 @@ $ ->
       if info.step is 1 && validation
         return false unless $('#validation-form').valid()
 
-      return if info.step isnt 4
+      switch info.step
+        when 2, 4
+          type = 'POST'
+          path = '/users.json'
+          userID = $('input[name=user-id]:checked').val()
 
-      type = 'POST'
-      path = '/guests.json'
-      guestID = $('input[name=guest-id]:checked').val()
+          if userID and userID isnt '0'
+            type = 'PUT'
+            path = "/users/#{userID}.json"
 
-      if guestID and guestID isnt '0'
-        type = 'PUT'
-        path = "/guests/#{guestID}.json"
+          path = path.replace('user', 'guest') if info.step is 4
 
-      $.ajax path,
-        type: type
-        data: $('form').serialize()
-        success: (data, textStatus, jqXHR) ->
-          return true
-        error: (jqXHR, textStatus, errorThrown) ->
-          alert('error', jqXHR.responseJSON.error)
-          return false
-        complete: (jqXHR, textStatus) ->
+          $.ajax path,
+            type: type
+            data: $('form').serialize()
+            success: (data, textStatus, jqXHR) ->
+              return true
+            error: (jqXHR, textStatus, errorThrown) ->
+              alert('error', jqXHR.responseJSON.error)
+              return false
+            complete: (jqXHR, textStatus) ->
+        else return
         
     .on 'finished', (e) ->
       e.preventDefault()

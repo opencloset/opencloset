@@ -83,9 +83,10 @@ helper sms2hr => sub {
 };
 
 helper guest2hr => sub {
-    my ($self, $guest) = @_;
+    my ($self, $user) = @_;
 
-    return { $guest->get_columns };
+    my %guest = $user->guest ? $user->guest->get_columns : ();
+    return { ($user->get_columns, %guest) };
 };
 
 helper overdue_calc => sub {
@@ -108,38 +109,62 @@ helper commify => sub {
     return $_;
 };
 
-helper validate_guest => sub {
+helper validate_user => sub {
     my $self = shift;
 
     my $validator = $self->create_validator;
     $validator->field('name')->required(1);
     $validator->field('phone')->regexp(qr/^01\d{8,9}$/);
     $validator->field('email')->email;
-
-    my @fields = qw/chest waist arm length/;
-    $validator->field([@fields])
-        ->each(sub { shift->required(1)->regexp(qr/^\d+$/) });
+    $validator->field('gender')->regexp(qr/^[12]$/);
+    $validator->field('age')->regexp(qr/^\d+$/);
 
     return unless $self->validate($validator);
+    ## TODO: check exist email and set to error
     return 1;
 };
 
-helper create_guest => sub {
+helper create_user => sub {
     my $self = shift;
 
     my %params;
     map {
         $params{$_} = $self->param($_) if defined $self->param($_)
-    } qw/name gender phone address age email height weight target_date purpose domain chest waist arm length/;
+    } qw/name email password phone gender age address/;
+
+    return $DB->resultset('User')->find_or_create(\%params);
+};
+
+helper validate_guest => sub {
+    my $self = shift;
+
+    my $validator = $self->create_validator;
+    $validator->field([qw/chest waist arm length height weight/])
+        ->each(sub { shift->required(1)->regexp(qr/^\d+$/) });
+
+    ## TODO: validate `target_date`
+    return unless $self->validate($validator);
+    return 1;
+};
+
+helper create_guest => sub {
+    my ($self, $user_id) = @_;
+
+    return unless $user_id;
+
+    my %params = ( id => $user_id );
+    map {
+        $params{$_} = $self->param($_) if defined $self->param($_)
+    } qw/chest waist arm length height weight purpose domain target_date/;
 
     return $DB->resultset('Guest')->find_or_create(\%params);
 };
 
 helper create_donor => sub {
-    my $self = shift;
+    my ($self, $user_id) = @_;
 
-    my %params;
-    map { $params{$_} = $self->param($_) } qw/name phone email comment gender address message comment/;
+    my %params = ( id => $user_id );
+    map { $params{$_} = $self->param($_) } qw/donation_msg comment/;
 
     return $DB->resultset('Donor')->find_or_create(\%params);
 };
@@ -239,7 +264,7 @@ get '/new-borrower' => sub {
     my $self = shift;
 
     my $q      = $self->param('q') || '';
-    my $guests = $DB->resultset('Guest')->search({
+    my $users = $DB->resultset('User')->search({
         -or => [
             id    => $q,
             name  => $q,
@@ -249,15 +274,44 @@ get '/new-borrower' => sub {
     });
 
     my @candidates;
-    while (my $g = $guests->next) {
-        push @candidates, $self->guest2hr($g);
+    while (my $user = $users->next) {
+        push @candidates, $self->guest2hr($user);
     }
-
-    $self->stash( candidates => $guests );
 
     $self->respond_to(
         json => { json => [@candidates] },
         html => { template => 'new-borrower' }
+    );
+};
+
+post '/users' => sub {
+    my $self = shift;
+
+    return $self->error(400, 'invalid request') unless $self->validate_user;
+
+    my $user = $self->create_user;
+    return $self->error(500, 'failed to create a new user') unless $user;
+
+    $self->res->headers->header('Location' => $self->url_for('/users/' . $user->id));
+    $self->respond_to(
+        json => { json => { $user->get_columns }, status => 201 },
+        html => sub {
+            $self->redirect_to('/users/' . $user->id);
+        }
+    );
+};
+
+any [qw/put patch/] => '/users/:id' => sub {
+    my $self  = shift;
+
+    return $self->error(400, 'invalid request') unless $self->validate_user;
+
+    my $rs   = $DB->resultset('User');
+    my $user = $rs->find({ id => $self->param('id') });
+    map { $user->$_($self->param($_)) } $rs->result_source->columns;
+    $user->update;
+    $self->respond_to(
+        json => { json => { $user->get_columns } },
     );
 };
 
@@ -299,6 +353,9 @@ any [qw/put patch/] => '/guests/:id' => sub {
 
     my $rs = $DB->resultset('Guest');
     my $guest = $rs->find({ id => $self->param('id') });
+
+    return $self->error(404, 'not found') unless $guest;
+
     map { $guest->$_($self->param($_)) } $rs->result_source->columns;
     $guest->update;
     $self->respond_to(
@@ -1096,24 +1153,6 @@ __DATA__
 
                   <div class="col-xs-12 col-sm-9">
                     <div class="search">
-                      <ul>
-                        <% while(my $g = $candidates->next) { %>
-                        <li>
-                          <a href='<%= url_for("/guests/@{[$g->id]}/size") %>'>
-                            %= "@{[$g->name]}(@{[$g->email]})"
-                          </a>
-                          <p class="muted">
-                            <span><%= $g->address %></span>
-                            <% if ($g->visit_date) { %>
-                            ,
-                            <time class="highlight"><%= $g->visit_date->ymd %></time>
-                            일 방문
-                            <% } %>
-                          </p>
-                        </li>
-                        <% } %>
-                      </ul>
-
                       <div class='input-group'>
                         <input class='form-control' id='guest-search' type='text' name='q' placeholder='이름 또는 이메일, 휴대전화 번호' />
                         <span class='input-group-btn'>
@@ -1409,7 +1448,7 @@ __DATA__
 <script id="tpl-new-borrower-guest-id" type="text/html">
   <div>
     <label class="blue highlight">
-      <input type="radio" class="ace valid" name="guest-id" value="<%%= id %>" data-guest-id="<%%= id %>">
+      <input type="radio" class="ace valid" name="user-id" value="<%%= id %>" data-user-id="<%%= id %>">
       <span class="lbl"> <%%= name %> (<%%= email %>)</span>
       <span><%%= address %></span>
     </label>

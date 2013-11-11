@@ -96,34 +96,38 @@
     });
     validation = false;
     $('#fuelux-wizard').ace_wizard().on('change', function(e, info) {
-      var guestID, path, type;
+      var path, type, userID;
       if (info.step === 1 && validation) {
         if (!$('#validation-form').valid()) {
           return false;
         }
       }
-      if (info.step !== 4) {
-        return;
+      switch (info.step) {
+        case 2:
+        case 4:
+          type = 'POST';
+          path = '/users.json';
+          userID = $('input[name=user-id]:checked').val();
+          if (userID && userID !== '0') {
+            type = 'PUT';
+            path = "/users/" + userID + ".json";
+          }
+          if (info.step === 4) {
+            path = path.replace('user', 'guest');
+          }
+          return $.ajax(path, {
+            type: type,
+            data: $('form').serialize(),
+            success: function(data, textStatus, jqXHR) {
+              return true;
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+              alert('error', jqXHR.responseJSON.error);
+              return false;
+            },
+            complete: function(jqXHR, textStatus) {}
+          });
       }
-      type = 'POST';
-      path = '/guests.json';
-      guestID = $('input[name=guest-id]:checked').val();
-      if (guestID && guestID !== '0') {
-        type = 'PUT';
-        path = "/guests/" + guestID + ".json";
-      }
-      return $.ajax(path, {
-        type: type,
-        data: $('form').serialize(),
-        success: function(data, textStatus, jqXHR) {
-          return true;
-        },
-        error: function(jqXHR, textStatus, errorThrown) {
-          alert('error', jqXHR.responseJSON.error);
-          return false;
-        },
-        complete: function(jqXHR, textStatus) {}
-      });
     }).on('finished', function(e) {
       var chest, guestID, waist;
       e.preventDefault();
