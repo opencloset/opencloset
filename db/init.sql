@@ -5,18 +5,18 @@ CREATE DATABASE `opencloset`;
 USE `opencloset`;
 
 --
--- donor 기증자
+-- user
 --
 
-CREATE TABLE `donor` (
+CREATE TABLE `user` (
   `id`          INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `name`        VARCHAR(32) NOT NULL,
+  `name`        VARCHAR(32) NOT NULL, -- realname
   `email`       VARCHAR(128) DEFAULT NULL,
-  `phone`       VARCHAR(16) DEFAULT NULL COMMENT 'regex: [0-9]{10,11}',
+  `password`    CHAR(50) DEFAULT NULL COMMENT 'first 40 length for digest, after 10 length for salt(random)',
+  `phone`       VARCHAR(16) DEFAULT NULL COMMENT 'regex: 01\d{8,9}',
   `gender`      INT DEFAULT NULL COMMENT '1: male, 2: female',
+  `age`         INT DEFAULT NULL,
   `address`     VARCHAR(255) DEFAULT NULL,
-  `message`     TEXT DEFAULT NULL,
-  `comment`     TEXT DEFAULT NULL,
   `create_date` DATETIME DEFAULT NULL,
 
   PRIMARY KEY (`id`),
@@ -25,33 +25,39 @@ CREATE TABLE `donor` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
+-- donor 기증자
+--
+
+CREATE TABLE `donor` (
+  `id`           INT UNSIGNED NOT NULL,
+  `donation_msg` TEXT DEFAULT NULL,
+  `comment`      TEXT DEFAULT NULL,
+  `create_date`  DATETIME DEFAULT NULL,
+
+  PRIMARY KEY (`id`),
+  CONSTRAINT `fk_donor1` FOREIGN KEY (`id`) REFERENCES `user` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
 -- guest
 --
 
 CREATE TABLE `guest` (
-  `id`          INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `name`        VARCHAR(32) NOT NULL,
-  `email`       VARCHAR(128) DEFAULT NULL,
-  `phone`       VARCHAR(16) DEFAULT NULL COMMENT 'regex: [0-9]{10,11}',
-  `gender`      INT DEFAULT NULL COMMENT '1: male, 2: female',
-  `address`     VARCHAR(255) DEFAULT NULL,
-  `age`         INT DEFAULT NULL,
-  `purpose`     VARCHAR(32),
-  `domain`      VARCHAR(64),
-
+  `id`          INT UNSIGNED NOT NULL,
   `chest`       INT NOT NULL,     -- 가슴둘레(cm)
   `waist`       INT NOT NULL,     -- 허리둘레(cm)
   `arm`         INT DEFAULT NULL, -- 팔길이(cm)
   `length`      INT DEFAULT NULL, -- 기장(cm)
   `height`      INT DEFAULT NULL, -- cm
   `weight`      INT DEFAULT NULL, -- kg
+  `purpose`     VARCHAR(32),
+  `domain`      VARCHAR(64),
   `create_date` DATETIME DEFAULT NULL,
   `visit_date`  DATETIME DEFAULT NULL, -- latest visit
   `target_date` DATETIME DEFAULT NULL, -- 착용일
 
   PRIMARY KEY (`id`),
-  UNIQUE KEY (`email`),
-  UNIQUE KEY (`phone`)
+  CONSTRAINT `fk_guest1` FOREIGN KEY (`id`) REFERENCES `user` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
@@ -133,7 +139,7 @@ CREATE TABLE `satisfaction` (
   -- 쟈켓만 해당함
 
   `guest_id`    INT UNSIGNED NOT NULL,
-  `cloth_id`   INT UNSIGNED NOT NULL,
+  `cloth_id`    INT UNSIGNED NOT NULL,
   `chest`       INT DEFAULT NULL,
   `waist`       INT DEFAULT NULL,
   `arm`         INT DEFAULT NULL,
@@ -198,7 +204,7 @@ CREATE TABLE `cloth_order` (
 
 CREATE TABLE `donor_cloth` (
   `donor_id`      INT UNSIGNED NOT NULL,
-  `cloth_id`    INT UNSIGNED NOT NULL,
+  `cloth_id`      INT UNSIGNED NOT NULL,
   `comment`       TEXT DEFAULT NULL,
   `donation_date` DATETIME DEFAULT NULL,
 

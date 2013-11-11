@@ -31,58 +31,8 @@ __PACKAGE__->table("guest");
 
   data_type: 'integer'
   extra: {unsigned => 1}
-  is_auto_increment: 1
+  is_foreign_key: 1
   is_nullable: 0
-
-=head2 name
-
-  data_type: 'varchar'
-  is_nullable: 0
-  size: 32
-
-=head2 email
-
-  data_type: 'varchar'
-  is_nullable: 1
-  size: 128
-
-=head2 phone
-
-  data_type: 'varchar'
-  is_nullable: 1
-  size: 16
-
-regex: [0-9]{10,11}
-
-=head2 gender
-
-  data_type: 'integer'
-  is_nullable: 1
-
-1: male, 2: female
-
-=head2 address
-
-  data_type: 'varchar'
-  is_nullable: 1
-  size: 255
-
-=head2 age
-
-  data_type: 'integer'
-  is_nullable: 1
-
-=head2 purpose
-
-  data_type: 'varchar'
-  is_nullable: 1
-  size: 32
-
-=head2 domain
-
-  data_type: 'varchar'
-  is_nullable: 1
-  size: 64
 
 =head2 chest
 
@@ -113,6 +63,18 @@ regex: [0-9]{10,11}
 
   data_type: 'integer'
   is_nullable: 1
+
+=head2 purpose
+
+  data_type: 'varchar'
+  is_nullable: 1
+  size: 32
+
+=head2 domain
+
+  data_type: 'varchar'
+  is_nullable: 1
+  size: 64
 
 =head2 create_date
 
@@ -145,25 +107,9 @@ __PACKAGE__->add_columns(
   {
     data_type => "integer",
     extra => { unsigned => 1 },
-    is_auto_increment => 1,
+    is_foreign_key => 1,
     is_nullable => 0,
   },
-  "name",
-  { data_type => "varchar", is_nullable => 0, size => 32 },
-  "email",
-  { data_type => "varchar", is_nullable => 1, size => 128 },
-  "phone",
-  { data_type => "varchar", is_nullable => 1, size => 16 },
-  "gender",
-  { data_type => "integer", is_nullable => 1 },
-  "address",
-  { data_type => "varchar", is_nullable => 1, size => 255 },
-  "age",
-  { data_type => "integer", is_nullable => 1 },
-  "purpose",
-  { data_type => "varchar", is_nullable => 1, size => 32 },
-  "domain",
-  { data_type => "varchar", is_nullable => 1, size => 64 },
   "chest",
   { data_type => "integer", is_nullable => 0 },
   "waist",
@@ -176,6 +122,10 @@ __PACKAGE__->add_columns(
   { data_type => "integer", is_nullable => 1 },
   "weight",
   { data_type => "integer", is_nullable => 1 },
+  "purpose",
+  { data_type => "varchar", is_nullable => 1, size => 32 },
+  "domain",
+  { data_type => "varchar", is_nullable => 1, size => 64 },
   "create_date",
   {
     data_type => "datetime",
@@ -214,33 +164,22 @@ __PACKAGE__->add_columns(
 
 __PACKAGE__->set_primary_key("id");
 
-=head1 UNIQUE CONSTRAINTS
-
-=head2 C<email>
-
-=over 4
-
-=item * L</email>
-
-=back
-
-=cut
-
-__PACKAGE__->add_unique_constraint("email", ["email"]);
-
-=head2 C<phone>
-
-=over 4
-
-=item * L</phone>
-
-=back
-
-=cut
-
-__PACKAGE__->add_unique_constraint("phone", ["phone"]);
-
 =head1 RELATIONS
+
+=head2 
+
+Type: belongs_to
+
+Related object: L<Opencloset::Schema::Result::User>
+
+=cut
+
+__PACKAGE__->belongs_to(
+  "",
+  "Opencloset::Schema::Result::User",
+  { id => "id" },
+  { is_deferrable => 1, on_delete => "CASCADE", on_update => "RESTRICT" },
+);
 
 =head2 orders
 
@@ -273,8 +212,8 @@ __PACKAGE__->has_many(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07036 @ 2013-11-09 15:04:47
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:1QkZeT5x1E6pS8NWykfRKw
+# Created by DBIx::Class::Schema::Loader v0.07036 @ 2013-11-11 15:22:59
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:MKYbYhTkLWovMNIARJnCUQ
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration
