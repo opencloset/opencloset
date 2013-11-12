@@ -67,5 +67,9 @@ $ ->
         $this.removeClass('disabled')
     $('#cloth-id').focus()
 
+  #
+  # 의류 검색 결과 테이블에서 모든 항목 선택 및 취소
+  #
   $('#input-check-all').click (e) ->
-    $(@).closest('thead').next().find('.ace:checkbox').trigger('click')
+    is_checked = $('#input-check-all').is(':checked')
+    $(@).closest('thead').next().find('.ace:checkbox:not(:disabled)').prop('checked', is_checked)

@@ -98,7 +98,9 @@
       return $('#cloth-id').focus();
     });
     return $('#input-check-all').click(function(e) {
-      return $(this).closest('thead').next().find('.ace:checkbox').trigger('click');
+      var is_checked;
+      is_checked = $('#input-check-all').is(':checked');
+      return $(this).closest('thead').next().find('.ace:checkbox:not(:disabled)').prop('checked', is_checked);
     });
   });
 
