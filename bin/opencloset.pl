@@ -2726,7 +2726,8 @@ __DATA__
 <!-- body-js-page -->
     <!-- page specific -->
     % my @include_jses = @$jses;
-    % push @include_jses, "$active_id.js" if $active_id;
+    % my $asset = app->static->file("js/$active_id.js");
+    % push @include_jses, "$active_id.js" if $active_id && $asset && $asset->is_file;
     % for my $js (@include_jses) {
     %   if ( $js =~ m{^/} ) {
           <script type="text/javascript" src="<%= $js %>"></script>
