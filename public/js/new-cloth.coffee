@@ -1,58 +1,62 @@
 $ ->
+  ## Global variable
+  userID  = undefined
+  donorID = undefined
+  clothNo = undefined
+
   #
   # step1 - 기증자 검색과 기증자 선택을 연동합니다.
   #
-  add_registered_giver = ->
-    query = $('#giver-search').val()
-
-    # sample data - TODO get real data using ajax
-    data =
-      giver_id: query.length,
-      giver_name: query,
+  add_registered_donor = ->
+    query = $('#donor-search').val()
 
     return unless query
-    return if     $("#giver-search-list input[data-giver-id='#{data.giver_id}']").length
 
-    compiled = _.template($('#tpl-new-cloth-giver-id').html())
-    html = $(compiled(data))
-    $('#giver-search-list').append(html)
+    $.ajax "/new-cloth.json",    # `/new-cloth` 로 donor 를 가져오는게 구림
+      type: 'GET'
+      data: { q: query }
+      success: (donors, textStatus, jqXHR) ->
+        compiled = _.template($('#tpl-new-cloth-donor-id').html())
+        _.each donors, (donor) ->
+          unless $("#donor-search-list input[data-donor-id='#{donor.id}']").length
+            $html = $(compiled(donor))
+            $html.find('input').attr('data-json', JSON.stringify(donor))
+            $("#donor-search-list").prepend($html)
+      error: (jqXHR, textStatus, errorThrown) ->
+        alert('error', jqXHR.responseJSON.error)
+      complete: (jqXHR, textStatus) ->
 
-  $('#giver-search').keypress (e) -> add_registered_giver() if e.keyCode is 13
-  $('#btn-giver-search').click -> add_registered_giver()
+  $('#donor-search').keypress (e) -> add_registered_donor() if e.keyCode is 13
+  $('#btn-donor-search').click -> add_registered_donor()
+
+  $('#donor-search-list').on 'click', ':radio', (e) ->
+    userID  = $(@).data('user-id')
+    donorID = $(@).data('donor-id')
+    return if $(@).val() is '0'
+    g = JSON.parse($(@).attr('data-json'))
+    _.each ['name','email','gender','phone','age',
+            'address','donation_msg','comment'], (name) ->
+      $input = $("input[name=#{name}]")
+      if $input.attr('type') is 'radio' or $input.attr('type') is 'checkbox'
+        $input.each (i, el) ->
+          $(el).attr('checked', true) if $(el).val() is g[name]
+      else
+        $input.val(g[name])
 
   #
   # step3 - 의류 종류 선택 콤보박스
   #
   clear_cloth_form = (show) ->
     if show
-      $('#display-cloth-bust').show()
-      $('#display-cloth-waist').show()
-      $('#display-cloth-hip').show()
-      $('#display-cloth-arm').show()
-      $('#display-cloth-length').show()
-      $('#display-cloth-foot').show()
+      _.each ['bust','waist','hip','arm','length','foot'], (name) ->
+        $("#display-cloth-#{name}").show()
     else
-      $('#display-cloth-bust').hide()
-      $('#display-cloth-waist').hide()
-      $('#display-cloth-hip').hide()
-      $('#display-cloth-arm').hide()
-      $('#display-cloth-length').hide()
-      $('#display-cloth-foot').hide()
-
-    $('#cloth-bust').prop('disabled', true)
-    $('#cloth-waist').prop('disabled', true)
-    $('#cloth-hip').prop('disabled', true)
-    $('#cloth-arm').prop('disabled', true)
-    $('#cloth-length').prop('disabled', true)
-    $('#cloth-foot').prop('disabled', true)
+      _.each ['bust','waist','hip','arm','length','foot'], (name) ->
+        $("#display-cloth-#{name}").hide()
 
     $('#cloth-color').select2('val', '')
-    $('#cloth-bust').val('')
-    $('#cloth-waist').val('')
-    $('#cloth-hip').val('')
-    $('#cloth-arm').val('')
-    $('#cloth-length').val('')
-    $('#cloth-foot').val('')
+    _.each ['bust','waist','hip','arm','length','foot'], (name) ->
+      $("#cloth-#{name}").prop('disabled', true).val('')
 
   $('#cloth-type').select2( dropdownCssClass: 'bigdrop' )
     .on 'change', (e) ->
@@ -132,7 +136,64 @@ $ ->
     .on 'change', (e, info) ->
       if info.step is 1 && validation
         return false unless $('#validation-form').valid()
+
+      ajax = {}
+      switch info.step
+        when 2
+          return unless $('#donor-name').val()
+
+          ajax.type = 'POST'
+          ajax.path = '/users.json'
+
+          if userID
+            ajax.type = 'PUT'
+            ajax.path = "/users/#{userID}.json"
+
+          $.ajax ajax.path,
+            type: ajax.type
+            data: $('form').serialize()
+            success: (data, textStatus, jqXHR) ->
+              userID = data.id
+              ## TODO: `donation_msg`, `comment` 입력 단계가 나오면 거기로 이동
+              if donorID
+                ajax.type = 'PUT'
+                ajax.path = "/donors/#{donorID}.json"
+              else
+                ajax.type = 'POST'
+                ajax.path = "/donors.json?user_id=#{userID}"
+
+              $.ajax ajax.path,
+                type: ajax.type
+                data: $('form').serialize()
+                success: (data, textStatus, jqXHR) ->
+                  return true
+                error: (jqXHR, textStatus, errorThrown) ->
+                  alert('error', jqXHR.responseJSON.error)
+                  return false
+                complete: (jqXHR, textStatus) ->
+            error: (jqXHR, textStatus, errorThrown) ->
+              alert('error', jqXHR.responseJSON.error)
+              return false
+            complete: (jqXHR, textStatus) ->
+        when 3
+          # clothe-list: 종류-색상-가슴-허리-엉덩이-팔길이-기장-발
+          # donor-id 를 같이 보내주어야함
+          # 근데 지금 donor 에 정보 입력단계가 없음
+          $.ajax '/clothes',
+            type: 'POST'
+            data: $('form').serialize()
+            success: (data, textStatus, jqXHR) ->
+              clothNo = data.no
+              return true
+            error: (jqXHR, textStatus, errorThrown) ->
+              alert('error', jqXHR.responseJSON.error)
+              return false
+            complete: (jqXHR, textStatus) ->
+        else return
+
     .on 'finished', (e) ->
+      location.href = "/clothes/#{clothNo}"
       false
     .on 'stepclick', (e) ->
+      console.log 'stepclick'
       #false

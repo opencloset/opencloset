@@ -94,6 +94,23 @@ helper guest2hr => sub {
         $columns{user_id} = $user->id;
     }
 
+    delete $columns{password};
+    return { %columns };
+};
+
+helper donor2hr => sub {
+    my ($self, $user) = @_;
+
+    my %columns;
+    if ($user->donor) {
+        %columns = ($user->get_columns, $user->donor->get_columns);
+    } else {
+        %columns = $user->get_columns;
+        map { $columns{$_} = undef } $DB->resultset('Donor')->result_source->columns;
+        $columns{user_id} = $user->id;
+    }
+
+    delete $columns{password};
     return { %columns };
 };
 
@@ -171,7 +188,7 @@ helper create_guest => sub {
 helper create_donor => sub {
     my ($self, $user_id) = @_;
 
-    my %params = ( id => $user_id );
+    my %params = ( user_id => $user_id );
     map { $params{$_} = $self->param($_) } qw/donation_msg comment/;
 
     return $DB->resultset('Donor')->find_or_create(\%params);
@@ -488,7 +505,30 @@ put '/clothes' => sub {
     );
 };
 
-get '/new-cloth' => 'new-cloth';
+get '/new-cloth' => sub {
+    my $self = shift;
+
+    my $q      = $self->param('q') || '';
+    my $users = $DB->resultset('User')->search({
+        -or => [
+            id    => $q,
+            name  => $q,
+            phone => $q,
+            email => $q
+        ],
+    });
+
+    my @candidates;
+    while (my $user = $users->next) {
+        push @candidates, $self->donor2hr($user);
+    }
+
+    $self->respond_to(
+        json => { json => [@candidates] },
+        html => { template => 'new-cloth' }
+    );
+};
+
 
 get '/clothes/:no' => sub {
     my $self = shift;
@@ -915,15 +955,24 @@ post '/donors' => sub {
         html => sub {
             $self->redirect_to('/donors/' . $donor->id);
         }
-        return $self->error( 400, { str => join(',', @error_str), data => $validator->errors } );
-    }
+    );
+};
 
-    my $donor = $self->create_donor;
-    return $self->error( 500, { str => 'failed to create a new donor' } ) unless $donor;
+any [qw/put patch/] => '/donors/:id' => sub {
+    my $self  = shift;
 
-    $self->res->headers->header('Location' => $self->url_for('/donors/' . $donor->id));
+    ## TODO: validate params
+
+    my $rs = $DB->resultset('Donor');
+    my $donor = $rs->find({ id => $self->param('id') });
+    return $self->error(404, 'not found') unless $donor;
+
+    map {
+        $donor->$_($self->param($_)) if defined $self->param($_);
+    } qw/donation_msg comment/;
+    $donor->update;
     $self->respond_to(
-        json => { json => { $donor->get_columns }, status => 201 },
+        json => { json => { $donor->get_columns } },
     );
 };
 
@@ -2344,7 +2393,7 @@ __DATA__
               /
               #step2.step-pane
                 %h3.lighter.block.green 기증자의 정보를 입력하세요.
-                %form#donor-info.form-horizontal{ :method => 'get' :novalidate="novalidate" }
+                %form#donor-info.form-horizontal{ :method => 'get', :novalidate="novalidate" }
                   /
                   / 이름
                   /
@@ -2352,7 +2401,7 @@ __DATA__
                     %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'donor-name' } 이름:
                     .col-xs-12.col-sm-9
                       .clearfix
-                        %input#donor-name.valid.col-xs-12.col-sm-6{ :name => 'donor-name', :type => 'text' }
+                        %input#donor-name.valid.col-xs-12.col-sm-6{ :name => 'name', :type => 'text' }
 
                   .space-2
 
@@ -2363,7 +2412,7 @@ __DATA__
                     %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'donor-email' } 전자우편:
                     .col-xs-12.col-sm-9
                       .clearfix
-                        %input#donor-email.valid.col-xs-12.col-sm-6{ :name => 'donor-email', :type => 'text' }
+                        %input#donor-email.valid.col-xs-12.col-sm-6{ :name => 'email', :type => 'text' }
 
                   .space-2
 
@@ -2374,7 +2423,7 @@ __DATA__
                     %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'donor-age' } 나이:
                     .col-xs-12.col-sm-9
                       .clearfix
-                        %input#donor-age.valid.col-xs-12.col-sm-3{ :name => 'donor-age', :type => 'text' }
+                        %input#donor-age.valid.col-xs-12.col-sm-3{ :name => 'age', :type => 'text' }
 
                   .space-2
 
@@ -2386,11 +2435,11 @@ __DATA__
                     .col-xs-12.col-sm-9
                       %div
                         %label.blue
-                          %input.ace.valid{ :name => 'donor-gender', :type => 'radio', :value => '1' }
+                          %input.ace.valid{ :name => 'gender', :type => 'radio', :value => '1' }
                           %span.lbl= ' 남자'
                       %div
                         %label.blue
-                          %input.ace.valid{ :name => 'donor-gender', :type => 'radio', :value => '2' }
+                          %input.ace.valid{ :name => 'gender', :type => 'radio', :value => '2' }
                           %span.lbl= ' 여자'
 
                   .space-2
@@ -2402,7 +2451,7 @@ __DATA__
                     %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'donor-phone' } 휴대전화:
                     .col-xs-12.col-sm-9
                       .clearfix
-                        %input#donor-phone.valid.col-xs-12.col-sm-6{ :name => 'donor-phone', :type => 'text' }
+                        %input#donor-phone.valid.col-xs-12.col-sm-6{ :name => 'phone', :type => 'text' }
 
                   .space-2
 
@@ -2413,7 +2462,7 @@ __DATA__
                     %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'donor-address' } 주소:
                     .col-xs-12.col-sm-9
                       .clearfix
-                        %input#donor-address.valid.col-xs-12.col-sm-8{ :name => 'donor-address', :type => 'text' }
+                        %input#donor-address.valid.col-xs-12.col-sm-8{ :name => 'address', :type => 'text' }
 
               /
               / step3
@@ -2425,7 +2474,7 @@ __DATA__
                   .form-group.has-info
                     %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'cloth-type' } 종류:
                     .col-xs-12.col-sm-6
-                      %select#cloth-type{ :name => 'cloth-type', 'data-placeholder' => '옷의 종류를 선택하세요', :size => '14' }
+                      %select#cloth-type{ :name => 'category_id', 'data-placeholder' => '옷의 종류를 선택하세요', :size => '14' }
                         %option{ :value => '-1' } Jacket & Pants
                         %option{ :value => '-2' } Jacket & Skirts
                         %option{ :value => '1'  } Jacket
@@ -2446,7 +2495,7 @@ __DATA__
                     .form-group.has-info
                       %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'cloth-color' } 색상:
                       .col-xs-12.col-sm-4
-                        %select#cloth-color{ :name => 'cloth-color', 'data-placeholder' => '옷의 색상을 선택하세요', :size => '6' }
+                        %select#cloth-color{ :name => 'color', 'data-placeholder' => '옷의 색상을 선택하세요', :size => '6' }
                           %option{ :value => 'B' } 검정(B)
                           %option{ :value => 'N' } 감청(N)
                           %option{ :value => 'G' } 회색(G)
@@ -2460,7 +2509,7 @@ __DATA__
                       %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'cloth-bust' } 가슴:
                       .col-xs-12.col-sm-5
                         .input-group
-                          %input#cloth-bust.valid.form-control{ :name => 'cloth-bust', :type => 'text' }
+                          %input#cloth-bust.valid.form-control{ :name => 'chest', :type => 'text' }
                           %span.input-group-addon
                             %i cm
 
@@ -2471,7 +2520,7 @@ __DATA__
                       %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'cloth-arm' } 팔 길이:
                       .col-xs-12.col-sm-5
                         .input-group
-                          %input#cloth-arm.valid.form-control{ :name => 'cloth-arm', :type => 'text' }
+                          %input#cloth-arm.valid.form-control{ :name => 'arm', :type => 'text' }
                           %span.input-group-addon
                             %i cm
 
@@ -2482,7 +2531,7 @@ __DATA__
                       %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'cloth-waist' } 허리:
                       .col-xs-12.col-sm-5
                         .input-group
-                          %input#cloth-waist.valid.form-control{ :name => 'cloth-waist', :type => 'text' }
+                          %input#cloth-waist.valid.form-control{ :name => 'waist', :type => 'text' }
                           %span.input-group-addon
                             %i cm
 
@@ -2493,7 +2542,7 @@ __DATA__
                       %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'cloth-hip' } 엉덩이:
                       .col-xs-12.col-sm-5
                         .input-group
-                          %input#cloth-hip.valid.form-control{ :name => 'cloth-hip', :type => 'text' }
+                          %input#cloth-hip.valid.form-control{ :name => 'hip', :type => 'text' }
                           %span.input-group-addon
                             %i cm
 
@@ -2504,7 +2553,7 @@ __DATA__
                       %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'cloth-length' } 기장:
                       .col-xs-12.col-sm-5
                         .input-group
-                          %input#cloth-length.valid.form-control{ :name => 'cloth-length', :type => 'text' }
+                          %input#cloth-length.valid.form-control{ :name => 'length', :type => 'text' }
                           %span.input-group-addon
                             %i cm
 
@@ -2515,7 +2564,7 @@ __DATA__
                       %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'cloth-foot' } 발 크기:
                       .col-xs-12.col-sm-5
                         .input-group
-                          %input#cloth-foot.valid.form-control{ :name => 'cloth-foot', :type => 'text' }
+                          %input#cloth-foot.valid.form-control{ :name => 'foot', :type => 'text' }
                           %span.input-group-addon
                             %i mm
 
