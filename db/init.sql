@@ -169,7 +169,6 @@ CREATE TABLE `order` (
   `return_date`      DATETIME DEFAULT NULL,
   `return_method`    VARCHAR(32) DEFAULT NULL,
   `payment_method`   VARCHAR(32) DEFAULT NULL,
-  `purpose`          VARCHAR(32),
   `price`            INT DEFAULT 0,
   `discount`         INT DEFAULT 0,
   `late_fee`         INT DEFAULT 0,
@@ -178,7 +177,9 @@ CREATE TABLE `order` (
   `staff_name`       VARCHAR(32) DEFAULT NULL,
   `comment`          TEXT DEFAULT NULL,
 
-  -- guest's size
+  -- guest info
+  `purpose`          VARCHAR(32),
+  `age`              INT DEFAULT NULL,
   `chest`            INT DEFAULT NULL,
   `waist`            INT DEFAULT NULL,
   `arm`              INT DEFAULT NULL,
