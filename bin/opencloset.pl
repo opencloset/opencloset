@@ -331,7 +331,7 @@ post '/guests' => sub {
     $self->respond_to(
         json => { json => { $guest->get_columns }, status => 201 },
         html => sub {
-            $self->redirect_to('/guests/' . $guest->id . '/size');
+            $self->redirect_to('/guests/' . $guest->id);
         }
     );
 };
@@ -372,40 +372,6 @@ any [qw/put patch/] => '/guests/:id' => sub {
     $guest->update;
     $self->respond_to(
         json => { json => { $guest->get_columns } },
-    );
-};
-
-get '/guests/:id/size' => sub {
-    my $self  = shift;
-    my $guest = $DB->resultset('Guest')->find({ id => $self->param('id') });
-    $self->stash(guest => $guest);
-    $self->render_fillinform({ $guest->get_columns });
-} => 'guests/size';
-
-post '/guests/:id/size' => sub {
-    my $self  = shift;
-
-    my $validator = $self->create_validator;
-    my @fields = qw/chest waist arm length/;
-    $validator->field([@fields])
-        ->each(sub { shift->required(1)->regexp(qr/^\d+$/) });
-
-    return $self->error(400, 'failed to validate')
-        unless $self->validate($validator);
-
-    my $guest = $DB->resultset('Guest')->find({ id => $self->param('id') });
-    map { $guest->$_($self->param($_)) } @fields;
-    $guest->update;
-    my ($chest, $waist) = ($guest->chest + 3, $guest->waist);
-    $self->respond_to(
-        json => { json => { $guest->get_columns } },
-        html => sub {
-            $self->redirect_to(
-                # ignore $guest->arm for wide search result
-                $self->url_for('/search')
-                    ->query(q => "$chest/$waist//1", gid => $guest->id)
-            );
-        }
     );
 };
 
@@ -1519,47 +1485,6 @@ __DATA__
     - }
   - }
 
-@@ guests/size.html.haml
-- layout 'default';
-- title '신체치수';
-
-.row
-  .span6
-    - if (my $order = $guest->orders({ status_id => 2 })->next) {
-      - if (overdue_calc($order->target_date, DateTime->now())) {
-        %span.label.label-important 연체중
-      - } else {
-        %span.label.label-warning= $order->status->name
-      - }
-    - }
-    %div= include 'guests/status', guest => $guest
-  .span6
-    %form.form-horizontal{:method => 'POST', :action => "#{url_for('')}"}
-      %legend 대여자 치수 정보
-      .control-group
-        %label.control-label{:for => 'input-chest'} 가슴
-        .controls
-          %input{:type => 'text', :id => 'input-chest', :name => 'chest'}
-            cm
-      .control-group
-        %label.control-label{:for => 'input-waist'} 허리
-        .controls
-          %input{:type => 'text', :id => 'input-waist', :name => 'waist'}
-            cm
-      .control-group
-        %label.control-label{:for => 'input-arm'} 팔
-        .controls
-          %input{:type => 'text', :id => 'input-arm', :name => 'arm'}
-            cm
-      .control-group
-        %label.control-label{:for => 'input-pants-len'} 기장
-        .controls
-          %input{:type => 'text', :id => 'input-pants-len', :name => 'length'}
-            cm
-      .control-group
-        .controls
-          %input.btn.btn-primary{:type => 'submit', :value => '다음'}
-
 
 @@ guests/breadcrumb.html.haml
 %p
@@ -1852,7 +1777,7 @@ __DATA__
     %ul
       - for my $order ($cloth->orders({ status_id => { '!=' => undef } }, { order_by => { -desc => [qw/rental_date/] } })) {
         %li
-          %a{:href => '/guests/#{$order->guest->id}/size'}= $order->guest->name
+          %a{:href => '/guests/#{$order->guest->id}'}= $order->guest->name
           님
           - if ($order->status && $order->status->name eq '대여중') {
             - if (overdue_calc($order->target_date, DateTime->now())) {
