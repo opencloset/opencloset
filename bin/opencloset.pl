@@ -905,16 +905,15 @@ del '/orders/:id' => sub {
 post '/donors' => sub {
     my $self   = shift;
 
-    my $validator = $self->create_validator;
-    $validator->field('name')->required(1);
-    $validator->field('phone')->regexp(qr/^\d{10,11}$/);
-    $validator->field('email')->email;
-    $validator->field('gender')->regexp(qr/^[12]$/);
+    my $user_id = $self->param('user_id');
+    my $donor = $self->create_donor($user_id);
+    return $self->error(500, 'failed to create a new donor') unless $donor;
 
-    unless ($self->validate($validator)) {
-        my @error_str;
-        while ( my ($k, $v) = each %{ $validator->errors } ) {
-            push @error_str, "$k:$v";
+    $self->res->headers->header('Location' => $self->url_for('/donors/' . $donor->id));
+    $self->respond_to(
+        json => { json => { $donor->get_columns }, status => 201 },
+        html => sub {
+            $self->redirect_to('/donors/' . $donor->id);
         }
         return $self->error( 400, { str => join(',', @error_str), data => $validator->errors } );
     }
