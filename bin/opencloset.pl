@@ -55,7 +55,7 @@ helper cloth2hr => sub {
 
     return {
         $cloth->get_columns,
-        donor    => $cloth->donor ? $cloth->donor->name : '',
+        donor    => $cloth->donor ? $cloth->donor->user->name : '',
         category => $cloth->category->name,
         price    => $self->commify($cloth->category->price),
         status   => $cloth->status->name,
@@ -83,9 +83,18 @@ helper sms2hr => sub {
 };
 
 helper guest2hr => sub {
-    my ($self, $guest) = @_;
+    my ($self, $user) = @_;
 
-    return { $guest->get_columns };
+    my %columns;
+    if ($user->guest) {
+        %columns = ($user->get_columns, $user->guest->get_columns);
+    } else {
+        %columns = $user->get_columns;
+        map { $columns{$_} = undef } $DB->resultset('Guest')->result_source->columns;
+        $columns{user_id} = $user->id;
+    }
+
+    return { %columns };
 };
 
 helper overdue_calc => sub {
@@ -108,38 +117,62 @@ helper commify => sub {
     return $_;
 };
 
-helper validate_guest => sub {
+helper validate_user => sub {
     my $self = shift;
 
     my $validator = $self->create_validator;
     $validator->field('name')->required(1);
     $validator->field('phone')->regexp(qr/^01\d{8,9}$/);
     $validator->field('email')->email;
-
-    my @fields = qw/chest waist arm length/;
-    $validator->field([@fields])
-        ->each(sub { shift->required(1)->regexp(qr/^\d+$/) });
+    $validator->field('gender')->regexp(qr/^[12]$/);
+    $validator->field('age')->regexp(qr/^\d+$/);
 
     return unless $self->validate($validator);
+    ## TODO: check exist email and set to error
     return 1;
 };
 
-helper create_guest => sub {
+helper create_user => sub {
     my $self = shift;
 
     my %params;
     map {
         $params{$_} = $self->param($_) if defined $self->param($_)
-    } qw/name gender phone address age email height weight target_date purpose domain chest waist arm length/;
+    } qw/name email password phone gender age address/;
+
+    return $DB->resultset('User')->find_or_create(\%params);
+};
+
+helper validate_guest => sub {
+    my $self = shift;
+
+    my $validator = $self->create_validator;
+    $validator->field([qw/chest waist arm length height weight/])
+        ->each(sub { shift->required(1)->regexp(qr/^\d+$/) });
+
+    ## TODO: validate `target_date`
+    return unless $self->validate($validator);
+    return 1;
+};
+
+helper create_guest => sub {
+    my ($self, $user_id) = @_;
+
+    return unless $user_id;
+
+    my %params = ( user_id => $user_id );
+    map {
+        $params{$_} = $self->param($_) if defined $self->param($_)
+    } qw/chest waist arm length height weight purpose domain target_date/;
 
     return $DB->resultset('Guest')->find_or_create(\%params);
 };
 
 helper create_donor => sub {
-    my $self = shift;
+    my ($self, $user_id) = @_;
 
-    my %params;
-    map { $params{$_} = $self->param($_) } qw/name phone email comment gender address message comment/;
+    my %params = ( id => $user_id );
+    map { $params{$_} = $self->param($_) } qw/donation_msg comment/;
 
     return $DB->resultset('Donor')->find_or_create(\%params);
 };
@@ -239,7 +272,7 @@ get '/new-borrower' => sub {
     my $self = shift;
 
     my $q      = $self->param('q') || '';
-    my $guests = $DB->resultset('Guest')->search({
+    my $users = $DB->resultset('User')->search({
         -or => [
             id    => $q,
             name  => $q,
@@ -249,11 +282,9 @@ get '/new-borrower' => sub {
     });
 
     my @candidates;
-    while (my $g = $guests->next) {
-        push @candidates, $self->guest2hr($g);
+    while (my $user = $users->next) {
+        push @candidates, $self->guest2hr($user);
     }
-
-    $self->stash( candidates => $guests );
 
     $self->respond_to(
         json => { json => [@candidates] },
@@ -261,19 +292,54 @@ get '/new-borrower' => sub {
     );
 };
 
+post '/users' => sub {
+    my $self = shift;
+
+    return $self->error(400, 'invalid request') unless $self->validate_user;
+
+    my $user = $self->create_user;
+    return $self->error(500, 'failed to create a new user') unless $user;
+
+    $self->res->headers->header('Location' => $self->url_for('/users/' . $user->id));
+    $self->respond_to(
+        json => { json => { $user->get_columns }, status => 201 },
+        html => sub {
+            $self->redirect_to('/users/' . $user->id);
+        }
+    );
+};
+
+any [qw/put patch/] => '/users/:id' => sub {
+    my $self  = shift;
+
+    return $self->error(400, 'invalid request') unless $self->validate_user;
+
+    my $rs   = $DB->resultset('User');
+    my $user = $rs->find({ id => $self->param('id') });
+    map { $user->$_($self->param($_)) } qw/name phone gender age address/;
+    $user->update;
+    $self->respond_to(
+        json => { json => { $user->get_columns } },
+    );
+};
+
 post '/guests' => sub {
     my $self = shift;
 
-    return $self->error(400, 'invalid request') unless $self->validate_guest;
+    return $self->error(400, 'invalid request')
+        unless ($self->validate_guest && $self->param('user_id'));
 
-    my $guest = $self->create_guest;
+    my $user = $DB->resultset('User')->find({ id => $self->param('user_id') });
+    return $self->error(404, 'not found user') unless $user;
+
+    my $guest = $self->create_guest($user->id);
     return $self->error(500, 'failed to create a new guest') unless $guest;
 
     $self->res->headers->header('Location' => $self->url_for('/guests/' . $guest->id));
     $self->respond_to(
         json => { json => { $guest->get_columns }, status => 201 },
         html => sub {
-            $self->redirect_to('/guests/' . $guest->id . '/size');
+            $self->redirect_to('/guests/' . $guest->id);
         }
     );
 };
@@ -281,6 +347,8 @@ post '/guests' => sub {
 get '/guests/:id' => sub {
     my $self   = shift;
     my $guest  = $DB->resultset('Guest')->find({ id => $self->param('id') });
+    return $self->error(404, 'not found guest') unless $guest;
+
     my @orders = $DB->resultset('Order')->search({
         guest_id => $self->param('id')
     }, {
@@ -290,7 +358,12 @@ get '/guests/:id' => sub {
         guest  => $guest,
         orders => [@orders],
     );
-} => 'guests/id';
+
+    $self->respond_to(
+        json => { json => { $guest->get_columns } },
+        html => { template => 'guests/id' }
+    );
+};
 
 any [qw/put patch/] => '/guests/:id' => sub {
     my $self  = shift;
@@ -299,44 +372,14 @@ any [qw/put patch/] => '/guests/:id' => sub {
 
     my $rs = $DB->resultset('Guest');
     my $guest = $rs->find({ id => $self->param('id') });
-    map { $guest->$_($self->param($_)) } $rs->result_source->columns;
+    return $self->error(404, 'not found') unless $guest;
+
+    map {
+        $guest->$_($self->param($_)) if defined $self->param($_);
+    } qw/chest waist arm length height weight purpose domain/;
     $guest->update;
     $self->respond_to(
         json => { json => { $guest->get_columns } },
-    );
-};
-
-get '/guests/:id/size' => sub {
-    my $self  = shift;
-    my $guest = $DB->resultset('Guest')->find({ id => $self->param('id') });
-    $self->stash(guest => $guest);
-    $self->render_fillinform({ $guest->get_columns });
-} => 'guests/size';
-
-post '/guests/:id/size' => sub {
-    my $self  = shift;
-
-    my $validator = $self->create_validator;
-    my @fields = qw/chest waist arm length/;
-    $validator->field([@fields])
-        ->each(sub { shift->required(1)->regexp(qr/^\d+$/) });
-
-    return $self->error(400, 'failed to validate')
-        unless $self->validate($validator);
-
-    my $guest = $DB->resultset('Guest')->find({ id => $self->param('id') });
-    map { $guest->$_($self->param($_)) } @fields;
-    $guest->update;
-    my ($chest, $waist) = ($guest->chest + 3, $guest->waist);
-    $self->respond_to(
-        json => { json => { $guest->get_columns } },
-        html => sub {
-            $self->redirect_to(
-                # ignore $guest->arm for wide search result
-                $self->url_for('/search')
-                    ->query(q => "$chest/$waist//1", gid => $guest->id)
-            );
-        }
     );
 };
 
@@ -563,7 +606,7 @@ get '/search' => sub {
         guest       => $guest,
         clothes     => $clothes,
         pageset     => $pageset,
-        status_id   => $status_id || q{},
+        status_id   => $status_id || 0,
         category_id => $category_id,
         color       => $color || q{},
     );
@@ -580,11 +623,13 @@ get '/rental' => sub {
     my $q      = $self->param('q');
     my @guests = $DB->resultset('Guest')->search({
         -or => [
-            id    => $q,
-            name  => $q,
-            phone => $q,
-            email => $q
+            'user_id'    => $q,
+            'user.name'  => $q,
+            'user.phone' => $q,
+            'user.email' => $q
         ],
+    }, {
+        join => 'user'
     });
 
     ### DBIx::Class::Storage::DBI::_gen_sql_bind(): DateTime objects passed to search() are not
@@ -1096,24 +1141,6 @@ __DATA__
 
                   <div class="col-xs-12 col-sm-9">
                     <div class="search">
-                      <ul>
-                        <% while(my $g = $candidates->next) { %>
-                        <li>
-                          <a href='<%= url_for("/guests/@{[$g->id]}/size") %>'>
-                            %= "@{[$g->name]}(@{[$g->email]})"
-                          </a>
-                          <p class="muted">
-                            <span><%= $g->address %></span>
-                            <% if ($g->visit_date) { %>
-                            ,
-                            <time class="highlight"><%= $g->visit_date->ymd %></time>
-                            일 방문
-                            <% } %>
-                          </p>
-                        </li>
-                        <% } %>
-                      </ul>
-
                       <div class='input-group'>
                         <input class='form-control' id='guest-search' type='text' name='q' placeholder='이름 또는 이메일, 휴대전화 번호' />
                         <span class='input-group-btn'>
@@ -1133,7 +1160,7 @@ __DATA__
                     <div id="guest-search-list">
                       <div>
                         <label class="blue">
-                          <input type="radio" class="ace valid" name="guest-id" value="0" data-guest-id="0">
+                          <input type="radio" class="ace valid" name="user-id" value="0">
                           <span class="lbl"> 처음 방문했습니다.</span>
                         </label>
                       </div>
@@ -1409,7 +1436,7 @@ __DATA__
 <script id="tpl-new-borrower-guest-id" type="text/html">
   <div>
     <label class="blue highlight">
-      <input type="radio" class="ace valid" name="guest-id" value="<%%= id %>" data-guest-id="<%%= id %>">
+      <input type="radio" class="ace valid" name="user-id" value="<%%= user_id %>" data-user-id="<%%= user_id %>" data-guest-id="<%%= id %>">
       <span class="lbl"> <%%= name %> (<%%= email %>)</span>
       <span><%%= address %></span>
     </label>
@@ -1421,15 +1448,15 @@ __DATA__
 %ul
   %li
     %i.icon-user
-    %a{:href => "#{url_for('/guests/' . $guest->id)}"} #{$guest->name}
-    %span (#{$guest->age})
+    %a{:href => "#{url_for('/guests/' . $guest->id)}"} #{$guest->user->name}
+    %span (#{$guest->user->age})
   %li
     %i.icon-map-marker
-    = $guest->address
+    = $guest->user->address
   %li
     %i.icon-envelope
-    %a{:href => "mailto:#{$guest->email}"}= $guest->email
-  %li= $guest->phone
+    %a{:href => "mailto:#{$guest->user->email}"}= $guest->user->email
+  %li= $guest->user->phone
   %li
     %span #{$guest->height} cm,
     %span #{$guest->weight} kg
@@ -1440,7 +1467,7 @@ __DATA__
 
 @@ guests/id.html.haml
 - layout 'default';
-- title $guest->name . '님';
+- title $guest->user->name . '님';
 
 %div= include 'guests/status', guest => $guest
 %div= include 'guests/breadcrumb', guest => $guest, status_id => 1;
@@ -1468,51 +1495,10 @@ __DATA__
     - }
   - }
 
-@@ guests/size.html.haml
-- layout 'default';
-- title '신체치수';
-
-.row
-  .span6
-    - if (my $order = $guest->orders({ status_id => 2 })->next) {
-      - if (overdue_calc($order->target_date, DateTime->now())) {
-        %span.label.label-important 연체중
-      - } else {
-        %span.label.label-warning= $order->status->name
-      - }
-    - }
-    %div= include 'guests/status', guest => $guest
-  .span6
-    %form.form-horizontal{:method => 'POST', :action => "#{url_for('')}"}
-      %legend 대여자 치수 정보
-      .control-group
-        %label.control-label{:for => 'input-chest'} 가슴
-        .controls
-          %input{:type => 'text', :id => 'input-chest', :name => 'chest'}
-            cm
-      .control-group
-        %label.control-label{:for => 'input-waist'} 허리
-        .controls
-          %input{:type => 'text', :id => 'input-waist', :name => 'waist'}
-            cm
-      .control-group
-        %label.control-label{:for => 'input-arm'} 팔
-        .controls
-          %input{:type => 'text', :id => 'input-arm', :name => 'arm'}
-            cm
-      .control-group
-        %label.control-label{:for => 'input-pants-len'} 기장
-        .controls
-          %input{:type => 'text', :id => 'input-pants-len', :name => 'length'}
-            cm
-      .control-group
-        .controls
-          %input.btn.btn-primary{:type => 'submit', :value => '다음'}
-
 
 @@ guests/breadcrumb.html.haml
 %p
-  %a{:href => '/guests/#{$guest->id}'}= $guest->name
+  %a{:href => '/guests/#{$guest->id}'}= $guest->user->name
   님
   - if ($guest->visit_date) {
     %strong= $guest->visit_date->ymd
@@ -1533,7 +1519,7 @@ __DATA__
 @@ guests/breadcrumb/radio.html.haml
 %label.radio.inline
   %input{:type => 'radio', :name => 'gid', :value => '#{$guest->id}'}
-  %a{:href => '/guests/#{$guest->id}'}= $guest->name
+  %a{:href => '/guests/#{$guest->id}'}= $guest->user->name
   님
   - if ($guest->visit_date) {
     %strong= $guest->visit_date->ymd
@@ -1541,8 +1527,8 @@ __DATA__
   - }
 %div
   %i.icon-envelope
-  %a{:href => "mailto:#{$guest->email}"}= $guest->email
-%div.muted= $guest->phone
+  %a{:href => "mailto:#{$guest->user->email}"}= $guest->user->email
+%div.muted= $guest->user->phone
 %div
   %span.label.label-info= $guest->chest
   %span.label.label-info= $guest->waist
@@ -1554,7 +1540,7 @@ __DATA__
 
 @@ donors/breadcrumb/radio.html.haml
 %input{:type => 'radio', :name => 'donor_id', :value => '#{$donor->id}'}
-%a{:href => '/donors/#{$donor->id}'}= $donor->name
+%a{:href => '/donors/#{$donor->id}'}= $donor->user->name
 님
 %div
   - if ($donor->email) {
@@ -1706,11 +1692,11 @@ __DATA__
             %ul
               - for my $s ($c->satisfactions({}, { rows => 5, order_by => { -desc => [qw/create_date/] } })) {
                 %li
-                  %span.badge{:class => 'satisfaction-#{$s->chest}'}= $s->guest->chest
-                  %span.badge{:class => 'satisfaction-#{$s->waist}'}= $s->guest->waist
-                  %span.badge{:class => 'satisfaction-#{$s->arm}'}=   $s->guest->arm
-                  %span.badge{:class => 'satisfaction-#{$s->top_fit}'}    상
-                  %span.badge{:class => 'satisfaction-#{$s->bottom_fit}'} 하
+                  %span.badge{:class => 'satisfaction-#{$s->chest || 0}'}= $s->guest->chest
+                  %span.badge{:class => 'satisfaction-#{$s->waist || 0}'}= $s->guest->waist
+                  %span.badge{:class => 'satisfaction-#{$s->arm || 0}'}=   $s->guest->arm
+                  %span.badge{:class => 'satisfaction-#{$s->top_fit || 0}'}    상
+                  %span.badge{:class => 'satisfaction-#{$s->bottom_fit || 0}'} 하
                   - if ($guest && $s->guest->id == $guest->id) {
                     %i.icon-star{:title => '대여한적 있음'}
                   - }
@@ -1794,14 +1780,14 @@ __DATA__
         - }
       - }
     - if ($cloth->donor) {
-      %h3= $cloth->donor->name
+      %h3= $cloth->donor->user->name
       %p.muted 님께서 기증하셨습니다
     - }
   .span4
     %ul
       - for my $order ($cloth->orders({ status_id => { '!=' => undef } }, { order_by => { -desc => [qw/rental_date/] } })) {
         %li
-          %a{:href => '/guests/#{$order->guest->id}/size'}= $order->guest->name
+          %a{:href => '/guests/#{$order->guest->id}'}= $order->guest->user->name
           님
           - if ($order->status && $order->status->name eq '대여중') {
             - if (overdue_calc($order->target_date, DateTime->now())) {

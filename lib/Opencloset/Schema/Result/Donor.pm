@@ -34,40 +34,14 @@ __PACKAGE__->table("donor");
   is_auto_increment: 1
   is_nullable: 0
 
-=head2 name
-
-  data_type: 'varchar'
-  is_nullable: 0
-  size: 32
-
-=head2 email
-
-  data_type: 'varchar'
-  is_nullable: 1
-  size: 128
-
-=head2 phone
-
-  data_type: 'varchar'
-  is_nullable: 1
-  size: 16
-
-regex: [0-9]{10,11}
-
-=head2 gender
+=head2 user_id
 
   data_type: 'integer'
-  is_nullable: 1
+  extra: {unsigned => 1}
+  is_foreign_key: 1
+  is_nullable: 0
 
-1: male, 2: female
-
-=head2 address
-
-  data_type: 'varchar'
-  is_nullable: 1
-  size: 255
-
-=head2 message
+=head2 donation_msg
 
   data_type: 'text'
   is_nullable: 1
@@ -95,17 +69,14 @@ __PACKAGE__->add_columns(
     is_auto_increment => 1,
     is_nullable => 0,
   },
-  "name",
-  { data_type => "varchar", is_nullable => 0, size => 32 },
-  "email",
-  { data_type => "varchar", is_nullable => 1, size => 128 },
-  "phone",
-  { data_type => "varchar", is_nullable => 1, size => 16 },
-  "gender",
-  { data_type => "integer", is_nullable => 1 },
-  "address",
-  { data_type => "varchar", is_nullable => 1, size => 255 },
-  "message",
+  "user_id",
+  {
+    data_type => "integer",
+    extra => { unsigned => 1 },
+    is_foreign_key => 1,
+    is_nullable => 0,
+  },
+  "donation_msg",
   { data_type => "text", is_nullable => 1 },
   "comment",
   { data_type => "text", is_nullable => 1 },
@@ -133,29 +104,17 @@ __PACKAGE__->set_primary_key("id");
 
 =head1 UNIQUE CONSTRAINTS
 
-=head2 C<email>
+=head2 C<user_id>
 
 =over 4
 
-=item * L</email>
+=item * L</user_id>
 
 =back
 
 =cut
 
-__PACKAGE__->add_unique_constraint("email", ["email"]);
-
-=head2 C<phone>
-
-=over 4
-
-=item * L</phone>
-
-=back
-
-=cut
-
-__PACKAGE__->add_unique_constraint("phone", ["phone"]);
+__PACKAGE__->add_unique_constraint("user_id", ["user_id"]);
 
 =head1 RELATIONS
 
@@ -189,9 +148,24 @@ __PACKAGE__->has_many(
   { cascade_copy => 0, cascade_delete => 0 },
 );
 
+=head2 user
 
-# Created by DBIx::Class::Schema::Loader v0.07036 @ 2013-11-05 11:48:52
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:wTZsR8WK4j+mp82+j5pgkQ
+Type: belongs_to
+
+Related object: L<Opencloset::Schema::Result::User>
+
+=cut
+
+__PACKAGE__->belongs_to(
+  "user",
+  "Opencloset::Schema::Result::User",
+  { id => "user_id" },
+  { is_deferrable => 1, on_delete => "CASCADE", on_update => "RESTRICT" },
+);
+
+
+# Created by DBIx::Class::Schema::Loader v0.07036 @ 2013-11-12 13:50:46
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:1akbzrBnSbZ3U+++c7kzNQ
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration
