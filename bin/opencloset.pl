@@ -1438,15 +1438,15 @@ __DATA__
 %ul
   %li
     %i.icon-user
-    %a{:href => "#{url_for('/guests/' . $guest->id)}"} #{$guest->name}
-    %span (#{$guest->age})
+    %a{:href => "#{url_for('/guests/' . $guest->id)}"} #{$guest->user->name}
+    %span (#{$guest->user->age})
   %li
     %i.icon-map-marker
-    = $guest->address
+    = $guest->user->address
   %li
     %i.icon-envelope
-    %a{:href => "mailto:#{$guest->email}"}= $guest->email
-  %li= $guest->phone
+    %a{:href => "mailto:#{$guest->user->email}"}= $guest->user->email
+  %li= $guest->user->phone
   %li
     %span #{$guest->height} cm,
     %span #{$guest->weight} kg
@@ -1457,7 +1457,7 @@ __DATA__
 
 @@ guests/id.html.haml
 - layout 'default';
-- title $guest->name . '님';
+- title $guest->user->name . '님';
 
 %div= include 'guests/status', guest => $guest
 %div= include 'guests/breadcrumb', guest => $guest, status_id => 1;
@@ -1488,7 +1488,7 @@ __DATA__
 
 @@ guests/breadcrumb.html.haml
 %p
-  %a{:href => '/guests/#{$guest->id}'}= $guest->name
+  %a{:href => '/guests/#{$guest->id}'}= $guest->user->name
   님
   - if ($guest->visit_date) {
     %strong= $guest->visit_date->ymd
