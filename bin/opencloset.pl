@@ -606,7 +606,7 @@ get '/search' => sub {
         guest       => $guest,
         clothes     => $clothes,
         pageset     => $pageset,
-        status_id   => $status_id || q{},
+        status_id   => $status_id || 0,
         category_id => $category_id,
         color       => $color || q{},
     );
@@ -1692,11 +1692,11 @@ __DATA__
             %ul
               - for my $s ($c->satisfactions({}, { rows => 5, order_by => { -desc => [qw/create_date/] } })) {
                 %li
-                  %span.badge{:class => 'satisfaction-#{$s->chest}'}= $s->guest->chest
-                  %span.badge{:class => 'satisfaction-#{$s->waist}'}= $s->guest->waist
-                  %span.badge{:class => 'satisfaction-#{$s->arm}'}=   $s->guest->arm
-                  %span.badge{:class => 'satisfaction-#{$s->top_fit}'}    상
-                  %span.badge{:class => 'satisfaction-#{$s->bottom_fit}'} 하
+                  %span.badge{:class => 'satisfaction-#{$s->chest || 0}'}= $s->guest->chest
+                  %span.badge{:class => 'satisfaction-#{$s->waist || 0}'}= $s->guest->waist
+                  %span.badge{:class => 'satisfaction-#{$s->arm || 0}'}=   $s->guest->arm
+                  %span.badge{:class => 'satisfaction-#{$s->top_fit || 0}'}    상
+                  %span.badge{:class => 'satisfaction-#{$s->bottom_fit || 0}'} 하
                   - if ($guest && $s->guest->id == $guest->id) {
                     %i.icon-star{:title => '대여한적 있음'}
                   - }
