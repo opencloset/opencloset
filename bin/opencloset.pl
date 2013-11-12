@@ -152,7 +152,7 @@ helper create_guest => sub {
 
     return unless $user_id;
 
-    my %params = ( id => $user_id );
+    my %params = ( user_id => $user_id );
     map {
         $params{$_} = $self->param($_) if defined $self->param($_)
     } qw/chest waist arm length height weight purpose domain target_date/;
@@ -308,7 +308,7 @@ any [qw/put patch/] => '/users/:id' => sub {
 
     my $rs   = $DB->resultset('User');
     my $user = $rs->find({ id => $self->param('id') });
-    map { $user->$_($self->param($_)) } $rs->result_source->columns;
+    map { $user->$_($self->param($_)) } qw/name phone gender age address/;
     $user->update;
     $self->respond_to(
         json => { json => { $user->get_columns } },
@@ -338,7 +338,7 @@ post '/guests' => sub {
 
 get '/guests/:id' => sub {
     my $self   = shift;
-    my $guest  = $DB->resultset('Guest')->find({ id => $self->param('id') });
+    my $guest  = $DB->resultset('Guest')->find({ user_id => $self->param('id') });
     return $self->error(404, 'not found guest') unless $guest;
 
     my @orders = $DB->resultset('Order')->search({
@@ -363,12 +363,12 @@ any [qw/put patch/] => '/guests/:id' => sub {
     return $self->error(400, 'invalid request') unless $self->validate_guest;
 
     my $rs = $DB->resultset('Guest');
-    my $guest = $rs->find({ id => $self->param('id') });
+    my $guest = $rs->find({ user_id => $self->param('id') });
     return $self->error(404, 'not found') unless $guest;
 
     map {
         $guest->$_($self->param($_)) if defined $self->param($_);
-    } $rs->result_source->columns;
+    } qw/chest waist arm length height weight purpose domain/;
     $guest->update;
     $self->respond_to(
         json => { json => { $guest->get_columns } },
@@ -615,11 +615,13 @@ get '/rental' => sub {
     my $q      = $self->param('q');
     my @guests = $DB->resultset('Guest')->search({
         -or => [
-            id    => $q,
-            name  => $q,
-            phone => $q,
-            email => $q
+            'user_id'    => $q,
+            'user.name'  => $q,
+            'user.phone' => $q,
+            'user.email' => $q
         ],
+    }, {
+        join => 'user'
     });
 
     ### DBIx::Class::Storage::DBI::_gen_sql_bind(): DateTime objects passed to search() are not
@@ -1426,7 +1428,7 @@ __DATA__
 <script id="tpl-new-borrower-guest-id" type="text/html">
   <div>
     <label class="blue highlight">
-      <input type="radio" class="ace valid" name="user-id" value="<%%= id %>" data-user-id="<%%= id %>">
+      <input type="radio" class="ace valid" name="user-id" value="<%%= user_id %>" data-user-id="<%%= user_id %>">
       <span class="lbl"> <%%= name %> (<%%= email %>)</span>
       <span><%%= address %></span>
     </label>
@@ -1509,7 +1511,7 @@ __DATA__
 @@ guests/breadcrumb/radio.html.haml
 %label.radio.inline
   %input{:type => 'radio', :name => 'gid', :value => '#{$guest->id}'}
-  %a{:href => '/guests/#{$guest->id}'}= $guest->name
+  %a{:href => '/guests/#{$guest->id}'}= $guest->user->name
   님
   - if ($guest->visit_date) {
     %strong= $guest->visit_date->ymd
@@ -1517,8 +1519,8 @@ __DATA__
   - }
 %div
   %i.icon-envelope
-  %a{:href => "mailto:#{$guest->email}"}= $guest->email
-%div.muted= $guest->phone
+  %a{:href => "mailto:#{$guest->user->email}"}= $guest->user->email
+%div.muted= $guest->user->phone
 %div
   %span.label.label-info= $guest->chest
   %span.label.label-info= $guest->waist

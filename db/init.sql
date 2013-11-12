@@ -36,6 +36,7 @@ CREATE TABLE `donor` (
   `create_date`  DATETIME DEFAULT NULL,
 
   PRIMARY KEY (`id`),
+  UNIQUE KEY (`user_id`),
   CONSTRAINT `fk_donor1` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -59,6 +60,7 @@ CREATE TABLE `guest` (
   `target_date` DATETIME DEFAULT NULL, -- 착용일
 
   PRIMARY KEY (`id`),
+  UNIQUE KEY (`user_id`),
   CONSTRAINT `fk_guest1` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 

@@ -102,6 +102,20 @@ __PACKAGE__->add_columns(
 
 __PACKAGE__->set_primary_key("id");
 
+=head1 UNIQUE CONSTRAINTS
+
+=head2 C<user_id>
+
+=over 4
+
+=item * L</user_id>
+
+=back
+
+=cut
+
+__PACKAGE__->add_unique_constraint("user_id", ["user_id"]);
+
 =head1 RELATIONS
 
 =head2 cloths
@@ -150,8 +164,8 @@ __PACKAGE__->belongs_to(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07036 @ 2013-11-12 10:51:42
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:sGpHCygIFepjgbcPF/Thng
+# Created by DBIx::Class::Schema::Loader v0.07036 @ 2013-11-12 13:50:46
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:1akbzrBnSbZ3U+++c7kzNQ
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration
