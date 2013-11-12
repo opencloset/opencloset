@@ -2316,9 +2316,9 @@ __DATA__
                     .col-xs-12.col-sm-9
                       .search
                         .input-group
-                          %input#giver-search.form-control{ :name => 'giver-search' :type => 'text', :placeholder => '이름 또는 이메일, 휴대전화 번호' }
+                          %input#donor-search.form-control{ :name => 'donor-search' :type => 'text', :placeholder => '이름 또는 이메일, 휴대전화 번호' }
                           %span.input-group-btn
-                            %button#btn-giver-search.btn.btn-default.btn-sm{ :type => 'submit' }
+                            %button#btn-donor-search.btn.btn-default.btn-sm{ :type => 'submit' }
                               %i.icon-search.bigger-110 검색
                   /
                   / 기증자 선택
@@ -2326,17 +2326,17 @@ __DATA__
                   .form-group.has-info
                     %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => "email" } 기증자 선택:
                     .col-xs-12.col-sm-9
-                      #giver-search-list
+                      #donor-search-list
                         %div
                           %label.blue
-                            %input.ace.valid{ :name => 'giver-id', :type => 'radio', 'data-giver-id' => '0', :value => '0' }
+                            %input.ace.valid{ :name => 'user-id', :type => 'radio', :value => '0' }
                             %span.lbl= ' 기증자를 모릅니다.'
                       :plain
-                        <script id="tpl-new-cloth-giver-id" type="text/html">
+                        <script id="tpl-new-cloth-donor-id" type="text/html">
                           <div>
                             <label class="blue">
-                              <input type="radio" class="ace valid" name="giver-id" value="<%= giver_id %>" data-giver-id="<%= giver_id %>">
-                              <span class="lbl"> <%= giver_name %></span>
+                              <input type="radio" class="ace valid" name="user-id" value="<%= user_id %>" data-donor-id="<%= id %>" data-user-id="<%= user_id %>">
+                              <span class="lbl"> <%= name %></span>
                             </label>
                           </div>
                         </script>
@@ -2345,15 +2345,15 @@ __DATA__
               /
               #step2.step-pane
                 %h3.lighter.block.green 기증자의 정보를 입력하세요.
-                %form#giver-info.form-horizontal{ :method => 'get' :novalidate="novalidate" }
+                %form#donor-info.form-horizontal{ :method => 'get' :novalidate="novalidate" }
                   /
                   / 이름
                   /
                   .form-group.has-info
-                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'giver-name' } 이름:
+                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'donor-name' } 이름:
                     .col-xs-12.col-sm-9
                       .clearfix
-                        %input#giver-name.valid.col-xs-12.col-sm-6{ :name => 'giver-name', :type => 'text' }
+                        %input#donor-name.valid.col-xs-12.col-sm-6{ :name => 'donor-name', :type => 'text' }
 
                   .space-2
 
@@ -2361,10 +2361,10 @@ __DATA__
                   / 전자우편
                   /
                   .form-group.has-info
-                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'giver-email' } 전자우편:
+                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'donor-email' } 전자우편:
                     .col-xs-12.col-sm-9
                       .clearfix
-                        %input#giver-email.valid.col-xs-12.col-sm-6{ :name => 'giver-email', :type => 'text' }
+                        %input#donor-email.valid.col-xs-12.col-sm-6{ :name => 'donor-email', :type => 'text' }
 
                   .space-2
 
@@ -2372,10 +2372,10 @@ __DATA__
                   / 나이
                   /
                   .form-group.has-info
-                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'giver-age' } 나이:
+                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'donor-age' } 나이:
                     .col-xs-12.col-sm-9
                       .clearfix
-                        %input#giver-age.valid.col-xs-12.col-sm-3{ :name => 'giver-age', :type => 'text' }
+                        %input#donor-age.valid.col-xs-12.col-sm-3{ :name => 'donor-age', :type => 'text' }
 
                   .space-2
 
@@ -2383,15 +2383,15 @@ __DATA__
                   / 성별
                   /
                   .form-group.has-info
-                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'giver-gender' } 성별:
+                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'donor-gender' } 성별:
                     .col-xs-12.col-sm-9
                       %div
                         %label.blue
-                          %input.ace.valid{ :name => 'giver-gender', :type => 'radio', :value => '1' }
+                          %input.ace.valid{ :name => 'donor-gender', :type => 'radio', :value => '1' }
                           %span.lbl= ' 남자'
                       %div
                         %label.blue
-                          %input.ace.valid{ :name => 'giver-gender', :type => 'radio', :value => '2' }
+                          %input.ace.valid{ :name => 'donor-gender', :type => 'radio', :value => '2' }
                           %span.lbl= ' 여자'
 
                   .space-2
@@ -2400,10 +2400,10 @@ __DATA__
                   / 휴대전화
                   /
                   .form-group.has-info
-                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'giver-phone' } 휴대전화:
+                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'donor-phone' } 휴대전화:
                     .col-xs-12.col-sm-9
                       .clearfix
-                        %input#giver-phone.valid.col-xs-12.col-sm-6{ :name => 'giver-phone', :type => 'text' }
+                        %input#donor-phone.valid.col-xs-12.col-sm-6{ :name => 'donor-phone', :type => 'text' }
 
                   .space-2
 
@@ -2411,10 +2411,10 @@ __DATA__
                   / 주소
                   /
                   .form-group.has-info
-                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'giver-address' } 주소:
+                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'donor-address' } 주소:
                     .col-xs-12.col-sm-9
                       .clearfix
-                        %input#giver-address.valid.col-xs-12.col-sm-8{ :name => 'giver-address', :type => 'text' }
+                        %input#donor-address.valid.col-xs-12.col-sm-8{ :name => 'donor-address', :type => 'text' }
 
               /
               / step3
