@@ -1,6 +1,7 @@
 $ ->
   ## Global variable
-  userID = undefined
+  userID  = undefined
+  guestID = undefined
 
   ## main
   $('#input-phone').ForceNumericOnly()
@@ -28,7 +29,8 @@ $ ->
       complete: (jqXHR, textStatus) ->
 
   $('#guest-search-list').on 'click', ':radio', (e) ->
-    userID = $(@).val()
+    userID  = $(@).data('user-id')
+    guestID = $(@).data('guest-id')
     return if $(@).val() is '0'
     g = JSON.parse($(@).attr('data-json'))
     _.each ['name','email','gender','phone','age',
@@ -84,9 +86,11 @@ $ ->
         when 2
           ajax.type = 'POST'
           ajax.path = '/users.json'
-          if userID and userID isnt '0'
+
+          if userID
             ajax.type = 'PUT'
             ajax.path = "/users/#{userID}.json"
+
           $.ajax ajax.path,
             type: ajax.type
             data: $('form').serialize()
@@ -98,36 +102,31 @@ $ ->
               return false
             complete: (jqXHR, textStatus) ->
         when 4
-          $.ajax "/guests/#{userID}.json",
-            type: 'GET'
+          if guestID
+            ajax.type = 'PUT'
+            ajax.path = "/guests/#{guestID}.json"
+          else
+            ajax.type = 'POST'
+            ajax.path = "/guests.json?user_id=#{userID}"
+
+          $.ajax ajax.path,
+            type: ajax.type
+            data: $('form').serialize()
             success: (data, textStatus, jqXHR) ->
-              ajax.type = 'PUT'
-              ajax.path = "/guests/#{userID}.json"
+              userID  = data.user_id
+              guestID = data.id
+              return true
             error: (jqXHR, textStatus, errorThrown) ->
-              if jqXHR.status is 404
-                ajax.type = 'POST'
-                ajax.path = "/guests.json?user_id=#{userID}"
-              else
-                alert('error', jqXHR.responseJSON.error)
-                return false
+              alert('error', jqXHR.responseJSON.error)
+              return false
             complete: (jqXHR, textStatus) ->
-              $.ajax ajax.path,
-                type: ajax.type
-                data: $('form').serialize()
-                success: (data, textStatus, jqXHR) ->
-                  return true
-                error: (jqXHR, textStatus, errorThrown) ->
-                  alert('error', jqXHR.responseJSON.error)
-                  return false
-                complete: (jqXHR, textStatus) ->
         else return
         
     .on 'finished', (e) ->
       e.preventDefault()
-      guestID = $('input[name=guest-id]:checked').val()
       chest = $("input[name=chest]").val()
       waist = $("input[name=waist]").val()
-      location.href = "/search?q=#{parseInt(chest) + 3}/#{waist}//1/&gid=#{userID}"
+      location.href = "/search?q=#{parseInt(chest) + 3}/#{waist}//1/&gid=#{guestID}"
       false
     .on 'stepclick', (e) ->
 

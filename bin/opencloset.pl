@@ -55,7 +55,7 @@ helper cloth2hr => sub {
 
     return {
         $cloth->get_columns,
-        donor    => $cloth->donor ? $cloth->donor->name : '',
+        donor    => $cloth->donor ? $cloth->donor->user->name : '',
         category => $cloth->category->name,
         price    => $self->commify($cloth->category->price),
         status   => $cloth->status->name,
@@ -85,8 +85,16 @@ helper sms2hr => sub {
 helper guest2hr => sub {
     my ($self, $user) = @_;
 
-    my %guest = $user->guest ? $user->guest->get_columns : ();
-    return { ($user->get_columns, %guest) };
+    my %columns;
+    if ($user->guest) {
+        %columns = ($user->get_columns, $user->guest->get_columns);
+    } else {
+        %columns = $user->get_columns;
+        map { $columns{$_} = undef } $DB->resultset('Guest')->result_source->columns;
+        $columns{user_id} = $user->id;
+    }
+
+    return { %columns };
 };
 
 helper overdue_calc => sub {
@@ -338,7 +346,7 @@ post '/guests' => sub {
 
 get '/guests/:id' => sub {
     my $self   = shift;
-    my $guest  = $DB->resultset('Guest')->find({ user_id => $self->param('id') });
+    my $guest  = $DB->resultset('Guest')->find({ id => $self->param('id') });
     return $self->error(404, 'not found guest') unless $guest;
 
     my @orders = $DB->resultset('Order')->search({
@@ -363,7 +371,7 @@ any [qw/put patch/] => '/guests/:id' => sub {
     return $self->error(400, 'invalid request') unless $self->validate_guest;
 
     my $rs = $DB->resultset('Guest');
-    my $guest = $rs->find({ user_id => $self->param('id') });
+    my $guest = $rs->find({ id => $self->param('id') });
     return $self->error(404, 'not found') unless $guest;
 
     map {
@@ -1152,7 +1160,7 @@ __DATA__
                     <div id="guest-search-list">
                       <div>
                         <label class="blue">
-                          <input type="radio" class="ace valid" name="guest-id" value="0" data-guest-id="0">
+                          <input type="radio" class="ace valid" name="user-id" value="0">
                           <span class="lbl"> 처음 방문했습니다.</span>
                         </label>
                       </div>
@@ -1428,7 +1436,7 @@ __DATA__
 <script id="tpl-new-borrower-guest-id" type="text/html">
   <div>
     <label class="blue highlight">
-      <input type="radio" class="ace valid" name="user-id" value="<%%= user_id %>" data-user-id="<%%= user_id %>">
+      <input type="radio" class="ace valid" name="user-id" value="<%%= user_id %>" data-user-id="<%%= user_id %>" data-guest-id="<%%= id %>">
       <span class="lbl"> <%%= name %> (<%%= email %>)</span>
       <span><%%= address %></span>
     </label>
@@ -1532,7 +1540,7 @@ __DATA__
 
 @@ donors/breadcrumb/radio.html.haml
 %input{:type => 'radio', :name => 'donor_id', :value => '#{$donor->id}'}
-%a{:href => '/donors/#{$donor->id}'}= $donor->name
+%a{:href => '/donors/#{$donor->id}'}= $donor->user->name
 님
 %div
   - if ($donor->email) {
@@ -1772,14 +1780,14 @@ __DATA__
         - }
       - }
     - if ($cloth->donor) {
-      %h3= $cloth->donor->name
+      %h3= $cloth->donor->user->name
       %p.muted 님께서 기증하셨습니다
     - }
   .span4
     %ul
       - for my $order ($cloth->orders({ status_id => { '!=' => undef } }, { order_by => { -desc => [qw/rental_date/] } })) {
         %li
-          %a{:href => '/guests/#{$order->guest->id}'}= $order->guest->name
+          %a{:href => '/guests/#{$order->guest->id}'}= $order->guest->user->name
           님
           - if ($order->status && $order->status->name eq '대여중') {
             - if (overdue_calc($order->target_date, DateTime->now())) {
