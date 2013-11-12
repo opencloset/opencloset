@@ -852,7 +852,6 @@ any [qw/post put patch/] => '/orders/:id' => sub {
     }
 
     for my $cloth (@missing_clothes) {
-        $self->app->log->debug('##########' . $cloth->no);
         $cloth->status_id($Opencloset::Constant::STATUS_PARTIAL_RETURN);
         $cloth->update;
     }
