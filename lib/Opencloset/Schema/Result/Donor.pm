@@ -31,6 +31,13 @@ __PACKAGE__->table("donor");
 
   data_type: 'integer'
   extra: {unsigned => 1}
+  is_auto_increment: 1
+  is_nullable: 0
+
+=head2 user_id
+
+  data_type: 'integer'
+  extra: {unsigned => 1}
   is_foreign_key: 1
   is_nullable: 0
 
@@ -56,6 +63,13 @@ __PACKAGE__->table("donor");
 
 __PACKAGE__->add_columns(
   "id",
+  {
+    data_type => "integer",
+    extra => { unsigned => 1 },
+    is_auto_increment => 1,
+    is_nullable => 0,
+  },
+  "user_id",
   {
     data_type => "integer",
     extra => { unsigned => 1 },
@@ -90,21 +104,6 @@ __PACKAGE__->set_primary_key("id");
 
 =head1 RELATIONS
 
-=head2 
-
-Type: belongs_to
-
-Related object: L<Opencloset::Schema::Result::User>
-
-=cut
-
-__PACKAGE__->belongs_to(
-  "",
-  "Opencloset::Schema::Result::User",
-  { id => "id" },
-  { is_deferrable => 1, on_delete => "CASCADE", on_update => "RESTRICT" },
-);
-
 =head2 cloths
 
 Type: has_many
@@ -135,9 +134,24 @@ __PACKAGE__->has_many(
   { cascade_copy => 0, cascade_delete => 0 },
 );
 
+=head2 user
 
-# Created by DBIx::Class::Schema::Loader v0.07036 @ 2013-11-11 15:22:59
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:tMb5tkoU7+WKISoLR1CZLg
+Type: belongs_to
+
+Related object: L<Opencloset::Schema::Result::User>
+
+=cut
+
+__PACKAGE__->belongs_to(
+  "user",
+  "Opencloset::Schema::Result::User",
+  { id => "user_id" },
+  { is_deferrable => 1, on_delete => "CASCADE", on_update => "RESTRICT" },
+);
+
+
+# Created by DBIx::Class::Schema::Loader v0.07036 @ 2013-11-12 10:51:42
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:sGpHCygIFepjgbcPF/Thng
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

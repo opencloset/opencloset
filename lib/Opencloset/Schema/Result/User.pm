@@ -174,39 +174,39 @@ __PACKAGE__->add_unique_constraint("phone", ["phone"]);
 
 =head1 RELATIONS
 
-=head2 donor
+=head2 donors
 
-Type: might_have
+Type: has_many
 
 Related object: L<Opencloset::Schema::Result::Donor>
 
 =cut
 
-__PACKAGE__->might_have(
-  "donor",
+__PACKAGE__->has_many(
+  "donors",
   "Opencloset::Schema::Result::Donor",
-  { "foreign.id" => "self.id" },
+  { "foreign.user_id" => "self.id" },
   { cascade_copy => 0, cascade_delete => 0 },
 );
 
-=head2 guest
+=head2 guests
 
-Type: might_have
+Type: has_many
 
 Related object: L<Opencloset::Schema::Result::Guest>
 
 =cut
 
-__PACKAGE__->might_have(
-  "guest",
+__PACKAGE__->has_many(
+  "guests",
   "Opencloset::Schema::Result::Guest",
-  { "foreign.id" => "self.id" },
+  { "foreign.user_id" => "self.id" },
   { cascade_copy => 0, cascade_delete => 0 },
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07036 @ 2013-11-11 15:22:59
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:eLRLttL8r/4HMpX+tGCKzg
+# Created by DBIx::Class::Schema::Loader v0.07036 @ 2013-11-12 10:51:42
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:RAZnsfpqTtn0uHxu5P7hRA
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

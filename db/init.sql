@@ -29,13 +29,14 @@ CREATE TABLE `user` (
 --
 
 CREATE TABLE `donor` (
-  `id`           INT UNSIGNED NOT NULL,
+  `id`           INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `user_id`      INT UNSIGNED NOT NULL,
   `donation_msg` TEXT DEFAULT NULL,
   `comment`      TEXT DEFAULT NULL,
   `create_date`  DATETIME DEFAULT NULL,
 
   PRIMARY KEY (`id`),
-  CONSTRAINT `fk_donor1` FOREIGN KEY (`id`) REFERENCES `user` (`id`) ON DELETE CASCADE
+  CONSTRAINT `fk_donor1` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
@@ -43,7 +44,8 @@ CREATE TABLE `donor` (
 --
 
 CREATE TABLE `guest` (
-  `id`          INT UNSIGNED NOT NULL,
+  `id`          INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `user_id`     INT UNSIGNED NOT NULL,
   `chest`       INT NOT NULL,     -- 가슴둘레(cm)
   `waist`       INT NOT NULL,     -- 허리둘레(cm)
   `arm`         INT DEFAULT NULL, -- 팔길이(cm)
@@ -57,7 +59,7 @@ CREATE TABLE `guest` (
   `target_date` DATETIME DEFAULT NULL, -- 착용일
 
   PRIMARY KEY (`id`),
-  CONSTRAINT `fk_guest1` FOREIGN KEY (`id`) REFERENCES `user` (`id`) ON DELETE CASCADE
+  CONSTRAINT `fk_guest1` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
