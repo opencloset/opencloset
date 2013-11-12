@@ -1898,13 +1898,26 @@ __DATA__
         %button#btn-clear.btn.btn.btn-sm.btn-default{:type => 'button'}
           %i.icon-eraser.bigger-110 지우기
 
-%form#order-form{:method => 'post', :action => '/orders'}
-  .row
-    .span8
-      #clothes-list
-        %ul
-        #action-buttons{:style => 'display: none'}
-          %button.btn{:type => 'button'} 주문서 확인
+.space-8
+
+#cloth-table
+  %form#order-form{:method => 'post', :action => '/orders'}
+    %table.table.table-striped.table-bordered.table-hover
+      %thead
+        %tr
+          %th.center
+            %label
+              %input#input-check-all.ace{ :type => 'checkbox' }
+              %span.lbl
+          %th 옷
+          %th 상태
+          %th 기타
+      %tbody
+    %ul
+    #action-buttons{:style => 'display: none'}
+      %span 선택한 항목을
+      %button.btn.btn-mini{:type => 'button', :data-status => '대여'} 대여
+      %span 합니다.
     .span4
       %ul
         - for my $g (@$guests) {
@@ -1912,26 +1925,50 @@ __DATA__
         - }
 
 :plain
-  <script id="tpl-row-checkbox" type="text/html">
-    <li class="row-checkbox" data-cloth-id="<%= id %>">
-      <% if (!/^대여가능/.test(status)) { %>
-      <label>
-        <a href="/clothes/<%= no %>"><%= category %></a>
-        <% if (/^(대여중|연체중)/.test(status)) { %>
-        <span class="order-status label label-important"><%= status %></span>
-        <% } else { %>
-        <span class="order-status label"><%= status %></span>
-        <% } %>
-      </label>
-      <% } else { %>
-      <label class="checkbox">
-        <input type="checkbox" name="cloth-id" value="<%= id %>" checked="checked" data-cloth-id="<%= id %>">
-        <a href="/clothes/<%= no %>"><%= category %></a>
-        <span class="order-status label"><%= status %></span>
-        <strong><%= price %></strong>
-      </label>
-      <% } %>
-    </li>
+  <script id="tpl-row-checkbox-disabled" type="text/html">
+    <tr data-cloth-id="<%= id %>" data-order-id="<%= order_id %>">
+      <td class="center">
+        <label>
+          <input class="ace" type="checkbox" disabled>
+          <span class="lbl"></span>
+        </label>
+      </td>
+      <td> <a href="/clothes/<%= no %>"> <%= no %> </a> </td> <!-- 옷 -->
+      <td>
+        <span class="order-status label">
+          <%= status %>
+          <span class="late-fee"><%= late_fee ? late_fee + '원' : '' %></span>
+        </span>
+      </td> <!-- 상태 -->
+      <td>
+        <span><%= category %></span>
+        <span><%= price %>원</span>
+        <a href="/orders/<%= order_id %>"><span class="label label-info arrowed-right arrowed-in">
+          <strong>주문서</strong>
+          <time class="js-relative-date" datetime="<%= rental_date.raw %>" title="<%= rental_date.ymd %>"><%= rental_date.md %></time>
+          ~
+          <time class="js-relative-date" datetime="<%= target_date.raw %>" title="<%= target_date.ymd %>"><%= target_date.md %></time>
+        </span></a>
+      </td> <!-- 기타 -->
+    </tr>
+  </script>
+
+:plain
+  <script id="tpl-row-checkbox-enabled" type="text/html">
+    <tr class="row-checkbox" data-cloth-id="<%= id %>">
+      <td class="center">
+        <label>
+          <input class="ace" type="checkbox" name="cloth-id" value="<%= id %>" data-cloth-id="<%= id %>" checked="checked">
+          <span class="lbl"></span>
+        </label>
+      </td>
+      <td> <a href="/clothes/<%= no %>"> <%= no %> </a> </td> <!-- 옷 -->
+      <td> <span class="order-status label"><%= status %></span> </td> <!-- 상태 -->
+      <td>
+        <span><%= category %></span>
+        <span><%= price %>원</span>
+      </td> <!-- 기타 -->
+    </tr>
   </script>
 
 

@@ -24,16 +24,25 @@
         dataType: 'json',
         success: function(data, textStatus, jqXHR) {
           var $html, compiled;
-          if ($("#clothes-list li[data-cloth-id='" + data.id + "']").length) {
+          if ($("#cloth-table table tbody tr[data-cloth-id='" + data.id + "']").length) {
             return;
           }
-          compiled = _.template($('#tpl-row-checkbox').html());
-          $html = $(compiled(data));
-          if (/대여가능/.test(data.status)) {
-            $html.find('.order-status').addClass('label-success');
+          if (!/^(대여중|연체중|부분반납)/.test(data.status)) {
+            compiled = _.template($('#tpl-row-checkbox-enabled').html());
+            $html = $(compiled(data));
+            if (/대여가능/.test(data.status)) {
+              $html.find('.order-status').addClass('label-success');
+            }
+            $('#cloth-table table tbody').append($html);
+            return $('#action-buttons').show();
+          } else {
+            compiled = _.template($('#tpl-row-checkbox-disabled').html());
+            $html = $(compiled(data));
+            if (/연체중/.test(data.status)) {
+              $html.find('.order-status').addClass('label-important');
+            }
+            return $("#cloth-table table tbody").append($html);
           }
-          $('#clothes-list ul').append($html);
-          return $('#action-buttons').show();
         },
         error: function(jqXHR, textStatus, errorThrown) {
           return alert('error', jqXHR.responseJSON.error);

@@ -7,6 +7,8 @@ $ ->
     $('#cloth-id').focus()
   $('#btn-cloth-search').click (e) ->
     $('#cloth-search-form').trigger('submit')
+
+  # 의류 검색
   $('#cloth-search-form').submit (e) ->
     e.preventDefault()
     cloth_id = $('#cloth-id').val()
@@ -16,13 +18,20 @@ $ ->
       type: 'GET'
       dataType: 'json'
       success: (data, textStatus, jqXHR) ->
-        return if $("#clothes-list li[data-cloth-id='#{data.id}']").length
-        compiled = _.template($('#tpl-row-checkbox').html())
-        $html = $(compiled(data))
-        if /대여가능/.test(data.status)
-          $html.find('.order-status').addClass('label-success')
-        $('#clothes-list ul').append($html)
-        $('#action-buttons').show()
+        return if $("#cloth-table table tbody tr[data-cloth-id='#{data.id}']").length
+        unless /^(대여중|연체중|부분반납)/.test(data.status)
+          compiled = _.template($('#tpl-row-checkbox-enabled').html())
+          $html = $(compiled(data))
+          if /대여가능/.test(data.status)
+            $html.find('.order-status').addClass('label-success')
+          $('#cloth-table table tbody').append($html)
+          $('#action-buttons').show()
+        else
+          compiled = _.template($('#tpl-row-checkbox-disabled').html())
+          $html = $(compiled(data))
+          if /연체중/.test(data.status)
+            $html.find('.order-status').addClass('label-important')
+          $("#cloth-table table tbody").append($html)
       error: (jqXHR, textStatus, errorThrown) ->
         alert('error', jqXHR.responseJSON.error)
       complete: (jqXHR, textStatus) ->
