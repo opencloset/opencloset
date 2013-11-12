@@ -50,6 +50,11 @@
         complete: function(jqXHR, textStatus) {}
       });
     });
+    $('#input-check-all').click(function(e) {
+      var is_checked;
+      is_checked = $('#input-check-all').is(':checked');
+      return $(this).closest('thead').next().find('.ace:checkbox:not(:disabled)').prop('checked', is_checked);
+    });
     return $('#action-buttons').on('click', 'button:not(.disabled)', function(e) {
       if (!$('input[name=gid]:checked').val()) {
         return alert('대여자님을 선택해 주세요');

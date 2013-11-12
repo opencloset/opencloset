@@ -8,7 +8,9 @@ $ ->
   $('#btn-cloth-search').click (e) ->
     $('#cloth-search-form').trigger('submit')
 
-  # 의류 검색
+  #
+  # 의류 검색 및 결과 테이블 갱신
+  #
   $('#cloth-search-form').submit (e) ->
     e.preventDefault()
     cloth_id = $('#cloth-id').val()
@@ -36,6 +38,16 @@ $ ->
         alert('error', jqXHR.responseJSON.error)
       complete: (jqXHR, textStatus) ->
 
+  #
+  # 의류 검색 결과 테이블에서 모든 항목 선택 및 취소
+  #
+  $('#input-check-all').click (e) ->
+    is_checked = $('#input-check-all').is(':checked')
+    $(@).closest('thead').next().find('.ace:checkbox:not(:disabled)').prop('checked', is_checked)
+
+  #
+  # 대여 버튼 클릭
+  #
   $('#action-buttons').on 'click', 'button:not(.disabled)', (e) ->
     unless $('input[name=gid]:checked').val()
       return alert('대여자님을 선택해 주세요')
