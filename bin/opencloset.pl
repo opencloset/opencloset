@@ -997,6 +997,8 @@ __DATA__
         %button#btn-clear.btn.btn.btn-sm.btn-default{:type => 'button'}
           %i.icon-eraser.bigger-110 지우기
 
+.space-8
+
 #cloth-table
   %table.table.table-striped.table-bordered.table-hover
     %thead
