@@ -677,6 +677,7 @@ post '/orders' => sub {
             arm       => $guest->arm,
             length    => $guest->length,
             purpose   => $guest->purpose,
+            age       => $guest->user->age,
         });
 
         for my $cloth (@clothes) {
@@ -852,7 +853,6 @@ any [qw/post put patch/] => '/orders/:id' => sub {
     }
 
     for my $cloth (@missing_clothes) {
-        $self->app->log->debug('##########' . $cloth->no);
         $cloth->status_id($Opencloset::Constant::STATUS_PARTIAL_RETURN);
         $cloth->update;
     }
@@ -2032,16 +2032,6 @@ __DATA__
     %label.control-label{:for => 'input-target-date'} 반납예정일
     .controls
       %input#input-target-date{:type => 'text', :name => 'target_date'}
-  .control-group
-    %label.control-label{:for => 'input-purpose'} 대여목적
-    .controls
-      %input{:type => 'text', :id => 'input-purpose', :name => 'purpose', :placeholder => '선택하거나 입력'}
-      %p
-        %span.label.clickable 입사면접
-        %span.label.clickable 사진촬영
-        %span.label.clickable 결혼식
-        %span.label.clickable 장례식
-        %span.label.clickable 학교행사
   .control-group
     %label.control-label{:for => 'input-staff'} staff
     .controls

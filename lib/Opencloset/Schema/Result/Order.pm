@@ -81,12 +81,6 @@ __PACKAGE__->table("order");
   is_nullable: 1
   size: 32
 
-=head2 purpose
-
-  data_type: 'varchar'
-  is_nullable: 1
-  size: 32
-
 =head2 price
 
   data_type: 'integer'
@@ -126,6 +120,17 @@ __PACKAGE__->table("order");
 =head2 comment
 
   data_type: 'text'
+  is_nullable: 1
+
+=head2 purpose
+
+  data_type: 'varchar'
+  is_nullable: 1
+  size: 32
+
+=head2 age
+
+  data_type: 'integer'
   is_nullable: 1
 
 =head2 chest
@@ -197,8 +202,6 @@ __PACKAGE__->add_columns(
   { data_type => "varchar", is_nullable => 1, size => 32 },
   "payment_method",
   { data_type => "varchar", is_nullable => 1, size => 32 },
-  "purpose",
-  { data_type => "varchar", is_nullable => 1, size => 32 },
   "price",
   { data_type => "integer", default_value => 0, is_nullable => 1 },
   "discount",
@@ -213,6 +216,10 @@ __PACKAGE__->add_columns(
   { data_type => "varchar", is_nullable => 1, size => 32 },
   "comment",
   { data_type => "text", is_nullable => 1 },
+  "purpose",
+  { data_type => "varchar", is_nullable => 1, size => 32 },
+  "age",
+  { data_type => "integer", is_nullable => 1 },
   "chest",
   { data_type => "integer", is_nullable => 1 },
   "waist",
@@ -298,8 +305,8 @@ Composing rels: L</cloth_orders> -> cloth
 __PACKAGE__->many_to_many("cloths", "cloth_orders", "cloth");
 
 
-# Created by DBIx::Class::Schema::Loader v0.07036 @ 2013-11-08 11:54:40
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:qelIEXwF4BEMqiPbaa+sIA
+# Created by DBIx::Class::Schema::Loader v0.07036 @ 2013-11-12 15:50:24
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:wKsx49K3hi5YfyEosw+PrQ
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration
