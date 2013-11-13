@@ -50,16 +50,50 @@ helper error => sub {
     );
 };
 
-helper cloth2hr => sub {
-    my ($self, $cloth) = @_;
+helper cloth_validator => sub {
+    my $self = shift;
 
-    return {
-        $cloth->get_columns,
-        donor    => $cloth->donor ? $cloth->donor->user->name : '',
-        category => $cloth->category->name,
-        price    => $self->commify($cloth->category->price),
-        status   => $cloth->status->name,
-    };
+    my $validator = $self->create_validator;
+    $validator->field('category_id')->required(1);
+    $validator->field('designated_for')->required(1)->regexp(qr/^[123]$/);
+
+    # Jacket
+    $validator->when('category_id')->regexp(qr/^(-1|-2|1)$/)
+        ->then(sub { shift->field('chest')->required(1) });
+    $validator->when('category_id')->regexp(qr/^(-1|-2|1)$/)
+        ->then(sub { shift->field('arm')->required(1) });
+
+    # Pants, Skirts
+    $validator->when('category_id')->regexp(qr/^(-1|-2|2|10)$/)
+        ->then(sub { shift->field('waist')->required(1) });
+    $validator->when('category_id')->regexp(qr/^(-1|-2|2|10)$/)
+        ->then(sub { shift->field('length')->required(1) });
+
+    # Shoes
+    $validator->when('category_id')->regexp(qr/^4$/)
+        ->then(sub { shift->field('foot')->required(1) });
+
+    $validator->field([qw/chest waist arm length foot/])
+        ->each(sub { shift->regexp(qr/^\d+$/) });
+
+    return $validator;
+};
+
+helper cloth2hr => sub {
+    my ($self, @clothes) = @_;
+
+    my @res;
+    for my $cloth (@clothes) {
+        push @res, {
+            $cloth->get_columns,
+            donor    => $cloth->donor ? $cloth->donor->user->name : '',
+            category => $cloth->category->name,
+            price    => $self->commify($cloth->category->price),
+            status   => $cloth->status->name,
+        };
+    }
+
+    return [@res];
 };
 
 helper order2hr => sub {
@@ -94,6 +128,23 @@ helper guest2hr => sub {
         $columns{user_id} = $user->id;
     }
 
+    delete $columns{password};
+    return { %columns };
+};
+
+helper donor2hr => sub {
+    my ($self, $user) = @_;
+
+    my %columns;
+    if ($user->donor) {
+        %columns = ($user->get_columns, $user->donor->get_columns);
+    } else {
+        %columns = $user->get_columns;
+        map { $columns{$_} = undef } $DB->resultset('Donor')->result_source->columns;
+        $columns{user_id} = $user->id;
+    }
+
+    delete $columns{password};
     return { %columns };
 };
 
@@ -171,21 +222,21 @@ helper create_guest => sub {
 helper create_donor => sub {
     my ($self, $user_id) = @_;
 
-    my %params = ( id => $user_id );
+    my %params = ( user_id => $user_id );
     map { $params{$_} = $self->param($_) } qw/donation_msg comment/;
 
     return $DB->resultset('Donor')->find_or_create(\%params);
 };
 
 helper create_cloth => sub {
-    my ($self, $category_id) = @_;
+    my ($self, %info) = @_;
 
     ## generate no
-    my $category = $DB->resultset('Category')->find({ id => $category_id });
+    my $category = $DB->resultset('Category')->find({ id => $info{category_id} });
     return unless $category;
 
     my $cloth = $DB->resultset('Cloth')->search({
-        category_id => $category_id
+        category_id => $info{category_id}
     }, {
         order_by => { -desc => 'no' }
     })->next;
@@ -201,22 +252,22 @@ helper create_cloth => sub {
 
     my %params;
     if ($category->which eq 'top') {
-        map { $params{$_} = $self->param($_) } qw/chest arm/;
+        map { $params{$_} = $info{$_} } qw/chest arm/;
     } elsif ($category->which eq 'bottom') {
-        map { $params{$_} = $self->param($_) } qw/waist length/;
+        map { $params{$_} = $info{$_} } qw/waist length/;
     } elsif ($category->which eq 'onepiece') {
-        map { $params{$_} = $self->param($_) } qw/chest waist length/;
+        map { $params{$_} = $info{$_} } qw/chest waist length/;
     } elsif ($category->which eq 'foot') {
-        map { $params{$_} = $self->param($_) } qw/foot/;
+        map { $params{$_} = $info{$_} } qw/foot/;
     }
 
     $params{no}              = $no;
-    $params{donor_id}        = $self->param('donor_id');
-    $params{category_id}     = $category_id;
+    $params{donor_id}        = $self->param('donor_id') || undef;
+    $params{category_id}     = $info{category_id};
     $params{status_id}       = $Opencloset::Constant::STATUS_AVAILABLE;
-    $params{designated_for}  = $self->param('designated_for');
-    $params{color}           = $self->param('color');
-    $params{compatible_code} = $self->param('compatible_code');
+    $params{designated_for}  = $info{designated_for};
+    $params{color}           = $info{color};
+    $params{compatible_code} = $info{compatible_code};
 
     my $new_cloth = $DB->resultset('Cloth')->find_or_create(\%params);
     return unless $new_cloth;
@@ -385,79 +436,111 @@ any [qw/put patch/] => '/guests/:id' => sub {
 
 post '/clothes' => sub {
     my $self = shift;
-    my $validator = $self->create_validator;
-    $validator->field('category_id')->required(1);
-    $validator->field('designated_for')->required(1)->regexp(qr/^[123]$/);
 
-    # Jacket
-    $validator->when('category_id')->regexp(qr/^(-1|-2|1)$/)
-        ->then(sub { shift->field('chest')->required(1) });
-    $validator->when('category_id')->regexp(qr/^(-1|-2|1)$/)
-        ->then(sub { shift->field('arm')->required(1) });
+    my $validator  = $self->cloth_validator;
+    my @cloth_list = $self->param('cloth-list');
 
-    # Pants, Skirts
-    $validator->when('category_id')->regexp(qr/^(-1|-2|2|10)$/)
-        ->then(sub { shift->field('waist')->required(1) });
-    $validator->when('category_id')->regexp(qr/^(-1|-2|2|10)$/)
-        ->then(sub { shift->field('length')->required(1) });
+    ###
+    ### validate
+    ###
+    for my $_cloth_list (@cloth_list) {
+        my $cloth_list = $_cloth_list;
+        my $is_negative = $cloth_list =~ /^-/;
+        $cloth_list =~ s/^-//;
+        my ($category_id, $color, $chest, $waist, $hip, $arm, $length, $foot, $designated_for, $compatible_code) = split /-/, $cloth_list;
+        $category_id = -($category_id) if $is_negative;
 
-    # Shoes
-    $validator->when('category_id')->regexp(qr/^4$/)
-        ->then(sub { shift->field('foot')->required(1) });
+        my $is_valid = $self->validate($validator, {
+            category_id     => $category_id,
+            color           => $color,
+            chest           => $chest,
+            waist           => $waist,
+            hip             => $hip,
+            arm             => $arm,
+            length          => $length,
+            foot            => $foot,
+            designated_for  => $designated_for || 1,    # TODO: should get from params
+            compatible_code => $compatible_code,
+        });
 
-    ## 나머지는 강제하지 않는다
-
-    my @fields = qw/chest waist arm length foot/;
-    $validator->field([@fields])
-        ->each(sub { shift->regexp(qr/^\d+$/) });
-
-    unless ($self->validate($validator)) {
-        my @error_str;
-        while ( my ($k, $v) = each %{ $validator->errors } ) {
-            push @error_str, "$k:$v";
+        unless ($is_valid) {
+            my @error_str;
+            while ( my ($k, $v) = each %{ $validator->errors } ) {
+                push @error_str, "$k:$v";
+            }
+            return $self->error( 400, { str => join(',', @error_str), data => $validator->errors } );
         }
-        return $self->error( 400, { str => join(',', @error_str), data => $validator->errors } );
     }
 
-    my $cid      = $self->param('category_id');
+    ###
+    ### create
+    ###
+    my @clothes;
     my $donor_id = $self->param('donor_id');
+    for my $_cloth_list (@cloth_list) {
+        my $cloth_list = $_cloth_list;
+        my $is_negative = $cloth_list =~ /^-/;
+        $cloth_list =~ s/^-//;
+        my ($category_id, $color, $chest, $waist, $hip, $arm, $length, $foot, $designated_for, $compatible_code) = split /-/, $cloth_list;
+        $category_id = -($category_id) if $is_negative;
 
-    my $cloth;
-    my $guard = $DB->txn_scope_guard;
-    # BEGIN TRANSACTION ~
-    if ($cid == $Opencloset::Constant::CATEOGORY_JACKET_PANTS ||
-            $cid == $Opencloset::Constant::CATEOGORY_JACKET_SKIRT) {
-        my $top = $self->create_cloth($Opencloset::Constant::CATEOGORY_JACKET);
-        my $bot_category_id = $cid == $Opencloset::Constant::CATEOGORY_JACKET_PANTS ?
-            $Opencloset::Constant::CATEOGORY_PANTS : $Opencloset::Constant::CATEOGORY_SKIRT;
-        my $bot = $self->create_cloth($bot_category_id);
-        return $self->error(500, 'failed to create a new cloth') unless ($top && $bot);
+        my %cloth_info = (
+            color           => $color,
+            chest           => $chest,
+            waist           => $waist,
+            hip             => $hip,
+            arm             => $arm,
+            length          => $length,
+            foot            => $foot,
+            designated_for  => $designated_for || 1,    # TODO: should get from params
+            compatible_code => $compatible_code,
+        );
 
-        if ($donor_id) {
-            $top->create_related('donor_clothes', { donor_id => $donor_id });
-            $bot->create_related('donor_clothes', { donor_id => $donor_id });
+        my $cid = $category_id;
+        my $guard = $DB->txn_scope_guard;
+        # BEGIN TRANSACTION ~
+        if ($cid == $Opencloset::Constant::CATEOGORY_JACKET_PANTS ||
+                $cid == $Opencloset::Constant::CATEOGORY_JACKET_SKIRT) {
+            $cloth_info{category_id} = $Opencloset::Constant::CATEOGORY_JACKET;
+            my $top = $self->create_cloth(%cloth_info);
+            my $bot_category_id = $cid == $Opencloset::Constant::CATEOGORY_JACKET_PANTS ?
+                $Opencloset::Constant::CATEOGORY_PANTS : $Opencloset::Constant::CATEOGORY_SKIRT;
+            $cloth_info{category_id} = $bot_category_id;
+            my $bot = $self->create_cloth(%cloth_info);
+            return $self->error(500, 'failed to create a new cloth') unless ($top && $bot);
+
+            if ($donor_id) {
+                $top->create_related('donor_cloths', { donor_id => $donor_id });
+                $bot->create_related('donor_cloths', { donor_id => $donor_id });
+            }
+            $top->bottom_id($bot->id);
+            $bot->top_id($top->id);
+            $top->update;
+            $bot->update;
+            push @clothes, $top, $bot;
+        } else {
+            $cloth_info{category_id} = $cid;
+            my $cloth = $self->create_cloth(%cloth_info);
+            return $self->error(500, 'failed to create a new cloth') unless $cloth;
+
+            if ($donor_id) {
+                $cloth->create_related('donor_cloths', { donor_id => $donor_id });
+            }
+            push @clothes, $cloth;
         }
-        $top->bottom_id($bot->id);
-        $bot->top_id($top->id);
-        $top->update;
-        $bot->update;
-        $cloth = $top;
-    } else {
-        $cloth = $self->create_cloth($cid);
-        return $self->error(500, 'failed to create a new cloth') unless $cloth;
-
-        if ($donor_id) {
-            $cloth->create_related('donor_clothes', { donor_id => $donor_id });
-        }
+        # ~ COMMIT
+        $guard->commit;
     }
-    # ~ COMMIT
-    $guard->commit;
 
-    $self->res->headers->header('Location' => $self->url_for('/clothes/' . $cloth->no));
+    ###
+    ### response
+    ###
+    ## 여러개가 될 수 있으므로 Location 헤더는 생략
+    ## $self->res->headers->header('Location' => $self->url_for('/clothes/' . $cloth->no));
     $self->respond_to(
-        json => { json => $self->cloth2hr($cloth), status => 201 },
+        json => { json => $self->cloth2hr(@clothes), status => 201 },
         html => sub {
-            $self->redirect_to('/clothes/' . $cloth->no);
+            $self->redirect_to('/clothes');
         }
     );
 };
@@ -488,7 +571,30 @@ put '/clothes' => sub {
     );
 };
 
-get '/new-cloth' => 'new-cloth';
+get '/new-cloth' => sub {
+    my $self = shift;
+
+    my $q      = $self->param('q') || '';
+    my $users = $DB->resultset('User')->search({
+        -or => [
+            id    => $q,
+            name  => $q,
+            phone => $q,
+            email => $q
+        ],
+    });
+
+    my @candidates;
+    while (my $user = $users->next) {
+        push @candidates, $self->donor2hr($user);
+    }
+
+    $self->respond_to(
+        json => { json => [@candidates] },
+        html => { template => 'new-cloth' }
+    );
+};
+
 
 get '/clothes/:no' => sub {
     my $self = shift;
@@ -905,26 +1011,34 @@ del '/orders/:id' => sub {
 post '/donors' => sub {
     my $self   = shift;
 
-    my $validator = $self->create_validator;
-    $validator->field('name')->required(1);
-    $validator->field('phone')->regexp(qr/^\d{10,11}$/);
-    $validator->field('email')->email;
-    $validator->field('gender')->regexp(qr/^[12]$/);
-
-    unless ($self->validate($validator)) {
-        my @error_str;
-        while ( my ($k, $v) = each %{ $validator->errors } ) {
-            push @error_str, "$k:$v";
-        }
-        return $self->error( 400, { str => join(',', @error_str), data => $validator->errors } );
-    }
-
-    my $donor = $self->create_donor;
-    return $self->error( 500, { str => 'failed to create a new donor' } ) unless $donor;
+    my $user_id = $self->param('user_id');
+    my $donor = $self->create_donor($user_id);
+    return $self->error(500, 'failed to create a new donor') unless $donor;
 
     $self->res->headers->header('Location' => $self->url_for('/donors/' . $donor->id));
     $self->respond_to(
         json => { json => { $donor->get_columns }, status => 201 },
+        html => sub {
+            $self->redirect_to('/donors/' . $donor->id);
+        }
+    );
+};
+
+any [qw/put patch/] => '/donors/:id' => sub {
+    my $self  = shift;
+
+    ## TODO: validate params (donation_msg?, comment?)
+
+    my $rs = $DB->resultset('Donor');
+    my $donor = $rs->find({ id => $self->param('id') });
+    return $self->error(404, 'not found') unless $donor;
+
+    map {
+        $donor->$_($self->param($_)) if defined $self->param($_);
+    } qw/donation_msg comment/;
+    $donor->update;
+    $self->respond_to(
+        json => { json => { $donor->get_columns } },
     );
 };
 
@@ -2316,9 +2430,9 @@ __DATA__
                     .col-xs-12.col-sm-9
                       .search
                         .input-group
-                          %input#giver-search.form-control{ :name => 'giver-search' :type => 'text', :placeholder => '이름 또는 이메일, 휴대전화 번호' }
+                          %input#donor-search.form-control{ :name => 'donor-search' :type => 'text', :placeholder => '이름 또는 이메일, 휴대전화 번호' }
                           %span.input-group-btn
-                            %button#btn-giver-search.btn.btn-default.btn-sm{ :type => 'submit' }
+                            %button#btn-donor-search.btn.btn-default.btn-sm{ :type => 'submit' }
                               %i.icon-search.bigger-110 검색
                   /
                   / 기증자 선택
@@ -2326,17 +2440,18 @@ __DATA__
                   .form-group.has-info
                     %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => "email" } 기증자 선택:
                     .col-xs-12.col-sm-9
-                      #giver-search-list
+                      #donor-search-list
                         %div
                           %label.blue
-                            %input.ace.valid{ :name => 'giver-id', :type => 'radio', 'data-giver-id' => '0', :value => '0' }
+                            %input.ace.valid{ :name => 'user-id', :type => 'radio', :value => '0' }
                             %span.lbl= ' 기증자를 모릅니다.'
                       :plain
-                        <script id="tpl-new-cloth-giver-id" type="text/html">
+                        <script id="tpl-new-cloth-donor-id" type="text/html">
                           <div>
-                            <label class="blue">
-                              <input type="radio" class="ace valid" name="giver-id" value="<%= giver_id %>" data-giver-id="<%= giver_id %>">
-                              <span class="lbl"> <%= giver_name %></span>
+                            <label class="blue highlight">
+                              <input type="radio" class="ace valid" name="user-id" value="<%= user_id %>" data-donor-id="<%= id %>" data-user-id="<%= user_id %>">
+                              <span class="lbl"> <%= name %> (<%= email %>)</span>
+                              <span><%= address %></span>
                             </label>
                           </div>
                         </script>
@@ -2345,15 +2460,15 @@ __DATA__
               /
               #step2.step-pane
                 %h3.lighter.block.green 기증자의 정보를 입력하세요.
-                %form#giver-info.form-horizontal{ :method => 'get' :novalidate="novalidate" }
+                %form#donor-info.form-horizontal{ :method => 'get', :novalidate="novalidate" }
                   /
                   / 이름
                   /
                   .form-group.has-info
-                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'giver-name' } 이름:
+                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'donor-name' } 이름:
                     .col-xs-12.col-sm-9
                       .clearfix
-                        %input#giver-name.valid.col-xs-12.col-sm-6{ :name => 'giver-name', :type => 'text' }
+                        %input#donor-name.valid.col-xs-12.col-sm-6{ :name => 'name', :type => 'text' }
 
                   .space-2
 
@@ -2361,10 +2476,10 @@ __DATA__
                   / 전자우편
                   /
                   .form-group.has-info
-                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'giver-email' } 전자우편:
+                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'donor-email' } 전자우편:
                     .col-xs-12.col-sm-9
                       .clearfix
-                        %input#giver-email.valid.col-xs-12.col-sm-6{ :name => 'giver-email', :type => 'text' }
+                        %input#donor-email.valid.col-xs-12.col-sm-6{ :name => 'email', :type => 'text' }
 
                   .space-2
 
@@ -2372,10 +2487,10 @@ __DATA__
                   / 나이
                   /
                   .form-group.has-info
-                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'giver-age' } 나이:
+                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'donor-age' } 나이:
                     .col-xs-12.col-sm-9
                       .clearfix
-                        %input#giver-age.valid.col-xs-12.col-sm-3{ :name => 'giver-age', :type => 'text' }
+                        %input#donor-age.valid.col-xs-12.col-sm-3{ :name => 'age', :type => 'text' }
 
                   .space-2
 
@@ -2383,15 +2498,15 @@ __DATA__
                   / 성별
                   /
                   .form-group.has-info
-                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'giver-gender' } 성별:
+                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'donor-gender' } 성별:
                     .col-xs-12.col-sm-9
                       %div
                         %label.blue
-                          %input.ace.valid{ :name => 'giver-gender', :type => 'radio', :value => '1' }
+                          %input.ace.valid{ :name => 'gender', :type => 'radio', :value => '1' }
                           %span.lbl= ' 남자'
                       %div
                         %label.blue
-                          %input.ace.valid{ :name => 'giver-gender', :type => 'radio', :value => '2' }
+                          %input.ace.valid{ :name => 'gender', :type => 'radio', :value => '2' }
                           %span.lbl= ' 여자'
 
                   .space-2
@@ -2400,10 +2515,10 @@ __DATA__
                   / 휴대전화
                   /
                   .form-group.has-info
-                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'giver-phone' } 휴대전화:
+                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'donor-phone' } 휴대전화:
                     .col-xs-12.col-sm-9
                       .clearfix
-                        %input#giver-phone.valid.col-xs-12.col-sm-6{ :name => 'giver-phone', :type => 'text' }
+                        %input#donor-phone.valid.col-xs-12.col-sm-6{ :name => 'phone', :type => 'text' }
 
                   .space-2
 
@@ -2411,10 +2526,20 @@ __DATA__
                   / 주소
                   /
                   .form-group.has-info
-                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'giver-address' } 주소:
+                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'donor-address' } 주소:
                     .col-xs-12.col-sm-9
                       .clearfix
-                        %input#giver-address.valid.col-xs-12.col-sm-8{ :name => 'giver-address', :type => 'text' }
+                        %input#donor-address.valid.col-xs-12.col-sm-8{ :name => 'address', :type => 'text' }
+                  .form-group.has-info
+                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'donation-msg' } 전하실 말:
+                    .col-xs-12.col-sm-9
+                      .clearfix
+                        %textarea#donation-msg.valid.col-xs-12.col-sm-6{ :name => 'donation_msg' }
+                  .form-group.has-info
+                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'comment' } 기타:
+                    .col-xs-12.col-sm-9
+                      .clearfix
+                        %textarea#comment.valid.col-xs-12.col-sm-6{ :name => 'comment' }
 
               /
               / step3
@@ -2424,9 +2549,25 @@ __DATA__
 
                 .form-horizontal
                   .form-group.has-info
+                    %label.control-label.no-padding-right.col-xs-12.col-sm-3 성별:
+                    .col-xs-12.col-sm-9
+                      %div
+                        %label.blue
+                          %input.ace.valid{ :name => 'designated-for', :type => 'radio', :value => '1', :checked => 'checked' }
+                          %span.lbl= ' 남성용'
+                      %div
+                        %label.blue
+                          %input.ace.valid{ :name => 'designated-for', :type => 'radio', :value => '2' }
+                          %span.lbl= ' 여성용'
+                      %div
+                        %label.blue
+                          %input.ace.valid{ :name => 'designated-for', :type => 'radio', :value => '3' }
+                          %span.lbl= ' 남여공용'
+
+                  .form-group.has-info
                     %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'cloth-type' } 종류:
                     .col-xs-12.col-sm-6
-                      %select#cloth-type{ :name => 'cloth-type', 'data-placeholder' => '옷의 종류를 선택하세요', :size => '14' }
+                      %select#cloth-type{ :name => 'category_id', 'data-placeholder' => '옷의 종류를 선택하세요', :size => '14' }
                         %option{ :value => '-1' } Jacket & Pants
                         %option{ :value => '-2' } Jacket & Skirts
                         %option{ :value => '1'  } Jacket
@@ -2447,7 +2588,7 @@ __DATA__
                     .form-group.has-info
                       %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'cloth-color' } 색상:
                       .col-xs-12.col-sm-4
-                        %select#cloth-color{ :name => 'cloth-color', 'data-placeholder' => '옷의 색상을 선택하세요', :size => '6' }
+                        %select#cloth-color{ :name => 'color', 'data-placeholder' => '옷의 색상을 선택하세요', :size => '6' }
                           %option{ :value => 'B' } 검정(B)
                           %option{ :value => 'N' } 감청(N)
                           %option{ :value => 'G' } 회색(G)
@@ -2461,7 +2602,7 @@ __DATA__
                       %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'cloth-bust' } 가슴:
                       .col-xs-12.col-sm-5
                         .input-group
-                          %input#cloth-bust.valid.form-control{ :name => 'cloth-bust', :type => 'text' }
+                          %input#cloth-bust.valid.form-control{ :name => 'chest', :type => 'text' }
                           %span.input-group-addon
                             %i cm
 
@@ -2472,7 +2613,7 @@ __DATA__
                       %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'cloth-arm' } 팔 길이:
                       .col-xs-12.col-sm-5
                         .input-group
-                          %input#cloth-arm.valid.form-control{ :name => 'cloth-arm', :type => 'text' }
+                          %input#cloth-arm.valid.form-control{ :name => 'arm', :type => 'text' }
                           %span.input-group-addon
                             %i cm
 
@@ -2483,7 +2624,7 @@ __DATA__
                       %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'cloth-waist' } 허리:
                       .col-xs-12.col-sm-5
                         .input-group
-                          %input#cloth-waist.valid.form-control{ :name => 'cloth-waist', :type => 'text' }
+                          %input#cloth-waist.valid.form-control{ :name => 'waist', :type => 'text' }
                           %span.input-group-addon
                             %i cm
 
@@ -2494,7 +2635,7 @@ __DATA__
                       %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'cloth-hip' } 엉덩이:
                       .col-xs-12.col-sm-5
                         .input-group
-                          %input#cloth-hip.valid.form-control{ :name => 'cloth-hip', :type => 'text' }
+                          %input#cloth-hip.valid.form-control{ :name => 'hip', :type => 'text' }
                           %span.input-group-addon
                             %i cm
 
@@ -2505,7 +2646,7 @@ __DATA__
                       %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'cloth-length' } 기장:
                       .col-xs-12.col-sm-5
                         .input-group
-                          %input#cloth-length.valid.form-control{ :name => 'cloth-length', :type => 'text' }
+                          %input#cloth-length.valid.form-control{ :name => 'length', :type => 'text' }
                           %span.input-group-addon
                             %i cm
 
@@ -2516,7 +2657,7 @@ __DATA__
                       %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'cloth-foot' } 발 크기:
                       .col-xs-12.col-sm-5
                         .input-group
-                          %input#cloth-foot.valid.form-control{ :name => 'cloth-foot', :type => 'text' }
+                          %input#cloth-foot.valid.form-control{ :name => 'foot', :type => 'text' }
                           %span.input-group-addon
                             %i mm
 
@@ -2539,7 +2680,7 @@ __DATA__
                             <div>
                               <label>
                                 <input type="checkbox" class="ace valid" name="cloth-list"
-                                  value="<%= [ cloth_type, cloth_color, cloth_bust, cloth_waist, cloth_hip, cloth_arm, cloth_length, cloth_foot ].join('-') %>"
+                                  value="<%= [ cloth_type, cloth_color, cloth_bust, cloth_waist, cloth_hip, cloth_arm, cloth_length, cloth_foot, cloth_gender ].join('-') %>"
                                   data-cloth-type="<%= cloth_type %>"
                                   data-cloth-color="<%= cloth_color %>"
                                   data-cloth-bust="<%= cloth_bust %>"
@@ -2548,6 +2689,7 @@ __DATA__
                                   data-cloth-hip="<%= cloth_hip %>"
                                   data-cloth-length="<%= cloth_length %>"
                                   data-cloth-foot="<%= cloth_foot %>"
+                                  data-cloth-gender="<%= cloth_gender %>"
                                 />
                                 <%
                                   var cloth_detail = []

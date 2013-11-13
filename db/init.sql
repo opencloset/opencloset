@@ -30,7 +30,7 @@ CREATE TABLE `user` (
 
 CREATE TABLE `donor` (
   `id`           INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `user_id`      INT UNSIGNED NOT NULL,
+  `user_id`      INT UNSIGNED DEFAULT NULL,
   `donation_msg` TEXT DEFAULT NULL,
   `comment`      TEXT DEFAULT NULL,
   `create_date`  DATETIME DEFAULT NULL,
