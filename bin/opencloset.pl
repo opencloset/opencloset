@@ -2576,25 +2576,9 @@ __DATA__
 
                 .form-horizontal
                   .form-group.has-info
-                    %label.control-label.no-padding-right.col-xs-12.col-sm-3 성별:
-                    .col-xs-12.col-sm-9
-                      %div
-                        %label.blue
-                          %input.ace.valid{ :name => 'designated-for', :type => 'radio', :value => '1', :checked => 'checked' }
-                          %span.lbl= ' 남성용'
-                      %div
-                        %label.blue
-                          %input.ace.valid{ :name => 'designated-for', :type => 'radio', :value => '2' }
-                          %span.lbl= ' 여성용'
-                      %div
-                        %label.blue
-                          %input.ace.valid{ :name => 'designated-for', :type => 'radio', :value => '3' }
-                          %span.lbl= ' 남여공용'
-
-                  .form-group.has-info
                     %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'cloth-type' } 종류:
                     .col-xs-12.col-sm-6
-                      %select#cloth-type{ :name => 'category_id', 'data-placeholder' => '옷의 종류를 선택하세요', :size => '14' }
+                      %select#cloth-type{ :name => 'cloth-type', 'data-placeholder' => '옷의 종류를 선택하세요', :size => '14' }
                         %option{ :value => '-1' } Jacket & Pants
                         %option{ :value => '-2' } Jacket & Skirts
                         %option{ :value => '1'  } Jacket
@@ -2608,6 +2592,24 @@ __DATA__
                         %option{ :value => '9'  } Onepiece
                         %option{ :value => '10' } Skirt
                         %option{ :value => '11' } Blouse
+
+                  .space-2
+
+                  .form-group.has-info
+                    %label.control-label.no-padding-right.col-xs-12.col-sm-3 성별:
+                    .col-xs-12.col-sm-9
+                      %div
+                        %label.blue
+                          %input.ace.valid{ :name => 'cloth-gender', :type => 'radio', :value => '1' }
+                          %span.lbl= ' 남성용'
+                      %div
+                        %label.blue
+                          %input.ace.valid{ :name => 'cloth-gender', :type => 'radio', :value => '2' }
+                          %span.lbl= ' 여성용'
+                      %div
+                        %label.blue
+                          %input.ace.valid{ :name => 'cloth-gender', :type => 'radio', :value => '3' }
+                          %span.lbl= ' 남여공용'
 
                   #display-cloth-color
                     .space-2
@@ -2721,6 +2723,7 @@ __DATA__
                                 <%
                                   var cloth_detail = []
                                   typeof yourvar != 'undefined'
+                                  if ( cloth_gender       >  0          ) { cloth_detail.push( cloth_gender_str                     ) }
                                   if ( typeof cloth_color != 'undefined') { cloth_detail.push( "색상("    + cloth_color_str + ")"   ) }
                                   if ( cloth_bust         >  0          ) { cloth_detail.push( "가슴("    + cloth_bust      + "cm)" ) }
                                   if ( cloth_arm          >  0          ) { cloth_detail.push( "팔 길이(" + cloth_arm       + "cm)" ) }

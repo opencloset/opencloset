@@ -73,6 +73,7 @@
           return $("#display-cloth-" + name).hide();
         });
       }
+      $('input[name=cloth-gender]').prop('checked', false);
       $('#cloth-color').select2('val', '');
       return _.each(['bust', 'waist', 'hip', 'arm', 'length', 'foot'], function(name) {
         return $("#cloth-" + name).prop('disabled', true).val('');
@@ -137,6 +138,8 @@
       data = {
         cloth_type: $('#cloth-type').val(),
         cloth_type_str: $('#cloth-type option:selected').text(),
+        cloth_gender: $('input[name=cloth-gender]:checked').val(),
+        cloth_gender_str: $('input[name=cloth-gender]:checked').next().text(),
         cloth_color: $('#cloth-color').val(),
         cloth_color_str: $('#cloth-color option:selected').text(),
         cloth_bust: $('#cloth-bust').val(),
@@ -144,8 +147,7 @@
         cloth_hip: $('#cloth-hip').val(),
         cloth_arm: $('#cloth-arm').val(),
         cloth_length: $('#cloth-length').val(),
-        cloth_foot: $('#cloth-foot').val(),
-        cloth_gender: $('input[name=designated-for]:checked').val()
+        cloth_foot: $('#cloth-foot').val()
       };
       if (!data.cloth_type) {
         return;
