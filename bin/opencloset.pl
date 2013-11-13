@@ -961,7 +961,7 @@ post '/donors' => sub {
 any [qw/put patch/] => '/donors/:id' => sub {
     my $self  = shift;
 
-    ## TODO: validate params
+    ## TODO: validate params (donation_msg?, comment?)
 
     my $rs = $DB->resultset('Donor');
     my $donor = $rs->find({ id => $self->param('id') });
@@ -2463,6 +2463,16 @@ __DATA__
                     .col-xs-12.col-sm-9
                       .clearfix
                         %input#donor-address.valid.col-xs-12.col-sm-8{ :name => 'address', :type => 'text' }
+                  .form-group.has-info
+                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'donation-msg' } 전하실 말:
+                    .col-xs-12.col-sm-9
+                      .clearfix
+                        %textarea#donation-msg.valid.col-xs-12.col-sm-6{ :name => 'donation_msg' }
+                  .form-group.has-info
+                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'comment' } 기타:
+                    .col-xs-12.col-sm-9
+                      .clearfix
+                        %textarea#comment.valid.col-xs-12.col-sm-6{ :name => 'comment' }
 
               /
               / step3
