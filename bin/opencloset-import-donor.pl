@@ -79,15 +79,24 @@ sub run {
             phone   => $row->{'전화번호'},
             email   => $row->{'이메일'},
             address => $row->{'주소'},
-            message => $row->{'기증자메세지'},
-            comment => $row->{'비고'},
         );
 
-        my $res = $ua->request( POST $opt->url . '/donors.json', [ %post_data ] );
+        my $res = $ua->request( POST $opt->url . '/users.json', [ %post_data ] );
 
         my $data = decode_json($res->content);
         if ($res->is_success) {
-            $success++;
+            $res = $ua->request( POST $opt->url . '/donors.json', [
+                donation_msg => $row->{'기증자메세지'},
+                comment      => $row->{'비고'},
+            ] );
+
+            $data = decode_json($res->content);
+            if ($res->is_success) {
+                $success++;
+            } else {
+                $fail++;
+                say STDERR "row($loop): $post_data{name}: $data->{error}";
+            }
         }
         else {
             $fail++;

@@ -168,7 +168,7 @@ helper commify => sub {
     return $_;
 };
 
-helper validate_user => sub {
+helper user_validator => sub {
     my $self = shift;
 
     my $validator = $self->create_validator;
@@ -178,9 +178,8 @@ helper validate_user => sub {
     $validator->field('gender')->regexp(qr/^[12]$/);
     $validator->field('age')->regexp(qr/^\d+$/);
 
-    return unless $self->validate($validator);
     ## TODO: check exist email and set to error
-    return 1;
+    return $validator;
 };
 
 helper create_user => sub {
@@ -194,7 +193,7 @@ helper create_user => sub {
     return $DB->resultset('User')->find_or_create(\%params);
 };
 
-helper validate_guest => sub {
+helper guest_validator => sub {
     my $self = shift;
 
     my $validator = $self->create_validator;
@@ -202,8 +201,7 @@ helper validate_guest => sub {
         ->each(sub { shift->required(1)->regexp(qr/^\d+$/) });
 
     ## TODO: validate `target_date`
-    return unless $self->validate($validator);
-    return 1;
+    return $validator;
 };
 
 helper create_guest => sub {
@@ -346,7 +344,14 @@ get '/new-borrower' => sub {
 post '/users' => sub {
     my $self = shift;
 
-    return $self->error(400, 'invalid request') unless $self->validate_user;
+    my $validator = $self->user_validator;
+    unless ($self->validate($validator)) {
+        my @error_str;
+        while ( my ($k, $v) = each %{ $validator->errors } ) {
+            push @error_str, "$k:$v";
+        }
+        return $self->error( 400, { str => join(',', @error_str), data => $validator->errors } );
+    }
 
     my $user = $self->create_user;
     return $self->error(500, 'failed to create a new user') unless $user;
@@ -363,7 +368,14 @@ post '/users' => sub {
 any [qw/put patch/] => '/users/:id' => sub {
     my $self  = shift;
 
-    return $self->error(400, 'invalid request') unless $self->validate_user;
+    my $validator = $self->user_validator;
+    unless ($self->validate($validator)) {
+        my @error_str;
+        while ( my ($k, $v) = each %{ $validator->errors } ) {
+            push @error_str, "$k:$v";
+        }
+        return $self->error( 400, { str => join(',', @error_str), data => $validator->errors } );
+    }
 
     my $rs   = $DB->resultset('User');
     my $user = $rs->find({ id => $self->param('id') });
@@ -377,8 +389,16 @@ any [qw/put patch/] => '/users/:id' => sub {
 post '/guests' => sub {
     my $self = shift;
 
-    return $self->error(400, 'invalid request')
-        unless ($self->validate_guest && $self->param('user_id'));
+    my $validator = $self->guest_validator;
+    unless ($self->validate($validator)) {
+        my @error_str;
+        while ( my ($k, $v) = each %{ $validator->errors } ) {
+            push @error_str, "$k:$v";
+        }
+        return $self->error( 400, { str => join(',', @error_str), data => $validator->errors } );
+    }
+
+    return $self->error(400, 'invalid request') unless $self->param('user_id');
 
     my $user = $DB->resultset('User')->find({ id => $self->param('user_id') });
     return $self->error(404, 'not found user') unless $user;
@@ -419,7 +439,14 @@ get '/guests/:id' => sub {
 any [qw/put patch/] => '/guests/:id' => sub {
     my $self  = shift;
 
-    return $self->error(400, 'invalid request') unless $self->validate_guest;
+    my $validator = $self->guest_validator;
+    unless ($self->validate($validator)) {
+        my @error_str;
+        while ( my ($k, $v) = each %{ $validator->errors } ) {
+            push @error_str, "$k:$v";
+        }
+        return $self->error( 400, { str => join(',', @error_str), data => $validator->errors } );
+    }
 
     my $rs = $DB->resultset('Guest');
     my $guest = $rs->find({ id => $self->param('id') });
