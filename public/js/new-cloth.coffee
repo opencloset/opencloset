@@ -1,8 +1,7 @@
 $ ->
   ## Global variable
   userID  = undefined
-  donorID = undefined
-  clothNo = undefined
+  donorID = ''
 
   #
   # step1 - 기증자 검색과 기증자 선택을 연동합니다.
@@ -102,6 +101,7 @@ $ ->
       cloth_arm:       $('#cloth-arm').val(),
       cloth_length:    $('#cloth-length').val(),
       cloth_foot:      $('#cloth-foot').val(),
+      cloth_gender:    $('input[name=designated-for]:checked').val()
 
     return unless data.cloth_type
 
@@ -154,7 +154,6 @@ $ ->
             data: $('form').serialize()
             success: (data, textStatus, jqXHR) ->
               userID = data.id
-              ## TODO: `donation_msg`, `comment` 입력 단계가 나오면 거기로 이동
               if donorID
                 ajax.type = 'PUT'
                 ajax.path = "/donors/#{donorID}.json"
@@ -166,6 +165,7 @@ $ ->
                 type: ajax.type
                 data: $('form').serialize()
                 success: (data, textStatus, jqXHR) ->
+                  donorID = data.id
                   return true
                 error: (jqXHR, textStatus, errorThrown) ->
                   alert('error', jqXHR.responseJSON.error)
@@ -176,14 +176,11 @@ $ ->
               return false
             complete: (jqXHR, textStatus) ->
         when 3
-          # clothe-list: 종류-색상-가슴-허리-엉덩이-팔길이-기장-발
-          # donor-id 를 같이 보내주어야함
-          # 근데 지금 donor 에 정보 입력단계가 없음
-          $.ajax '/clothes',
+          return unless $("input[name=cloth-list]:checked").length
+          $.ajax '/clothes.json',
             type: 'POST'
-            data: $('form').serialize()
+            data: "#{$('form').serialize()}&donor_id=#{donorID}"
             success: (data, textStatus, jqXHR) ->
-              clothNo = data.no
               return true
             error: (jqXHR, textStatus, errorThrown) ->
               alert('error', jqXHR.responseJSON.error)
@@ -192,8 +189,7 @@ $ ->
         else return
 
     .on 'finished', (e) ->
-      location.href = "/clothes/#{clothNo}"
+      location.href = "/"
       false
     .on 'stepclick', (e) ->
-      console.log 'stepclick'
-      #false
+      # false
