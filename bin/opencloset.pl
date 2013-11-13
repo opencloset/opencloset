@@ -50,16 +50,50 @@ helper error => sub {
     );
 };
 
-helper cloth2hr => sub {
-    my ($self, $cloth) = @_;
+helper cloth_validator => sub {
+    my $self = shift;
 
-    return {
-        $cloth->get_columns,
-        donor    => $cloth->donor ? $cloth->donor->user->name : '',
-        category => $cloth->category->name,
-        price    => $self->commify($cloth->category->price),
-        status   => $cloth->status->name,
-    };
+    my $validator = $self->create_validator;
+    $validator->field('category_id')->required(1);
+    $validator->field('designated_for')->required(1)->regexp(qr/^[123]$/);
+
+    # Jacket
+    $validator->when('category_id')->regexp(qr/^(-1|-2|1)$/)
+        ->then(sub { shift->field('chest')->required(1) });
+    $validator->when('category_id')->regexp(qr/^(-1|-2|1)$/)
+        ->then(sub { shift->field('arm')->required(1) });
+
+    # Pants, Skirts
+    $validator->when('category_id')->regexp(qr/^(-1|-2|2|10)$/)
+        ->then(sub { shift->field('waist')->required(1) });
+    $validator->when('category_id')->regexp(qr/^(-1|-2|2|10)$/)
+        ->then(sub { shift->field('length')->required(1) });
+
+    # Shoes
+    $validator->when('category_id')->regexp(qr/^4$/)
+        ->then(sub { shift->field('foot')->required(1) });
+
+    $validator->field([qw/chest waist arm length foot/])
+        ->each(sub { shift->regexp(qr/^\d+$/) });
+
+    return $validator;
+};
+
+helper cloth2hr => sub {
+    my ($self, @clothes) = @_;
+
+    my @res;
+    for my $cloth (@clothes) {
+        push @res, {
+            $cloth->get_columns,
+            donor    => $cloth->donor ? $cloth->donor->user->name : '',
+            category => $cloth->category->name,
+            price    => $self->commify($cloth->category->price),
+            status   => $cloth->status->name,
+        };
+    }
+
+    return [@res];
 };
 
 helper order2hr => sub {
@@ -195,14 +229,14 @@ helper create_donor => sub {
 };
 
 helper create_cloth => sub {
-    my ($self, $category_id) = @_;
+    my ($self, %info) = @_;
 
     ## generate no
-    my $category = $DB->resultset('Category')->find({ id => $category_id });
+    my $category = $DB->resultset('Category')->find({ id => $info{category_id} });
     return unless $category;
 
     my $cloth = $DB->resultset('Cloth')->search({
-        category_id => $category_id
+        category_id => $info{category_id}
     }, {
         order_by => { -desc => 'no' }
     })->next;
@@ -218,22 +252,22 @@ helper create_cloth => sub {
 
     my %params;
     if ($category->which eq 'top') {
-        map { $params{$_} = $self->param($_) } qw/chest arm/;
+        map { $params{$_} = $info{$_} } qw/chest arm/;
     } elsif ($category->which eq 'bottom') {
-        map { $params{$_} = $self->param($_) } qw/waist length/;
+        map { $params{$_} = $info{$_} } qw/waist length/;
     } elsif ($category->which eq 'onepiece') {
-        map { $params{$_} = $self->param($_) } qw/chest waist length/;
+        map { $params{$_} = $info{$_} } qw/chest waist length/;
     } elsif ($category->which eq 'foot') {
-        map { $params{$_} = $self->param($_) } qw/foot/;
+        map { $params{$_} = $info{$_} } qw/foot/;
     }
 
     $params{no}              = $no;
-    $params{donor_id}        = $self->param('donor_id');
-    $params{category_id}     = $category_id;
+    $params{donor_id}        = $self->param('donor_id') || undef;
+    $params{category_id}     = $info{category_id};
     $params{status_id}       = $Opencloset::Constant::STATUS_AVAILABLE;
-    $params{designated_for}  = $self->param('designated_for');
-    $params{color}           = $self->param('color');
-    $params{compatible_code} = $self->param('compatible_code');
+    $params{designated_for}  = $info{designated_for};
+    $params{color}           = $info{color};
+    $params{compatible_code} = $info{compatible_code};
 
     my $new_cloth = $DB->resultset('Cloth')->find_or_create(\%params);
     return unless $new_cloth;
@@ -402,79 +436,111 @@ any [qw/put patch/] => '/guests/:id' => sub {
 
 post '/clothes' => sub {
     my $self = shift;
-    my $validator = $self->create_validator;
-    $validator->field('category_id')->required(1);
-    $validator->field('designated_for')->required(1)->regexp(qr/^[123]$/);
 
-    # Jacket
-    $validator->when('category_id')->regexp(qr/^(-1|-2|1)$/)
-        ->then(sub { shift->field('chest')->required(1) });
-    $validator->when('category_id')->regexp(qr/^(-1|-2|1)$/)
-        ->then(sub { shift->field('arm')->required(1) });
+    my $validator  = $self->cloth_validator;
+    my @cloth_list = $self->param('cloth-list');
 
-    # Pants, Skirts
-    $validator->when('category_id')->regexp(qr/^(-1|-2|2|10)$/)
-        ->then(sub { shift->field('waist')->required(1) });
-    $validator->when('category_id')->regexp(qr/^(-1|-2|2|10)$/)
-        ->then(sub { shift->field('length')->required(1) });
+    ###
+    ### validate
+    ###
+    for my $_cloth_list (@cloth_list) {
+        my $cloth_list = $_cloth_list;
+        my $is_negative = $cloth_list =~ /^-/;
+        $cloth_list =~ s/^-//;
+        my ($category_id, $color, $chest, $waist, $hip, $arm, $length, $foot, $designated_for, $compatible_code) = split /-/, $cloth_list;
+        $category_id = -($category_id) if $is_negative;
 
-    # Shoes
-    $validator->when('category_id')->regexp(qr/^4$/)
-        ->then(sub { shift->field('foot')->required(1) });
+        my $is_valid = $self->validate($validator, {
+            category_id     => $category_id,
+            color           => $color,
+            chest           => $chest,
+            waist           => $waist,
+            hip             => $hip,
+            arm             => $arm,
+            length          => $length,
+            foot            => $foot,
+            designated_for  => $designated_for || 1,    # TODO: should get from params
+            compatible_code => $compatible_code,
+        });
 
-    ## 나머지는 강제하지 않는다
-
-    my @fields = qw/chest waist arm length foot/;
-    $validator->field([@fields])
-        ->each(sub { shift->regexp(qr/^\d+$/) });
-
-    unless ($self->validate($validator)) {
-        my @error_str;
-        while ( my ($k, $v) = each %{ $validator->errors } ) {
-            push @error_str, "$k:$v";
+        unless ($is_valid) {
+            my @error_str;
+            while ( my ($k, $v) = each %{ $validator->errors } ) {
+                push @error_str, "$k:$v";
+            }
+            return $self->error( 400, { str => join(',', @error_str), data => $validator->errors } );
         }
-        return $self->error( 400, { str => join(',', @error_str), data => $validator->errors } );
     }
 
-    my $cid      = $self->param('category_id');
+    ###
+    ### create
+    ###
+    my @clothes;
     my $donor_id = $self->param('donor_id');
+    for my $_cloth_list (@cloth_list) {
+        my $cloth_list = $_cloth_list;
+        my $is_negative = $cloth_list =~ /^-/;
+        $cloth_list =~ s/^-//;
+        my ($category_id, $color, $chest, $waist, $hip, $arm, $length, $foot, $designated_for, $compatible_code) = split /-/, $cloth_list;
+        $category_id = -($category_id) if $is_negative;
 
-    my $cloth;
-    my $guard = $DB->txn_scope_guard;
-    # BEGIN TRANSACTION ~
-    if ($cid == $Opencloset::Constant::CATEOGORY_JACKET_PANTS ||
-            $cid == $Opencloset::Constant::CATEOGORY_JACKET_SKIRT) {
-        my $top = $self->create_cloth($Opencloset::Constant::CATEOGORY_JACKET);
-        my $bot_category_id = $cid == $Opencloset::Constant::CATEOGORY_JACKET_PANTS ?
-            $Opencloset::Constant::CATEOGORY_PANTS : $Opencloset::Constant::CATEOGORY_SKIRT;
-        my $bot = $self->create_cloth($bot_category_id);
-        return $self->error(500, 'failed to create a new cloth') unless ($top && $bot);
+        my %cloth_info = (
+            color           => $color,
+            chest           => $chest,
+            waist           => $waist,
+            hip             => $hip,
+            arm             => $arm,
+            length          => $length,
+            foot            => $foot,
+            designated_for  => $designated_for || 1,    # TODO: should get from params
+            compatible_code => $compatible_code,
+        );
 
-        if ($donor_id) {
-            $top->create_related('donor_clothes', { donor_id => $donor_id });
-            $bot->create_related('donor_clothes', { donor_id => $donor_id });
+        my $cid = $category_id;
+        my $guard = $DB->txn_scope_guard;
+        # BEGIN TRANSACTION ~
+        if ($cid == $Opencloset::Constant::CATEOGORY_JACKET_PANTS ||
+                $cid == $Opencloset::Constant::CATEOGORY_JACKET_SKIRT) {
+            $cloth_info{category_id} = $Opencloset::Constant::CATEOGORY_JACKET;
+            my $top = $self->create_cloth(%cloth_info);
+            my $bot_category_id = $cid == $Opencloset::Constant::CATEOGORY_JACKET_PANTS ?
+                $Opencloset::Constant::CATEOGORY_PANTS : $Opencloset::Constant::CATEOGORY_SKIRT;
+            $cloth_info{category_id} = $bot_category_id;
+            my $bot = $self->create_cloth(%cloth_info);
+            return $self->error(500, 'failed to create a new cloth') unless ($top && $bot);
+
+            if ($donor_id) {
+                $top->create_related('donor_cloths', { donor_id => $donor_id });
+                $bot->create_related('donor_cloths', { donor_id => $donor_id });
+            }
+            $top->bottom_id($bot->id);
+            $bot->top_id($top->id);
+            $top->update;
+            $bot->update;
+            push @clothes, $top, $bot;
+        } else {
+            $cloth_info{category_id} = $cid;
+            my $cloth = $self->create_cloth(%cloth_info);
+            return $self->error(500, 'failed to create a new cloth') unless $cloth;
+
+            if ($donor_id) {
+                $cloth->create_related('donor_cloths', { donor_id => $donor_id });
+            }
+            push @clothes, $cloth;
         }
-        $top->bottom_id($bot->id);
-        $bot->top_id($top->id);
-        $top->update;
-        $bot->update;
-        $cloth = $top;
-    } else {
-        $cloth = $self->create_cloth($cid);
-        return $self->error(500, 'failed to create a new cloth') unless $cloth;
-
-        if ($donor_id) {
-            $cloth->create_related('donor_clothes', { donor_id => $donor_id });
-        }
+        # ~ COMMIT
+        $guard->commit;
     }
-    # ~ COMMIT
-    $guard->commit;
 
-    $self->res->headers->header('Location' => $self->url_for('/clothes/' . $cloth->no));
+    ###
+    ### response
+    ###
+    ## 여러개가 될 수 있으므로 Location 헤더는 생략
+    ## $self->res->headers->header('Location' => $self->url_for('/clothes/' . $cloth->no));
     $self->respond_to(
-        json => { json => $self->cloth2hr($cloth), status => 201 },
+        json => { json => $self->cloth2hr(@clothes), status => 201 },
         html => sub {
-            $self->redirect_to('/clothes/' . $cloth->no);
+            $self->redirect_to('/clothes');
         }
     );
 };
@@ -2382,9 +2448,10 @@ __DATA__
                       :plain
                         <script id="tpl-new-cloth-donor-id" type="text/html">
                           <div>
-                            <label class="blue">
+                            <label class="blue highlight">
                               <input type="radio" class="ace valid" name="user-id" value="<%= user_id %>" data-donor-id="<%= id %>" data-user-id="<%= user_id %>">
-                              <span class="lbl"> <%= name %></span>
+                              <span class="lbl"> <%= name %> (<%= email %>)</span>
+                              <span><%= address %></span>
                             </label>
                           </div>
                         </script>
@@ -2481,6 +2548,22 @@ __DATA__
                 %h3.lighter.block.green 새로운 옷의 종류와 치수를 입력하세요.
 
                 .form-horizontal
+                  .form-group.has-info
+                    %label.control-label.no-padding-right.col-xs-12.col-sm-3 성별:
+                    .col-xs-12.col-sm-9
+                      %div
+                        %label.blue
+                          %input.ace.valid{ :name => 'designated-for', :type => 'radio', :value => '1', :checked => 'checked' }
+                          %span.lbl= ' 남성용'
+                      %div
+                        %label.blue
+                          %input.ace.valid{ :name => 'designated-for', :type => 'radio', :value => '2' }
+                          %span.lbl= ' 여성용'
+                      %div
+                        %label.blue
+                          %input.ace.valid{ :name => 'designated-for', :type => 'radio', :value => '3' }
+                          %span.lbl= ' 남여공용'
+
                   .form-group.has-info
                     %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'cloth-type' } 종류:
                     .col-xs-12.col-sm-6
@@ -2597,7 +2680,7 @@ __DATA__
                             <div>
                               <label>
                                 <input type="checkbox" class="ace valid" name="cloth-list"
-                                  value="<%= [ cloth_type, cloth_color, cloth_bust, cloth_waist, cloth_hip, cloth_arm, cloth_length, cloth_foot ].join('-') %>"
+                                  value="<%= [ cloth_type, cloth_color, cloth_bust, cloth_waist, cloth_hip, cloth_arm, cloth_length, cloth_foot, cloth_gender ].join('-') %>"
                                   data-cloth-type="<%= cloth_type %>"
                                   data-cloth-color="<%= cloth_color %>"
                                   data-cloth-bust="<%= cloth_bust %>"
@@ -2606,6 +2689,7 @@ __DATA__
                                   data-cloth-hip="<%= cloth_hip %>"
                                   data-cloth-length="<%= cloth_length %>"
                                   data-cloth-foot="<%= cloth_foot %>"
+                                  data-cloth-gender="<%= cloth_gender %>"
                                 />
                                 <%
                                   var cloth_detail = []
