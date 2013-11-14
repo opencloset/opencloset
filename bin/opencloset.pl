@@ -3624,7 +3624,7 @@ __DATA__
                 = content
                 / PAGE CONTENT ENDS
     = include 'layouts/default/body-js'
-    = include 'layouts/default/body-theme'
+    = include 'layouts/default/body-js-theme'
 
 
 @@ layouts/login/signup-box.html.ep
