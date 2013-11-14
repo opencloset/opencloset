@@ -55,7 +55,7 @@ helper cloth_validator => sub {
 
     my $validator = $self->create_validator;
     $validator->field('category_id')->required(1);
-    $validator->field('designated_for')->required(1)->regexp(qr/^[123]$/);
+    $validator->field('gender')->required(1)->regexp(qr/^[123]$/);
 
     # Jacket
     $validator->when('category_id')->regexp(qr/^(-1|-2|1)$/)
@@ -263,7 +263,7 @@ helper create_cloth => sub {
     $params{donor_id}        = $self->param('donor_id') || undef;
     $params{category_id}     = $info{category_id};
     $params{status_id}       = $Opencloset::Constant::STATUS_AVAILABLE;
-    $params{designated_for}  = $info{designated_for};
+    $params{gender}          = $info{gender};
     $params{color}           = $info{color};
     $params{compatible_code} = $info{compatible_code};
 
@@ -474,7 +474,7 @@ post '/clothes' => sub {
         my $cloth_list = $_cloth_list;
         my $is_negative = $cloth_list =~ /^-/;
         $cloth_list =~ s/^-//;
-        my ($category_id, $color, $chest, $waist, $hip, $arm, $length, $foot, $designated_for, $compatible_code) = split /-/, $cloth_list;
+        my ($category_id, $color, $chest, $waist, $hip, $arm, $length, $foot, $gender, $compatible_code) = split /-/, $cloth_list;
         $category_id = -($category_id) if $is_negative;
 
         my $is_valid = $self->validate($validator, {
@@ -486,7 +486,7 @@ post '/clothes' => sub {
             arm             => $arm,
             length          => $length,
             foot            => $foot,
-            designated_for  => $designated_for || 1,    # TODO: should get from params
+            gender          => $gender || 1,    # TODO: should get from params
             compatible_code => $compatible_code,
         });
 
@@ -508,7 +508,7 @@ post '/clothes' => sub {
         my $cloth_list = $_cloth_list;
         my $is_negative = $cloth_list =~ /^-/;
         $cloth_list =~ s/^-//;
-        my ($category_id, $color, $chest, $waist, $hip, $arm, $length, $foot, $designated_for, $compatible_code) = split /-/, $cloth_list;
+        my ($category_id, $color, $chest, $waist, $hip, $arm, $length, $foot, $gender, $compatible_code) = split /-/, $cloth_list;
         $category_id = -($category_id) if $is_negative;
 
         my %cloth_info = (
@@ -519,7 +519,7 @@ post '/clothes' => sub {
             arm             => $arm,
             length          => $length,
             foot            => $foot,
-            designated_for  => $designated_for || 1,    # TODO: should get from params
+            gender          => $gender || 1,    # TODO: should get from params
             compatible_code => $compatible_code,
         );
 

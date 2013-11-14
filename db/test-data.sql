@@ -13,7 +13,7 @@ VALUES
   (1,1,'잘입으셈','열린옷장대표1',NOW()),
   (2,2,'후후후후','열린옷장대표2',NOW());
 
-INSERT INTO `cloth` (`id`,`no`,`chest`,`waist`,`arm`,`length`,`category_id`,`top_id`,`bottom_id`,`donor_id`,`status_id`,`designated_for`,`color`,`compatible_code`) VALUES 
+INSERT INTO `cloth` (`id`,`no`,`chest`,`waist`,`arm`,`length`,`category_id`,`top_id`,`bottom_id`,`donor_id`,`status_id`,`gender`,`color`,`compatible_code`) VALUES 
 (1,'JCK00001', 94, NULL, 51, NULL, 1, NULL, NULL, 1, 1, 1,'B',NULL),
 (2,'PTS00001', NULL, 79, NULL, 102, 2, NULL, NULL, 1, 1, 1,'B',NULL),
 (3,'SHR00001', NULL, NULL, NULL, NULL, 3, NULL, NULL, 1, 1, 1,'B',NULL),

@@ -59,7 +59,7 @@ sub run {
         );
     }
 
-    my %designated_for_map = (
+    my %gender_map = (
         M  => 1, m  => 1,
         W  => 2, w  => 2,
         '' => 3,
@@ -70,7 +70,7 @@ sub run {
     while (my $row = $csv->getline_hr($fh)) {
         $loop++;
 
-        my $designated_for = $row->{designated_for} // '';
+        my $gender = $row->{gender} // '';
         my $foot = $row->{foot};
         if ($row->{category} == $Opencloset::Constant::CATEOGORY_SHOES) {
             $foot = $row->{donor_id};
@@ -83,7 +83,7 @@ sub run {
             length          => $row->{length},
             foot            => $foot,
             category_id     => $row->{category},
-            designated_for  => $designated_for_map{$designated_for},
+            gender          => $gender_map{$gender},
             compatible_code => $row->{code},
             color           => $row->{color},
         );
@@ -96,7 +96,7 @@ sub run {
         }
         else {
             $fail++;
-            my $cloth_data = join q{,}, @post_data{ qw/ chest waist arm length foot category_id designated_for compatible_code color / };
+            my $cloth_data = join q{,}, @post_data{ qw/ chest waist arm length foot category_id gender compatible_code color / };
             say STDERR "row($loop): data($cloth_data): $data->{error}{str}";
             say STDERR "  $_ => $post_data{$_}" for keys %{ $data->{error}{data} };
         }
