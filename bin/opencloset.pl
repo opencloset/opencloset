@@ -80,20 +80,15 @@ helper cloth_validator => sub {
 };
 
 helper cloth2hr => sub {
-    my ($self, @clothes) = @_;
+    my ($self, $cloth) = @_;
 
-    my @res;
-    for my $cloth (@clothes) {
-        push @res, {
-            $cloth->get_columns,
-            donor    => $cloth->donor ? $cloth->donor->user->name : '',
-            category => $cloth->category->name,
-            price    => $self->commify($cloth->category->price),
-            status   => $cloth->status->name,
-        };
-    }
-
-    return [@res];
+    return {
+        $cloth->get_columns,
+        donor    => $cloth->donor ? $cloth->donor->user->name : '',
+        category => $cloth->category->name,
+        price    => $self->commify($cloth->category->price),
+        status   => $cloth->status->name,
+    };
 };
 
 helper order2hr => sub {
@@ -565,7 +560,7 @@ post '/clothes' => sub {
     ## 여러개가 될 수 있으므로 Location 헤더는 생략
     ## $self->res->headers->header('Location' => $self->url_for('/clothes/' . $cloth->no));
     $self->respond_to(
-        json => { json => $self->cloth2hr(@clothes), status => 201 },
+        json => { json => [map { $self->cloth2hr($_) } @clothes], status => 201 },
         html => sub {
             $self->redirect_to('/clothes');
         }
