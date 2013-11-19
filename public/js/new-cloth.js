@@ -85,34 +85,34 @@
       var type, types, _i, _len, _results;
       clear_cloth_form(false);
       types = [];
-      switch (e.val) {
-        case '-1':
+      switch (parseInt(e.val, 10)) {
+        case 0x0001 | 0x0002:
           types = ['bust', 'arm', 'waist', 'length'];
           break;
-        case '-2':
+        case 0x0001 | 0x0020:
           types = ['bust', 'arm', 'waist', 'hip', 'length'];
           break;
-        case '1':
-        case '3':
-        case '8':
-        case '11':
+        case 0x0001:
+        case 0x0004:
+        case 0x0080:
+        case 0x0400:
           types = ['bust', 'arm'];
           break;
-        case '2':
+        case 0x0002:
           types = ['waist', 'length'];
           break;
-        case '10':
+        case 0x0200:
           types = ['waist', 'hip', 'length'];
           break;
-        case '4':
+        case 0x0008:
           types = ['foot'];
           break;
-        case '7':
+        case 0x0040:
           types = ['waist'];
           break;
-        case '5':
-        case '6':
-        case '9':
+        case 0x0010:
+        case 0x0020:
+        case 0x0100:
           types = [];
           break;
         default:

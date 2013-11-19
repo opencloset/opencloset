@@ -62,16 +62,19 @@ $ ->
     .on 'change', (e) ->
       clear_cloth_form false
       types = []
-      switch e.val
-        when '-1'                then types = [ 'bust', 'arm', 'waist', 'length'        ] # Jacket & Pants
-        when '-2'                then types = [ 'bust', 'arm', 'waist', 'hip', 'length' ] # Jacket & Skirts
-        when '1', '3', '8', '11' then types = [ 'bust', 'arm'                           ] # Jacket, Shirts, Coat, Blouse
-        when '2'                 then types = [ 'waist', 'length'                       ] # Pants
-        when '10'                then types = [ 'waist', 'hip', 'length'                ] # Skirt
-        when '4'                 then types = [ 'foot'                                  ] # Shoes
-        when '7'                 then types = [ 'waist'                                 ] # Waistcoat
-        when '5', '6', '9'       then types = [                                         ] # Hat, Tie, Onepiece
-        else                          types = [                                         ]
+      #
+      # check Opencloset::Constant
+      #
+      switch parseInt( e.val, 10 )
+        when 0x0001 | 0x0002                then types = [ 'bust', 'arm', 'waist', 'length'        ] # Jacket & Pants
+        when 0x0001 | 0x0020                then types = [ 'bust', 'arm', 'waist', 'hip', 'length' ] # Jacket & Skirts
+        when 0x0001, 0x0004, 0x0080, 0x0400 then types = [ 'bust', 'arm'                           ] # Jacket, Shirts, Coat, Blouse
+        when 0x0002                         then types = [ 'waist', 'length'                       ] # Pants
+        when 0x0200                         then types = [ 'waist', 'hip', 'length'                ] # Skirt
+        when 0x0008                         then types = [ 'foot'                                  ] # Shoes
+        when 0x0040                         then types = [ 'waist'                                 ] # Waistcoat
+        when 0x0010, 0x0020, 0x0100         then types = [                                         ] # Hat, Tie, Onepiece
+        else                                     types = [                                         ]
       for type in types
         $("#display-cloth-#{type}").show()
         $("#cloth-#{type}").prop('disabled', false)

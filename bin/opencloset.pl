@@ -2577,19 +2577,19 @@ __DATA__
                     %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'cloth-type' } 종류:
                     .col-xs-12.col-sm-6
                       %select#cloth-type{ :name => 'cloth-type', 'data-placeholder' => '옷의 종류를 선택하세요', :size => '14' }
-                        %option{ :value => '-1' } Jacket & Pants
-                        %option{ :value => '-2' } Jacket & Skirts
-                        %option{ :value => '1'  } Jacket
-                        %option{ :value => '2'  } Pants
-                        %option{ :value => '3'  } Shirts
-                        %option{ :value => '4'  } Shoes
-                        %option{ :value => '5'  } Hat
-                        %option{ :value => '6'  } Tie
-                        %option{ :value => '7'  } Waistcoat
-                        %option{ :value => '8'  } Coat
-                        %option{ :value => '9'  } Onepiece
-                        %option{ :value => '10' } Skirt
-                        %option{ :value => '11' } Blouse
+                        %option{ :value => "#{0x0001 | 0x0002}" } Jacket & Pants
+                        %option{ :value => "#{0x0001 | 0x0020}" } Jacket & Skirts
+                        %option{ :value => "#{0x0001}"          } Jacket
+                        %option{ :value => "#{0x0002}"          } Pants
+                        %option{ :value => "#{0x0004}"          } Shirts
+                        %option{ :value => "#{0x0008}"          } Shoes
+                        %option{ :value => "#{0x0010}"          } Hat
+                        %option{ :value => "#{0x0020}"          } Tie
+                        %option{ :value => "#{0x0040}"          } Waistcoat
+                        %option{ :value => "#{0x0080}"          } Coat
+                        %option{ :value => "#{0x0100}"          } Onepiece
+                        %option{ :value => "#{0x0200}"          } Skirt
+                        %option{ :value => "#{0x0400}"          } Blouse
 
                   .space-2
 
