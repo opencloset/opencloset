@@ -41,7 +41,7 @@ __PACKAGE__->table("satisfaction");
   is_foreign_key: 1
   is_nullable: 0
 
-=head2 chest
+=head2 bust
 
   data_type: 'integer'
   is_nullable: 1
@@ -91,7 +91,7 @@ __PACKAGE__->add_columns(
     is_foreign_key => 1,
     is_nullable => 0,
   },
-  "chest",
+  "bust",
   { data_type => "integer", is_nullable => 1 },
   "waist",
   { data_type => "integer", is_nullable => 1 },
@@ -158,8 +158,8 @@ __PACKAGE__->belongs_to(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07036 @ 2013-11-05 11:48:52
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:KkYZeM71RVkUoeIz4kVtiA
+# Created by DBIx::Class::Schema::Loader v0.07036 @ 2013-11-19 19:36:49
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:sVb6iQniQAt804F/0MW7Qw
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

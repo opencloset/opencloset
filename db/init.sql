@@ -47,7 +47,7 @@ CREATE TABLE `donor` (
 CREATE TABLE `guest` (
   `id`          INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `user_id`     INT UNSIGNED NOT NULL,
-  `chest`       INT NOT NULL,     -- 가슴둘레(cm)
+  `bust`        INT NOT NULL,     -- 가슴둘레(cm)
   `waist`       INT NOT NULL,     -- 허리둘레(cm)
   `arm`         INT DEFAULT NULL, -- 팔길이(cm)
   `length`      INT DEFAULT NULL, -- 기장(cm)
@@ -103,7 +103,7 @@ INSERT INTO `status` (`id`, `name`) VALUES (1, '대여가능'), (2, '대여중')
 CREATE TABLE `cloth` (
   `id`          INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `no`          VARCHAR(64) NOT NULL,  -- 바코드 품번
-  `chest`       INT DEFAULT NULL,
+  `bust`        INT DEFAULT NULL,
   `waist`       INT DEFAULT NULL,
   `arm`         INT DEFAULT NULL, -- 팔길이(cm)
   `length`      INT DEFAULT NULL, -- 기장(cm)
@@ -122,7 +122,7 @@ CREATE TABLE `cloth` (
 
   PRIMARY KEY (`id`),
   UNIQUE KEY (`no`),
-  INDEX (`chest`),
+  INDEX (`bust`),
   INDEX (`waist`),
   INDEX (`arm`),
   INDEX (`length`),
@@ -144,7 +144,7 @@ CREATE TABLE `satisfaction` (
 
   `guest_id`    INT UNSIGNED NOT NULL,
   `cloth_id`    INT UNSIGNED NOT NULL,
-  `chest`       INT DEFAULT NULL,
+  `bust`        INT DEFAULT NULL,
   `waist`       INT DEFAULT NULL,
   `arm`         INT DEFAULT NULL,
   `top_fit`     INT DEFAULT NULL,
@@ -180,7 +180,7 @@ CREATE TABLE `order` (
   -- guest info
   `purpose`          VARCHAR(32),
   `age`              INT DEFAULT NULL,
-  `chest`            INT DEFAULT NULL,
+  `bust`             INT DEFAULT NULL,
   `waist`            INT DEFAULT NULL,
   `arm`              INT DEFAULT NULL,
   `length`           INT DEFAULT NULL,

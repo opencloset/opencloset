@@ -35,7 +35,7 @@ $ ->
     g = JSON.parse($(@).attr('data-json'))
     _.each ['name','email','gender','phone','age',
             'address','height','weight','purpose',
-            'chest','waist','arm','length','domain'], (name) ->
+            'bust','waist','arm','length','domain'], (name) ->
       $input = $("input[name=#{name}]")
       if $input.attr('type') is 'radio' or $input.attr('type') is 'checkbox'
         $input.each (i, el) ->
@@ -124,9 +124,9 @@ $ ->
         
     .on 'finished', (e) ->
       e.preventDefault()
-      chest = $("input[name=chest]").val()
+      bust  = $("input[name=bust]").val()
       waist = $("input[name=waist]").val()
-      location.href = "/search?q=#{parseInt(chest) + 3}/#{waist}//1/&gid=#{guestID}"
+      location.href = "/search?q=#{parseInt(bust) + 3}/#{waist}//1/&gid=#{guestID}"
       false
     .on 'stepclick', (e) ->
 

@@ -59,7 +59,7 @@ helper cloth_validator => sub {
 
     # Jacket
     $validator->when('category_id')->regexp(qr/^(-1|-2|1)$/)
-        ->then(sub { shift->field('chest')->required(1) });
+        ->then(sub { shift->field('bust')->required(1) });
     $validator->when('category_id')->regexp(qr/^(-1|-2|1)$/)
         ->then(sub { shift->field('arm')->required(1) });
 
@@ -73,7 +73,7 @@ helper cloth_validator => sub {
     $validator->when('category_id')->regexp(qr/^4$/)
         ->then(sub { shift->field('foot')->required(1) });
 
-    $validator->field([qw/chest waist arm length foot/])
+    $validator->field([qw/bust waist arm length foot/])
         ->each(sub { shift->regexp(qr/^\d+$/) });
 
     return $validator;
@@ -192,7 +192,7 @@ helper guest_validator => sub {
     my $self = shift;
 
     my $validator = $self->create_validator;
-    $validator->field([qw/chest waist arm length height weight/])
+    $validator->field([qw/bust waist arm length height weight/])
         ->each(sub { shift->required(1)->regexp(qr/^\d+$/) });
 
     ## TODO: validate `target_date`
@@ -207,7 +207,7 @@ helper create_guest => sub {
     my %params = ( user_id => $user_id );
     map {
         $params{$_} = $self->param($_) if defined $self->param($_)
-    } qw/chest waist arm length height weight purpose domain target_date/;
+    } qw/bust waist arm length height weight purpose domain target_date/;
 
     return $DB->resultset('Guest')->find_or_create(\%params);
 };
@@ -245,11 +245,11 @@ helper create_cloth => sub {
 
     my %params;
     if ($category->which eq 'top') {
-        map { $params{$_} = $info{$_} } qw/chest arm/;
+        map { $params{$_} = $info{$_} } qw/bust arm/;
     } elsif ($category->which eq 'bottom') {
         map { $params{$_} = $info{$_} } qw/waist length/;
     } elsif ($category->which eq 'onepiece') {
-        map { $params{$_} = $info{$_} } qw/chest waist length/;
+        map { $params{$_} = $info{$_} } qw/bust waist length/;
     } elsif ($category->which eq 'foot') {
         map { $params{$_} = $info{$_} } qw/foot/;
     }
@@ -296,9 +296,9 @@ helper _q => sub {
     my ($self, %params) = @_;
 
     my $q = $self->param('q') || q{};
-    my ($chest, $waist, $arm, $status_id, $category_id) = split /\//, $q;
+    my ($bust, $waist, $arm, $status_id, $category_id) = split /\//, $q;
     my %q = (
-        chest    => $chest       || '',
+        bust     => $bust        || '',
         waist    => $waist       || '',
         arm      => $arm         || '',
         status   => $status_id   || '',
@@ -306,7 +306,7 @@ helper _q => sub {
         %params,
     );
 
-    return join('/', ($q{chest}, $q{waist}, $q{arm}, $q{status}, $q{category}));
+    return join('/', ($q{bust}, $q{waist}, $q{arm}, $q{status}, $q{category}));
 };
 
 get '/'      => 'home';
@@ -449,7 +449,7 @@ any [qw/put patch/] => '/guests/:id' => sub {
 
     map {
         $guest->$_($self->param($_)) if defined $self->param($_);
-    } qw/chest waist arm length height weight purpose domain/;
+    } qw/bust waist arm length height weight purpose domain/;
     $guest->update;
     $self->respond_to(
         json => { json => { $guest->get_columns } },
@@ -471,13 +471,13 @@ post '/clothes' => sub {
         if ( $cloth_list =~ s/^(\d*)--(\d+)/$1-$2/ ) {
             $is_negative = 1;
         }
-        my ( $donor_id, $category_id, $color, $chest, $waist, $hip, $arm, $length, $foot, $gender, $compatible_code ) = split /-/, $cloth_list;
+        my ( $donor_id, $category_id, $color, $bust, $waist, $hip, $arm, $length, $foot, $gender, $compatible_code ) = split /-/, $cloth_list;
         $category_id = -($category_id) if $is_negative;
 
         my $is_valid = $self->validate($validator, {
             category_id     => $category_id,
             color           => $color,
-            chest           => $chest,
+            bust            => $bust,
             waist           => $waist,
             hip             => $hip,
             arm             => $arm,
@@ -506,12 +506,12 @@ post '/clothes' => sub {
         if ( $cloth_list =~ s/^(\d*)--(\d+)/$1-$2/ ) {
             $is_negative = 1;
         }
-        my ( $donor_id, $category_id, $color, $chest, $waist, $hip, $arm, $length, $foot, $gender, $compatible_code ) = split /-/, $cloth_list;
+        my ( $donor_id, $category_id, $color, $bust, $waist, $hip, $arm, $length, $foot, $gender, $compatible_code ) = split /-/, $cloth_list;
         $category_id = -($category_id) if $is_negative;
 
         my %cloth_info = (
             color           => $color,
-            chest           => $chest,
+            bust            => $bust,
             waist           => $waist,
             hip             => $hip,
             arm             => $arm,
@@ -685,7 +685,7 @@ any [qw/put patch/] => '/clothes/:no' => sub {
 
     map {
         $cloth->$_($self->param($_)) if defined $self->param($_);
-    } qw/chest waist arm length foot/;
+    } qw/bust waist arm length foot/;
 
     $cloth->update;
     $self->respond_to(
@@ -704,10 +704,10 @@ get '/search' => sub {
 
     my $guest    = $gid ? $DB->resultset('Guest')->find({ id => $gid }) : undef;
     my $cond = {};
-    my ($chest, $waist, $arm, $status_id, $category_id) = split /\//, $q;
+    my ($bust, $waist, $arm, $status_id, $category_id) = split /\//, $q;
     $category_id = $Opencloset::Constant::CATEOGORY_JACKET unless $category_id;
     $cond->{'me.category_id'} = $category_id;
-    $cond->{'me.chest'}       = { '>=' => $chest } if $chest;
+    $cond->{'me.bust'}        = { '>=' => $bust  } if $bust;
     $cond->{'bottom.waist'}   = { '>=' => $waist } if $waist;
     $cond->{'me.arm'}         = { '>=' => $arm   } if $arm;
     $cond->{'me.status_id'}   = $status_id         if $status_id;
@@ -719,7 +719,7 @@ get '/search' => sub {
         {
             page     => $self->param('p') || 1,
             rows     => $entries_per_page,
-            order_by => [qw/chest bottom.waist arm/],
+            order_by => [qw/bust bottom.waist arm/],
             join     => 'bottom',
         }
     );
@@ -803,7 +803,7 @@ post '/orders' => sub {
         # BEGIN TRANSACTION ~
         $order = $DB->resultset('Order')->create({
             guest_id  => $guest->id,
-            chest     => $guest->chest,
+            bust      => $guest->bust,
             waist     => $guest->waist,
             arm       => $guest->arm,
             length    => $guest->length,
@@ -902,7 +902,7 @@ get '/orders/:id' => sub {
         $self->stash(template => 'orders/id/nil_status');
     }
 
-    map { delete $fillinform{$_} } qw/chest waist arm length/;
+    map { delete $fillinform{$_} } qw/bust waist arm length/;
     $self->render_fillinform({ %fillinform });
 };
 
@@ -923,7 +923,7 @@ any [qw/post put patch/] => '/orders/:id' => sub {
     }
     $validator->field([qw/price discount late_fee l_discount/])
         ->each(sub { shift->regexp(qr/^\d+$/) });
-    $validator->field([qw/chest waist arm top_fit bottom_fit/])
+    $validator->field([qw/bust waist arm top_fit bottom_fit/])
         ->each(sub { shift->regexp(qr/^[12345]$/) });
 
     return $self->error(400, 'failed to validate')
@@ -991,7 +991,7 @@ any [qw/post put patch/] => '/orders/:id' => sub {
     # ~ COMMIT
 
     my %satisfaction;
-    map { $satisfaction{$_} = $self->param($_) } qw/chest waist arm top_fit bottom_fit/;
+    map { $satisfaction{$_} = $self->param($_) } qw/bust waist arm top_fit bottom_fit/;
 
     if (values %satisfaction) {
         # $order
@@ -1464,7 +1464,7 @@ __DATA__
 
                   <div class="col-xs-12 col-sm-5">
                     <div class="input-group">
-                      <input type="text" class="valid form-control" id="guest-chest" name="chest">
+                      <input type="text" class="valid form-control" id="guest-bust" name="bust">
                       <span class="input-group-addon"> <i>cm</i> </span>
                     </div>
                   </div>
@@ -1647,7 +1647,7 @@ __DATA__
   - }
   %div
     %span.label.label-info.search-label
-      %a{:href => "#{url_with('/search')->query([q => $guest->chest])}///#{$status_id}"}= $guest->chest
+      %a{:href => "#{url_with('/search')->query([q => $guest->bust])}///#{$status_id}"}= $guest->bust
     %span.label.label-info.search-label
       %a{:href => "#{url_with('/search')->query([q => '/' . $guest->waist . '//' . $status_id])}"}= $guest->waist
     %span.label.label-info.search-label
@@ -1671,7 +1671,7 @@ __DATA__
   %a{:href => "mailto:#{$guest->user->email}"}= $guest->user->email
 %div.muted= $guest->user->phone
 %div
-  %span.label.label-info= $guest->chest
+  %span.label.label-info= $guest->bust
   %span.label.label-info= $guest->waist
   %span.label.label-info= $guest->arm
   %span.label= $guest->length
@@ -1800,9 +1800,9 @@ __DATA__
 
           .tags
             %span.label-holder
-              - if ($c->chest) {
+              - if ($c->bust) {
                 %span.label.label-info.search-label
-                  %a{:href => "#{url_with->query([p => 1, q => $c->chest . '///' . $status_id])}"}= $c->chest
+                  %a{:href => "#{url_with->query([p => 1, q => $c->bust . '///' . $status_id])}"}= $c->bust
                 - if ($c->bottom) {
                   %span.label.label-info.search-label
                     %a{:href => "#{url_with->query([p => 1, q => '/' . $c->bottom->waist . '//' . $status_id])}"}= $c->bottom->waist
@@ -1833,7 +1833,7 @@ __DATA__
             %ul
               - for my $s ($c->satisfactions({}, { rows => 5, order_by => { -desc => [qw/create_date/] } })) {
                 %li
-                  %span.badge{:class => 'satisfaction-#{$s->chest || 0}'}= $s->guest->chest
+                  %span.badge{:class => 'satisfaction-#{$s->bust || 0}'}= $s->guest->bust
                   %span.badge{:class => 'satisfaction-#{$s->waist || 0}'}= $s->guest->waist
                   %span.badge{:class => 'satisfaction-#{$s->arm || 0}'}=   $s->guest->arm
                   %span.badge{:class => 'satisfaction-#{$s->top_fit || 0}'}    상
@@ -1862,7 +1862,7 @@ __DATA__
   %a#btn-edit.btn.btn-sm{:href => '#'} edit
   #input-edit{:style => 'display: none'}
     - if ($cloth->category->which eq 'top') {
-      %input{:type => 'text', :name => 'chest', :value => '#{$cloth->chest}', :placeholder => '가슴둘레'}
+      %input{:type => 'text', :name => 'bust', :value => '#{$cloth->bust}', :placeholder => '가슴둘레'}
       %input{:type => 'text', :name => 'arm', :value => '#{$cloth->arm}', :placeholder => '팔길이'}
     - } elsif ($cloth->category->which eq 'bottom') {
       %input{:type => 'text', :name => 'waist', :value => '#{$cloth->waist}', :placeholder => '허리둘레'}
@@ -1903,9 +1903,9 @@ __DATA__
       %img.img-polaroid{:src => 'http://placehold.it/200x200', :alt => '#{$cloth->no}'}
 
     %div
-      - if ($cloth->chest) {
+      - if ($cloth->bust) {
         %span.label.label-info.search-label
-          %a{:href => "#{url_with('/search')->query([q => $cloth->chest])}///1"}= $cloth->chest
+          %a{:href => "#{url_with('/search')->query([q => $cloth->bust])}///1"}= $cloth->bust
       - }
       - if ($cloth->waist) {
         %span.label.label-info.search-label
@@ -2227,10 +2227,10 @@ __DATA__
   .control-group
     %label.control-label 만족도
     .controls
-      %input.span1{:type => 'text', :name => 'chest', :placeholder => '가슴'}
-      %input.span1{:type => 'text', :name => 'waist', :placeholder => '허리'}
-      %input.span1{:type => 'text', :name => 'arm', :placeholder => '팔'}
-      %input.span1{:type => 'text', :name => 'top_fit', :placeholder => '상의'}
+      %input.span1{:type => 'text', :name => 'bust',       :placeholder => '가슴'}
+      %input.span1{:type => 'text', :name => 'waist',      :placeholder => '허리'}
+      %input.span1{:type => 'text', :name => 'arm',        :placeholder => '팔'}
+      %input.span1{:type => 'text', :name => 'top_fit',    :placeholder => '상의'}
       %input.span1{:type => 'text', :name => 'bottom_fit', :placeholder => '하의'}
   .control-group
     .controls
@@ -2275,7 +2275,7 @@ __DATA__
 
 @@ partial/satisfaction.html.haml
 %h5 만족도
-- my ($c, $w, $a, $t, $b) = ($s->chest || 0, $s->waist || 0, $s->arm || 0, $s->top_fit || 0, $s->bottom_fit || 0);
+- my ($c, $w, $a, $t, $b) = ($s->bust || 0, $s->waist || 0, $s->arm || 0, $s->top_fit || 0, $s->bottom_fit || 0);
 %p
   %span.badge{:class => "satisfaction-#{$c}"} 가슴
   %span.badge{:class => "satisfaction-#{$w}"} 허리
@@ -2629,7 +2629,7 @@ __DATA__
                       %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'cloth-bust' } 가슴:
                       .col-xs-12.col-sm-5
                         .input-group
-                          %input#cloth-bust.valid.form-control{ :name => 'chest', :type => 'text' }
+                          %input#cloth-bust.valid.form-control{ :name => 'bust', :type => 'text' }
                           %span.input-group-addon
                             %i cm
 

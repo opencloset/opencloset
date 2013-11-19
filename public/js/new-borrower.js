@@ -42,7 +42,7 @@
         return;
       }
       g = JSON.parse($(this).attr('data-json'));
-      return _.each(['name', 'email', 'gender', 'phone', 'age', 'address', 'height', 'weight', 'purpose', 'chest', 'waist', 'arm', 'length', 'domain'], function(name) {
+      return _.each(['name', 'email', 'gender', 'phone', 'age', 'address', 'height', 'weight', 'purpose', 'bust', 'waist', 'arm', 'length', 'domain'], function(name) {
         var $input;
         $input = $("input[name=" + name + "]");
         if ($input.attr('type') === 'radio' || $input.attr('type') === 'checkbox') {
@@ -152,11 +152,11 @@
           });
       }
     }).on('finished', function(e) {
-      var chest, waist;
+      var bust, waist;
       e.preventDefault();
-      chest = $("input[name=chest]").val();
+      bust = $("input[name=bust]").val();
       waist = $("input[name=waist]").val();
-      location.href = "/search?q=" + (parseInt(chest) + 3) + "/" + waist + "//1/&gid=" + guestID;
+      location.href = "/search?q=" + (parseInt(bust) + 3) + "/" + waist + "//1/&gid=" + guestID;
       return false;
     }).on('stepclick', function(e) {});
     why = $('#guest-why').tag({

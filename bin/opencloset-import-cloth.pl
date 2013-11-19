@@ -78,7 +78,7 @@ sub run {
         #   donor_id
         #   category_id
         #   color
-        #   chest
+        #   bust
         #   waist
         #   hip
         #   arm
@@ -91,7 +91,7 @@ sub run {
             donor_id        => $row->{donor_id},
             category_id     => $row->{category},
             color           => $row->{color},
-            chest           => $row->{chest},
+            bust            => $row->{bust},
             waist           => $row->{waist},
             hip             => q{},
             arm             => $row->{arm},
@@ -100,7 +100,7 @@ sub run {
             gender          => $gender_map{$gender},
             compatible_code => $row->{code},
         );
-        my @order = qw/ donor_id category_id color chest waist hip arm length foot gender compatible_code /;
+        my @order = qw/ donor_id category_id color bust waist hip arm length foot gender compatible_code /;
         my $res   = $ua->request( POST $opt->url . '/clothes.json', [ 'cloth-list' => join( '-', @data{@order} ) ] );
 
         my $data = decode_json($res->content);
