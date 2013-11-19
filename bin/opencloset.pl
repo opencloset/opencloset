@@ -467,9 +467,11 @@ post '/clothes' => sub {
     ###
     for my $_cloth_list (@cloth_list) {
         my $cloth_list = $_cloth_list;
-        my $is_negative = $cloth_list =~ /^-/;
-        $cloth_list =~ s/^-//;
-        my ($category_id, $color, $chest, $waist, $hip, $arm, $length, $foot, $gender, $compatible_code) = split /-/, $cloth_list;
+        my $is_negative;
+        if ( $cloth_list =~ s/^(\d*)--(\d+)/$1-$2/ ) {
+            $is_negative = 1;
+        }
+        my ( $donor_id, $category_id, $color, $chest, $waist, $hip, $arm, $length, $foot, $gender, $compatible_code ) = split /-/, $cloth_list;
         $category_id = -($category_id) if $is_negative;
 
         my $is_valid = $self->validate($validator, {
@@ -498,12 +500,13 @@ post '/clothes' => sub {
     ### create
     ###
     my @clothes;
-    my $donor_id = $self->param('donor_id');
     for my $_cloth_list (@cloth_list) {
         my $cloth_list = $_cloth_list;
-        my $is_negative = $cloth_list =~ /^-/;
-        $cloth_list =~ s/^-//;
-        my ($category_id, $color, $chest, $waist, $hip, $arm, $length, $foot, $gender, $compatible_code) = split /-/, $cloth_list;
+        my $is_negative;
+        if ( $cloth_list =~ s/^(\d*)--(\d+)/$1-$2/ ) {
+            $is_negative = 1;
+        }
+        my ( $donor_id, $category_id, $color, $chest, $waist, $hip, $arm, $length, $foot, $gender, $compatible_code ) = split /-/, $cloth_list;
         $category_id = -($category_id) if $is_negative;
 
         my %cloth_info = (
@@ -2704,7 +2707,8 @@ __DATA__
                             <div>
                               <label>
                                 <input type="checkbox" class="ace valid" name="cloth-list"
-                                  value="<%= [ cloth_type, cloth_color, cloth_bust, cloth_waist, cloth_hip, cloth_arm, cloth_length, cloth_foot, cloth_gender ].join('-') %>"
+                                  value="<%= [ donor_id, cloth_type, cloth_color, cloth_bust, cloth_waist, cloth_hip, cloth_arm, cloth_length, cloth_foot, cloth_gender ].join('-') %>"
+                                  data-donor-id="<%= donor_id %>"
                                   data-cloth-type="<%= cloth_type %>"
                                   data-cloth-color="<%= cloth_color %>"
                                   data-cloth-bust="<%= cloth_bust %>"

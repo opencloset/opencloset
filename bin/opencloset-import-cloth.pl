@@ -71,24 +71,37 @@ sub run {
         $loop++;
 
         my $gender = $row->{gender} // '';
-        my $foot = $row->{foot};
-        if ($row->{category} == $Opencloset::Constant::CATEOGORY_SHOES) {
-            $foot = $row->{donor_id};
-        }
 
-        my %post_data = (
+        #
+        # order of parameter
+        #
+        #   donor_id
+        #   category_id
+        #   color
+        #   chest
+        #   waist
+        #   hip
+        #   arm
+        #   length
+        #   foot
+        #   gender
+        #   compatible_code
+        #
+        my %data = (
+            donor_id        => $row->{donor_id},
+            category_id     => $row->{category},
+            color           => $row->{color},
             chest           => $row->{chest},
             waist           => $row->{waist},
+            hip             => q{},
             arm             => $row->{arm},
             length          => $row->{length},
-            foot            => $foot,
-            category_id     => $row->{category},
+            foot            => $row->{foot},
             gender          => $gender_map{$gender},
             compatible_code => $row->{code},
-            color           => $row->{color},
         );
-
-        my $res = $ua->request( POST $opt->url . '/clothes.json', [ %post_data ] );
+        my @order = qw/ donor_id category_id color chest waist hip arm length foot gender compatible_code /;
+        my $res   = $ua->request( POST $opt->url . '/clothes.json', [ 'cloth-list' => join( '-', @data{@order} ) ] );
 
         my $data = decode_json($res->content);
         if ($res->is_success) {
@@ -96,9 +109,9 @@ sub run {
         }
         else {
             $fail++;
-            my $cloth_data = join q{,}, @post_data{ qw/ chest waist arm length foot category_id gender compatible_code color / };
+            my $cloth_data = join q{,}, @data{@order};
             say STDERR "row($loop): data($cloth_data): $data->{error}{str}";
-            say STDERR "  $_ => $post_data{$_}" for keys %{ $data->{error}{data} };
+            say STDERR "  $_ => $data{$_}" for keys %{ $data->{error}{data} };
         }
     }
 

@@ -136,6 +136,7 @@
     $('#btn-cloth-add').click(function() {
       var compiled, count, data, html, valid_count;
       data = {
+        donor_id: donorID,
         cloth_type: $('#cloth-type').val(),
         cloth_type_str: $('#cloth-type option:selected').text(),
         cloth_gender: $('input[name=cloth-gender]:checked').val(),
@@ -236,7 +237,7 @@
           }
           return $.ajax('/clothes.json', {
             type: 'POST',
-            data: "" + ($('form').serialize()) + "&donor_id=" + donorID,
+            data: $('form').serialize(),
             success: function(data, textStatus, jqXHR) {
               return true;
             },

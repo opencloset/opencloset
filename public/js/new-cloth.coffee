@@ -92,6 +92,7 @@ $ ->
   #
   $('#btn-cloth-add').click ->
     data =
+      donor_id:         donorID,
       cloth_type:       $('#cloth-type').val(),
       cloth_type_str:   $('#cloth-type option:selected').text(),
       cloth_gender:     $('input[name=cloth-gender]:checked').val()
@@ -181,7 +182,7 @@ $ ->
           return unless $("input[name=cloth-list]:checked").length
           $.ajax '/clothes.json',
             type: 'POST'
-            data: "#{$('form').serialize()}&donor_id=#{donorID}"
+            data: $('form').serialize()
             success: (data, textStatus, jqXHR) ->
               return true
             error: (jqXHR, textStatus, errorThrown) ->
