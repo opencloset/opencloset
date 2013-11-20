@@ -2699,7 +2699,10 @@ __DATA__
 
                   %form.form-horizontal{ :method => 'get', :novalidate => 'novalidate' }
                     .form-group.has-info
-                      %label.control-label.no-padding-right.col-xs-12.col-sm-3 추가할 의류 선택:
+                      %label.control-label.no-padding-right.col-xs-12.col-sm-3
+                        추가할 의류 선택:
+                        %br
+                        %a#btn-cloth-select-all.btn.btn-xs.btn-success{ :role => 'button' } 모두 선택
                       .col-xs-12.col-sm-9
                         #display-cloth-list
                         :plain

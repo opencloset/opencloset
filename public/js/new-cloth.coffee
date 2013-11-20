@@ -135,6 +135,17 @@ $ ->
     $('#cloth-type').focus()
 
   #
+  # step3 - 추가한 모든 의류 선택 또는 해제
+  #
+  $('#btn-cloth-select-all').click ->
+    count   = 0
+    checked = 0
+    $('input[name=cloth-list]').each (i, el) ->
+      count++
+      checked++ if $(el).prop('checked')
+    $('input[name=cloth-list]').prop( 'checked', ( checked < count ? true : false ) )
+
+  #
   # 마법사 위젯
   #
   validation = false

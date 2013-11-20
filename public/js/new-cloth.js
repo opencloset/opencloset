@@ -179,6 +179,20 @@
       $('#btn-cloth-reset').click();
       return $('#cloth-type').focus();
     });
+    $('#btn-cloth-select-all').click(function() {
+      var checked, count, _ref;
+      count = 0;
+      checked = 0;
+      $('input[name=cloth-list]').each(function(i, el) {
+        count++;
+        if ($(el).prop('checked')) {
+          return checked++;
+        }
+      });
+      return $('input[name=cloth-list]').prop('checked', (_ref = checked < count) != null ? _ref : {
+        "true": false
+      });
+    });
     validation = false;
     return $('#fuelux-wizard').ace_wizard().on('change', function(e, info) {
       var ajax;
