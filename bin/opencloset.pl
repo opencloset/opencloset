@@ -143,8 +143,12 @@ helper donor2hr => sub {
     return { %columns };
 };
 
-helper overdue_calc => sub {
-    my ($self, $target_dt, $return_dt) = @_;
+helper calc_overdue => sub {
+    my ( $self, $target_dt, $return_dt ) = @_;
+
+    return unless $target_dt;
+
+    $return_dt ||= DateTime->now;
 
     my $DAY_AS_SECONDS = 60 * 60 * 24;
 
@@ -162,6 +166,16 @@ helper commify => sub {
     1 while s/((?:\A|[^.0-9])[-+]?\d+)(\d{3})/$1,$2/s;
     return $_;
 };
+
+helper calc_late_fee => sub {
+    my ( $self, $order, $commify ) = @_;
+
+    my $overdue  = $self->calc_overdue( $order->target_date );
+    my $late_fee = $order->price * 0.2 * $overdue;
+
+    return $commify ? $self->commify($late_fee) : $late_fee;
+};
+
 
 helper user_validator => sub {
     my $self = shift;
@@ -648,7 +662,7 @@ get '/clothes/:no' => sub {
         push @with, $self->cloth2hr($_cloth);
     }
 
-    my $overdue = $self->overdue_calc($order->target_date, DateTime->now);
+    my $overdue = $self->calc_overdue($order->target_date, DateTime->now);
     my %columns = (
         %{ $self->cloth2hr($cloth) },
         rental_date => {
@@ -664,7 +678,7 @@ get '/clothes/:no' => sub {
         order_id    => $order->id,
         price       => $self->commify($order->price),
         overdue     => $overdue,
-        late_fee    => $self->commify($order->price * 0.2 * $overdue),
+        late_fee    => $self->calc_late_fee( $order, 'commify' ),
         clothes     => \@with,
     );
 
@@ -858,8 +872,8 @@ get '/orders/:id' => sub {
         $price += $cloth->category->price;
     }
 
-    my $overdue  = $order->target_date ? $self->overdue_calc($order->target_date, DateTime->now()) : 0;
-    my $late_fee = $order->price * 0.2 * $overdue;
+    my $overdue  = $self->calc_overdue($order->target_date);
+    my $late_fee = $self->calc_late_fee($order);
 
     my $c_jacket = $DB->resultset('Category')->find({ name => 'jacket' });
     my $cond = { category_id => $c_jacket->id };
@@ -1619,7 +1633,7 @@ __DATA__
       %li
         %a{:href => "#{url_for('/orders/' . $order->id)}"}
           - if ($order->status->name eq '대여중') {
-            - if (overdue_calc($order->target_date, DateTime->now())) {
+            - if (calc_overdue($order->target_date, DateTime->now())) {
               %span.label.label-important 연체중
             - } else {
               %span.label.label-important= $order->status->name
@@ -1931,7 +1945,7 @@ __DATA__
           %a{:href => '/guests/#{$order->guest->id}'}= $order->guest->user->name
           님
           - if ($order->status && $order->status->name eq '대여중') {
-            - if (overdue_calc($order->target_date, DateTime->now())) {
+            - if (calc_overdue($order->target_date, DateTime->now())) {
               %span.label.label-important 연체중
             - } else {
               %span.label.label-important= $order->status->name
@@ -2121,28 +2135,43 @@ __DATA__
 -   ];
 - title $meta->{$id}{text};
 
-%ul
-  - while(my $order = $orders->next) {
-      - if ($order->status) {
-        %li
-          %a{:href => "#{url_for('/orders/' . $order->id)}"}
-            - if ($order->status->name eq '대여중') {
-              - if (overdue_calc($order->target_date, DateTime->now())) {
-                %span.label.label-important 연체중
-              - } else {
-                %span.label.label-important= $order->status->name
-              - }
-              %span.highlight{:title => '대여일'}= $order->rental_date->ymd
-              ~
-              %span{:title => '반납예정일'}= $order->target_date->ymd
-            - } else {
-              %span.label= $order->status->name
-              %span.highlight{:title => '대여일'}= $order->rental_date->ymd
-              ~
-              %span.highlight{:title => '반납일'}= $order->return_date->ymd
+#order-table
+  %table.table.table-striped.table-bordered.table-hover
+    %thead
+      %tr
+        %th #
+        %th 상태
+        %th 기간
+        %th 대여자
+        %th 담당자
+        %th 기타
+    %tbody
+      - while ( my $order = $orders->next ) {
+        - next unless $order->status;
+        - my $late_fee = calc_late_fee($order);
+        %tr
+          %td
+            %a{ :href => "#{url_for('/orders/' . $order->id)}" }= $order->id
+          %td
+            - if ($late_fee) {
+              %span.label.label-important.order-status
+                = $order->status->name
+                %span.late-fee= $late_fee ? "${late_fee}원" : q{}
+            - }
+            - else {
+              %span.label.label-success.order-status
+                = $order->status->name
+            - }
+          %td
+            = $order->rental_date->ymd . q{ ~ } . $order->target_date->ymd
+          %td= $order->guest->user->name
+          %td= $order->staff_name
+          %td
+            - for my $c ( $order->cloths ) {
+              %span
+                %a{ :href => '/clothes/#{$c->no}' }= sprintf "%s(%s)", $c->no, $c->category->name
             - }
       - }
-  - }
 
 
 @@ orders/id/nil_status.html.haml
