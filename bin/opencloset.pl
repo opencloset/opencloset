@@ -1239,351 +1239,294 @@ __DATA__
 - title $meta->{$id}{text};
 
 #new-borrower
-  = include 'new-borrower-inner'
-
-
-@@ new-borrower-inner.html.ep
-<div class="row-fluid">
-  <div class="span12">
-    <div class="widget-box">
-      <div class="widget-header widget-header-blue widget-header-flat">
-        <h4 class="lighter">대여자 등록</h4>
-      </div>
-
-      <div class="widget-body">
-        <div class="widget-main">
-
-          <div data-target="#step-container" class="row-fluid" id="fuelux-wizard">
-            <ul class="wizard-steps">
-              <li class="active" data-target="#step1">
-                <span class="step">1</span>
-                <span class="title">대여자 검색</span>
-              </li>
-
-              <li data-target="#step2" class="">
-                <span class="step">2</span>
-                <span class="title">개인 정보 및 대여 목적</span>
-              </li>
-
-              <li data-target="#step3" class="">
-                <span class="step">3</span>
-                <span class="title">신체 치수</span>
-              </li>
-
-              <li data-target="#step4" class="">
-                <span class="step">4</span>
-                <span class="title">완료</span>
-              </li>
-            </ul>
-          </div>
-
-          <hr>
-
-          <div id="step-container" class="step-content row-fluid position-relative">
-
-            <div id="step1" class="step-pane active">
-              <h3 class="lighter block green">이전에 방문했던 적이 있나요?</h3>
-
-              <div class="form-horizontal">
-
-                <div class="form-group has-info">
-                  <label class="control-label col-xs-12 col-sm-3 no-padding-right">대여자 검색:</label>
-
-                  <div class="col-xs-12 col-sm-9">
-                    <div class="search">
-                      <div class='input-group'>
-                        <input class='form-control' id='guest-search' type='text' name='q' placeholder='이름 또는 이메일, 휴대전화 번호' />
-                        <span class='input-group-btn'>
-                          <button class='btn btn-default btn-sm' id='btn-guest-search' type='submit'>
-                            <i class='bigger-110 icon-search'>검색</i>
-                          </button>
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="form-group has-info">
-                  <label class="control-label col-xs-12 col-sm-3 no-padding-right">대여자 선택:</label>
-
-                  <div class="col-xs-12 col-sm-9">
-                    <div id="guest-search-list">
-                      <div>
-                        <label class="blue">
-                          <input type="radio" class="ace valid" name="user-id" value="0">
-                          <span class="lbl"> 처음 방문했습니다.</span>
-                        </label>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="hr hr-dotted"></div>
-              </div>
-
-              <form method="get" id="validation-form" class="form-horizontal" novalidate="novalidate">
-
-                <div class="form-group has-info">
-                  <label class="control-label col-xs-12 col-sm-3 no-padding-right"></label>
-                  <div class="col-xs-12 col-sm-9">
-                    <div>
-                      <strong class="co-name"><%= $company_name %></strong>은 정확한 의류 선택 및
-                      대여 관리를 위해 개인 정보와 신체 치수를 수집합니다.
-                      수집한 정보는 <strong class="co-name"><%= $company_name %></strong>의
-                      대여 서비스 품질을 높이기 위한 통계 목적으로만 사용합니다.
-                    </div>
-
-                    <div class="space-8"></div>
-
-                    <div>
-                      <strong class="co-name"><%= $company_name %></strong>은 대여자의 반납 편의를 돕거나
-                      <strong class="co-name"><%= $company_name %></strong> 관련 유용한 정보를 알려드리기 위해
-                      기재된 연락처로 휴대폰 단문 메시지 또는 전자우편을 보내거나 전화를 드립니다.
-                    </div>
-
-                  </div>
-                </div>
-
-              </form>
-            </div>
-
-            <div id="step2" class="step-pane">
-              <h3 class="lighter block green">다음 개인 정보를 입력해주세요.</h3>
-
-              <form method="get" id="validation-form" class="form-horizontal" novalidate="novalidate">
-                <div class="form-group has-info">
-                  <label for="email" class="control-label col-xs-12 col-sm-3 no-padding-right">전자우편:</label>
-
-                  <div class="col-xs-12 col-sm-9">
-                    <div class="clearfix">
-                      <input type="email" class="col-xs-12 col-sm-4 valid" id="email" name="email">
-                    </div>
-                  </div>
-                </div>
-
-                <div class="form-group has-info">
-                  <label for="name" class="control-label col-xs-12 col-sm-3 no-padding-right">이름:</label>
-
-                  <div class="col-xs-12 col-sm-9">
-                    <div class="clearfix">
-                      <input type="text" class="col-xs-12 col-sm-4 valid" name="name" id="name">
-                    </div>
-                  </div>
-                </div>
-
-                <div class="space-2"></div>
-
-                <div class="form-group has-info">
-                  <label for="age" class="control-label col-xs-12 col-sm-3 no-padding-right">나이:</label>
-
-                  <div class="col-xs-12 col-sm-9">
-                    <div class="clearfix">
-                      <input type="text" class="col-xs-12 col-sm-4 valid" name="age" id="age">
-                    </div>
-                  </div>
-                </div>
-
-                <div class="space-2"></div>
-
-                <div class="form-group has-info">
-                  <label class="control-label col-xs-12 col-sm-3 no-padding-right">성별:</label>
-
-                  <div class="col-xs-12 col-sm-9">
-                    <div>
-                      <label class="blue">
-                        <input type="radio" class="ace valid" value="1" name="gender">
-                        <span class="lbl"> 남자</span>
-                      </label>
-                    </div>
-
-                    <div>
-                      <label class="blue">
-                        <input type="radio" class="ace valid" value="2" name="gender">
-                        <span class="lbl"> 여자</span>
-                      </label>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="space-2"></div>
-
-                <div class="form-group has-info">
-                  <label for="input-phone" class="control-label col-xs-12 col-sm-3 no-padding-right">휴대전화:</label>
-
-                  <div class="col-xs-12 col-sm-7">
-                    <div class="input-group">
-                      <input type="tel" name="phone" id="input-phone" class="valid form-control">
-
-                      <span class="input-group-btn">
-                        <button id="btn-sendsms" class="btn btn-sm btn-default"> <i class="icon-phone"></i> 인증 </button>
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="space-2"></div>
-
-                <div class="form-group has-info">
-                  <label for="address" class="control-label col-xs-12 col-sm-3 no-padding-right">주소:</label>
-
-                  <div class="col-xs-12 col-sm-9">
-                    <div class="clearfix">
-                      <input type="text" class="col-xs-12 col-sm-8 valid" name="address" id="address">
-                    </div>
-                  </div>
-                </div>
-
-                <div class="hr hr-dotted"></div>
-
-                <div class="form-group has-info">
-                  <label for="guest-height" class="control-label col-xs-12 col-sm-3 no-padding-right">키:</label>
-
-                  <div class="col-xs-12 col-sm-5">
-                    <div class="input-group">
-                      <input type="text" class="valid form-control" id="guest-height" name="height">
-                      <span class="input-group-addon"> <i>cm</i> </span>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="space-2"></div>
-
-                <div class="form-group has-info">
-                  <label for="guest-weight" class="control-label col-xs-12 col-sm-3 no-padding-right">몸무게:</label>
-
-                  <div class="col-xs-12 col-sm-5">
-                    <div class="input-group">
-                      <input type="text" class="valid form-control" id="guest-weight" name="weight">
-                      <span class="input-group-addon"> <i>kg</i> </span>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="hr hr-dotted"></div>
-
-                <div class="form-group has-info">
-                  <label for="guest-why" class="control-label col-xs-12 col-sm-3 no-padding-right">대여 목적:</label>
-
-                  <div class="col-xs-12 col-sm-7">
-                    <div class="guest-why">
-                      <input type="text" class="valid" id="guest-why" name="purpose" data-provide="tag" value="" placeholder="대여 목적을 선택하거나 입력하세요...">
-                      <p>
-                        <span class="label label-info clickable"> 입사면접 </span>
-                        <span class="label label-info clickable"> 사진촬영 </span>
-                        <span class="label label-info clickable"> 결혼식 </span>
-                        <span class="label label-info clickable"> 장례식 </span>
-                        <span class="label label-info clickable"> 입학식 </span>
-                        <span class="label label-info clickable"> 졸업식 </span>
-                        <span class="label label-info clickable"> 세미나 </span>
-                        <span class="label label-info clickable"> 발표 </span>
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="space-2"></div>
-
-                <div class="form-group has-info">
-                  <label for="guest-domain" class="control-label col-xs-12 col-sm-3 no-padding-right">응시 기업 및 분야:</label>
-
-                  <div class="col-xs-12 col-sm-9">
-                    <div class="clearfix">
-                      <input type="text" class="col-xs-12 col-sm-4 valid" id="guest-domain" name="domain">
-                    </div>
-                  </div>
-                </div>
-
-              </form>
-            </div>
-
-            <div id="step3" class="step-pane">
-              <h3 class="lighter block green">다음 신체 치수를 입력해주세요.</h3>
-
-              <form method="get" id="validation-form" class="form-horizontal" novalidate="novalidate">
-                <div class="form-group has-info">
-                  <label for="guest-bust" class="control-label col-xs-12 col-sm-3 no-padding-right">가슴:</label>
-
-                  <div class="col-xs-12 col-sm-5">
-                    <div class="input-group">
-                      <input type="text" class="valid form-control" id="guest-bust" name="bust">
-                      <span class="input-group-addon"> <i>cm</i> </span>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="space-2"></div>
-
-                <div class="form-group has-info">
-                  <label for="guest-waist" class="control-label col-xs-12 col-sm-3 no-padding-right">허리:</label>
-
-                  <div class="col-xs-12 col-sm-5">
-                    <div class="input-group">
-                      <input type="text" class="valid form-control" id="guest-waist" name="waist">
-                      <span class="input-group-addon"> <i>cm</i> </span>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="space-2"></div>
-
-                <div class="form-group has-info">
-                  <label for="guest-arm" class="control-label col-xs-12 col-sm-3 no-padding-right">팔 길이:</label>
-
-                  <div class="col-xs-12 col-sm-5">
-                    <div class="input-group">
-                      <input type="text" class="valid form-control" id="guest-arm" name="arm">
-                      <span class="input-group-addon"> <i>cm</i> </span>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="space-2"></div>
-
-                <div class="form-group has-info">
-                  <label for="guest-length" class="control-label col-xs-12 col-sm-3 no-padding-right">다리 길이:</label>
-
-                  <div class="col-xs-12 col-sm-5">
-                    <div class="input-group">
-                      <input type="text" class="valid form-control" id="guest-length" name="length">
-                      <span class="input-group-addon"> <i>cm</i> </span>
-                    </div>
-                  </div>
-                </div>
-
-              </form>
-            </div>
-
-            <div id="step4" class="step-pane">
-              <h3 class="lighter block green">등록이 완료되었습니다!</h3>
-            </div>
-          </div>
-
-          <hr>
-          <div class="row-fluid wizard-actions">
-            <button class="btn btn-prev" disabled="disabled">
-              <i class="icon-arrow-left"></i>
-              이전
-            </button>
-
-            <button data-last="완료 " class="btn btn-success btn-next">
-              다음
-            <i class="icon-arrow-right icon-on-right"></i></button>
-          </div>
-        </div><!-- /widget-main -->
-      </div><!-- /widget-body -->
-    </div>
-  </div>
-</div>
-
-<script id="tpl-new-borrower-guest-id" type="text/html">
-  <div>
-    <label class="blue highlight">
-      <input type="radio" class="ace valid" name="user-id" value="<%%= user_id %>" data-user-id="<%%= user_id %>" data-guest-id="<%%= id %>">
-      <span class="lbl"> <%%= name %> (<%%= email %>)</span>
-      <span><%%= address %></span>
-    </label>
-  </div>
-</script>
+  .row-fluid
+    .span12
+      .widget-box
+        .widget-header.widget-header-blue.widget-header-flat
+          %h4.lighter 대여자 등록
+
+        .widget-body
+          .widget-main
+            /
+            / step navigation
+            /
+            #fuelux-wizard.row-fluid{ "data-target" => '#step-container' }
+              %ul.wizard-steps
+                %li.active{ "data-target" => "#step1" }
+                  %span.step  1
+                  %span.title 대여자 검색
+                %li{ "data-target" => "#step2" }
+                  %span.step  2
+                  %span.title 개인 정보 및 대여 목적
+                %li{ "data-target" => "#step3" }
+                  %span.step  3
+                  %span.title 신체 치수
+                %li{ "data-target" => "#step4" }
+                  %span.step  4
+                  %span.title 완료
+
+            %hr
+
+            #step-container.step-content.row-fluid.position-relative
+              /
+              / step1
+              /
+              #step1.step-pane.active
+                %h3.lighter.block.green 이전에 방문했던 적이 있나요?
+                .form-horizontal
+                  /
+                  / 대여자 검색
+                  /
+                  .form-group.has-info
+                    %label.control-label.no-padding-right.col-xs-12.col-sm-3 대여자 검색:
+                    .col-xs-12.col-sm-9
+                      .search
+                        .input-group
+                          %input#guest-search.form-control{ :name => 'guest-search' :type => 'text', :placeholder => '이름 또는 이메일, 휴대전화 번호' }
+                          %span.input-group-btn
+                            %button#btn-guest-search.btn.btn-default.btn-sm{ :type => 'submit' }
+                              %i.icon-search.bigger-110 검색
+                  /
+                  / 대여자 선택
+                  /
+                  .form-group.has-info
+                    %label.control-label.no-padding-right.col-xs-12.col-sm-3 대여자 선택:
+                    .col-xs-12.col-sm-9
+                      #guest-search-list
+                        %div
+                          %label.blue
+                            %input.ace.valid{ :name => 'user-id', :type => 'radio', :value => '0' }
+                            %span.lbl= ' 처음 방문했습니다.'
+                      :plain
+                        <script id="tpl-new-borrower-guest-id" type="text/html">
+                          <div>
+                            <label class="blue highlight">
+                              <input type="radio" class="ace valid" name="user-id" value="<%= user_id %>" data-user-id="<%= user_id %>" data-guest-id="<%= id %>">
+                              <span class="lbl"> <%= name %> (<%= email %>)</span>
+                              <span><%= address %></span>
+                            </label>
+                          </div>
+                        </script>
+
+                  .hr.hr-dotted
+
+                %form.form-horizontal{ :method => "get" }
+                  .form-group.has-info
+                    %label.control-label.no-padding-right.col-xs-12.col-sm-3
+                    .col-xs-12.col-sm-9
+                      %div
+                        :plain
+                          <strong class="co-name">#{$company_name}</strong>은 정확한 의류 선택 및
+                          대여 관리를 위해 개인 정보와 신체 치수를 수집합니다.
+                          수집한 정보는 <strong class="co-name">#{$company_name}</strong>의
+                          대여 서비스 품질을 높이기 위한 통계 목적으로만 사용합니다.
+
+                      .space-8
+
+                      %div
+                        :plain
+                          <strong class="co-name">#{$company_name}</strong>은 대여자의 반납 편의를 돕거나
+                          <strong class="co-name">#{$company_name}</strong> 관련 유용한 정보를 알려드리기 위해
+                          기재된 연락처로 휴대폰 단문 메시지 또는 전자우편을 보내거나 전화를 드립니다.
+              /
+              / step2
+              /
+              #step2.step-pane
+                %h3.lighter.block.green 다음 개인 정보를 입력해주세요.
+                %form.form-horizontal{ :method => 'get' }
+                  /
+                  / 전자우편
+                  /
+                  .form-group.has-info
+                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'email' } 전자우편:
+                    .col-xs-12.col-sm-9
+                      .clearfix
+                        %input#email.valid.col-xs-12.col-sm-6{ :name => 'email', :type => 'text' }
+
+                  /
+                  / 이름
+                  /
+                  .form-group.has-info
+                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'name' } 이름:
+                    .col-xs-12.col-sm-9
+                      .clearfix
+                        %input#name.valid.col-xs-12.col-sm-6{ :name => 'name', :type => 'text' }
+
+                  /
+                  / 나이
+                  /
+                  .form-group.has-info
+                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'age' } 나이:
+                    .col-xs-12.col-sm-9
+                      .clearfix
+                        %input#age.valid.col-xs-12.col-sm-6{ :name => 'age', :type => 'text' }
+
+                  /
+                  / 성별
+                  /
+                  .form-group.has-info
+                    %label.control-label.no-padding-right.col-xs-12.col-sm-3 성별:
+                    .col-xs-12.col-sm-9
+                      %div
+                        %label.blue
+                          %input.ace.valid{ :type => 'radio', :name => 'gender', :value => '1' }
+                          %span.lbl= " 남자"
+                      %div
+                        %label.blue
+                          %input.ace.valid{ :type => 'radio', :name => 'gender', :value => '2' }
+                          %span.lbl= " 여자"
+
+                  /
+                  / 휴대전화
+                  /
+                  .form-group.has-info
+                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'phone' } 휴대전화:
+                    .col-xs-12.col-sm-7
+                      .input-group
+                        %input#phone.form-control.valid.col-xs-12.col-sm-6{ :name => 'phone', :type => 'tel' }
+                        %span.input-group-btn
+                          %button#btn-sendsms.btn.btn-sm.btn-default
+                            %i.icon-phone
+                            인증
+
+                  /
+                  / 주소
+                  /
+                  .form-group.has-info
+                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'address' } 주소:
+                    .col-xs-12.col-sm-9
+                      .clearfix
+                        %input#address.valid.col-xs-12.col-sm-9{ :name => 'address', :type => 'text' }
+
+                  .hr.hr-dotted
+
+                  /
+                  / 키
+                  /
+                  .form-group.has-info
+                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'height' } 키:
+                    .col-xs-12.col-sm-5
+                      .input-group
+                        %input#height.form-control.valid.col-xs-12.col-sm-6{ :name => 'height', :type => 'text' }
+                        %span.input-group-addon
+                          %i cm
+
+                  /
+                  / 몸무게
+                  /
+                  .form-group.has-info
+                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'weight' } 몸무게:
+                    .col-xs-12.col-sm-5
+                      .input-group
+                        %input#weight.form-control.valid.col-xs-12.col-sm-6{ :name => 'weight', :type => 'text' }
+                        %span.input-group-addon
+                          %i kg
+
+                  .hr.hr-dotted
+
+                  /
+                  / 대여 목적
+                  /
+                  .form-group.has-info
+                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'purpose' } 대여 목적:
+                    .col-xs-12.col-sm-7
+                      .guest-why
+                        %input#purpose.valid.col-xs-12.col-sm-6{ :name => 'purpose', :type => 'text', :value => '', :placeholder => '대여목적', 'data-provide' => 'tag' }
+                        %p
+                          %span.label.label-info.clickable 입사면접
+                          %span.label.label-info.clickable 사진촬영
+                          %span.label.label-info.clickable 결혼식
+                          %span.label.label-info.clickable 장례식
+                          %span.label.label-info.clickable 입학식
+                          %span.label.label-info.clickable 졸업식
+                          %span.label.label-info.clickable 세미나
+                          %span.label.label-info.clickable 발표
+
+                  /
+                  / 응시 기업 및 분야
+                  /
+                  .form-group.has-info
+                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'domain' } 응시 기업 및 분야:
+                    .col-xs-12.col-sm-9
+                      .clearfix
+                        %input#domain.valid.col-xs-12.col-sm-6{ :name => 'domain', :type => 'text' }
+
+              /
+              / step3
+              /
+              #step3.step-pane
+                %h3.lighter.block.green 다음 신체 치수를 입력해주세요.
+                %form.form-horizontal{ :method => 'get' }
+                  /
+                  / 가슴
+                  /
+                  .form-group.has-info
+                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'bust' } 가슴:
+                    .col-xs-12.col-sm-5
+                      .input-group
+                        %input#bust.form-control.valid.col-xs-12.col-sm-6{ :name => 'bust', :type => 'text' }
+                        %span.input-group-addon
+                          %i cm
+
+                  /
+                  / 허리
+                  /
+                  .form-group.has-info
+                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'waist' } 허리:
+                    .col-xs-12.col-sm-5
+                      .input-group
+                        %input#waist.form-control.valid.col-xs-12.col-sm-6{ :name => 'waist', :type => 'text' }
+                        %span.input-group-addon
+                          %i cm
+
+                  /
+                  / 엉덩이
+                  /
+                  .form-group.has-info
+                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'hip' } 엉덩이:
+                    .col-xs-12.col-sm-5
+                      .input-group
+                        %input#hip.form-control.valid.col-xs-12.col-sm-6{ :name => 'hip', :type => 'text' }
+                        %span.input-group-addon
+                          %i cm
+
+                  /
+                  / 팔 길이
+                  /
+                  .form-group.has-info
+                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'arm' } 팔 길이:
+                    .col-xs-12.col-sm-5
+                      .input-group
+                        %input#arm.form-control.valid.col-xs-12.col-sm-6{ :name => 'arm', :type => 'text' }
+                        %span.input-group-addon
+                          %i cm
+
+                  /
+                  / 다리 길이
+                  /
+                  .form-group.has-info
+                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'length' } 다리 길이:
+                    .col-xs-12.col-sm-5
+                      .input-group
+                        %input#length.form-control.valid.col-xs-12.col-sm-6{ :name => 'length', :type => 'text' }
+                        %span.input-group-addon
+                          %i cm
+
+              /
+              / step4
+              /
+              #step4.step-pane
+                %h3.lighter.block.green 등록이 완료되었습니다!
+
+            %hr
+
+            .wizard-actions.row-fluid
+              %button.btn.btn-prev{ :disabled => "disabled" }
+                %i.icon-arrow-left
+                이전
+              %button.btn.btn-next.btn-success{ "data-last" => "완료 " }
+                다음
+                %i.icon-arrow-right.icon-on-right
 
 
 @@ guests/status.html.haml
