@@ -1262,7 +1262,7 @@ __DATA__
 
               <li data-target="#step2" class="">
                 <span class="step">2</span>
-                <span class="title">개인 정보</span>
+                <span class="title">개인 정보 및 대여 목적</span>
               </li>
 
               <li data-target="#step3" class="">
@@ -1272,11 +1272,6 @@ __DATA__
 
               <li data-target="#step4" class="">
                 <span class="step">4</span>
-                <span class="title">대여 목적</span>
-              </li>
-
-              <li data-target="#step5" class="">
-                <span class="step">5</span>
                 <span class="title">완료</span>
               </li>
             </ul>
@@ -1366,8 +1361,6 @@ __DATA__
                   </div>
                 </div>
 
-                <div class="hr hr-dotted"></div>
-
                 <div class="form-group has-info">
                   <label for="name" class="control-label col-xs-12 col-sm-3 no-padding-right">이름:</label>
 
@@ -1440,13 +1433,8 @@ __DATA__
                   </div>
                 </div>
 
-              </form>
-            </div>
+                <div class="hr hr-dotted"></div>
 
-            <div id="step3" class="step-pane">
-              <h3 class="lighter block green">다음 신체 치수를 입력해주세요.</h3>
-
-              <form method="get" id="validation-form" class="form-horizontal" novalidate="novalidate">
                 <div class="form-group has-info">
                   <label for="guest-height" class="control-label col-xs-12 col-sm-3 no-padding-right">키:</label>
 
@@ -1473,6 +1461,45 @@ __DATA__
 
                 <div class="hr hr-dotted"></div>
 
+                <div class="form-group has-info">
+                  <label for="guest-why" class="control-label col-xs-12 col-sm-3 no-padding-right">대여 목적:</label>
+
+                  <div class="col-xs-12 col-sm-7">
+                    <div class="guest-why">
+                      <input type="text" class="valid" id="guest-why" name="purpose" data-provide="tag" value="" placeholder="대여 목적을 선택하거나 입력하세요...">
+                      <p>
+                        <span class="label label-info clickable"> 입사면접 </span>
+                        <span class="label label-info clickable"> 사진촬영 </span>
+                        <span class="label label-info clickable"> 결혼식 </span>
+                        <span class="label label-info clickable"> 장례식 </span>
+                        <span class="label label-info clickable"> 입학식 </span>
+                        <span class="label label-info clickable"> 졸업식 </span>
+                        <span class="label label-info clickable"> 세미나 </span>
+                        <span class="label label-info clickable"> 발표 </span>
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="space-2"></div>
+
+                <div class="form-group has-info">
+                  <label for="guest-domain" class="control-label col-xs-12 col-sm-3 no-padding-right">응시 기업 및 분야:</label>
+
+                  <div class="col-xs-12 col-sm-9">
+                    <div class="clearfix">
+                      <input type="text" class="col-xs-12 col-sm-4 valid" id="guest-domain" name="domain">
+                    </div>
+                  </div>
+                </div>
+
+              </form>
+            </div>
+
+            <div id="step3" class="step-pane">
+              <h3 class="lighter block green">다음 신체 치수를 입력해주세요.</h3>
+
+              <form method="get" id="validation-form" class="form-horizontal" novalidate="novalidate">
                 <div class="form-group has-info">
                   <label for="guest-bust" class="control-label col-xs-12 col-sm-3 no-padding-right">가슴:</label>
 
@@ -1527,46 +1554,6 @@ __DATA__
             </div>
 
             <div id="step4" class="step-pane">
-              <h3 class="lighter block green">대여 목적을 입력해주세요.</h3>
-
-              <form method="get" id="validation-form" class="form-horizontal" novalidate="novalidate">
-
-                <div class="form-group has-info">
-                  <label for="guest-why" class="control-label col-xs-12 col-sm-3 no-padding-right">대여 목적:</label>
-
-                  <div class="col-xs-12 col-sm-7">
-                    <div class="guest-why">
-                      <input type="text" class="valid" id="guest-why" name="purpose" data-provide="tag" value="" placeholder="대여 목적을 선택하거나 입력하세요...">
-                      <p>
-                        <span class="label label-info clickable"> 입사면접 </span>
-                        <span class="label label-info clickable"> 사진촬영 </span>
-                        <span class="label label-info clickable"> 결혼식 </span>
-                        <span class="label label-info clickable"> 장례식 </span>
-                        <span class="label label-info clickable"> 입학식 </span>
-                        <span class="label label-info clickable"> 졸업식 </span>
-                        <span class="label label-info clickable"> 세미나 </span>
-                        <span class="label label-info clickable"> 발표 </span>
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="space-2"></div>
-
-                <div class="form-group has-info">
-                  <label for="guest-domain" class="control-label col-xs-12 col-sm-3 no-padding-right">응시 기업 및 분야:</label>
-
-                  <div class="col-xs-12 col-sm-9">
-                    <div class="clearfix">
-                      <input type="text" class="col-xs-12 col-sm-4 valid" id="guest-domain" name="domain">
-                    </div>
-                  </div>
-                </div>
-
-              </form>
-            </div>
-
-            <div id="step5" class="step-pane">
               <h3 class="lighter block green">등록이 완료되었습니다!</h3>
             </div>
           </div>
