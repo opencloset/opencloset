@@ -2169,7 +2169,7 @@ __DATA__
           %td
             - for my $c ( $order->cloths ) {
               %span
-                %a{ :href => '/clothes/#{$c->no}' }= sprintf "%s(%s)", $c->no, $c->category->name
+                %a{ :href => '/clothes/#{$c->no}' }= $c->category->name
             - }
       - }
 
