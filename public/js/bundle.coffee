@@ -14,6 +14,12 @@ $ ->
   $('.navbar .nav > li').each (i, el) ->
     if pathname is $(el).children('a').attr('href') then $(el).addClass('active')
 
+  #
+  # sidebar active open
+  #
+  $('.sidebar li').each (i, el) ->
+    $(el).addClass('active open') if $(el).find('li.active').length > 0
+
 $.fn.ForceNumericOnly = ->
   @each ->
     $(@).keydown (e) ->

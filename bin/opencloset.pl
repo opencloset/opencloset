@@ -2061,6 +2061,7 @@ __DATA__
 - layout 'default',
 -   active_id   => $id,
 -   breadcrumbs => [
+-     { text => $meta->{'menu-orders'}{text} },
 -     { text => $meta->{$id}{text} },
 -   ];
 - title $meta->{$id}{text};
@@ -2267,8 +2268,16 @@ __DATA__
 
 
 @@ orders/id/status_rent.html.haml
-- layout 'default', jses => ['orders-id.js'];
-- title '주문확인 - 대여중';
+- my $id   = 'orders-id';
+- my $meta = $sidebar->{meta};
+- layout 'default',
+-   active_id   => $id,
+-   breadcrumbs => [
+-     { text => $meta->{'orders'}{text}, link => '/orders' },
+-     { text => $meta->{$id}{text} },
+-   ],
+-   ;
+- title $meta->{$id}{text} . ': 대여중';
 
 %p= include 'partial/status_label'
 %div.pull-right= include 'guests/breadcrumb', guest => $order->guest, status_id => ''
@@ -3195,6 +3204,7 @@ __DATA__
           %   my ( $m, $items, $active_id, $level ) = @_;
           %   my $space = $level ? q{  } x ( $level * 2 ) : q{};
           %
+          <!-- sidebar items -->
           <%= $space %><ul class="<%= $level ? "submenu" : "nav nav-list" %>">
           %
           %   for my $item (@$items) {

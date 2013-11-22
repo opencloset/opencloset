@@ -14,9 +14,14 @@
       }, 3000);
     };
     pathname = location.pathname;
-    return $('.navbar .nav > li').each(function(i, el) {
+    $('.navbar .nav > li').each(function(i, el) {
       if (pathname === $(el).children('a').attr('href')) {
         return $(el).addClass('active');
+      }
+    });
+    return $('.sidebar li').each(function(i, el) {
+      if ($(el).find('li.active').length > 0) {
+        return $(el).addClass('active open');
       }
     });
   });
