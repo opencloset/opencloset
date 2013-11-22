@@ -2148,20 +2148,43 @@ __DATA__
     %tbody
       - while ( my $order = $orders->next ) {
         - next unless $order->status;
-        - my $late_fee = calc_late_fee($order);
         %tr
           %td
             %a{ :href => "#{url_for('/orders/' . $order->id)}" }= $order->id
           %td
-            - if ($late_fee) {
-              %span.label.label-important.order-status
-                = $order->status->name
-                %span.late-fee= $late_fee ? "${late_fee}원" : q{}
-            - }
-            - else {
-              %span.label.label-success.order-status
-                = $order->status->name
-            - }
+            %a{ :href => "#{url_for('/orders/' . $order->id)}" }
+              - use v5.14;
+              - no warnings 'experimental';
+              - given ( $order->status->name ) {
+                - when ('대여가능') {
+                  %span.label.label-success.order-status
+                    = $order->status->name
+                - }
+                - when (/세탁|수선|분실|폐기|반납|대여불가|예약/) {
+                  %span.label.label-info.order-status
+                    = $order->status->name
+                - }
+                - when (/반납배송중|부분반납/) {
+                  %span.label.label-warning.order-status
+                    = $order->status->name
+                - }
+                - when (/대여중/) {
+                  - my $late_fee = calc_late_fee($order);
+                  - if ($late_fee) {
+                    %span.label.label-important.order-status
+                      = $order->status->name . '(연체)'
+                      %span.late-fee= "${late_fee}원"
+                  - }
+                  - else {
+                    %span.label.label-warning.order-status
+                      = $order->status->name
+                  - }
+                - }
+                - default {
+                  %span.label.order-status
+                    = $order->status->name
+                - }
+              - }
           %td
             = $order->rental_date->ymd . q{ ~ } . $order->target_date->ymd
           %td= $order->guest->user->name
