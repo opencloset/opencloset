@@ -94,7 +94,21 @@ CREATE TABLE `status` (
   UNIQUE KEY (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-INSERT INTO `status` (`id`, `name`) VALUES (1, '대여가능'), (2, '대여중'), (3, '세탁'), (4, '수선'), (5, '대여불가'), (6, '연체중'), (7, '분실'), (8,'반납'),(9,'부분반납');
+INSERT INTO `status` (`id`, `name`)
+  VALUES
+    (1,  '대여가능'),
+    (2,  '대여중'),
+    (3,  '대여불가'),
+    (4,  '연체중'),
+    (5,  '예약'),
+    (6,  '세탁'),
+    (7,  '수선'),
+    (8,  '분실'),
+    (9,  '폐기'),
+    (10, '반납'),
+    (11, '부분반납'),
+    (12, '반납배송중')
+    ;
 
 --
 -- cloth
