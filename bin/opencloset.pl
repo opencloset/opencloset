@@ -108,22 +108,6 @@ helper sms2hr => sub {
     return { $sms->get_columns };
 };
 
-helper guest2hr => sub {
-    my ($self, $user) = @_;
-
-    my %columns;
-    if ($user->guest) {
-        %columns = ($user->get_columns, $user->guest->get_columns);
-    } else {
-        %columns = $user->get_columns;
-        map { $columns{$_} = undef } $DB->resultset('Guest')->result_source->columns;
-        $columns{user_id} = $user->id;
-    }
-
-    delete $columns{password};
-    return { %columns };
-};
-
 helper donor2hr => sub {
     my ($self, $user) = @_;
 
@@ -335,8 +319,8 @@ get '/login';
 get '/new-borrower' => sub {
     my $self = shift;
 
-    my $q      = $self->param('q') || '';
-    my $users = $DB->resultset('User')->search({
+    my $q  = $self->param('q') || q{};
+    my $rs = $DB->resultset('User')->search({
         -or => [
             id    => $q,
             name  => $q,
@@ -345,14 +329,16 @@ get '/new-borrower' => sub {
         ],
     });
 
-    my @candidates;
-    while (my $user = $users->next) {
-        push @candidates, $self->guest2hr($user);
+    my @users;
+    while ( my $user = $rs->next ) {
+        my %data = ( $user->userinfo->get_columns, $user->get_columns );
+        delete @data{qw/ user_id password /};
+        push @users, \%data;
     }
 
     $self->respond_to(
-        json => { json => [@candidates] },
-        html => { template => 'new-borrower' }
+        json => { json     => \@users        },
+        html => { template => 'new-borrower' },
     );
 };
 
