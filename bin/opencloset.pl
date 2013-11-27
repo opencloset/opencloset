@@ -68,9 +68,9 @@ helper cloth_validator => sub {
 
     # shoes
     $validator->when('category')->regexp(qr/^shoes$/)
-        ->then(sub { shift->field('foot')->required(1) });
+        ->then(sub { shift->field('length')->required(1) });
 
-    $validator->field(qw/ bust waist hip arm length foot /)
+    $validator->field(qw/ bust waist hip arm length /)
         ->each(sub { shift->regexp(qr/^\d+$/) });
 
     return $validator;
@@ -275,7 +275,7 @@ helper create_cloth => sub {
             @keys = qw( bust arm )          when /^(jacket|shirt|waistcoat|coat|blouse)$/i;
             @keys = qw( waist length )      when /^(pants|skirt)$/i;
             @keys = qw( bust waist length ) when /^(onepiece)$/i;
-            @keys = qw( foot )              when /^(foot)$/i;
+            @keys = qw( length )            when /^(shoes)$/i;
         }
         map { $params{$_} = $info{$_} } @keys;
     }
@@ -487,9 +487,9 @@ post '/clothes' => sub {
     ###
     for my $cloth (@cloth_list) {
         my (
-            $donor_id, $category, $color,  $bust,
-            $waist,    $hip,      $arm,    $thigh,
-            $length,   $foot,     $gender, $compatible_code
+            $donor_id, $category, $color, $bust,
+            $waist,    $hip,      $arm,   $thigh,
+            $length,   $gender,   $compatible_code,
         ) = split /-/, $cloth;
 
         my $is_valid = $self->validate($validator, {
@@ -501,7 +501,6 @@ post '/clothes' => sub {
             arm             => $arm,
             thigh           => $thigh,
             length          => $length,
-            foot            => $foot,
             gender          => $gender || 1,    # TODO: should get from params
             compatible_code => $compatible_code,
         });
@@ -521,9 +520,9 @@ post '/clothes' => sub {
     my @clothes;
     for my $cloth (@cloth_list) {
         my (
-            $donor_id, $category, $color,  $bust,
-            $waist,    $hip,      $arm,    $thigh,
-            $length,   $foot,     $gender, $compatible_code
+            $donor_id, $category, $color, $bust,
+            $waist,    $hip,      $arm,   $thigh,
+            $length,   $gender,   $compatible_code,
         ) = split /-/, $cloth;
 
         my %cloth_info = (
@@ -534,7 +533,6 @@ post '/clothes' => sub {
             arm             => $arm,
             thigh           => $thigh,
             length          => $length,
-            foot            => $foot,
             gender          => $gender || 1,    # TODO: should get from params
             compatible_code => $compatible_code,
         );
@@ -713,7 +711,7 @@ any [qw/put patch/] => '/clothes/:code' => sub {
 
     map {
         $cloth->$_($self->param($_)) if defined $self->param($_);
-    } qw/bust waist arm length foot/;
+    } qw/bust waist arm length/;
 
     $cloth->update;
     $self->respond_to(
@@ -1763,8 +1761,8 @@ __DATA__
                 %span.label.label-info.search-label
                   %a{:href => "#{url_with->query([p => 1, q => '//' . $c->arm . '/' . $status_id])}"}= $c->arm
               - }
-              - if ($c->foot) {
-                %span.label.label-info.search-label= $c->foot
+              - if ($c->length) {
+                %span.label.label-info.search-label= $c->length
               - }
 
             %span.label-holder
@@ -1824,7 +1822,7 @@ __DATA__
         %input{:type => 'text', :name => 'length', :value => '#{$cloth->length}', :placeholder => '기장'}
       - }
       - when ( /^(shoes)$/i ) {
-        %input{:type => 'text', :name => 'foot', :value => '#{$cloth->foot}', :placeholder => '발크기'}
+        %input{:type => 'text', :name => 'length', :value => '#{$cloth->length}', :placeholder => '발크기'}
       - }
     - }
     %input#btn-submit.btn.btn-sm{:type => 'submit', :value => 'Save Changes'}
@@ -1872,10 +1870,8 @@ __DATA__
         %span.label.label-info.search-label
           %a{:href => "#{url_with('/search')->query([q => '//' . $cloth->arm])}/1"}= $cloth->arm
       - }
-      - for my $column (qw/length foot/) {
-        - if ($cloth->$column) {
-          %span.label.label-info.search-label{:class => 'category-#{$column}'}= $cloth->$column
-        - }
+      - if ($cloth->length) {
+        %span.label.label-info.search-label= $cloth->length
       - }
     - if ($cloth->donor) {
       %h3= $cloth->donor->user->name
