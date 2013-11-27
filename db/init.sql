@@ -126,6 +126,7 @@ CREATE TABLE `cloth` (
   INDEX (`arm`),
   INDEX (`thigh`),
   INDEX (`length`),
+  INDEX (`category`),
   CONSTRAINT `fk_cloth1` FOREIGN KEY (`top_id`)    REFERENCES `cloth`  (`id`) ON DELETE CASCADE,
   CONSTRAINT `fk_cloth2` FOREIGN KEY (`bottom_id`) REFERENCES `cloth`  (`id`) ON DELETE CASCADE,
   CONSTRAINT `fk_cloth3` FOREIGN KEY (`donor_id`)  REFERENCES `donor`  (`id`) ON DELETE CASCADE,
