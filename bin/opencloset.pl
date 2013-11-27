@@ -108,22 +108,6 @@ helper sms2hr => sub {
     return { $sms->get_columns };
 };
 
-helper donor2hr => sub {
-    my ($self, $user) = @_;
-
-    my %columns;
-    if ($user->donor) {
-        %columns = ($user->get_columns, $user->donor->get_columns);
-    } else {
-        %columns = $user->get_columns;
-        map { $columns{$_} = undef } $DB->resultset('Donor')->result_source->columns;
-        $columns{user_id} = $user->id;
-    }
-
-    delete $columns{password};
-    return { %columns };
-};
-
 helper calc_overdue => sub {
     my ( $self, $target_dt, $return_dt ) = @_;
 
@@ -325,7 +309,7 @@ get '/new-borrower' => sub {
             id    => $q,
             name  => $q,
             phone => $q,
-            email => $q
+            email => $q,
         ],
     });
 
@@ -614,24 +598,26 @@ put '/clothes' => sub {
 get '/new-cloth' => sub {
     my $self = shift;
 
-    my $q      = $self->param('q') || '';
-    my $users = $DB->resultset('User')->search({
+    my $q  = $self->param('q') || q{};
+    my $rs = $DB->resultset('User')->search({
         -or => [
             id    => $q,
             name  => $q,
             phone => $q,
-            email => $q
+            email => $q,
         ],
     });
 
-    my @candidates;
-    while (my $user = $users->next) {
-        push @candidates, $self->donor2hr($user);
+    my @users;
+    while ( my $user = $rs->next ) {
+        my %data = ( $user->userinfo->get_columns, $user->get_columns );
+        delete @data{qw/ user_id password height weight bust waist hip thigh arm leg knee foot /};
+        push @users, \%data;
     }
 
     $self->respond_to(
-        json => { json => [@candidates] },
-        html => { template => 'new-cloth' }
+        json => { json     => \@users     },
+        html => { template => 'new-cloth' },
     );
 };
 
