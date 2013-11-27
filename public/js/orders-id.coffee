@@ -62,30 +62,30 @@ $ ->
 
   clothes = []
   $('.input-cloth').each (i, el) ->
-    clothes.push $(el).data('cloth-no')
+    clothes.push $(el).data('cloth-code')
 
-  $('#input-cloth-no').focus()
+  $('#input-cloth-code').focus()
 
-  $('#btn-cloth-no').click (e) ->
-    $('#form-cloth-no').trigger('submit')
-  $('#form-cloth-no').submit (e) ->
+  $('#btn-cloth-code').click (e) ->
+    $('#form-cloth-code').trigger('submit')
+  $('#form-cloth-code').submit (e) ->
     e.preventDefault()
-    cloth_no = $('#input-cloth-no').val()
-    $('#input-cloth-no').val('').focus()
+    cloth_code = $('#input-cloth-code').val()
+    $('#input-cloth-code').val('').focus()
     found = _.find clothes, (val) ->
-      val is cloth_no
-    return alert("Not found #{cloth_no}") unless found
-    $(".input-cloth[data-cloth-no=#{found}]").attr('checked', true)
+      val is cloth_code
+    return alert("Not found #{cloth_code}") unless found
+    $(".input-cloth[data-cloth-code=#{found}]").attr('checked', true)
 
   $('#form-return').submit (e) ->
-    clothes_no = []
+    clothes_code = []
     $('.input-cloth:not(:checked)').each (i, el) ->
-      clothes_no.push $(el).data('cloth-no')
-    console.log $.putUrlVars({ clothes : clothes_no.join() })
+      clothes_code.push $(el).data('cloth-code')
+    console.log $.putUrlVars({ clothes : clothes_code.join() })
     if $('.input-cloth').length isnt $('.input-cloth:checked').length
       if confirm('반납품목이 제대로 체크 되지 않았습니다. 계속하시겠습니까?')
         action = $('#form-return').attr('action')
-        $('#form-return').attr('action', "#{action}?#{$.putUrlVars({ missing_clothes : clothes_no.join() })}")
+        $('#form-return').attr('action', "#{action}?#{$.putUrlVars({ missing_clothes : clothes_code.join() })}")
         return true
       else
         return false

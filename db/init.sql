@@ -98,7 +98,7 @@ INSERT INTO `status` (`id`, `name`)
 CREATE TABLE `cloth` (
   `id`          INT UNSIGNED NOT NULL AUTO_INCREMENT,
 
-  `no`          VARCHAR(64) NOT NULL,     -- 바코드 품번
+  `code`        CHAR(5)     NOT NULL,     -- 바코드 품번
   `bust`        INT         DEFAULT NULL, -- 가슴 둘레(cm)
   `waist`       INT         DEFAULT NULL, -- 허리 둘레(cm)
   `hip`         INT         DEFAULT NULL, -- 엉덩이 둘레(cm)
@@ -119,7 +119,7 @@ CREATE TABLE `cloth` (
   `compatible_code` VARCHAR(32) DEFAULT NULL,
 
   PRIMARY KEY (`id`),
-  UNIQUE KEY (`no`),
+  UNIQUE KEY (`code`),
   INDEX (`bust`),
   INDEX (`waist`),
   INDEX (`hip`),

@@ -236,30 +236,30 @@ helper create_cloth => sub {
     my ($self, %info) = @_;
 
     #
-    # FIXME generate no
+    # FIXME generate code
     #
-    my $no;
+    my $code;
     {
         my $cloth = $DB->resultset('Cloth')->search(
             { category => $info{category} },
-            { order_by => { -desc => 'no' } },
+            { order_by => { -desc => 'code' } },
         )->next;
 
         my $index = 1;
         if ($cloth) {
-            $index = substr $cloth->no, -5, 5;
+            $index = substr $cloth->code, -5, 5;
             $index =~ s/^0+//;
             $index++;
         }
 
-        $no = sprintf '%05d', $index;
+        $code = sprintf '%05d', $index;
     }
 
     #
     # tune params to create clothes
     #
     my %params = (
-        no              => $no,
+        code            => $code,
         donor_id        => $self->param('donor_id') || undef,
         category        => $info{category},
         status_id       => $Opencloset::Constant::STATUS_AVAILABLE,
@@ -592,7 +592,7 @@ post '/clothes' => sub {
     ### response
     ###
     ## 여러개가 될 수 있으므로 Location 헤더는 생략
-    ## $self->res->headers->header('Location' => $self->url_for('/clothes/' . $cloth->no));
+    ## $self->res->headers->header('Location' => $self->url_for('/clothes/' . $cloth->code));
     $self->respond_to(
         json => { json => [map { $self->cloth2hr($_) } @clothes], status => 201 },
         html => sub {
@@ -652,11 +652,11 @@ get '/new-cloth' => sub {
 };
 
 
-get '/clothes/:no' => sub {
+get '/clothes/:code' => sub {
     my $self = shift;
-    my $no = $self->param('no');
-    my $cloth = $DB->resultset('Cloth')->find({ no => $no });
-    return $self->error(404, "Not found `$no`") unless $cloth;
+    my $code = $self->param('code');
+    my $cloth = $DB->resultset('Cloth')->find({ code => $code });
+    return $self->error(404, "Not found `$code`") unless $cloth;
 
     my $co_rs = $cloth->cloth_orders->search({
         'order.status_id' => { -in => [$Opencloset::Constant::STATUS_RENT, $cloth->status_id] },
@@ -667,7 +667,7 @@ get '/clothes/:no' => sub {
     unless ($co_rs) {
         $self->respond_to(
             json => { json => $self->cloth2hr($cloth) },
-            html => { template => 'clothes/no', cloth => $cloth }    # also, CODEREF is OK
+            html => { template => 'clothes/code', cloth => $cloth }    # also, CODEREF is OK
         );
         return;
     }
@@ -701,15 +701,15 @@ get '/clothes/:no' => sub {
 
     $self->respond_to(
         json => { json => { %columns } },
-        html => { template => 'clothes/no', cloth => $cloth }    # also, CODEREF is OK
+        html => { template => 'clothes/code', cloth => $cloth }    # also, CODEREF is OK
     );
 };
 
-any [qw/put patch/] => '/clothes/:no' => sub {
+any [qw/put patch/] => '/clothes/:code' => sub {
     my $self = shift;
-    my $no = $self->param('no');
-    my $cloth = $DB->resultset('Cloth')->find({ no => $no });
-    return $self->error(404, "Not found `$no`") unless $cloth;
+    my $code = $self->param('code');
+    my $cloth = $DB->resultset('Cloth')->find({ code => $code });
+    return $self->error(404, "Not found `$code`") unless $cloth;
 
     map {
         $cloth->$_($self->param($_)) if defined $self->param($_);
@@ -718,7 +718,7 @@ any [qw/put patch/] => '/clothes/:no' => sub {
     $cloth->update;
     $self->respond_to(
         json => { json => $self->cloth2hr($cloth) },
-        html => { template => 'clothes/no', cloth => $cloth }    # also, CODEREF is OK
+        html => { template => 'clothes/code', cloth => $cloth }    # also, CODEREF is OK
     );
 };
 
@@ -977,7 +977,7 @@ any [qw/post put patch/] => '/orders/:id' => sub {
         if ($missing_clothes) {
             $status_id = $Opencloset::Constant::STATUS_PARTIAL_RETURN;
             @missing_clothes = $DB->resultset('Cloth')->search({
-                'me.no' => { -in => [split(/,/, $missing_clothes)] }
+                'me.code' => { -in => [split(/,/, $missing_clothes)] }
             });
         }
     }
@@ -1197,7 +1197,7 @@ __DATA__
           <span class="lbl"></span>
         </label>
       </td>
-      <td> <a href="/clothes/<%= no %>"> <%= no %> </a> </td> <!-- 옷 -->
+      <td> <a href="/clothes/<%= code %>"> <%= code %> </a> </td> <!-- 옷 -->
       <td>
         <span class="order-status label">
           <%= status %>
@@ -1205,7 +1205,7 @@ __DATA__
         </span>
       </td> <!-- 상태 -->
       <td>
-        <% _.each(clothes, function(cloth) { %> <a href="/clothes/<%= cloth.no %>"><%= cloth.no %></a><% }); %>
+        <% _.each(clothes, function(cloth) { %> <a href="/clothes/<%= cloth.code %>"><%= cloth.code %></a><% }); %>
       </td> <!-- 묶음 -->
       <td>
         <a href="/orders/<%= order_id %>"><span class="label label-info arrowed-right arrowed-in">
@@ -1234,7 +1234,7 @@ __DATA__
           <span class="lbl"></span>
         </label>
       </td>
-      <td> <a href="/clothes/<%= no %>"> <%= no %> </a> </td> <!-- 옷 -->
+      <td> <a href="/clothes/<%= code %>"> <%= code %> </a> </td> <!-- 옷 -->
       <td> <span class="order-status label"><%= status %></span> </td> <!-- 상태 -->
       <td> </td> <!-- 묶음 -->
       <td> </td> <!-- 기타 -->
@@ -1741,13 +1741,13 @@ __DATA__
     %ul.ace-thumbnails
       - while (my $c = $clothes->next) {
         %li
-          %a{:href => '/clothes/#{$c->no}'}
-            %img{:src => 'http://placehold.it/160x160', :alt => '#{$c->no}'}
+          %a{:href => '/clothes/#{$c->code}'}
+            %img{:src => 'http://placehold.it/160x160', :alt => '#{$c->code}'}
 
           .tags-top-ltr
             %span.label-holder
               %span.label.label-warning.search-label
-                %a{:href => '/clothes/#{$c->no}'}= $c->no
+                %a{:href => '/clothes/#{$c->code}'}= $c->code
 
           .tags
             %span.label-holder
@@ -1801,12 +1801,12 @@ __DATA__
       = include 'pagination'
 
 
-@@ clothes/no.html.haml
-- layout 'default', jses => ['clothes-no.js'];
-- title 'clothes/' . $cloth->no;
+@@ clothes/code.html.haml
+- layout 'default', jses => ['clothes-code.js'];
+- title 'clothes/' . $cloth->code;
 
 %h1
-  %a{:href => ''}= $cloth->no
+  %a{:href => ''}= $cloth->code
   %span - #{$cloth->category}
 
 %form#edit
@@ -1850,14 +1850,14 @@ __DATA__
 
     %span
       - if ($cloth->top) {
-        %a{:href => '/clothes/#{$cloth->top->no}'}= $cloth->top->no
+        %a{:href => '/clothes/#{$cloth->top->code}'}= $cloth->top->code
       - }
       - if ($cloth->bottom) {
-        %a{:href => '/clothes/#{$cloth->bottom->no}'}= $cloth->bottom->no
+        %a{:href => '/clothes/#{$cloth->bottom->code}'}= $cloth->bottom->code
       - }
 
     %div
-      %img.img-polaroid{:src => 'http://placehold.it/200x200', :alt => '#{$cloth->no}'}
+      %img.img-polaroid{:src => 'http://placehold.it/200x200', :alt => '#{$cloth->code}'}
 
     %div
       - if ($cloth->bust) {
@@ -2029,7 +2029,7 @@ __DATA__
           <span class="lbl"></span>
         </label>
       </td>
-      <td> <a href="/clothes/<%= no %>"> <%= no %> </a> </td> <!-- 옷 -->
+      <td> <a href="/clothes/<%= code %>"> <%= code %> </a> </td> <!-- 옷 -->
       <td>
         <span class="order-status label">
           <%= status %>
@@ -2058,7 +2058,7 @@ __DATA__
           <span class="lbl"></span>
         </label>
       </td>
-      <td> <a href="/clothes/<%= no %>"> <%= no %> </a> </td> <!-- 옷 -->
+      <td> <a href="/clothes/<%= code %>"> <%= code %> </a> </td> <!-- 옷 -->
       <td> <span class="order-status label"><%= status %></span> </td> <!-- 상태 -->
       <td>
         <span><%= category %></span>
@@ -2136,7 +2136,7 @@ __DATA__
           %td
             - for my $c ( $order->cloths ) {
               %span
-                %a{ :href => '/clothes/#{$c->no}' }= $c->category
+                %a{ :href => '/clothes/#{$c->code}' }= $c->category
             - }
       - }
 
@@ -2166,17 +2166,17 @@ __DATA__
       - $loop++;
       - if ($loop == 1) {
         %span
-          %a{:href => '/clothes/#{$cloth->no}'}= $cloth->category
+          %a{:href => '/clothes/#{$cloth->code}'}= $cloth->category
           %small.highlight= commify($cloth->price)
       - } elsif ($loop == 2) {
         %span
           with
-          %a{:href => '/clothes/#{$cloth->no}'}= $cloth->category
+          %a{:href => '/clothes/#{$cloth->code}'}= $cloth->category
           %small.highlight= commify($cloth->price)
       - } else {
         %span
           ,
-          %a{:href => '/clothes/#{$cloth->no}'}= $cloth->category
+          %a{:href => '/clothes/#{$cloth->code}'}= $cloth->category
           %small.highlight= commify($cloth->price)
       - }
     - }
@@ -2296,15 +2296,15 @@ __DATA__
 %div.pull-right= include 'guests/breadcrumb', guest => $order->guest, status_id => ''
 %p.text-info 반납품목을 확인해주세요
 #clothes-category
-  %form#form-cloth-no
+  %form#form-cloth-code
     %fieldset
       .input-append
-        %input#input-cloth-no.input-large{:type => 'text', :placeholder => '품번'}
-        %button#btn-cloth-no.btn{:type => 'button'} 입력
+        %input#input-cloth-code.input-large{:type => 'text', :placeholder => '품번'}
+        %button#btn-cloth-code.btn{:type => 'button'} 입력
       - for my $cloth (@$clothes) {
         %label.checkbox
-          %input.input-cloth{:type => 'checkbox', :data-cloth-no => '#{$cloth->no}'}
-          %a{:href => '/clothes/#{$cloth->no}'}= $cloth->category
+          %input.input-cloth{:type => 'checkbox', :data-cloth-code => '#{$cloth->code}'}
+          %a{:href => '/clothes/#{$cloth->code}'}= $cloth->category
           %small.highlight= commify($cloth->price)
       - }
 %div= include 'partial/order_info'
@@ -2358,7 +2358,7 @@ __DATA__
 
 - for my $cloth (@$clothes) {
   %p
-    %a{:href => '/clothes/#{$cloth->no}'}= $cloth->category
+    %a{:href => '/clothes/#{$cloth->code}'}= $cloth->category
     %small.highlight= commify($cloth->price)
 - }
 
@@ -2376,19 +2376,19 @@ __DATA__
 %p= include 'partial/status_label'
 %div.pull-right= include 'guests/breadcrumb', guest => $order->guest, status_id => ''
 #clothes-category
-  %form#form-cloth-no
+  %form#form-cloth-code
     %fieldset
       .input-append
-        %input#input-cloth-no.input-large{:type => 'text', :placeholder => '품번'}
-        %button#btn-cloth-no.btn{:type => 'button'} 입력
+        %input#input-cloth-code.input-large{:type => 'text', :placeholder => '품번'}
+        %button#btn-cloth-code.btn{:type => 'button'} 입력
       - for my $cloth (@$clothes) {
         %label.checkbox
           - if ($cloth->status_id != $Opencloset::Constant::STATUS_PARTIAL_RETURN) {
-            %input.input-cloth{:type => 'checkbox', :checked => 'checked', :data-cloth-no => '#{$cloth->no}'}
+            %input.input-cloth{:type => 'checkbox', :checked => 'checked', :data-cloth-code => '#{$cloth->code}'}
           - } else {
-            %input.input-cloth{:type => 'checkbox', :data-cloth-no => '#{$cloth->no}'}
+            %input.input-cloth{:type => 'checkbox', :data-cloth-code => '#{$cloth->code}'}
           - }
-          %a{:href => '/clothes/#{$cloth->no}'}= $cloth->category
+          %a{:href => '/clothes/#{$cloth->code}'}= $cloth->category
           %small.highlight= commify($cloth->price)
       - }
 %div= include 'partial/order_info'

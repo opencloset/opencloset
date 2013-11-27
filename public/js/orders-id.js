@@ -74,39 +74,39 @@
     });
     clothes = [];
     $('.input-cloth').each(function(i, el) {
-      return clothes.push($(el).data('cloth-no'));
+      return clothes.push($(el).data('cloth-code'));
     });
-    $('#input-cloth-no').focus();
-    $('#btn-cloth-no').click(function(e) {
-      return $('#form-cloth-no').trigger('submit');
+    $('#input-cloth-code').focus();
+    $('#btn-cloth-code').click(function(e) {
+      return $('#form-cloth-code').trigger('submit');
     });
-    $('#form-cloth-no').submit(function(e) {
-      var cloth_no, found;
+    $('#form-cloth-code').submit(function(e) {
+      var cloth_code, found;
       e.preventDefault();
-      cloth_no = $('#input-cloth-no').val();
-      $('#input-cloth-no').val('').focus();
+      cloth_code = $('#input-cloth-code').val();
+      $('#input-cloth-code').val('').focus();
       found = _.find(clothes, function(val) {
-        return val === cloth_no;
+        return val === cloth_code;
       });
       if (!found) {
-        return alert("Not found " + cloth_no);
+        return alert("Not found " + cloth_code);
       }
-      return $(".input-cloth[data-cloth-no=" + found + "]").attr('checked', true);
+      return $(".input-cloth[data-cloth-code=" + found + "]").attr('checked', true);
     });
     return $('#form-return').submit(function(e) {
-      var action, clothes_no;
-      clothes_no = [];
+      var action, clothes_code;
+      clothes_code = [];
       $('.input-cloth:not(:checked)').each(function(i, el) {
-        return clothes_no.push($(el).data('cloth-no'));
+        return clothes_code.push($(el).data('cloth-code'));
       });
       console.log($.putUrlVars({
-        clothes: clothes_no.join()
+        clothes: clothes_code.join()
       }));
       if ($('.input-cloth').length !== $('.input-cloth:checked').length) {
         if (confirm('반납품목이 제대로 체크 되지 않았습니다. 계속하시겠습니까?')) {
           action = $('#form-return').attr('action');
           $('#form-return').attr('action', "" + action + "?" + ($.putUrlVars({
-            missing_clothes: clothes_no.join()
+            missing_clothes: clothes_code.join()
           })));
           return true;
         } else {
