@@ -24,7 +24,9 @@
         dataType: 'json',
         success: function(data, textStatus, jqXHR) {
           var $html, compiled, html;
-          if (!/^(대여중|연체중|부분반납)/.test(data.status)) {
+          console.log(data);
+          console.log(data.status);
+          if (data.status === '대여가능') {
             if ($("#cloth-table table tbody tr[data-cloth-id='" + data.id + "']").length) {
               return;
             }
@@ -41,7 +43,7 @@
             }
             compiled = _.template($('#tpl-row-checkbox-disabled').html());
             $html = $(compiled(data));
-            if (/연체중/.test(data.status)) {
+            if (/대여중/.test(data.status)) {
               $html.find('.order-status').addClass('label-important');
             }
             if (data.overdue) {

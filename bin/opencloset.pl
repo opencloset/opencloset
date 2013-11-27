@@ -1,5 +1,6 @@
 #!/usr/bin/env perl
 
+use v5.14;
 use Mojolicious::Lite;
 
 use Data::Pageset;
@@ -54,26 +55,22 @@ helper cloth_validator => sub {
     my $self = shift;
 
     my $validator = $self->create_validator;
-    $validator->field('category_id')->required(1);
+    $validator->field('category')->required(1);
     $validator->field('gender')->required(1)->regexp(qr/^[123]$/);
 
-    # Jacket
-    $validator->when('category_id')->regexp(qr/^(-1|-2|1)$/)
-        ->then(sub { shift->field('bust')->required(1) });
-    $validator->when('category_id')->regexp(qr/^(-1|-2|1)$/)
-        ->then(sub { shift->field('arm')->required(1) });
+    # jacket
+    $validator->when('category')->regexp(qr/jacket/)
+        ->then(sub { shift->field(qw/ bust arm /)->required(1) });
 
-    # Pants, Skirts
-    $validator->when('category_id')->regexp(qr/^(-1|-2|2|10)$/)
-        ->then(sub { shift->field('waist')->required(1) });
-    $validator->when('category_id')->regexp(qr/^(-1|-2|2|10)$/)
-        ->then(sub { shift->field('length')->required(1) });
+    # pants, skirts
+    $validator->when('category')->regexp(qr/(pants|skirt)/)
+        ->then(sub { shift->field(qw/ waist length /)->required(1) });
 
-    # Shoes
-    $validator->when('category_id')->regexp(qr/^4$/)
+    # shoes
+    $validator->when('category')->regexp(qr/^shoes$/)
         ->then(sub { shift->field('foot')->required(1) });
 
-    $validator->field([qw/bust waist arm length foot/])
+    $validator->field(qw/ bust waist hip arm length foot /)
         ->each(sub { shift->regexp(qr/^\d+$/) });
 
     return $validator;
@@ -85,8 +82,8 @@ helper cloth2hr => sub {
     return {
         $cloth->get_columns,
         donor    => $cloth->donor ? $cloth->donor->user->name : '',
-        category => $cloth->category->name,
-        price    => $self->commify($cloth->category->price),
+        category => $cloth->category,
+        price    => $self->commify($cloth->price),
         status   => $cloth->status->name,
     };
 };
@@ -238,43 +235,50 @@ helper create_donor => sub {
 helper create_cloth => sub {
     my ($self, %info) = @_;
 
-    ## generate no
-    my $category = $DB->resultset('Category')->find({ id => $info{category_id} });
-    return unless $category;
+    #
+    # FIXME generate no
+    #
+    my $no;
+    {
+        my $cloth = $DB->resultset('Cloth')->search(
+            { category => $info{category} },
+            { order_by => { -desc => 'no' } },
+        )->next;
 
-    my $cloth = $DB->resultset('Cloth')->search({
-        category_id => $info{category_id}
-    }, {
-        order_by => { -desc => 'no' }
-    })->next;
+        my $index = 1;
+        if ($cloth) {
+            $index = substr $cloth->no, -5, 5;
+            $index =~ s/^0+//;
+            $index++;
+        }
 
-    my $index = 1;
-    if ($cloth) {
-        $index = substr $cloth->no, -5, 5;
-        $index =~ s/^0+//;
-        $index++;
+        $no = sprintf '%05d', $index;
     }
 
-    my $no = sprintf "%s%05d", $category->abbr, $index;
+    #
+    # tune params to create clothes
+    #
+    my %params = (
+        no              => $no,
+        donor_id        => $self->param('donor_id') || undef,
+        category        => $info{category},
+        status_id       => $Opencloset::Constant::STATUS_AVAILABLE,
+        gender          => $info{gender},
+        color           => $info{color},
+        compatible_code => $info{compatible_code},
+    );
+    {
+        no warnings 'experimental';
 
-    my %params;
-    if ($category->which eq 'top') {
-        map { $params{$_} = $info{$_} } qw/bust arm/;
-    } elsif ($category->which eq 'bottom') {
-        map { $params{$_} = $info{$_} } qw/waist length/;
-    } elsif ($category->which eq 'onepiece') {
-        map { $params{$_} = $info{$_} } qw/bust waist length/;
-    } elsif ($category->which eq 'foot') {
-        map { $params{$_} = $info{$_} } qw/foot/;
+        my @keys;
+        given ( $info{category} ) {
+            @keys = qw( bust arm )          when /^(jacket|shirt|waistcoat|coat|blouse)$/i;
+            @keys = qw( waist length )      when /^(pants|skirt)$/i;
+            @keys = qw( bust waist length ) when /^(onepiece)$/i;
+            @keys = qw( foot )              when /^(foot)$/i;
+        }
+        map { $params{$_} = $info{$_} } @keys;
     }
-
-    $params{no}              = $no;
-    $params{donor_id}        = $self->param('donor_id') || undef;
-    $params{category_id}     = $info{category_id};
-    $params{status_id}       = $Opencloset::Constant::STATUS_AVAILABLE;
-    $params{gender}          = $info{gender};
-    $params{color}           = $info{color};
-    $params{compatible_code} = $info{compatible_code};
 
     my $new_cloth = $DB->resultset('Cloth')->find_or_create(\%params);
     return unless $new_cloth;
@@ -283,23 +287,25 @@ helper create_cloth => sub {
     my $compatible_code = $new_cloth->compatible_code;
     $compatible_code =~ s/[A-Z]/_/g;
     my $top_or_bottom = $DB->resultset('Cloth')->search({
-        category_id     => { '!=' => $new_cloth->category_id },
+        category        => { '!=' => $new_cloth->category },
         compatible_code => { like => $compatible_code },
     })->next;
 
-    if ($top_or_bottom && $top_or_bottom->category->which) {
-        my $which = $top_or_bottom->category->which;
-        if ($which eq 'top') {
-            $new_cloth->top_id($top_or_bottom->id);
-            $top_or_bottom->bottom_id($new_cloth->id);
-            $new_cloth->update;
-            $top_or_bottom->update;
-        }
-        elsif ($which eq 'bottom') {
-            $new_cloth->bottom_id($top_or_bottom->id);
-            $top_or_bottom->top_id($new_cloth->id);
-            $new_cloth->update;
-            $top_or_bottom->update;
+    if ($top_or_bottom) {
+        no warnings 'experimental';
+        given ( $top_or_bottom->category ) {
+            when ( /^(jacket|shirt|waistcoat|coat|blouse)$/i ) {
+                $new_cloth->top_id($top_or_bottom->id);
+                $top_or_bottom->bottom_id($new_cloth->id);
+                $new_cloth->update;
+                $top_or_bottom->update;
+            }
+            when ( /^(pants|skirt)$/i ) {
+                $new_cloth->bottom_id($top_or_bottom->id);
+                $top_or_bottom->top_id($new_cloth->id);
+                $new_cloth->update;
+                $top_or_bottom->update;
+            }
         }
     }
 
@@ -310,17 +316,17 @@ helper _q => sub {
     my ($self, %params) = @_;
 
     my $q = $self->param('q') || q{};
-    my ($bust, $waist, $arm, $status_id, $category_id) = split /\//, $q;
+    my ( $bust, $waist, $arm, $status_id, $category ) = split /\//, $q;
     my %q = (
-        bust     => $bust        || '',
-        waist    => $waist       || '',
-        arm      => $arm         || '',
-        status   => $status_id   || '',
-        category => $category_id || '',
+        bust     => $bust      || '',
+        waist    => $waist     || '',
+        arm      => $arm       || '',
+        status   => $status_id || '',
+        category => $category  || '',
         %params,
     );
 
-    return join('/', ($q{bust}, $q{waist}, $q{arm}, $q{status}, $q{category}));
+    return join '/', ( $q{bust}, $q{waist}, $q{arm}, $q{status}, $q{category} );
 };
 
 get '/'      => 'home';
@@ -479,22 +485,21 @@ post '/clothes' => sub {
     ###
     ### validate
     ###
-    for my $_cloth_list (@cloth_list) {
-        my $cloth_list = $_cloth_list;
-        my $is_negative;
-        if ( $cloth_list =~ s/^(\d*)--(\d+)/$1-$2/ ) {
-            $is_negative = 1;
-        }
-        my ( $donor_id, $category_id, $color, $bust, $waist, $hip, $arm, $length, $foot, $gender, $compatible_code ) = split /-/, $cloth_list;
-        $category_id = -($category_id) if $is_negative;
+    for my $cloth (@cloth_list) {
+        my (
+            $donor_id, $category, $color,  $bust,
+            $waist,    $hip,      $arm,    $thigh,
+            $length,   $foot,     $gender, $compatible_code
+        ) = split /-/, $cloth;
 
         my $is_valid = $self->validate($validator, {
-            category_id     => $category_id,
+            category        => $category,
             color           => $color,
             bust            => $bust,
             waist           => $waist,
             hip             => $hip,
             arm             => $arm,
+            thigh           => $thigh,
             length          => $length,
             foot            => $foot,
             gender          => $gender || 1,    # TODO: should get from params
@@ -514,14 +519,12 @@ post '/clothes' => sub {
     ### create
     ###
     my @clothes;
-    for my $_cloth_list (@cloth_list) {
-        my $cloth_list = $_cloth_list;
-        my $is_negative;
-        if ( $cloth_list =~ s/^(\d*)--(\d+)/$1-$2/ ) {
-            $is_negative = 1;
-        }
-        my ( $donor_id, $category_id, $color, $bust, $waist, $hip, $arm, $length, $foot, $gender, $compatible_code ) = split /-/, $cloth_list;
-        $category_id = -($category_id) if $is_negative;
+    for my $cloth (@cloth_list) {
+        my (
+            $donor_id, $category, $color,  $bust,
+            $waist,    $hip,      $arm,    $thigh,
+            $length,   $foot,     $gender, $compatible_code
+        ) = split /-/, $cloth;
 
         my %cloth_info = (
             color           => $color,
@@ -529,45 +532,59 @@ post '/clothes' => sub {
             waist           => $waist,
             hip             => $hip,
             arm             => $arm,
+            thigh           => $thigh,
             length          => $length,
             foot            => $foot,
             gender          => $gender || 1,    # TODO: should get from params
             compatible_code => $compatible_code,
         );
 
-        my $cid = $category_id;
+        #
+        # TRANSACTION
+        #
         my $guard = $DB->txn_scope_guard;
-        # BEGIN TRANSACTION ~
-        if ($cid == $Opencloset::Constant::CATEOGORY_JACKET_PANTS ||
-                $cid == $Opencloset::Constant::CATEOGORY_JACKET_SKIRT) {
-            $cloth_info{category_id} = $Opencloset::Constant::CATEOGORY_JACKET;
-            my $top = $self->create_cloth(%cloth_info);
-            my $bot_category_id = $cid == $Opencloset::Constant::CATEOGORY_JACKET_PANTS ?
-                $Opencloset::Constant::CATEOGORY_PANTS : $Opencloset::Constant::CATEOGORY_SKIRT;
-            $cloth_info{category_id} = $bot_category_id;
-            my $bot = $self->create_cloth(%cloth_info);
-            return $self->error(500, 'failed to create a new cloth') unless ($top && $bot);
+        if ( $category =~ m/jacket/ && $category =~ m/pants/ ) {
+            my $c1 = $self->create_cloth( %cloth_info, category => 'jacket' );
+            my $c2 = $self->create_cloth( %cloth_info, category => 'pants'  );
+            return $self->error(500, '!!! failed to create a new cloth') unless ($c1 && $c2);
 
             if ($donor_id) {
-                $top->create_related('donor_cloths', { donor_id => $donor_id });
-                $bot->create_related('donor_cloths', { donor_id => $donor_id });
+                $c1->create_related('donor_cloths', { donor_id => $donor_id });
+                $c2->create_related('donor_cloths', { donor_id => $donor_id });
             }
-            $top->bottom_id($bot->id);
-            $bot->top_id($top->id);
-            $top->update;
-            $bot->update;
-            push @clothes, $top, $bot;
-        } else {
-            $cloth_info{category_id} = $cid;
-            my $cloth = $self->create_cloth(%cloth_info);
-            return $self->error(500, 'failed to create a new cloth') unless $cloth;
 
-            if ($donor_id) {
-                $cloth->create_related('donor_cloths', { donor_id => $donor_id });
-            }
-            push @clothes, $cloth;
+            $c1->bottom_id($c2->id);
+            $c2->top_id($c1->id);
+            $c1->update;
+            $c2->update;
+
+            push @clothes, $c1, $c2;
         }
-        # ~ COMMIT
+        elsif ( $category =~ m/jacket/ && $category =~ m/skirt/ ) {
+            my $c1 = $self->create_cloth( %cloth_info, category => 'jacket' );
+            my $c2 = $self->create_cloth( %cloth_info, category => 'skirt'  );
+            return $self->error(500, '!!! failed to create a new cloth') unless ($c1 && $c2);
+
+            if ($donor_id) {
+                $c1->create_related('donor_cloths', { donor_id => $donor_id });
+                $c2->create_related('donor_cloths', { donor_id => $donor_id });
+            }
+
+            $c1->bottom_id($c2->id);
+            $c2->top_id($c1->id);
+            $c1->update;
+            $c2->update;
+
+            push @clothes, $c1, $c2;
+        } else {
+            my $c = $self->create_cloth(%cloth_info);
+            return $self->error(500, '--- failed to create a new cloth') unless $c;
+
+            if ($donor_id) {
+                $c->create_related('donor_cloths', { donor_id => $donor_id });
+            }
+            push @clothes, $c;
+        }
         $guard->commit;
     }
 
@@ -682,9 +699,6 @@ get '/clothes/:no' => sub {
         clothes     => \@with,
     );
 
-    $columns{status} = $DB->resultset('Status')->find({ id => 6 })->name
-        if $overdue;    # 6: 연체중, 한글을 쓰면 `utf8` pragma 를 써줘야 해서..
-
     $self->respond_to(
         json => { json => { %columns } },
         html => { template => 'clothes/no', cloth => $cloth }    # also, CODEREF is OK
@@ -718,14 +732,16 @@ get '/search' => sub {
 
     my $guest    = $gid ? $DB->resultset('Guest')->find({ id => $gid }) : undef;
     my $cond = {};
-    my ($bust, $waist, $arm, $status_id, $category_id) = split /\//, $q;
-    $category_id = $Opencloset::Constant::CATEOGORY_JACKET unless $category_id;
-    $cond->{'me.category_id'} = $category_id;
-    $cond->{'me.bust'}        = { '>=' => $bust  } if $bust;
-    $cond->{'bottom.waist'}   = { '>=' => $waist } if $waist;
-    $cond->{'me.arm'}         = { '>=' => $arm   } if $arm;
-    $cond->{'me.status_id'}   = $status_id         if $status_id;
-    $cond->{'me.color'}       = $color             if $color;
+    my ( $bust, $waist, $arm, $status_id, $category ) = split /\//, $q;
+    $status_id ||= 0;
+    $category  ||= 'jacket';
+
+    $cond->{'me.category'}  = $category;
+    $cond->{'me.bust'}      = { '>=' => $bust  } if $bust;
+    $cond->{'bottom.waist'} = { '>=' => $waist } if $waist;
+    $cond->{'me.arm'}       = { '>=' => $arm   } if $arm;
+    $cond->{'me.status_id'} = $status_id         if $status_id;
+    $cond->{'me.color'}     = $color             if $color;
 
     ### row, current_page, count
     my $clothes = $DB->resultset('Cloth')->search(
@@ -746,14 +762,14 @@ get '/search' => sub {
     });
 
     $self->stash(
-        q           => $q,
-        gid         => $gid,
-        guest       => $guest,
-        clothes     => $clothes,
-        pageset     => $pageset,
-        status_id   => $status_id || 0,
-        category_id => $category_id,
-        color       => $color || q{},
+        q         => $q,
+        gid       => $gid,
+        guest     => $guest,
+        clothes   => $clothes,
+        pageset   => $pageset,
+        status_id => $status_id,
+        category  => $category,
+        color     => $color,
     );
 };
 
@@ -869,15 +885,13 @@ get '/orders/:id' => sub {
     my @clothes = $order->cloths;
     my $price = 0;
     for my $cloth (@clothes) {
-        $price += $cloth->category->price;
+        $price += $cloth->price;
     }
 
     my $overdue  = $self->calc_overdue($order->target_date);
     my $late_fee = $self->calc_late_fee($order);
 
-    my $c_jacket = $DB->resultset('Category')->find({ name => 'jacket' });
-    my $cond = { category_id => $c_jacket->id };
-    my $cloth = $order->cloths($cond)->next;
+    my $cloth = $order->cloths({ category => 'jacket' })->next;
 
     my $satisfaction;
     if ($cloth) {
@@ -981,16 +995,19 @@ any [qw/post put patch/] => '/orders/:id' => sub {
     for my $cloth ($order->cloths) {
         if ($order->status_id == $Opencloset::Constant::STATUS_RENT) {
             $cloth->status_id($Opencloset::Constant::STATUS_RENT);
-        } else {
+        }
+        else {
             next if grep { $cloth->id == $_->id } @missing_clothes;
-            if ($cloth->category_id == $Opencloset::Constant::CATEOGORY_SHOES ||
-                  $cloth->category_id == $Opencloset::Constant::CATEOGORY_TIE ||
-                  $cloth->category_id == $Opencloset::Constant::CATEOGORY_HAT) {
-                $cloth->status_id($Opencloset::Constant::STATUS_AVAILABLE);    # Shoes, Tie, Hat
-            } else {
-                # otherwise
-                if ($cloth->status_id != $Opencloset::Constant::STATUS_AVAILABLE) {
-                    $cloth->status_id($Opencloset::Constant::STATUS_WASHING);
+
+            no warnings 'experimental';
+            given ( $cloth->category ) {
+                when ( /^(shoes|tie|hat)$/i ) {
+                    $cloth->status_id($Opencloset::Constant::STATUS_AVAILABLE);    # Shoes, Tie, Hat
+                }
+                default {
+                    if ($cloth->status_id != $Opencloset::Constant::STATUS_AVAILABLE) {
+                        $cloth->status_id($Opencloset::Constant::STATUS_WASHING);
+                    }
                 }
             }
         }
@@ -1009,9 +1026,7 @@ any [qw/post put patch/] => '/orders/:id' => sub {
 
     if (values %satisfaction) {
         # $order
-        my $c_jacket = $DB->resultset('Category')->find({ name => 'jacket' });
-        my $cond = { category_id => $c_jacket->id };
-        my $cloth = $order->cloths($cond)->next;
+        my $cloth = $order->cloths({ category => 'jacket' })->next;
         if ($cloth) {
             $DB->resultset('Satisfaction')->update_or_create({
                 %satisfaction,
@@ -1662,37 +1677,29 @@ __DATA__
       %span{:class => "#{$status_id == 2 ? 'highlight' : ''}"}
         %a{:href => "#{url_with->query(q => _q(status => 2))}"} 2: 대여중
       %span{:class => "#{$status_id == 3 ? 'highlight' : ''}"}
-        %a{:href => "#{url_with->query(q => _q(status => 3))}"} 3: 세탁
+        %a{:href => "#{url_with->query(q => _q(status => 3))}"} 3: 대여불가
       %span{:class => "#{$status_id == 4 ? 'highlight' : ''}"}
-        %a{:href => "#{url_with->query(q => _q(status => 4))}"} 4: 수선
+        %a{:href => "#{url_with->query(q => _q(status => 4))}"} 4: 예약
       %span{:class => "#{$status_id == 5 ? 'highlight' : ''}"}
-        %a{:href => "#{url_with->query(q => _q(status => 5))}"} 5: 대여불가
+        %a{:href => "#{url_with->query(q => _q(status => 5))}"} 5: 세탁
+      %span{:class => "#{$status_id == 6 ? 'highlight' : ''}"}
+        %a{:href => "#{url_with->query(q => _q(status => 6))}"} 6: 수선
       %span{:class => "#{$status_id == 7 ? 'highlight' : ''}"}
         %a{:href => "#{url_with->query(q => _q(status => 7))}"} 7: 분실
+      %span{:class => "#{$status_id == 8 ? 'highlight' : ''}"}
+        %a{:href => "#{url_with->query(q => _q(status => 8))}"} 8: 폐기
+      %span{:class => "#{$status_id == 9 ? 'highlight' : ''}"}
+        %a{:href => "#{url_with->query(q => _q(status => 9))}"} 9: 반납
+      %span{:class => "#{$status_id == 10 ? 'highlight' : ''}"}
+        %a{:href => "#{url_with->query(q => _q(status => 10))}"} 10: 부분반납
+      %span{:class => "#{$status_id == 11 ? 'highlight' : ''}"}
+        %a{:href => "#{url_with->query(q => _q(status => 11))}"} 11: 반납배송중
     %p.muted
       %span.text-info 종류
-      %span{:class => "#{$category_id == 1 ? 'highlight' : ''}"}
-        %a{:href => "#{url_with->query(q => _q(category => 1))}"} 1: Jacket
-      %span{:class => "#{$category_id == 2 ? 'highlight' : ''}"}
-        %a{:href => "#{url_with->query(q => _q(category => 2))}"} 2: Pants
-      %span{:class => "#{$category_id == 3 ? 'highlight' : ''}"}
-        %a{:href => "#{url_with->query(q => _q(category => 3))}"} 3: Shirts
-      %span{:class => "#{$category_id == 4 ? 'highlight' : ''}"}
-        %a{:href => "#{url_with->query(q => _q(category => 4))}"} 4: Shoes
-      %span{:class => "#{$category_id == 5 ? 'highlight' : ''}"}
-        %a{:href => "#{url_with->query(q => _q(category => 5))}"} 5: Hat
-      %span{:class => "#{$category_id == 6 ? 'highlight' : ''}"}
-        %a{:href => "#{url_with->query(q => _q(category => 6))}"} 6: Tie
-      %span{:class => "#{$category_id == 7 ? 'highlight' : ''}"}
-        %a{:href => "#{url_with->query(q => _q(category => 7))}"} 7: Waistcoat
-      %span{:class => "#{$category_id == 8 ? 'highlight' : ''}"}
-        %a{:href => "#{url_with->query(q => _q(category => 8))}"} 8: Coat
-      %span{:class => "#{$category_id == 9 ? 'highlight' : ''}"}
-        %a{:href => "#{url_with->query(q => _q(category => 9))}"} 9: Onepiece
-      %span{:class => "#{$category_id == 10 ? 'highlight' : ''}"}
-        %a{:href => "#{url_with->query(q => _q(category => 10))}"} 10: Skirt
-      %span{:class => "#{$category_id == 11 ? 'highlight' : ''}"}
-        %a{:href => "#{url_with->query(q => _q(category => 11))}"} 11: Blouse
+      - for (qw/ jacket pants shirt shoes hat tie waistcoat coat onepiece skirt blouse /) {
+        %span{:class => "#{$category eq $_ ? 'highlight' : ''}"}
+          %a{:href => "#{url_with->query(q => _q(category => $_))}"}= $_
+      - }
 
 .row
   .col-xs-12
@@ -1800,19 +1807,25 @@ __DATA__
 
 %h1
   %a{:href => ''}= $cloth->no
-  %span - #{$cloth->category->name}
+  %span - #{$cloth->category}
 
 %form#edit
   %a#btn-edit.btn.btn-sm{:href => '#'} edit
   #input-edit{:style => 'display: none'}
-    - if ($cloth->category->which eq 'top') {
-      %input{:type => 'text', :name => 'bust', :value => '#{$cloth->bust}', :placeholder => '가슴둘레'}
-      %input{:type => 'text', :name => 'arm', :value => '#{$cloth->arm}', :placeholder => '팔길이'}
-    - } elsif ($cloth->category->which eq 'bottom') {
-      %input{:type => 'text', :name => 'waist', :value => '#{$cloth->waist}', :placeholder => '허리둘레'}
-      %input{:type => 'text', :name => 'length', :value => '#{$cloth->length}', :placeholder => '기장'}
-    - } elsif ($cloth->category->which eq 'foot') {
-      %input{:type => 'text', :name => 'foot', :value => '#{$cloth->foot}', :placeholder => '발크기'}
+    - use v5.14;
+    - no warnings 'experimental';
+    - given ( $cloth->category ) {
+      - when ( /^(jacket|shirt|waistcoat|coat|blouse)$/i ) {
+        %input{:type => 'text', :name => 'bust', :value => '#{$cloth->bust}', :placeholder => '가슴둘레'}
+        %input{:type => 'text', :name => 'arm',  :value => '#{$cloth->arm}',  :placeholder => '팔길이'}
+      - }
+      - when ( /^(pants|skirt)$/i ) {
+        %input{:type => 'text', :name => 'waist',  :value => '#{$cloth->waist}',  :placeholder => '허리둘레'}
+        %input{:type => 'text', :name => 'length', :value => '#{$cloth->length}', :placeholder => '기장'}
+      - }
+      - when ( /^(shoes)$/i ) {
+        %input{:type => 'text', :name => 'foot', :value => '#{$cloth->foot}', :placeholder => '발크기'}
+      - }
     - }
     %input#btn-submit.btn.btn-sm{:type => 'submit', :value => 'Save Changes'}
     %a#btn-cancel.btn.btn-sm{:href => '#'} Cancel
@@ -2123,7 +2136,7 @@ __DATA__
           %td
             - for my $c ( $order->cloths ) {
               %span
-                %a{ :href => '/clothes/#{$c->no}' }= $c->category->name
+                %a{ :href => '/clothes/#{$c->no}' }= $c->category
             - }
       - }
 
@@ -2153,18 +2166,18 @@ __DATA__
       - $loop++;
       - if ($loop == 1) {
         %span
-          %a{:href => '/clothes/#{$cloth->no}'}= $cloth->category->name
-          %small.highlight= commify($cloth->category->price)
+          %a{:href => '/clothes/#{$cloth->no}'}= $cloth->category
+          %small.highlight= commify($cloth->price)
       - } elsif ($loop == 2) {
         %span
           with
-          %a{:href => '/clothes/#{$cloth->no}'}= $cloth->category->name
-          %small.highlight= commify($cloth->category->price)
+          %a{:href => '/clothes/#{$cloth->no}'}= $cloth->category
+          %small.highlight= commify($cloth->price)
       - } else {
         %span
           ,
-          %a{:href => '/clothes/#{$cloth->no}'}= $cloth->category->name
-          %small.highlight= commify($cloth->category->price)
+          %a{:href => '/clothes/#{$cloth->no}'}= $cloth->category
+          %small.highlight= commify($cloth->price)
       - }
     - }
   .control-group
@@ -2291,8 +2304,8 @@ __DATA__
       - for my $cloth (@$clothes) {
         %label.checkbox
           %input.input-cloth{:type => 'checkbox', :data-cloth-no => '#{$cloth->no}'}
-          %a{:href => '/clothes/#{$cloth->no}'}= $cloth->category->name
-          %small.highlight= commify($cloth->category->price)
+          %a{:href => '/clothes/#{$cloth->no}'}= $cloth->category
+          %small.highlight= commify($cloth->price)
       - }
 %div= include 'partial/order_info'
 
@@ -2345,8 +2358,8 @@ __DATA__
 
 - for my $cloth (@$clothes) {
   %p
-    %a{:href => '/clothes/#{$cloth->no}'}= $cloth->category->name
-    %small.highlight= commify($cloth->category->price)
+    %a{:href => '/clothes/#{$cloth->no}'}= $cloth->category
+    %small.highlight= commify($cloth->price)
 - }
 
 %div= include 'partial/order_info'
@@ -2375,8 +2388,8 @@ __DATA__
           - } else {
             %input.input-cloth{:type => 'checkbox', :data-cloth-no => '#{$cloth->no}'}
           - }
-          %a{:href => '/clothes/#{$cloth->no}'}= $cloth->category->name
-          %small.highlight= commify($cloth->category->price)
+          %a{:href => '/clothes/#{$cloth->no}'}= $cloth->category
+          %small.highlight= commify($cloth->price)
       - }
 %div= include 'partial/order_info'
 %p= commify($order->late_fee)

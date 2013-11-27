@@ -50,7 +50,17 @@ __PACKAGE__->table("cloth");
   data_type: 'integer'
   is_nullable: 1
 
+=head2 hip
+
+  data_type: 'integer'
+  is_nullable: 1
+
 =head2 arm
+
+  data_type: 'integer'
+  is_nullable: 1
+
+=head2 thigh
 
   data_type: 'integer'
   is_nullable: 1
@@ -76,12 +86,17 @@ __PACKAGE__->table("cloth");
   data_type: 'integer'
   is_nullable: 1
 
-=head2 category_id
+=head2 category
+
+  data_type: 'varchar'
+  is_nullable: 0
+  size: 32
+
+=head2 price
 
   data_type: 'integer'
-  extra: {unsigned => 1}
-  is_foreign_key: 1
-  is_nullable: 0
+  default_value: 0
+  is_nullable: 1
 
 =head2 top_id
 
@@ -134,7 +149,11 @@ __PACKAGE__->add_columns(
   { data_type => "integer", is_nullable => 1 },
   "waist",
   { data_type => "integer", is_nullable => 1 },
+  "hip",
+  { data_type => "integer", is_nullable => 1 },
   "arm",
+  { data_type => "integer", is_nullable => 1 },
+  "thigh",
   { data_type => "integer", is_nullable => 1 },
   "length",
   { data_type => "integer", is_nullable => 1 },
@@ -144,13 +163,10 @@ __PACKAGE__->add_columns(
   { data_type => "varchar", is_nullable => 1, size => 32 },
   "gender",
   { data_type => "integer", is_nullable => 1 },
-  "category_id",
-  {
-    data_type => "integer",
-    extra => { unsigned => 1 },
-    is_foreign_key => 1,
-    is_nullable => 0,
-  },
+  "category",
+  { data_type => "varchar", is_nullable => 0, size => 32 },
+  "price",
+  { data_type => "integer", default_value => 0, is_nullable => 1 },
   "top_id",
   {
     data_type => "integer",
@@ -230,21 +246,6 @@ __PACKAGE__->belongs_to(
     on_delete     => "CASCADE",
     on_update     => "RESTRICT",
   },
-);
-
-=head2 category
-
-Type: belongs_to
-
-Related object: L<Opencloset::Schema::Result::Category>
-
-=cut
-
-__PACKAGE__->belongs_to(
-  "category",
-  "Opencloset::Schema::Result::Category",
-  { id => "category_id" },
-  { is_deferrable => 1, on_delete => "CASCADE", on_update => "RESTRICT" },
 );
 
 =head2 cloth_bottoms
@@ -393,8 +394,8 @@ Composing rels: L</cloth_orders> -> order
 __PACKAGE__->many_to_many("orders", "cloth_orders", "order");
 
 
-# Created by DBIx::Class::Schema::Loader v0.07036 @ 2013-11-19 19:36:49
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:q6uKrf2c0ayCaye4blKp6A
+# Created by DBIx::Class::Schema::Loader v0.07038 @ 2013-11-27 15:29:08
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:axYqgvFST4dI/MzoNz/PUA
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

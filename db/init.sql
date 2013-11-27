@@ -65,24 +65,6 @@ CREATE TABLE `guest` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
--- category
---
-
-CREATE TABLE `category` (
-  `id`    INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `name`  VARCHAR(64) NOT NULL,
-  `price` INT DEFAULT 0,
-  `which` VARCHAR(32) DEFAULT NULL,  -- top, bottom, foot, head, hand, onepiece, back, neck
-  `abbr`  VARCHAR(32) NOT NULL, -- cloth-no 을 만들때 사용됨
-
-  PRIMARY KEY (`id`),
-  UNIQUE KEY (`name`),
-  UNIQUE KEY (`abbr`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-INSERT INTO `category` (`id`, `name`, `price`,`which`,`abbr`) VALUES (1, 'Jacket', 10000,'top','JCK'), (2, 'Pants', 10000,'bottom','PTS'), (3, 'Shirts', 5000,'top','SHR'), (4, 'Shoes', 5000,'foot','SHO'), (5, 'Hat', 0,'head','HAT'), (6, 'Tie', 0,'neck','TIE'),(7,'Waistcoat',5000,'top','WCT'),(8,'Coat',15000,'top','COT'),(9,'Onepiece',15000,'onepiece','OPC'),(10,'Skirt',10000,'bottom','SKT'),(11,'Blouse',5000,'top','BLS');
-
---
 -- status
 --
 
@@ -115,17 +97,20 @@ INSERT INTO `status` (`id`, `name`)
 
 CREATE TABLE `cloth` (
   `id`          INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `no`          VARCHAR(64) NOT NULL,  -- 바코드 품번
-  `bust`        INT DEFAULT NULL,
-  `waist`       INT DEFAULT NULL,
-  `arm`         INT DEFAULT NULL, -- 팔길이(cm)
-  `length`      INT DEFAULT NULL, -- 기장(cm)
-  `foot`        INT DEFAULT NULL, -- 발크기(mm)
+
+  `no`          VARCHAR(64) NOT NULL,     -- 바코드 품번
+  `bust`        INT         DEFAULT NULL, -- 가슴 둘레(cm)
+  `waist`       INT         DEFAULT NULL, -- 허리 둘레(cm)
+  `hip`         INT         DEFAULT NULL, -- 엉덩이 둘레(cm)
+  `arm`         INT         DEFAULT NULL, -- 팔 길이(cm)
+  `thigh`       INT         DEFAULT NULL, -- 허벅지 둘레(cm)
+  `length`      INT         DEFAULT NULL, -- 기장(cm)
+  `foot`        INT         DEFAULT NULL, -- 발 크기(mm)
   `color`       VARCHAR(32) DEFAULT NULL,
+  `gender`      INT         DEFAULT NULL, -- 1: man, 2: woman, 3: unisex
+  `category`    VARCHAR(32) NOT NULL,     -- 종류
+  `price`       INT DEFAULT 0,            -- 대여 가격
 
-  `gender`      INT DEFAULT NULL, -- 1: man, 2: woman, 3: unisex
-
-  `category_id` INT UNSIGNED NOT NULL,
   `top_id`      INT UNSIGNED DEFAULT NULL,
   `bottom_id`   INT UNSIGNED DEFAULT NULL,
   `donor_id`    INT UNSIGNED DEFAULT NULL,
@@ -137,13 +122,14 @@ CREATE TABLE `cloth` (
   UNIQUE KEY (`no`),
   INDEX (`bust`),
   INDEX (`waist`),
+  INDEX (`hip`),
   INDEX (`arm`),
+  INDEX (`thigh`),
   INDEX (`length`),
-  CONSTRAINT `fk_cloth1` FOREIGN KEY (`category_id`) REFERENCES `category` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `fk_cloth2` FOREIGN KEY (`top_id`) REFERENCES `cloth` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `fk_cloth3` FOREIGN KEY (`bottom_id`) REFERENCES `cloth` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `fk_cloth4` FOREIGN KEY (`donor_id`) REFERENCES `donor` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `fk_cloth5` FOREIGN KEY (`status_id`) REFERENCES `status` (`id`) ON DELETE CASCADE
+  CONSTRAINT `fk_cloth1` FOREIGN KEY (`top_id`)    REFERENCES `cloth`  (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_cloth2` FOREIGN KEY (`bottom_id`) REFERENCES `cloth`  (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_cloth3` FOREIGN KEY (`donor_id`)  REFERENCES `donor`  (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_cloth4` FOREIGN KEY (`status_id`) REFERENCES `status` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --

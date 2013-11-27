@@ -16,7 +16,9 @@ $ ->
       type: 'GET'
       dataType: 'json'
       success: (data, textStatus, jqXHR) ->
-        unless /^(대여중|연체중|부분반납)/.test(data.status)
+        console.log data
+        console.log data.status
+        if data.status is '대여가능'
           return if $("#cloth-table table tbody tr[data-cloth-id='#{data.id}']").length
           compiled = _.template($('#tpl-row-checkbox-enabled').html())
           $html = $(compiled(data))
@@ -28,7 +30,7 @@ $ ->
           return if $("#cloth-table table tbody tr[data-order-id='#{data.order_id}']").length
           compiled = _.template($('#tpl-row-checkbox-disabled').html())
           $html = $(compiled(data))
-          if /연체중/.test(data.status)
+          if /대여중/.test(data.status)
             $html.find('.order-status').addClass('label-important')
           if data.overdue
             compiled = _.template($('#tpl-overdue-paragraph').html())
