@@ -34,7 +34,7 @@ __PACKAGE__->table("order");
   is_auto_increment: 1
   is_nullable: 0
 
-=head2 guest_id
+=head2 user_id
 
   data_type: 'integer'
   extra: {unsigned => 1}
@@ -163,7 +163,7 @@ __PACKAGE__->add_columns(
     is_auto_increment => 1,
     is_nullable => 0,
   },
-  "guest_id",
+  "user_id",
   {
     data_type => "integer",
     extra => { unsigned => 1 },
@@ -259,21 +259,6 @@ __PACKAGE__->has_many(
   { cascade_copy => 0, cascade_delete => 0 },
 );
 
-=head2 guest
-
-Type: belongs_to
-
-Related object: L<Opencloset::Schema::Result::Guest>
-
-=cut
-
-__PACKAGE__->belongs_to(
-  "guest",
-  "Opencloset::Schema::Result::Guest",
-  { id => "guest_id" },
-  { is_deferrable => 1, on_delete => "CASCADE", on_update => "RESTRICT" },
-);
-
 =head2 status
 
 Type: belongs_to
@@ -294,6 +279,21 @@ __PACKAGE__->belongs_to(
   },
 );
 
+=head2 user
+
+Type: belongs_to
+
+Related object: L<Opencloset::Schema::Result::User>
+
+=cut
+
+__PACKAGE__->belongs_to(
+  "user",
+  "Opencloset::Schema::Result::User",
+  { id => "user_id" },
+  { is_deferrable => 1, on_delete => "CASCADE", on_update => "RESTRICT" },
+);
+
 =head2 cloths
 
 Type: many_to_many
@@ -305,8 +305,8 @@ Composing rels: L</cloth_orders> -> cloth
 __PACKAGE__->many_to_many("cloths", "cloth_orders", "cloth");
 
 
-# Created by DBIx::Class::Schema::Loader v0.07036 @ 2013-11-19 19:36:49
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:fJerWqifXgB0IvQ7LqU9qg
+# Created by DBIx::Class::Schema::Loader v0.07038 @ 2013-11-27 22:12:05
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:5jt9mV7t2a0heh9STk1s6Q
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

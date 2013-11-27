@@ -27,7 +27,7 @@ __PACKAGE__->table("donor_cloth");
 
 =head1 ACCESSORS
 
-=head2 donor_id
+=head2 user_id
 
   data_type: 'integer'
   extra: {unsigned => 1}
@@ -56,7 +56,7 @@ __PACKAGE__->table("donor_cloth");
 =cut
 
 __PACKAGE__->add_columns(
-  "donor_id",
+  "user_id",
   {
     data_type => "integer",
     extra => { unsigned => 1 },
@@ -85,7 +85,7 @@ __PACKAGE__->add_columns(
 
 =over 4
 
-=item * L</donor_id>
+=item * L</user_id>
 
 =item * L</cloth_id>
 
@@ -93,7 +93,7 @@ __PACKAGE__->add_columns(
 
 =cut
 
-__PACKAGE__->set_primary_key("donor_id", "cloth_id");
+__PACKAGE__->set_primary_key("user_id", "cloth_id");
 
 =head1 RELATIONS
 
@@ -112,24 +112,24 @@ __PACKAGE__->belongs_to(
   { is_deferrable => 1, on_delete => "CASCADE", on_update => "RESTRICT" },
 );
 
-=head2 donor
+=head2 user
 
 Type: belongs_to
 
-Related object: L<Opencloset::Schema::Result::Donor>
+Related object: L<Opencloset::Schema::Result::User>
 
 =cut
 
 __PACKAGE__->belongs_to(
-  "donor",
-  "Opencloset::Schema::Result::Donor",
-  { id => "donor_id" },
+  "user",
+  "Opencloset::Schema::Result::User",
+  { id => "user_id" },
   { is_deferrable => 1, on_delete => "CASCADE", on_update => "RESTRICT" },
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07036 @ 2013-11-05 11:48:52
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:vDhWVNMANRdk6c7f7E5FdA
+# Created by DBIx::Class::Schema::Loader v0.07038 @ 2013-11-27 22:12:05
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:oY4j0+Q60tqW3g65/GmLGA
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

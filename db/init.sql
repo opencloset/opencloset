@@ -10,57 +10,50 @@ USE `opencloset`;
 
 CREATE TABLE `user` (
   `id`          INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `name`        VARCHAR(32) NOT NULL, -- realname
+
+  `name`        VARCHAR(32)  NOT NULL, -- realname
   `email`       VARCHAR(128) DEFAULT NULL,
-  `password`    CHAR(50) DEFAULT NULL COMMENT 'first 40 length for digest, after 10 length for salt(random)',
-  `phone`       VARCHAR(16) DEFAULT NULL COMMENT 'regex: 01\d{8,9}',
-  `gender`      INT DEFAULT NULL COMMENT '1: male, 2: female',
-  `age`         INT DEFAULT NULL,
-  `address`     VARCHAR(255) DEFAULT NULL,
-  `create_date` DATETIME DEFAULT NULL,
+  `password`    CHAR(50)     DEFAULT NULL COMMENT 'first 40 length for digest, after 10 length for salt(random)',
+  `create_date` DATETIME     DEFAULT NULL,
 
   PRIMARY KEY (`id`),
-  UNIQUE KEY (`email`),
-  UNIQUE KEY (`phone`)
+  UNIQUE  KEY (`email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
--- donor 기증자
+-- userinfo
 --
 
-CREATE TABLE `donor` (
-  `id`           INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `user_id`      INT UNSIGNED DEFAULT NULL,
-  `donation_msg` TEXT DEFAULT NULL,
-  `comment`      TEXT DEFAULT NULL,
-  `create_date`  DATETIME DEFAULT NULL,
-
-  PRIMARY KEY (`id`),
-  UNIQUE KEY (`user_id`),
-  CONSTRAINT `fk_donor1` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
---
--- guest
---
-
-CREATE TABLE `guest` (
+CREATE TABLE `userinfo` (
   `id`          INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `user_id`     INT UNSIGNED NOT NULL,
-  `bust`        INT NOT NULL,     -- 가슴둘레(cm)
-  `waist`       INT NOT NULL,     -- 허리둘레(cm)
-  `arm`         INT DEFAULT NULL, -- 팔길이(cm)
-  `length`      INT DEFAULT NULL, -- 기장(cm)
-  `height`      INT DEFAULT NULL, -- cm
-  `weight`      INT DEFAULT NULL, -- kg
-  `purpose`     VARCHAR(32),
-  `domain`      VARCHAR(64),
-  `create_date` DATETIME DEFAULT NULL,
-  `visit_date`  DATETIME DEFAULT NULL, -- latest visit
-  `target_date` DATETIME DEFAULT NULL, -- 착용일
+
+  --
+  -- general
+  --
+  `phone`       VARCHAR(16)  DEFAULT NULL COMMENT 'regex: 01\d{8,9}',
+  `address`     VARCHAR(255) DEFAULT NULL,
+  `gender`      VARCHAR(6)   DEFAULT NULL COMMENT 'male/female',
+  `birth`       TINYINT      DEFAULT NULL,
+  `comment`     TEXT         DEFAULT NULL,
+
+  --
+  -- for rental
+  --
+  `height`      INT DEFAULT NULL, -- 키(cm)
+  `weight`      INT DEFAULT NULL, -- 몸무게(kg)
+  `bust`        INT DEFAULT NULL, -- 가슴   둘레(cm)
+  `waist`       INT DEFAULT NULL, -- 허리   둘레(cm)
+  `hip`         INT DEFAULT NULL, -- 엉덩이 둘레(cm)
+  `thigh`       INT DEFAULT NULL, -- 허벅지 둘레(cm)
+  `arm`         INT DEFAULT NULL, -- 팔   길이(cm)
+  `leg`         INT DEFAULT NULL, -- 다리 길이(cm)
+  `knee`        INT DEFAULT NULL, -- 무릎 길이(cm)
+  `foot`        INT DEFAULT NULL, -- 발 크기(mm)
 
   PRIMARY KEY (`id`),
   UNIQUE KEY (`user_id`),
+  UNIQUE KEY (`phone`),
   CONSTRAINT `fk_guest1` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -112,7 +105,7 @@ CREATE TABLE `cloth` (
 
   `top_id`      INT UNSIGNED DEFAULT NULL,
   `bottom_id`   INT UNSIGNED DEFAULT NULL,
-  `donor_id`    INT UNSIGNED DEFAULT NULL,
+  `user_id`     INT UNSIGNED DEFAULT NULL,
   `status_id`   INT UNSIGNED DEFAULT 1,
 
   `compatible_code` VARCHAR(32) DEFAULT NULL,
@@ -128,7 +121,7 @@ CREATE TABLE `cloth` (
   INDEX (`category`),
   CONSTRAINT `fk_cloth1` FOREIGN KEY (`top_id`)    REFERENCES `cloth`  (`id`) ON DELETE CASCADE,
   CONSTRAINT `fk_cloth2` FOREIGN KEY (`bottom_id`) REFERENCES `cloth`  (`id`) ON DELETE CASCADE,
-  CONSTRAINT `fk_cloth3` FOREIGN KEY (`donor_id`)  REFERENCES `donor`  (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_cloth3` FOREIGN KEY (`user_id`)   REFERENCES `user`   (`id`) ON DELETE CASCADE,
   CONSTRAINT `fk_cloth4` FOREIGN KEY (`status_id`) REFERENCES `status` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -141,7 +134,7 @@ CREATE TABLE `satisfaction` (
   -- 높을 수록 좋은거(작은거 보단 큰게 낫다 by aanoaa)
   -- 쟈켓만 해당함
 
-  `guest_id`    INT UNSIGNED NOT NULL,
+  `user_id`     INT UNSIGNED NOT NULL,
   `cloth_id`    INT UNSIGNED NOT NULL,
   `bust`        INT DEFAULT NULL,
   `waist`       INT DEFAULT NULL,
@@ -150,8 +143,8 @@ CREATE TABLE `satisfaction` (
   `bottom_fit`  INT DEFAULT NULL,
   `create_date` DATETIME DEFAULT NULL,
 
-  PRIMARY KEY (`guest_id`, `cloth_id`),
-  CONSTRAINT `fk_satisfaction1` FOREIGN KEY (`guest_id`) REFERENCES `guest` (`id`) ON DELETE CASCADE,
+  PRIMARY KEY (`user_id`, `cloth_id`),
+  CONSTRAINT `fk_satisfaction1` FOREIGN KEY (`user_id`)  REFERENCES `user`  (`id`) ON DELETE CASCADE,
   CONSTRAINT `fk_satisfaction2` FOREIGN KEY (`cloth_id`) REFERENCES `cloth` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -161,7 +154,7 @@ CREATE TABLE `satisfaction` (
 
 CREATE TABLE `order` (
   `id`               INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `guest_id`         INT UNSIGNED NOT NULL,
+  `user_id`          INT UNSIGNED NOT NULL,
   `status_id`        INT UNSIGNED DEFAULT NULL,
   `rental_date`      DATETIME DEFAULT NULL,
   `target_date`      DATETIME DEFAULT NULL,
@@ -185,7 +178,7 @@ CREATE TABLE `order` (
   `length`           INT DEFAULT NULL,
 
   PRIMARY KEY (`id`),
-  CONSTRAINT `fk_order1` FOREIGN KEY (`guest_id`) REFERENCES `guest` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_order1` FOREIGN KEY (`user_id`)   REFERENCES `user` (`id`) ON DELETE CASCADE,
   CONSTRAINT `fk_order2` FOREIGN KEY (`status_id`) REFERENCES `status` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -207,13 +200,13 @@ CREATE TABLE `cloth_order` (
 --
 
 CREATE TABLE `donor_cloth` (
-  `donor_id`      INT UNSIGNED NOT NULL,
+  `user_id`       INT UNSIGNED NOT NULL,
   `cloth_id`      INT UNSIGNED NOT NULL,
   `comment`       TEXT DEFAULT NULL,
   `donation_date` DATETIME DEFAULT NULL,
 
-  PRIMARY KEY (`donor_id`, `cloth_id`),
-  CONSTRAINT `fk_donor_cloth1` FOREIGN KEY (`donor_id`) REFERENCES `donor` (`id`) ON DELETE CASCADE,
+  PRIMARY KEY (`user_id`, `cloth_id`),
+  CONSTRAINT `fk_donor_cloth1` FOREIGN KEY (`user_id`)  REFERENCES `user`  (`id`) ON DELETE CASCADE,
   CONSTRAINT `fk_donor_cloth2` FOREIGN KEY (`cloth_id`) REFERENCES `cloth` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 

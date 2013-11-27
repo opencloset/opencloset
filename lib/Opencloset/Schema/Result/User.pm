@@ -58,32 +58,6 @@ __PACKAGE__->table("user");
 
 first 40 length for digest, after 10 length for salt(random)
 
-=head2 phone
-
-  data_type: 'varchar'
-  is_nullable: 1
-  size: 16
-
-regex: 01d{8,9}
-
-=head2 gender
-
-  data_type: 'integer'
-  is_nullable: 1
-
-1: male, 2: female
-
-=head2 age
-
-  data_type: 'integer'
-  is_nullable: 1
-
-=head2 address
-
-  data_type: 'varchar'
-  is_nullable: 1
-  size: 255
-
 =head2 create_date
 
   data_type: 'datetime'
@@ -116,14 +90,6 @@ __PACKAGE__->add_columns(
     is_nullable         => 1,
     size                => 50,
   },
-  "phone",
-  { data_type => "varchar", is_nullable => 1, size => 16 },
-  "gender",
-  { data_type => "integer", is_nullable => 1 },
-  "age",
-  { data_type => "integer", is_nullable => 1 },
-  "address",
-  { data_type => "varchar", is_nullable => 1, size => 255 },
   "create_date",
   {
     data_type => "datetime",
@@ -160,53 +126,86 @@ __PACKAGE__->set_primary_key("id");
 
 __PACKAGE__->add_unique_constraint("email", ["email"]);
 
-=head2 C<phone>
-
-=over 4
-
-=item * L</phone>
-
-=back
-
-=cut
-
-__PACKAGE__->add_unique_constraint("phone", ["phone"]);
-
 =head1 RELATIONS
 
-=head2 donor
+=head2 cloths
 
-Type: might_have
+Type: has_many
 
-Related object: L<Opencloset::Schema::Result::Donor>
+Related object: L<Opencloset::Schema::Result::Cloth>
 
 =cut
 
-__PACKAGE__->might_have(
-  "donor",
-  "Opencloset::Schema::Result::Donor",
+__PACKAGE__->has_many(
+  "cloths",
+  "Opencloset::Schema::Result::Cloth",
   { "foreign.user_id" => "self.id" },
   { cascade_copy => 0, cascade_delete => 0 },
 );
 
-=head2 guest
+=head2 donor_cloths
+
+Type: has_many
+
+Related object: L<Opencloset::Schema::Result::DonorCloth>
+
+=cut
+
+__PACKAGE__->has_many(
+  "donor_cloths",
+  "Opencloset::Schema::Result::DonorCloth",
+  { "foreign.user_id" => "self.id" },
+  { cascade_copy => 0, cascade_delete => 0 },
+);
+
+=head2 orders
+
+Type: has_many
+
+Related object: L<Opencloset::Schema::Result::Order>
+
+=cut
+
+__PACKAGE__->has_many(
+  "orders",
+  "Opencloset::Schema::Result::Order",
+  { "foreign.user_id" => "self.id" },
+  { cascade_copy => 0, cascade_delete => 0 },
+);
+
+=head2 satisfactions
+
+Type: has_many
+
+Related object: L<Opencloset::Schema::Result::Satisfaction>
+
+=cut
+
+__PACKAGE__->has_many(
+  "satisfactions",
+  "Opencloset::Schema::Result::Satisfaction",
+  { "foreign.user_id" => "self.id" },
+  { cascade_copy => 0, cascade_delete => 0 },
+);
+
+=head2 userinfo
 
 Type: might_have
 
-Related object: L<Opencloset::Schema::Result::Guest>
+Related object: L<Opencloset::Schema::Result::Userinfo>
 
 =cut
 
 __PACKAGE__->might_have(
-  "guest",
-  "Opencloset::Schema::Result::Guest",
+  "userinfo",
+  "Opencloset::Schema::Result::Userinfo",
   { "foreign.user_id" => "self.id" },
   { cascade_copy => 0, cascade_delete => 0 },
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07036 @ 2013-11-12 13:50:46
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:4IZVMAGAuv0djNCNiNOlBg
+# Created by DBIx::Class::Schema::Loader v0.07038 @ 2013-11-27 22:12:05
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:7JvZZYQh98NWcJYmlG5DcA
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration
