@@ -1045,19 +1045,19 @@ post '/donors' => sub {
 any [qw/put patch/] => '/donors/:id' => sub {
     my $self  = shift;
 
-    ## TODO: validate params (donation_msg?, comment?)
+    my $user = $DB->resultset('User')->find({ id => $self->param('id') });
+    return $self->error(404, 'not found user') unless $user;
 
-    my $rs = $DB->resultset('Donor');
-    my $donor = $rs->find({ id => $self->param('id') });
-    return $self->error(404, 'not found') unless $donor;
+    $user->user_info->update({
+        map {
+            defined $self->param($_) ? ( $_ => $self->param($_) ) : ()
+        } qw()
+    });
 
-    map {
-        $donor->$_($self->param($_)) if defined $self->param($_);
-    } qw/donation_msg comment/;
-    $donor->update;
-    $self->respond_to(
-        json => { json => { $donor->get_columns } },
-    );
+    my %data = ( $user->user_info->get_columns, $user->get_columns );
+    delete @data{qw/ user_id password /};
+
+    $self->respond_to( json => { json => \%data } );
 };
 
 post '/sms' => sub {
