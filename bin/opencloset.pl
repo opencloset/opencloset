@@ -178,19 +178,6 @@ helper guest_validator => sub {
     return $validator;
 };
 
-helper create_guest => sub {
-    my ($self, $user_id) = @_;
-
-    return unless $user_id;
-
-    my %params = ( user_id => $user_id );
-    map {
-        $params{$_} = $self->param($_) if defined $self->param($_)
-    } qw/bust waist arm length height weight purpose domain target_date/;
-
-    return $DB->resultset('Guest')->find_or_create(\%params);
-};
-
 helper create_donor => sub {
     my ($self, $user_id) = @_;
 
@@ -375,12 +362,12 @@ post '/guests' => sub {
     my $self = shift;
 
     my $validator = $self->guest_validator;
-    unless ($self->validate($validator)) {
+    unless ( $self->validate($validator) ) {
         my @error_str;
-        while ( my ($k, $v) = each %{ $validator->errors } ) {
+        while ( my ( $k, $v ) = each %{ $validator->errors } ) {
             push @error_str, "$k:$v";
         }
-        return $self->error( 400, { str => join(',', @error_str), data => $validator->errors } );
+        return $self->error( 400, { str => join( ',', @error_str ), data => $validator->errors } );
     }
 
     return $self->error(400, 'invalid request') unless $self->param('user_id');
@@ -388,15 +375,19 @@ post '/guests' => sub {
     my $user = $DB->resultset('User')->find({ id => $self->param('user_id') });
     return $self->error(404, 'not found user') unless $user;
 
-    my $guest = $self->create_guest($user->id);
-    return $self->error(500, 'failed to create a new guest') unless $guest;
+    $user->user_info->update({
+        map {
+            $params{$_} = $self->param($_) if defined $self->param($_)
+        } qw( height weight bust waist hip thigh arm leg knee foot )
+    });
 
-    $self->res->headers->header('Location' => $self->url_for('/guests/' . $guest->id));
+    my %data = ( $user->userinfo->get_columns, $user->get_columns );
+    delete @data{qw/ user_id password /};
+
+    $self->res->headers->header( 'Location' => $self->url_for( '/guests/' . $user->id ) );
     $self->respond_to(
-        json => { json => { $guest->get_columns }, status => 201 },
-        html => sub {
-            $self->redirect_to('/guests/' . $guest->id);
-        }
+        json => { json => \%data, status => 201 },
+        html => sub { $self->redirect_to( '/guests/' . $user->id ) },
     );
 };
 
