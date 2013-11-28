@@ -392,23 +392,27 @@ post '/guests' => sub {
 };
 
 get '/guests/:id' => sub {
-    my $self   = shift;
-    my $guest  = $DB->resultset('Guest')->find({ id => $self->param('id') });
-    return $self->error(404, 'not found guest') unless $guest;
+    my $self = shift;
 
-    my @orders = $DB->resultset('Order')->search({
-        guest_id => $self->param('id')
-    }, {
-        order_by => { -desc => 'rental_date' }
-    });
-    $self->stash(
-        guest  => $guest,
-        orders => [@orders],
+    my $user = $DB->resultset('User')->find({ id => $self->param('id') });
+    return $self->error(404, 'not found user') unless $user;
+
+    my @orders = $DB->resultset('Order')->search(
+        { guest_id => $self->param('id') },
+        { order_by => { -desc => 'rental_date' } },
     );
 
+    $self->stash(
+        user   => $user,
+        orders => \@orders,
+    );
+
+    my %data = ( $user->userinfo->get_columns, $user->get_columns );
+    delete @data{qw/ user_id password /};
+
     $self->respond_to(
-        json => { json => { $guest->get_columns } },
-        html => { template => 'guests/id' }
+        json => { json     => \%data      },
+        html => { template => 'guests/id' },
     );
 };
 
@@ -1509,29 +1513,26 @@ __DATA__
 %ul
   %li
     %i.icon-user
-    %a{:href => "#{url_for('/guests/' . $guest->id)}"} #{$guest->user->name}
-    %span (#{$guest->user->age})
+    %a{:href => "#{url_for('/guests/' . $user->id)}"} #{$user->name}
+    %span (#{$user->user_info->birth})
   %li
     %i.icon-map-marker
-    = $guest->user->address
+    = $user->user_info->address
   %li
     %i.icon-envelope
-    %a{:href => "mailto:#{$guest->user->email}"}= $guest->user->email
-  %li= $guest->user->phone
+    %a{:href => "mailto:#{$user->email}"}= $user->email
+  %li= $user->user_info->phone
   %li
-    %span #{$guest->height} cm,
-    %span #{$guest->weight} kg
-  - if ($guest->target_date) {
-    %li= $guest->target_date->ymd . ' 착용'
-  - }
+    %span #{$user->user_info->height} cm,
+    %span #{$user->user_info->weight} kg
 
 
 @@ guests/id.html.haml
 - layout 'default';
-- title $guest->user->name . '님';
+- title $user->name . '님';
 
-%div= include 'guests/status', guest => $guest
-%div= include 'guests/breadcrumb', guest => $guest, status_id => 1;
+%div= include 'guests/status',     user => $user
+%div= include 'guests/breadcrumb', user => $user, status_id => 1;
 %h3 주문내역
 %ul
   - for my $order (@$orders) {
@@ -1559,11 +1560,11 @@ __DATA__
 
 @@ guests/breadcrumb.html.haml
 %p
-  %a{:href => '/guests/#{$guest->id}'}= $guest->user->name
+  %a{:href => '/guests/#{$user->id}'}= $user->name
   님
-  - if ($guest->visit_date) {
-    %strong= $guest->visit_date->ymd
-    %span 일 방문
+  - if ( $user->user_info->visit_date ) {
+    %strong= $user->user_info->visit_date->ymd
+    %span 방문
   - }
   %div
     %span.label.label-info.search-label
@@ -1582,9 +1583,9 @@ __DATA__
   %input{:type => 'radio', :name => 'gid', :value => '#{$guest->id}'}
   %a{:href => '/guests/#{$guest->id}'}= $guest->user->name
   님
-  - if ($guest->visit_date) {
-    %strong= $guest->visit_date->ymd
-    %span 일 방문
+  - if ( $user->user_info->visit_date ) {
+    %strong= $user->user_info->visit_date->ymd
+    %span 방문
   - }
 %div
   %i.icon-envelope
