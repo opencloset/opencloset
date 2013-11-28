@@ -377,7 +377,7 @@ post '/guests' => sub {
 
     $user->user_info->update({
         map {
-            $params{$_} = $self->param($_) if defined $self->param($_)
+            defined $self->param($_) ? $_ => $self->param($_) : ()
         } qw( height weight bust waist hip thigh arm leg knee foot )
     });
 
