@@ -377,7 +377,7 @@ post '/guests' => sub {
 
     $user->user_info->update({
         map {
-            defined $self->param($_) ? $_ => $self->param($_) : ()
+            defined $self->param($_) ? ( $_ => $self->param($_) ) : ()
         } qw( height weight bust waist hip thigh arm leg knee foot )
     });
 
@@ -433,7 +433,7 @@ any [qw/put patch/] => '/guests/:id' => sub {
 
     $user->user_info->update({
         map {
-            defined $self->param($_) ? $_ => $self->param($_) : ()
+            defined $self->param($_) ? ( $_ => $self->param($_) ) : ()
         } qw( height weight bust waist hip thigh arm leg knee foot )
     });
 
