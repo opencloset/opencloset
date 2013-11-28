@@ -315,7 +315,7 @@ get '/new-borrower' => sub {
 
     my @users;
     while ( my $user = $rs->next ) {
-        my %data = ( $user->userinfo->get_columns, $user->get_columns );
+        my %data = ( $user->user_info->get_columns, $user->get_columns );
         delete @data{qw/ user_id password /};
         push @users, \%data;
     }
@@ -610,7 +610,7 @@ get '/new-cloth' => sub {
 
     my @users;
     while ( my $user = $rs->next ) {
-        my %data = ( $user->userinfo->get_columns, $user->get_columns );
+        my %data = ( $user->user_info->get_columns, $user->get_columns );
         delete @data{qw/ user_id password height weight bust waist hip thigh arm leg knee foot /};
         push @users, \%data;
     }

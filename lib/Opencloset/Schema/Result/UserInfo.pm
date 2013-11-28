@@ -1,12 +1,12 @@
 use utf8;
-package Opencloset::Schema::Result::Userinfo;
+package Opencloset::Schema::Result::UserInfo;
 
 # Created by DBIx::Class::Schema::Loader
 # DO NOT MODIFY THE FIRST PART OF THIS FILE
 
 =head1 NAME
 
-Opencloset::Schema::Result::Userinfo
+Opencloset::Schema::Result::UserInfo
 
 =cut
 
@@ -19,11 +19,11 @@ use warnings;
 
 use base 'Opencloset::Schema::Base';
 
-=head1 TABLE: C<userinfo>
+=head1 TABLE: C<user_info>
 
 =cut
 
-__PACKAGE__->table("userinfo");
+__PACKAGE__->table("user_info");
 
 =head1 ACCESSORS
 
@@ -228,8 +228,8 @@ __PACKAGE__->belongs_to(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07038 @ 2013-11-27 22:12:05
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:9kqiD/X3mHp+lTH9w8eRww
+# Created by DBIx::Class::Schema::Loader v0.07038 @ 2013-11-28 12:23:25
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:mMbFt2KvJkpseuVB+FKDig
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

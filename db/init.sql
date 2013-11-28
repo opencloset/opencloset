@@ -21,10 +21,10 @@ CREATE TABLE `user` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
--- userinfo
+-- user_info
 --
 
-CREATE TABLE `userinfo` (
+CREATE TABLE `user_info` (
   `id`          INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `user_id`     INT UNSIGNED NOT NULL,
 

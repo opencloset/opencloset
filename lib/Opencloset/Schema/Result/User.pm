@@ -188,24 +188,24 @@ __PACKAGE__->has_many(
   { cascade_copy => 0, cascade_delete => 0 },
 );
 
-=head2 userinfo
+=head2 user_info
 
 Type: might_have
 
-Related object: L<Opencloset::Schema::Result::Userinfo>
+Related object: L<Opencloset::Schema::Result::UserInfo>
 
 =cut
 
 __PACKAGE__->might_have(
-  "userinfo",
-  "Opencloset::Schema::Result::Userinfo",
+  "user_info",
+  "Opencloset::Schema::Result::UserInfo",
   { "foreign.user_id" => "self.id" },
   { cascade_copy => 0, cascade_delete => 0 },
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07038 @ 2013-11-27 22:12:05
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:7JvZZYQh98NWcJYmlG5DcA
+# Created by DBIx::Class::Schema::Loader v0.07038 @ 2013-11-28 12:23:25
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:Uqlj6TQGxLrVoyy+BxPM7g
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

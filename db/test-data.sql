@@ -9,7 +9,7 @@ INSERT
     ;
 
 -- INSERT
---   INTO `userinfo` ( `id`, `user_id`, `phone`, `address`, `gender`, `birth` )
+--   INTO `user_info` ( `id`, `user_id`, `phone`, `address`, `gender`, `birth` )
 --   VALUES
 --     ( 1, 1, '01012345678', '인천 송도',   'male',   1980 ),
 --     ( 2, 2, '01024681357', '서울 신사동', 'female', 1979 ),
@@ -20,7 +20,7 @@ INSERT
 -- 기증자
 --
 INSERT
-  INTO `userinfo` ( `id`, `user_id`, `phone`, `address`, `gender`, `birth`, `comment` )
+  INTO `user_info` ( `id`, `user_id`, `phone`, `address`, `gender`, `birth`, `comment` )
   VALUES
     ( 1, 1, '01012345678', '인천 송도',   'male',   1980, '열린옷장대표1' ),
     ( 2, 2, '01024681357', '서울 신사동', 'female', 1979, '열린옷장대표2' )
@@ -30,7 +30,7 @@ INSERT
 -- 대여자
 --
 INSERT
-  INTO `userinfo` (
+  INTO `user_info` (
     `id`, `user_id`, `phone`, `address`, `gender`, `birth`, `comment`,
     `height`, `weight`, `bust`, `waist`, `hip`, `thigh`, `arm`, `leg`, `knee`, `foot`
   )
