@@ -178,15 +178,6 @@ helper guest_validator => sub {
     return $validator;
 };
 
-helper create_donor => sub {
-    my ($self, $user_id) = @_;
-
-    my %params = ( user_id => $user_id );
-    map { $params{$_} = $self->param($_) } qw/donation_msg comment/;
-
-    return $DB->resultset('Donor')->find_or_create(\%params);
-};
-
 helper create_cloth => sub {
     my ($self, %info) = @_;
 
@@ -1032,16 +1023,22 @@ del '/orders/:id' => sub {
 post '/donors' => sub {
     my $self   = shift;
 
-    my $user_id = $self->param('user_id');
-    my $donor = $self->create_donor($user_id);
-    return $self->error(500, 'failed to create a new donor') unless $donor;
+    my $user = $DB->resultset('User')->find({ id => $self->param('user_id') });
+    return $self->error(404, 'not found user') unless $user;
 
-    $self->res->headers->header('Location' => $self->url_for('/donors/' . $donor->id));
+    $user->user_info->update({
+        map {
+            defined $self->param($_) ? ( $_ => $self->param($_) ) : ()
+        } qw()
+    });
+
+    my %data = ( $user->userinfo->get_columns, $user->get_columns );
+    delete @data{qw/ user_id password /};
+
+    $self->res->headers->header('Location' => $self->url_for('/donors/' . $user->id));
     $self->respond_to(
-        json => { json => { $donor->get_columns }, status => 201 },
-        html => sub {
-            $self->redirect_to('/donors/' . $donor->id);
-        }
+        json => { json => \%data, status => 201                  },
+        html => sub { $self->redirect_to('/donors/' . $user->id) },
     );
 };
 
