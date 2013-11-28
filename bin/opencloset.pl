@@ -1567,20 +1567,20 @@ __DATA__
   - }
   %div
     %span.label.label-info.search-label
-      %a{:href => "#{url_with('/search')->query([q => $guest->bust])}///#{$status_id}"}= $guest->bust
+      %a{:href => "#{url_with('/search')->query([q => $user->bust])}///#{$status_id}"}= $user->bust
     %span.label.label-info.search-label
-      %a{:href => "#{url_with('/search')->query([q => '/' . $guest->waist . '//' . $status_id])}"}= $guest->waist
+      %a{:href => "#{url_with('/search')->query([q => '/' . $user->waist . '//' . $status_id])}"}= $user->waist
     %span.label.label-info.search-label
-      %a{:href => "#{url_with('/search')->query([q => '//' . $guest->arm])}/#{$status_id}"}= $guest->arm
-    %span.label= $guest->length
-    %span.label= $guest->height
-    %span.label= $guest->weight
+      %a{:href => "#{url_with('/search')->query([q => '//' . $user->arm])}/#{$status_id}"}= $user->arm
+    %span.label= $user->length
+    %span.label= $user->height
+    %span.label= $user->weight
 
 
 @@ guests/breadcrumb/radio.html.haml
 %label.radio.inline
-  %input{:type => 'radio', :name => 'gid', :value => '#{$guest->id}'}
-  %a{:href => '/guests/#{$guest->id}'}= $guest->user->name
+  %input{:type => 'radio', :name => 'gid', :value => '#{$user->id}'}
+  %a{:href => '/guests/#{$user->id}'}= $user->name
   님
   - if ( $user->user_info->visit_date ) {
     %strong= $user->user_info->visit_date->ymd
@@ -1588,15 +1588,15 @@ __DATA__
   - }
 %div
   %i.icon-envelope
-  %a{:href => "mailto:#{$guest->user->email}"}= $guest->user->email
-%div.muted= $guest->user->phone
+  %a{:href => "mailto:#{$user->email}"}= $user->email
+%div.muted= $user->user_info->phone
 %div
-  %span.label.label-info= $guest->bust
-  %span.label.label-info= $guest->waist
-  %span.label.label-info= $guest->arm
-  %span.label= $guest->length
-  %span.label= $guest->height
-  %span.label= $guest->weight
+  %span.label.label-info= $user->user_info->bust
+  %span.label.label-info= $user->user_info->waist
+  %span.label.label-info= $user->user_info->arm
+  %span.label= $user->user_info->leg
+  %span.label= $user->user_info->height
+  %span.label= $user->user_info->weight
 
 
 @@ donors/breadcrumb/radio.html.haml
@@ -1695,7 +1695,7 @@ __DATA__
 
 .row
   .col-xs-12
-    = include 'guests/breadcrumb', guest => $guest if $guest
+    = include 'guests/breadcrumb', user => $user if $user
 
 .row
   .col-xs-12
@@ -1976,7 +1976,7 @@ __DATA__
     .span4
       %ul
         - for my $g (@$guests) {
-          %li= include 'guests/breadcrumb/radio', guest => $g
+          %li= include 'guests/breadcrumb/radio', user => $g
         - }
 
 :plain
