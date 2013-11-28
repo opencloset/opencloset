@@ -372,7 +372,7 @@ post '/guests' => sub {
         } qw( height weight bust waist hip thigh arm leg knee foot )
     });
 
-    my %data = ( $user->userinfo->get_columns, $user->get_columns );
+    my %data = ( $user->user_info->get_columns, $user->get_columns );
     delete @data{qw/ user_id password /};
 
     $self->res->headers->header( 'Location' => $self->url_for( '/guests/' . $user->id ) );
@@ -398,7 +398,7 @@ get '/guests/:id' => sub {
         orders => \@orders,
     );
 
-    my %data = ( $user->userinfo->get_columns, $user->get_columns );
+    my %data = ( $user->user_info->get_columns, $user->get_columns );
     delete @data{qw/ user_id password /};
 
     $self->respond_to(
@@ -428,7 +428,7 @@ any [qw/put patch/] => '/guests/:id' => sub {
         } qw( height weight bust waist hip thigh arm leg knee foot )
     });
 
-    my %data = ( $user->userinfo->get_columns, $user->get_columns );
+    my %data = ( $user->user_info->get_columns, $user->get_columns );
     delete @data{qw/ user_id password /};
 
     $self->respond_to( json => { json => \%data } );
@@ -1032,7 +1032,7 @@ post '/donors' => sub {
         } qw()
     });
 
-    my %data = ( $user->userinfo->get_columns, $user->get_columns );
+    my %data = ( $user->user_info->get_columns, $user->get_columns );
     delete @data{qw/ user_id password /};
 
     $self->res->headers->header('Location' => $self->url_for('/donors/' . $user->id));
