@@ -428,17 +428,19 @@ any [qw/put patch/] => '/guests/:id' => sub {
         return $self->error( 400, { str => join(',', @error_str), data => $validator->errors } );
     }
 
-    my $rs = $DB->resultset('Guest');
-    my $guest = $rs->find({ id => $self->param('id') });
-    return $self->error(404, 'not found') unless $guest;
+    my $user = $DB->resultset('User')->find({ id => $self->param('user_id') });
+    return $self->error(404, 'not found user') unless $user;
 
-    map {
-        $guest->$_($self->param($_)) if defined $self->param($_);
-    } qw/bust waist arm length height weight purpose domain/;
-    $guest->update;
-    $self->respond_to(
-        json => { json => { $guest->get_columns } },
-    );
+    $user->user_info->update({
+        map {
+            defined $self->param($_) ? $_ => $self->param($_) : ()
+        } qw( height weight bust waist hip thigh arm leg knee foot )
+    });
+
+    my %data = ( $user->userinfo->get_columns, $user->get_columns );
+    delete @data{qw/ user_id password /};
+
+    $self->respond_to( json => { json => \%data } );
 };
 
 post '/clothes' => sub {
