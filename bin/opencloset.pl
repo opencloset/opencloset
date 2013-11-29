@@ -680,6 +680,79 @@ group {
 
     sub api_update_order {
         my $self = shift;
+
+        #
+        # fetch params
+        #
+        my %params = $self->get_params(qw/
+            id
+            user_id     status_id     rental_date    target_date
+            return_date return_method payment_method price
+            discount    late_fee      l_discount     l_payment_method
+            staff_name  comment       purpose        height
+            weight      bust          waist          hip
+            thigh       arm           leg            knee
+            foot
+        /);
+
+        #
+        # validate params
+        #
+        my $v = $self->create_validator;
+        $v->field('id')->required(1)->regexp(qr/^\d+$/);
+        $v->field('user_id')->required(1)->regexp(qr/^\d+$/)->callback(sub {
+            my $val = shift;
+
+            return 1 if $DB->resultset('User')->find({ id => $val });
+            return ( 0, 'user not found using user_id' );
+        });
+        #
+        # FIXME
+        #   need more validation but not now
+        #   since columns are not perfect yet.
+        #
+        $v->field(qw/ height weight bust waist hip thigh arm leg knee foot /)->each(sub {
+            shift->regexp(qr/^\d{1,3}$/);
+        });
+        unless ( $self->validate( $v, \%params ) ) {
+            my @error_str;
+            while ( my ( $k, $v ) = each %{ $v->errors } ) {
+                push @error_str, "$k:$v";
+            }
+            return $self->error( 400, {
+                str  => join(',', @error_str),
+                data => $v->errors,
+            });
+        }
+
+        #
+        # find order
+        #
+        my $order = $DB->resultset('Order')->find({ id => $params{id} });
+        return $self->error( 404, {
+            str  => 'order not found',
+            data => {},
+        }) unless $order;
+
+        #
+        # update order
+        #
+        {
+            my %_params = %params;
+            delete $_params{id};
+            $order->update( \%_params )
+                or return $self->error( 500, {
+                    str  => 'failed to update a order',
+                    data => {},
+                });
+        }
+
+        #
+        # response
+        #
+        my %data = ( $order->get_columns );
+
+        $self->respond_to( json => { status => 200, json => \%data } );
     }
 
     sub api_delete_order {
