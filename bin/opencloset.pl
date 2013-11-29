@@ -5,6 +5,7 @@ use Mojolicious::Lite;
 
 use Data::Pageset;
 use DateTime;
+use List::MoreUtils qw( zip );
 use SMS::Send::KR::CoolSMS;
 use SMS::Send;
 use Try::Tiny;
@@ -81,7 +82,7 @@ helper cloth2hr => sub {
 
     return {
         $cloth->get_columns,
-        donor    => $cloth->donor ? $cloth->donor->user->name : '',
+        donor    => $cloth->donor ? $cloth->user->name : '',
         category => $cloth->category,
         price    => $self->commify($cloth->price),
         status   => $cloth->status->name,
@@ -106,38 +107,6 @@ helper sms2hr => sub {
     my ($self, $sms) = @_;
 
     return { $sms->get_columns };
-};
-
-helper guest2hr => sub {
-    my ($self, $user) = @_;
-
-    my %columns;
-    if ($user->guest) {
-        %columns = ($user->get_columns, $user->guest->get_columns);
-    } else {
-        %columns = $user->get_columns;
-        map { $columns{$_} = undef } $DB->resultset('Guest')->result_source->columns;
-        $columns{user_id} = $user->id;
-    }
-
-    delete $columns{password};
-    return { %columns };
-};
-
-helper donor2hr => sub {
-    my ($self, $user) = @_;
-
-    my %columns;
-    if ($user->donor) {
-        %columns = ($user->get_columns, $user->donor->get_columns);
-    } else {
-        %columns = $user->get_columns;
-        map { $columns{$_} = undef } $DB->resultset('Donor')->result_source->columns;
-        $columns{user_id} = $user->id;
-    }
-
-    delete $columns{password};
-    return { %columns };
 };
 
 helper calc_overdue => sub {
@@ -208,28 +177,6 @@ helper guest_validator => sub {
 
     ## TODO: validate `target_date`
     return $validator;
-};
-
-helper create_guest => sub {
-    my ($self, $user_id) = @_;
-
-    return unless $user_id;
-
-    my %params = ( user_id => $user_id );
-    map {
-        $params{$_} = $self->param($_) if defined $self->param($_)
-    } qw/bust waist arm length height weight purpose domain target_date/;
-
-    return $DB->resultset('Guest')->find_or_create(\%params);
-};
-
-helper create_donor => sub {
-    my ($self, $user_id) = @_;
-
-    my %params = ( user_id => $user_id );
-    map { $params{$_} = $self->param($_) } qw/donation_msg comment/;
-
-    return $DB->resultset('Donor')->find_or_create(\%params);
 };
 
 helper create_cloth => sub {
@@ -329,30 +276,339 @@ helper _q => sub {
     return join '/', ( $q{bust}, $q{waist}, $q{arm}, $q{status}, $q{category} );
 };
 
+helper get_params => sub {
+    my ( $self, @keys ) = @_;
+
+    #
+    # make parameter hash using explicit keys
+    #
+    my %params = zip @keys, @{ [ $self->param( \@keys ) ] };
+
+    #
+    # remove not defined parameter key and values
+    #
+    defined $params{$_} ? 1 : delete $params{$_} for keys %params;
+
+    return %params;
+};
+
+#
+# API section
+#
+group {
+    under '/api' => sub {
+        my $self = shift;
+
+        #
+        # FIXME - need authorization
+        #
+        if (1) {
+            return 1;
+        }
+
+        $self->render( json => { error => 'invalid_access' }, status => 400 );
+        return;
+    };
+
+    post '/user'      => \&api_create_user;
+    get  '/user/:id'  => \&api_get_user;
+    put  '/user/:id'  => \&api_update_user;
+    del  '/user/:id'  => \&api_delete_user;
+
+    post '/order'     => \&api_create_order;
+    get  '/order/:id' => \&api_get_order;
+    put  '/order/:id' => \&api_update_order;
+    del  '/order/:id' => \&api_delete_order;
+
+    sub api_create_user {
+        my $self = shift;
+
+        #
+        # fetch params
+        #
+        my %user_params      = $self->get_params(qw/ name email password /);
+        my %user_info_params = $self->get_params(qw/
+            phone  address gender birth comment
+            height weight  bust   waist hip
+            thigh  arm     leg    knee  foot
+        /);
+
+        #
+        # validate params
+        #
+        my $v = $self->create_validator;
+        $v->field('name')->required(1);
+        $v->field('email')->email;
+        $v->field('phone')->regexp(qr/^\d+$/);
+        $v->field('gender')->in(qw/ male female /);
+        $v->field('birth')->regexp(qr/^(19|20)\d{2}$/);
+        $v->field(qw/ height weight bust waist hip thigh arm leg knee foot /)->each(sub {
+            shift->regexp(qr/^\d{,3}$/);
+        });
+        unless ( $self->validate( $v, { %user_params, %user_info_params } ) ) {
+            my @error_str;
+            while ( my ( $k, $v ) = each %{ $v->errors } ) {
+                push @error_str, "$k:$v";
+            }
+            return $self->error( 400, {
+                str  => join(',', @error_str),
+                data => $v->errors,
+            });
+        }
+
+        #
+        # create user
+        #
+        my $user = do {
+            my $guard = $DB->txn_scope_guard;
+
+            my $user = $DB->resultset('User')->create(\%user_params);
+            return $self->error( 500, {
+                str  => 'failed to create a new user',
+                data => {},
+            }) unless $user;
+
+            my $user_info = $DB->resultset('UserInfo')->create({
+                %user_info_params,
+                user_id => $user->id,
+            });
+            return $self->error( 500, {
+                str  => 'failed to create a new user info',
+                data => {},
+            }) unless $user_info;
+
+            $guard->commit;
+
+            $user;
+        };
+
+        #
+        # response
+        #
+        my %data = ( $user->user_info->get_columns, $user->get_columns );
+        delete @data{qw/ user_id password /};
+
+        $self->res->headers->header(
+            'Location' => $self->url_for( '/api/user/' . $user->id ),
+        );
+        $self->respond_to( json => { status => 201, json => \%data } );
+    }
+
+    sub api_get_user {
+        my $self = shift;
+
+        #
+        # fetch params
+        #
+        my %params = $self->get_params(qw/ id /);
+
+        #
+        # validate params
+        #
+        my $v = $self->create_validator;
+        $v->field('id')->required(1)->regexp(qr/^\d+$/);
+        unless ( $self->validate( $v, \%params ) ) {
+            my @error_str;
+            while ( my ( $k, $v ) = each %{ $v->errors } ) {
+                push @error_str, "$k:$v";
+            }
+            return $self->error( 400, {
+                str  => join(',', @error_str),
+                data => $v->errors,
+            });
+        }
+
+        #
+        # find user
+        #
+        my $user = $DB->resultset('User')->find( \%params );
+        return $self->error( 404, {
+            str  => 'user not found',
+            data => {},
+        }) unless $user;
+        return $self->error( 404, {
+            str  => 'user info not found',
+            data => {},
+        }) unless $user->user_info;
+
+        #
+        # response
+        #
+        my %data = ( $user->user_info->get_columns, $user->get_columns );
+        delete @data{qw/ user_id password /};
+
+        $self->respond_to( json => { status => 200, json => \%data } );
+    }
+
+    sub api_update_user {
+        my $self = shift;
+
+        #
+        # fetch params
+        #
+        my %user_params      = $self->get_params(qw/ id name email password /);
+        my %user_info_params = $self->get_params(qw/
+            phone  address gender birth comment
+            height weight  bust   waist hip
+            thigh  arm     leg    knee  foot
+        /);
+
+        #
+        # validate params
+        #
+        my $v = $self->create_validator;
+        $v->field('id')->required(1)->regexp(qr/^\d+$/);
+        $v->field('email')->email;
+        $v->field('phone')->regexp(qr/^\d+$/);
+        $v->field('gender')->in(qw/ male female /);
+        $v->field('birth')->regexp(qr/^(19|20)\d{2}$/);
+        $v->field(qw/ height weight bust waist hip thigh arm leg knee foot /)->each(sub {
+            shift->regexp(qr/^\d{,3}$/);
+        });
+        unless ( $self->validate( $v, { %user_params, %user_info_params } ) ) {
+            my @error_str;
+            while ( my ( $k, $v ) = each %{ $v->errors } ) {
+                push @error_str, "$k:$v";
+            }
+            return $self->error( 400, {
+                str  => join(',', @error_str),
+                data => $v->errors,
+            });
+        }
+
+        #
+        # find user
+        #
+        my $user = $DB->resultset('User')->find({ id => $user_params{id} });
+        return $self->error( 404, {
+            str  => 'user not found',
+            data => {},
+        }) unless $user;
+        return $self->error( 404, {
+            str  => 'user info not found',
+            data => {},
+        }) unless $user->user_info;
+
+        #
+        # update user
+        #
+        {
+            my $guard = $DB->txn_scope_guard;
+
+            my %_user_params = %user_params;
+            delete $_user_params{id};
+            $user->update( \%_user_params )
+                or return $self->error( 500, {
+                    str  => 'failed to update a user',
+                    data => {},
+                });
+
+            $user->user_info->update({
+                %user_info_params,
+                user_id => $user->id,
+            }) or return $self->error( 500, {
+                str  => 'failed to update a user info',
+                data => {},
+            });
+
+            $guard->commit;
+        }
+
+        #
+        # response
+        #
+        my %data = ( $user->user_info->get_columns, $user->get_columns );
+        delete @data{qw/ user_id password /};
+
+        $self->respond_to( json => { status => 200, json => \%data } );
+    }
+
+    sub api_delete_user {
+        my $self = shift;
+
+        #
+        # fetch params
+        #
+        my %params = $self->get_params(qw/ id /);
+
+        #
+        # validate params
+        #
+        my $v = $self->create_validator;
+        $v->field('id')->required(1)->regexp(qr/^\d+$/);
+        unless ( $self->validate( $v, \%params ) ) {
+            my @error_str;
+            while ( my ( $k, $v ) = each %{ $v->errors } ) {
+                push @error_str, "$k:$v";
+            }
+            return $self->error( 400, {
+                str  => join(',', @error_str),
+                data => $v->errors,
+            });
+        }
+
+        #
+        # find user
+        #
+        my $user = $DB->resultset('User')->find( \%params );
+        return $self->error( 404, {
+            str  => 'user not found',
+            data => {},
+        }) unless $user;
+
+        #
+        # delete & response
+        #
+        my %data = ( $user->user_info->get_columns, $user->get_columns );
+        delete @data{qw/ user_id password /};
+        $user->delete;
+
+        $self->respond_to( json => { status => 200, json => \%data } );
+    }
+
+    sub api_create_order {
+        my $self = shift;
+    }
+
+    sub api_get_order {
+        my $self = shift;
+    }
+
+    sub api_update_order {
+        my $self = shift;
+    }
+
+    sub api_delete_order {
+        my $self = shift;
+    }
+}; # end of API section
+
 get '/'      => 'home';
 get '/login';
 
 get '/new-borrower' => sub {
     my $self = shift;
 
-    my $q      = $self->param('q') || '';
-    my $users = $DB->resultset('User')->search({
+    my $q  = $self->param('q') || q{};
+    my $rs = $DB->resultset('User')->search({
         -or => [
             id    => $q,
             name  => $q,
             phone => $q,
-            email => $q
+            email => $q,
         ],
     });
 
-    my @candidates;
-    while (my $user = $users->next) {
-        push @candidates, $self->guest2hr($user);
+    my @users;
+    while ( my $user = $rs->next ) {
+        my %data = ( $user->user_info->get_columns, $user->get_columns );
+        delete @data{qw/ user_id password /};
+        push @users, \%data;
     }
 
     $self->respond_to(
-        json => { json => [@candidates] },
-        html => { template => 'new-borrower' }
+        json => { json     => \@users        },
+        html => { template => 'new-borrower' },
     );
 };
 
@@ -405,12 +661,12 @@ post '/guests' => sub {
     my $self = shift;
 
     my $validator = $self->guest_validator;
-    unless ($self->validate($validator)) {
+    unless ( $self->validate($validator) ) {
         my @error_str;
-        while ( my ($k, $v) = each %{ $validator->errors } ) {
+        while ( my ( $k, $v ) = each %{ $validator->errors } ) {
             push @error_str, "$k:$v";
         }
-        return $self->error( 400, { str => join(',', @error_str), data => $validator->errors } );
+        return $self->error( 400, { str => join( ',', @error_str ), data => $validator->errors } );
     }
 
     return $self->error(400, 'invalid request') unless $self->param('user_id');
@@ -418,36 +674,44 @@ post '/guests' => sub {
     my $user = $DB->resultset('User')->find({ id => $self->param('user_id') });
     return $self->error(404, 'not found user') unless $user;
 
-    my $guest = $self->create_guest($user->id);
-    return $self->error(500, 'failed to create a new guest') unless $guest;
+    $user->user_info->update({
+        map {
+            defined $self->param($_) ? ( $_ => $self->param($_) ) : ()
+        } qw( height weight bust waist hip thigh arm leg knee foot )
+    });
 
-    $self->res->headers->header('Location' => $self->url_for('/guests/' . $guest->id));
+    my %data = ( $user->user_info->get_columns, $user->get_columns );
+    delete @data{qw/ user_id password /};
+
+    $self->res->headers->header( 'Location' => $self->url_for( '/guests/' . $user->id ) );
     $self->respond_to(
-        json => { json => { $guest->get_columns }, status => 201 },
-        html => sub {
-            $self->redirect_to('/guests/' . $guest->id);
-        }
+        json => { json => \%data, status => 201 },
+        html => sub { $self->redirect_to( '/guests/' . $user->id ) },
     );
 };
 
 get '/guests/:id' => sub {
-    my $self   = shift;
-    my $guest  = $DB->resultset('Guest')->find({ id => $self->param('id') });
-    return $self->error(404, 'not found guest') unless $guest;
+    my $self = shift;
 
-    my @orders = $DB->resultset('Order')->search({
-        guest_id => $self->param('id')
-    }, {
-        order_by => { -desc => 'rental_date' }
-    });
-    $self->stash(
-        guest  => $guest,
-        orders => [@orders],
+    my $user = $DB->resultset('User')->find({ id => $self->param('id') });
+    return $self->error(404, 'not found user') unless $user;
+
+    my @orders = $DB->resultset('Order')->search(
+        { guest_id => $self->param('id') },
+        { order_by => { -desc => 'rental_date' } },
     );
 
+    $self->stash(
+        user   => $user,
+        orders => \@orders,
+    );
+
+    my %data = ( $user->user_info->get_columns, $user->get_columns );
+    delete @data{qw/ user_id password /};
+
     $self->respond_to(
-        json => { json => { $guest->get_columns } },
-        html => { template => 'guests/id' }
+        json => { json     => \%data      },
+        html => { template => 'guests/id' },
     );
 };
 
@@ -463,17 +727,19 @@ any [qw/put patch/] => '/guests/:id' => sub {
         return $self->error( 400, { str => join(',', @error_str), data => $validator->errors } );
     }
 
-    my $rs = $DB->resultset('Guest');
-    my $guest = $rs->find({ id => $self->param('id') });
-    return $self->error(404, 'not found') unless $guest;
+    my $user = $DB->resultset('User')->find({ id => $self->param('user_id') });
+    return $self->error(404, 'not found user') unless $user;
 
-    map {
-        $guest->$_($self->param($_)) if defined $self->param($_);
-    } qw/bust waist arm length height weight purpose domain/;
-    $guest->update;
-    $self->respond_to(
-        json => { json => { $guest->get_columns } },
-    );
+    $user->user_info->update({
+        map {
+            defined $self->param($_) ? ( $_ => $self->param($_) ) : ()
+        } qw( height weight bust waist hip thigh arm leg knee foot )
+    });
+
+    my %data = ( $user->user_info->get_columns, $user->get_columns );
+    delete @data{qw/ user_id password /};
+
+    $self->respond_to( json => { json => \%data } );
 };
 
 post '/clothes' => sub {
@@ -628,24 +894,26 @@ put '/clothes' => sub {
 get '/new-cloth' => sub {
     my $self = shift;
 
-    my $q      = $self->param('q') || '';
-    my $users = $DB->resultset('User')->search({
+    my $q  = $self->param('q') || q{};
+    my $rs = $DB->resultset('User')->search({
         -or => [
             id    => $q,
             name  => $q,
             phone => $q,
-            email => $q
+            email => $q,
         ],
     });
 
-    my @candidates;
-    while (my $user = $users->next) {
-        push @candidates, $self->donor2hr($user);
+    my @users;
+    while ( my $user = $rs->next ) {
+        my %data = ( $user->user_info->get_columns, $user->get_columns );
+        delete @data{qw/ user_id password height weight bust waist hip thigh arm leg knee foot /};
+        push @users, \%data;
     }
 
     $self->respond_to(
-        json => { json => [@candidates] },
-        html => { template => 'new-cloth' }
+        json => { json     => \@users     },
+        html => { template => 'new-cloth' },
     );
 };
 
@@ -728,22 +996,22 @@ get '/search' => sub {
     my $color            = $self->param('color')            || q{};
     my $entries_per_page = $self->param('entries_per_page') || app->config->{entries_per_page};
 
-    my $guest    = $gid ? $DB->resultset('Guest')->find({ id => $gid }) : undef;
-    my $cond = {};
+    my $user = $gid ? $DB->resultset('User')->find({ id => $gid }) : undef;
     my ( $bust, $waist, $arm, $status_id, $category ) = split /\//, $q;
     $status_id ||= 0;
     $category  ||= 'jacket';
 
-    $cond->{'me.category'}  = $category;
-    $cond->{'me.bust'}      = { '>=' => $bust  } if $bust;
-    $cond->{'bottom.waist'} = { '>=' => $waist } if $waist;
-    $cond->{'me.arm'}       = { '>=' => $arm   } if $arm;
-    $cond->{'me.status_id'} = $status_id         if $status_id;
-    $cond->{'me.color'}     = $color             if $color;
+    my %cond;
+    $cond{'me.category'}  = $category;
+    $cond{'me.bust'}      = { '>=' => $bust  } if $bust;
+    $cond{'bottom.waist'} = { '>=' => $waist } if $waist;
+    $cond{'me.arm'}       = { '>=' => $arm   } if $arm;
+    $cond{'me.status_id'} = $status_id         if $status_id;
+    $cond{'me.color'}     = $color             if $color;
 
     ### row, current_page, count
     my $clothes = $DB->resultset('Cloth')->search(
-        $cond,
+        \%cond,
         {
             page     => $self->param('p') || 1,
             rows     => $entries_per_page,
@@ -762,7 +1030,7 @@ get '/search' => sub {
     $self->stash(
         q         => $q,
         gid       => $gid,
-        guest     => $guest,
+        user      => $user,
         clothes   => $clothes,
         pageset   => $pageset,
         status_id => $status_id,
@@ -779,17 +1047,18 @@ get '/rental' => sub {
     $today->set_minute(0);
     $today->set_second(0);
 
-    my $q      = $self->param('q');
-    my @guests = $DB->resultset('Guest')->search({
-        -or => [
-            'user_id'    => $q,
-            'user.name'  => $q,
-            'user.phone' => $q,
-            'user.email' => $q
-        ],
-    }, {
-        join => 'user'
-    });
+    my $q     = $self->param('q');
+    my @users = $DB->resultset('User')->search(
+        {
+            -or => [
+                'id'              => $q,
+                'name'            => $q,
+                'email'           => $q,
+                'user_info.phone' => $q,
+            ],
+        },
+        { join => 'user_info' },
+    );
 
     ### DBIx::Class::Storage::DBI::_gen_sql_bind(): DateTime objects passed to search() are not
     ### supported properly (InflateColumn::DateTime formats and settings are not respected.)
@@ -798,16 +1067,17 @@ get '/rental' => sub {
     ###
     ### DateTime object 를 search 에 바로 사용하지 말고 parser 를 이용하라능 - @aanoaa
     my $dt_parser = $DB->storage->datetime_parser;
-    push @guests, $DB->resultset('Guest')->search({
-        -or => [
-            create_date => { '>=' => $dt_parser->format_datetime($today) },
-            visit_date  => { '>=' => $dt_parser->format_datetime($today) },
-        ],
-    }, {
-        order_by => { -desc => 'create_date' },
-    });
+    push @users, $DB->resultset('User')->search(
+        {
+            -or => [
+                create_date => { '>=' => $dt_parser->format_datetime($today) },
+                visit_date  => { '>=' => $dt_parser->format_datetime($today) },
+            ],
+        },
+        { order_by => { -desc => 'create_date' } },
+    );
 
-    $self->stash(guests => \@guests);
+    $self->stash( users => \@users );
 } => 'rental';
 
 post '/orders' => sub {
@@ -820,31 +1090,31 @@ post '/orders' => sub {
     return $self->error(400, 'failed to validate')
         unless $self->validate($validator);
 
-    my $guest   = $DB->resultset('Guest')->find({ id => $self->param('gid') });
+    my $user    = $DB->resultset('User')->find({ id => $self->param('gid') });
     my @clothes = $DB->resultset('Cloth')->search({ 'me.id' => { -in => [$self->param('cloth-id')] } });
 
-    return $self->error(400, 'invalid request') unless $guest || @clothes;
+    return $self->error(400, 'invalid request') unless $user || @clothes;
 
     my $guard = $DB->txn_scope_guard;
     my $order;
     try {
         # BEGIN TRANSACTION ~
         $order = $DB->resultset('Order')->create({
-            guest_id  => $guest->id,
-            bust      => $guest->bust,
-            waist     => $guest->waist,
-            arm       => $guest->arm,
-            length    => $guest->length,
-            purpose   => $guest->purpose,
-            age       => $guest->user->age,
+            user_id  => $user->id,
+            bust     => $user->user_info->bust,
+            waist    => $user->user_info->waist,
+            arm      => $user->user_info->arm,
+            leg      => $user->user_info->leg,
+            purpose  => $user->purpose,
         });
 
         for my $cloth (@clothes) {
             $order->create_related('cloth_orders', { cloth_id => $cloth->id });
         }
-        my $dt_parser = $DB->storage->datetime_parser;
-        $guest->visit_date($dt_parser->format_datetime(DateTime->now()));
-        $guest->update;    # refresh `visit_date`
+        # FIXME now user does not have visit_date column
+        #my $dt_parser = $DB->storage->datetime_parser;
+        #$user->visit_date($dt_parser->format_datetime(DateTime->now()));
+        #$user->update;    # refresh `visit_date`
         $guard->commit;
         # ~ COMMIT
     } catch {
@@ -854,7 +1124,7 @@ post '/orders' => sub {
         return $self->error(500, "Failed to create `order`: $error") unless $order;
     };
 
-    $self->res->headers->header('Location' => $self->url_for('/orders/' . $guest->id));
+    $self->res->headers->header('Location' => $self->url_for('/orders/' . $order->id));
     $self->respond_to(
         json => { json => $self->order2hr($order), status => 201 },
         html => sub {
@@ -1063,35 +1333,41 @@ del '/orders/:id' => sub {
 post '/donors' => sub {
     my $self   = shift;
 
-    my $user_id = $self->param('user_id');
-    my $donor = $self->create_donor($user_id);
-    return $self->error(500, 'failed to create a new donor') unless $donor;
+    my $user = $DB->resultset('User')->find({ id => $self->param('user_id') });
+    return $self->error(404, 'not found user') unless $user;
 
-    $self->res->headers->header('Location' => $self->url_for('/donors/' . $donor->id));
+    $user->user_info->update({
+        map {
+            defined $self->param($_) ? ( $_ => $self->param($_) ) : ()
+        } qw()
+    });
+
+    my %data = ( $user->user_info->get_columns, $user->get_columns );
+    delete @data{qw/ user_id password /};
+
+    $self->res->headers->header('Location' => $self->url_for('/donors/' . $user->id));
     $self->respond_to(
-        json => { json => { $donor->get_columns }, status => 201 },
-        html => sub {
-            $self->redirect_to('/donors/' . $donor->id);
-        }
+        json => { json => \%data, status => 201                  },
+        html => sub { $self->redirect_to('/donors/' . $user->id) },
     );
 };
 
 any [qw/put patch/] => '/donors/:id' => sub {
     my $self  = shift;
 
-    ## TODO: validate params (donation_msg?, comment?)
+    my $user = $DB->resultset('User')->find({ id => $self->param('id') });
+    return $self->error(404, 'not found user') unless $user;
 
-    my $rs = $DB->resultset('Donor');
-    my $donor = $rs->find({ id => $self->param('id') });
-    return $self->error(404, 'not found') unless $donor;
+    $user->user_info->update({
+        map {
+            defined $self->param($_) ? ( $_ => $self->param($_) ) : ()
+        } qw()
+    });
 
-    map {
-        $donor->$_($self->param($_)) if defined $self->param($_);
-    } qw/donation_msg comment/;
-    $donor->update;
-    $self->respond_to(
-        json => { json => { $donor->get_columns } },
-    );
+    my %data = ( $user->user_info->get_columns, $user->get_columns );
+    delete @data{qw/ user_id password /};
+
+    $self->respond_to( json => { json => \%data } );
 };
 
 post '/sms' => sub {
@@ -1546,29 +1822,26 @@ __DATA__
 %ul
   %li
     %i.icon-user
-    %a{:href => "#{url_for('/guests/' . $guest->id)}"} #{$guest->user->name}
-    %span (#{$guest->user->age})
+    %a{:href => "#{url_for('/guests/' . $user->id)}"} #{$user->name}
+    %span (#{$user->user_info->birth})
   %li
     %i.icon-map-marker
-    = $guest->user->address
+    = $user->user_info->address
   %li
     %i.icon-envelope
-    %a{:href => "mailto:#{$guest->user->email}"}= $guest->user->email
-  %li= $guest->user->phone
+    %a{:href => "mailto:#{$user->email}"}= $user->email
+  %li= $user->user_info->phone
   %li
-    %span #{$guest->height} cm,
-    %span #{$guest->weight} kg
-  - if ($guest->target_date) {
-    %li= $guest->target_date->ymd . ' 착용'
-  - }
+    %span #{$user->user_info->height} cm,
+    %span #{$user->user_info->weight} kg
 
 
 @@ guests/id.html.haml
 - layout 'default';
-- title $guest->user->name . '님';
+- title $user->name . '님';
 
-%div= include 'guests/status', guest => $guest
-%div= include 'guests/breadcrumb', guest => $guest, status_id => 1;
+%div= include 'guests/status',     user => $user
+%div= include 'guests/breadcrumb', user => $user, status_id => 1;
 %h3 주문내역
 %ul
   - for my $order (@$orders) {
@@ -1596,44 +1869,44 @@ __DATA__
 
 @@ guests/breadcrumb.html.haml
 %p
-  %a{:href => '/guests/#{$guest->id}'}= $guest->user->name
+  %a{:href => '/guests/#{$user->id}'}= $user->name
   님
-  - if ($guest->visit_date) {
-    %strong= $guest->visit_date->ymd
-    %span 일 방문
+  - if ( $user->user_info->visit_date ) {
+    %strong= $user->user_info->visit_date->ymd
+    %span 방문
   - }
   %div
     %span.label.label-info.search-label
-      %a{:href => "#{url_with('/search')->query([q => $guest->bust])}///#{$status_id}"}= $guest->bust
+      %a{:href => "#{url_with('/search')->query([q => $user->bust])}///#{$status_id}"}= $user->bust
     %span.label.label-info.search-label
-      %a{:href => "#{url_with('/search')->query([q => '/' . $guest->waist . '//' . $status_id])}"}= $guest->waist
+      %a{:href => "#{url_with('/search')->query([q => '/' . $user->waist . '//' . $status_id])}"}= $user->waist
     %span.label.label-info.search-label
-      %a{:href => "#{url_with('/search')->query([q => '//' . $guest->arm])}/#{$status_id}"}= $guest->arm
-    %span.label= $guest->length
-    %span.label= $guest->height
-    %span.label= $guest->weight
+      %a{:href => "#{url_with('/search')->query([q => '//' . $user->arm])}/#{$status_id}"}= $user->arm
+    %span.label= $user->length
+    %span.label= $user->height
+    %span.label= $user->weight
 
 
 @@ guests/breadcrumb/radio.html.haml
 %label.radio.inline
-  %input{:type => 'radio', :name => 'gid', :value => '#{$guest->id}'}
-  %a{:href => '/guests/#{$guest->id}'}= $guest->user->name
+  %input{:type => 'radio', :name => 'gid', :value => '#{$user->id}'}
+  %a{:href => '/guests/#{$user->id}'}= $user->name
   님
-  - if ($guest->visit_date) {
-    %strong= $guest->visit_date->ymd
-    %span 일 방문
+  - if ( $user->user_info->visit_date ) {
+    %strong= $user->user_info->visit_date->ymd
+    %span 방문
   - }
 %div
   %i.icon-envelope
-  %a{:href => "mailto:#{$guest->user->email}"}= $guest->user->email
-%div.muted= $guest->user->phone
+  %a{:href => "mailto:#{$user->email}"}= $user->email
+%div.muted= $user->user_info->phone
 %div
-  %span.label.label-info= $guest->bust
-  %span.label.label-info= $guest->waist
-  %span.label.label-info= $guest->arm
-  %span.label= $guest->length
-  %span.label= $guest->height
-  %span.label= $guest->weight
+  %span.label.label-info= $user->user_info->bust
+  %span.label.label-info= $user->user_info->waist
+  %span.label.label-info= $user->user_info->arm
+  %span.label= $user->user_info->leg
+  %span.label= $user->user_info->height
+  %span.label= $user->user_info->weight
 
 
 @@ donors/breadcrumb/radio.html.haml
@@ -1645,7 +1918,7 @@ __DATA__
     %i.icon-envelope
     %a{:href => "mailto:#{$donor->email}"}= $donor->email
   - }
-  - if ($donor->phone) {
+  - if ($donor->user_info->phone) {
     %div.muted= $donor->phone
   - }
 
@@ -1732,7 +2005,7 @@ __DATA__
 
 .row
   .col-xs-12
-    = include 'guests/breadcrumb', guest => $guest if $guest
+    = include 'guests/breadcrumb', user => $user if $user
 
 .row
   .col-xs-12
@@ -1787,7 +2060,7 @@ __DATA__
                   %span.badge{:class => 'satisfaction-#{$s->arm || 0}'}=   $s->guest->arm
                   %span.badge{:class => 'satisfaction-#{$s->top_fit || 0}'}    상
                   %span.badge{:class => 'satisfaction-#{$s->bottom_fit || 0}'} 하
-                  - if ($guest && $s->guest->id == $guest->id) {
+                  - if ($user && $s->user_id == $user->id) {
                     %i.icon-star{:title => '대여한적 있음'}
                   - }
               - }
@@ -1874,7 +2147,7 @@ __DATA__
         %span.label.label-info.search-label= $cloth->length
       - }
     - if ($cloth->donor) {
-      %h3= $cloth->donor->user->name
+      %h3= $cloth->donor->name
       %p.muted 님께서 기증하셨습니다
     - }
   .span4
@@ -2012,8 +2285,8 @@ __DATA__
       %span 합니다.
     .span4
       %ul
-        - for my $g (@$guests) {
-          %li= include 'guests/breadcrumb/radio', guest => $g
+        - for my $u (@$users) {
+          %li= include 'guests/breadcrumb/radio', user => $u
         - }
 
 :plain

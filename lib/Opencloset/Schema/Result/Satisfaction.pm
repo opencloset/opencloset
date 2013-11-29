@@ -27,7 +27,7 @@ __PACKAGE__->table("satisfaction");
 
 =head1 ACCESSORS
 
-=head2 guest_id
+=head2 user_id
 
   data_type: 'integer'
   extra: {unsigned => 1}
@@ -77,7 +77,7 @@ __PACKAGE__->table("satisfaction");
 =cut
 
 __PACKAGE__->add_columns(
-  "guest_id",
+  "user_id",
   {
     data_type => "integer",
     extra => { unsigned => 1 },
@@ -115,7 +115,7 @@ __PACKAGE__->add_columns(
 
 =over 4
 
-=item * L</guest_id>
+=item * L</user_id>
 
 =item * L</cloth_id>
 
@@ -123,7 +123,7 @@ __PACKAGE__->add_columns(
 
 =cut
 
-__PACKAGE__->set_primary_key("guest_id", "cloth_id");
+__PACKAGE__->set_primary_key("user_id", "cloth_id");
 
 =head1 RELATIONS
 
@@ -142,24 +142,24 @@ __PACKAGE__->belongs_to(
   { is_deferrable => 1, on_delete => "CASCADE", on_update => "RESTRICT" },
 );
 
-=head2 guest
+=head2 user
 
 Type: belongs_to
 
-Related object: L<Opencloset::Schema::Result::Guest>
+Related object: L<Opencloset::Schema::Result::User>
 
 =cut
 
 __PACKAGE__->belongs_to(
-  "guest",
-  "Opencloset::Schema::Result::Guest",
-  { id => "guest_id" },
+  "user",
+  "Opencloset::Schema::Result::User",
+  { id => "user_id" },
   { is_deferrable => 1, on_delete => "CASCADE", on_update => "RESTRICT" },
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07036 @ 2013-11-19 19:36:49
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:sVb6iQniQAt804F/0MW7Qw
+# Created by DBIx::Class::Schema::Loader v0.07038 @ 2013-11-27 22:12:05
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:m6KSKBwiD3qhgpuEKbbVPw
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration
