@@ -592,7 +592,12 @@ group {
         # validate params
         #
         my $v = $self->create_validator;
-        $v->field('user_id')->required(1)->regexp(qr/^\d+$/);
+        $v->field('user_id')->required(1)->regexp(qr/^\d+$/)->callback(sub {
+            my $val = shift;
+
+            return 1 if $DB->resultset('User')->find({ id => $val });
+            return ( 0, 'user not found using user_id' );
+        });
         #
         # FIXME
         #   need more validation but not now
