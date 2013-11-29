@@ -1,12 +1,12 @@
 use utf8;
-package Opencloset::Schema::Result::ClothOrder;
+package Opencloset::Schema::Result::OrderClothes;
 
 # Created by DBIx::Class::Schema::Loader
 # DO NOT MODIFY THE FIRST PART OF THIS FILE
 
 =head1 NAME
 
-Opencloset::Schema::Result::ClothOrder
+Opencloset::Schema::Result::OrderClothes
 
 =cut
 
@@ -19,22 +19,22 @@ use warnings;
 
 use base 'Opencloset::Schema::Base';
 
-=head1 TABLE: C<cloth_order>
+=head1 TABLE: C<order_clothes>
 
 =cut
 
-__PACKAGE__->table("cloth_order");
+__PACKAGE__->table("order_clothes");
 
 =head1 ACCESSORS
 
-=head2 cloth_id
+=head2 order_id
 
   data_type: 'integer'
   extra: {unsigned => 1}
   is_foreign_key: 1
   is_nullable: 0
 
-=head2 order_id
+=head2 clothes_id
 
   data_type: 'integer'
   extra: {unsigned => 1}
@@ -44,14 +44,14 @@ __PACKAGE__->table("cloth_order");
 =cut
 
 __PACKAGE__->add_columns(
-  "cloth_id",
+  "order_id",
   {
     data_type => "integer",
     extra => { unsigned => 1 },
     is_foreign_key => 1,
     is_nullable => 0,
   },
-  "order_id",
+  "clothes_id",
   {
     data_type => "integer",
     extra => { unsigned => 1 },
@@ -64,30 +64,30 @@ __PACKAGE__->add_columns(
 
 =over 4
 
-=item * L</cloth_id>
-
 =item * L</order_id>
+
+=item * L</clothes_id>
 
 =back
 
 =cut
 
-__PACKAGE__->set_primary_key("cloth_id", "order_id");
+__PACKAGE__->set_primary_key("order_id", "clothes_id");
 
 =head1 RELATIONS
 
-=head2 cloth
+=head2 clothes
 
 Type: belongs_to
 
-Related object: L<Opencloset::Schema::Result::Cloth>
+Related object: L<Opencloset::Schema::Result::Clothes>
 
 =cut
 
 __PACKAGE__->belongs_to(
-  "cloth",
-  "Opencloset::Schema::Result::Cloth",
-  { id => "cloth_id" },
+  "clothes",
+  "Opencloset::Schema::Result::Clothes",
+  { id => "clothes_id" },
   { is_deferrable => 1, on_delete => "CASCADE", on_update => "RESTRICT" },
 );
 
@@ -107,8 +107,8 @@ __PACKAGE__->belongs_to(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07036 @ 2013-11-05 11:48:52
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:K1w9rbeiVq6AFBGlSer1PA
+# Created by DBIx::Class::Schema::Loader v0.07038 @ 2013-11-29 20:22:55
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:947X1Qs3MDbYQMtyy8BG8A
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

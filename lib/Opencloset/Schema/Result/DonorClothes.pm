@@ -1,12 +1,12 @@
 use utf8;
-package Opencloset::Schema::Result::DonorCloth;
+package Opencloset::Schema::Result::DonorClothes;
 
 # Created by DBIx::Class::Schema::Loader
 # DO NOT MODIFY THE FIRST PART OF THIS FILE
 
 =head1 NAME
 
-Opencloset::Schema::Result::DonorCloth
+Opencloset::Schema::Result::DonorClothes
 
 =cut
 
@@ -19,11 +19,11 @@ use warnings;
 
 use base 'Opencloset::Schema::Base';
 
-=head1 TABLE: C<donor_cloth>
+=head1 TABLE: C<donor_clothes>
 
 =cut
 
-__PACKAGE__->table("donor_cloth");
+__PACKAGE__->table("donor_clothes");
 
 =head1 ACCESSORS
 
@@ -34,7 +34,7 @@ __PACKAGE__->table("donor_cloth");
   is_foreign_key: 1
   is_nullable: 0
 
-=head2 cloth_id
+=head2 clothes_id
 
   data_type: 'integer'
   extra: {unsigned => 1}
@@ -63,7 +63,7 @@ __PACKAGE__->add_columns(
     is_foreign_key => 1,
     is_nullable => 0,
   },
-  "cloth_id",
+  "clothes_id",
   {
     data_type => "integer",
     extra => { unsigned => 1 },
@@ -87,28 +87,28 @@ __PACKAGE__->add_columns(
 
 =item * L</user_id>
 
-=item * L</cloth_id>
+=item * L</clothes_id>
 
 =back
 
 =cut
 
-__PACKAGE__->set_primary_key("user_id", "cloth_id");
+__PACKAGE__->set_primary_key("user_id", "clothes_id");
 
 =head1 RELATIONS
 
-=head2 cloth
+=head2 clothes
 
 Type: belongs_to
 
-Related object: L<Opencloset::Schema::Result::Cloth>
+Related object: L<Opencloset::Schema::Result::Clothes>
 
 =cut
 
 __PACKAGE__->belongs_to(
-  "cloth",
-  "Opencloset::Schema::Result::Cloth",
-  { id => "cloth_id" },
+  "clothes",
+  "Opencloset::Schema::Result::Clothes",
+  { id => "clothes_id" },
   { is_deferrable => 1, on_delete => "CASCADE", on_update => "RESTRICT" },
 );
 
@@ -128,8 +128,8 @@ __PACKAGE__->belongs_to(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07038 @ 2013-11-27 22:12:05
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:oY4j0+Q60tqW3g65/GmLGA
+# Created by DBIx::Class::Schema::Loader v0.07038 @ 2013-11-29 20:22:55
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:jzp/66XLdXzt9AdvTZPZjg
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

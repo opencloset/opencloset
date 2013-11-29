@@ -34,7 +34,7 @@ __PACKAGE__->table("satisfaction");
   is_foreign_key: 1
   is_nullable: 0
 
-=head2 cloth_id
+=head2 clothes_id
 
   data_type: 'integer'
   extra: {unsigned => 1}
@@ -84,7 +84,7 @@ __PACKAGE__->add_columns(
     is_foreign_key => 1,
     is_nullable => 0,
   },
-  "cloth_id",
+  "clothes_id",
   {
     data_type => "integer",
     extra => { unsigned => 1 },
@@ -117,28 +117,28 @@ __PACKAGE__->add_columns(
 
 =item * L</user_id>
 
-=item * L</cloth_id>
+=item * L</clothes_id>
 
 =back
 
 =cut
 
-__PACKAGE__->set_primary_key("user_id", "cloth_id");
+__PACKAGE__->set_primary_key("user_id", "clothes_id");
 
 =head1 RELATIONS
 
-=head2 cloth
+=head2 clothes
 
 Type: belongs_to
 
-Related object: L<Opencloset::Schema::Result::Cloth>
+Related object: L<Opencloset::Schema::Result::Clothes>
 
 =cut
 
 __PACKAGE__->belongs_to(
-  "cloth",
-  "Opencloset::Schema::Result::Cloth",
-  { id => "cloth_id" },
+  "clothes",
+  "Opencloset::Schema::Result::Clothes",
+  { id => "clothes_id" },
   { is_deferrable => 1, on_delete => "CASCADE", on_update => "RESTRICT" },
 );
 
@@ -158,8 +158,8 @@ __PACKAGE__->belongs_to(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07038 @ 2013-11-27 22:12:05
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:m6KSKBwiD3qhgpuEKbbVPw
+# Created by DBIx::Class::Schema::Loader v0.07038 @ 2013-11-29 20:22:55
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:j7mKNHx8JvX7WuwFr51W2g
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

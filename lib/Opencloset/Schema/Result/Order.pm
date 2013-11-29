@@ -279,17 +279,17 @@ __PACKAGE__->set_primary_key("id");
 
 =head1 RELATIONS
 
-=head2 cloth_orders
+=head2 order_clothes
 
 Type: has_many
 
-Related object: L<Opencloset::Schema::Result::ClothOrder>
+Related object: L<Opencloset::Schema::Result::OrderClothes>
 
 =cut
 
 __PACKAGE__->has_many(
-  "cloth_orders",
-  "Opencloset::Schema::Result::ClothOrder",
+  "order_clothes",
+  "Opencloset::Schema::Result::OrderClothes",
   { "foreign.order_id" => "self.id" },
   { cascade_copy => 0, cascade_delete => 0 },
 );
@@ -329,19 +329,19 @@ __PACKAGE__->belongs_to(
   { is_deferrable => 1, on_delete => "CASCADE", on_update => "RESTRICT" },
 );
 
-=head2 cloths
+=head2 clothes
 
 Type: many_to_many
 
-Composing rels: L</cloth_orders> -> cloth
+Composing rels: L</order_clothes> -> clothes
 
 =cut
 
-__PACKAGE__->many_to_many("cloths", "cloth_orders", "cloth");
+__PACKAGE__->many_to_many("clothes", "order_clothes", "clothes");
 
 
-# Created by DBIx::Class::Schema::Loader v0.07038 @ 2013-11-29 14:56:06
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:TTwwH/Q1MKswmWeggeqYQg
+# Created by DBIx::Class::Schema::Loader v0.07038 @ 2013-11-29 20:22:55
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:C/qZnan/v1W5C2oFbTNQkw
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

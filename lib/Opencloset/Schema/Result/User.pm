@@ -128,32 +128,32 @@ __PACKAGE__->add_unique_constraint("email", ["email"]);
 
 =head1 RELATIONS
 
-=head2 cloths
+=head2 clothes
 
 Type: has_many
 
-Related object: L<Opencloset::Schema::Result::Cloth>
+Related object: L<Opencloset::Schema::Result::Clothes>
 
 =cut
 
 __PACKAGE__->has_many(
-  "cloths",
-  "Opencloset::Schema::Result::Cloth",
+  "clothes",
+  "Opencloset::Schema::Result::Clothes",
   { "foreign.user_id" => "self.id" },
   { cascade_copy => 0, cascade_delete => 0 },
 );
 
-=head2 donor_cloths
+=head2 donor_clothes
 
 Type: has_many
 
-Related object: L<Opencloset::Schema::Result::DonorCloth>
+Related object: L<Opencloset::Schema::Result::DonorClothes>
 
 =cut
 
 __PACKAGE__->has_many(
-  "donor_cloths",
-  "Opencloset::Schema::Result::DonorCloth",
+  "donor_clothes",
+  "Opencloset::Schema::Result::DonorClothes",
   { "foreign.user_id" => "self.id" },
   { cascade_copy => 0, cascade_delete => 0 },
 );
@@ -204,8 +204,8 @@ __PACKAGE__->might_have(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07038 @ 2013-11-28 12:23:25
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:Uqlj6TQGxLrVoyy+BxPM7g
+# Created by DBIx::Class::Schema::Loader v0.07038 @ 2013-11-29 20:22:55
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:fW7DSOTGRAiwwZndxEkWcw
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

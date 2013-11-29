@@ -21,6 +21,12 @@ my $conf = eval path($conf_file)->slurp_utf8;
     loader_options => {
         dump_directory            => 'lib',
         naming                    => { ALL => 'v8' },
+        moniker_map               => {
+            clothes       => 'Clothes',
+            donor_clothes => 'DonorClothes',
+            order_clothes => 'OrderClothes',
+        },
+        inflect_singular          => { clothes => 'clothes' },
         skip_load_external        => 1,
         relationships             => 1,
         col_collision_map         => 'column_%s',
@@ -48,6 +54,6 @@ my $conf = eval path($conf_file)->slurp_utf8;
                     encode_check_method => 'check_password',
                 };
             }
-        }
+        },
     },
 }

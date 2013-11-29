@@ -39,7 +39,7 @@ INSERT
     ;
 
 INSERT
-  INTO `cloth` (
+  INTO `clothes` (
     `id`,`code`,`bust`,`waist`,`arm`,`length`,`category`,
     `top_id`,`bottom_id`,`user_id`,`status_id`,`gender`,`color`,`compatible_code`
   )
@@ -50,25 +50,25 @@ INSERT
     (4,'0A001', NULL, NULL, NULL, NULL, 'shoes',  NULL, NULL, 1, 1, 1,'B',NULL),
     (5,'0T001', NULL, NULL, NULL, NULL, 'tie',    NULL, NULL, 1, 1, 1,'B',NULL)
     ;
-UPDATE `cloth` SET `bottom_id`=2 WHERE `id`=1;
-UPDATE `cloth` SET `top_id`=1 WHERE `id`=2;
+UPDATE `clothes` SET `bottom_id`=2 WHERE `id`=1;
+UPDATE `clothes` SET `top_id`=1    WHERE `id`=2;
 
 INSERT
-  INTO `donor_cloth` (`user_id`, `cloth_id`, `comment`, `donation_date`)
+  INTO `donor_clothes` (`user_id`, `clothes_id`, `comment`, `donation_date`)
   VALUES (1, 1, '필요없어서 했습니다', NOW()), (1, 2, '', NOW());
 
 -- 대여중인거
 INSERT
-  INTO `cloth` (`id`,`code`,`bust`,`waist`,`arm`,`length`,`category`,`top_id`,`bottom_id`,`user_id`,`status_id`)
+  INTO `clothes` (`id`,`code`,`bust`,`waist`,`arm`,`length`,`category`,`top_id`,`bottom_id`,`user_id`,`status_id`)
   VALUES
     (6,'0J002', 99, NULL, 55, NULL, 'jacket', NULL, NULL, 1, 2),
     (7,'0P002', NULL, 82, NULL, 112, 'pants', NULL, NULL, 1, 2)
     ;
-UPDATE `cloth` SET `bottom_id`=7 WHERE `id`=6;
-UPDATE `cloth` SET `top_id`=6 WHERE `id`=7;
+UPDATE `clothes` SET `bottom_id`=7 WHERE `id`=6;
+UPDATE `clothes` SET `top_id`=6 WHERE `id`=7;
 
 INSERT
-  INTO `donor_cloth` (`user_id`, `cloth_id`, `comment`, `donation_date`)
+  INTO `donor_clothes` (`user_id`, `clothes_id`, `comment`, `donation_date`)
   VALUES (1, 3, '남아서..', NOW()), (1, 4, '', NOW())
   ;
 
@@ -80,10 +80,10 @@ INSERT
   VALUES
     (1,1,2,'2013-10-18','2013-10-21',NULL,20000,0,NULL,'현금','김소령','입사면접',95,78,60,105);
 
-INSERT INTO `cloth_order` (`cloth_id`,`order_id`) VALUES (6,1), (7,1);
+INSERT INTO `order_clothes` (`order_id`, `clothes_id`) VALUES (1,6), (1,7);
 
 INSERT
-  INTO `satisfaction` (`user_id`,`cloth_id`,`bust`,`waist`,`arm`,`top_fit`,`bottom_fit`,`create_date`)
+  INTO `satisfaction` (`user_id`,`clothes_id`,`bust`,`waist`,`arm`,`top_fit`,`bottom_fit`,`create_date`)
   VALUES (1,6,1,2,3,4,5,'2013-10-18')
   ;
 

@@ -82,17 +82,17 @@ __PACKAGE__->add_unique_constraint("name", ["name"]);
 
 =head1 RELATIONS
 
-=head2 cloths
+=head2 clothes
 
 Type: has_many
 
-Related object: L<Opencloset::Schema::Result::Cloth>
+Related object: L<Opencloset::Schema::Result::Clothes>
 
 =cut
 
 __PACKAGE__->has_many(
-  "cloths",
-  "Opencloset::Schema::Result::Cloth",
+  "clothes",
+  "Opencloset::Schema::Result::Clothes",
   { "foreign.status_id" => "self.id" },
   { cascade_copy => 0, cascade_delete => 0 },
 );
@@ -113,8 +113,8 @@ __PACKAGE__->has_many(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07036 @ 2013-11-05 11:48:52
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:8NAFYHtso/h5FZpn4xy/QQ
+# Created by DBIx::Class::Schema::Loader v0.07038 @ 2013-11-29 20:22:55
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:1Rh6QCkbZHB3EaQLB2qO7Q
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration
