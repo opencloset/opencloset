@@ -275,6 +275,84 @@ helper _q => sub {
     return join '/', ( $q{bust}, $q{waist}, $q{arm}, $q{status}, $q{category} );
 };
 
+helper get_params => sub {
+    my ( $self, @keys ) = @_;
+
+    use List::MoreUtils qw( zip );
+    #
+    # make parameter hash using explicit keys
+    #
+    my %params = zip @keys, @{ [ $self->param( \@keys ) ] };
+
+    #
+    # remove not defined parameter key and values
+    #
+    defined $params{$_} ? 1 : delete $params{$_} for keys %params;
+
+    return %params;
+};
+
+#
+# API section
+#
+group {
+    under '/api' => sub {
+        my $self = shift;
+
+        #
+        # FIXME - need authorization
+        #
+        if (1) {
+            return 1;
+        }
+
+        $self->render( json => { error => 'invalid_access' }, status => 400 );
+        return;
+    };
+
+    post '/user'      => \&api_create_user;
+    get  '/user/:id'  => \&api_get_user;
+    put  '/user/:id'  => \&api_update_user;
+    del  '/user/:id'  => \&api_delete_user;
+
+    post '/order'     => \&api_create_order;
+    get  '/order/:id' => \&api_get_order;
+    put  '/order/:id' => \&api_update_order;
+    del  '/order/:id' => \&api_delete_order;
+
+    sub api_create_user {
+        my $self = shift;
+    }
+
+    sub api_get_user {
+        my $self = shift;
+    }
+
+    sub api_update_user {
+        my $self = shift;
+    }
+
+    sub api_delete_user {
+        my $self = shift;
+    }
+
+    sub api_create_order {
+        my $self = shift;
+    }
+
+    sub api_get_order {
+        my $self = shift;
+    }
+
+    sub api_update_order {
+        my $self = shift;
+    }
+
+    sub api_delete_order {
+        my $self = shift;
+    }
+}; # end of API section
+
 get '/'      => 'home';
 get '/login';
 
