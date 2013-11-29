@@ -446,6 +446,45 @@ group {
 
     sub api_delete_user {
         my $self = shift;
+
+        #
+        # fetch params
+        #
+        my %params = $self->get_params(qw/ id /);
+
+        #
+        # validate params
+        #
+        my $v = $self->create_validator;
+        $v->field('id')->required(1)->regexp(qr/^\d+$/);
+        unless ( $self->validate( $v, \%params ) ) {
+            my @error_str;
+            while ( my ( $k, $v ) = each %{ $v->errors } ) {
+                push @error_str, "$k:$v";
+            }
+            return $self->error( 400, {
+                str  => join(',', @error_str),
+                data => $v->errors,
+            });
+        }
+
+        #
+        # find user
+        #
+        my $user = $DB->resultset('User')->find( \%params );
+        return $self->error( 404, {
+            str  => 'user not found',
+            data => {},
+        }) unless $user;
+
+        #
+        # delete & response
+        #
+        my %data = ( $user->user_info->get_columns, $user->get_columns );
+        delete @data{qw/ user_id password /};
+        $user->delete;
+
+        $self->respond_to( json => { status => 200, json => \%data } );
     }
 
     sub api_create_order {
