@@ -310,15 +310,17 @@ group {
         return;
     };
 
-    post '/user'      => \&api_create_user;
-    get  '/user/:id'  => \&api_get_user;
-    put  '/user/:id'  => \&api_update_user;
-    del  '/user/:id'  => \&api_delete_user;
+    post '/user'       => \&api_create_user;
+    get  '/user/:id'   => \&api_get_user;
+    put  '/user/:id'   => \&api_update_user;
+    del  '/user/:id'   => \&api_delete_user;
+    get  '/user-list'  => \&api_get_user_list;
 
-    post '/order'     => \&api_create_order;
-    get  '/order/:id' => \&api_get_order;
-    put  '/order/:id' => \&api_update_order;
-    del  '/order/:id' => \&api_delete_order;
+    post '/order'      => \&api_create_order;
+    get  '/order/:id'  => \&api_get_order;
+    put  '/order/:id'  => \&api_update_order;
+    del  '/order/:id'  => \&api_delete_order;
+    get  '/order-list' => \&api_get_order_list;
 
     sub api_create_user {
         my $self = shift;
@@ -566,6 +568,10 @@ group {
         $self->respond_to( json => { status => 200, json => \%data } );
     }
 
+    sub api_get_user_list {
+        my $self = shift;
+    }
+
     sub api_create_order {
         my $self = shift;
     }
@@ -579,6 +585,10 @@ group {
     }
 
     sub api_delete_order {
+        my $self = shift;
+    }
+
+    sub api_get_order_list {
         my $self = shift;
     }
 }; # end of API section
