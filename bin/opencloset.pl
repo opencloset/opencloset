@@ -592,7 +592,7 @@ group {
         # validate params
         #
         my $v = $self->create_validator;
-        $v->field('user_id')->required(1);
+        $v->field('user_id')->required(1)->regexp(qr/^\d+$/);
         #
         # FIXME
         #   need more validation but not now
