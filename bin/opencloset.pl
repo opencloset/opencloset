@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 
-use v5.14;
+use v5.18;
 use Mojolicious::Lite;
 
 use Data::Pageset;
