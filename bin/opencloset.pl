@@ -81,7 +81,7 @@ helper cloth2hr => sub {
 
     return {
         $cloth->get_columns,
-        donor    => $cloth->donor ? $cloth->donor->user->name : '',
+        donor    => $cloth->donor ? $cloth->user->name : '',
         category => $cloth->category,
         price    => $self->commify($cloth->price),
         status   => $cloth->status->name,
@@ -996,22 +996,22 @@ get '/search' => sub {
     my $color            = $self->param('color')            || q{};
     my $entries_per_page = $self->param('entries_per_page') || app->config->{entries_per_page};
 
-    my $guest    = $gid ? $DB->resultset('Guest')->find({ id => $gid }) : undef;
-    my $cond = {};
+    my $user = $gid ? $DB->resultset('User')->find({ id => $gid }) : undef;
     my ( $bust, $waist, $arm, $status_id, $category ) = split /\//, $q;
     $status_id ||= 0;
     $category  ||= 'jacket';
 
-    $cond->{'me.category'}  = $category;
-    $cond->{'me.bust'}      = { '>=' => $bust  } if $bust;
-    $cond->{'bottom.waist'} = { '>=' => $waist } if $waist;
-    $cond->{'me.arm'}       = { '>=' => $arm   } if $arm;
-    $cond->{'me.status_id'} = $status_id         if $status_id;
-    $cond->{'me.color'}     = $color             if $color;
+    my %cond;
+    $cond{'me.category'}  = $category;
+    $cond{'me.bust'}      = { '>=' => $bust  } if $bust;
+    $cond{'bottom.waist'} = { '>=' => $waist } if $waist;
+    $cond{'me.arm'}       = { '>=' => $arm   } if $arm;
+    $cond{'me.status_id'} = $status_id         if $status_id;
+    $cond{'me.color'}     = $color             if $color;
 
     ### row, current_page, count
     my $clothes = $DB->resultset('Cloth')->search(
-        $cond,
+        \%cond,
         {
             page     => $self->param('p') || 1,
             rows     => $entries_per_page,
@@ -1030,7 +1030,7 @@ get '/search' => sub {
     $self->stash(
         q         => $q,
         gid       => $gid,
-        guest     => $guest,
+        user      => $user,
         clothes   => $clothes,
         pageset   => $pageset,
         status_id => $status_id,
@@ -1047,17 +1047,18 @@ get '/rental' => sub {
     $today->set_minute(0);
     $today->set_second(0);
 
-    my $q      = $self->param('q');
-    my @guests = $DB->resultset('Guest')->search({
-        -or => [
-            'user_id'    => $q,
-            'user.name'  => $q,
-            'user.phone' => $q,
-            'user.email' => $q
-        ],
-    }, {
-        join => 'user'
-    });
+    my $q     = $self->param('q');
+    my @users = $DB->resultset('User')->search(
+        {
+            -or => [
+                'id'              => $q,
+                'name'            => $q,
+                'email'           => $q,
+                'user_info.phone' => $q,
+            ],
+        },
+        { join => 'user_info' },
+    );
 
     ### DBIx::Class::Storage::DBI::_gen_sql_bind(): DateTime objects passed to search() are not
     ### supported properly (InflateColumn::DateTime formats and settings are not respected.)
@@ -1066,16 +1067,17 @@ get '/rental' => sub {
     ###
     ### DateTime object 를 search 에 바로 사용하지 말고 parser 를 이용하라능 - @aanoaa
     my $dt_parser = $DB->storage->datetime_parser;
-    push @guests, $DB->resultset('Guest')->search({
-        -or => [
-            create_date => { '>=' => $dt_parser->format_datetime($today) },
-            visit_date  => { '>=' => $dt_parser->format_datetime($today) },
-        ],
-    }, {
-        order_by => { -desc => 'create_date' },
-    });
+    push @users, $DB->resultset('User')->search(
+        {
+            -or => [
+                create_date => { '>=' => $dt_parser->format_datetime($today) },
+                visit_date  => { '>=' => $dt_parser->format_datetime($today) },
+            ],
+        },
+        { order_by => { -desc => 'create_date' } },
+    );
 
-    $self->stash(guests => \@guests);
+    $self->stash( users => \@users );
 } => 'rental';
 
 post '/orders' => sub {
@@ -1088,31 +1090,31 @@ post '/orders' => sub {
     return $self->error(400, 'failed to validate')
         unless $self->validate($validator);
 
-    my $guest   = $DB->resultset('Guest')->find({ id => $self->param('gid') });
+    my $user    = $DB->resultset('User')->find({ id => $self->param('gid') });
     my @clothes = $DB->resultset('Cloth')->search({ 'me.id' => { -in => [$self->param('cloth-id')] } });
 
-    return $self->error(400, 'invalid request') unless $guest || @clothes;
+    return $self->error(400, 'invalid request') unless $user || @clothes;
 
     my $guard = $DB->txn_scope_guard;
     my $order;
     try {
         # BEGIN TRANSACTION ~
         $order = $DB->resultset('Order')->create({
-            guest_id  => $guest->id,
-            bust      => $guest->bust,
-            waist     => $guest->waist,
-            arm       => $guest->arm,
-            length    => $guest->length,
-            purpose   => $guest->purpose,
-            age       => $guest->user->age,
+            user_id  => $user->id,
+            bust     => $user->user_info->bust,
+            waist    => $user->user_info->waist,
+            arm      => $user->user_info->arm,
+            leg      => $user->user_info->leg,
+            purpose  => $user->purpose,
         });
 
         for my $cloth (@clothes) {
             $order->create_related('cloth_orders', { cloth_id => $cloth->id });
         }
-        my $dt_parser = $DB->storage->datetime_parser;
-        $guest->visit_date($dt_parser->format_datetime(DateTime->now()));
-        $guest->update;    # refresh `visit_date`
+        # FIXME now user does not have visit_date column
+        #my $dt_parser = $DB->storage->datetime_parser;
+        #$user->visit_date($dt_parser->format_datetime(DateTime->now()));
+        #$user->update;    # refresh `visit_date`
         $guard->commit;
         # ~ COMMIT
     } catch {
@@ -1122,7 +1124,7 @@ post '/orders' => sub {
         return $self->error(500, "Failed to create `order`: $error") unless $order;
     };
 
-    $self->res->headers->header('Location' => $self->url_for('/orders/' . $guest->id));
+    $self->res->headers->header('Location' => $self->url_for('/orders/' . $order->id));
     $self->respond_to(
         json => { json => $self->order2hr($order), status => 201 },
         html => sub {
@@ -1916,7 +1918,7 @@ __DATA__
     %i.icon-envelope
     %a{:href => "mailto:#{$donor->email}"}= $donor->email
   - }
-  - if ($donor->phone) {
+  - if ($donor->user_info->phone) {
     %div.muted= $donor->phone
   - }
 
@@ -2058,7 +2060,7 @@ __DATA__
                   %span.badge{:class => 'satisfaction-#{$s->arm || 0}'}=   $s->guest->arm
                   %span.badge{:class => 'satisfaction-#{$s->top_fit || 0}'}    상
                   %span.badge{:class => 'satisfaction-#{$s->bottom_fit || 0}'} 하
-                  - if ($guest && $s->guest->id == $guest->id) {
+                  - if ($user && $s->user_id == $user->id) {
                     %i.icon-star{:title => '대여한적 있음'}
                   - }
               - }
@@ -2145,7 +2147,7 @@ __DATA__
         %span.label.label-info.search-label= $cloth->length
       - }
     - if ($cloth->donor) {
-      %h3= $cloth->donor->user->name
+      %h3= $cloth->donor->name
       %p.muted 님께서 기증하셨습니다
     - }
   .span4
@@ -2283,8 +2285,8 @@ __DATA__
       %span 합니다.
     .span4
       %ul
-        - for my $g (@$guests) {
-          %li= include 'guests/breadcrumb/radio', user => $g
+        - for my $u (@$users) {
+          %li= include 'guests/breadcrumb/radio', user => $u
         - }
 
 :plain
