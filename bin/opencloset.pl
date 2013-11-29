@@ -5,6 +5,7 @@ use Mojolicious::Lite;
 
 use Data::Pageset;
 use DateTime;
+use List::MoreUtils qw( zip );
 use SMS::Send::KR::CoolSMS;
 use SMS::Send;
 use Try::Tiny;
@@ -278,7 +279,6 @@ helper _q => sub {
 helper get_params => sub {
     my ( $self, @keys ) = @_;
 
-    use List::MoreUtils qw( zip );
     #
     # make parameter hash using explicit keys
     #
