@@ -345,7 +345,7 @@ group {
         $v->field('gender')->in(qw/ male female /);
         $v->field('birth')->regexp(qr/^(19|20)\d{2}$/);
         $v->field(qw/ height weight bust waist hip thigh arm leg knee foot /)->each(sub {
-            shift->regexp(qr/^\d{,3}$/);
+            shift->regexp(qr/^\d{1,3}$/);
         });
         unless ( $self->validate( $v, { %user_params, %user_info_params } ) ) {
             my @error_str;
@@ -465,7 +465,7 @@ group {
         $v->field('gender')->in(qw/ male female /);
         $v->field('birth')->regexp(qr/^(19|20)\d{2}$/);
         $v->field(qw/ height weight bust waist hip thigh arm leg knee foot /)->each(sub {
-            shift->regexp(qr/^\d{,3}$/);
+            shift->regexp(qr/^\d{1,3}$/);
         });
         unless ( $self->validate( $v, { %user_params, %user_info_params } ) ) {
             my @error_str;
@@ -604,7 +604,7 @@ group {
         #   since columns are not perfect yet.
         #
         $v->field(qw/ height weight bust waist hip thigh arm leg knee foot /)->each(sub {
-            shift->regexp(qr/^\d{,3}$/);
+            shift->regexp(qr/^\d{1,3}$/);
         });
         unless ( $self->validate( $v, \%params ) ) {
             my @error_str;
