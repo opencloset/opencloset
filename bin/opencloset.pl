@@ -574,6 +574,62 @@ group {
 
     sub api_create_order {
         my $self = shift;
+
+        #
+        # fetch params
+        #
+        my %params = $self->get_params(qw/
+            user_id     status_id     rental_date    target_date
+            return_date return_method payment_method price
+            discount    late_fee      l_discount     l_payment_method
+            staff_name  comment       purpose        height
+            weight      bust          waist          hip
+            thigh       arm           leg            knee
+            foot
+        /);
+
+        #
+        # validate params
+        #
+        my $v = $self->create_validator;
+        $v->field('user_id')->required(1);
+        #
+        # FIXME
+        #   need more validation but not now
+        #   since columns are not perfect yet.
+        #
+        $v->field(qw/ height weight bust waist hip thigh arm leg knee foot /)->each(sub {
+            shift->regexp(qr/^\d{,3}$/);
+        });
+        unless ( $self->validate( $v, \%params ) ) {
+            my @error_str;
+            while ( my ( $k, $v ) = each %{ $v->errors } ) {
+                push @error_str, "$k:$v";
+            }
+            return $self->error( 400, {
+                str  => join(',', @error_str),
+                data => $v->errors,
+            });
+        }
+
+        #
+        # create order
+        #
+        my $order = $DB->resultset('Order')->create( \%params );
+        return $self->error( 500, {
+            str  => 'failed to create a new order',
+            data => {},
+        }) unless $order;
+
+        #
+        # response
+        #
+        my %data = ( $order->get_columns );
+
+        $self->res->headers->header(
+            'Location' => $self->url_for( '/api/order/' . $order->id ),
+        );
+        $self->respond_to( json => { status => 201, json => \%data } );
     }
 
     sub api_get_order {
