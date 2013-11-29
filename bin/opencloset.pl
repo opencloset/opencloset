@@ -322,6 +322,76 @@ group {
 
     sub api_create_user {
         my $self = shift;
+
+        #
+        # fetch params
+        #
+        my %user_params      = $self->get_params(qw/ name email password /);
+        my %user_info_params = $self->get_params(qw/
+            phone  address gender birth comment
+            height weight  bust   waist hip
+            thigh  arm     leg    knee  foot
+        /);
+
+        #
+        # validate params
+        #
+        my $v = $self->create_validator;
+        $v->field('name')->required(1);
+        $v->field('email')->email;
+        $v->field('phone')->regexp(qr/^\d+$/);
+        $v->field('gender')->in(qw/ male female /);
+        $v->field('birth')->regexp(qr/^(19|20)\d{2}$/);
+        $v->field(qw/ height weight bust waist hip thigh arm leg knee foot /)->each(sub {
+            shift->regexp(qr/^\d{,3}$/);
+        });
+        unless ( $self->validate( $v, { %user_params, %user_info_params } ) ) {
+            my @error_str;
+            while ( my ( $k, $v ) = each %{ $v->errors } ) {
+                push @error_str, "$k:$v";
+            }
+            return $self->error( 400, {
+                str  => join(',', @error_str),
+                data => $v->errors,
+            });
+        }
+
+        #
+        # create user
+        #
+        my $user = do {
+            my $guard = $DB->txn_scope_guard;
+
+            my $user = $DB->resultset('User')->create(\%user_params);
+            return $self->error( 500, {
+                str  => 'failed to create a new user',
+                data => {},
+            }) unless $user;
+
+            my $user_info = $DB->resultset('UserInfo')->create({
+                %user_info_params,
+                user_id => $user->id,
+            });
+            return $self->error( 500, {
+                str  => 'failed to create a new user info',
+                data => {},
+            }) unless $user_info;
+
+            $guard->commit;
+
+            $user;
+        };
+
+        #
+        # response
+        #
+        my %data = ( $user->user_info->get_columns, $user->get_columns );
+        delete @data{qw/ user_id password /};
+
+        $self->res->headers->header(
+            'Location' => $self->url_for( '/api/user/' . $user->id ),
+        );
+        $self->respond_to( json => { status => 201, json => \%data } );
     }
 
     sub api_get_user {
