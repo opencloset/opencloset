@@ -65,7 +65,7 @@ male/female
 
 =head2 birth
 
-  data_type: 'tinyint'
+  data_type: 'integer'
   is_nullable: 1
 
 =head2 comment
@@ -147,7 +147,7 @@ __PACKAGE__->add_columns(
   "gender",
   { data_type => "varchar", is_nullable => 1, size => 6 },
   "birth",
-  { data_type => "tinyint", is_nullable => 1 },
+  { data_type => "integer", is_nullable => 1 },
   "comment",
   { data_type => "text", is_nullable => 1 },
   "height",
@@ -228,8 +228,8 @@ __PACKAGE__->belongs_to(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07038 @ 2013-11-28 12:23:25
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:mMbFt2KvJkpseuVB+FKDig
+# Created by DBIx::Class::Schema::Loader v0.07038 @ 2013-11-29 14:43:48
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:XzZdAdDXzTjw96UgRdOvvw
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

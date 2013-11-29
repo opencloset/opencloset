@@ -34,7 +34,7 @@ CREATE TABLE `user_info` (
   `phone`       VARCHAR(16)  DEFAULT NULL COMMENT 'regex: 01\d{8,9}',
   `address`     VARCHAR(255) DEFAULT NULL,
   `gender`      VARCHAR(6)   DEFAULT NULL COMMENT 'male/female',
-  `birth`       TINYINT      DEFAULT NULL,
+  `birth`       INT          DEFAULT NULL,
   `comment`     TEXT         DEFAULT NULL,
 
   --
