@@ -78,28 +78,28 @@ helper cloth_validator => sub {
 };
 
 helper cloth2hr => sub {
-    my ($self, $cloth) = @_;
+    my ($self, $clothes) = @_;
 
     return {
-        $cloth->get_columns,
-        donor    => $cloth->donor ? $cloth->user->name : '',
-        category => $cloth->category,
-        price    => $self->commify($cloth->price),
-        status   => $cloth->status->name,
+        $clothes->get_columns,
+        donor    => $clothes->donor ? $clothes->user->name : '',
+        category => $clothes->category,
+        price    => $self->commify($clothes->price),
+        status   => $clothes->status->name,
     };
 };
 
 helper order2hr => sub {
     my ($self, $order) = @_;
 
-    my @clothes;
-    for my $cloth ($order->cloths) {
-        push @clothes, $self->cloth2hr($cloth);
+    my @clothes_list;
+    for my $clothes ($order->cloths) {
+        push @clothes_list, $self->cloth2hr($clothes);
     }
 
     return {
         $order->get_columns,
-        clothes => [@clothes],
+        clothes_list => \@clothes_list
     };
 };
 
@@ -187,14 +187,14 @@ helper create_cloth => sub {
     #
     my $code;
     {
-        my $cloth = $DB->resultset('Cloth')->search(
+        my $clothes = $DB->resultset('Clothes')->search(
             { category => $info{category} },
             { order_by => { -desc => 'code' } },
         )->next;
 
         my $index = 1;
-        if ($cloth) {
-            $index = substr $cloth->code, -5, 5;
+        if ($clothes) {
+            $index = substr $clothes->code, -5, 5;
             $index =~ s/^0+//;
             $index++;
         }
@@ -227,13 +227,13 @@ helper create_cloth => sub {
         map { $params{$_} = $info{$_} } @keys;
     }
 
-    my $new_cloth = $DB->resultset('Cloth')->find_or_create(\%params);
+    my $new_cloth = $DB->resultset('Clothes')->find_or_create(\%params);
     return unless $new_cloth;
     return $new_cloth unless $new_cloth->compatible_code;
 
     my $compatible_code = $new_cloth->compatible_code;
     $compatible_code =~ s/[A-Z]/_/g;
-    my $top_or_bottom = $DB->resultset('Cloth')->search({
+    my $top_or_bottom = $DB->resultset('Clothes')->search({
         category        => { '!=' => $new_cloth->category },
         compatible_code => { like => $compatible_code },
     })->next;
@@ -310,17 +310,23 @@ group {
         return;
     };
 
-    post '/user'       => \&api_create_user;
-    get  '/user/:id'   => \&api_get_user;
-    put  '/user/:id'   => \&api_update_user;
-    del  '/user/:id'   => \&api_delete_user;
-    get  '/user-list'  => \&api_get_user_list;
+    post '/user'         => \&api_create_user;
+    get  '/user/:id'     => \&api_get_user;
+    put  '/user/:id'     => \&api_update_user;
+    del  '/user/:id'     => \&api_delete_user;
+    get  '/user-list'    => \&api_get_user_list;
 
-    post '/order'      => \&api_create_order;
-    get  '/order/:id'  => \&api_get_order;
-    put  '/order/:id'  => \&api_update_order;
-    del  '/order/:id'  => \&api_delete_order;
-    get  '/order-list' => \&api_get_order_list;
+    post '/order'        => \&api_create_order;
+    get  '/order/:id'    => \&api_get_order;
+    put  '/order/:id'    => \&api_update_order;
+    del  '/order/:id'    => \&api_delete_order;
+    get  '/order-list'   => \&api_get_order_list;
+
+    post '/clothes'      => \&api_create_clothes;
+    get  '/clothes/:id'  => \&api_get_clothes;
+    put  '/clothes/:id'  => \&api_update_clothes;
+    del  '/clothes/:id'  => \&api_delete_clothes;
+    get  '/clothes-list' => \&api_get_clothes_list;
 
     sub api_create_user {
         my $self = shift;
@@ -800,6 +806,26 @@ group {
     sub api_get_order_list {
         my $self = shift;
     }
+
+    sub api_create_clothes {
+        my $self = shift;
+    }
+
+    sub api_get_clothes {
+        my $self = shift;
+    }
+
+    sub api_update_clothes {
+        my $self = shift;
+    }
+
+    sub api_delete_clothes {
+        my $self = shift;
+    }
+
+    sub api_get_clothes_list {
+        my $self = shift;
+    }
 }; # end of API section
 
 get '/'      => 'home';
@@ -965,17 +991,17 @@ post '/clothes' => sub {
     my $self = shift;
 
     my $validator  = $self->cloth_validator;
-    my @cloth_list = $self->param('cloth-list');
+    my @cloth_list = $self->param('clothes-list');
 
     ###
     ### validate
     ###
-    for my $cloth (@cloth_list) {
+    for my $clothes (@cloth_list) {
         my (
             $donor_id, $category, $color, $bust,
             $waist,    $hip,      $arm,   $thigh,
             $length,   $gender,   $compatible_code,
-        ) = split /-/, $cloth;
+        ) = split /-/, $clothes;
 
         my $is_valid = $self->validate($validator, {
             category        => $category,
@@ -1002,13 +1028,13 @@ post '/clothes' => sub {
     ###
     ### create
     ###
-    my @clothes;
-    for my $cloth (@cloth_list) {
+    my @clothes_list;
+    for my $clothes (@cloth_list) {
         my (
             $donor_id, $category, $color, $bust,
             $waist,    $hip,      $arm,   $thigh,
             $length,   $gender,   $compatible_code,
-        ) = split /-/, $cloth;
+        ) = split /-/, $clothes;
 
         my %cloth_info = (
             color           => $color,
@@ -1029,7 +1055,7 @@ post '/clothes' => sub {
         if ( $category =~ m/jacket/ && $category =~ m/pants/ ) {
             my $c1 = $self->create_cloth( %cloth_info, category => 'jacket' );
             my $c2 = $self->create_cloth( %cloth_info, category => 'pants'  );
-            return $self->error(500, '!!! failed to create a new cloth') unless ($c1 && $c2);
+            return $self->error(500, '!!! failed to create a new clothes') unless ($c1 && $c2);
 
             if ($donor_id) {
                 $c1->create_related('donor_cloths', { donor_id => $donor_id });
@@ -1041,12 +1067,12 @@ post '/clothes' => sub {
             $c1->update;
             $c2->update;
 
-            push @clothes, $c1, $c2;
+            push @clothes_list, $c1, $c2;
         }
         elsif ( $category =~ m/jacket/ && $category =~ m/skirt/ ) {
             my $c1 = $self->create_cloth( %cloth_info, category => 'jacket' );
             my $c2 = $self->create_cloth( %cloth_info, category => 'skirt'  );
-            return $self->error(500, '!!! failed to create a new cloth') unless ($c1 && $c2);
+            return $self->error(500, '!!! failed to create a new clothes') unless ($c1 && $c2);
 
             if ($donor_id) {
                 $c1->create_related('donor_cloths', { donor_id => $donor_id });
@@ -1058,15 +1084,15 @@ post '/clothes' => sub {
             $c1->update;
             $c2->update;
 
-            push @clothes, $c1, $c2;
+            push @clothes_list, $c1, $c2;
         } else {
             my $c = $self->create_cloth(%cloth_info);
-            return $self->error(500, '--- failed to create a new cloth') unless $c;
+            return $self->error(500, '--- failed to create a new clothes') unless $c;
 
             if ($donor_id) {
                 $c->create_related('donor_cloths', { donor_id => $donor_id });
             }
-            push @clothes, $c;
+            push @clothes_list, $c;
         }
         $guard->commit;
     }
@@ -1075,9 +1101,9 @@ post '/clothes' => sub {
     ### response
     ###
     ## 여러개가 될 수 있으므로 Location 헤더는 생략
-    ## $self->res->headers->header('Location' => $self->url_for('/clothes/' . $cloth->code));
+    ## $self->res->headers->header('Location' => $self->url_for('/clothes/' . $clothes->code));
     $self->respond_to(
-        json => { json => [map { $self->cloth2hr($_) } @clothes], status => 201 },
+        json => { json => [map { $self->cloth2hr($_) } @clothes_list], status => 201 },
         html => sub {
             $self->redirect_to('/clothes');
         }
@@ -1086,31 +1112,32 @@ post '/clothes' => sub {
 
 put '/clothes' => sub {
     my $self = shift;
-    my $clothes = $self->param('clothes');
-    return $self->error(400, 'Nothing to change') unless $clothes;
+
+    my $clothes_list = $self->param('clothes_list');
+    return $self->error(400, 'Nothing to change') unless $clothes_list;
 
     my $status = $DB->resultset('Status')->find({ name => $self->param('status') });
     return $self->error(400, 'Invalid status') unless $status;
 
-    my $rs    = $DB->resultset('Cloth')->search({ 'me.id' => { -in => [split(/,/, $clothes)] } });
+    my $rs    = $DB->resultset('Clothes')->search({ 'me.id' => { -in => [split(/,/, $clothes_list)] } });
     my $guard = $DB->txn_scope_guard;
     my @rows;
     # BEGIN TRANSACTION ~
-    while (my $cloth = $rs->next) {
-        $cloth->status_id($status->id);
-        $cloth->update;
-        push @rows, { $cloth->get_columns };
+    while (my $clothes = $rs->next) {
+        $clothes->status_id($status->id);
+        $clothes->update;
+        push @rows, { $clothes->get_columns };
     }
     # ~ COMMIT
     $guard->commit;
 
     $self->respond_to(
         json => { json => [@rows] },
-        html => { template => 'clothes' }    # TODO: `cloth.html.haml`
+        html => { template => 'clothes' }    # TODO: `clothes.html.haml`
     );
 };
 
-get '/new-cloth' => sub {
+get '/new-clothes' => sub {
     my $self = shift;
 
     my $q  = $self->param('q') || q{};
@@ -1132,7 +1159,7 @@ get '/new-cloth' => sub {
 
     $self->respond_to(
         json => { json     => \@users     },
-        html => { template => 'new-cloth' },
+        html => { template => 'new-clothes' },
     );
 };
 
@@ -1140,19 +1167,19 @@ get '/new-cloth' => sub {
 get '/clothes/:code' => sub {
     my $self = shift;
     my $code = $self->param('code');
-    my $cloth = $DB->resultset('Cloth')->find({ code => $code });
-    return $self->error(404, "Not found `$code`") unless $cloth;
+    my $clothes = $DB->resultset('Clothes')->find({ code => $code });
+    return $self->error(404, "Not found `$code`") unless $clothes;
 
-    my $co_rs = $cloth->cloth_orders->search({
-        'order.status_id' => { -in => [$Opencloset::Constant::STATUS_RENT, $cloth->status_id] },
+    my $co_rs = $clothes->cloth_orders->search({
+        'order.status_id' => { -in => [$Opencloset::Constant::STATUS_RENT, $clothes->status_id] },
     }, {
         join => 'order'
     })->next;
 
     unless ($co_rs) {
         $self->respond_to(
-            json => { json => $self->cloth2hr($cloth) },
-            html => { template => 'clothes/code', cloth => $cloth }    # also, CODEREF is OK
+            json => { json => $self->cloth2hr($clothes) },
+            html => { template => 'clothes/code', clothes => $clothes }    # also, CODEREF is OK
         );
         return;
     }
@@ -1160,13 +1187,13 @@ get '/clothes/:code' => sub {
     my @with;
     my $order = $co_rs->order;
     for my $_cloth ($order->cloths) {
-        next if $_cloth->id == $cloth->id;
+        next if $_cloth->id == $clothes->id;
         push @with, $self->cloth2hr($_cloth);
     }
 
     my $overdue = $self->calc_overdue($order->target_date, DateTime->now);
     my %columns = (
-        %{ $self->cloth2hr($cloth) },
+        %{ $self->cloth2hr($clothes) },
         rental_date => {
             raw => $order->rental_date,
             md  => $order->rental_date->month . '/' . $order->rental_date->day,
@@ -1186,24 +1213,24 @@ get '/clothes/:code' => sub {
 
     $self->respond_to(
         json => { json => { %columns } },
-        html => { template => 'clothes/code', cloth => $cloth }    # also, CODEREF is OK
+        html => { template => 'clothes/code', clothes => $clothes }    # also, CODEREF is OK
     );
 };
 
 any [qw/put patch/] => '/clothes/:code' => sub {
     my $self = shift;
     my $code = $self->param('code');
-    my $cloth = $DB->resultset('Cloth')->find({ code => $code });
-    return $self->error(404, "Not found `$code`") unless $cloth;
+    my $clothes = $DB->resultset('Clothes')->find({ code => $code });
+    return $self->error(404, "Not found `$code`") unless $clothes;
 
     map {
-        $cloth->$_($self->param($_)) if defined $self->param($_);
+        $clothes->$_($self->param($_)) if defined $self->param($_);
     } qw/bust waist arm length/;
 
-    $cloth->update;
+    $clothes->update;
     $self->respond_to(
-        json => { json => $self->cloth2hr($cloth) },
-        html => { template => 'clothes/code', cloth => $cloth }    # also, CODEREF is OK
+        json => { json => $self->cloth2hr($clothes) },
+        html => { template => 'clothes/code', clothes => $clothes }    # also, CODEREF is OK
     );
 };
 
@@ -1229,7 +1256,7 @@ get '/search' => sub {
     $cond{'me.color'}     = $color             if $color;
 
     ### row, current_page, count
-    my $clothes = $DB->resultset('Cloth')->search(
+    my $clothes_list = $DB->resultset('Clothes')->search(
         \%cond,
         {
             page     => $self->param('p') || 1,
@@ -1240,21 +1267,21 @@ get '/search' => sub {
     );
 
     my $pageset = Data::Pageset->new({
-        total_entries    => $clothes->pager->total_entries,
+        total_entries    => $clothes_list->pager->total_entries,
         entries_per_page => $entries_per_page,
         current_page     => $self->param('p') || 1,
         mode             => 'fixed'
     });
 
     $self->stash(
-        q         => $q,
-        gid       => $gid,
-        user      => $user,
-        clothes   => $clothes,
-        pageset   => $pageset,
-        status_id => $status_id,
-        category  => $category,
-        color     => $color,
+        q            => $q,
+        gid          => $gid,
+        user         => $user,
+        clothes_list => $clothes_list,
+        pageset      => $pageset,
+        status_id    => $status_id,
+        category     => $category,
+        color        => $color,
     );
 };
 
@@ -1303,16 +1330,16 @@ post '/orders' => sub {
     my $self = shift;
 
     my $validator = $self->create_validator;
-    $validator->field([qw/gid cloth-id/])
+    $validator->field([qw/gid clothes-id/])
         ->each(sub { shift->required(1)->regexp(qr/^\d+$/) });
 
     return $self->error(400, 'failed to validate')
         unless $self->validate($validator);
 
-    my $user    = $DB->resultset('User')->find({ id => $self->param('gid') });
-    my @clothes = $DB->resultset('Cloth')->search({ 'me.id' => { -in => [$self->param('cloth-id')] } });
+    my $user         = $DB->resultset('User')->find({ id => $self->param('gid') });
+    my @clothes_list = $DB->resultset('Clothes')->search({ 'me.id' => { -in => [$self->param('clothes-id')] } });
 
-    return $self->error(400, 'invalid request') unless $user || @clothes;
+    return $self->error(400, 'invalid request') unless $user || @clothes_list;
 
     my $guard = $DB->txn_scope_guard;
     my $order;
@@ -1327,8 +1354,8 @@ post '/orders' => sub {
             purpose  => $user->purpose,
         });
 
-        for my $cloth (@clothes) {
-            $order->create_related('cloth_orders', { cloth_id => $cloth->id });
+        for my $clothes (@clothes_list) {
+            $order->create_related('cloth_orders', { cloth_id => $clothes->id });
         }
         # FIXME now user does not have visit_date column
         #my $dt_parser = $DB->storage->datetime_parser;
@@ -1369,28 +1396,28 @@ get '/orders/:id' => sub {
     my $order = $DB->resultset('Order')->find({ id => $self->param('id') });
     return $self->error(404, "Not found") unless $order;
 
-    my @clothes = $order->cloths;
+    my @clothes_list = $order->cloths;
     my $price = 0;
-    for my $cloth (@clothes) {
-        $price += $cloth->price;
+    for my $clothes (@clothes_list) {
+        $price += $clothes->price;
     }
 
     my $overdue  = $self->calc_overdue($order->target_date);
     my $late_fee = $self->calc_late_fee($order);
 
-    my $cloth = $order->cloths({ category => 'jacket' })->next;
+    my $clothes = $order->cloths({ category => 'jacket' })->next;
 
     my $satisfaction;
-    if ($cloth) {
-        $satisfaction = $cloth->satisfactions({
-            cloth_id => $cloth->id,
+    if ($clothes) {
+        $satisfaction = $clothes->satisfactions({
+            cloth_id => $clothes->id,
             guest_id  => $order->guest->id,
         })->next;
     }
 
     $self->stash(
         order        => $order,
-        clothes      => [@clothes],
+        clothes      => \@clothes_list,
         price        => $price,
         overdue      => $overdue,
         late_fee     => $late_fee,
@@ -1458,13 +1485,13 @@ any [qw/post put patch/] => '/orders/:id' => sub {
     my $guard = $DB->txn_scope_guard;
     # BEGIN TRANSACTION ~
     my $status_id = $status_to_be{$order->status_id || 0};
-    my @missing_clothes;
+    my @missing_clothes_list;
     if ($status_id == $Opencloset::Constant::STATUS_RETURN) {
-        my $missing_clothes = $self->param('missing_clothes') || '';
-        if ($missing_clothes) {
+        my $missing_clothes_list = $self->param('missing_clothes_list') || '';
+        if ($missing_clothes_list) {
             $status_id = $Opencloset::Constant::STATUS_PARTIAL_RETURN;
-            @missing_clothes = $DB->resultset('Cloth')->search({
-                'me.code' => { -in => [split(/,/, $missing_clothes)] }
+            @missing_clothes_list = $DB->resultset('Clothes')->search({
+                'me.code' => { -in => [split(/,/, $missing_clothes_list)] }
             });
         }
     }
@@ -1479,31 +1506,31 @@ any [qw/post put patch/] => '/orders/:id' => sub {
         if $status_id == $Opencloset::Constant::STATUS_RENT;
     $order->update;
 
-    for my $cloth ($order->cloths) {
+    for my $clothes ($order->cloths) {
         if ($order->status_id == $Opencloset::Constant::STATUS_RENT) {
-            $cloth->status_id($Opencloset::Constant::STATUS_RENT);
+            $clothes->status_id($Opencloset::Constant::STATUS_RENT);
         }
         else {
-            next if grep { $cloth->id == $_->id } @missing_clothes;
+            next if grep { $clothes->id == $_->id } @missing_clothes_list;
 
             no warnings 'experimental';
-            given ( $cloth->category ) {
+            given ( $clothes->category ) {
                 when ( /^(shoes|tie|hat)$/i ) {
-                    $cloth->status_id($Opencloset::Constant::STATUS_AVAILABLE);    # Shoes, Tie, Hat
+                    $clothes->status_id($Opencloset::Constant::STATUS_AVAILABLE);    # Shoes, Tie, Hat
                 }
                 default {
-                    if ($cloth->status_id != $Opencloset::Constant::STATUS_AVAILABLE) {
-                        $cloth->status_id($Opencloset::Constant::STATUS_WASHING);
+                    if ($clothes->status_id != $Opencloset::Constant::STATUS_AVAILABLE) {
+                        $clothes->status_id($Opencloset::Constant::STATUS_WASHING);
                     }
                 }
             }
         }
-        $cloth->update;
+        $clothes->update;
     }
 
-    for my $cloth (@missing_clothes) {
-        $cloth->status_id($Opencloset::Constant::STATUS_PARTIAL_RETURN);
-        $cloth->update;
+    for my $clothes (@missing_clothes_list) {
+        $clothes->status_id($Opencloset::Constant::STATUS_PARTIAL_RETURN);
+        $clothes->update;
     }
     $guard->commit;
     # ~ COMMIT
@@ -1513,12 +1540,12 @@ any [qw/post put patch/] => '/orders/:id' => sub {
 
     if (values %satisfaction) {
         # $order
-        my $cloth = $order->cloths({ category => 'jacket' })->next;
-        if ($cloth) {
+        my $clothes = $order->cloths({ category => 'jacket' })->next;
+        if ($clothes) {
             $DB->resultset('Satisfaction')->update_or_create({
                 %satisfaction,
                 guest_id  => $order->guest_id,
-                cloth_id => $cloth->id,
+                cloth_id => $clothes->id,
             });
         }
     }
@@ -1537,9 +1564,9 @@ del '/orders/:id' => sub {
     my $order = $DB->resultset('Order')->find({ id => $self->param('id') });
     return $self->error(404, "Not found") unless $order;
 
-    for my $cloth ($order->cloths) {
-        $cloth->status_id($Opencloset::Constant::STATUS_AVAILABLE);
-        $cloth->update;
+    for my $clothes ($order->cloths) {
+        $clothes->status_id($Opencloset::Constant::STATUS_AVAILABLE);
+        $clothes->update;
     }
 
     $order->delete;
@@ -1648,11 +1675,11 @@ __DATA__
 - title $meta->{$id}{text};
 
 .search
-  %form#cloth-search-form
+  %form#clothes-search-form
     .input-group
-      %input#cloth-id.form-control{ :type => 'text', :placeholder => '품번' }
+      %input#clothes-id.form-control{ :type => 'text', :placeholder => '품번' }
       %span.input-group-btn
-        %button#btn-cloth-search.btn.btn-sm.btn-default{ :type => 'button' }
+        %button#btn-clothes-search.btn.btn-sm.btn-default{ :type => 'button' }
           %i.icon-search.bigger-110 검색
       %span.input-group-btn
         %button#btn-clear.btn.btn.btn-sm.btn-default{:type => 'button'}
@@ -1660,7 +1687,7 @@ __DATA__
 
 .space-8
 
-#cloth-table
+#clothes-table
   %table.table.table-striped.table-bordered.table-hover
     %thead
       %tr
@@ -1698,7 +1725,7 @@ __DATA__
         </span>
       </td> <!-- 상태 -->
       <td>
-        <% _.each(clothes, function(cloth) { %> <a href="/clothes/<%= cloth.code %>"><%= cloth.code %></a><% }); %>
+        <% _.each(clothes, function(clothes) { %> <a href="/clothes/<%= clothes.code %>"><%= clothes.code %></a><% }); %>
       </td> <!-- 묶음 -->
       <td>
         <a href="/orders/<%= order_id %>"><span class="label label-info arrowed-right arrowed-in">
@@ -1720,10 +1747,10 @@ __DATA__
 
 :plain
   <script id="tpl-row-checkbox-enabled" type="text/html">
-    <tr class="row-checkbox" data-cloth-id="<%= id %>">
+    <tr class="row-checkbox" data-clothes-id="<%= id %>">
       <td class="center">
         <label>
-          <input class="ace" type="checkbox" data-cloth-id="<%= id %>">
+          <input class="ace" type="checkbox" data-clothes-id="<%= id %>">
           <span class="lbl"></span>
         </label>
       </td>
@@ -2199,7 +2226,7 @@ __DATA__
           %input#gid{:type => 'hidden', :name => 'gid', :value => "#{$gid}"}
           %input#q.form-control{ :type => 'text', :placeholder => '가슴/허리/팔/상태/종류', :name => 'q', :value => "#{$q}" }
           %span.input-group-btn
-            %button#btn-cloth-search.btn.btn-sm.btn-default{ :type => 'submit' }
+            %button#btn-clothes-search.btn.btn-sm.btn-default{ :type => 'submit' }
               %i.icon-search.bigger-110 검색
 
     .space-10
@@ -2229,7 +2256,7 @@ __DATA__
 .row
   .col-xs-12
     %ul.ace-thumbnails
-      - while (my $c = $clothes->next) {
+      - while (my $c = $clothes_list->next) {
         %li
           %a{:href => '/clothes/#{$c->code}'}
             %img{:src => 'http://placehold.it/160x160', :alt => '#{$c->code}'}
@@ -2293,85 +2320,85 @@ __DATA__
 
 @@ clothes/code.html.haml
 - layout 'default', jses => ['clothes-code.js'];
-- title 'clothes/' . $cloth->code;
+- title 'clothes/' . $clothes->code;
 
 %h1
-  %a{:href => ''}= $cloth->code
-  %span - #{$cloth->category}
+  %a{:href => ''}= $clothes->code
+  %span - #{$clothes->category}
 
 %form#edit
   %a#btn-edit.btn.btn-sm{:href => '#'} edit
   #input-edit{:style => 'display: none'}
     - use v5.14;
     - no warnings 'experimental';
-    - given ( $cloth->category ) {
+    - given ( $clothes->category ) {
       - when ( /^(jacket|shirt|waistcoat|coat|blouse)$/i ) {
-        %input{:type => 'text', :name => 'bust', :value => '#{$cloth->bust}', :placeholder => '가슴둘레'}
-        %input{:type => 'text', :name => 'arm',  :value => '#{$cloth->arm}',  :placeholder => '팔길이'}
+        %input{:type => 'text', :name => 'bust', :value => '#{$clothes->bust}', :placeholder => '가슴둘레'}
+        %input{:type => 'text', :name => 'arm',  :value => '#{$clothes->arm}',  :placeholder => '팔길이'}
       - }
       - when ( /^(pants|skirt)$/i ) {
-        %input{:type => 'text', :name => 'waist',  :value => '#{$cloth->waist}',  :placeholder => '허리둘레'}
-        %input{:type => 'text', :name => 'length', :value => '#{$cloth->length}', :placeholder => '기장'}
+        %input{:type => 'text', :name => 'waist',  :value => '#{$clothes->waist}',  :placeholder => '허리둘레'}
+        %input{:type => 'text', :name => 'length', :value => '#{$clothes->length}', :placeholder => '기장'}
       - }
       - when ( /^(shoes)$/i ) {
-        %input{:type => 'text', :name => 'length', :value => '#{$cloth->length}', :placeholder => '발크기'}
+        %input{:type => 'text', :name => 'length', :value => '#{$clothes->length}', :placeholder => '발크기'}
       - }
     - }
     %input#btn-submit.btn.btn-sm{:type => 'submit', :value => 'Save Changes'}
     %a#btn-cancel.btn.btn-sm{:href => '#'} Cancel
 
-%h4= $cloth->compatible_code
+%h4= $clothes->compatible_code
 
 .row
   .span8
-    - if ($cloth->status->name eq '대여가능') {
-      %span.label.label-success= $cloth->status->name
-    - } elsif ($cloth->status->name eq '대여중') {
-      %span.label.label-important= $cloth->status->name
-      - if (my $order = $cloth->orders({ status_id => 2 })->next) {
+    - if ($clothes->status->name eq '대여가능') {
+      %span.label.label-success= $clothes->status->name
+    - } elsif ($clothes->status->name eq '대여중') {
+      %span.label.label-important= $clothes->status->name
+      - if (my $order = $clothes->orders({ status_id => 2 })->next) {
         - if ($order->target_date) {
           %small.highlight{:title => '반납예정일'}
             %a{:href => "/orders/#{$order->id}"}= $order->target_date->ymd
         - }
       - }
     - } else {
-      %span.label= $cloth->status->name
+      %span.label= $clothes->status->name
     - }
 
     %span
-      - if ($cloth->top) {
-        %a{:href => '/clothes/#{$cloth->top->code}'}= $cloth->top->code
+      - if ($clothes->top) {
+        %a{:href => '/clothes/#{$clothes->top->code}'}= $clothes->top->code
       - }
-      - if ($cloth->bottom) {
-        %a{:href => '/clothes/#{$cloth->bottom->code}'}= $cloth->bottom->code
+      - if ($clothes->bottom) {
+        %a{:href => '/clothes/#{$clothes->bottom->code}'}= $clothes->bottom->code
       - }
 
     %div
-      %img.img-polaroid{:src => 'http://placehold.it/200x200', :alt => '#{$cloth->code}'}
+      %img.img-polaroid{:src => 'http://placehold.it/200x200', :alt => '#{$clothes->code}'}
 
     %div
-      - if ($cloth->bust) {
+      - if ($clothes->bust) {
         %span.label.label-info.search-label
-          %a{:href => "#{url_with('/search')->query([q => $cloth->bust])}///1"}= $cloth->bust
+          %a{:href => "#{url_with('/search')->query([q => $clothes->bust])}///1"}= $clothes->bust
       - }
-      - if ($cloth->waist) {
+      - if ($clothes->waist) {
         %span.label.label-info.search-label
-          %a{:href => "#{url_with('/search')->query([q => '/' . $cloth->waist . '//1'])}"}= $cloth->waist
+          %a{:href => "#{url_with('/search')->query([q => '/' . $clothes->waist . '//1'])}"}= $clothes->waist
       - }
-      - if ($cloth->arm) {
+      - if ($clothes->arm) {
         %span.label.label-info.search-label
-          %a{:href => "#{url_with('/search')->query([q => '//' . $cloth->arm])}/1"}= $cloth->arm
+          %a{:href => "#{url_with('/search')->query([q => '//' . $clothes->arm])}/1"}= $clothes->arm
       - }
-      - if ($cloth->length) {
-        %span.label.label-info.search-label= $cloth->length
+      - if ($clothes->length) {
+        %span.label.label-info.search-label= $clothes->length
       - }
-    - if ($cloth->donor) {
-      %h3= $cloth->donor->name
+    - if ($clothes->donor) {
+      %h3= $clothes->donor->name
       %p.muted 님께서 기증하셨습니다
     - }
   .span4
     %ul
-      - for my $order ($cloth->orders({ status_id => { '!=' => undef } }, { order_by => { -desc => [qw/rental_date/] } })) {
+      - for my $order ($clothes->orders({ status_id => { '!=' => undef } }, { order_by => { -desc => [qw/rental_date/] } })) {
         %li
           %a{:href => '/guests/#{$order->guest->id}'}= $order->guest->user->name
           님
@@ -2472,11 +2499,11 @@ __DATA__
     %button.btn{:type => 'submit'} 검색
 
 .search
-  %form#cloth-search-form
+  %form#clothes-search-form
     .input-group
-      %input#cloth-id.form-control{ :type => 'text', :placeholder => '품번' }
+      %input#clothes-id.form-control{ :type => 'text', :placeholder => '품번' }
       %span.input-group-btn
-        %button#btn-cloth-search.btn.btn-sm.btn-default{ :type => 'button' }
+        %button#btn-clothes-search.btn.btn-sm.btn-default{ :type => 'button' }
           %i.icon-search.bigger-110 검색
       %span.input-group-btn
         %button#btn-clear.btn.btn.btn-sm.btn-default{:type => 'button'}
@@ -2484,7 +2511,7 @@ __DATA__
 
 .space-8
 
-#cloth-table
+#clothes-table
   %form#order-form{:method => 'post', :action => '/orders'}
     %table.table.table-striped.table-bordered.table-hover
       %thead
@@ -2510,7 +2537,7 @@ __DATA__
 
 :plain
   <script id="tpl-row-checkbox-disabled" type="text/html">
-    <tr data-cloth-id="<%= id %>" data-order-id="<%= order_id %>">
+    <tr data-clothes-id="<%= id %>" data-order-id="<%= order_id %>">
       <td class="center">
         <label>
           <input class="ace" type="checkbox" disabled>
@@ -2539,10 +2566,10 @@ __DATA__
 
 :plain
   <script id="tpl-row-checkbox-enabled" type="text/html">
-    <tr class="row-checkbox" data-cloth-id="<%= id %>">
+    <tr class="row-checkbox" data-clothes-id="<%= id %>">
       <td class="center">
         <label>
-          <input class="ace" type="checkbox" name="cloth-id" value="<%= id %>" data-cloth-id="<%= id %>" checked="checked">
+          <input class="ace" type="checkbox" name="clothes-id" value="<%= id %>" data-clothes-id="<%= id %>" checked="checked">
           <span class="lbl"></span>
         </label>
       </td>
@@ -2650,22 +2677,22 @@ __DATA__
 %form.form-horizontal{:method => 'post', :action => ''}
   %legend
     - my $loop = 0;
-    - for my $cloth (@$clothes) {
+    - for my $clothes (@$clothes_list) {
       - $loop++;
       - if ($loop == 1) {
         %span
-          %a{:href => '/clothes/#{$cloth->code}'}= $cloth->category
-          %small.highlight= commify($cloth->price)
+          %a{:href => '/clothes/#{$clothes->code}'}= $clothes->category
+          %small.highlight= commify($clothes->price)
       - } elsif ($loop == 2) {
         %span
           with
-          %a{:href => '/clothes/#{$cloth->code}'}= $cloth->category
-          %small.highlight= commify($cloth->price)
+          %a{:href => '/clothes/#{$clothes->code}'}= $clothes->category
+          %small.highlight= commify($clothes->price)
       - } else {
         %span
           ,
-          %a{:href => '/clothes/#{$cloth->code}'}= $cloth->category
-          %small.highlight= commify($cloth->price)
+          %a{:href => '/clothes/#{$clothes->code}'}= $clothes->category
+          %small.highlight= commify($clothes->price)
       - }
     - }
   .control-group
@@ -2784,16 +2811,16 @@ __DATA__
 %div.pull-right= include 'guests/breadcrumb', guest => $order->guest, status_id => ''
 %p.text-info 반납품목을 확인해주세요
 #clothes-category
-  %form#form-cloth-code
+  %form#form-clothes-code
     %fieldset
       .input-append
-        %input#input-cloth-code.input-large{:type => 'text', :placeholder => '품번'}
-        %button#btn-cloth-code.btn{:type => 'button'} 입력
-      - for my $cloth (@$clothes) {
+        %input#input-clothes-code.input-large{:type => 'text', :placeholder => '품번'}
+        %button#btn-clothes-code.btn{:type => 'button'} 입력
+      - for my $clothes (@$clothes_list) {
         %label.checkbox
-          %input.input-cloth{:type => 'checkbox', :data-cloth-code => '#{$cloth->code}'}
-          %a{:href => '/clothes/#{$cloth->code}'}= $cloth->category
-          %small.highlight= commify($cloth->price)
+          %input.input-clothes{:type => 'checkbox', :data-clothes-code => '#{$clothes->code}'}
+          %a{:href => '/clothes/#{$clothes->code}'}= $clothes->category
+          %small.highlight= commify($clothes->price)
       - }
 %div= include 'partial/order_info'
 
@@ -2844,10 +2871,10 @@ __DATA__
 %p= include 'partial/status_label'
 %div.pull-right= include 'guests/breadcrumb', guest => $order->guest, status_id => ''
 
-- for my $cloth (@$clothes) {
+- for my $clothes (@$clothes_list) {
   %p
-    %a{:href => '/clothes/#{$cloth->code}'}= $cloth->category
-    %small.highlight= commify($cloth->price)
+    %a{:href => '/clothes/#{$clothes->code}'}= $clothes->category
+    %small.highlight= commify($clothes->price)
 - }
 
 %div= include 'partial/order_info'
@@ -2864,20 +2891,20 @@ __DATA__
 %p= include 'partial/status_label'
 %div.pull-right= include 'guests/breadcrumb', guest => $order->guest, status_id => ''
 #clothes-category
-  %form#form-cloth-code
+  %form#form-clothes-code
     %fieldset
       .input-append
-        %input#input-cloth-code.input-large{:type => 'text', :placeholder => '품번'}
-        %button#btn-cloth-code.btn{:type => 'button'} 입력
-      - for my $cloth (@$clothes) {
+        %input#input-clothes-code.input-large{:type => 'text', :placeholder => '품번'}
+        %button#btn-clothes-code.btn{:type => 'button'} 입력
+      - for my $clothes (@$clothes_list) {
         %label.checkbox
-          - if ($cloth->status_id != $Opencloset::Constant::STATUS_PARTIAL_RETURN) {
-            %input.input-cloth{:type => 'checkbox', :checked => 'checked', :data-cloth-code => '#{$cloth->code}'}
+          - if ($clothes->status_id != $Opencloset::Constant::STATUS_PARTIAL_RETURN) {
+            %input.input-clothes{:type => 'checkbox', :checked => 'checked', :data-clothes-code => '#{$clothes->code}'}
           - } else {
-            %input.input-cloth{:type => 'checkbox', :data-cloth-code => '#{$cloth->code}'}
+            %input.input-clothes{:type => 'checkbox', :data-clothes-code => '#{$clothes->code}'}
           - }
-          %a{:href => '/clothes/#{$cloth->code}'}= $cloth->category
-          %small.highlight= commify($cloth->price)
+          %a{:href => '/clothes/#{$clothes->code}'}= $clothes->category
+          %small.highlight= commify($clothes->price)
       - }
 %div= include 'partial/order_info'
 %p= commify($order->late_fee)
@@ -2890,8 +2917,8 @@ __DATA__
 %p= include 'partial/satisfaction', s => $satisfaction
 
 
-@@ new-cloth.html.haml
-- my $id   = 'new-cloth';
+@@ new-clothes.html.haml
+- my $id   = 'new-clothes';
 - my $meta = $sidebar->{meta};
 - layout 'default',
 -   active_id   => $id,
@@ -2903,7 +2930,7 @@ __DATA__
 -   ];
 - title $meta->{$id}{text};
 
-#new-cloth
+#new-clothes
   .row-fluid
     .span12
       .widget-box
@@ -2963,7 +2990,7 @@ __DATA__
                             %input.ace.valid{ :name => 'user-id', :type => 'radio', :value => '0' }
                             %span.lbl= ' 기증자를 모릅니다.'
                       :plain
-                        <script id="tpl-new-cloth-donor-id" type="text/html">
+                        <script id="tpl-new-clothes-donor-id" type="text/html">
                           <div>
                             <label class="blue highlight">
                               <input type="radio" class="ace valid" name="user-id" value="<%= user_id %>" data-donor-id="<%= id %>" data-user-id="<%= user_id %>">
@@ -3066,9 +3093,9 @@ __DATA__
 
                 .form-horizontal
                   .form-group.has-info
-                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'cloth-type' } 종류:
+                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'clothes-type' } 종류:
                     .col-xs-12.col-sm-6
-                      %select#cloth-type{ :name => 'cloth-type', 'data-placeholder' => '옷의 종류를 선택하세요', :size => '14' }
+                      %select#clothes-type{ :name => 'clothes-type', 'data-placeholder' => '옷의 종류를 선택하세요', :size => '14' }
                         %option{ :value => "#{0x0001 | 0x0002}" } Jacket & Pants
                         %option{ :value => "#{0x0001 | 0x0020}" } Jacket & Skirts
                         %option{ :value => "#{0x0001}"          } Jacket
@@ -3090,93 +3117,93 @@ __DATA__
                     .col-xs-12.col-sm-9
                       %div
                         %label.blue
-                          %input.ace.valid{ :name => 'cloth-gender', :type => 'radio', :value => '1' }
+                          %input.ace.valid{ :name => 'clothes-gender', :type => 'radio', :value => '1' }
                           %span.lbl= ' 남성용'
                       %div
                         %label.blue
-                          %input.ace.valid{ :name => 'cloth-gender', :type => 'radio', :value => '2' }
+                          %input.ace.valid{ :name => 'clothes-gender', :type => 'radio', :value => '2' }
                           %span.lbl= ' 여성용'
                       %div
                         %label.blue
-                          %input.ace.valid{ :name => 'cloth-gender', :type => 'radio', :value => '3' }
+                          %input.ace.valid{ :name => 'clothes-gender', :type => 'radio', :value => '3' }
                           %span.lbl= ' 남여공용'
 
-                  #display-cloth-color
+                  #display-clothes-color
                     .space-2
 
                     .form-group.has-info
-                      %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'cloth-color' } 색상:
+                      %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'clothes-color' } 색상:
                       .col-xs-12.col-sm-4
-                        %select#cloth-color{ :name => 'color', 'data-placeholder' => '옷의 색상을 선택하세요', :size => '6' }
+                        %select#clothes-color{ :name => 'color', 'data-placeholder' => '옷의 색상을 선택하세요', :size => '6' }
                           %option{ :value => 'B' } 검정(B)
                           %option{ :value => 'N' } 감청(N)
                           %option{ :value => 'G' } 회색(G)
                           %option{ :value => 'R' } 빨강(R)
                           %option{ :value => 'W' } 흰색(W)
 
-                  #display-cloth-bust
+                  #display-clothes-bust
                     .space-2
 
                     .form-group.has-info
-                      %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'cloth-bust' } 가슴:
+                      %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'clothes-bust' } 가슴:
                       .col-xs-12.col-sm-5
                         .input-group
-                          %input#cloth-bust.valid.form-control{ :name => 'bust', :type => 'text' }
+                          %input#clothes-bust.valid.form-control{ :name => 'bust', :type => 'text' }
                           %span.input-group-addon
                             %i cm
 
-                  #display-cloth-arm
+                  #display-clothes-arm
                     .space-2
 
                     .form-group.has-info
-                      %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'cloth-arm' } 팔 길이:
+                      %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'clothes-arm' } 팔 길이:
                       .col-xs-12.col-sm-5
                         .input-group
-                          %input#cloth-arm.valid.form-control{ :name => 'arm', :type => 'text' }
+                          %input#clothes-arm.valid.form-control{ :name => 'arm', :type => 'text' }
                           %span.input-group-addon
                             %i cm
 
-                  #display-cloth-waist
+                  #display-clothes-waist
                     .space-2
 
                     .form-group.has-info
-                      %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'cloth-waist' } 허리:
+                      %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'clothes-waist' } 허리:
                       .col-xs-12.col-sm-5
                         .input-group
-                          %input#cloth-waist.valid.form-control{ :name => 'waist', :type => 'text' }
+                          %input#clothes-waist.valid.form-control{ :name => 'waist', :type => 'text' }
                           %span.input-group-addon
                             %i cm
 
-                  #display-cloth-hip
+                  #display-clothes-hip
                     .space-2
 
                     .form-group.has-info
-                      %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'cloth-hip' } 엉덩이:
+                      %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'clothes-hip' } 엉덩이:
                       .col-xs-12.col-sm-5
                         .input-group
-                          %input#cloth-hip.valid.form-control{ :name => 'hip', :type => 'text' }
+                          %input#clothes-hip.valid.form-control{ :name => 'hip', :type => 'text' }
                           %span.input-group-addon
                             %i cm
 
-                  #display-cloth-length
+                  #display-clothes-length
                     .space-2
 
                     .form-group.has-info
-                      %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'cloth-length' } 기장:
+                      %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'clothes-length' } 기장:
                       .col-xs-12.col-sm-5
                         .input-group
-                          %input#cloth-length.valid.form-control{ :name => 'length', :type => 'text' }
+                          %input#clothes-length.valid.form-control{ :name => 'length', :type => 'text' }
                           %span.input-group-addon
                             %i cm
 
-                  #display-cloth-foot
+                  #display-clothes-foot
                     .space-2
 
                     .form-group.has-info
-                      %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'cloth-foot' } 발 크기:
+                      %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'clothes-foot' } 발 크기:
                       .col-xs-12.col-sm-5
                         .input-group
-                          %input#cloth-foot.valid.form-control{ :name => 'foot', :type => 'text' }
+                          %input#clothes-foot.valid.form-control{ :name => 'foot', :type => 'text' }
                           %span.input-group-addon
                             %i mm
 
@@ -3184,8 +3211,8 @@ __DATA__
                     %label.control-label.no-padding-right.col-xs-12.col-sm-3= ' '
                     .col-xs-12.col-sm-5
                       .input-group
-                        %button#btn-cloth-reset.btn.btn-default 지움
-                        %button#btn-cloth-add.btn.btn-primary 추가
+                        %button#btn-clothes-reset.btn.btn-default 지움
+                        %button#btn-clothes-add.btn.btn-primary 추가
 
                   .hr.hr-dotted
 
@@ -3194,25 +3221,25 @@ __DATA__
                       %label.control-label.no-padding-right.col-xs-12.col-sm-3
                         추가할 의류 선택:
                         %br
-                        %a#btn-cloth-select-all.btn.btn-xs.btn-success{ :role => 'button' } 모두 선택
+                        %a#btn-clothes-select-all.btn.btn-xs.btn-success{ :role => 'button' } 모두 선택
                       .col-xs-12.col-sm-9
-                        #display-cloth-list
+                        #display-clothes-list
                         :plain
-                          <script id="tpl-new-cloth-cloth-item" type="text/html">
+                          <script id="tpl-new-clothes-clothes-item" type="text/html">
                             <div>
                               <label>
-                                <input type="checkbox" class="ace valid" name="cloth-list"
+                                <input type="checkbox" class="ace valid" name="clothes-list"
                                   value="<%= [ donor_id, cloth_type, cloth_color, cloth_bust, cloth_waist, cloth_hip, cloth_arm, cloth_length, cloth_foot, cloth_gender ].join('-') %>"
                                   data-donor-id="<%= donor_id %>"
-                                  data-cloth-type="<%= cloth_type %>"
-                                  data-cloth-color="<%= cloth_color %>"
-                                  data-cloth-bust="<%= cloth_bust %>"
-                                  data-cloth-arm="<%= cloth_arm %>"
-                                  data-cloth-waist="<%= cloth_waist %>"
-                                  data-cloth-hip="<%= cloth_hip %>"
-                                  data-cloth-length="<%= cloth_length %>"
-                                  data-cloth-foot="<%= cloth_foot %>"
-                                  data-cloth-gender="<%= cloth_gender %>"
+                                  data-clothes-type="<%= cloth_type %>"
+                                  data-clothes-color="<%= cloth_color %>"
+                                  data-clothes-bust="<%= cloth_bust %>"
+                                  data-clothes-arm="<%= cloth_arm %>"
+                                  data-clothes-waist="<%= cloth_waist %>"
+                                  data-clothes-hip="<%= cloth_hip %>"
+                                  data-clothes-length="<%= cloth_length %>"
+                                  data-clothes-foot="<%= cloth_foot %>"
+                                  data-clothes-gender="<%= cloth_gender %>"
                                 />
                                 <%
                                   var cloth_detail = []
