@@ -93,20 +93,6 @@ __PACKAGE__->table("clothes");
   default_value: 0
   is_nullable: 1
 
-=head2 top_id
-
-  data_type: 'integer'
-  extra: {unsigned => 1}
-  is_foreign_key: 1
-  is_nullable: 1
-
-=head2 bottom_id
-
-  data_type: 'integer'
-  extra: {unsigned => 1}
-  is_foreign_key: 1
-  is_nullable: 1
-
 =head2 user_id
 
   data_type: 'integer'
@@ -118,6 +104,13 @@ __PACKAGE__->table("clothes");
 
   data_type: 'integer'
   default_value: 1
+  extra: {unsigned => 1}
+  is_foreign_key: 1
+  is_nullable: 1
+
+=head2 group_id
+
+  data_type: 'integer'
   extra: {unsigned => 1}
   is_foreign_key: 1
   is_nullable: 1
@@ -160,20 +153,6 @@ __PACKAGE__->add_columns(
   { data_type => "varchar", is_nullable => 0, size => 32 },
   "price",
   { data_type => "integer", default_value => 0, is_nullable => 1 },
-  "top_id",
-  {
-    data_type => "integer",
-    extra => { unsigned => 1 },
-    is_foreign_key => 1,
-    is_nullable => 1,
-  },
-  "bottom_id",
-  {
-    data_type => "integer",
-    extra => { unsigned => 1 },
-    is_foreign_key => 1,
-    is_nullable => 1,
-  },
   "user_id",
   {
     data_type => "integer",
@@ -185,6 +164,13 @@ __PACKAGE__->add_columns(
   {
     data_type => "integer",
     default_value => 1,
+    extra => { unsigned => 1 },
+    is_foreign_key => 1,
+    is_nullable => 1,
+  },
+  "group_id",
+  {
+    data_type => "integer",
     extra => { unsigned => 1 },
     is_foreign_key => 1,
     is_nullable => 1,
@@ -221,56 +207,6 @@ __PACKAGE__->add_unique_constraint("code", ["code"]);
 
 =head1 RELATIONS
 
-=head2 bottom
-
-Type: belongs_to
-
-Related object: L<Opencloset::Schema::Result::Clothes>
-
-=cut
-
-__PACKAGE__->belongs_to(
-  "bottom",
-  "Opencloset::Schema::Result::Clothes",
-  { id => "bottom_id" },
-  {
-    is_deferrable => 1,
-    join_type     => "LEFT",
-    on_delete     => "CASCADE",
-    on_update     => "RESTRICT",
-  },
-);
-
-=head2 clothes_bottoms
-
-Type: has_many
-
-Related object: L<Opencloset::Schema::Result::Clothes>
-
-=cut
-
-__PACKAGE__->has_many(
-  "clothes_bottoms",
-  "Opencloset::Schema::Result::Clothes",
-  { "foreign.bottom_id" => "self.id" },
-  { cascade_copy => 0, cascade_delete => 0 },
-);
-
-=head2 clothes_tops
-
-Type: has_many
-
-Related object: L<Opencloset::Schema::Result::Clothes>
-
-=cut
-
-__PACKAGE__->has_many(
-  "clothes_tops",
-  "Opencloset::Schema::Result::Clothes",
-  { "foreign.top_id" => "self.id" },
-  { cascade_copy => 0, cascade_delete => 0 },
-);
-
 =head2 donor_clothes
 
 Type: has_many
@@ -284,6 +220,26 @@ __PACKAGE__->has_many(
   "Opencloset::Schema::Result::DonorClothes",
   { "foreign.clothes_id" => "self.id" },
   { cascade_copy => 0, cascade_delete => 0 },
+);
+
+=head2 group
+
+Type: belongs_to
+
+Related object: L<Opencloset::Schema::Result::Group>
+
+=cut
+
+__PACKAGE__->belongs_to(
+  "group",
+  "Opencloset::Schema::Result::Group",
+  { id => "group_id" },
+  {
+    is_deferrable => 1,
+    join_type     => "LEFT",
+    on_delete     => "CASCADE",
+    on_update     => "RESTRICT",
+  },
 );
 
 =head2 order_clothes
@@ -336,26 +292,6 @@ __PACKAGE__->belongs_to(
   },
 );
 
-=head2 top
-
-Type: belongs_to
-
-Related object: L<Opencloset::Schema::Result::Clothes>
-
-=cut
-
-__PACKAGE__->belongs_to(
-  "top",
-  "Opencloset::Schema::Result::Clothes",
-  { id => "top_id" },
-  {
-    is_deferrable => 1,
-    join_type     => "LEFT",
-    on_delete     => "CASCADE",
-    on_update     => "RESTRICT",
-  },
-);
-
 =head2 user
 
 Type: belongs_to
@@ -387,8 +323,8 @@ Composing rels: L</order_clothes> -> order
 __PACKAGE__->many_to_many("orders", "order_clothes", "order");
 
 
-# Created by DBIx::Class::Schema::Loader v0.07038 @ 2013-11-29 20:22:55
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:22obwd6YiZRyFIPDoXwuzA
+# Created by DBIx::Class::Schema::Loader v0.07038 @ 2013-11-29 22:35:21
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:biX7eM/hw+n2PRZVxLxDTQ
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

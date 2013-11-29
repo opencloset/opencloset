@@ -41,17 +41,15 @@ INSERT
 INSERT
   INTO `clothes` (
     `id`,`code`,`bust`,`waist`,`arm`,`length`,`category`,
-    `top_id`,`bottom_id`,`user_id`,`status_id`,`gender`,`color`,`compatible_code`
+    `user_id`,`status_id`,`gender`,`color`,`compatible_code`
   )
   VALUES 
-    (1,'0J001', 94, NULL, 51, NULL,     'jacket', NULL, NULL, 1, 1, 1,'B',NULL),
-    (2,'0P001', NULL, 79, NULL, 102,    'pants',  NULL, NULL, 1, 1, 1,'B',NULL),
-    (3,'0S001', NULL, NULL, NULL, NULL, 'shirt',  NULL, NULL, 1, 1, 1,'B',NULL),
-    (4,'0A001', NULL, NULL, NULL, NULL, 'shoes',  NULL, NULL, 1, 1, 1,'B',NULL),
-    (5,'0T001', NULL, NULL, NULL, NULL, 'tie',    NULL, NULL, 1, 1, 1,'B',NULL)
+    (1,'0J001', 94, NULL, 51, NULL,     'jacket', 1, 1, 1,'B',NULL),
+    (2,'0P001', NULL, 79, NULL, 102,    'pants',  1, 1, 1,'B',NULL),
+    (3,'0S001', NULL, NULL, NULL, NULL, 'shirt',  1, 1, 1,'B',NULL),
+    (4,'0A001', NULL, NULL, NULL, NULL, 'shoes',  1, 1, 1,'B',NULL),
+    (5,'0T001', NULL, NULL, NULL, NULL, 'tie',    1, 1, 1,'B',NULL)
     ;
-UPDATE `clothes` SET `bottom_id`=2 WHERE `id`=1;
-UPDATE `clothes` SET `top_id`=1    WHERE `id`=2;
 
 INSERT
   INTO `donor_clothes` (`user_id`, `clothes_id`, `comment`, `donation_date`)
@@ -59,13 +57,11 @@ INSERT
 
 -- 대여중인거
 INSERT
-  INTO `clothes` (`id`,`code`,`bust`,`waist`,`arm`,`length`,`category`,`top_id`,`bottom_id`,`user_id`,`status_id`)
+  INTO `clothes` (`id`,`code`,`bust`,`waist`,`arm`,`length`,`category`,`user_id`,`status_id`)
   VALUES
-    (6,'0J002', 99, NULL, 55, NULL, 'jacket', NULL, NULL, 1, 2),
-    (7,'0P002', NULL, 82, NULL, 112, 'pants', NULL, NULL, 1, 2)
+    (6,'0J002', 99, NULL, 55, NULL, 'jacket', 1, 2),
+    (7,'0P002', NULL, 82, NULL, 112, 'pants', 1, 2)
     ;
-UPDATE `clothes` SET `bottom_id`=7 WHERE `id`=6;
-UPDATE `clothes` SET `top_id`=6 WHERE `id`=7;
 
 INSERT
   INTO `donor_clothes` (`user_id`, `clothes_id`, `comment`, `donation_date`)

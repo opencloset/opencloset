@@ -85,6 +85,16 @@ INSERT INTO `status` (`id`, `name`)
     ;
 
 --
+-- group
+--
+
+CREATE TABLE `group` (
+  `id`   INT UNSIGNED NOT NULL,
+
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
 -- clothes
 --
 
@@ -103,10 +113,9 @@ CREATE TABLE `clothes` (
   `category`    VARCHAR(32) NOT NULL,     -- 종류
   `price`       INT DEFAULT 0,            -- 대여 가격
 
-  `top_id`      INT UNSIGNED DEFAULT NULL,
-  `bottom_id`   INT UNSIGNED DEFAULT NULL,
   `user_id`     INT UNSIGNED DEFAULT NULL,
   `status_id`   INT UNSIGNED DEFAULT 1,
+  `group_id`    INT UNSIGNED DEFAULT NULL,
 
   `compatible_code` VARCHAR(32) DEFAULT NULL,
 
@@ -119,10 +128,9 @@ CREATE TABLE `clothes` (
   INDEX (`thigh`),
   INDEX (`length`),
   INDEX (`category`),
-  CONSTRAINT `fk_clothes1` FOREIGN KEY (`top_id`)    REFERENCES `clothes` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `fk_clothes2` FOREIGN KEY (`bottom_id`) REFERENCES `clothes` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `fk_clothes3` FOREIGN KEY (`user_id`)   REFERENCES `user`    (`id`) ON DELETE CASCADE,
-  CONSTRAINT `fk_clothes4` FOREIGN KEY (`status_id`) REFERENCES `status`  (`id`) ON DELETE CASCADE
+  CONSTRAINT `fk_clothes1` FOREIGN KEY (`user_id`)   REFERENCES `user`   (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_clothes2` FOREIGN KEY (`status_id`) REFERENCES `status` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_clothes3` FOREIGN KEY (`group_id`)  REFERENCES `group`  (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
