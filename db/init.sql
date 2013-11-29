@@ -171,11 +171,16 @@ CREATE TABLE `order` (
 
   -- guest info
   `purpose`          VARCHAR(32),
-  `age`              INT DEFAULT NULL,
-  `bust`             INT DEFAULT NULL,
-  `waist`            INT DEFAULT NULL,
-  `arm`              INT DEFAULT NULL,
-  `length`           INT DEFAULT NULL,
+  `height`           INT DEFAULT NULL, -- 키(cm)
+  `weight`           INT DEFAULT NULL, -- 몸무게(kg)
+  `bust`             INT DEFAULT NULL, -- 가슴   둘레(cm)
+  `waist`            INT DEFAULT NULL, -- 허리   둘레(cm)
+  `hip`              INT DEFAULT NULL, -- 엉덩이 둘레(cm)
+  `thigh`            INT DEFAULT NULL, -- 허벅지 둘레(cm)
+  `arm`              INT DEFAULT NULL, -- 팔   길이(cm)
+  `leg`              INT DEFAULT NULL, -- 다리 길이(cm)
+  `knee`             INT DEFAULT NULL, -- 무릎 길이(cm)
+  `foot`             INT DEFAULT NULL, -- 발 크기(mm)
 
   PRIMARY KEY (`id`),
   CONSTRAINT `fk_order1` FOREIGN KEY (`user_id`)   REFERENCES `user` (`id`) ON DELETE CASCADE,

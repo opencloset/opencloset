@@ -128,7 +128,12 @@ __PACKAGE__->table("order");
   is_nullable: 1
   size: 32
 
-=head2 age
+=head2 height
+
+  data_type: 'integer'
+  is_nullable: 1
+
+=head2 weight
 
   data_type: 'integer'
   is_nullable: 1
@@ -143,12 +148,32 @@ __PACKAGE__->table("order");
   data_type: 'integer'
   is_nullable: 1
 
+=head2 hip
+
+  data_type: 'integer'
+  is_nullable: 1
+
+=head2 thigh
+
+  data_type: 'integer'
+  is_nullable: 1
+
 =head2 arm
 
   data_type: 'integer'
   is_nullable: 1
 
-=head2 length
+=head2 leg
+
+  data_type: 'integer'
+  is_nullable: 1
+
+=head2 knee
+
+  data_type: 'integer'
+  is_nullable: 1
+
+=head2 foot
 
   data_type: 'integer'
   is_nullable: 1
@@ -218,15 +243,25 @@ __PACKAGE__->add_columns(
   { data_type => "text", is_nullable => 1 },
   "purpose",
   { data_type => "varchar", is_nullable => 1, size => 32 },
-  "age",
+  "height",
+  { data_type => "integer", is_nullable => 1 },
+  "weight",
   { data_type => "integer", is_nullable => 1 },
   "bust",
   { data_type => "integer", is_nullable => 1 },
   "waist",
   { data_type => "integer", is_nullable => 1 },
+  "hip",
+  { data_type => "integer", is_nullable => 1 },
+  "thigh",
+  { data_type => "integer", is_nullable => 1 },
   "arm",
   { data_type => "integer", is_nullable => 1 },
-  "length",
+  "leg",
+  { data_type => "integer", is_nullable => 1 },
+  "knee",
+  { data_type => "integer", is_nullable => 1 },
+  "foot",
   { data_type => "integer", is_nullable => 1 },
 );
 
@@ -305,8 +340,8 @@ Composing rels: L</cloth_orders> -> cloth
 __PACKAGE__->many_to_many("cloths", "cloth_orders", "cloth");
 
 
-# Created by DBIx::Class::Schema::Loader v0.07038 @ 2013-11-27 22:12:05
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:5jt9mV7t2a0heh9STk1s6Q
+# Created by DBIx::Class::Schema::Loader v0.07038 @ 2013-11-29 14:56:06
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:TTwwH/Q1MKswmWeggeqYQg
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration
