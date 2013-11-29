@@ -442,6 +442,85 @@ group {
 
     sub api_update_user {
         my $self = shift;
+
+        #
+        # fetch params
+        #
+        my %user_params      = $self->get_params(qw/ id name email password /);
+        my %user_info_params = $self->get_params(qw/
+            phone  address gender birth comment
+            height weight  bust   waist hip
+            thigh  arm     leg    knee  foot
+        /);
+
+        #
+        # validate params
+        #
+        my $v = $self->create_validator;
+        $v->field('id')->required(1)->regexp(qr/^\d+$/);
+        $v->field('email')->email;
+        $v->field('phone')->regexp(qr/^\d+$/);
+        $v->field('gender')->in(qw/ male female /);
+        $v->field('birth')->regexp(qr/^(19|20)\d{2}$/);
+        $v->field(qw/ height weight bust waist hip thigh arm leg knee foot /)->each(sub {
+            shift->regexp(qr/^\d{,3}$/);
+        });
+        unless ( $self->validate( $v, { %user_params, %user_info_params } ) ) {
+            my @error_str;
+            while ( my ( $k, $v ) = each %{ $v->errors } ) {
+                push @error_str, "$k:$v";
+            }
+            return $self->error( 400, {
+                str  => join(',', @error_str),
+                data => $v->errors,
+            });
+        }
+
+        #
+        # find user
+        #
+        my $user = $DB->resultset('User')->find({ id => $user_params{id} });
+        return $self->error( 404, {
+            str  => 'user not found',
+            data => {},
+        }) unless $user;
+        return $self->error( 404, {
+            str  => 'user info not found',
+            data => {},
+        }) unless $user->user_info;
+
+        #
+        # update user
+        #
+        {
+            my $guard = $DB->txn_scope_guard;
+
+            my %_user_params = %user_params;
+            delete $_user_params{id};
+            $user->update( \%_user_params )
+                or return $self->error( 500, {
+                    str  => 'failed to update a user',
+                    data => {},
+                });
+
+            $user->user_info->update({
+                %user_info_params,
+                user_id => $user->id,
+            }) or return $self->error( 500, {
+                str  => 'failed to update a user info',
+                data => {},
+            });
+
+            $guard->commit;
+        }
+
+        #
+        # response
+        #
+        my %data = ( $user->user_info->get_columns, $user->get_columns );
+        delete @data{qw/ user_id password /};
+
+        $self->respond_to( json => { status => 200, json => \%data } );
     }
 
     sub api_delete_user {
