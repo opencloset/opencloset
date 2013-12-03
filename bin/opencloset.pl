@@ -310,23 +310,23 @@ group {
         return;
     };
 
-    post '/user'         => \&api_create_user;
-    get  '/user/:id'     => \&api_get_user;
-    put  '/user/:id'     => \&api_update_user;
-    del  '/user/:id'     => \&api_delete_user;
-    get  '/user-list'    => \&api_get_user_list;
+    post '/user'          => \&api_create_user;
+    get  '/user/:id'      => \&api_get_user;
+    put  '/user/:id'      => \&api_update_user;
+    del  '/user/:id'      => \&api_delete_user;
+    get  '/user-list'     => \&api_get_user_list;
 
-    post '/order'        => \&api_create_order;
-    get  '/order/:id'    => \&api_get_order;
-    put  '/order/:id'    => \&api_update_order;
-    del  '/order/:id'    => \&api_delete_order;
-    get  '/order-list'   => \&api_get_order_list;
+    post '/order'         => \&api_create_order;
+    get  '/order/:id'     => \&api_get_order;
+    put  '/order/:id'     => \&api_update_order;
+    del  '/order/:id'     => \&api_delete_order;
+    get  '/order-list'    => \&api_get_order_list;
 
-    post '/clothes'      => \&api_create_clothes;
-    get  '/clothes/:id'  => \&api_get_clothes;
-    put  '/clothes/:id'  => \&api_update_clothes;
-    del  '/clothes/:id'  => \&api_delete_clothes;
-    get  '/clothes-list' => \&api_get_clothes_list;
+    post '/clothes'       => \&api_create_clothes;
+    get  '/clothes/:code' => \&api_get_clothes;
+    put  '/clothes/:code' => \&api_update_clothes;
+    del  '/clothes/:code' => \&api_delete_clothes;
+    get  '/clothes-list'  => \&api_get_clothes_list;
 
     sub api_create_user {
         my $self = shift;
