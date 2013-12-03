@@ -928,9 +928,38 @@ group {
         }) unless $clothes;
 
         #
+        # additional information for clothes
+        #
+        my %extra_data;
+        # '대여중'인 항목만 주문서 정보를 포함합니다.
+        my $order = $clothes->orders->find({ status_id => 2 });
+        if ($order) {
+            %extra_data = (
+                order => {
+                    id          => $order->id,
+                    price       => $order->price,
+                    clothes     => [ $order->clothes->get_column('code')->all ],
+                    late_fee    => $self->calc_late_fee( $order, 'commify' ),
+                    overdue     => $self->calc_overdue( $order->target_date ),
+                    rental_date => {
+                        raw => $order->rental_date,
+                        md  => $order->rental_date->month . '/' . $order->rental_date->day,
+                        ymd => $order->rental_date->ymd
+                    },
+                    target_date => {
+                        raw => $order->target_date,
+                        md  => $order->target_date->month . '/' . $order->target_date->day,
+                        ymd => $order->target_date->ymd
+                    },
+                },
+            );
+        }
+
+        #
         # response
         #
-        my %data = ( $clothes->get_columns );
+        my %data = ( $clothes->get_columns, %extra_data );
+        $data{status} = $clothes->status->name;
 
         $self->respond_to( json => { status => 200, json => \%data } );
     }
@@ -1945,8 +1974,8 @@ __DATA__
     %span (으)로 변경 합니다
 
 :plain
-  <script id="tpl-row-checkbox-disabled" type="text/html">
-    <tr data-order-id="<%= order_id %>">
+  <script id="tpl-row-checkbox-clothes-with-order" type="text/html">
+    <tr data-order-id="<%= order.id %>">
       <td class="center">
         <label>
           <input class="ace" type="checkbox" disabled>
@@ -1957,36 +1986,29 @@ __DATA__
       <td>
         <span class="order-status label">
           <%= status %>
-          <span class="late-fee"><%= late_fee ? late_fee + '원' : '' %></span>
+          <span class="late-fee"><%= order.late_fee ? order.late_fee + '원' : '' %></span>
         </span>
       </td> <!-- 상태 -->
       <td>
-        <% _.each(clothes, function(clothes) { %> <a href="/clothes/<%= clothes.code %>"><%= clothes.code %></a><% }); %>
+        <% _.each(order.clothes, function(c) { c = c.replace(/^0/, ''); %> <a href="/clothes/<%= c %>"><%= c %></a><% }); %>
       </td> <!-- 묶음 -->
       <td>
-        <a href="/orders/<%= order_id %>"><span class="label label-info arrowed-right arrowed-in">
+        <a href="/orders/<%= order.id %>"><span class="label label-info arrowed-right arrowed-in">
           <strong>주문서</strong>
-          <time class="js-relative-date" datetime="<%= rental_date.raw %>" title="<%= rental_date.ymd %>"><%= rental_date.md %></time>
+          <time class="js-relative-date" datetime="<%= order.rental_date.raw %>" title="<%= order.rental_date.ymd %>"><%= order.rental_date.md %></time>
           ~
-          <time class="js-relative-date" datetime="<%= target_date.raw %>" title="<%= target_date.ymd %>"><%= target_date.md %></time>
+          <time class="js-relative-date" datetime="<%= order.target_date.raw %>" title="<%= order.target_date.ymd %>"><%= order.target_date.md %></time>
         </span></a>
       </td> <!-- 기타 -->
     </tr>
   </script>
 
 :plain
-  <script id="tpl-overdue-paragraph" type="text/html">
-    <span>
-      연체료 <%= late_fee %>원 = <%= price %>원 x <%= overdue %>일 x 20%
-    </span>
-  </script>
-
-:plain
-  <script id="tpl-row-checkbox-enabled" type="text/html">
-    <tr class="row-checkbox" data-clothes-id="<%= id %>">
+  <script id="tpl-row-checkbox-clothes" type="text/html">
+    <tr class="row-checkbox" data-clothes-code="<%= code %>">
       <td class="center">
         <label>
-          <input class="ace" type="checkbox" data-clothes-id="<%= id %>">
+          <input class="ace" type="checkbox" <%= status == '대여가능' ? '' : 'disabled' %> data-clothes-code="<%= code %>">
           <span class="lbl"></span>
         </label>
       </td>
@@ -1995,6 +2017,13 @@ __DATA__
       <td> </td> <!-- 묶음 -->
       <td> </td> <!-- 기타 -->
     </tr>
+  </script>
+
+:plain
+  <script id="tpl-overdue-paragraph" type="text/html">
+    <span>
+      연체료 <%= order.late_fee %>원 = <%= order.price %>원 x <%= order.overdue %>일 x 20%
+    </span>
   </script>
 
 

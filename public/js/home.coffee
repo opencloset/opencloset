@@ -1,42 +1,45 @@
 $ ->
-  $('#cloth-id').focus()
+  $('#clothes-id').focus()
   $('#btn-clear').click (e) ->
     e.preventDefault()
-    $('#cloth-table table tbody tr').remove()
+    $('#clothes-table table tbody tr').remove()
     $('#action-buttons').hide()
-    $('#cloth-id').focus()
-  $('#btn-cloth-search').click (e) ->
-    $('#cloth-search-form').trigger('submit')
-  $('#cloth-search-form').submit (e) ->
+    $('#clothes-id').focus()
+  $('#btn-clothes-search').click (e) ->
+    $('#clothes-search-form').trigger('submit')
+
+  #
+  # 옷 검색 후 테이블에 추가
+  #
+  $('#clothes-search-form').submit (e) ->
     e.preventDefault()
-    cloth_id = $('#cloth-id').val()
-    $('#cloth-id').val('').focus()
-    return unless cloth_id
-    $.ajax "/clothes/#{cloth_id}.json",
+    clothes_id = $('#clothes-id').val()
+    $('#clothes-id').val('').focus()
+    return unless clothes_id
+    $.ajax "/api/clothes/#{clothes_id}.json",
       type: 'GET'
       dataType: 'json'
       success: (data, textStatus, jqXHR) ->
         console.log data
-        console.log data.status
-        if data.status is '대여가능'
-          return if $("#cloth-table table tbody tr[data-cloth-id='#{data.id}']").length
-          compiled = _.template($('#tpl-row-checkbox-enabled').html())
+        data.code = data.code.replace /^0/, ''
+        if data.status is '대여중'
+          return if $("#clothes-table table tbody tr[data-order-id='#{data.order.id}']").length
+          compiled = _.template($('#tpl-row-checkbox-clothes-with-order').html())
           $html = $(compiled(data))
-          if /대여가능/.test(data.status)
-            $html.find('.order-status').addClass('label-success')
-          $('#cloth-table table tbody').append($html)
-          $('#action-buttons').show()
-        else
-          return if $("#cloth-table table tbody tr[data-order-id='#{data.order_id}']").length
-          compiled = _.template($('#tpl-row-checkbox-disabled').html())
-          $html = $(compiled(data))
-          if /대여중/.test(data.status)
-            $html.find('.order-status').addClass('label-important')
-          if data.overdue
+          $html.find('.order-status').addClass('label-important')
+          if data.order.overdue
             compiled = _.template($('#tpl-overdue-paragraph').html())
             html     = compiled(data)
             $html.find("td:last-child").append(html)
-          $("#cloth-table table tbody").append($html)
+          $("#clothes-table table tbody").append($html)
+        else
+          return if $("#clothes-table table tbody tr[data-clothes-code='#{data.code}']").length
+          compiled = _.template($('#tpl-row-checkbox-clothes').html())
+          $html = $(compiled(data))
+          $('#clothes-table table tbody').append($html)
+          if data.status is '대여가능'
+            $html.find('.order-status').addClass('label-success')
+            $('#action-buttons').show()
       error: (jqXHR, textStatus, errorThrown) ->
         alert('error', jqXHR.responseJSON.error)
       complete: (jqXHR, textStatus) ->
@@ -47,8 +50,8 @@ $ ->
     status  = $this.data('status')
     clothes = []
     alert 'hello'
-    $('#cloth-table input:checked').each (i, el) ->
-      clothes.push($(el).data('cloth-id'))
+    $('#clothes-table input:checked').each (i, el) ->
+      clothes.push($(el).data('clothes-id'))
       console.log $(el)
       console.log $(i)
     alert 'world'
@@ -67,7 +70,7 @@ $ ->
         alert('error', jqXHR.responseJSON.error)
       complete: (jqXHR, textStatus) ->
         $this.removeClass('disabled')
-    $('#cloth-id').focus()
+    $('#clothes-id').focus()
 
   #
   # 의류 검색 결과 테이블에서 모든 항목 선택 및 취소

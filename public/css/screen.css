@@ -32,9 +32,9 @@
 .ace-thumbnails > li .satisfaction li { list-style-type: none; }
 
 .page-content .search { width: 400px; }
-.page-content #cloth-table table th:first-child { width: 50px; }
-.page-content #cloth-table table th:nth-child(2) { width: 80px; }
-.page-content #cloth-table table th:nth-child(3) { width: 160px; }
+.page-content #clothes-table table th:first-child { width: 50px; }
+.page-content #clothes-table table th:nth-child(2) { width: 80px; }
+.page-content #clothes-table table th:nth-child(3) { width: 160px; }
 .page-content #order-table table th:first-child { width: 50px; }
 .page-content #order-table table th:nth-child(2) { width: 160px; }
 .page-content #order-table table th:nth-child(3) { width: 200px; }
