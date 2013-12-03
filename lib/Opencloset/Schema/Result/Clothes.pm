@@ -96,6 +96,7 @@ __PACKAGE__->table("clothes");
 =head2 user_id
 
   data_type: 'integer'
+  default_value: 1
   extra: {unsigned => 1}
   is_foreign_key: 1
   is_nullable: 1
@@ -111,6 +112,7 @@ __PACKAGE__->table("clothes");
 =head2 group_id
 
   data_type: 'integer'
+  default_value: 1
   extra: {unsigned => 1}
   is_foreign_key: 1
   is_nullable: 1
@@ -156,6 +158,7 @@ __PACKAGE__->add_columns(
   "user_id",
   {
     data_type => "integer",
+    default_value => 1,
     extra => { unsigned => 1 },
     is_foreign_key => 1,
     is_nullable => 1,
@@ -171,6 +174,7 @@ __PACKAGE__->add_columns(
   "group_id",
   {
     data_type => "integer",
+    default_value => 1,
     extra => { unsigned => 1 },
     is_foreign_key => 1,
     is_nullable => 1,
@@ -323,8 +327,8 @@ Composing rels: L</order_clothes> -> order
 __PACKAGE__->many_to_many("orders", "order_clothes", "order");
 
 
-# Created by DBIx::Class::Schema::Loader v0.07038 @ 2013-11-29 22:35:21
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:biX7eM/hw+n2PRZVxLxDTQ
+# Created by DBIx::Class::Schema::Loader v0.07038 @ 2013-12-02 20:32:52
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:16Q50ij4IYckPVw604hHdQ
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

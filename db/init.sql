@@ -20,6 +20,8 @@ CREATE TABLE `user` (
   UNIQUE  KEY (`email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+INSERT INTO `user` (`id`,`name`,`email`) VALUES (1,'열린옷장','opencloset@opencloset.net');
+
 --
 -- user_info
 --
@@ -94,6 +96,8 @@ CREATE TABLE `group` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+INSERT INTO `group` (`id`) VALUES (1);
+
 --
 -- clothes
 --
@@ -113,9 +117,9 @@ CREATE TABLE `clothes` (
   `category`    VARCHAR(32) NOT NULL,     -- 종류
   `price`       INT DEFAULT 0,            -- 대여 가격
 
-  `user_id`     INT UNSIGNED DEFAULT NULL,
+  `user_id`     INT UNSIGNED DEFAULT 1,
   `status_id`   INT UNSIGNED DEFAULT 1,
-  `group_id`    INT UNSIGNED DEFAULT NULL,
+  `group_id`    INT UNSIGNED DEFAULT 1,
 
   `compatible_code` VARCHAR(32) DEFAULT NULL,
 
