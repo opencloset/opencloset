@@ -891,6 +891,48 @@ group {
 
     sub api_get_clothes {
         my $self = shift;
+
+        #
+        # fetch params
+        #
+        my %params = $self->get_params(qw/ code /);
+
+        #
+        # validate params
+        #
+        my $v = $self->create_validator;
+        $v->field('code')->required(1)->regexp(qr/^[A-Z0-9]{4,5}$/);
+        unless ( $self->validate( $v, \%params ) ) {
+            my @error_str;
+            while ( my ( $k, $v ) = each %{ $v->errors } ) {
+                push @error_str, "$k:$v";
+            }
+            return $self->error( 400, {
+                str  => join(',', @error_str),
+                data => $v->errors,
+            });
+        }
+
+        #
+        # adjust params
+        #
+        $params{code} = sprintf( '%05s', $params{code} ) if length( $params{code} ) == 4;
+
+        #
+        # find clothes
+        #
+        my $clothes = $DB->resultset('Clothes')->find( \%params );
+        return $self->error( 404, {
+            str  => 'clothes not found',
+            data => {},
+        }) unless $clothes;
+
+        #
+        # response
+        #
+        my %data = ( $clothes->get_columns );
+
+        $self->respond_to( json => { status => 200, json => \%data } );
     }
 
     sub api_update_clothes {
