@@ -937,6 +937,79 @@ group {
 
     sub api_update_clothes {
         my $self = shift;
+
+        #
+        # fetch params
+        #
+        my %params = $self->get_params(qw/
+            arm   bust            category code
+            color compatible_code gender   group_id
+            hip   length          price    status_id
+            thigh user_id         waist
+        /);
+
+        #
+        # validate params
+        #
+        my $v = $self->create_validator;
+        $v->field('code')->required(1)->regexp(qr/^[A-Z0-9]{4,5}$/);
+        $v->field('category')->required(1)->in(@CATEGORIES);
+        $v->field('gender')->in(qw/ male female /);
+        $v->field('price')->regexp(qr/^\d*$/);
+        $v->field(qw/ bust waist hip thigh arm length /)->each(sub {
+            shift->regexp(qr/^\d{1,3}$/);
+        });
+        $v->field('user_id')->regexp(qr/^\d*$/)->callback(sub {
+            my $val = shift;
+
+            return 1 if $DB->resultset('User')->find({ id => $val });
+            return ( 0, 'user not found using user_id' );
+        });
+
+        $v->field('status_id')->regexp(qr/^\d*$/)->callback(sub {
+            my $val = shift;
+
+            return 1 if $DB->resultset('Status')->find({ id => $val });
+            return ( 0, 'status not found using status_id' );
+        });
+
+        $v->field('group_id')->regexp(qr/^\d*$/)->callback(sub {
+            my $val = shift;
+
+            return 1 if $DB->resultset('Group')->find({ id => $val });
+            return ( 0, 'status not found using group_id' );
+        });
+        unless ( $self->validate( $v, \%params ) ) {
+            my @error_str;
+            while ( my ( $k, $v ) = each %{ $v->errors } ) {
+                push @error_str, "$k:$v";
+            }
+            return $self->error( 400, {
+                str  => join(',', @error_str),
+                data => $v->errors,
+            });
+        }
+
+        #
+        # adjust params
+        #
+        $params{code} = sprintf( '%05s', $params{code} ) if length( $params{code} ) == 4;
+
+        #
+        # update clothes
+        #
+        my $clothes = $DB->resultset('Clothes')->create( \%params );
+        return $self->error( 500, {
+            str  => 'failed to update a new clothes',
+            data => {},
+        }) unless $clothes;
+
+        #
+        # response
+        #
+        my %data = ( $clothes->get_columns );
+
+        $self->respond_to( json => { status => 200, json => \%data } );
     }
 
     sub api_delete_clothes {
