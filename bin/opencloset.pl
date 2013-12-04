@@ -1036,11 +1036,15 @@ group {
         #
         # update clothes
         #
-        $clothes->update( \%params )
-            or return $self->error( 500, {
-                str  => 'failed to update a new clothes',
-                data => {},
-            });
+        {
+            my %_params = %params;
+            delete $_params{code};
+            $clothes->update( \%params )
+                or return $self->error( 500, {
+                    str  => 'failed to update a clothes',
+                    data => {},
+                });
+        }
 
         #
         # response
