@@ -348,6 +348,8 @@ group {
     get  '/clothes-list'  => \&api_get_clothes_list;
     put  '/clothes-list'  => \&api_update_clothes_list;
 
+    get  '/search/user'   => \&api_search_user;
+
     sub api_create_user {
         my $self = shift;
 
@@ -1288,6 +1290,67 @@ group {
         my %data = ();
 
         $self->respond_to( json => { status => 200, json => \%data } );
+    }
+
+    #
+    # FIXME
+    #   parameter is wired.
+    #   but it seemed enough for opencloset now
+    #
+    sub api_search_user {
+        my $self = shift;
+
+        #
+        # fetch params
+        #
+        my %params = $self->get_params(qw/ q /);
+
+        #
+        # validate params
+        #
+        my $v = $self->create_validator;
+        $v->field('q')->required(1);
+        unless ( $self->validate( $v, \%params ) ) {
+            my @error_str;
+            while ( my ( $k, $v ) = each %{ $v->errors } ) {
+                push @error_str, "$k:$v";
+            }
+            return $self->error( 400, {
+                str  => join(',', @error_str),
+                data => $v->errors,
+            });
+        }
+
+        #
+        # find user
+        #
+        my @users = $DB->resultset('User')->search(
+            {
+                -or => [
+                    'me.name'         => $params{q},
+                    'me.email'        => $params{q},
+                    'user_info.phone' => $params{q},
+                ],
+            },
+            { join => 'user_info' },
+        );
+        return $self->error( 404, {
+            str  => 'user not found',
+            data => {},
+        }) unless @users;
+
+        #
+        # response
+        #
+        my @data;
+        for my $user (@users) {
+            my %inner = ( $user->user_info->get_columns, $user->get_columns );
+            delete @inner{qw/ user_id password /};
+
+            push @data, \%inner;
+        }
+
+        $self->respond_to( json => { status => 200, json => \@data } );
     }
 }; # end of API section
 
