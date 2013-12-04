@@ -78,8 +78,11 @@ __PACKAGE__->table("clothes");
 
 =head2 gender
 
-  data_type: 'integer'
+  data_type: 'varchar'
   is_nullable: 1
+  size: 6
+
+male/female/unisex
 
 =head2 category
 
@@ -150,7 +153,7 @@ __PACKAGE__->add_columns(
   "color",
   { data_type => "varchar", is_nullable => 1, size => 32 },
   "gender",
-  { data_type => "integer", is_nullable => 1 },
+  { data_type => "varchar", is_nullable => 1, size => 6 },
   "category",
   { data_type => "varchar", is_nullable => 0, size => 32 },
   "price",
@@ -327,8 +330,8 @@ Composing rels: L</order_clothes> -> order
 __PACKAGE__->many_to_many("orders", "order_clothes", "order");
 
 
-# Created by DBIx::Class::Schema::Loader v0.07038 @ 2013-12-02 20:32:52
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:16Q50ij4IYckPVw604hHdQ
+# Created by DBIx::Class::Schema::Loader v0.07038 @ 2013-12-04 15:55:38
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:fmIk2vjCTll1NC0sWxQTbA
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

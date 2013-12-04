@@ -44,11 +44,11 @@ INSERT
     `user_id`,`status_id`,`gender`,`color`,`compatible_code`
   )
   VALUES 
-    (1,'0J001', 94, NULL, 51, NULL,     'jacket', 2, 1, 1,'B',NULL),
-    (2,'0P001', NULL, 79, NULL, 102,    'pants',  2, 1, 1,'B',NULL),
-    (3,'0S001', NULL, NULL, NULL, NULL, 'shirt',  2, 1, 1,'B',NULL),
-    (4,'0A001', NULL, NULL, NULL, NULL, 'shoes',  2, 1, 1,'B',NULL),
-    (5,'0T001', NULL, NULL, NULL, NULL, 'tie',    2, 1, 1,'B',NULL)
+    (1, '0J001', 94,   NULL, 51,   NULL, 'jacket', 2, 1, 'male', 'B', NULL),
+    (2, '0P001', NULL, 79,   NULL, 102,  'pants',  2, 1, 'male', 'B', NULL),
+    (3, '0S001', NULL, NULL, NULL, NULL, 'shirt',  2, 1, 'male', 'B', NULL),
+    (4, '0A001', NULL, NULL, NULL, NULL, 'shoes',  2, 1, 'male', 'B', NULL),
+    (5, '0T001', NULL, NULL, NULL, NULL, 'tie',    2, 1, 'male', 'B', NULL)
     ;
 
 INSERT

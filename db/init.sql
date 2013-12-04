@@ -113,7 +113,7 @@ CREATE TABLE `clothes` (
   `thigh`       INT         DEFAULT NULL, -- 허벅지 둘레(cm)
   `length`      INT         DEFAULT NULL, -- 기장(cm) 또는 발 크기(mm)
   `color`       VARCHAR(32) DEFAULT NULL,
-  `gender`      INT         DEFAULT NULL, -- 1: man, 2: woman, 3: unisex
+  `gender`      VARCHAR(6)  DEFAULT NULL COMMENT 'male/female/unisex',
   `category`    VARCHAR(32) NOT NULL,     -- 종류
   `price`       INT DEFAULT 0,            -- 대여 가격
 
