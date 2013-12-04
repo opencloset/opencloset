@@ -1121,6 +1121,90 @@ group {
 
     sub api_get_clothes_list {
         my $self = shift;
+
+        #
+        # fetch params
+        #
+        my %params = $self->get_params(qw/ code /);
+
+        #
+        # validate params
+        #
+        my $v = $self->create_validator;
+        $v->field('code')->required(1)->regexp(qr/^[A-Z0-9]{4,5}$/);
+        unless ( $self->validate( $v, \%params ) ) {
+            my @error_str;
+            while ( my ( $k, $v ) = each %{ $v->errors } ) {
+                push @error_str, "$k:$v";
+            }
+            return $self->error( 400, {
+                str  => join(',', @error_str),
+                data => $v->errors,
+            });
+        }
+
+        #
+        # adjust params
+        #
+        $params{code} = [ $params{code} ] unless ref $params{code} eq 'ARRAY';
+        for my $code ( @{ $params{code} } ) {
+            next unless length($code) == 4;
+            $code = sprintf( '%05s', $code );
+        }
+
+        #
+        # find clothes
+        #
+        my @clothes_list
+                = $DB->resultset('Clothes')
+                ->search( { code => $params{code} } )
+                ->all
+                ;
+        return $self->error( 404, {
+            str  => 'clothes list not found',
+            data => {},
+        }) unless @clothes_list;
+
+        #
+        # additional information for clothes list
+        #
+        my @data;
+        for my $clothes (@clothes_list) {
+            # '대여중'인 항목만 주문서 정보를 포함합니다.
+            my %extra_data;
+            my $order = $clothes->orders->find({ status_id => 2 });
+            if ($order) {
+                %extra_data = (
+                    order => {
+                        id          => $order->id,
+                        price       => $order->price,
+                        clothes     => [ $order->clothes->get_column('code')->all ],
+                        late_fee    => $self->calc_late_fee( $order, 'commify' ),
+                        overdue     => $self->calc_overdue( $order->target_date ),
+                        rental_date => {
+                            raw => $order->rental_date,
+                            md  => $order->rental_date->month . '/' . $order->rental_date->day,
+                            ymd => $order->rental_date->ymd
+                        },
+                        target_date => {
+                            raw => $order->target_date,
+                            md  => $order->target_date->month . '/' . $order->target_date->day,
+                            ymd => $order->target_date->ymd
+                        },
+                    },
+                );
+            }
+            push @data, {
+                $clothes->get_columns,
+                %extra_data,
+                status => $clothes->status->name,
+            };
+        }
+
+        #
+        # response
+        #
+        $self->respond_to( json => { status => 200, json => \@data } );
     }
 
     sub api_update_clothes_list {
