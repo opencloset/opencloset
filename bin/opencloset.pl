@@ -330,19 +330,23 @@ group {
     get  '/user/:id'      => \&api_get_user;
     put  '/user/:id'      => \&api_update_user;
     del  '/user/:id'      => \&api_delete_user;
+
     get  '/user-list'     => \&api_get_user_list;
 
     post '/order'         => \&api_create_order;
     get  '/order/:id'     => \&api_get_order;
     put  '/order/:id'     => \&api_update_order;
     del  '/order/:id'     => \&api_delete_order;
+
     get  '/order-list'    => \&api_get_order_list;
 
     post '/clothes'       => \&api_create_clothes;
     get  '/clothes/:code' => \&api_get_clothes;
     put  '/clothes/:code' => \&api_update_clothes;
     del  '/clothes/:code' => \&api_delete_clothes;
+
     get  '/clothes-list'  => \&api_get_clothes_list;
+    put  '/clothes-list'  => \&api_update_clothes_list;
 
     sub api_create_user {
         my $self = shift;
@@ -1117,6 +1121,89 @@ group {
 
     sub api_get_clothes_list {
         my $self = shift;
+    }
+
+    sub api_update_clothes_list {
+        my $self = shift;
+
+        #
+        # fetch params
+        #
+        my %params = $self->get_params(qw/
+            arm   bust            category code
+            color compatible_code gender   group_id
+            hip   length          price    status_id
+            thigh user_id         waist
+        /);
+
+        #
+        # validate params
+        #
+        my $v = $self->create_validator;
+        $v->field('code')->required(1)->regexp(qr/^[A-Z0-9]{4,5}$/);
+        $v->field('category')->in(@CATEGORIES);
+        $v->field('gender')->in(qw/ male female unisex /);
+        $v->field('price')->regexp(qr/^\d*$/);
+        $v->field(qw/ bust waist hip thigh arm length /)->each(sub {
+            shift->regexp(qr/^\d{1,3}$/);
+        });
+        $v->field('user_id')->regexp(qr/^\d*$/)->callback(sub {
+            my $val = shift;
+
+            return 1 if $DB->resultset('User')->find({ id => $val });
+            return ( 0, 'user not found using user_id' );
+        });
+
+        $v->field('status_id')->regexp(qr/^\d*$/)->callback(sub {
+            my $val = shift;
+
+            return 1 if $DB->resultset('Status')->find({ id => $val });
+            return ( 0, 'status not found using status_id' );
+        });
+
+        $v->field('group_id')->regexp(qr/^\d*$/)->callback(sub {
+            my $val = shift;
+
+            return 1 if $DB->resultset('Group')->find({ id => $val });
+            return ( 0, 'status not found using group_id' );
+        });
+        unless ( $self->validate( $v, \%params ) ) {
+            my @error_str;
+            while ( my ( $k, $v ) = each %{ $v->errors } ) {
+                push @error_str, "$k:$v";
+            }
+            return $self->error( 400, {
+                str  => join(',', @error_str),
+                data => $v->errors,
+            });
+        }
+
+        #
+        # adjust params
+        #
+        $params{code} = [ $params{code} ] unless ref $params{code} eq 'ARRAY';
+        for my $code ( @{ $params{code} } ) {
+            next unless length($code) == 4;
+            $code = sprintf( '%05s', $code );
+        }
+
+        #
+        # update clothes list
+        #
+        {
+            my %_params = %params;
+            my $code = delete $_params{code};
+            $DB->resultset('Clothes')
+                ->search( { code => $params{code} } )
+                ->update( \%_params )
+        }
+
+        #
+        # response
+        #
+        my %data = ();
+
+        $self->respond_to( json => { status => 200, json => \%data } );
     }
 }; # end of API section
 
