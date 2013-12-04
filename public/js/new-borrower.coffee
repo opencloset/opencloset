@@ -9,26 +9,26 @@ $ ->
   #
   # step1 - 대여자 검색과 대여자 선택을 연동합니다.
   #
-  add_registered_guest = ->
-    query = $('#guest-search').val()
+  add_registered_user = ->
+    query = $('#user-search').val()
 
     return unless query
 
-    $.ajax "/new-borrower.json",
+    $.ajax "/api/search/user.json",
       type: 'GET'
       data: { q: query }
-      success: (guests, textStatus, jqXHR) ->
-        compiled = _.template($('#tpl-new-borrower-guest-id').html())
-        _.each guests, (guest) ->
-          unless $("#guest-search-list input[data-guest-id='#{guest.id}']").length
-            $html = $(compiled(guest))
-            $html.find('input').attr('data-json', JSON.stringify(guest))
-            $("#guest-search-list").prepend($html)
+      success: (data, textStatus, jqXHR) ->
+        compiled = _.template($('#tpl-new-borrower-user-id').html())
+        _.each data, (user) ->
+          unless $("#user-search-list input[data-user-id='#{user.id}']").length
+            $html = $(compiled(user))
+            $html.find('input').attr('data-json', JSON.stringify(user))
+            $("#user-search-list").prepend($html)
       error: (jqXHR, textStatus, errorThrown) ->
         alert('error', jqXHR.responseJSON.error)
       complete: (jqXHR, textStatus) ->
 
-  $('#guest-search-list').on 'click', ':radio', (e) ->
+  $('#user-search-list').on 'click', ':radio', (e) ->
     userID  = $(@).data('user-id')
     guestID = $(@).data('guest-id')
     return if $(@).val() is '0'
@@ -43,8 +43,8 @@ $ ->
       else
         $input.val(g[name])
 
-  $('#guest-search').keypress (e) -> add_registered_guest() if e.keyCode is 13
-  $('#btn-guest-search').click -> add_registered_guest()
+  $('#user-search').keypress (e) -> add_registered_user() if e.keyCode is 13
+  $('#btn-user-search').click -> add_registered_user()
 
   #
   #
@@ -130,8 +130,8 @@ $ ->
       false
     .on 'stepclick', (e) ->
 
-  why = $('#guest-why').tag({
-    placeholder: $('#guest-why').attr('placeholder'),
+  why = $('#user-why').tag({
+    placeholder: $('#user-why').attr('placeholder'),
     source: [
       '입사면접',
       '사진촬영',
@@ -143,7 +143,7 @@ $ ->
       '발표',
     ],
   })
-  $('.guest-why .clickable.label').click ->
+  $('.user-why .clickable.label').click ->
     text = $(@).text()
     e = $.Event('keydown', { keyCode: 13 })
     why.next().val(text).trigger(e)

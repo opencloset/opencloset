@@ -1354,36 +1354,10 @@ group {
     }
 }; # end of API section
 
-get '/'      => 'home';
 get '/login';
 
-get '/new-borrower' => sub {
-    my $self = shift;
-
-    my $q  = $self->param('q') || q{};
-    my $rs = $DB->resultset('User')->search(
-        {
-            -or => [
-                'me.name'         => $q,
-                'me.email'        => $q,
-                'user_info.phone' => $q,
-            ],
-        },
-        { join => 'user_info' },
-    );
-
-    my @users;
-    while ( my $user = $rs->next ) {
-        my %data = ( $user->user_info->get_columns, $user->get_columns );
-        delete @data{qw/ user_id password /};
-        push @users, \%data;
-    }
-
-    $self->respond_to(
-        json => { json     => \@users        },
-        html => { template => 'new-borrower' },
-    );
-};
+get '/'             => 'home';
+get '/new-borrower' => 'new-borrower';
 
 post '/users' => sub {
     my $self = shift;
@@ -2353,9 +2327,9 @@ __DATA__
                     .col-xs-12.col-sm-9
                       .search
                         .input-group
-                          %input#guest-search.form-control{ :name => 'guest-search' :type => 'text', :placeholder => '이름 또는 이메일, 휴대전화 번호' }
+                          %input#user-search.form-control{ :name => 'user-search' :type => 'text', :placeholder => '이름 또는 이메일, 휴대전화 번호' }
                           %span.input-group-btn
-                            %button#btn-guest-search.btn.btn-default.btn-sm{ :type => 'submit' }
+                            %button#btn-user-search.btn.btn-default.btn-sm{ :type => 'submit' }
                               %i.icon-search.bigger-110 검색
                   /
                   / 대여자 선택
@@ -2363,16 +2337,16 @@ __DATA__
                   .form-group.has-info
                     %label.control-label.no-padding-right.col-xs-12.col-sm-3 대여자 선택:
                     .col-xs-12.col-sm-9
-                      #guest-search-list
+                      #user-search-list
                         %div
                           %label.blue
                             %input.ace.valid{ :name => 'user-id', :type => 'radio', :value => '0' }
                             %span.lbl= ' 처음 방문했습니다.'
                       :plain
-                        <script id="tpl-new-borrower-guest-id" type="text/html">
+                        <script id="tpl-new-borrower-user-id" type="text/html">
                           <div>
                             <label class="blue highlight">
-                              <input type="radio" class="ace valid" name="user-id" value="<%= user_id %>" data-user-id="<%= user_id %>" data-guest-id="<%= id %>">
+                              <input type="radio" class="ace valid" name="user-id" value="<%= id %>" data-user-id="<%= id %>">
                               <span class="lbl"> <%= name %> (<%= email %>)</span>
                               <span><%= address %></span>
                             </label>
@@ -2501,7 +2475,7 @@ __DATA__
                   .form-group.has-info
                     %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'purpose' } 대여 목적:
                     .col-xs-12.col-sm-7
-                      .guest-why
+                      .user-why
                         %input#purpose.valid.col-xs-12.col-sm-6{ :name => 'purpose', :type => 'text', :value => '', :placeholder => '대여목적', 'data-provide' => 'tag' }
                         %p
                           %span.label.label-info.clickable 입사면접
