@@ -708,7 +708,7 @@ group {
         #
         my $v = $self->create_validator;
         $v->field('id')->required(1)->regexp(qr/^\d+$/);
-        $v->field('user_id')->required(1)->regexp(qr/^\d+$/)->callback(sub {
+        $v->field('user_id')->regexp(qr/^\d+$/)->callback(sub {
             my $val = shift;
 
             return 1 if $DB->resultset('User')->find({ id => $val });
@@ -982,8 +982,8 @@ group {
         #
         my $v = $self->create_validator;
         $v->field('code')->required(1)->regexp(qr/^[A-Z0-9]{4,5}$/);
-        $v->field('category')->required(1)->in(@CATEGORIES);
-        $v->field('gender')->in(qw/ male female /);
+        $v->field('category')->in(@CATEGORIES);
+        $v->field('gender')->in(qw/ male female unisex /);
         $v->field('price')->regexp(qr/^\d*$/);
         $v->field(qw/ bust waist hip thigh arm length /)->each(sub {
             shift->regexp(qr/^\d{1,3}$/);
