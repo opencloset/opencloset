@@ -2164,12 +2164,20 @@ __DATA__
         %th 기타
     %tbody
   %ul
-  #action-buttons{:style => 'display: none'}
-    %span 선택한 항목을
-    %button.btn.btn-mini{:type => 'button', :data-status => '세탁'} 세탁
-    %button.btn.btn-mini{:type => 'button', :data-status => '대여가능'} 대여가능
-    %button.btn.btn-mini{:type => 'button', :data-status => '분실'} 분실
-    %span (으)로 변경 합니다
+  #action-buttons.btn-group
+    %button.btn.btn-primary.dropdown-toggle{ 'data-toggle' => 'dropdown' }
+      선택한 항목을 변경할 상태를 선택하세요.
+      %i.icon-angle-down.icon-on-right
+    %ul.dropdown-menu
+      - for my $status (qw/ 세탁 대여가능 /) {
+        %li
+          %a{ :href => "#" }= $status
+      - }
+      %li.divider
+      - for my $status (qw/ 대여불가 예약 수선 분실 폐기 /) {
+        %li
+          %a{ :href => "#" }= $status
+      - }
 
 :plain
   <script id="tpl-row-checkbox-clothes-with-order" type="text/html">
@@ -2206,7 +2214,7 @@ __DATA__
     <tr class="row-checkbox" data-clothes-code="<%= code %>">
       <td class="center">
         <label>
-          <input class="ace" type="checkbox" <%= status == '대여가능' ? '' : 'disabled' %> data-clothes-code="<%= code %>">
+          <input class="ace" type="checkbox" <%= status == '대여중' ? 'disabled' : '' %> data-clothes-code="<%= code %>">
           <span class="lbl"></span>
         </label>
       </td>
