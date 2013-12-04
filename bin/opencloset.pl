@@ -1025,13 +1025,22 @@ group {
         $params{code} = sprintf( '%05s', $params{code} ) if length( $params{code} ) == 4;
 
         #
-        # update clothes
+        # find clothes
         #
-        my $clothes = $DB->resultset('Clothes')->create( \%params );
-        return $self->error( 500, {
-            str  => 'failed to update a new clothes',
+        my $clothes = $DB->resultset('Clothes')->find( \%params );
+        return $self->error( 404, {
+            str  => 'clothes not found',
             data => {},
         }) unless $clothes;
+
+        #
+        # update clothes
+        #
+        $clothes->update( \%params )
+            or return $self->error( 500, {
+                str  => 'failed to update a new clothes',
+                data => {},
+            });
 
         #
         # response
