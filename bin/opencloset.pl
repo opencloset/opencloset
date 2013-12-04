@@ -1298,14 +1298,17 @@ get '/new-borrower' => sub {
     my $self = shift;
 
     my $q  = $self->param('q') || q{};
-    my $rs = $DB->resultset('User')->search({
-        -or => [
-            id    => $q,
-            name  => $q,
-            phone => $q,
-            email => $q,
-        ],
-    });
+    my $rs = $DB->resultset('User')->search(
+        {
+            -or => [
+                'me.id'           => $q,
+                'me.name'         => $q,
+                'me.email'        => $q,
+                'user_info.phone' => $q,
+            ],
+        },
+        { join => 'user_info' },
+    );
 
     my @users;
     while ( my $user = $rs->next ) {
