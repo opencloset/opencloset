@@ -282,9 +282,23 @@ helper get_params => sub {
     my ( $self, @keys ) = @_;
 
     #
+    # parameter can have multiple values
+    #
+    my @values;
+    for my $k (@keys) {
+        my @v = $self->param($k);
+        if ( @v > 1 ) {
+            push @values, \@v;
+        }
+        else {
+            push @values, $v[0];
+        }
+    }
+
+    #
     # make parameter hash using explicit keys
     #
-    my %params = zip @keys, @{ [ $self->param( \@keys ) ] };
+    my %params = zip @keys, @values;
 
     #
     # remove not defined parameter key and values
