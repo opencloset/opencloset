@@ -1301,7 +1301,6 @@ get '/new-borrower' => sub {
     my $rs = $DB->resultset('User')->search(
         {
             -or => [
-                'me.id'           => $q,
                 'me.name'         => $q,
                 'me.email'        => $q,
                 'user_info.phone' => $q,
