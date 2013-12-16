@@ -1,3 +1,4 @@
+use v5.18;
 use strict;
 use warnings;
 
@@ -34,26 +35,42 @@ my $conf = eval path($conf_file)->slurp_utf8;
         overwrite_modifications   => 1,
         datetime_undef_if_invalid => 1,
         custom_column_info        => sub {
-            my ($table, $col_name, $col_info) = @_;
-            if ($col_name eq 'create_date') {
-                return {%{$col_info}, set_on_create => 1, inflate_datetime => 1};
-            }
-            elsif ($col_name eq 'visit_date') {
-                return {%{$col_info}, set_on_create => 1, set_on_update => 1, inflate_datetime => 1};
-            }
-            elsif ($col_name =~ /_date$/) {
-                return {%{$col_info}, inflate_datetime => 1};
+            my ( $table, $col_name, $col_info ) = @_;
+
+            no warnings 'experimental';
+            given ($col_name) {
+                when ('create_date') {
+                    return +{
+                        %$col_info,
+                        set_on_create    => 1,
+                        inflate_datetime => 1,
+                    };
+                }
+                when ('update_date') {
+                    return +{
+                        %$col_info,
+                        set_on_update    => 1,
+                        inflate_datetime => 1,
+                    };
+                }
+                when (/_date$/) {
+                    return +{
+                        %$col_info,
+                        inflate_datetime => 1,
+                    };
+                }
+                when ('password') {
+                    return +{
+                        %$col_info,
+                        encode_column       => 1,
+                        encode_class        => 'Digest',
+                        encode_args         => { algorithm => 'SHA-1', format => 'hex', salt_length => 10 },
+                        encode_check_method => 'check_password',
+                    };
+                }
             }
 
-            if ($col_name eq 'password') {
-                return {
-                    %{$col_info},
-                    encode_column => 1,
-                    encode_class  => 'Digest',
-                    encode_args   => { algorithm => 'SHA-1', format => 'hex', salt_length => 10 },
-                    encode_check_method => 'check_password',
-                };
-            }
+            return;
         },
     },
 }

@@ -1,11 +1,11 @@
 START TRANSACTION;
 
 INSERT
-  INTO `user` ( `id`, `name`, `email`, `password`, `create_date` )
+  INTO `user` ( `id`, `name`, `email`, `password`, `create_date`, `update_date` )
   VALUES
-    ( 2, '한만일', '10001if@opencloset.net',   NULL, NOW() ),
-    ( 3, '김소령', 'commander@opencloset.net', NULL, NOW() ),
-    ( 4, '홍형석', 'aanoaa@gmail.com',         NULL, NOW() )
+    ( 2, '한만일', '10001if@opencloset.net',   NULL, NOW(), NOW() ),
+    ( 3, '김소령', 'commander@opencloset.net', NULL, NOW(), NOW() ),
+    ( 4, '홍형석', 'aanoaa@gmail.com',         NULL, NOW(), NOW() )
     ;
 
 -- INSERT
@@ -22,8 +22,8 @@ INSERT
 INSERT
   INTO `user_info` ( `id`, `user_id`, `phone`, `address`, `gender`, `birth`, `comment` )
   VALUES
-    ( 1, 2, '01012345678', '인천 송도',   'male',   1980, '열린옷장대표1' ),
-    ( 2, 3, '01024681357', '서울 신사동', 'female', 1979, '열린옷장대표2' )
+    ( 2, 2, '01012345678', '인천 송도',   'male',   1980, '열린옷장대표1' ),
+    ( 3, 3, '01024681357', '서울 신사동', 'female', 1979, '열린옷장대표2' )
     ;
 
 --
@@ -35,7 +35,7 @@ INSERT
     `height`, `weight`, `bust`, `waist`, `hip`, `thigh`, `arm`, `leg`, `knee`, `foot`
   )
   VALUES
-    ( 3, 4, '01011112222', '서울 사당동', 'male', 1982, '최초 대여자', 168, 59, 93, 78, NULL, NULL, 51, 102, NULL, NULL )
+    ( 4, 4, '01011112222', '서울 사당동', 'male', 1982, '최초 대여자', 168, 59, 93, 78, NULL, NULL, 51, 102, NULL, NULL )
     ;
 
 INSERT

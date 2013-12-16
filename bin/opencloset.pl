@@ -1799,9 +1799,9 @@ get '/rental' => sub {
     my @users = $DB->resultset('User')->search(
         {
             -or => [
-                'id'              => $q,
-                'name'            => $q,
-                'email'           => $q,
+                'me.id'           => $q,
+                'me.name'         => $q,
+                'me.email'        => $q,
                 'user_info.phone' => $q,
             ],
         },
@@ -1819,7 +1819,7 @@ get '/rental' => sub {
         {
             -or => [
                 create_date => { '>=' => $dt_parser->format_datetime($today) },
-                visit_date  => { '>=' => $dt_parser->format_datetime($today) },
+                update_date => { '>=' => $dt_parser->format_datetime($today) },
             ],
         },
         { order_by => { -desc => 'create_date' } },
@@ -2627,8 +2627,8 @@ __DATA__
 %p
   %a{:href => '/guests/#{$user->id}'}= $user->name
   님
-  - if ( $user->user_info->visit_date ) {
-    %strong= $user->user_info->visit_date->ymd
+  - if ( $user->update_date ) {
+    %strong= $user->update_date->ymd
     %span 방문
   - }
   %div
@@ -2641,28 +2641,6 @@ __DATA__
     %span.label= $user->length
     %span.label= $user->height
     %span.label= $user->weight
-
-
-@@ guests/breadcrumb/radio.html.haml
-%label.radio.inline
-  %input{:type => 'radio', :name => 'gid', :value => '#{$user->id}'}
-  %a{:href => '/guests/#{$user->id}'}= $user->name
-  님
-  - if ( $user->user_info->visit_date ) {
-    %strong= $user->user_info->visit_date->ymd
-    %span 방문
-  - }
-%div
-  %i.icon-envelope
-  %a{:href => "mailto:#{$user->email}"}= $user->email
-%div.muted= $user->user_info->phone
-%div
-  %span.label.label-info= $user->user_info->bust
-  %span.label.label-info= $user->user_info->waist
-  %span.label.label-info= $user->user_info->arm
-  %span.label= $user->user_info->leg
-  %span.label= $user->user_info->height
-  %span.label= $user->user_info->weight
 
 
 @@ donors/breadcrumb/radio.html.haml
@@ -3041,8 +3019,27 @@ __DATA__
       %span 합니다.
     .span4
       %ul
-        - for my $u (@$users) {
-          %li= include 'guests/breadcrumb/radio', user => $u
+        - for my $user (@$users) {
+          %li
+            %label.radio.inline
+              %input{:type => 'radio', :name => 'gid', :value => '#{$user->id}'}
+              %a{:href => '/guests/#{$user->id}'}= $user->name
+              님
+              - if ( $user->update_date ) {
+                %strong= $user->update_date->ymd
+                %span 방문
+              - }
+            %div
+              %i.icon-envelope
+              %a{:href => "mailto:#{$user->email}"}= $user->email
+            %div.muted= $user->user_info->phone
+            %div
+              %span.label.label-info= $user->user_info->bust
+              %span.label.label-info= $user->user_info->waist
+              %span.label.label-info= $user->user_info->arm
+              %span.label= $user->user_info->leg
+              %span.label= $user->user_info->height
+              %span.label= $user->user_info->weight
         - }
 
 :plain

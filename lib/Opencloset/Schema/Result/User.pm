@@ -66,6 +66,14 @@ first 40 length for digest, after 10 length for salt(random)
   is_nullable: 1
   set_on_create: 1
 
+=head2 update_date
+
+  data_type: 'datetime'
+  datetime_undef_if_invalid: 1
+  inflate_datetime: 1
+  is_nullable: 1
+  set_on_update: 1
+
 =cut
 
 __PACKAGE__->add_columns(
@@ -97,6 +105,14 @@ __PACKAGE__->add_columns(
     inflate_datetime => 1,
     is_nullable => 1,
     set_on_create => 1,
+  },
+  "update_date",
+  {
+    data_type => "datetime",
+    datetime_undef_if_invalid => 1,
+    inflate_datetime => 1,
+    is_nullable => 1,
+    set_on_update => 1,
   },
 );
 
@@ -204,8 +220,8 @@ __PACKAGE__->might_have(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07038 @ 2013-11-29 20:22:55
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:fW7DSOTGRAiwwZndxEkWcw
+# Created by DBIx::Class::Schema::Loader v0.07038 @ 2013-12-16 18:16:39
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:Pe0LM3fp//bSYADD6NDY5g
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

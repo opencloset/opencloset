@@ -15,6 +15,7 @@ CREATE TABLE `user` (
   `email`       VARCHAR(128) DEFAULT NULL,
   `password`    CHAR(50)     DEFAULT NULL COMMENT 'first 40 length for digest, after 10 length for salt(random)',
   `create_date` DATETIME     DEFAULT NULL,
+  `update_date` DATETIME     DEFAULT NULL,
 
   PRIMARY KEY (`id`),
   UNIQUE  KEY (`email`)
@@ -58,6 +59,12 @@ CREATE TABLE `user_info` (
   UNIQUE KEY (`phone`),
   CONSTRAINT `fk_guest1` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+INSERT
+  INTO `user_info` ( `id`, `user_id`, `phone`, `address`, `gender`, `birth`, `comment` )
+  VALUES
+    ( 1, 1, '07075837521', '서울특별시 광진구 화양동 48-3 웅진빌딩 403호', 'male', 2012, '열린옷장' )
+    ;
 
 --
 -- status
