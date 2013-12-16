@@ -2414,11 +2414,11 @@ __DATA__
                     .col-xs-12.col-sm-9
                       %div
                         %label.blue
-                          %input.ace.valid{ :type => 'radio', :name => 'gender', :value => '1' }
+                          %input.ace.valid{ :type => 'radio', :name => 'gender', :value => 'male' }
                           %span.lbl= " 남자"
                       %div
                         %label.blue
-                          %input.ace.valid{ :type => 'radio', :name => 'gender', :value => '2' }
+                          %input.ace.valid{ :type => 'radio', :name => 'gender', :value => 'female' }
                           %span.lbl= " 여자"
 
                   /
