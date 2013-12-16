@@ -1,7 +1,6 @@
 $ ->
   ## Global variable
   userID  = undefined
-  guestID = undefined
 
   ## main
   $('#input-phone').ForceNumericOnly()
@@ -29,8 +28,7 @@ $ ->
       complete: (jqXHR, textStatus) ->
 
   $('#user-search-list').on 'click', ':radio', (e) ->
-    userID  = $(@).data('user-id')
-    guestID = $(@).data('guest-id')
+    userID = $(@).data('user-id')
     return if $(@).val() is '0'
     g = JSON.parse($(@).attr('data-json'))
     _.each ['name','email','gender','phone','birth',
@@ -78,15 +76,19 @@ $ ->
       if info.step is 1 && validation
         return false unless $('#validation-form').valid()
 
+      # "다음"으로 움직일 때만 Ajax 호출을 수행하고
+      # "이전"으로 움직일 때는 아무 동작도 수행하지 않습니다.
+      return true unless info.direction is 'next'
+
       ajax = {}
       switch info.step
         when 2
-          ajax.type = 'POST'
-          ajax.path = '/users.json'
-
           if userID
             ajax.type = 'PUT'
-            ajax.path = "/users/#{userID}.json"
+            ajax.path = "/api/user/#{userID}.json"
+          else
+            ajax.type = 'POST'
+            ajax.path = '/api/user.json'
 
           $.ajax ajax.path,
             type: ajax.type
@@ -98,20 +100,19 @@ $ ->
               alert('error', jqXHR.responseJSON.error)
               return false
             complete: (jqXHR, textStatus) ->
-        when 4
-          if guestID
+        when 3
+          if userID
             ajax.type = 'PUT'
-            ajax.path = "/guests/#{guestID}.json"
+            ajax.path = "/api/user/#{userID}.json"
           else
             ajax.type = 'POST'
-            ajax.path = "/guests.json?user_id=#{userID}"
+            ajax.path = '/api/user.json'
 
           $.ajax ajax.path,
             type: ajax.type
             data: $('form').serialize()
             success: (data, textStatus, jqXHR) ->
-              userID  = data.user_id
-              guestID = data.id
+              userID = data.id
               return true
             error: (jqXHR, textStatus, errorThrown) ->
               alert('error', jqXHR.responseJSON.error)
@@ -123,7 +124,7 @@ $ ->
       e.preventDefault()
       bust  = $("input[name=bust]").val()
       waist = $("input[name=waist]").val()
-      location.href = "/search?q=#{parseInt(bust) + 3}/#{waist}//1/&gid=#{guestID}"
+      location.href = "/search?q=#{parseInt(bust) + 3}/#{waist}//1/&gid=#{userID}"
       false
     .on 'stepclick', (e) ->
 
