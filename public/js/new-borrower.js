@@ -42,7 +42,7 @@
         return;
       }
       g = JSON.parse($(this).attr('data-json'));
-      return _.each(['name', 'email', 'gender', 'phone', 'age', 'address', 'height', 'weight', 'purpose', 'bust', 'waist', 'arm', 'length', 'domain'], function(name) {
+      return _.each(['name', 'email', 'gender', 'phone', 'birth', 'address', 'height', 'weight', 'purpose', 'bust', 'waist', 'arm', 'length', 'domain'], function(name) {
         var $input;
         $input = $("input[name=" + name + "]");
         if ($input.attr('type') === 'radio' || $input.attr('type') === 'checkbox') {
@@ -169,7 +169,7 @@
       e = $.Event('keydown', {
         keyCode: 13
       });
-      return why.next().val(text).trigger(e);
+      return $('input#purpose').next().val(text).trigger(e);
     });
   });
 

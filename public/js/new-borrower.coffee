@@ -33,7 +33,7 @@ $ ->
     guestID = $(@).data('guest-id')
     return if $(@).val() is '0'
     g = JSON.parse($(@).attr('data-json'))
-    _.each ['name','email','gender','phone','age',
+    _.each ['name','email','gender','phone','birth',
             'address','height','weight','purpose',
             'bust','waist','arm','length','domain'], (name) ->
       $input = $("input[name=#{name}]")
@@ -146,4 +146,4 @@ $ ->
   $('.user-why .clickable.label').click ->
     text = $(@).text()
     e = $.Event('keydown', { keyCode: 13 })
-    why.next().val(text).trigger(e)
+    $('input#purpose').next().val(text).trigger(e)
