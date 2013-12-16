@@ -1437,7 +1437,7 @@ post '/guests' => sub {
     );
 };
 
-get '/guests/:id' => sub {
+get '/user/:id' => sub {
     my $self = shift;
 
     my $user = $DB->resultset('User')->find({ id => $self->param('id') });
@@ -1458,9 +1458,9 @@ get '/guests/:id' => sub {
 
     $self->respond_to(
         json => { json     => \%data      },
-        html => { template => 'guests/id' },
+        html => { template => 'user/id' },
     );
-};
+} => 'user/id';
 
 any [qw/put patch/] => '/guests/:id' => sub {
     my $self  = shift;
@@ -2574,7 +2574,10 @@ __DATA__
                 %i.icon-arrow-right.icon-on-right
 
 
-@@ guests/status.html.haml
+@@ user/id.html.haml
+- layout 'default';
+- title $user->name . '님';
+
 %ul
   %li
     %i.icon-user
@@ -2591,12 +2594,6 @@ __DATA__
     %span #{$user->user_info->height} cm,
     %span #{$user->user_info->weight} kg
 
-
-@@ guests/id.html.haml
-- layout 'default';
-- title $user->name . '님';
-
-%div= include 'guests/status',     user => $user
 %div= include 'guests/breadcrumb', user => $user, status_id => 1;
 %h3 주문내역
 %ul
@@ -3023,7 +3020,7 @@ __DATA__
           %li
             %label.radio.inline
               %input{:type => 'radio', :name => 'gid', :value => '#{$user->id}'}
-              %a{:href => '/guests/#{$user->id}'}= $user->name
+              %a{:href => '/user/#{$user->id}'}= $user->name
               님
               - if ( $user->update_date ) {
                 %strong= $user->update_date->ymd
