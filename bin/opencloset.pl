@@ -2398,13 +2398,13 @@ __DATA__
                         %input#name.valid.col-xs-12.col-sm-6{ :name => 'name', :type => 'text' }
 
                   /
-                  / 나이
+                  / 태어난 해
                   /
                   .form-group.has-info
-                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'age' } 나이:
+                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'birth' } 태어난 해:
                     .col-xs-12.col-sm-9
                       .clearfix
-                        %input#age.valid.col-xs-12.col-sm-6{ :name => 'age', :type => 'text' }
+                        %input#birth.valid.col-xs-12.col-sm-6{ :name => 'birth', :type => 'text' }
 
                   /
                   / 성별
