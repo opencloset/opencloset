@@ -49,6 +49,7 @@ my $conf = eval path($conf_file)->slurp_utf8;
                 when ('update_date') {
                     return +{
                         %$col_info,
+                        set_on_create    => 1,
                         set_on_update    => 1,
                         inflate_datetime => 1,
                     };
