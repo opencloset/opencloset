@@ -47,6 +47,7 @@
 .page-content #user-table table th:nth-child(2) { width: 80px; }
 .page-content #user-table table th:nth-child(3) { width: 180px; }
 .page-content #user-table table th:nth-child(4) { width: 100px; }
+.page-content #user-table table td { vertical-align: middle; }
 .page-content #user-table table td:nth-child(3) [class^="icon-"], .page-content #user-table table td:nth-child(3) [class*=" icon-"] { width: 1.2em; }
 .page-content #new-borrower form .input-group { width: inherit; }
 .page-content #new-borrower form .tags { width: 100%; }
