@@ -3029,8 +3029,10 @@ __DATA__
 
 .space-8
 
-#clothes-table
-  %form#order-form{:method => 'post', :action => '/orders'}
+%form#order-form{:method => 'post', :action => '/orders'}
+  #clothes-table
+    %h2 대여할 옷을 선택해 주세요.
+    .space-4
     %table.table.table-striped.table-bordered.table-hover
       %thead
         %tr
@@ -3047,30 +3049,47 @@ __DATA__
       %span 선택한 항목을
       %button.btn.btn-mini{:type => 'button', :data-status => '대여'} 대여
       %span 합니다.
-    .span4
-      %ul
+
+  .space-8
+
+  #user-table
+    %h2 대여할 사용자를 선택해 주세요.
+    .space-4
+    %table.table.table-striped.table-bordered.table-hover
+      %thead
+        %tr
+          %th
+          %th 이름
+          %th 연락처
+          %th 방문일
+          %th 사이즈
+      %tbody
         - for my $user (@$users) {
-          %li
-            %label.radio.inline
-              %input{:type => 'radio', :name => 'gid', :value => '#{$user->id}'}
+          %tr
+            %td.center
+              %label
+                %input.ace{ :type => 'radio', :name => 'user_id', :value => '#{$user->id}' }
+                %span.lbl
+            %td
               %a{:href => '/user/#{$user->id}'}= $user->name
-              님
-              - if ( $user->update_date ) {
-                %strong= $user->update_date->ymd
-                %span 방문
-              - }
-            %div
+            %td
               %i.icon-envelope
               %a{:href => "mailto:#{$user->email}"}= $user->email
-            %div.muted= $user->user_info->phone
-            %div
-              %span.label.label-info= $user->user_info->bust
-              %span.label.label-info= $user->user_info->waist
-              %span.label.label-info= $user->user_info->arm
-              %span.label= $user->user_info->leg
-              %span.label= $user->user_info->height
-              %span.label= $user->user_info->weight
+              %br
+              %i.icon-phone
+              = $user->user_info->phone
+            %td
+              %strong= $user->update_date ? $user->update_date->ymd : q{}
+            %td
+              %div
+                %span.label.label-info= $user->user_info->bust
+                %span.label.label-info= $user->user_info->waist
+                %span.label.label-info= $user->user_info->arm
+                %span.label= $user->user_info->leg
+                %span.label= $user->user_info->height
+                %span.label= $user->user_info->weight
         - }
+
 
 :plain
   <script id="tpl-row-checkbox-disabled" type="text/html">

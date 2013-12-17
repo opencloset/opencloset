@@ -106,6 +106,21 @@
 }
 
 .page-content {
+    h1, h2, h3 {
+        color: #2679B5;
+        font-weight: lighter;
+        margin: 0 8px;
+        padding: 0;
+    }
+    h1 {
+        font-size: 24px;
+    }
+    h2 {
+        font-size: 20px;
+    }
+    h3 {
+        font-size: 16px;
+    }
     .search {
         width: 400px;
     }
@@ -132,6 +147,29 @@
         }
         &:nth-child(4), &:nth-child(5) {
             width: 80px;
+        }
+    }
+    #user-table table {
+        th {
+            &:first-child {
+                width: 50px;
+            }
+            &:nth-child(2) {
+                width: 80px;
+            }
+            &:nth-child(3) {
+                width: 180px;
+            }
+            &:nth-child(4) {
+                width: 100px;
+            }
+        }
+        td {
+            &:nth-child(3) {
+                [class^="icon-"], [class*=" icon-"] {
+                    width: 1.2em;
+                }
+            }
         }
     }
     #new-borrower {

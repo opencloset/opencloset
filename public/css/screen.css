@@ -31,6 +31,10 @@
 .ace-thumbnails > li .satisfaction ul { margin-left: 5px; }
 .ace-thumbnails > li .satisfaction li { list-style-type: none; }
 
+.page-content h1, .page-content h2, .page-content h3 { color: #2679B5; font-weight: lighter; margin: 0 8px; padding: 0; }
+.page-content h1 { font-size: 24px; }
+.page-content h2 { font-size: 20px; }
+.page-content h3 { font-size: 16px; }
 .page-content .search { width: 400px; }
 .page-content #clothes-table table th:first-child { width: 50px; }
 .page-content #clothes-table table th:nth-child(2) { width: 80px; }
@@ -39,6 +43,11 @@
 .page-content #order-table table th:nth-child(2) { width: 160px; }
 .page-content #order-table table th:nth-child(3) { width: 200px; }
 .page-content #order-table table th:nth-child(4), .page-content #order-table table th:nth-child(5) { width: 80px; }
+.page-content #user-table table th:first-child { width: 50px; }
+.page-content #user-table table th:nth-child(2) { width: 80px; }
+.page-content #user-table table th:nth-child(3) { width: 180px; }
+.page-content #user-table table th:nth-child(4) { width: 100px; }
+.page-content #user-table table td:nth-child(3) [class^="icon-"], .page-content #user-table table td:nth-child(3) [class*=" icon-"] { width: 1.2em; }
 .page-content #new-borrower form .input-group { width: inherit; }
 .page-content #new-borrower form .tags { width: 100%; }
 .page-content #new-cloth form .input-group { width: inherit; }
