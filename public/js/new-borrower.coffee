@@ -58,6 +58,7 @@ $ ->
 
   $('#user-search').keypress (e) -> add_registered_user() if e.keyCode is 13
   $('#btn-user-search').click -> add_registered_user()
+  add_registered_user()
 
   #
   #

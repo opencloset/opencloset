@@ -62,6 +62,7 @@
     $('#btn-user-search').click(function() {
       return add_registered_user();
     });
+    add_registered_user();
     $('#input-target-date').datepicker({
       startDate: "-0d",
       language: 'kr',
