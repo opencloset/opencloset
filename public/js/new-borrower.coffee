@@ -31,9 +31,24 @@ $ ->
     userID = $(@).data('user-id')
     return if $(@).val() is '0'
     g = JSON.parse($(@).attr('data-json'))
-    _.each ['name','email','gender','phone','birth',
-            'address','height','weight','purpose',
-            'bust','waist','arm','length','domain'], (name) ->
+    _.each [
+      'name',
+      'email',
+      'phone',
+      'address',
+      'gender',
+      'birth',
+      'height',
+      'weight',
+      'bust',
+      'waist',
+      'hip',
+      'thigh',
+      'arm',
+      'leg',
+      'knee',
+      'foot',
+    ], (name) ->
       $input = $("input[name=#{name}]")
       if $input.attr('type') is 'radio' or $input.attr('type') is 'checkbox'
         $input.each (i, el) ->

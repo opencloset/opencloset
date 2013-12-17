@@ -2536,6 +2536,17 @@ __DATA__
                           %i cm
 
                   /
+                  / 허벅지
+                  /
+                  .form-group.has-info
+                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'thigh' } 허벅지:
+                    .col-xs-12.col-sm-5
+                      .input-group
+                        %input#thigh.form-control.valid.col-xs-12.col-sm-6{ :name => 'thigh', :type => 'text' }
+                        %span.input-group-addon
+                          %i cm
+
+                  /
                   / 팔 길이
                   /
                   .form-group.has-info
@@ -2550,12 +2561,34 @@ __DATA__
                   / 다리 길이
                   /
                   .form-group.has-info
-                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'length' } 다리 길이:
+                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'leg' } 다리 길이:
                     .col-xs-12.col-sm-5
                       .input-group
-                        %input#length.form-control.valid.col-xs-12.col-sm-6{ :name => 'length', :type => 'text' }
+                        %input#leg.form-control.valid.col-xs-12.col-sm-6{ :name => 'leg', :type => 'text' }
                         %span.input-group-addon
                           %i cm
+
+                  /
+                  / 무릎 길이
+                  /
+                  .form-group.has-info
+                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'knee' } 무릎 길이:
+                    .col-xs-12.col-sm-5
+                      .input-group
+                        %input#knee.form-control.valid.col-xs-12.col-sm-6{ :name => 'knee', :type => 'text' }
+                        %span.input-group-addon
+                          %i cm
+
+                  /
+                  / 발 크기
+                  /
+                  .form-group.has-info
+                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'foot' } 발 크기:
+                    .col-xs-12.col-sm-5
+                      .input-group
+                        %input#foot.form-control.valid.col-xs-12.col-sm-6{ :name => 'foot', :type => 'text' }
+                        %span.input-group-addon
+                          %i mm
 
               /
               / step4

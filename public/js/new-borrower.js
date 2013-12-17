@@ -40,7 +40,7 @@
         return;
       }
       g = JSON.parse($(this).attr('data-json'));
-      return _.each(['name', 'email', 'gender', 'phone', 'birth', 'address', 'height', 'weight', 'purpose', 'bust', 'waist', 'arm', 'length', 'domain'], function(name) {
+      return _.each(['name', 'email', 'phone', 'address', 'gender', 'birth', 'height', 'weight', 'bust', 'waist', 'hip', 'thigh', 'arm', 'leg', 'knee', 'foot'], function(name) {
         var $input;
         $input = $("input[name=" + name + "]");
         if ($input.attr('type') === 'radio' || $input.attr('type') === 'checkbox') {
