@@ -1,3 +1,40 @@
+$opencloset-yellow:        #ffc80f;
+$opencloset-darken-yellow: desaturate(darken($opencloset-yellow, 4%), 10%);
+
+.navbar {
+    background: $opencloset-yellow;
+    .navbar-brand {
+        color: #000000;
+    }
+}
+
+.ace-nav {
+    > li {
+        $colorList:
+            "opencloset-yellow"        $opencloset-yellow,
+            "opencloset-darken-yellow" $opencloset-darken-yellow
+        ;
+        @each $i in $colorList {
+            &.#{ nth($i,1) } > a {
+                background-color: nth($i,2);
+                color: #000;
+                &:hover, &:focus {
+                    background-color: desaturate(darken(nth($i,2), 4%), 4%);
+                }
+                i {
+                    color: #000;
+                }
+            }
+            &.open.#{ nth($i,1) } > a {
+                background-color: desaturate(darken(nth($i,2), 4%), 4%) !important;
+            }
+        }
+        &.open > a {
+            color:#000 !important;
+        }
+    }
+}
+
 .clickable {
     cursor: pointer;
 }

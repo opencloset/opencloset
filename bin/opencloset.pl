@@ -4244,7 +4244,7 @@ __DATA__
                   </ul>
                 </li> <!-- green -->
 
-                <li class="light-blue">
+                <li class="opencloset-darken-yellow">
                   <a data-toggle="dropdown" href="#" class="dropdown-toggle">
                     <img class="nav-user-photo" src="https://pbs.twimg.com/profile_images/1814758551/keedi_bigger.jpg" alt="Keedi's Photo" />
                     <span class="user-info"> <small>Welcome,</small> Keedi </span>
@@ -4257,7 +4257,7 @@ __DATA__
                     <li class="divider"></li>
                     <li> <a href="#"> <i class="icon-off"></i> 로그아웃 </a> </li>
                   </ul>
-                </li> <!-- light-blue -->
+                </li> <!-- opencloset-darken-yellow -->
 
           </ul><!-- /.<%= $theme %>-nav -->
         </div><!-- /.navbar-header -->
