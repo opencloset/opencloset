@@ -3002,15 +3002,10 @@ __DATA__
 -   ];
 - title $meta->{$id}{text};
 
-.pull-right
-  %form.form-search{:method => 'get', :action => ''}
-    %input.input-medium.search-query{:type => 'text', :id => 'search-query', :name => 'q', :placeholder => '이메일, 이름 또는 휴대폰번호'}
-    %button.btn{:type => 'submit'} 검색
-
 .search
   %form#clothes-search-form
     .input-group
-      %input#clothes-id.form-control{ :type => 'text', :placeholder => '품번' }
+      %input#clothes-id.form-control{ :type => 'text', :placeholder => '품번/이메일/이름/휴대전화' }
       %span.input-group-btn
         %button#btn-clothes-search.btn.btn-sm.btn-default{ :type => 'button' }
           %i.icon-search.bigger-110 검색
