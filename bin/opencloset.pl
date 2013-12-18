@@ -1812,13 +1812,8 @@ get '/rental' => sub {
     my $today     = DateTime->today( time_zone => 'Asia/Seoul' );
     my $dt_parser = $DB->storage->datetime_parser;
     push @users, $DB->resultset('User')->search(
-        {
-            -or => [
-                create_date => { '>=' => $dt_parser->format_datetime($today) },
-                update_date => { '>=' => $dt_parser->format_datetime($today) },
-            ],
-        },
-        { order_by => { -desc => 'create_date' } },
+        { update_date => { '>=' => $dt_parser->format_datetime($today) } },
+        { order_by    => { -desc => 'update_date' } },
     );
 
     $self->stash( users => \@users );
