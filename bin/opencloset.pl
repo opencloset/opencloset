@@ -1790,11 +1790,6 @@ get '/search' => sub {
 get '/rental' => sub {
     my $self = shift;
 
-    my $today = DateTime->now;
-    $today->set_hour(0);
-    $today->set_minute(0);
-    $today->set_second(0);
-
     my $q     = $self->param('q');
     my @users = $DB->resultset('User')->search(
         {
@@ -1814,6 +1809,7 @@ get '/rental' => sub {
     ### To disable this warning for good set $ENV{DBIC_DT_SEARCH_OK} to true
     ###
     ### DateTime object 를 search 에 바로 사용하지 말고 parser 를 이용하라능 - @aanoaa
+    my $today     = DateTime->today( time_zone => 'Asia/Seoul' );
     my $dt_parser = $DB->storage->datetime_parser;
     push @users, $DB->resultset('User')->search(
         {
