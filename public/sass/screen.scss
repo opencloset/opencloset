@@ -217,6 +217,18 @@ $opencloset-darken-yellow: desaturate(darken($opencloset-yellow, 4%), 10%);
         }
     }
     #user-table table {
+        th, td {
+            &:nth-child(5) {
+                border-right: none;
+            }
+            &:nth-child(6) {
+                border-right: none;
+                border-left: none;
+            }
+            &:nth-child(7) {
+                border-left: none;
+            }
+        }
         th {
             &:first-child {
                 width: 50px;
