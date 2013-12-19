@@ -3003,11 +3003,11 @@ __DATA__
 - title $meta->{$id}{text};
 
 .search
-  %form#clothes-search-form
+  %form#search-form
     .input-group
-      %input#clothes-id.form-control{ :type => 'text', :placeholder => '품번/이메일/이름/휴대전화' }
+      %input#query.form-control{ :type => 'text', :placeholder => '의류코드/이메일/이름/휴대전화' }
       %span.input-group-btn
-        %button#btn-clothes-search.btn.btn-sm.btn-default{ :type => 'button' }
+        %button#btn-search.btn.btn-sm.btn-default{ :type => 'button' }
           %i.icon-search.bigger-110 검색
       %span.input-group-btn
         %button#btn-clear.btn.btn.btn-sm.btn-default{:type => 'button'}
@@ -3028,6 +3028,8 @@ __DATA__
               %span.lbl
           %th 옷
           %th 상태
+          %th 종류
+          %th 대여 가격
           %th 기타
       %tbody
     %ul
@@ -3079,7 +3081,7 @@ __DATA__
 
 :plain
   <script id="tpl-row-checkbox-disabled" type="text/html">
-    <tr data-clothes-id="<%= id %>" data-order-id="<%= order_id %>">
+    <tr data-clothes-code="<%= code %>" data-order-id="<%= order.id %>">
       <td class="center">
         <label>
           <input class="ace" type="checkbox" disabled>
@@ -3090,17 +3092,21 @@ __DATA__
       <td>
         <span class="order-status label">
           <%= status %>
-          <span class="late-fee"><%= late_fee ? late_fee + '원' : '' %></span>
+          <span class="late-fee"><%= order.late_fee ? order.late_fee + '원' : '' %></span>
         </span>
       </td> <!-- 상태 -->
       <td>
-        <span><%= category %></span>
+        <span><%= categoryStr %></span>
+      </td> <!-- 종류 -->
+      <td>
         <span><%= price %>원</span>
-        <a href="/orders/<%= order_id %>"><span class="label label-info arrowed-right arrowed-in">
+      </td> <!-- 대여 가격 -->
+      <td>
+        <a href="/orders/<%= order.id %>"><span class="label label-info arrowed-right arrowed-in">
           <strong>주문서</strong>
-          <time class="js-relative-date" datetime="<%= rental_date.raw %>" title="<%= rental_date.ymd %>"><%= rental_date.md %></time>
+          <time class="js-relative-date" datetime="<%= order.rental_date.raw %>" title="<%= order.rental_date.ymd %>"><%= order.rental_date.md %></time>
           ~
-          <time class="js-relative-date" datetime="<%= target_date.raw %>" title="<%= target_date.ymd %>"><%= target_date.md %></time>
+          <time class="js-relative-date" datetime="<%= order.target_date.raw %>" title="<%= order.target_date.ymd %>"><%= order.target_date.md %></time>
         </span></a>
       </td> <!-- 기타 -->
     </tr>
@@ -3108,18 +3114,22 @@ __DATA__
 
 :plain
   <script id="tpl-row-checkbox-enabled" type="text/html">
-    <tr class="row-checkbox" data-clothes-id="<%= id %>">
+    <tr class="row-checkbox" data-clothes-code="<%= code %>">
       <td class="center">
         <label>
-          <input class="ace" type="checkbox" name="clothes-id" value="<%= id %>" data-clothes-id="<%= id %>" checked="checked">
+          <input class="ace" type="checkbox" name="clothes-code" value="<%= id %>" data-clothes-code="<%= id %>" checked="checked">
           <span class="lbl"></span>
         </label>
       </td>
       <td> <a href="/clothes/<%= code %>"> <%= code %> </a> </td> <!-- 옷 -->
       <td> <span class="order-status label"><%= status %></span> </td> <!-- 상태 -->
       <td>
-        <span><%= category %></span>
+        <span><%= categoryStr %></span>
+      </td> <!-- 종류 -->
+      <td>
         <span><%= price %>원</span>
+      </td> <!-- 대여 가격 -->
+      <td>
       </td> <!-- 기타 -->
     </tr>
   </script>
