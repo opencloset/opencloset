@@ -2,7 +2,8 @@ $ ->
   $('#query').focus()
   $('#btn-clear').click (e) ->
     e.preventDefault()
-    $('#clothes-list ul li').remove()
+    $('#clothes-table table tbody tr').remove()
+    $('#user-table table tbody tr').remove()
     $('#action-buttons').hide()
     $('#query').focus()
   $('#btn-search').click (e) ->

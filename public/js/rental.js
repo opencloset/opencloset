@@ -4,7 +4,8 @@
     $('#query').focus();
     $('#btn-clear').click(function(e) {
       e.preventDefault();
-      $('#clothes-list ul li').remove();
+      $('#clothes-table table tbody tr').remove();
+      $('#user-table table tbody tr').remove();
       $('#action-buttons').hide();
       return $('#query').focus();
     });
