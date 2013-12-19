@@ -24,7 +24,7 @@
           type: 'GET',
           dataType: 'json',
           success: function(data, textStatus, jqXHR) {
-            var $html, compiled;
+            var $html, compiled, html;
             data.code = data.code.replace(/^0/, '');
             data.categoryStr = OpenCloset.getCategoryStr(data.category);
             if (data.status === '대여중') {
@@ -33,6 +33,11 @@
               }
               compiled = _.template($('#tpl-row-checkbox-disabled').html());
               $html = $(compiled(data));
+              if (data.order.overdue) {
+                compiled = _.template($('#tpl-overdue-paragraph').html());
+                html = compiled(data);
+                $html.find("td:last-child").append(html);
+              }
             } else {
               if ($("#clothes-table table tbody tr[data-clothes-code='" + data.code + "']").length) {
                 return;

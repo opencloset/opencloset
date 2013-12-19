@@ -3112,6 +3112,13 @@ __DATA__
   </script>
 
 :plain
+  <script id="tpl-overdue-paragraph" type="text/html">
+    <span>
+      연체료 <%= order.late_fee %>원 = <%= order.price %>원 x <%= order.overdue %>일 x 20%
+    </span>
+  </script>
+
+:plain
   <script id="tpl-row-radio" type="text/html">
     <tr data-user-id="<%= id %>">
       <td class="center">

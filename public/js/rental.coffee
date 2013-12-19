@@ -31,10 +31,10 @@ $ ->
             return if $("#clothes-table table tbody tr[data-order-id='#{data.order.id}']").length
             compiled = _.template($('#tpl-row-checkbox-disabled').html())
             $html = $(compiled(data))
-            #if data.order.overdue
-            #  compiled = _.template($('#tpl-overdue-paragraph').html())
-            #  html     = compiled(data)
-            #  $html.find("td:last-child").append(html)
+            if data.order.overdue
+              compiled = _.template($('#tpl-overdue-paragraph').html())
+              html     = compiled(data)
+              $html.find("td:last-child").append(html)
           else
             return if $("#clothes-table table tbody tr[data-clothes-code='#{data.code}']").length
             compiled = _.template($('#tpl-row-checkbox-enabled').html())
