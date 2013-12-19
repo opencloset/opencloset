@@ -3890,7 +3890,7 @@ __DATA__
                 %small
                   %i.icon-double-angle-right
                   = $sidebar->{meta}{$active_id}{desc} // q{}
-            .row
+            .row{ :id => "#{$active_id}" }
               .col-xs-12
                 / PAGE CONTENT BEGINS
                 = content
