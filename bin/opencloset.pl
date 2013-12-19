@@ -3052,7 +3052,9 @@ __DATA__
           %th 방문일
           %th
             %span.label.label-success 키 / 몸무게
+          %th
             %span.label.label-info    가슴 / 허리 / 엉덩이
+          %th
             %span.label.label-warning 허벅지 / 팔 / 다리 / 무릎 / 발
       %tbody
 
@@ -3144,9 +3146,17 @@ __DATA__
         <div>
           <span class="label label-success"> <%= height || 0 %> </span>
           <span class="label label-success"> <%= weight || 0 %> </span>
+        </div>
+      </td>
+      <td>
+        <div>
           <span class="label label-info">    <%= bust   || 0 %> </span>
           <span class="label label-info">    <%= waist  || 0 %> </span>
           <span class="label label-info">    <%= hip    || 0 %> </span>
+        </div>
+      </td>
+      <td>
+        <div>
           <span class="label label-warning"> <%= thigh  || 0 %> </span>
           <span class="label label-warning"> <%= arm    || 0 %> </span>
           <span class="label label-warning"> <%= leg    || 0 %> </span>
