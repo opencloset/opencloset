@@ -2193,7 +2193,6 @@ __DATA__
         %th 묶음
         %th 기타
     %tbody
-  %ul
   #action-buttons.btn-group
     %button.btn.btn-primary.dropdown-toggle{ 'data-toggle' => 'dropdown' }
       선택한 항목을 변경할 상태를 선택하세요.
