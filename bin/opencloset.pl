@@ -3031,10 +3031,7 @@ __DATA__
           %th 대여 가격
           %th 기타
       %tbody
-    #action-buttons{:style => 'display: none'}
-      %span 선택한 항목을
-      %button.btn.btn-mini{:type => 'button', :data-status => '대여'} 대여
-      %span 합니다.
+    %button#action-buttons.btn.btn-sm.btn-primary{ :style => 'display: none;' } 선택한 항목을 대여합니다.
 
   .space-8
 
