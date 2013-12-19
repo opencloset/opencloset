@@ -1812,13 +1812,8 @@ get '/rental' => sub {
     my $today     = DateTime->today( time_zone => 'Asia/Seoul' );
     my $dt_parser = $DB->storage->datetime_parser;
     push @users, $DB->resultset('User')->search(
-        {
-            -or => [
-                create_date => { '>=' => $dt_parser->format_datetime($today) },
-                update_date => { '>=' => $dt_parser->format_datetime($today) },
-            ],
-        },
-        { order_by => { -desc => 'create_date' } },
+        { update_date => { '>=' => $dt_parser->format_datetime($today) } },
+        { order_by    => { -desc => 'update_date' } },
     );
 
     $self->stash( users => \@users );
@@ -2198,7 +2193,6 @@ __DATA__
         %th 묶음
         %th 기타
     %tbody
-  %ul
   #action-buttons.btn-group
     %button.btn.btn-primary.dropdown-toggle{ 'data-toggle' => 'dropdown' }
       선택한 항목을 변경할 상태를 선택하세요.
@@ -3007,17 +3001,12 @@ __DATA__
 -   ];
 - title $meta->{$id}{text};
 
-.pull-right
-  %form.form-search{:method => 'get', :action => ''}
-    %input.input-medium.search-query{:type => 'text', :id => 'search-query', :name => 'q', :placeholder => '이메일, 이름 또는 휴대폰번호'}
-    %button.btn{:type => 'submit'} 검색
-
 .search
-  %form#clothes-search-form
+  %form#search-form
     .input-group
-      %input#clothes-id.form-control{ :type => 'text', :placeholder => '품번' }
+      %input#query.form-control{ :type => 'text', :placeholder => '의류코드/이메일/이름/휴대전화' }
       %span.input-group-btn
-        %button#btn-clothes-search.btn.btn-sm.btn-default{ :type => 'button' }
+        %button#btn-search.btn.btn-sm.btn-default{ :type => 'button' }
           %i.icon-search.bigger-110 검색
       %span.input-group-btn
         %button#btn-clear.btn.btn.btn-sm.btn-default{:type => 'button'}
@@ -3038,13 +3027,11 @@ __DATA__
               %span.lbl
           %th 옷
           %th 상태
+          %th 종류
+          %th 대여 가격
           %th 기타
       %tbody
-    %ul
-    #action-buttons{:style => 'display: none'}
-      %span 선택한 항목을
-      %button.btn.btn-mini{:type => 'button', :data-status => '대여'} 대여
-      %span 합니다.
+    %button#action-buttons.btn.btn-sm.btn-primary{ :style => 'display: none;' } 선택한 항목을 대여합니다.
 
   .space-8
 
@@ -3058,38 +3045,17 @@ __DATA__
           %th 이름
           %th 연락처
           %th 방문일
-          %th 사이즈
+          %th
+            %span.label.label-success 키 / 몸무게
+          %th
+            %span.label.label-info    가슴 / 허리 / 엉덩이
+          %th
+            %span.label.label-warning 허벅지 / 팔 / 다리 / 무릎 / 발
       %tbody
-        - for my $user (@$users) {
-          %tr
-            %td.center
-              %label
-                %input.ace{ :type => 'radio', :name => 'user_id', :value => '#{$user->id}' }
-                %span.lbl
-            %td
-              %a{:href => '/user/#{$user->id}'}= $user->name
-            %td
-              %i.icon-envelope
-              %a{:href => "mailto:#{$user->email}"}= $user->email
-              %br
-              %i.icon-phone
-              = $user->user_info->phone
-            %td
-              %strong= $user->update_date ? $user->update_date->ymd : q{}
-            %td
-              %div
-                %span.label.label-info= $user->user_info->bust
-                %span.label.label-info= $user->user_info->waist
-                %span.label.label-info= $user->user_info->arm
-                %span.label= $user->user_info->leg
-                %span.label= $user->user_info->height
-                %span.label= $user->user_info->weight
-        - }
-
 
 :plain
   <script id="tpl-row-checkbox-disabled" type="text/html">
-    <tr data-clothes-id="<%= id %>" data-order-id="<%= order_id %>">
+    <tr data-clothes-code="<%= code %>" data-order-id="<%= order.id %>">
       <td class="center">
         <label>
           <input class="ace" type="checkbox" disabled>
@@ -3100,17 +3066,21 @@ __DATA__
       <td>
         <span class="order-status label">
           <%= status %>
-          <span class="late-fee"><%= late_fee ? late_fee + '원' : '' %></span>
+          <span class="late-fee"><%= order.late_fee ? order.late_fee + '원' : '' %></span>
         </span>
       </td> <!-- 상태 -->
       <td>
-        <span><%= category %></span>
+        <span><%= categoryStr %></span>
+      </td> <!-- 종류 -->
+      <td>
         <span><%= price %>원</span>
-        <a href="/orders/<%= order_id %>"><span class="label label-info arrowed-right arrowed-in">
+      </td> <!-- 대여 가격 -->
+      <td>
+        <a href="/orders/<%= order.id %>"><span class="label label-info arrowed-right arrowed-in">
           <strong>주문서</strong>
-          <time class="js-relative-date" datetime="<%= rental_date.raw %>" title="<%= rental_date.ymd %>"><%= rental_date.md %></time>
+          <time class="js-relative-date" datetime="<%= order.rental_date.raw %>" title="<%= order.rental_date.ymd %>"><%= order.rental_date.md %></time>
           ~
-          <time class="js-relative-date" datetime="<%= target_date.raw %>" title="<%= target_date.ymd %>"><%= target_date.md %></time>
+          <time class="js-relative-date" datetime="<%= order.target_date.raw %>" title="<%= order.target_date.ymd %>"><%= order.target_date.md %></time>
         </span></a>
       </td> <!-- 기타 -->
     </tr>
@@ -3118,19 +3088,77 @@ __DATA__
 
 :plain
   <script id="tpl-row-checkbox-enabled" type="text/html">
-    <tr class="row-checkbox" data-clothes-id="<%= id %>">
+    <tr class="row-checkbox" data-clothes-code="<%= code %>">
       <td class="center">
         <label>
-          <input class="ace" type="checkbox" name="clothes-id" value="<%= id %>" data-clothes-id="<%= id %>" checked="checked">
+          <input class="ace" type="checkbox" name="clothes-code" value="<%= id %>" data-clothes-code="<%= id %>" checked="checked">
           <span class="lbl"></span>
         </label>
       </td>
       <td> <a href="/clothes/<%= code %>"> <%= code %> </a> </td> <!-- 옷 -->
       <td> <span class="order-status label"><%= status %></span> </td> <!-- 상태 -->
       <td>
-        <span><%= category %></span>
+        <span><%= categoryStr %></span>
+      </td> <!-- 종류 -->
+      <td>
         <span><%= price %>원</span>
+      </td> <!-- 대여 가격 -->
+      <td>
       </td> <!-- 기타 -->
+    </tr>
+  </script>
+
+:plain
+  <script id="tpl-overdue-paragraph" type="text/html">
+    <span>
+      연체료 <%= order.late_fee %>원 = <%= order.price %>원 x <%= order.overdue %>일 x 20%
+    </span>
+  </script>
+
+:plain
+  <script id="tpl-row-radio" type="text/html">
+    <tr data-user-id="<%= id %>">
+      <td class="center">
+        <label>
+          <input class="ace" type="radio" name="user_id" value="<%= id %>">
+          <span class="lbl"></span>
+        </label>
+      </td>
+      <td>
+        <a href="/user/<%= id %>"> <%= name %> </a>
+      </td>
+      <td>
+        <i class="icon-envelope"></i>
+        <a href="mailto:<%= email %>"><%= email %></a>
+        <br />
+        <i class="icon-phone"></i>
+        <%= phone %>
+      </td>
+      <td>
+        <strong> <%= update_date ? update_date.substr(0, 10) : '' %> </strong>
+      </td>
+      <td>
+        <div>
+          <span class="label label-success"> <%= height || 0 %> </span>
+          <span class="label label-success"> <%= weight || 0 %> </span>
+        </div>
+      </td>
+      <td>
+        <div>
+          <span class="label label-info">    <%= bust   || 0 %> </span>
+          <span class="label label-info">    <%= waist  || 0 %> </span>
+          <span class="label label-info">    <%= hip    || 0 %> </span>
+        </div>
+      </td>
+      <td>
+        <div>
+          <span class="label label-warning"> <%= thigh  || 0 %> </span>
+          <span class="label label-warning"> <%= arm    || 0 %> </span>
+          <span class="label label-warning"> <%= leg    || 0 %> </span>
+          <span class="label label-warning"> <%= knee   || 0 %> </span>
+          <span class="label label-warning"> <%= foot   || 0 %> </span>
+        </div>
+      </td>
     </tr>
   </script>
 
@@ -3857,7 +3885,7 @@ __DATA__
                 %small
                   %i.icon-double-angle-right
                   = $sidebar->{meta}{$active_id}{desc} // q{}
-            .row
+            .row{ :id => "#{$active_id}" }
               .col-xs-12
                 / PAGE CONTENT BEGINS
                 = content

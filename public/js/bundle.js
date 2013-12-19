@@ -19,11 +19,177 @@
         return $(el).addClass('active');
       }
     });
-    return $('.sidebar li').each(function(i, el) {
+    $('.sidebar li').each(function(i, el) {
       if ($(el).find('li.active').length > 0) {
         return $(el).addClass('active open');
       }
     });
+    Window.prototype.OpenCloset = {
+      getStatusCss: function(status) {
+        var css;
+        switch (status) {
+          case '대여가능':
+            css = 'label-success';
+            break;
+          case '대여중':
+            css = 'label-important';
+            break;
+          case '대여불가':
+            css = 'label-inverse';
+            break;
+          case '예약':
+            css = 'label-inverse';
+            break;
+          case '세탁':
+            css = 'label-inverse';
+            break;
+          case '수선':
+            css = 'label-inverse';
+            break;
+          case '분실':
+            css = 'label-inverse';
+            break;
+          case '폐기':
+            css = 'label-inverse';
+            break;
+          case '반납':
+            css = 'label-inverse';
+            break;
+          case '부분반납':
+            css = 'label-warning';
+            break;
+          case '반납배송중':
+            css = 'label-warning';
+            break;
+          default:
+            css = '';
+        }
+        return css;
+      },
+      getStatusId: function(status) {
+        var id;
+        switch (status) {
+          case '대여가능':
+            id = 1;
+            break;
+          case '대여중':
+            id = 2;
+            break;
+          case '대여불가':
+            id = 3;
+            break;
+          case '예약':
+            id = 4;
+            break;
+          case '세탁':
+            id = 5;
+            break;
+          case '수선':
+            id = 6;
+            break;
+          case '분실':
+            id = 7;
+            break;
+          case '폐기':
+            id = 8;
+            break;
+          case '반납':
+            id = 9;
+            break;
+          case '부분반납':
+            id = 10;
+            break;
+          case '반납배송중':
+            id = 11;
+            break;
+          default:
+            id = undef;
+        }
+        return id;
+      },
+      getCategoryStr: function(category) {
+        var str;
+        switch (category) {
+          case 'belt':
+            str = '벨트';
+            break;
+          case 'blouse':
+            str = '블라우스';
+            break;
+          case 'coat':
+            str = '코트';
+            break;
+          case 'hat':
+            str = '모자';
+            break;
+          case 'jacket':
+            str = '재킷';
+            break;
+          case 'onepiece':
+            str = '원피스';
+            break;
+          case 'pants':
+            str = '바지';
+            break;
+          case 'shirts':
+            str = '셔츠';
+            break;
+          case 'shoes':
+            str = '신발';
+            break;
+          case 'skirt':
+            str = '치마';
+            break;
+          case 'tie':
+            str = '넥타이';
+            break;
+          case 'waistcoat':
+            str = '조끼';
+            break;
+          default:
+            str = undef;
+        }
+        return str;
+      },
+      getMeasurementStr: function(measurement) {
+        var str;
+        switch (measurement) {
+          case 'height':
+            str = '키';
+            break;
+          case 'weight':
+            str = '몸무게';
+            break;
+          case 'bust':
+            str = '가슴';
+            break;
+          case 'waist':
+            str = '허리';
+            break;
+          case 'hip':
+            str = '엉덩이';
+            break;
+          case 'thigh':
+            str = '허벅지';
+            break;
+          case 'arm':
+            str = '팔 길이';
+            break;
+          case 'leg':
+            str = '다리 길이';
+            break;
+          case 'knee':
+            str = '무릎 길이';
+            break;
+          case 'foot':
+            str = '발 크기';
+            break;
+          default:
+            str = undef;
+        }
+        return str;
+      }
+    };
   });
 
   $.fn.ForceNumericOnly = function() {

@@ -161,15 +161,45 @@ $opencloset-darken-yellow: desaturate(darken($opencloset-yellow, 4%), 10%);
     .search {
         width: 400px;
     }
-    #clothes-table table th {
-        &:first-child {
-            width: 50px;
+    #home {
+        #clothes-table table {
+            th {
+                &:first-child {
+                    width: 50px;
+                }
+                &:nth-child(2) {
+                    width: 80px;
+                }
+                &:nth-child(3) {
+                    width: 160px;
+                }
+            }
         }
-        &:nth-child(2) {
-            width: 80px;
-        }
-        &:nth-child(3) {
-            width: 160px;
+    }
+    #rental {
+        #clothes-table table {
+            th {
+                &:first-child {
+                    width: 50px;
+                }
+                &:nth-child(2) {
+                    width: 80px;
+                }
+                &:nth-child(3) {
+                    width: 160px;
+                }
+                &:nth-child(4) {
+                    width: 80px;
+                }
+                &:nth-child(5) {
+                    width: 80px;
+                }
+            }
+            td {
+                &:nth-child(5) {
+                    text-align: right;
+                }
+            }
         }
     }
     #order-table table th {
@@ -187,6 +217,18 @@ $opencloset-darken-yellow: desaturate(darken($opencloset-yellow, 4%), 10%);
         }
     }
     #user-table table {
+        th, td {
+            &:nth-child(5) {
+                border-right: none;
+            }
+            &:nth-child(6) {
+                border-right: none;
+                border-left: none;
+            }
+            &:nth-child(7) {
+                border-left: none;
+            }
+        }
         th {
             &:first-child {
                 width: 50px;
