@@ -8,38 +8,6 @@ $ ->
   $('#btn-clothes-search').click (e) ->
     $('#clothes-search-form').trigger('submit')
 
-  getStatusCss = (status) ->
-    switch status
-      when '대여가능'   then css = 'label-success'
-      when '대여중'     then css = 'label-important'
-      when '대여불가'   then css = 'label-inverse'
-      when '예약'       then css = 'label-inverse'
-      when '세탁'       then css = 'label-inverse'
-      when '수선'       then css = 'label-inverse'
-      when '분실'       then css = 'label-inverse'
-      when '폐기'       then css = 'label-inverse'
-      when '반납'       then css = 'label-inverse'
-      when '부분반납'   then css = 'label-warning'
-      when '반납배송중' then css = 'label-warning'
-      else                   css = ''
-    return css
-
-  getStatusId = (status) ->
-    switch status
-      when '대여가능'   then id = 1
-      when '대여중'     then id = 2
-      when '대여불가'   then id = 3
-      when '예약'       then id = 4
-      when '세탁'       then id = 5
-      when '수선'       then id = 6
-      when '분실'       then id = 7
-      when '폐기'       then id = 8
-      when '반납'       then id = 9
-      when '부분반납'   then id = 10
-      when '반납배송중' then id = 11
-      else                   id = undef
-    return id
-
   #
   # 옷 검색 후 테이블에 추가
   #
@@ -67,7 +35,7 @@ $ ->
           $html = $(compiled(data))
           $('#action-buttons').show() if data.status is '대여가능'
 
-        $html.find('.order-status').addClass(getStatusCss data.status)
+        $html.find('.order-status').addClass( OpenCloset.getStatusCss data.status )
         $("#clothes-table table tbody").append($html)
       error: (jqXHR, textStatus, errorThrown) ->
         alert('error', jqXHR.responseJSON.error)
@@ -84,7 +52,7 @@ $ ->
     clothes = _.uniq(clothes)
     return unless clothes.length
 
-    status_id = getStatusId( this.innerHTML.replace /^\s+|\s+$/g, "" )
+    status_id = OpenCloset.getStatusId( this.innerHTML.replace /^\s+|\s+$/g, "" )
 
     #
     # 체크한 의류 상태를 변경하는 api 호출
@@ -107,7 +75,7 @@ $ ->
               $("#clothes-table table tbody tr[data-clothes-code='#{code}'] td:nth-child(3) span.order-status")
                 .html(clothes.status)
                 .removeClass( (i, c) -> c )
-                .addClass [ 'order-status', 'label', getStatusCss(clothes.status) ].join(' ')
+                .addClass [ 'order-status', 'label', OpenCloset.getStatusCss(clothes.status) ].join(' ')
           error: (jqXHR, textStatus, errorThrown) ->
             alert('error', jqXHR.responseJSON.error)
       error: (jqXHR, textStatus, errorThrown) ->
