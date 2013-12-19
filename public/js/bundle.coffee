@@ -56,19 +56,33 @@ $ ->
       return id
     getCategoryStr: (category) ->
       switch category
-        when "belt"      then str = "벨트"
-        when "blouse"    then str = "블라우스"
-        when "coat"      then str = "코트"
-        when "hat"       then str = "모자"
-        when "jacket"    then str = "재킷"
-        when "onepiece"  then str = "원피스"
-        when "pants"     then str = "바지"
-        when "shirts"    then str = "셔츠"
-        when "shoes"     then str = "신발"
-        when "skirt"     then str = "치마"
-        when "tie"       then str = "넥타이"
-        when "waistcoat" then str = "조끼"
+        when 'belt'      then str = '벨트'
+        when 'blouse'    then str = '블라우스'
+        when 'coat'      then str = '코트'
+        when 'hat'       then str = '모자'
+        when 'jacket'    then str = '재킷'
+        when 'onepiece'  then str = '원피스'
+        when 'pants'     then str = '바지'
+        when 'shirts'    then str = '셔츠'
+        when 'shoes'     then str = '신발'
+        when 'skirt'     then str = '치마'
+        when 'tie'       then str = '넥타이'
+        when 'waistcoat' then str = '조끼'
         else                  str = undef
+      return str
+    getMeasurementStr: (measurement) ->
+      switch measurement
+        when 'height' then str = '키'
+        when 'weight' then str = '몸무게'
+        when 'bust'   then str = '가슴'
+        when 'waist'  then str = '허리'
+        when 'hip'    then str = '엉덩이'
+        when 'thigh'  then str = '허벅지'
+        when 'arm'    then str = '팔 길이'
+        when 'leg'    then str = '다리 길이'
+        when 'knee'   then str = '무릎 길이'
+        when 'foot'   then str = '발 크기'
+        else               str = undef
       return str
 
   #

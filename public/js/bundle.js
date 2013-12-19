@@ -110,41 +110,79 @@
       getCategoryStr: function(category) {
         var str;
         switch (category) {
-          case "belt":
-            str = "벨트";
+          case 'belt':
+            str = '벨트';
             break;
-          case "blouse":
-            str = "블라우스";
+          case 'blouse':
+            str = '블라우스';
             break;
-          case "coat":
-            str = "코트";
+          case 'coat':
+            str = '코트';
             break;
-          case "hat":
-            str = "모자";
+          case 'hat':
+            str = '모자';
             break;
-          case "jacket":
-            str = "재킷";
+          case 'jacket':
+            str = '재킷';
             break;
-          case "onepiece":
-            str = "원피스";
+          case 'onepiece':
+            str = '원피스';
             break;
-          case "pants":
-            str = "바지";
+          case 'pants':
+            str = '바지';
             break;
-          case "shirts":
-            str = "셔츠";
+          case 'shirts':
+            str = '셔츠';
             break;
-          case "shoes":
-            str = "신발";
+          case 'shoes':
+            str = '신발';
             break;
-          case "skirt":
-            str = "치마";
+          case 'skirt':
+            str = '치마';
             break;
-          case "tie":
-            str = "넥타이";
+          case 'tie':
+            str = '넥타이';
             break;
-          case "waistcoat":
-            str = "조끼";
+          case 'waistcoat':
+            str = '조끼';
+            break;
+          default:
+            str = undef;
+        }
+        return str;
+      },
+      getMeasurementStr: function(measurement) {
+        var str;
+        switch (measurement) {
+          case 'height':
+            str = '키';
+            break;
+          case 'weight':
+            str = '몸무게';
+            break;
+          case 'bust':
+            str = '가슴';
+            break;
+          case 'waist':
+            str = '허리';
+            break;
+          case 'hip':
+            str = '엉덩이';
+            break;
+          case 'thigh':
+            str = '허벅지';
+            break;
+          case 'arm':
+            str = '팔 길이';
+            break;
+          case 'leg':
+            str = '다리 길이';
+            break;
+          case 'knee':
+            str = '무릎 길이';
+            break;
+          case 'foot':
+            str = '발 크기';
             break;
           default:
             str = undef;

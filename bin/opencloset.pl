@@ -3050,34 +3050,11 @@ __DATA__
           %th 이름
           %th 연락처
           %th 방문일
-          %th 사이즈
+          %th
+            %span.label.label-success 키 / 몸무게
+            %span.label.label-info    가슴 / 허리 / 엉덩이
+            %span.label.label-warning 허벅지 / 팔 / 다리 / 무릎 / 발
       %tbody
-        - for my $user (@$users) {
-          %tr
-            %td.center
-              %label
-                %input.ace{ :type => 'radio', :name => 'user_id', :value => '#{$user->id}' }
-                %span.lbl
-            %td
-              %a{:href => '/user/#{$user->id}'}= $user->name
-            %td
-              %i.icon-envelope
-              %a{:href => "mailto:#{$user->email}"}= $user->email
-              %br
-              %i.icon-phone
-              = $user->user_info->phone
-            %td
-              %strong= $user->update_date ? $user->update_date->ymd : q{}
-            %td
-              %div
-                %span.label.label-info= $user->user_info->bust
-                %span.label.label-info= $user->user_info->waist
-                %span.label.label-info= $user->user_info->arm
-                %span.label= $user->user_info->leg
-                %span.label= $user->user_info->height
-                %span.label= $user->user_info->weight
-        - }
-
 
 :plain
   <script id="tpl-row-checkbox-disabled" type="text/html">
@@ -3131,6 +3108,45 @@ __DATA__
       </td> <!-- 대여 가격 -->
       <td>
       </td> <!-- 기타 -->
+    </tr>
+  </script>
+
+:plain
+  <script id="tpl-row-radio" type="text/html">
+    <tr data-user-id="<%= id %>">
+      <td class="center">
+        <label>
+          <input class="ace" type="radio" name="user_id" value="<%= id %>">
+          <span class="lbl"></span>
+        </label>
+      </td>
+      <td>
+        <a href="/user/<%= id %>"> <%= name %> </a>
+      </td>
+      <td>
+        <i class="icon-envelope"></i>
+        <a href="mailto:<%= email %>"><%= email %></a>
+        <br />
+        <i class="icon-phone"></i>
+        <%= phone %>
+      </td>
+      <td>
+        <strong> <%= update_date ? update_date.substr(0, 10) : '' %> </strong>
+      </td>
+      <td>
+        <div>
+          <span class="label label-success"> <%= height || 0 %> </span>
+          <span class="label label-success"> <%= weight || 0 %> </span>
+          <span class="label label-info">    <%= bust   || 0 %> </span>
+          <span class="label label-info">    <%= waist  || 0 %> </span>
+          <span class="label label-info">    <%= hip    || 0 %> </span>
+          <span class="label label-warning"> <%= thigh  || 0 %> </span>
+          <span class="label label-warning"> <%= arm    || 0 %> </span>
+          <span class="label label-warning"> <%= leg    || 0 %> </span>
+          <span class="label label-warning"> <%= knee   || 0 %> </span>
+          <span class="label label-warning"> <%= foot   || 0 %> </span>
+        </div>
+      </td>
     </tr>
   </script>
 
