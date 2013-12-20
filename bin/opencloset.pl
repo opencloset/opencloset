@@ -3014,7 +3014,7 @@ __DATA__
         %button#btn-search.btn.btn-sm.btn-default{ :type => 'button' }
           %i.icon-search.bigger-110 검색
       %span.input-group-btn
-        %button#btn-clear.btn.btn.btn-sm.btn-default{:type => 'button'}
+        %button#btn-clear.btn.btn.btn-sm.btn-default{ :type => 'button' }
           %i.icon-eraser.bigger-110 지우기
 
 .space-8
@@ -3036,7 +3036,7 @@ __DATA__
           %th 대여 가격
           %th 기타
       %tbody
-    %button#action-buttons.btn.btn-sm.btn-primary{ :style => 'display: none;' } 선택한 항목을 대여합니다.
+    %button#action-buttons.btn.btn-sm.btn-primary{ :type => 'button', :style => 'display: none;' } 선택한 항목을 대여합니다.
 
   .space-8
 
@@ -3130,7 +3130,7 @@ __DATA__
     <tr class="row-checkbox" data-clothes-code="<%= code %>">
       <td class="center">
         <label>
-          <input class="ace" type="checkbox" name="clothes-code" value="<%= id %>" data-clothes-code="<%= id %>" checked="checked">
+          <input class="ace" type="checkbox" name="clothes-code" value="<%= code %>" data-clothes-code="<%= code %>" checked="checked">
           <span class="lbl"></span>
         </label>
       </td>

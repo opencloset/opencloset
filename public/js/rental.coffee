@@ -76,9 +76,16 @@ $ ->
   #
   # 대여 버튼 클릭
   #
-  $('#action-buttons').on 'click', 'button:not(.disabled)', (e) ->
-    unless $('input[name=gid]:checked').val()
-      return alert('대여자님을 선택해 주세요')
-    unless $('input[name=clothes-code]:checked').val()
-      return alert('선택하신 주문상품이 없습니다')
+  $('#action-buttons').click (e) ->
+    user = $('input[name=user_id]:checked').val()
+
+    clothes = []
+    $('input[name=clothes-code]:checked').each (i, el) ->
+      return if $(el).attr('id') is 'input-check-all'
+      clothes.push($(el).data('clothes-code'))
+    clothes = _.uniq(clothes)
+
+    return alert('대여할 사용자를 선택해 주세요') unless user
+    return alert('대여할 옷을 선택해 주세요.')    unless clothes
+
     $('#order-form').submit()

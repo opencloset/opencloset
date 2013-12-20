@@ -93,12 +93,22 @@
       is_checked = $('#input-check-all').is(':checked');
       return $(this).closest('thead').next().find('.ace:checkbox:not(:disabled)').prop('checked', is_checked);
     });
-    return $('#action-buttons').on('click', 'button:not(.disabled)', function(e) {
-      if (!$('input[name=gid]:checked').val()) {
-        return alert('대여자님을 선택해 주세요');
+    return $('#action-buttons').click(function(e) {
+      var clothes, user;
+      user = $('input[name=user_id]:checked').val();
+      clothes = [];
+      $('input[name=clothes-code]:checked').each(function(i, el) {
+        if ($(el).attr('id') === 'input-check-all') {
+          return;
+        }
+        return clothes.push($(el).data('clothes-code'));
+      });
+      clothes = _.uniq(clothes);
+      if (!user) {
+        return alert('대여할 사용자를 선택해 주세요');
       }
-      if (!$('input[name=clothes-code]:checked').val()) {
-        return alert('선택하신 주문상품이 없습니다');
+      if (!clothes) {
+        return alert('대여할 옷을 선택해 주세요.');
       }
       return $('#order-form').submit();
     });
