@@ -66,8 +66,8 @@
 .page-content #user-table table th:nth-child(6), .page-content #user-table table td:nth-child(6) { border-right: none; border-left: none; }
 .page-content #user-table table th:nth-child(7), .page-content #user-table table td:nth-child(7) { border-left: none; }
 .page-content #user-table table th:first-child { width: 50px; }
-.page-content #user-table table th:nth-child(2) { width: 80px; }
-.page-content #user-table table th:nth-child(3) { width: 180px; }
+.page-content #user-table table th:nth-child(2) { width: 70px; }
+.page-content #user-table table th:nth-child(3) { width: 210px; }
 .page-content #user-table table th:nth-child(4) { width: 100px; }
 .page-content #user-table table td { vertical-align: middle; }
 .page-content #user-table table td:nth-child(3) [class^="icon-"], .page-content #user-table table td:nth-child(3) [class*=" icon-"] { width: 1.2em; }
