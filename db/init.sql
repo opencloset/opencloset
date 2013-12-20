@@ -153,18 +153,18 @@ CREATE TABLE `satisfaction` (
   -- 높을 수록 좋은거(작은거 보단 큰게 낫다 by aanoaa)
   -- 쟈켓만 해당함
 
-  `user_id`     INT UNSIGNED NOT NULL,
-  `clothes_id`  INT UNSIGNED NOT NULL,
-  `bust`        INT DEFAULT NULL,
-  `waist`       INT DEFAULT NULL,
-  `arm`         INT DEFAULT NULL,
-  `top_fit`     INT DEFAULT NULL,
-  `bottom_fit`  INT DEFAULT NULL,
-  `create_date` DATETIME DEFAULT NULL,
+  `user_id`      INT UNSIGNED NOT NULL,
+  `clothes_code` CHAR(5)      NOT NULL,
+  `bust`         INT DEFAULT NULL,
+  `waist`        INT DEFAULT NULL,
+  `arm`          INT DEFAULT NULL,
+  `top_fit`      INT DEFAULT NULL,
+  `bottom_fit`   INT DEFAULT NULL,
+  `create_date`  DATETIME DEFAULT NULL,
 
-  PRIMARY KEY (`user_id`, `clothes_id`),
-  CONSTRAINT `fk_satisfaction1` FOREIGN KEY (`user_id`)    REFERENCES `user`    (`id`) ON DELETE CASCADE,
-  CONSTRAINT `fk_satisfaction2` FOREIGN KEY (`clothes_id`) REFERENCES `clothes` (`id`) ON DELETE CASCADE
+  PRIMARY KEY (`user_id`, `clothes_code`),
+  CONSTRAINT `fk_satisfaction1` FOREIGN KEY (`user_id`)      REFERENCES `user`    (`id`)   ON DELETE CASCADE,
+  CONSTRAINT `fk_satisfaction2` FOREIGN KEY (`clothes_code`) REFERENCES `clothes` (`code`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
@@ -211,12 +211,12 @@ CREATE TABLE `order` (
 --
 
 CREATE TABLE `order_clothes` (
-  `order_id`   INT UNSIGNED NOT NULL,
-  `clothes_id` INT UNSIGNED NOT NULL,
+  `order_id`     INT UNSIGNED NOT NULL,
+  `clothes_code` CHAR(5)      NOT NULL,
 
-  PRIMARY KEY (`order_id`, `clothes_id`),
-  CONSTRAINT `fk_order_clothes1` FOREIGN KEY (`order_id`)   REFERENCES `order`   (`id`) ON DELETE CASCADE,
-  CONSTRAINT `fk_order_clothes2` FOREIGN KEY (`clothes_id`) REFERENCES `clothes` (`id`) ON DELETE CASCADE
+  PRIMARY KEY (`order_id`, `clothes_code`),
+  CONSTRAINT `fk_order_clothes1` FOREIGN KEY (`order_id`)     REFERENCES `order`   (`id`)   ON DELETE CASCADE,
+  CONSTRAINT `fk_order_clothes2` FOREIGN KEY (`clothes_code`) REFERENCES `clothes` (`code`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
@@ -225,13 +225,13 @@ CREATE TABLE `order_clothes` (
 
 CREATE TABLE `donor_clothes` (
   `user_id`       INT UNSIGNED NOT NULL,
-  `clothes_id`    INT UNSIGNED NOT NULL,
+  `clothes_code`  CHAR(5)      NOT NULL,
   `comment`       TEXT DEFAULT NULL,
   `donation_date` DATETIME DEFAULT NULL,
 
-  PRIMARY KEY (`user_id`, `clothes_id`),
-  CONSTRAINT `fk_donor_clothes1` FOREIGN KEY (`user_id`)    REFERENCES `user`    (`id`) ON DELETE CASCADE,
-  CONSTRAINT `fk_donor_clothes2` FOREIGN KEY (`clothes_id`) REFERENCES `clothes` (`id`) ON DELETE CASCADE
+  PRIMARY KEY (`user_id`, `clothes_code`),
+  CONSTRAINT `fk_donor_clothes1` FOREIGN KEY (`user_id`)      REFERENCES `user`    (`id`)   ON DELETE CASCADE,
+  CONSTRAINT `fk_donor_clothes2` FOREIGN KEY (`clothes_code`) REFERENCES `clothes` (`code`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `short_message` (

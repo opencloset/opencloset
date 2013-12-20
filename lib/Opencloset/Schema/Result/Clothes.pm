@@ -225,7 +225,7 @@ Related object: L<Opencloset::Schema::Result::DonorClothes>
 __PACKAGE__->has_many(
   "donor_clothes",
   "Opencloset::Schema::Result::DonorClothes",
-  { "foreign.clothes_id" => "self.id" },
+  { "foreign.clothes_code" => "self.code" },
   { cascade_copy => 0, cascade_delete => 0 },
 );
 
@@ -260,7 +260,7 @@ Related object: L<Opencloset::Schema::Result::OrderClothes>
 __PACKAGE__->has_many(
   "order_clothes",
   "Opencloset::Schema::Result::OrderClothes",
-  { "foreign.clothes_id" => "self.id" },
+  { "foreign.clothes_code" => "self.code" },
   { cascade_copy => 0, cascade_delete => 0 },
 );
 
@@ -275,7 +275,7 @@ Related object: L<Opencloset::Schema::Result::Satisfaction>
 __PACKAGE__->has_many(
   "satisfactions",
   "Opencloset::Schema::Result::Satisfaction",
-  { "foreign.clothes_id" => "self.id" },
+  { "foreign.clothes_code" => "self.code" },
   { cascade_copy => 0, cascade_delete => 0 },
 );
 
@@ -330,8 +330,8 @@ Composing rels: L</order_clothes> -> order
 __PACKAGE__->many_to_many("orders", "order_clothes", "order");
 
 
-# Created by DBIx::Class::Schema::Loader v0.07038 @ 2013-12-04 15:55:38
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:fmIk2vjCTll1NC0sWxQTbA
+# Created by DBIx::Class::Schema::Loader v0.07038 @ 2013-12-20 17:10:12
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:p1QmCm90EFhwEcD96/SoWw
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

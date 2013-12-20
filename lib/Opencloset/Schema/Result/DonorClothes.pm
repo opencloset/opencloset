@@ -34,12 +34,12 @@ __PACKAGE__->table("donor_clothes");
   is_foreign_key: 1
   is_nullable: 0
 
-=head2 clothes_id
+=head2 clothes_code
 
-  data_type: 'integer'
-  extra: {unsigned => 1}
+  data_type: 'char'
   is_foreign_key: 1
   is_nullable: 0
+  size: 5
 
 =head2 comment
 
@@ -63,13 +63,8 @@ __PACKAGE__->add_columns(
     is_foreign_key => 1,
     is_nullable => 0,
   },
-  "clothes_id",
-  {
-    data_type => "integer",
-    extra => { unsigned => 1 },
-    is_foreign_key => 1,
-    is_nullable => 0,
-  },
+  "clothes_code",
+  { data_type => "char", is_foreign_key => 1, is_nullable => 0, size => 5 },
   "comment",
   { data_type => "text", is_nullable => 1 },
   "donation_date",
@@ -87,13 +82,13 @@ __PACKAGE__->add_columns(
 
 =item * L</user_id>
 
-=item * L</clothes_id>
+=item * L</clothes_code>
 
 =back
 
 =cut
 
-__PACKAGE__->set_primary_key("user_id", "clothes_id");
+__PACKAGE__->set_primary_key("user_id", "clothes_code");
 
 =head1 RELATIONS
 
@@ -108,7 +103,7 @@ Related object: L<Opencloset::Schema::Result::Clothes>
 __PACKAGE__->belongs_to(
   "clothes",
   "Opencloset::Schema::Result::Clothes",
-  { id => "clothes_id" },
+  { code => "clothes_code" },
   { is_deferrable => 1, on_delete => "CASCADE", on_update => "RESTRICT" },
 );
 
@@ -128,8 +123,8 @@ __PACKAGE__->belongs_to(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07038 @ 2013-11-29 20:22:55
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:jzp/66XLdXzt9AdvTZPZjg
+# Created by DBIx::Class::Schema::Loader v0.07038 @ 2013-12-20 17:10:12
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:ivDWytyDekYF0hvZB9eYBA
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

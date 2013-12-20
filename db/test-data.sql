@@ -52,8 +52,11 @@ INSERT
     ;
 
 INSERT
-  INTO `donor_clothes` (`user_id`, `clothes_id`, `comment`, `donation_date`)
-  VALUES (2, 1, '필요없어서 했습니다', NOW()), (2, 2, '', NOW());
+  INTO `donor_clothes` (`user_id`, `clothes_code`, `comment`, `donation_date`)
+  VALUES
+    (2, '0J001', '필요없어서 했습니다', NOW()),
+    (2, '0P001', '',                    NOW())
+    ;
 
 -- 대여중인거
 INSERT
@@ -64,9 +67,11 @@ INSERT
     ;
 
 INSERT
-  INTO `donor_clothes` (`user_id`, `clothes_id`, `comment`, `donation_date`)
-  VALUES (2, 3, '남아서..', NOW()), (1, 4, '', NOW())
-  ;
+  INTO `donor_clothes` (`user_id`, `clothes_code`, `comment`, `donation_date`)
+  VALUES
+    (2, '0S001', '남아서..', NOW()),
+    (1, '0A001', '',         NOW())
+    ;
 
 INSERT
   INTO `order` (
@@ -76,11 +81,11 @@ INSERT
   VALUES
     (1,2,2,'2013-10-18','2013-10-21',NULL,20000,0,NULL,'현금','김소령','입사면접',95,78,60,105);
 
-INSERT INTO `order_clothes` (`order_id`, `clothes_id`) VALUES (1,6), (1,7);
+INSERT INTO `order_clothes` (`order_id`, `clothes_code`) VALUES (1,'0J002'), (1,'0P002');
 
 INSERT
-  INTO `satisfaction` (`user_id`,`clothes_id`,`bust`,`waist`,`arm`,`top_fit`,`bottom_fit`,`create_date`)
-  VALUES (2,6,1,2,3,4,5,'2013-10-18')
+  INTO `satisfaction` (`user_id`,`clothes_code`,`bust`,`waist`,`arm`,`top_fit`,`bottom_fit`,`create_date`)
+  VALUES (2,'0J002',1,2,3,4,5,'2013-10-18')
   ;
 
 COMMIT;
