@@ -284,9 +284,24 @@ helper get_params => sub {
     #
     # parameter can have multiple values
     #
+    my @src_keys;
+    my @dest_keys;
     my @values;
     for my $k (@keys) {
-        my @v = $self->param($k);
+        my @v;
+        if ( ref($k) eq 'ARRAY' ) {
+            push @src_keys,  $k->[0];
+            push @dest_keys, $k->[1];
+
+            @v = $self->param( $k->[0] );
+        }
+        else {
+            push @src_keys,  $k;
+            push @dest_keys, $k;
+
+            @v = $self->param($k);
+        }
+
         if ( @v > 1 ) {
             push @values, \@v;
         }
@@ -298,7 +313,7 @@ helper get_params => sub {
     #
     # make parameter hash using explicit keys
     #
-    my %params = zip @keys, @values;
+    my %params = zip @dest_keys, @values;
 
     #
     # remove not defined parameter key and values
