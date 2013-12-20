@@ -95,9 +95,9 @@
     });
     return $('#action-buttons').click(function(e) {
       var clothes, user;
-      user = $('input[name=user-id]:checked').val();
+      user = $('input[name=user_id]:checked').val();
       clothes = [];
-      $('input[name=clothes-code]:checked').each(function(i, el) {
+      $('input[name=clothes_code]:checked').each(function(i, el) {
         if ($(el).attr('id') === 'input-check-all') {
           return;
         }

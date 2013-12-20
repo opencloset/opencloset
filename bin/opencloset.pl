@@ -323,6 +323,104 @@ helper get_params => sub {
     return %params;
 };
 
+helper create_order => sub {
+    my ( $self, $order_params, $order_clothes_params ) = @_;
+
+    return unless $order_params;
+    return unless ref($order_params) eq 'HASH';
+
+    #
+    # validate params
+    #
+    my $v = $self->create_validator;
+    $v->field('user_id')->required(1)->regexp(qr/^\d+$/)->callback(sub {
+        my $val = shift;
+
+        return 1 if $DB->resultset('User')->find({ id => $val });
+        return ( 0, 'user not found using user_id' );
+    });
+    #
+    # FIXME
+    #   need more validation but not now
+    #   since columns are not perfect yet.
+    #
+    $v->field(qw/ height weight bust waist hip thigh arm leg knee foot /)->each(sub {
+        shift->regexp(qr/^\d{1,3}$/);
+    });
+    $v->field('clothes_code')->regexp(qr/^[A-Z0-9]{4,5}$/);
+    unless ( $self->validate( $v, { %$order_params, %$order_clothes_params } ) ) {
+        my @error_str;
+        while ( my ( $k, $v ) = each %{ $v->errors } ) {
+            push @error_str, "$k:$v";
+        }
+        $self->error( 400, {
+            str  => join(',', @error_str),
+            data => $v->errors,
+        }), return;
+    }
+
+    #
+    # adjust params
+    #
+    if ( $order_clothes_params && $order_clothes_params->{clothes_code} ) {
+        $order_clothes_params->{clothes_code} = [ $order_clothes_params->{clothes_code} ]
+            unless ref $order_clothes_params->{clothes_code};
+
+        for ( @{ $order_clothes_params->{clothes_code} } ) {
+            next unless length == 4;
+            $_ = sprintf( '%05s', $_ );
+        }
+    }
+
+    #
+    # TRANSACTION:
+    #
+    #   - create order
+    #   - create order_clothes
+    #
+    my ( $order, $error ) = do {
+        my $guard = $DB->txn_scope_guard;
+        try {
+            #
+            # create order
+            #
+            my $order = $DB->resultset('Order')->create( $order_params );
+            die "failed to create a new order\n" unless $order;
+
+            #
+            # create order_clothes
+            #
+            if ( $order_clothes_params && $order_clothes_params->{clothes_code} ) {
+                for ( @{ $order_clothes_params->{clothes_code} } ) {
+                    $order->add_to_order_clothes({ clothes_code => $_ })
+                        or die "failed to create a new order_clothes\n";
+                }
+            }
+
+            $guard->commit;
+
+            return $order;
+        }
+        catch {
+            chomp;
+            app->log->error("failed to create a new order & a new order_clothes");
+            app->log->error($_);
+
+            return ( undef, $_ );
+        };
+    };
+
+    #
+    # response
+    #
+    $self->error( 500, {
+        str  => $error,
+        data => {},
+    }), return unless $order;
+
+    return $order;
+};
+
 #
 # API section
 #
@@ -621,7 +719,7 @@ group {
         #
         # fetch params
         #
-        my %params = $self->get_params(qw/
+        my %order_params = $self->get_params(qw/
             user_id     status_id     rental_date    target_date
             return_date return_method payment_method price
             discount    late_fee      l_discount     l_payment_method
@@ -630,44 +728,10 @@ group {
             thigh       arm           leg            knee
             foot
         /);
+        my %order_clothes_params = $self->get_params(qw/ clothes_code /);
 
-        #
-        # validate params
-        #
-        my $v = $self->create_validator;
-        $v->field('user_id')->required(1)->regexp(qr/^\d+$/)->callback(sub {
-            my $val = shift;
-
-            return 1 if $DB->resultset('User')->find({ id => $val });
-            return ( 0, 'user not found using user_id' );
-        });
-        #
-        # FIXME
-        #   need more validation but not now
-        #   since columns are not perfect yet.
-        #
-        $v->field(qw/ height weight bust waist hip thigh arm leg knee foot /)->each(sub {
-            shift->regexp(qr/^\d{1,3}$/);
-        });
-        unless ( $self->validate( $v, \%params ) ) {
-            my @error_str;
-            while ( my ( $k, $v ) = each %{ $v->errors } ) {
-                push @error_str, "$k:$v";
-            }
-            return $self->error( 400, {
-                str  => join(',', @error_str),
-                data => $v->errors,
-            });
-        }
-
-        #
-        # create order
-        #
-        my $order = $DB->resultset('Order')->create( \%params );
-        return $self->error( 500, {
-            str  => 'failed to create a new order',
-            data => {},
-        }) unless $order;
+        my $order = $self->create_order( \%order_params, \%order_clothes_params );
+        return unless $order;
 
         #
         # response
@@ -1839,57 +1903,22 @@ get '/rental' => sub {
     $self->stash( users => \@users );
 } => 'rental';
 
-post '/orders' => sub {
+post '/order' => sub {
     my $self = shift;
 
-    my $validator = $self->create_validator;
-    $validator->field([qw/gid clothes-id/])
-        ->each(sub { shift->required(1)->regexp(qr/^\d+$/) });
+    #
+    # fetch params
+    #
+    my %order_params         = $self->get_params(qw/ user_id /);
+    my %order_clothes_params = $self->get_params(qw/ clothes_code /);
 
-    return $self->error(400, 'failed to validate')
-        unless $self->validate($validator);
+    my $order = $self->create_order( \%order_params, \%order_clothes_params );
+    return unless $order;
 
-    my $user         = $DB->resultset('User')->find({ id => $self->param('gid') });
-    my @clothes_list = $DB->resultset('Clothes')->search({ 'me.id' => { -in => [$self->param('clothes-id')] } });
-
-    return $self->error(400, 'invalid request') unless $user || @clothes_list;
-
-    my $guard = $DB->txn_scope_guard;
-    my $order;
-    try {
-        # BEGIN TRANSACTION ~
-        $order = $DB->resultset('Order')->create({
-            user_id  => $user->id,
-            bust     => $user->user_info->bust,
-            waist    => $user->user_info->waist,
-            arm      => $user->user_info->arm,
-            leg      => $user->user_info->leg,
-            purpose  => $user->purpose,
-        });
-
-        for my $clothes (@clothes_list) {
-            $order->create_related('cloth_orders', { cloth_id => $clothes->id });
-        }
-        # FIXME now user does not have visit_date column
-        #my $dt_parser = $DB->storage->datetime_parser;
-        #$user->visit_date($dt_parser->format_datetime(DateTime->now()));
-        #$user->update;    # refresh `visit_date`
-        $guard->commit;
-        # ~ COMMIT
-    } catch {
-        # ROLLBACK
-        my $error = shift;
-        $self->app->log->error("Failed to create `order`: $error");
-        return $self->error(500, "Failed to create `order`: $error") unless $order;
-    };
-
-    $self->res->headers->header('Location' => $self->url_for('/orders/' . $order->id));
-    $self->respond_to(
-        json => { json => $self->order2hr($order), status => 201 },
-        html => sub {
-            $self->redirect_to('/orders/' . $order->id);
-        }
-    );
+    #
+    # response
+    #
+    $self->redirect_to( '/order/' . $order->id );
 };
 
 get '/orders' => sub {
@@ -3034,7 +3063,7 @@ __DATA__
 
 .space-8
 
-%form#order-form{:method => 'post', :action => '/orders'}
+%form#order-form{:method => 'post', :action => '/order'}
   #clothes-table
     %h2 대여할 옷을 선택해 주세요.
     .space-4
@@ -3076,7 +3105,7 @@ __DATA__
           %tr{ 'data-user-id' => "#{ $user->id }" }
             %td.center
               %label
-                %input.ace{ :type => 'radio', name => 'user-id', value => "#{ $user->id}" }
+                %input.ace{ :type => 'radio', name => 'user_id', value => "#{ $user->id}" }
                 %span.lbl
             %td
               %a{ :href => "/user/#{ $user->id }" }= $user->name
@@ -3145,7 +3174,7 @@ __DATA__
     <tr class="row-checkbox" data-clothes-code="<%= code %>">
       <td class="center">
         <label>
-          <input class="ace" type="checkbox" name="clothes-code" value="<%= code %>" data-clothes-code="<%= code %>" checked="checked">
+          <input class="ace" type="checkbox" name="clothes_code" value="<%= code %>" data-clothes-code="<%= code %>" checked="checked">
           <span class="lbl"></span>
         </label>
       </td>
@@ -3174,7 +3203,7 @@ __DATA__
     <tr data-user-id="<%= id %>">
       <td class="center">
         <label>
-          <input class="ace" type="radio" name="user-id" value="<%= id %>">
+          <input class="ace" type="radio" name="user_id" value="<%= id %>">
           <span class="lbl"></span>
         </label>
       </td>
