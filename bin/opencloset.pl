@@ -3075,21 +3075,21 @@ __DATA__
               %strong= $user->update_date ? $user->update_date->ymd : q{}
             %td
               %div
-                %span.label.label-success= $user->user_info->height || 0
-                %span.label.label-success= $user->user_info->weight || 0
+                %span.label.label-success= $user->user_info->height || '-'
+                %span.label.label-success= $user->user_info->weight || '-'
             %td
               %div
-                %span.label.label-info=    $user->user_info->bust   || 0
-                %span.label.label-info=    $user->user_info->waist  || 0
-                %span.label.label-info=    $user->user_info->hip    || 0
+                %span.label.label-info=    $user->user_info->bust   || '-'
+                %span.label.label-info=    $user->user_info->waist  || '-'
+                %span.label.label-info=    $user->user_info->hip    || '-'
             %td
               %div
 
-                %span.label.label-warning= $user->user_info->thigh  || 0
-                %span.label.label-warning= $user->user_info->arm    || 0
-                %span.label.label-warning= $user->user_info->leg    || 0
-                %span.label.label-warning= $user->user_info->knee   || 0
-                %span.label.label-warning= $user->user_info->foot   || 0
+                %span.label.label-warning= $user->user_info->thigh  || '-'
+                %span.label.label-warning= $user->user_info->arm    || '-'
+                %span.label.label-warning= $user->user_info->leg    || '-'
+                %span.label.label-warning= $user->user_info->knee   || '-'
+                %span.label.label-warning= $user->user_info->foot   || '-'
         - }
 
 :plain
