@@ -1790,18 +1790,7 @@ get '/search' => sub {
 get '/rental' => sub {
     my $self = shift;
 
-    my $q     = $self->param('q');
-    my @users = $DB->resultset('User')->search(
-        {
-            -or => [
-                'me.id'           => $q,
-                'me.name'         => $q,
-                'me.email'        => $q,
-                'user_info.phone' => $q,
-            ],
-        },
-        { join => 'user_info' },
-    );
+    my $q = $self->param('q');
 
     ### DBIx::Class::Storage::DBI::_gen_sql_bind(): DateTime objects passed to search() are not
     ### supported properly (InflateColumn::DateTime formats and settings are not respected.)
@@ -1811,9 +1800,25 @@ get '/rental' => sub {
     ### DateTime object 를 search 에 바로 사용하지 말고 parser 를 이용하라능 - @aanoaa
     my $today     = DateTime->today( time_zone => 'Asia/Seoul' );
     my $dt_parser = $DB->storage->datetime_parser;
-    push @users, $DB->resultset('User')->search(
-        { update_date => { '>=' => $dt_parser->format_datetime($today) } },
-        { order_by    => { -desc => 'update_date' } },
+
+    my @users = $DB->resultset('User')->search(
+        {
+            -or => [
+                {
+                    -or => [
+                        'me.id'           => $q,
+                        'me.name'         => $q,
+                        'me.email'        => $q,
+                        'user_info.phone' => $q,
+                    ],
+                },
+                { update_date => { '>=' => $dt_parser->format_datetime($today) } },
+            ],
+        },
+        {
+            order_by => { -desc => 'update_date' },
+            join     => 'user_info',
+        },
     );
 
     $self->stash( users => \@users );
@@ -3052,6 +3057,40 @@ __DATA__
           %th
             %span.label.label-warning 허벅지 / 팔 / 다리 / 무릎 / 발
       %tbody
+        - for my $user (@$users) {
+          %tr{ 'data-user-id' => "#{ $user->id }" }
+            %td.center
+              %label
+                %input.ace{ :type => 'radio', name => 'user_id', value => "#{ $user->id}" }
+                %span.lbl
+            %td
+              %a{ :href => "/user/#{ $user->id }" }= $user->name
+            %td
+              %i.icon-envelope
+              %a{ :href => "mailto:#{ $user->email}" }= $user->email
+              %br
+              %i.icon-phone
+              = $user->user_info->phone
+            %td
+              %strong= $user->update_date ? $user->update_date->ymd : q{}
+            %td
+              %div
+                %span.label.label-success= $user->user_info->height || 0
+                %span.label.label-success= $user->user_info->weight || 0
+            %td
+              %div
+                %span.label.label-info=    $user->user_info->bust   || 0
+                %span.label.label-info=    $user->user_info->waist  || 0
+                %span.label.label-info=    $user->user_info->hip    || 0
+            %td
+              %div
+
+                %span.label.label-warning= $user->user_info->thigh  || 0
+                %span.label.label-warning= $user->user_info->arm    || 0
+                %span.label.label-warning= $user->user_info->leg    || 0
+                %span.label.label-warning= $user->user_info->knee   || 0
+                %span.label.label-warning= $user->user_info->foot   || 0
+        - }
 
 :plain
   <script id="tpl-row-checkbox-disabled" type="text/html">
