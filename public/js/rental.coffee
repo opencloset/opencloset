@@ -77,7 +77,7 @@ $ ->
   # 대여 버튼 클릭
   #
   $('#action-buttons').click (e) ->
-    user = $('input[name=user_id]:checked').val()
+    user = $('input[name=user-id]:checked').val()
 
     clothes = []
     $('input[name=clothes-code]:checked').each (i, el) ->

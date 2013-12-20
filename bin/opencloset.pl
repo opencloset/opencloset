@@ -3061,7 +3061,7 @@ __DATA__
           %tr{ 'data-user-id' => "#{ $user->id }" }
             %td.center
               %label
-                %input.ace{ :type => 'radio', name => 'user_id', value => "#{ $user->id}" }
+                %input.ace{ :type => 'radio', name => 'user-id', value => "#{ $user->id}" }
                 %span.lbl
             %td
               %a{ :href => "/user/#{ $user->id }" }= $user->name
@@ -3159,7 +3159,7 @@ __DATA__
     <tr data-user-id="<%= id %>">
       <td class="center">
         <label>
-          <input class="ace" type="radio" name="user_id" value="<%= id %>">
+          <input class="ace" type="radio" name="user-id" value="<%= id %>">
           <span class="lbl"></span>
         </label>
       </td>
