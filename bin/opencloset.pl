@@ -421,6 +421,37 @@ helper create_order => sub {
     return $order;
 };
 
+helper get_order => sub {
+    my ( $self, $params ) = @_;
+
+    #
+    # validate params
+    #
+    my $v = $self->create_validator;
+    $v->field('id')->required(1)->regexp(qr/^\d+$/);
+    unless ( $self->validate( $v, $params ) ) {
+        my @error_str;
+        while ( my ( $k, $v ) = each %{ $v->errors } ) {
+            push @error_str, "$k:$v";
+        }
+        return $self->error( 400, {
+            str  => join(',', @error_str),
+            data => $v->errors,
+        });
+    }
+
+    #
+    # find order
+    #
+    my $order = $DB->resultset('Order')->find( $params );
+    return $self->error( 404, {
+        str  => 'order not found',
+        data => {},
+    }) unless $order;
+
+    return $order;
+};
+
 #
 # API section
 #
@@ -752,30 +783,8 @@ group {
         #
         my %params = $self->get_params(qw/ id /);
 
-        #
-        # validate params
-        #
-        my $v = $self->create_validator;
-        $v->field('id')->required(1)->regexp(qr/^\d+$/);
-        unless ( $self->validate( $v, \%params ) ) {
-            my @error_str;
-            while ( my ( $k, $v ) = each %{ $v->errors } ) {
-                push @error_str, "$k:$v";
-            }
-            return $self->error( 400, {
-                str  => join(',', @error_str),
-                data => $v->errors,
-            });
-        }
-
-        #
-        # find user
-        #
-        my $order = $DB->resultset('Order')->find( \%params );
-        return $self->error( 404, {
-            str  => 'order not found',
-            data => {},
-        }) unless $order;
+        my $order = $self->get_order( \%params );
+        return unless $order;
 
         #
         # response
