@@ -1941,63 +1941,22 @@ get '/orders' => sub {
     $self->stash( orders => $orders );
 } => 'orders';
 
-get '/orders/:id' => sub {
+get '/order/:id' => sub {
     my $self = shift;
 
-    my $order = $DB->resultset('Order')->find({ id => $self->param('id') });
-    return $self->error(404, "Not found") unless $order;
+    #
+    # fetch params
+    #
+    my %params = $self->get_params(qw/ id /);
 
-    my @clothes_list = $order->cloths;
-    my $price = 0;
-    for my $clothes (@clothes_list) {
-        $price += $clothes->price;
-    }
+    my $order = $self->get_order( \%params );
+    return unless $order;
 
-    my $overdue  = $self->calc_overdue($order->target_date);
-    my $late_fee = $self->calc_late_fee($order);
-
-    my $clothes = $order->cloths({ category => 'jacket' })->next;
-
-    my $satisfaction;
-    if ($clothes) {
-        $satisfaction = $clothes->satisfactions({
-            cloth_id => $clothes->id,
-            guest_id  => $order->guest->id,
-        })->next;
-    }
-
-    $self->stash(
-        order        => $order,
-        clothes      => \@clothes_list,
-        price        => $price,
-        overdue      => $overdue,
-        late_fee     => $late_fee,
-        satisfaction => $satisfaction,
-    );
-
-    my %fillinform = $order->get_columns;
-    $fillinform{price} = $price unless $fillinform{price};
-    $fillinform{late_fee} = $late_fee;
-    unless ($fillinform{target_date}) {
-        $fillinform{target_date} = DateTime->now()->add(days => 3)->ymd;
-    }
-
-    my $status_id = $order->status ? $order->status->id : undef;
-    if ($status_id) {
-        if ($status_id == $Opencloset::Constant::STATUS_RENT) {
-            $self->stash(template => 'orders/id/status_rent');
-        } elsif ($status_id == $Opencloset::Constant::STATUS_RETURN) {
-            $self->stash(template => 'orders/id/status_return');
-        } elsif ($status_id == $Opencloset::Constant::STATUS_PARTIAL_RETURN) {
-            $self->stash(template => 'orders/id/status_partial_return');
-        }
-    } else {
-        $self->stash(template => 'orders/id/nil_status');
-    }
-
-    map { delete $fillinform{$_} } qw/bust waist arm length/;
-    $self->render_fillinform({ %fillinform });
-};
+    #
+    # response
+    #
+    $self->stash( order => $order );
+} => 'order/id';
 
 any [qw/post put patch/] => '/orders/:id' => sub {
     my $self = shift;
