@@ -3287,265 +3287,139 @@ __DATA__
       - }
 
 
-@@ orders/id/nil_status.html.haml
-- layout 'default', jses => ['orders-id.js'];
-- title '주문확인';
-
-%div.pull-right= include 'guests/breadcrumb', guest => $order->guest, status_id => ''
-
-%div
-  %p.muted
-    최종금액 = 정상가 + 추가금액 - 에누리금액
-  %p#total_price
-    %strong#total_fee{:title => '최종금액'}
-    %span =
-    %span#origin_fee{:title => '정상가'}
-    %span +
-    %span#additional_fee{:title => '추가금액'}
-    %span -
-    %span#discount_fee{:title => '에누리금액'}
-
-%form.form-horizontal{:method => 'post', :action => ''}
-  %legend
-    - my $loop = 0;
-    - for my $clothes (@$clothes_list) {
-      - $loop++;
-      - if ($loop == 1) {
-        %span
-          %a{:href => '/clothes/#{$clothes->code}'}= $clothes->category
-          %small.highlight= commify($clothes->price)
-      - } elsif ($loop == 2) {
-        %span
-          with
-          %a{:href => '/clothes/#{$clothes->code}'}= $clothes->category
-          %small.highlight= commify($clothes->price)
-      - } else {
-        %span
-          ,
-          %a{:href => '/clothes/#{$clothes->code}'}= $clothes->category
-          %small.highlight= commify($clothes->price)
-      - }
-    - }
-  .control-group
-    %label.control-label{:for => 'input-price'} 가격
-    .controls
-      %input{:type => 'text', :id => 'input-price', :name => 'price', :value => '#{$price}'}
-      원
-  .control-group
-    %label.control-label{:for => 'input-discount'} 에누리
-    .controls
-      %input{:type => 'text', :id => 'input-discount', :name => 'discount'}
-      원
-  .control-group
-    %label.control-label 결제방법
-    .controls
-      %label.radio.inline
-        %input{:type => 'radio', :name => 'payment_method', :value => '현금'}
-          현금
-      %label.radio.inline
-        %input{:type => 'radio', :name => 'payment_method', :value => '카드'}
-          카드
-      %label.radio.inline
-        %input{:type => 'radio', :name => 'payment_method', :value => '현금+카드'}
-          현금 + 카드
-  .control-group
-    %label.control-label{:for => 'input-target-date'} 반납예정일
-    .controls
-      %input#input-target-date{:type => 'text', :name => 'target_date'}
-  .control-group
-    %label.control-label{:for => 'input-staff'} staff
-    .controls
-      %input#input-staff{:type => 'text', :name => 'staff_name'}
-      %p
-        %span.label.clickable 한만일
-        %span.label.clickable 김소령
-        %span.label.clickable 서동건
-        %span.label.clickable 정선경
-        %span.label.clickable 김기리
-  .control-group
-    %label.control-label{:for => 'input-comment'} Comment
-    .controls
-      %textarea{:id => 'input-comment', :name => 'comment'}
-  .control-group
-    %label.control-label 만족도
-    .controls
-      %input.span1{:type => 'text', :name => 'bust',       :placeholder => '가슴'}
-      %input.span1{:type => 'text', :name => 'waist',      :placeholder => '허리'}
-      %input.span1{:type => 'text', :name => 'arm',        :placeholder => '팔'}
-      %input.span1{:type => 'text', :name => 'top_fit',    :placeholder => '상의'}
-      %input.span1{:type => 'text', :name => 'bottom_fit', :placeholder => '하의'}
-  .control-group
-    .controls
-      %input.btn.btn-success{:type => 'submit', :value => '대여완료'}
-
-@@ partial/status_label.html.haml
-- if ($overdue && $order->status_id == $Opencloset::Constant::STATUS_RENT) {
-  %span.label{:class => 'status-#{$order->status_id}'} 연체중
-- } else {
-  %span.label{:class => 'status-#{$order->status_id}'}= $order->status->name
-- }
-%p
-  %span.highlight= $order->purpose
-  으로 방문
-
-@@ partial/order_info.html.haml
-- if ($order->rental_date) {
-  %h3
-    %time.highlight= $order->rental_date->ymd . ' ~ '
-    %time.highlight= $order->return_date->ymd if $order->return_date
-  %p.muted= '반납예정일: ' . $order->target_date->ymd if $order->target_date
-- }
-
-%h3
-  %span.highlight= commify($order->price - $order->discount)
-%p.muted= commify($order->discount) . '원 할인'
-
-%p= $order->payment_method
-%p= $order->staff_name
-
-- if ($overdue) {
-  %p.muted
-    %span 연체료
-    %strong.text-error= commify($late_fee)
-    는 연체일(#{ $overdue }) x 대여금액(#{ commify($order->price) })의 20% 로 계산됩니다
-- }
-
-- if ($order->comment) {
-  %p.well= $order->comment 
-- }
-
-
-@@ partial/satisfaction.html.haml
-%h5 만족도
-- my ($c, $w, $a, $t, $b) = ($s->bust || 0, $s->waist || 0, $s->arm || 0, $s->top_fit || 0, $s->bottom_fit || 0);
-%p
-  %span.badge{:class => "satisfaction-#{$c}"} 가슴
-  %span.badge{:class => "satisfaction-#{$w}"} 허리
-  %span.badge{:class => "satisfaction-#{$a}"} 팔길이
-  %span.badge{:class => "satisfaction-#{$t}"} 상의fit
-  %span.badge{:class => "satisfaction-#{$b}"} 하의fit
-
-
-@@ orders/id/status_rent.html.haml
-- my $id   = 'orders-id';
+@@ order/id.html.haml
+- my $id   = 'order-id';
 - my $meta = $sidebar->{meta};
 - layout 'default',
 -   active_id   => $id,
 -   breadcrumbs => [
--     { text => $meta->{'orders'}{text}, link => '/orders' },
+-     { text => $meta->{'menu-order'}{text} },
 -     { text => $meta->{$id}{text} },
--   ],
--   ;
-- title $meta->{$id}{text} . ': 대여중';
+-   ];
+- title $meta->{$id}{text};
 
-%p= include 'partial/status_label'
-%div.pull-right= include 'guests/breadcrumb', guest => $order->guest, status_id => ''
-%p.text-info 반납품목을 확인해주세요
-#clothes-category
-  %form#form-clothes-code
-    %fieldset
-      .input-append
-        %input#input-clothes-code.input-large{:type => 'text', :placeholder => '품번'}
-        %button#btn-clothes-code.btn{:type => 'button'} 입력
-      - for my $clothes (@$clothes_list) {
-        %label.checkbox
-          %input.input-clothes{:type => 'checkbox', :data-clothes-code => '#{$clothes->code}'}
-          %a{:href => '/clothes/#{$clothes->code}'}= $clothes->category
-          %small.highlight= commify($clothes->price)
-      - }
-%div= include 'partial/order_info'
+                .row
+                  .col-sm-10.col-sm-offset-1
+                    .widget-box.transparent.invoice-box
+                      /
+                      / body
+                      /
+                      .widget-body
+                        .widget-main
+                          .row
+                            /
+                            / 주문서 정보
+                            /
+                            .col-sm-6
+                              .row
+                                .col-xs-11.label.label-lg.label-info.arrowed-in.arrowed-right
+                                  %strong 주문서 정보
+                              .row
+                                %ul.list-unstyled.spaced
+                                  %li
+                                    %i.icon-caret-right.blue
+                                    대여 기간:
+                                    %strong 2013-12-18 ~ 2013-12-21
+                                  %li
+                                    %i.icon-caret-right.blue
+                                    대여 기간:
+                                    %strong 2013-12-18 ~ 2013-12-21
+                                  %li
+                                    %i.icon-caret-right.blue
+                                    대여 기간:
+                                    %strong 2013-12-18 ~ 2013-12-21
+                                  %li
+                                    %i.icon-caret-right.blue
+                                    대여 기간:
+                                    %strong 2013-12-18 ~ 2013-12-21
 
-%form#form-return.form-horizontal{:method => 'post', :action => "#{url_for('')}"}
-  %fieldset
-    %legend 연체료 및 반납방법
-    .control-group
-      %label 연체료
-      .controls
-        %input#input-late_fee.input-mini{:type => 'text', :name => 'late_fee', :placeholder => '연체료'}
-    .control-group
-      %label{:for => '#input-ldiscount'} 연체료의 에누리
-      .controls
-        %input#input-ldiscount.input-mini{:type => 'text', :name => 'l_discount', :placeholder => '연체료의 에누리'}
-    .control-group
-      %label 반납방법
-      .controls
-        %label.radio.inline
-          %input{:type => 'radio', :name => 'return_method', :value => '방문'}
-          방문
-        %label.radio.inline
-          %input{:type => 'radio', :name => 'return_method', :value => '택배'}
-          택배
-    .control-group
-      %label 결제방법
-      .controls
-        %label.radio.inline
-          %input{:type => 'radio', :name => 'l_payment_method', :value => '현금'}
-          현금
-        %label.radio.inline
-          %input{:type => 'radio', :name => 'l_payment_method', :value => '카드'}
-          카드
-        %label.radio.inline
-          %input{:type => 'radio', :name => 'l_payment_method', :value => '현금+카드'}
-          현금+카드
-    .control-group
-      .controls
-        %button.btn.btn-success{:type => 'submit'} 반납
-        %a.pull-right#btn-order-cancel.btn.btn-danger{:href => '#{url_for()}'} 주문취소
+                                  %li.divider
 
-%p= include 'partial/satisfaction', s => $satisfaction
+                                  %li
+                                    %i.icon-caret-right.blue
+                                    결제 방법:
+                                    %strong 현금 / 카드 / 현금 + 카드
+                            /
+                            / 대여자 정보
+                            /
+                            .col-sm-6
+                              .row
+                                .col-xs-11.label.label-lg.label-success.arrowed-in.arrowed-right
+                                  %strong 대여자 정보
+                              .row
+                                %ul.list-unstyled.spaced
+                                  %li
+                                    %i.icon-caret-right.green
+                                    대여 기간:
+                                    %strong 2013-12-18 ~ 2013-12-21
+                                  %li
+                                    %i.icon-caret-right.green
+                                    대여 기간:
+                                    %strong 2013-12-18 ~ 2013-12-21
+                                  %li
+                                    %i.icon-caret-right.green
+                                    대여 기간:
+                                    %strong 2013-12-18 ~ 2013-12-21
+                                  %li
+                                    %i.icon-caret-right.green
+                                    대여 기간:
+                                    %strong 2013-12-18 ~ 2013-12-21
+                                  %li
+                                    %i.icon-caret-right.green
+                                    대여 기간:
+                                    %strong 2013-12-18 ~ 2013-12-21
+                                  %li
+                                    %i.icon-caret-right.green
+                                    대여 기간:
+                                    %strong 2013-12-18 ~ 2013-12-21
 
+                                  %li.divider
 
-@@ orders/id/status_return.html.haml
-- layout 'default', jses => ['orders-id.js'];
-- title '주문확인 - 반납';
+                                  %li
+                                    %i.icon-caret-right.green
+                                    결제 방법:
+                                    %strong 현금 / 카드 / 현금 + 카드
+                          .space
+                          %div
+                            %table.table.table-striped.table-bordered.table-hover
+                              %thead
+                                %tr
+                                  %th.center #
+                                  %th 옷
+                                  %th 상태
+                                  %th 종류
+                                  %th 대여 가격
+                                  %th 기타
+                              %tbody
+                                - my $count = 0;
+                                - for my $clothes ( $order->clothes ) {
+                                  %tr
+                                    %td.center= ++$count
+                                    %td
+                                      %a{ :href => "/clothes/#{ $clothes->code }" }= $clothes->code
+                                    %td
+                                      %span.order-status.label= %clothes->status
+                                    %td
+                                      %span 자켓
+                                    %td
+                                      %span= $clothes->price
+                                    %td ...
+                                - }
 
-%p= include 'partial/status_label'
-%div.pull-right= include 'guests/breadcrumb', guest => $order->guest, status_id => ''
+                          .hr.hr8.hr-double.hr-dotted
 
-- for my $clothes (@$clothes_list) {
-  %p
-    %a{:href => '/clothes/#{$clothes->code}'}= $clothes->category
-    %small.highlight= commify($clothes->price)
-- }
+                          .row
+                            .col-sm-5.pull-right
+                              %h4.pull-right
+                                총액:
+                                %span.red 20000원
+                            .col-sm-7.pull-left
+                              추가 정보 ...
 
-%div= include 'partial/order_info'
-%p= commify($order->late_fee)
-%p= $order->return_method
-%p= '연체료 ' . commify($order->l_discount) . ' 원 할인'
-%p= include 'partial/satisfaction', s => $satisfaction
+                          .space-6
+                          .well
+                            열린옷장을 이용해주셔서 고맙습니다.
 
-
-@@ orders/id/status_partial_return.html.haml
-- layout 'default', jses => ['orders-id.js'];
-- title '주문확인 - 부분반납';
-
-%p= include 'partial/status_label'
-%div.pull-right= include 'guests/breadcrumb', guest => $order->guest, status_id => ''
-#clothes-category
-  %form#form-clothes-code
-    %fieldset
-      .input-append
-        %input#input-clothes-code.input-large{:type => 'text', :placeholder => '품번'}
-        %button#btn-clothes-code.btn{:type => 'button'} 입력
-      - for my $clothes (@$clothes_list) {
-        %label.checkbox
-          - if ($clothes->status_id != $Opencloset::Constant::STATUS_PARTIAL_RETURN) {
-            %input.input-clothes{:type => 'checkbox', :checked => 'checked', :data-clothes-code => '#{$clothes->code}'}
-          - } else {
-            %input.input-clothes{:type => 'checkbox', :data-clothes-code => '#{$clothes->code}'}
-          - }
-          %a{:href => '/clothes/#{$clothes->code}'}= $clothes->category
-          %small.highlight= commify($clothes->price)
-      - }
-%div= include 'partial/order_info'
-%p= commify($order->late_fee)
-%p= $order->return_method
-%form#form-return.form-horizontal{:method => 'post', :action => "#{url_for('')}"}
-  %fieldset
-    .control-group
-      .controls
-        %button.btn.btn-success{:type => 'submit'} 반납
-%p= include 'partial/satisfaction', s => $satisfaction
 
 
 @@ new-clothes.html.haml
