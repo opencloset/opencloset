@@ -93,7 +93,7 @@ __PACKAGE__->table("order");
   is_nullable: 1
   size: 32
 
-=head2 comment
+=head2 desc
 
   data_type: 'text'
   is_nullable: 1
@@ -207,7 +207,7 @@ __PACKAGE__->add_columns(
   { data_type => "varchar", is_nullable => 1, size => 32 },
   "staff_name",
   { data_type => "varchar", is_nullable => 1, size => 32 },
-  "comment",
+  "desc",
   { data_type => "text", is_nullable => 1 },
   "purpose",
   { data_type => "varchar", is_nullable => 1, size => 32 },
@@ -323,8 +323,8 @@ Composing rels: L</order_clothes> -> clothes
 __PACKAGE__->many_to_many("clothes", "order_clothes", "clothes");
 
 
-# Created by DBIx::Class::Schema::Loader v0.07038 @ 2013-12-23 16:23:46
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:w33NPug0AmbgJWpkmOo93w
+# Created by DBIx::Class::Schema::Loader v0.07038 @ 2013-12-23 16:34:45
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:YkVjep07SZsc+feKcBadaQ
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

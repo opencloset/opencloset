@@ -182,7 +182,7 @@ CREATE TABLE `order` (
   `payment_method`   VARCHAR(32) DEFAULT NULL,
   `l_payment_method` VARCHAR(32) DEFAULT NULL,
   `staff_name`       VARCHAR(32) DEFAULT NULL,
-  `comment`          TEXT DEFAULT NULL,
+  `desc`             TEXT DEFAULT NULL,
 
   -- guest info
   `purpose`          VARCHAR(32),
