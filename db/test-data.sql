@@ -40,15 +40,15 @@ INSERT
 
 INSERT
   INTO `clothes` (
-    `id`,`code`,`bust`,`waist`,`arm`,`length`,`category`,
+    `id`,`code`,`bust`,`waist`,`arm`,`length`,`category`,`price`,
     `user_id`,`status_id`,`gender`,`color`,`compatible_code`
   )
   VALUES 
-    (1, '0J001', 94,   NULL, 51,   NULL, 'jacket', 2, 1, 'male', 'B', NULL),
-    (2, '0P001', NULL, 79,   NULL, 102,  'pants',  2, 1, 'male', 'B', NULL),
-    (3, '0S001', NULL, NULL, NULL, NULL, 'shirt',  2, 1, 'male', 'B', NULL),
-    (4, '0A001', NULL, NULL, NULL, NULL, 'shoes',  2, 1, 'male', 'B', NULL),
-    (5, '0T001', NULL, NULL, NULL, NULL, 'tie',    2, 1, 'male', 'B', NULL)
+    (1, '0J001', 94,   NULL, 51,   NULL, 'jacket', 15000, 2, 1, 'male', 'B', NULL),
+    (2, '0P001', NULL, 79,   NULL, 102,  'pants',  10000, 2, 1, 'male', 'B', NULL),
+    (3, '0S001', NULL, NULL, NULL, NULL, 'shirt',   5000, 2, 1, 'male', 'B', NULL),
+    (4, '0A001', NULL, NULL, NULL, NULL, 'shoes',   5000, 2, 1, 'male', 'B', NULL),
+    (5, '0T001', NULL, NULL, NULL, NULL, 'tie',     5000, 2, 1, 'male', 'B', NULL)
     ;
 
 INSERT
@@ -60,10 +60,10 @@ INSERT
 
 -- 대여중인거
 INSERT
-  INTO `clothes` (`id`,`code`,`bust`,`waist`,`arm`,`length`,`category`,`user_id`,`status_id`)
+  INTO `clothes` (`id`,`code`,`bust`,`waist`,`arm`,`length`,`category`,`price`,`user_id`,`status_id`)
   VALUES
-    (6,'0J002', 99, NULL, 55, NULL, 'jacket', 2, 2),
-    (7,'0P002', NULL, 82, NULL, 112, 'pants', 2, 2)
+    (6,'0J002', 99, NULL, 55, NULL, 'jacket', '15000', 2, 2),
+    (7,'0P002', NULL, 82, NULL, 112, 'pants', '10000', 2, 2)
     ;
 
 INSERT
