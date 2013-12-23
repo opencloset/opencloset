@@ -84,6 +84,13 @@ INSERT
 INSERT INTO `order_clothes` (`order_id`, `clothes_code`) VALUES (1,'0J002'), (1,'0P002');
 
 INSERT
+  INTO `order_detail` (`order_id`, `clothes_code`, `name`, `price`, `desc`)
+  VALUES
+    (1, '0J002', 'J002 - jacket', 15000, '2번 기증 재킷'),
+    (1, '0P002', 'P002 - pants',  10000, '2번 기증 바지')
+  ;
+
+INSERT
   INTO `satisfaction` (`user_id`,`clothes_code`,`bust`,`waist`,`arm`,`top_fit`,`bottom_fit`,`create_date`)
   VALUES (2,'0J002',1,2,3,4,5,'2013-10-18')
   ;

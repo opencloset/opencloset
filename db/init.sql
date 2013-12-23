@@ -227,8 +227,9 @@ CREATE TABLE `order_detail` (
   `id`           INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `order_id`     INT UNSIGNED NOT NULL,
   `clothes_code` CHAR(5)      DEFAULT NULL,
+  `name`         TEXT         NOT NULL,
   `price`        INT          DEFAULT 0,
-  `comment`      INT          DEFAULT 0,
+  `desc`         TEXT         DEFAULT NULL,
 
   PRIMARY KEY (`id`),
   CONSTRAINT `fk_order_detail1` FOREIGN KEY (`order_id`)     REFERENCES `order`   (`id`)   ON DELETE CASCADE,

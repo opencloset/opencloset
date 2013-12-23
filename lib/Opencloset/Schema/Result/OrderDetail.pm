@@ -48,16 +48,20 @@ __PACKAGE__->table("order_detail");
   is_nullable: 1
   size: 5
 
+=head2 name
+
+  data_type: 'text'
+  is_nullable: 0
+
 =head2 price
 
   data_type: 'integer'
   default_value: 0
   is_nullable: 1
 
-=head2 comment
+=head2 desc
 
-  data_type: 'integer'
-  default_value: 0
+  data_type: 'text'
   is_nullable: 1
 
 =cut
@@ -79,10 +83,12 @@ __PACKAGE__->add_columns(
   },
   "clothes_code",
   { data_type => "char", is_foreign_key => 1, is_nullable => 1, size => 5 },
+  "name",
+  { data_type => "text", is_nullable => 0 },
   "price",
   { data_type => "integer", default_value => 0, is_nullable => 1 },
-  "comment",
-  { data_type => "integer", default_value => 0, is_nullable => 1 },
+  "desc",
+  { data_type => "text", is_nullable => 1 },
 );
 
 =head1 PRIMARY KEY
@@ -135,8 +141,8 @@ __PACKAGE__->belongs_to(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07038 @ 2013-12-23 14:09:43
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:Aff191pWJD4PcY/KLGNriA
+# Created by DBIx::Class::Schema::Loader v0.07038 @ 2013-12-23 15:19:52
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:DCBSiVvd1DuMhYfJR57egw
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration
