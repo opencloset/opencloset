@@ -3288,15 +3288,15 @@ __DATA__
 
 
 @@ order/id.html.haml
-- my $id   = 'order-id';
+- my $_id   = 'order-id';
 - my $meta = $sidebar->{meta};
 - layout 'default',
--   active_id   => $id,
+-   active_id   => $_id,
 -   breadcrumbs => [
 -     { text => $meta->{'menu-order'}{text} },
--     { text => $meta->{$id}{text} },
+-     { text => $meta->{$_id}{text} },
 -   ];
-- title $meta->{$id}{text};
+- title $meta->{$_id}{text};
 
                 .row
                   .col-sm-10.col-sm-offset-1
