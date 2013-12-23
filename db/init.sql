@@ -220,6 +220,22 @@ CREATE TABLE `order_clothes` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
+-- order_detail
+--
+
+CREATE TABLE `order_detail` (
+  `id`           INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `order_id`     INT UNSIGNED NOT NULL,
+  `clothes_code` CHAR(5)      DEFAULT NULL,
+  `price`        INT          DEFAULT 0,
+  `comment`      INT          DEFAULT 0,
+
+  PRIMARY KEY (`id`),
+  CONSTRAINT `fk_order_detail1` FOREIGN KEY (`order_id`)     REFERENCES `order`   (`id`)   ON DELETE CASCADE,
+  CONSTRAINT `fk_order_detail2` FOREIGN KEY (`clothes_code`) REFERENCES `clothes` (`code`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
 -- donor_clothes
 --
 
