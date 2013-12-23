@@ -3380,45 +3380,49 @@ __DATA__
                                     결제 방법:
                                     %strong 현금 / 카드 / 현금 + 카드
                           .space
-                          %div
-                            %table.table.table-striped.table-bordered.table-hover
-                              %thead
-                                %tr
-                                  %th.center #
-                                  %th 옷
-                                  %th 상태
-                                  %th 종류
-                                  %th 대여 가격
-                                  %th 기타
-                              %tbody
-                                - my $count = 0;
-                                - for my $clothes ( $order->clothes ) {
+                          - my $total_price = 0;
+                            %div
+                              %table.table.table-striped.table-bordered.table-hover
+                                %thead
                                   %tr
-                                    %td.center= ++$count
-                                    %td
-                                      %a{ :href => "/clothes/#{ $clothes->code }" }= $clothes->code
-                                    %td
-                                      %span.order-status.label= $clothes->status->name
-                                    %td
-                                      %span= $clothes->category
-                                    %td
-                                      %span= $clothes->price
-                                    %td ...
-                                - }
+                                    %th.center #
+                                    %th 항목
+                                    %th 상태
+                                    %th 대여 가격
+                                    %th 기타
+                                %tbody
+                                  - my $count = 0;
+                                  - for my $detail ( $order->order_details ) {
+                                  -   $total_price += $detail->price;
+                                    %tr
+                                      %td.center= ++$count
+                                      %td
+                                        - if ( $detail->clothes ) {
+                                          %a{ :href => "/clothes/#{ $detail->clothes->code }" }= $detail->name
+                                        - }
+                                        - else {
+                                          = $detail->name
+                                        - }
+                                      %td
+                                      %td
+                                        %span= $detail->price . ' 원'
+                                      %td
+                                        %span= $detail->desc || q{none}
+                                  - }
 
-                          .hr.hr8.hr-double.hr-dotted
+                            .hr.hr8.hr-double.hr-dotted
 
-                          .row
-                            .col-sm-5.pull-right
-                              %h4.pull-right
-                                총액:
-                                %span.red 20000원
-                            .col-sm-7.pull-left
-                              추가 정보 ...
+                            .row
+                              .col-sm-5.pull-right
+                                %h4.pull-right
+                                  총액:
+                                  %span.red= "${total_price}원"
+                              .col-sm-7.pull-left
+                                추가 정보 ...
 
-                          .space-6
-                          .well
-                            열린옷장을 이용해주셔서 고맙습니다.
+                            .space-6
+                            .well
+                              열린옷장을 이용해주셔서 고맙습니다.
 
 
 

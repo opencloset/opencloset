@@ -62,6 +62,11 @@
 .page-content #order-table table th:nth-child(2) { width: 160px; }
 .page-content #order-table table th:nth-child(3) { width: 200px; }
 .page-content #order-table table th:nth-child(4), .page-content #order-table table th:nth-child(5) { width: 80px; }
+.page-content #order-id table th:first-child { width: 40px; }
+.page-content #order-id table th:nth-child(2) { width: 120px; }
+.page-content #order-id table th:nth-child(3) { width: 160px; }
+.page-content #order-id table th:nth-child(4) { width: 80px; }
+.page-content #order-id table td:nth-child(4) { text-align: right; }
 .page-content #user-table table th:nth-child(5), .page-content #user-table table td:nth-child(5) { border-right: none; }
 .page-content #user-table table th:nth-child(6), .page-content #user-table table td:nth-child(6) { border-right: none; border-left: none; }
 .page-content #user-table table th:nth-child(7), .page-content #user-table table td:nth-child(7) { border-left: none; }
