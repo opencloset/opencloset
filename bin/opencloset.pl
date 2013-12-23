@@ -3398,7 +3398,7 @@ __DATA__
                                     %td
                                       %a{ :href => "/clothes/#{ $clothes->code }" }= $clothes->code
                                     %td
-                                      %span.order-status.label= %clothes->status
+                                      %span.order-status.label= $clothes->status->name
                                     %td
                                       %span 자켓
                                     %td
