@@ -180,10 +180,6 @@ CREATE TABLE `order` (
   `return_date`      DATETIME DEFAULT NULL,
   `return_method`    VARCHAR(32) DEFAULT NULL,
   `payment_method`   VARCHAR(32) DEFAULT NULL,
-  `price`            INT DEFAULT 0,
-  `discount`         INT DEFAULT 0,
-  `late_fee`         INT DEFAULT 0,
-  `l_discount`       INT DEFAULT 0, -- late_fee discount
   `l_payment_method` VARCHAR(32) DEFAULT NULL,
   `staff_name`       VARCHAR(32) DEFAULT NULL,
   `comment`          TEXT DEFAULT NULL,

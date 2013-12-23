@@ -81,30 +81,6 @@ __PACKAGE__->table("order");
   is_nullable: 1
   size: 32
 
-=head2 price
-
-  data_type: 'integer'
-  default_value: 0
-  is_nullable: 1
-
-=head2 discount
-
-  data_type: 'integer'
-  default_value: 0
-  is_nullable: 1
-
-=head2 late_fee
-
-  data_type: 'integer'
-  default_value: 0
-  is_nullable: 1
-
-=head2 l_discount
-
-  data_type: 'integer'
-  default_value: 0
-  is_nullable: 1
-
 =head2 l_payment_method
 
   data_type: 'varchar'
@@ -227,14 +203,6 @@ __PACKAGE__->add_columns(
   { data_type => "varchar", is_nullable => 1, size => 32 },
   "payment_method",
   { data_type => "varchar", is_nullable => 1, size => 32 },
-  "price",
-  { data_type => "integer", default_value => 0, is_nullable => 1 },
-  "discount",
-  { data_type => "integer", default_value => 0, is_nullable => 1 },
-  "late_fee",
-  { data_type => "integer", default_value => 0, is_nullable => 1 },
-  "l_discount",
-  { data_type => "integer", default_value => 0, is_nullable => 1 },
   "l_payment_method",
   { data_type => "varchar", is_nullable => 1, size => 32 },
   "staff_name",
@@ -355,8 +323,8 @@ Composing rels: L</order_clothes> -> clothes
 __PACKAGE__->many_to_many("clothes", "order_clothes", "clothes");
 
 
-# Created by DBIx::Class::Schema::Loader v0.07038 @ 2013-12-23 14:07:53
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:D7dto/Py58e3QbVm62EbEQ
+# Created by DBIx::Class::Schema::Loader v0.07038 @ 2013-12-23 16:23:46
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:w33NPug0AmbgJWpkmOo93w
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration
