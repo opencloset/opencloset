@@ -3400,7 +3400,7 @@ __DATA__
                                     %td
                                       %span.order-status.label= $clothes->status->name
                                     %td
-                                      %span 자켓
+                                      %span= $clothes->category
                                     %td
                                       %span= $clothes->price
                                     %td ...
