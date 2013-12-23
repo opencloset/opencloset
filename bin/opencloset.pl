@@ -2167,7 +2167,7 @@ post '/sms' => sub {
     );
 };
 
-app->secret( app->defaults->{secret} );
+app->secrets( app->defaults->{secrets} );
 app->start;
 
 __DATA__
