@@ -3413,12 +3413,12 @@ __DATA__
                             .hr.hr8.hr-double.hr-dotted
 
                             .row
-                              .col-sm-5.pull-right
+                              .col-sm-3.pull-right
                                 %h4.pull-right
                                   총액:
-                                  %span.red= "${total_price}원"
-                              .col-sm-7.pull-left
-                                추가 정보 ...
+                                  %span.red= "${total_price} 원"
+                              .col-sm-9.pull-left
+                                = $order->desc || q{}
 
                             .space-6
                             .well
