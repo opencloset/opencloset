@@ -84,6 +84,12 @@ $ ->
         when 'foot'   then str = '발 크기'
         else               str = undef
       return str
+    commify: (num) ->
+      num += ''
+      regex = /(^[+-]?\d+)(\d{3})/
+      while (regex.test(num))
+        num = num.replace(regex, '$1' + ',' + '$2')
+      return num
 
   #
   # return nothing

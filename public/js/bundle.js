@@ -188,6 +188,15 @@
             str = undef;
         }
         return str;
+      },
+      commify: function(num) {
+        var regex;
+        num += '';
+        regex = /(^[+-]?\d+)(\d{3})/;
+        while (regex.test(num)) {
+          num = num.replace(regex, '$1' + ',' + '$2');
+        }
+        return num;
       }
     };
   });
