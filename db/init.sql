@@ -180,13 +180,9 @@ CREATE TABLE `order` (
   `return_date`      DATETIME DEFAULT NULL,
   `return_method`    VARCHAR(32) DEFAULT NULL,
   `payment_method`   VARCHAR(32) DEFAULT NULL,
-  `price`            INT DEFAULT 0,
-  `discount`         INT DEFAULT 0,
-  `late_fee`         INT DEFAULT 0,
-  `l_discount`       INT DEFAULT 0, -- late_fee discount
   `l_payment_method` VARCHAR(32) DEFAULT NULL,
   `staff_name`       VARCHAR(32) DEFAULT NULL,
-  `comment`          TEXT DEFAULT NULL,
+  `desc`             TEXT DEFAULT NULL,
 
   -- guest info
   `purpose`          VARCHAR(32),
@@ -217,6 +213,25 @@ CREATE TABLE `order_clothes` (
   PRIMARY KEY (`order_id`, `clothes_code`),
   CONSTRAINT `fk_order_clothes1` FOREIGN KEY (`order_id`)     REFERENCES `order`   (`id`)   ON DELETE CASCADE,
   CONSTRAINT `fk_order_clothes2` FOREIGN KEY (`clothes_code`) REFERENCES `clothes` (`code`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- order_detail
+--
+
+CREATE TABLE `order_detail` (
+  `id`           INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `order_id`     INT UNSIGNED NOT NULL,
+  `clothes_code` CHAR(5)      DEFAULT NULL,
+  `status_id`    INT UNSIGNED DEFAULT NULL,
+  `name`         TEXT         NOT NULL,
+  `price`        INT          DEFAULT 0,
+  `desc`         TEXT         DEFAULT NULL,
+
+  PRIMARY KEY (`id`),
+  CONSTRAINT `fk_order_detail1` FOREIGN KEY (`order_id`)     REFERENCES `order`   (`id`)   ON DELETE CASCADE,
+  CONSTRAINT `fk_order_detail2` FOREIGN KEY (`clothes_code`) REFERENCES `clothes` (`code`) ON DELETE CASCADE,
+  CONSTRAINT `fk_order_detail3` FOREIGN KEY (`status_id`)    REFERENCES `status`  (`id`)   ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --

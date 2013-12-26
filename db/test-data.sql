@@ -40,15 +40,15 @@ INSERT
 
 INSERT
   INTO `clothes` (
-    `id`,`code`,`bust`,`waist`,`arm`,`length`,`category`,
+    `id`,`code`,`bust`,`waist`,`arm`,`length`,`category`,`price`,
     `user_id`,`status_id`,`gender`,`color`,`compatible_code`
   )
   VALUES 
-    (1, '0J001', 94,   NULL, 51,   NULL, 'jacket', 2, 1, 'male', 'B', NULL),
-    (2, '0P001', NULL, 79,   NULL, 102,  'pants',  2, 1, 'male', 'B', NULL),
-    (3, '0S001', NULL, NULL, NULL, NULL, 'shirt',  2, 1, 'male', 'B', NULL),
-    (4, '0A001', NULL, NULL, NULL, NULL, 'shoes',  2, 1, 'male', 'B', NULL),
-    (5, '0T001', NULL, NULL, NULL, NULL, 'tie',    2, 1, 'male', 'B', NULL)
+    (1, '0J001', 94,   NULL, 51,   NULL, 'jacket', 15000, 2, 1, 'male', 'B', NULL),
+    (2, '0P001', NULL, 79,   NULL, 102,  'pants',  10000, 2, 1, 'male', 'B', NULL),
+    (3, '0S001', NULL, NULL, NULL, NULL, 'shirt',   5000, 2, 1, 'male', 'B', NULL),
+    (4, '0A001', NULL, NULL, NULL, NULL, 'shoes',   5000, 2, 1, 'male', 'B', NULL),
+    (5, '0T001', NULL, NULL, NULL, NULL, 'tie',     5000, 2, 1, 'male', 'B', NULL)
     ;
 
 INSERT
@@ -60,10 +60,10 @@ INSERT
 
 -- 대여중인거
 INSERT
-  INTO `clothes` (`id`,`code`,`bust`,`waist`,`arm`,`length`,`category`,`user_id`,`status_id`)
+  INTO `clothes` (`id`,`code`,`bust`,`waist`,`arm`,`length`,`category`,`price`,`user_id`,`status_id`)
   VALUES
-    (6,'0J002', 99, NULL, 55, NULL, 'jacket', 2, 2),
-    (7,'0P002', NULL, 82, NULL, 112, 'pants', 2, 2)
+    (6,'0J002', 99, NULL, 55, NULL, 'jacket', '15000', 2, 2),
+    (7,'0P002', NULL, 82, NULL, 112, 'pants', '10000', 2, 2)
     ;
 
 INSERT
@@ -76,12 +76,20 @@ INSERT
 INSERT
   INTO `order` (
     `id`,`user_id`,`status_id`,`rental_date`,`target_date`,`return_date`,
-    `price`,`discount`,`comment`,`payment_method`,`staff_name`,`purpose`,`bust`,`waist`,`arm`,`leg`
+    `desc`,`payment_method`,`staff_name`,`purpose`,`bust`,`waist`,`arm`,`leg`
   )
   VALUES
-    (1,2,2,'2013-10-18','2013-10-21',NULL,20000,0,NULL,'현금','김소령','입사면접',95,78,60,105);
+    (1,2,2,'2013-10-18','2013-10-21',NULL,NULL,'현금','김소령','입사면접',95,78,60,105);
 
 INSERT INTO `order_clothes` (`order_id`, `clothes_code`) VALUES (1,'0J002'), (1,'0P002');
+
+INSERT
+  INTO `order_detail` (`order_id`, `clothes_code`, `status_id`, `name`, `price`, `desc`)
+  VALUES
+    (1, '0J002', 2,    'J002 - jacket', 15000, '2번 기증 재킷'),
+    (1, '0P002', 2,    'P002 - pants',  10000, '2번 기증 바지'),
+    (1, NULL,    NULL, '에누리',        -2500, '대여자 상황을 고려해 택배비 에누리')
+  ;
 
 INSERT
   INTO `satisfaction` (`user_id`,`clothes_code`,`bust`,`waist`,`arm`,`top_fit`,`bottom_fit`,`create_date`)

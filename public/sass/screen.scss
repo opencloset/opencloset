@@ -216,6 +216,34 @@ $opencloset-darken-yellow: desaturate(darken($opencloset-yellow, 4%), 10%);
             width: 80px;
         }
     }
+    #order-id {
+        table {
+            th {
+                &:first-child {
+                    width: 40px;
+                }
+                &:nth-child(2) {
+                    width: 120px;
+                }
+                &:nth-child(3) {
+                    width: 90px;
+                }
+                &:nth-child(4) {
+                    width: 80px;
+                }
+            }
+            td {
+                &:nth-child(4) {
+                    text-align: right;
+                }
+            }
+        }
+        ul li.row {
+            margin-left: 0;
+            margin-right: 0;
+        }
+
+    }
     #user-table table {
         th, td {
             &:nth-child(5) {

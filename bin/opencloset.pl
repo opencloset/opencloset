@@ -111,6 +111,17 @@ helper sms2hr => sub {
     return { $sms->get_columns };
 };
 
+helper order_price => sub {
+    my ( $self, $order ) = @_;
+
+    return 0 unless $order;
+
+    my $price = 0;
+    $price += $_->price for $order->order_details;
+
+    return $price;
+};
+
 helper calc_overdue => sub {
     my ( $self, $target_dt, $return_dt ) = @_;
 
@@ -138,8 +149,11 @@ helper commify => sub {
 helper calc_late_fee => sub {
     my ( $self, $order, $commify ) = @_;
 
+    my $price = 0;
+    $price += $_->price for $order->order_details;
+
     my $overdue  = $self->calc_overdue( $order->target_date );
-    my $late_fee = $order->price * 0.2 * $overdue;
+    my $late_fee = $price * 0.2 * $overdue;
 
     return $commify ? $self->commify($late_fee) : $late_fee;
 };
@@ -417,6 +431,37 @@ helper create_order => sub {
         str  => $error,
         data => {},
     }), return unless $order;
+
+    return $order;
+};
+
+helper get_order => sub {
+    my ( $self, $params ) = @_;
+
+    #
+    # validate params
+    #
+    my $v = $self->create_validator;
+    $v->field('id')->required(1)->regexp(qr/^\d+$/);
+    unless ( $self->validate( $v, $params ) ) {
+        my @error_str;
+        while ( my ( $k, $v ) = each %{ $v->errors } ) {
+            push @error_str, "$k:$v";
+        }
+        return $self->error( 400, {
+            str  => join(',', @error_str),
+            data => $v->errors,
+        });
+    }
+
+    #
+    # find order
+    #
+    my $order = $DB->resultset('Order')->find( $params );
+    return $self->error( 404, {
+        str  => 'order not found',
+        data => {},
+    }) unless $order;
 
     return $order;
 };
@@ -752,30 +797,8 @@ group {
         #
         my %params = $self->get_params(qw/ id /);
 
-        #
-        # validate params
-        #
-        my $v = $self->create_validator;
-        $v->field('id')->required(1)->regexp(qr/^\d+$/);
-        unless ( $self->validate( $v, \%params ) ) {
-            my @error_str;
-            while ( my ( $k, $v ) = each %{ $v->errors } ) {
-                push @error_str, "$k:$v";
-            }
-            return $self->error( 400, {
-                str  => join(',', @error_str),
-                data => $v->errors,
-            });
-        }
-
-        #
-        # find user
-        #
-        my $order = $DB->resultset('Order')->find( \%params );
-        return $self->error( 404, {
-            str  => 'order not found',
-            data => {},
-        }) unless $order;
+        my $order = $self->get_order( \%params );
+        return unless $order;
 
         #
         # response
@@ -1932,63 +1955,22 @@ get '/orders' => sub {
     $self->stash( orders => $orders );
 } => 'orders';
 
-get '/orders/:id' => sub {
+get '/order/:id' => sub {
     my $self = shift;
 
-    my $order = $DB->resultset('Order')->find({ id => $self->param('id') });
-    return $self->error(404, "Not found") unless $order;
+    #
+    # fetch params
+    #
+    my %params = $self->get_params(qw/ id /);
 
-    my @clothes_list = $order->cloths;
-    my $price = 0;
-    for my $clothes (@clothes_list) {
-        $price += $clothes->price;
-    }
+    my $order = $self->get_order( \%params );
+    return unless $order;
 
-    my $overdue  = $self->calc_overdue($order->target_date);
-    my $late_fee = $self->calc_late_fee($order);
-
-    my $clothes = $order->cloths({ category => 'jacket' })->next;
-
-    my $satisfaction;
-    if ($clothes) {
-        $satisfaction = $clothes->satisfactions({
-            cloth_id => $clothes->id,
-            guest_id  => $order->guest->id,
-        })->next;
-    }
-
-    $self->stash(
-        order        => $order,
-        clothes      => \@clothes_list,
-        price        => $price,
-        overdue      => $overdue,
-        late_fee     => $late_fee,
-        satisfaction => $satisfaction,
-    );
-
-    my %fillinform = $order->get_columns;
-    $fillinform{price} = $price unless $fillinform{price};
-    $fillinform{late_fee} = $late_fee;
-    unless ($fillinform{target_date}) {
-        $fillinform{target_date} = DateTime->now()->add(days => 3)->ymd;
-    }
-
-    my $status_id = $order->status ? $order->status->id : undef;
-    if ($status_id) {
-        if ($status_id == $Opencloset::Constant::STATUS_RENT) {
-            $self->stash(template => 'orders/id/status_rent');
-        } elsif ($status_id == $Opencloset::Constant::STATUS_RETURN) {
-            $self->stash(template => 'orders/id/status_return');
-        } elsif ($status_id == $Opencloset::Constant::STATUS_PARTIAL_RETURN) {
-            $self->stash(template => 'orders/id/status_partial_return');
-        }
-    } else {
-        $self->stash(template => 'orders/id/nil_status');
-    }
-
-    map { delete $fillinform{$_} } qw/bust waist arm length/;
-    $self->render_fillinform({ %fillinform });
-};
+    #
+    # response
+    #
+    $self->stash( order => $order );
+} => 'order/id';
 
 any [qw/post put patch/] => '/orders/:id' => sub {
     my $self = shift;
@@ -2199,7 +2181,7 @@ post '/sms' => sub {
     );
 };
 
-app->secret( app->defaults->{secret} );
+app->secrets( app->defaults->{secrets} );
 app->start;
 
 __DATA__
@@ -3319,265 +3301,187 @@ __DATA__
       - }
 
 
-@@ orders/id/nil_status.html.haml
-- layout 'default', jses => ['orders-id.js'];
-- title '주문확인';
-
-%div.pull-right= include 'guests/breadcrumb', guest => $order->guest, status_id => ''
-
-%div
-  %p.muted
-    최종금액 = 정상가 + 추가금액 - 에누리금액
-  %p#total_price
-    %strong#total_fee{:title => '최종금액'}
-    %span =
-    %span#origin_fee{:title => '정상가'}
-    %span +
-    %span#additional_fee{:title => '추가금액'}
-    %span -
-    %span#discount_fee{:title => '에누리금액'}
-
-%form.form-horizontal{:method => 'post', :action => ''}
-  %legend
-    - my $loop = 0;
-    - for my $clothes (@$clothes_list) {
-      - $loop++;
-      - if ($loop == 1) {
-        %span
-          %a{:href => '/clothes/#{$clothes->code}'}= $clothes->category
-          %small.highlight= commify($clothes->price)
-      - } elsif ($loop == 2) {
-        %span
-          with
-          %a{:href => '/clothes/#{$clothes->code}'}= $clothes->category
-          %small.highlight= commify($clothes->price)
-      - } else {
-        %span
-          ,
-          %a{:href => '/clothes/#{$clothes->code}'}= $clothes->category
-          %small.highlight= commify($clothes->price)
-      - }
-    - }
-  .control-group
-    %label.control-label{:for => 'input-price'} 가격
-    .controls
-      %input{:type => 'text', :id => 'input-price', :name => 'price', :value => '#{$price}'}
-      원
-  .control-group
-    %label.control-label{:for => 'input-discount'} 에누리
-    .controls
-      %input{:type => 'text', :id => 'input-discount', :name => 'discount'}
-      원
-  .control-group
-    %label.control-label 결제방법
-    .controls
-      %label.radio.inline
-        %input{:type => 'radio', :name => 'payment_method', :value => '현금'}
-          현금
-      %label.radio.inline
-        %input{:type => 'radio', :name => 'payment_method', :value => '카드'}
-          카드
-      %label.radio.inline
-        %input{:type => 'radio', :name => 'payment_method', :value => '현금+카드'}
-          현금 + 카드
-  .control-group
-    %label.control-label{:for => 'input-target-date'} 반납예정일
-    .controls
-      %input#input-target-date{:type => 'text', :name => 'target_date'}
-  .control-group
-    %label.control-label{:for => 'input-staff'} staff
-    .controls
-      %input#input-staff{:type => 'text', :name => 'staff_name'}
-      %p
-        %span.label.clickable 한만일
-        %span.label.clickable 김소령
-        %span.label.clickable 서동건
-        %span.label.clickable 정선경
-        %span.label.clickable 김기리
-  .control-group
-    %label.control-label{:for => 'input-comment'} Comment
-    .controls
-      %textarea{:id => 'input-comment', :name => 'comment'}
-  .control-group
-    %label.control-label 만족도
-    .controls
-      %input.span1{:type => 'text', :name => 'bust',       :placeholder => '가슴'}
-      %input.span1{:type => 'text', :name => 'waist',      :placeholder => '허리'}
-      %input.span1{:type => 'text', :name => 'arm',        :placeholder => '팔'}
-      %input.span1{:type => 'text', :name => 'top_fit',    :placeholder => '상의'}
-      %input.span1{:type => 'text', :name => 'bottom_fit', :placeholder => '하의'}
-  .control-group
-    .controls
-      %input.btn.btn-success{:type => 'submit', :value => '대여완료'}
-
-@@ partial/status_label.html.haml
-- if ($overdue && $order->status_id == $Opencloset::Constant::STATUS_RENT) {
-  %span.label{:class => 'status-#{$order->status_id}'} 연체중
-- } else {
-  %span.label{:class => 'status-#{$order->status_id}'}= $order->status->name
-- }
-%p
-  %span.highlight= $order->purpose
-  으로 방문
-
-@@ partial/order_info.html.haml
-- if ($order->rental_date) {
-  %h3
-    %time.highlight= $order->rental_date->ymd . ' ~ '
-    %time.highlight= $order->return_date->ymd if $order->return_date
-  %p.muted= '반납예정일: ' . $order->target_date->ymd if $order->target_date
-- }
-
-%h3
-  %span.highlight= commify($order->price - $order->discount)
-%p.muted= commify($order->discount) . '원 할인'
-
-%p= $order->payment_method
-%p= $order->staff_name
-
-- if ($overdue) {
-  %p.muted
-    %span 연체료
-    %strong.text-error= commify($late_fee)
-    는 연체일(#{ $overdue }) x 대여금액(#{ commify($order->price) })의 20% 로 계산됩니다
-- }
-
-- if ($order->comment) {
-  %p.well= $order->comment 
-- }
-
-
-@@ partial/satisfaction.html.haml
-%h5 만족도
-- my ($c, $w, $a, $t, $b) = ($s->bust || 0, $s->waist || 0, $s->arm || 0, $s->top_fit || 0, $s->bottom_fit || 0);
-%p
-  %span.badge{:class => "satisfaction-#{$c}"} 가슴
-  %span.badge{:class => "satisfaction-#{$w}"} 허리
-  %span.badge{:class => "satisfaction-#{$a}"} 팔길이
-  %span.badge{:class => "satisfaction-#{$t}"} 상의fit
-  %span.badge{:class => "satisfaction-#{$b}"} 하의fit
-
-
-@@ orders/id/status_rent.html.haml
-- my $id   = 'orders-id';
+@@ order/id.html.haml
+- my $_id   = 'order-id';
 - my $meta = $sidebar->{meta};
 - layout 'default',
--   active_id   => $id,
+-   active_id   => $_id,
 -   breadcrumbs => [
--     { text => $meta->{'orders'}{text}, link => '/orders' },
--     { text => $meta->{$id}{text} },
--   ],
--   ;
-- title $meta->{$id}{text} . ': 대여중';
+-     { text => $meta->{'menu-order'}{text} },
+-     { text => $meta->{$_id}{text} },
+-   ];
+- title $meta->{$_id}{text};
 
-%p= include 'partial/status_label'
-%div.pull-right= include 'guests/breadcrumb', guest => $order->guest, status_id => ''
-%p.text-info 반납품목을 확인해주세요
-#clothes-category
-  %form#form-clothes-code
-    %fieldset
-      .input-append
-        %input#input-clothes-code.input-large{:type => 'text', :placeholder => '품번'}
-        %button#btn-clothes-code.btn{:type => 'button'} 입력
-      - for my $clothes (@$clothes_list) {
-        %label.checkbox
-          %input.input-clothes{:type => 'checkbox', :data-clothes-code => '#{$clothes->code}'}
-          %a{:href => '/clothes/#{$clothes->code}'}= $clothes->category
-          %small.highlight= commify($clothes->price)
-      - }
-%div= include 'partial/order_info'
+- my $order_price = order_price($order);
+- my $late_fee    = calc_late_fee($order);
 
-%form#form-return.form-horizontal{:method => 'post', :action => "#{url_for('')}"}
-  %fieldset
-    %legend 연체료 및 반납방법
-    .control-group
-      %label 연체료
-      .controls
-        %input#input-late_fee.input-mini{:type => 'text', :name => 'late_fee', :placeholder => '연체료'}
-    .control-group
-      %label{:for => '#input-ldiscount'} 연체료의 에누리
-      .controls
-        %input#input-ldiscount.input-mini{:type => 'text', :name => 'l_discount', :placeholder => '연체료의 에누리'}
-    .control-group
-      %label 반납방법
-      .controls
-        %label.radio.inline
-          %input{:type => 'radio', :name => 'return_method', :value => '방문'}
-          방문
-        %label.radio.inline
-          %input{:type => 'radio', :name => 'return_method', :value => '택배'}
-          택배
-    .control-group
-      %label 결제방법
-      .controls
-        %label.radio.inline
-          %input{:type => 'radio', :name => 'l_payment_method', :value => '현금'}
-          현금
-        %label.radio.inline
-          %input{:type => 'radio', :name => 'l_payment_method', :value => '카드'}
-          카드
-        %label.radio.inline
-          %input{:type => 'radio', :name => 'l_payment_method', :value => '현금+카드'}
-          현금+카드
-    .control-group
-      .controls
-        %button.btn.btn-success{:type => 'submit'} 반납
-        %a.pull-right#btn-order-cancel.btn.btn-danger{:href => '#{url_for()}'} 주문취소
+                .row
+                  .col-sm-10.col-sm-offset-1
+                    .widget-box.transparent.invoice-box
+                      /
+                      / body
+                      /
+                      .widget-body
+                        .widget-main
+                          .row
+                            /
+                            / 주문서 정보
+                            /
+                            .col-sm-6
+                              .row
+                                .col-xs-11.label.label-lg.label-info.arrowed-in.arrowed-right
+                                  %strong 주문서 정보
+                              .row
+                                %ul.list-unstyled.spaced
+                                  %li.row
+                                    .col-sm-1
+                                      %i.icon-caret-right.blue
+                                    .col-sm-3.no-padding-left
+                                      담당자:
+                                    .col-sm-8
+                                      %strong= $order->staff_name
+                                  %li.row
+                                    .col-sm-1
+                                      %i.icon-caret-right.blue
+                                    .col-sm-3.no-padding-left
+                                      대여일:
+                                    .col-sm-8
+                                      %strong= $order->rental_date->ymd
+                                  %li.row
+                                    .col-sm-1
+                                      %i.icon-caret-right.blue
+                                    .col-sm-3.no-padding-left
+                                      반납 예정일:
+                                    .col-sm-8
+                                      %strong= $order->target_date->ymd
+                                  %li.row
+                                    .col-sm-1
+                                      %i.icon-caret-right.blue
+                                    .col-sm-3.no-padding-left
+                                      대여비:
+                                    .col-sm-8
+                                      %strong= $order->payment_method
+                                      \/
+                                      %strong= commify($order_price) . '원'
+                                  %li.row
+                                    .col-sm-1
+                                      %i.icon-caret-right.blue
+                                    .col-sm-3.no-padding-left
+                                      연체료:
+                                    .col-sm-8
+                                      - if ($late_fee) {
+                                        %strong= $order->return_method || '미납'
+                                        \/
+                                        %strong= sprintf( "%s원", commify($late_fee) )
+                                        %br
+                                        %strong= sprintf( "%s일 x %s원 x 20%%", calc_overdue($order->target_date), commify($order_price) )
+                                      - }
+                                      - else {
+                                        %strong 해당사항 없음
+                                      - }
+                            /
+                            / 대여자 정보
+                            /
+                            .col-sm-6
+                              .row
+                                .col-xs-11.label.label-lg.label-success.arrowed-in.arrowed-right
+                                  %strong 대여자 정보
+                              .row
+                                %ul.list-unstyled.spaced
+                                  %li.row
+                                    .col-sm-1
+                                      %i.icon-caret-right.green
+                                    .col-sm-3.no-padding-left
+                                      이름:
+                                    .col-sm-8
+                                      %strong= $order->user->name
+                                  %li.row
+                                    .col-sm-1
+                                      %i.icon-caret-right.green
+                                    .col-sm-3.no-padding-left
+                                      전자우편:
+                                    .col-sm-8
+                                      %strong= $order->user->email
+                                  %li.row
+                                    .col-sm-1
+                                      %i.icon-caret-right.green
+                                    .col-sm-3.no-padding-left
+                                      전화번호:
+                                    .col-sm-8
+                                      %strong= $order->user->user_info->phone
+                                  %li.row
+                                    .col-sm-1
+                                      %i.icon-caret-right.green
+                                    .col-sm-3.no-padding-left
+                                      주소:
+                                    .col-sm-8
+                                      %strong= $order->user->user_info->address
+                                  %li.row
+                                    .col-sm-1
+                                      %i.icon-caret-right.green
+                                    .col-sm-3.no-padding-left
+                                      신체 치수:
+                                    .col-sm-8
+                                      %span.label.label-success= $order->user->user_info->height || '-'
+                                      %span.label.label-success= $order->user->user_info->weight || '-'
+                                      %br
+                                      %span.label.label-info=    $order->user->user_info->bust   || '-'
+                                      %span.label.label-info=    $order->user->user_info->waist  || '-'
+                                      %span.label.label-info=    $order->user->user_info->hip    || '-'
+                                      %br
+                                      %span.label.label-warning= $order->user->user_info->thigh  || '-'
+                                      %span.label.label-warning= $order->user->user_info->arm    || '-'
+                                      %span.label.label-warning= $order->user->user_info->leg    || '-'
+                                      %span.label.label-warning= $order->user->user_info->knee   || '-'
+                                      %span.label.label-warning= $order->user->user_info->foot   || '-'
+                          .space
+                          %div
+                            %table.table.table-striped.table-bordered.table-hover
+                              %thead
+                                %tr
+                                  %th.center #
+                                  %th 항목
+                                  %th 상태
+                                  %th 대여 가격
+                                  %th 기타
+                              %tbody
+                                - my $count = 0;
+                                - for my $detail ( $order->order_details ) {
+                                  %tr
+                                    %td.center= ++$count
+                                    - if ( $detail->clothes ) {
+                                      %td
+                                        %a{ :href => "/clothes/#{ $detail->clothes->code }" }= $detail->name
+                                      %td
+                                        %span.order-status.label{ 'data-order-status' => "#{ $detail->status->name }", 'data-order-late-fee' => "#{$late_fee}" }
+                                          = $detail->status->name
+                                    - }
+                                    - else {
+                                      %td= $detail->name
+                                      %td
+                                    - }
+                                    %td
+                                      %span= commify($detail->price) . '원'
+                                    %td
+                                      %span= $detail->desc || q{none}
+                                - }
 
-%p= include 'partial/satisfaction', s => $satisfaction
+                          .hr.hr8.hr-double.hr-dotted
 
+                          .row
+                            .col-sm-3.pull-right
+                              %h4.pull-right
+                                총액:
+                                %span.red= commify($order_price) . "원"
+                            .col-sm-9.pull-left
+                              %div
+                                %strong 연체료는 연체일 x 대여금액의 20%입니다.
+                              = $order->desc || q{}
 
-@@ orders/id/status_return.html.haml
-- layout 'default', jses => ['orders-id.js'];
-- title '주문확인 - 반납';
+                          .space-6
+                          .well
+                            열린옷장을 이용해주셔서 고맙습니다.
 
-%p= include 'partial/status_label'
-%div.pull-right= include 'guests/breadcrumb', guest => $order->guest, status_id => ''
-
-- for my $clothes (@$clothes_list) {
-  %p
-    %a{:href => '/clothes/#{$clothes->code}'}= $clothes->category
-    %small.highlight= commify($clothes->price)
-- }
-
-%div= include 'partial/order_info'
-%p= commify($order->late_fee)
-%p= $order->return_method
-%p= '연체료 ' . commify($order->l_discount) . ' 원 할인'
-%p= include 'partial/satisfaction', s => $satisfaction
-
-
-@@ orders/id/status_partial_return.html.haml
-- layout 'default', jses => ['orders-id.js'];
-- title '주문확인 - 부분반납';
-
-%p= include 'partial/status_label'
-%div.pull-right= include 'guests/breadcrumb', guest => $order->guest, status_id => ''
-#clothes-category
-  %form#form-clothes-code
-    %fieldset
-      .input-append
-        %input#input-clothes-code.input-large{:type => 'text', :placeholder => '품번'}
-        %button#btn-clothes-code.btn{:type => 'button'} 입력
-      - for my $clothes (@$clothes_list) {
-        %label.checkbox
-          - if ($clothes->status_id != $Opencloset::Constant::STATUS_PARTIAL_RETURN) {
-            %input.input-clothes{:type => 'checkbox', :checked => 'checked', :data-clothes-code => '#{$clothes->code}'}
-          - } else {
-            %input.input-clothes{:type => 'checkbox', :data-clothes-code => '#{$clothes->code}'}
-          - }
-          %a{:href => '/clothes/#{$clothes->code}'}= $clothes->category
-          %small.highlight= commify($clothes->price)
-      - }
-%div= include 'partial/order_info'
-%p= commify($order->late_fee)
-%p= $order->return_method
-%form#form-return.form-horizontal{:method => 'post', :action => "#{url_for('')}"}
-  %fieldset
-    .control-group
-      .controls
-        %button.btn.btn-success{:type => 'submit'} 반납
-%p= include 'partial/satisfaction', s => $satisfaction
 
 
 @@ new-clothes.html.haml

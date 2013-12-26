@@ -81,30 +81,6 @@ __PACKAGE__->table("order");
   is_nullable: 1
   size: 32
 
-=head2 price
-
-  data_type: 'integer'
-  default_value: 0
-  is_nullable: 1
-
-=head2 discount
-
-  data_type: 'integer'
-  default_value: 0
-  is_nullable: 1
-
-=head2 late_fee
-
-  data_type: 'integer'
-  default_value: 0
-  is_nullable: 1
-
-=head2 l_discount
-
-  data_type: 'integer'
-  default_value: 0
-  is_nullable: 1
-
 =head2 l_payment_method
 
   data_type: 'varchar'
@@ -117,7 +93,7 @@ __PACKAGE__->table("order");
   is_nullable: 1
   size: 32
 
-=head2 comment
+=head2 desc
 
   data_type: 'text'
   is_nullable: 1
@@ -227,19 +203,11 @@ __PACKAGE__->add_columns(
   { data_type => "varchar", is_nullable => 1, size => 32 },
   "payment_method",
   { data_type => "varchar", is_nullable => 1, size => 32 },
-  "price",
-  { data_type => "integer", default_value => 0, is_nullable => 1 },
-  "discount",
-  { data_type => "integer", default_value => 0, is_nullable => 1 },
-  "late_fee",
-  { data_type => "integer", default_value => 0, is_nullable => 1 },
-  "l_discount",
-  { data_type => "integer", default_value => 0, is_nullable => 1 },
   "l_payment_method",
   { data_type => "varchar", is_nullable => 1, size => 32 },
   "staff_name",
   { data_type => "varchar", is_nullable => 1, size => 32 },
-  "comment",
+  "desc",
   { data_type => "text", is_nullable => 1 },
   "purpose",
   { data_type => "varchar", is_nullable => 1, size => 32 },
@@ -294,6 +262,21 @@ __PACKAGE__->has_many(
   { cascade_copy => 0, cascade_delete => 0 },
 );
 
+=head2 order_details
+
+Type: has_many
+
+Related object: L<Opencloset::Schema::Result::OrderDetail>
+
+=cut
+
+__PACKAGE__->has_many(
+  "order_details",
+  "Opencloset::Schema::Result::OrderDetail",
+  { "foreign.order_id" => "self.id" },
+  { cascade_copy => 0, cascade_delete => 0 },
+);
+
 =head2 status
 
 Type: belongs_to
@@ -340,8 +323,8 @@ Composing rels: L</order_clothes> -> clothes
 __PACKAGE__->many_to_many("clothes", "order_clothes", "clothes");
 
 
-# Created by DBIx::Class::Schema::Loader v0.07038 @ 2013-11-29 20:22:55
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:C/qZnan/v1W5C2oFbTNQkw
+# Created by DBIx::Class::Schema::Loader v0.07038 @ 2013-12-23 16:34:45
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:YkVjep07SZsc+feKcBadaQ
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration
