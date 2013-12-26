@@ -2,8 +2,8 @@
 (function() {
   $(function() {
     return $('span.order-status.label').each(function(i, el) {
-      $(el).addClass(OpenCloset.getStatusCss($(el).data('order-status')));
-      if ($(el).data('order-late-fee') > 0) {
+      $(el).addClass(OpenCloset.getStatusCss($(el).data('order-detail-status')));
+      if ($(el).data('order-detail-status') === '대여중' && $(el).data('order-late-fee') > 0) {
         return $(el).html('연체중');
       }
     });

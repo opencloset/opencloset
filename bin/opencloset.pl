@@ -3453,7 +3453,7 @@ __DATA__
                                       %td
                                         %a{ :href => "/clothes/#{ $detail->clothes->code }" }= $detail->name
                                       %td
-                                        %span.order-status.label{ 'data-order-status' => "#{ $detail->status->name }", 'data-order-late-fee' => "#{$late_fee}" }
+                                        %span.order-status.label{ 'data-order-detail-status' => "#{ $detail->status->name }", 'data-order-late-fee' => "#{$late_fee}" }
                                           = $detail->status->name
                                     - }
                                     - else {
