@@ -111,6 +111,17 @@ helper sms2hr => sub {
     return { $sms->get_columns };
 };
 
+helper order_price => sub {
+    my ( $self, $order ) = @_;
+
+    return 0 unless $order;
+
+    my $price = 0;
+    $price += $_->price for $order->order_details;
+
+    return $price;
+};
+
 helper calc_overdue => sub {
     my ( $self, $target_dt, $return_dt ) = @_;
 
@@ -138,8 +149,11 @@ helper commify => sub {
 helper calc_late_fee => sub {
     my ( $self, $order, $commify ) = @_;
 
+    my $price = 0;
+    $price += $_->price for $order->order_details;
+
     my $overdue  = $self->calc_overdue( $order->target_date );
-    my $late_fee = $order->price * 0.2 * $overdue;
+    my $late_fee = $price * 0.2 * $overdue;
 
     return $commify ? $self->commify($late_fee) : $late_fee;
 };
@@ -3298,6 +3312,9 @@ __DATA__
 -   ];
 - title $meta->{$_id}{text};
 
+- my $order_price = order_price($order);
+- my $late_fee    = calc_late_fee($order);
+
                 .row
                   .col-sm-10.col-sm-offset-1
                     .widget-box.transparent.invoice-box
@@ -3316,29 +3333,52 @@ __DATA__
                                   %strong 주문서 정보
                               .row
                                 %ul.list-unstyled.spaced
-                                  %li
-                                    %i.icon-caret-right.blue
-                                    대여 기간:
-                                    %strong 2013-12-18 ~ 2013-12-21
-                                  %li
-                                    %i.icon-caret-right.blue
-                                    대여 기간:
-                                    %strong 2013-12-18 ~ 2013-12-21
-                                  %li
-                                    %i.icon-caret-right.blue
-                                    대여 기간:
-                                    %strong 2013-12-18 ~ 2013-12-21
-                                  %li
-                                    %i.icon-caret-right.blue
-                                    대여 기간:
-                                    %strong 2013-12-18 ~ 2013-12-21
-
-                                  %li.divider
-
-                                  %li
-                                    %i.icon-caret-right.blue
-                                    결제 방법:
-                                    %strong 현금 / 카드 / 현금 + 카드
+                                  %li.row
+                                    .col-sm-1
+                                      %i.icon-caret-right.blue
+                                    .col-sm-3.no-padding-left
+                                      담당자:
+                                    .col-sm-8
+                                      %strong= $order->staff_name
+                                  %li.row
+                                    .col-sm-1
+                                      %i.icon-caret-right.blue
+                                    .col-sm-3.no-padding-left
+                                      대여일:
+                                    .col-sm-8
+                                      %strong= $order->rental_date->ymd
+                                  %li.row
+                                    .col-sm-1
+                                      %i.icon-caret-right.blue
+                                    .col-sm-3.no-padding-left
+                                      반납 예정일:
+                                    .col-sm-8
+                                      %strong= $order->target_date->ymd
+                                  %li.row
+                                    .col-sm-1
+                                      %i.icon-caret-right.blue
+                                    .col-sm-3.no-padding-left
+                                      대여비:
+                                    .col-sm-8
+                                      %strong= $order->payment_method
+                                      \/
+                                      %strong= commify($order_price) . '원'
+                                  %li.row
+                                    .col-sm-1
+                                      %i.icon-caret-right.blue
+                                    .col-sm-3.no-padding-left
+                                      연체료:
+                                    .col-sm-8
+                                      - if ($late_fee) {
+                                        %strong= $order->return_method || '미납'
+                                        \/
+                                        %strong= sprintf( "%s원", commify($late_fee) )
+                                        %br
+                                        %strong= sprintf( "%s일 x %s원 x 20%%", calc_overdue($order->target_date), commify($order_price) )
+                                      - }
+                                      - else {
+                                        %strong 해당사항 없음
+                                      - }
                             /
                             / 대여자 정보
                             /
@@ -3348,81 +3388,99 @@ __DATA__
                                   %strong 대여자 정보
                               .row
                                 %ul.list-unstyled.spaced
-                                  %li
-                                    %i.icon-caret-right.green
-                                    대여 기간:
-                                    %strong 2013-12-18 ~ 2013-12-21
-                                  %li
-                                    %i.icon-caret-right.green
-                                    대여 기간:
-                                    %strong 2013-12-18 ~ 2013-12-21
-                                  %li
-                                    %i.icon-caret-right.green
-                                    대여 기간:
-                                    %strong 2013-12-18 ~ 2013-12-21
-                                  %li
-                                    %i.icon-caret-right.green
-                                    대여 기간:
-                                    %strong 2013-12-18 ~ 2013-12-21
-                                  %li
-                                    %i.icon-caret-right.green
-                                    대여 기간:
-                                    %strong 2013-12-18 ~ 2013-12-21
-                                  %li
-                                    %i.icon-caret-right.green
-                                    대여 기간:
-                                    %strong 2013-12-18 ~ 2013-12-21
-
-                                  %li.divider
-
-                                  %li
-                                    %i.icon-caret-right.green
-                                    결제 방법:
-                                    %strong 현금 / 카드 / 현금 + 카드
+                                  %li.row
+                                    .col-sm-1
+                                      %i.icon-caret-right.green
+                                    .col-sm-3.no-padding-left
+                                      이름:
+                                    .col-sm-8
+                                      %strong= $order->user->name
+                                  %li.row
+                                    .col-sm-1
+                                      %i.icon-caret-right.green
+                                    .col-sm-3.no-padding-left
+                                      전자우편:
+                                    .col-sm-8
+                                      %strong= $order->user->email
+                                  %li.row
+                                    .col-sm-1
+                                      %i.icon-caret-right.green
+                                    .col-sm-3.no-padding-left
+                                      전화번호:
+                                    .col-sm-8
+                                      %strong= $order->user->user_info->phone
+                                  %li.row
+                                    .col-sm-1
+                                      %i.icon-caret-right.green
+                                    .col-sm-3.no-padding-left
+                                      주소:
+                                    .col-sm-8
+                                      %strong= $order->user->user_info->address
+                                  %li.row
+                                    .col-sm-1
+                                      %i.icon-caret-right.green
+                                    .col-sm-3.no-padding-left
+                                      신체 치수:
+                                    .col-sm-8
+                                      %span.label.label-success= $order->user->user_info->height || '-'
+                                      %span.label.label-success= $order->user->user_info->weight || '-'
+                                      %br
+                                      %span.label.label-info=    $order->user->user_info->bust   || '-'
+                                      %span.label.label-info=    $order->user->user_info->waist  || '-'
+                                      %span.label.label-info=    $order->user->user_info->hip    || '-'
+                                      %br
+                                      %span.label.label-warning= $order->user->user_info->thigh  || '-'
+                                      %span.label.label-warning= $order->user->user_info->arm    || '-'
+                                      %span.label.label-warning= $order->user->user_info->leg    || '-'
+                                      %span.label.label-warning= $order->user->user_info->knee   || '-'
+                                      %span.label.label-warning= $order->user->user_info->foot   || '-'
                           .space
-                          - my $total_price = 0;
-                            %div
-                              %table.table.table-striped.table-bordered.table-hover
-                                %thead
+                          %div
+                            %table.table.table-striped.table-bordered.table-hover
+                              %thead
+                                %tr
+                                  %th.center #
+                                  %th 항목
+                                  %th 상태
+                                  %th 대여 가격
+                                  %th 기타
+                              %tbody
+                                - my $count = 0;
+                                - for my $detail ( $order->order_details ) {
                                   %tr
-                                    %th.center #
-                                    %th 항목
-                                    %th 상태
-                                    %th 대여 가격
-                                    %th 기타
-                                %tbody
-                                  - my $count = 0;
-                                  - for my $detail ( $order->order_details ) {
-                                  -   $total_price += $detail->price;
-                                    %tr
-                                      %td.center= ++$count
+                                    %td.center= ++$count
+                                    - if ( $detail->clothes ) {
                                       %td
-                                        - if ( $detail->clothes ) {
-                                          %a{ :href => "/clothes/#{ $detail->clothes->code }" }= $detail->name
-                                        - }
-                                        - else {
-                                          = $detail->name
-                                        - }
+                                        %a{ :href => "/clothes/#{ $detail->clothes->code }" }= $detail->name
                                       %td
+                                        %span.order-status.label{ 'data-order-status' => "#{ $detail->status->name }", 'data-order-late-fee' => "#{$late_fee}" }
+                                          = $detail->status->name
+                                    - }
+                                    - else {
+                                      %td= $detail->name
                                       %td
-                                        %span= $detail->price . ' 원'
-                                      %td
-                                        %span= $detail->desc || q{none}
-                                  - }
+                                    - }
+                                    %td
+                                      %span= commify($detail->price) . '원'
+                                    %td
+                                      %span= $detail->desc || q{none}
+                                - }
 
-                            .hr.hr8.hr-double.hr-dotted
+                          .hr.hr8.hr-double.hr-dotted
 
-                            .row
-                              .col-sm-3.pull-right
-                                %h4.pull-right
-                                  총액:
-                                  %span.red= "${total_price} 원"
-                              .col-sm-9.pull-left
-                                = $order->desc || q{}
+                          .row
+                            .col-sm-3.pull-right
+                              %h4.pull-right
+                                총액:
+                                %span.red= commify($order_price) . "원"
+                            .col-sm-9.pull-left
+                              %div
+                                %strong 연체료는 연체일 x 대여금액의 20%입니다.
+                              = $order->desc || q{}
 
-                            .space-6
-                            .well
-                              열린옷장을 이용해주셔서 고맙습니다.
+                          .space-6
+                          .well
+                            열린옷장을 이용해주셔서 고맙습니다.
 
 
 
