@@ -84,11 +84,11 @@ INSERT
 INSERT INTO `order_clothes` (`order_id`, `clothes_code`) VALUES (1,'0J002'), (1,'0P002');
 
 INSERT
-  INTO `order_detail` (`order_id`, `clothes_code`, `name`, `price`, `desc`)
+  INTO `order_detail` (`order_id`, `clothes_code`, `status_id`, `name`, `price`, `desc`)
   VALUES
-    (1, '0J002', 'J002 - jacket', 15000, '2번 기증 재킷'),
-    (1, '0P002', 'P002 - pants',  10000, '2번 기증 바지'),
-    (1, NULL,    '에누리',        -2500, '대여자 상황을 고려해 택배비 에누리')
+    (1, '0J002', 2,    'J002 - jacket', 15000, '2번 기증 재킷'),
+    (1, '0P002', 2,    'P002 - pants',  10000, '2번 기증 바지'),
+    (1, NULL,    NULL, '에누리',        -2500, '대여자 상황을 고려해 택배비 에누리')
   ;
 
 INSERT

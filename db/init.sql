@@ -223,13 +223,15 @@ CREATE TABLE `order_detail` (
   `id`           INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `order_id`     INT UNSIGNED NOT NULL,
   `clothes_code` CHAR(5)      DEFAULT NULL,
+  `status_id`    INT UNSIGNED DEFAULT NULL,
   `name`         TEXT         NOT NULL,
   `price`        INT          DEFAULT 0,
   `desc`         TEXT         DEFAULT NULL,
 
   PRIMARY KEY (`id`),
   CONSTRAINT `fk_order_detail1` FOREIGN KEY (`order_id`)     REFERENCES `order`   (`id`)   ON DELETE CASCADE,
-  CONSTRAINT `fk_order_detail2` FOREIGN KEY (`clothes_code`) REFERENCES `clothes` (`code`) ON DELETE CASCADE
+  CONSTRAINT `fk_order_detail2` FOREIGN KEY (`clothes_code`) REFERENCES `clothes` (`code`) ON DELETE CASCADE,
+  CONSTRAINT `fk_order_detail3` FOREIGN KEY (`status_id`)    REFERENCES `status`  (`id`)   ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
