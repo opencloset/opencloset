@@ -482,6 +482,43 @@ helper get_order => sub {
     return $order;
 };
 
+helper delete_order => sub {
+    my ( $self, $params ) = @_;
+
+    #
+    # validate params
+    #
+    my $v = $self->create_validator;
+    $v->field('id')->required(1)->regexp(qr/^\d+$/);
+    unless ( $self->validate( $v, $params ) ) {
+        my @error_str;
+        while ( my ( $k, $v ) = each %{ $v->errors } ) {
+            push @error_str, "$k:$v";
+        }
+        return $self->error( 400, {
+            str  => join(',', @error_str),
+            data => $v->errors,
+        });
+    }
+
+    #
+    # find order
+    #
+    my $order = $DB->resultset('Order')->find( $params );
+    return $self->error( 404, {
+        str  => 'order not found',
+        data => {},
+    }) unless $order;
+
+    #
+    # delete order
+    #
+    my %data = $order->get_columns;
+    $order->delete;
+
+    return \%data;
+};
+
 helper get_order_list => sub {
     my ( $self, $params ) = @_;
 
@@ -955,38 +992,13 @@ group {
         #
         my %params = $self->get_params(qw/ id /);
 
-        #
-        # validate params
-        #
-        my $v = $self->create_validator;
-        $v->field('id')->required(1)->regexp(qr/^\d+$/);
-        unless ( $self->validate( $v, \%params ) ) {
-            my @error_str;
-            while ( my ( $k, $v ) = each %{ $v->errors } ) {
-                push @error_str, "$k:$v";
-            }
-            return $self->error( 400, {
-                str  => join(',', @error_str),
-                data => $v->errors,
-            });
-        }
+        my $data = $self->delete_order( \%params );
+        return unless $data;
 
         #
-        # find order
+        # response
         #
-        my $order = $DB->resultset('Order')->find( \%params );
-        return $self->error( 404, {
-            str  => 'order not found',
-            data => {},
-        }) unless $order;
-
-        #
-        # delete & response
-        #
-        my %data = ( $order->get_columns );
-        $order->delete;
-
-        $self->respond_to( json => { status => 200, json => \%data } );
+        $self->respond_to( json => { status => 200, json => $data } );
     }
 
     sub api_get_order_list {
@@ -2017,10 +2029,8 @@ get '/order' => sub {
     #
     # response
     #
-    $self->stash(
-        status     => 200,
-        order_list => $rs,
-    );
+    $self->stash( order_list => $rs );
+    $self->respond_to( html => { status => 200 } );
 } => 'order';
 
 post '/order' => sub {
@@ -2057,6 +2067,21 @@ get '/order/:id' => sub {
     #
     $self->stash( order => $order );
 } => 'order/id';
+
+get '/order/:id/delete' => sub {
+    my $self = shift;
+
+    #
+    # fetch params
+    #
+    my %params = $self->get_params(qw/ id /);
+    $self->delete_order( \%params );
+
+    #
+    # response
+    #
+    $self->redirect_to('/order');
+};
 
 any [qw/post put patch/] => '/orders/:id' => sub {
     my $self = shift;
@@ -3385,7 +3410,7 @@ __DATA__
           %td
             = $order->target_date ? $order->target_date->ymd : q{}
           %td= $order->user ? $order->user->name : q{}
-          %td= $order->staff_name
+          %td= $order->staff_name || q{}
           %td
             - my $count = 0;
             - for my $detail ( $order->order_details ) {
@@ -3620,7 +3645,14 @@ __DATA__
                           .space-6
                           .well
                             열린옷장을 이용해주셔서 고맙습니다.
-
+                - unless ( $order->status ) {
+                  .row
+                    .col-sm-10.col-sm-offset-1
+                      .clearfix.form-actions
+                        %a.btn.btn-danger.pull-right{ :type => 'button', :href => "#{ url_for('/order/' . $order->id . '/delete') }" }
+                          %i.icon-remove.bigger-110
+                          주문 지우기
+                - }
 
 
 @@ new-clothes.html.haml
