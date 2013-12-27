@@ -155,6 +155,8 @@ helper calc_late_fee => sub {
     $price += $_->price for $order->order_details;
 
     my $overdue  = $self->calc_overdue( $order->target_date );
+    return 0 unless $overdue;
+
     my $late_fee = $price * 0.2 * $overdue;
 
     return $commify ? $self->commify($late_fee) : $late_fee;
@@ -393,6 +395,7 @@ helper create_order => sub {
     #
     #   - create order
     #   - create order_clothes
+    #   - create order_detail
     #
     my ( $order, $error ) = do {
         my $guard = $DB->txn_scope_guard;
@@ -403,13 +406,24 @@ helper create_order => sub {
             my $order = $DB->resultset('Order')->create( $order_params );
             die "failed to create a new order\n" unless $order;
 
-            #
-            # create order_clothes
-            #
             if ( $order_clothes_params && $order_clothes_params->{clothes_code} ) {
                 for ( @{ $order_clothes_params->{clothes_code} } ) {
+                    #
+                    # create order_clothes
+                    #
                     $order->add_to_order_clothes({ clothes_code => $_ })
                         or die "failed to create a new order_clothes\n";
+
+                    #
+                    # create order_detail
+                    #
+                    my $clothes = $DB->resultset('Clothes')->find({ code => $_ });
+                    $order->add_to_order_details({
+                        clothes_code => $clothes->code,
+                        status_id    => $clothes->status->id,
+                        name         => join( q{ - }, $clothes->code, $clothes->category ),
+                        price        => $clothes->price,
+                    }) or die "failed to create a new order_detail\n";
                 }
             }
 
@@ -3422,14 +3436,22 @@ __DATA__
                                     .col-sm-3.no-padding-left
                                       대여일:
                                     .col-sm-8
-                                      %strong= $order->rental_date->ymd
+                                      - if ( $order->rental_date ) {
+                                        %strong= $order->rental_date->ymd
+                                      - }
+                                      - else {
+                                      - }
                                   %li.row
                                     .col-sm-1
                                       %i.icon-caret-right.blue
                                     .col-sm-3.no-padding-left
                                       반납 예정일:
                                     .col-sm-8
-                                      %strong= $order->target_date->ymd
+                                      - if ( $order->target_date ) {
+                                        %strong= $order->target_date->ymd
+                                      - }
+                                      - else {
+                                      - }
                                   %li.row
                                     .col-sm-1
                                       %i.icon-caret-right.blue
@@ -3464,52 +3486,84 @@ __DATA__
                                   %strong 대여자 정보
                               .row
                                 %ul.list-unstyled.spaced
-                                  %li.row
-                                    .col-sm-1
-                                      %i.icon-caret-right.green
-                                    .col-sm-3.no-padding-left
-                                      이름:
-                                    .col-sm-8
-                                      %strong= $order->user->name
-                                  %li.row
-                                    .col-sm-1
-                                      %i.icon-caret-right.green
-                                    .col-sm-3.no-padding-left
-                                      전자우편:
-                                    .col-sm-8
-                                      %strong= $order->user->email
-                                  %li.row
-                                    .col-sm-1
-                                      %i.icon-caret-right.green
-                                    .col-sm-3.no-padding-left
-                                      전화번호:
-                                    .col-sm-8
-                                      %strong= $order->user->user_info->phone
-                                  %li.row
-                                    .col-sm-1
-                                      %i.icon-caret-right.green
-                                    .col-sm-3.no-padding-left
-                                      주소:
-                                    .col-sm-8
-                                      %strong= $order->user->user_info->address
-                                  %li.row
-                                    .col-sm-1
-                                      %i.icon-caret-right.green
-                                    .col-sm-3.no-padding-left
-                                      신체 치수:
-                                    .col-sm-8
-                                      %span.label.label-success= $order->user->user_info->height || '-'
-                                      %span.label.label-success= $order->user->user_info->weight || '-'
-                                      %br
-                                      %span.label.label-info=    $order->user->user_info->bust   || '-'
-                                      %span.label.label-info=    $order->user->user_info->waist  || '-'
-                                      %span.label.label-info=    $order->user->user_info->hip    || '-'
-                                      %br
-                                      %span.label.label-warning= $order->user->user_info->thigh  || '-'
-                                      %span.label.label-warning= $order->user->user_info->arm    || '-'
-                                      %span.label.label-warning= $order->user->user_info->leg    || '-'
-                                      %span.label.label-warning= $order->user->user_info->knee   || '-'
-                                      %span.label.label-warning= $order->user->user_info->foot   || '-'
+                                  - if ( $order->user ) {
+                                    %li.row
+                                      .col-sm-1
+                                        %i.icon-caret-right.green
+                                      .col-sm-3.no-padding-left 이름:
+                                      .col-sm-8=                $order->user->name
+                                    %li.row
+                                      .col-sm-1
+                                        %i.icon-caret-right.green
+                                      .col-sm-3.no-padding-left 전자우편:
+                                      .col-sm-8=                $order->user->email
+                                    %li.row
+                                      .col-sm-1
+                                        %i.icon-caret-right.green
+                                      .col-sm-3.no-padding-left 전화번호:
+                                      .col-sm-8=                $order->user->user_info->phone
+                                    %li.row
+                                      .col-sm-1
+                                        %i.icon-caret-right.green
+                                      .col-sm-3.no-padding-left 주소:
+                                      .col-sm-8=                $order->user->user_info->address
+                                    %li.row
+                                      .col-sm-1
+                                        %i.icon-caret-right.green
+                                      .col-sm-3.no-padding-left 신체 치수:
+                                      .col-sm-8
+                                        %span.label.label-success= $order->user->user_info->height || '-'
+                                        %span.label.label-success= $order->user->user_info->weight || '-'
+                                        %br
+                                        %span.label.label-info=    $order->user->user_info->bust   || '-'
+                                        %span.label.label-info=    $order->user->user_info->waist  || '-'
+                                        %span.label.label-info=    $order->user->user_info->hip    || '-'
+                                        %br
+                                        %span.label.label-warning= $order->user->user_info->thigh  || '-'
+                                        %span.label.label-warning= $order->user->user_info->arm    || '-'
+                                        %span.label.label-warning= $order->user->user_info->leg    || '-'
+                                        %span.label.label-warning= $order->user->user_info->knee   || '-'
+                                        %span.label.label-warning= $order->user->user_info->foot   || '-'
+                                  - }
+                                  - else {
+                                    %li.row
+                                      .col-sm-1
+                                        %i.icon-caret-right.green
+                                      .col-sm-3.no-padding-left 이름:
+                                      .col-sm-8
+                                    %li.row
+                                      .col-sm-1
+                                        %i.icon-caret-right.green
+                                      .col-sm-3.no-padding-left 전자우편:
+                                      .col-sm-8
+                                    %li.row
+                                      .col-sm-1
+                                        %i.icon-caret-right.green
+                                      .col-sm-3.no-padding-left 전화번호:
+                                      .col-sm-8
+                                    %li.row
+                                      .col-sm-1
+                                        %i.icon-caret-right.green
+                                      .col-sm-3.no-padding-left 주소:
+                                      .col-sm-8
+                                    %li.row
+                                      .col-sm-1
+                                        %i.icon-caret-right.green
+                                      .col-sm-3.no-padding-left 신체 치수:
+                                      .col-sm-8
+                                        %span.label.label-success= '-'
+                                        %span.label.label-success= '-'
+                                        %br
+                                        %span.label.label-info=    '-'
+                                        %span.label.label-info=    '-'
+                                        %span.label.label-info=    '-'
+                                        %br
+                                        %span.label.label-warning= '-'
+                                        %span.label.label-warning= '-'
+                                        %span.label.label-warning= '-'
+                                        %span.label.label-warning= '-'
+                                        %span.label.label-warning= '-'
+                                  - }
                           .space
                           %div
                             %table.table.table-striped.table-bordered.table-hover
@@ -3529,8 +3583,10 @@ __DATA__
                                       %td
                                         %a{ :href => "/clothes/#{ $detail->clothes->code }" }= $detail->name
                                       %td
-                                        %span.order-status.label{ 'data-order-detail-status' => "#{ $detail->status->name }", 'data-order-late-fee' => "#{$late_fee}" }
-                                          = $detail->status->name
+                                        - if ( $detail->status ) {
+                                          %span.order-status.label{ 'data-order-detail-status' => "#{ $detail->status->name }", 'data-order-late-fee' => "#{$late_fee}" }
+                                            = $detail->status->name
+                                        - }
                                     - }
                                     - else {
                                       %td= $detail->name
@@ -3539,7 +3595,7 @@ __DATA__
                                     %td
                                       %span= commify($detail->price) . '원'
                                     %td
-                                      %span= $detail->desc || q{none}
+                                      %span= $detail->desc || q{}
                                 - }
 
                           .hr.hr8.hr-double.hr-dotted
