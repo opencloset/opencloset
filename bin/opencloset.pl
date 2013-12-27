@@ -3364,7 +3364,7 @@ __DATA__
               -        if ($late_fee) {
                 %span.label.label-important.order-status
                   = $order->status->name . '(연체)'
-                  %span.late-fee= "${late_fee}원"
+                  %span.late-fee= commify($late_fee) . "원"
               -       }
               -       else {
                 %span.label.label-warning.order-status
