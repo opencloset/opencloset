@@ -204,16 +204,16 @@ $opencloset-darken-yellow: desaturate(darken($opencloset-yellow, 4%), 10%);
     }
     #order-table table th {
         &:first-child {
-            width: 50px;
+            width: 40px;
         }
         &:nth-child(2) {
-            width: 160px;
+            width: 155px;
         }
         &:nth-child(3) {
-            width: 200px;
+            width: 160px;
         }
         &:nth-child(4), &:nth-child(5) {
-            width: 80px;
+            width: 75px;
         }
     }
     #order-id {

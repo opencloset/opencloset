@@ -52,6 +52,8 @@ helper error => sub {
             status   => $status
         }
     );
+
+    return;
 };
 
 helper cloth_validator => sub {
@@ -464,6 +466,52 @@ helper get_order => sub {
     }) unless $order;
 
     return $order;
+};
+
+helper get_order_list => sub {
+    my ( $self, $params ) = @_;
+
+    #
+    # validate params
+    #
+    my $v = $self->create_validator;
+    $v->field('id')->regexp(qr/^\d+$/);
+    unless ( $self->validate( $v, $params ) ) {
+        my @error_str;
+        while ( my ( $k, $v ) = each %{ $v->errors } ) {
+            push @error_str, "$k:$v";
+        }
+        return $self->error( 400, {
+            str  => join(',', @error_str),
+            data => $v->errors,
+        });
+    }
+
+    #
+    # adjust params
+    #
+    $params->{id} = [ $params->{id} ]
+        if defined $params->{id} && not ref $params->{id} eq 'ARRAY';
+
+    #
+    # find order
+    #
+    my $rs;
+    if ( defined $params->{id} ) {
+        $rs
+            = $DB->resultset('Order')
+            ->search({ id => $params->{id} })
+            ;
+    }
+    else {
+        $rs = $DB->resultset('Order');
+    }
+    return $self->error( 404, {
+        str  => 'order list not found',
+        data => {},
+    }) unless $rs->count;
+
+    return $rs;
 };
 
 #
@@ -929,6 +977,22 @@ group {
 
     sub api_get_order_list {
         my $self = shift;
+
+        #
+        # fetch params
+        #
+        my %params = $self->get_params(qw/ id /);
+
+        my $rs = $self->get_order_list( \%params );
+        return unless $rs;
+
+        #
+        # response
+        #
+        my @data;
+        push @data, +{ $_->get_columns } for $rs->all;
+
+        $self->respond_to( json => { status => 200, json => \@data } );
     }
 
     sub api_create_clothes {
@@ -1926,6 +1990,25 @@ get '/rental' => sub {
     $self->stash( users => \@users );
 } => 'rental';
 
+get '/order' => sub {
+    my $self = shift;
+
+    #
+    # fetch params
+    #
+    my %params = $self->get_params(qw/ id /);
+
+    my $rs = $self->get_order_list( \%params );
+
+    #
+    # response
+    #
+    $self->stash(
+        status     => 200,
+        order_list => $rs,
+    );
+} => 'order';
+
 post '/order' => sub {
     my $self = shift;
 
@@ -1943,17 +2026,6 @@ post '/order' => sub {
     #
     $self->redirect_to( '/order/' . $order->id );
 };
-
-get '/orders' => sub {
-    my $self = shift;
-
-    my $q      = $self->param('q') || '';
-    my $cond;
-    $cond->{status_id} = $q if $q;
-    my $orders = $DB->resultset('Order')->search($cond);
-
-    $self->stash( orders => $orders );
-} => 'orders';
 
 get '/order/:id' => sub {
     my $self = shift;
@@ -3228,13 +3300,13 @@ __DATA__
   </script>
 
 
-@@ orders.html.haml
-- my $id   = 'orders';
+@@ order.html.haml
+- my $id   = 'order';
 - my $meta = $sidebar->{meta};
 - layout 'default',
 -   active_id   => $id,
 -   breadcrumbs => [
--     { text => $meta->{'menu-orders'}{text} },
+-     { text => $meta->{'menu-order'}{text} },
 -     { text => $meta->{$id}{text} },
 -   ];
 - title $meta->{$id}{text};
@@ -3243,20 +3315,20 @@ __DATA__
   %table.table.table-striped.table-bordered.table-hover
     %thead
       %tr
-        %th #
+        %th.center #
         %th 상태
         %th 기간
         %th 대여자
         %th 담당자
         %th 기타
     %tbody
-      - while ( my $order = $orders->next ) {
+      - while ( my $order = $order_list->next ) {
         - next unless $order->status;
         %tr
+          %td.center
+            %a{ :href => "#{url_for('/order/' . $order->id)}" }= $order->id
           %td
-            %a{ :href => "#{url_for('/orders/' . $order->id)}" }= $order->id
-          %td
-            %a{ :href => "#{url_for('/orders/' . $order->id)}" }
+            %a{ :href => "#{url_for('/order/' . $order->id)}" }
               - use v5.14;
               - no warnings 'experimental';
               - given ( $order->status->name ) {
@@ -3291,12 +3363,16 @@ __DATA__
               - }
           %td
             = $order->rental_date->ymd . q{ ~ } . $order->target_date->ymd
-          %td= $order->guest->user->name
+          %td= $order->user->name
           %td= $order->staff_name
           %td
-            - for my $c ( $order->cloths ) {
+            - my $count = 0;
+            - for my $detail ( $order->order_details ) {
+            -   next unless $detail->clothes;
+            -   ++$count;
+              = $count > 1 ? q{, } : q{}
               %span
-                %a{ :href => '/clothes/#{$c->code}' }= $c->category
+                %a{ :href => '/clothes/#{ $detail->clothes->code }' }= $detail->clothes->category
             - }
       - }
 
