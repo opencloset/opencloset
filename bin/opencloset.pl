@@ -3331,53 +3331,60 @@ __DATA__
       %tr
         %th.center #
         %th 상태
-        %th 기간
+        %th 대여일
+        %th 반납 예정일
         %th 대여자
         %th 담당자
         %th 기타
     %tbody
       - while ( my $order = $order_list->next ) {
-        - next unless $order->status;
         %tr
           %td.center
             %a{ :href => "#{url_for('/order/' . $order->id)}" }= $order->id
           %td
             %a{ :href => "#{url_for('/order/' . $order->id)}" }
-              - use v5.14;
-              - no warnings 'experimental';
-              - given ( $order->status->name ) {
-                - when ('대여가능') {
-                  %span.label.label-success.order-status
-                    = $order->status->name
-                - }
-                - when (/세탁|수선|분실|폐기|반납|대여불가|예약/) {
-                  %span.label.label-info.order-status
-                    = $order->status->name
-                - }
-                - when (/반납배송중|부분반납/) {
-                  %span.label.label-warning.order-status
-                    = $order->status->name
-                - }
-                - when (/대여중/) {
-                  - my $late_fee = calc_late_fee($order);
-                  - if ($late_fee) {
-                    %span.label.label-important.order-status
-                      = $order->status->name . '(연체)'
-                      %span.late-fee= "${late_fee}원"
-                  - }
-                  - else {
-                    %span.label.label-warning.order-status
-                      = $order->status->name
-                  - }
-                - }
-                - default {
-                  %span.label.order-status
-                    = $order->status->name
-                - }
+              - if ( $order->status ) {
+              -   use v5.14;
+              -   no warnings 'experimental';
+              -   given ( $order->status->name ) {
+              -     when ('대여가능') {
+                %span.label.label-success.order-status
+                  = $order->status->name
+              -     }
+              -     when (/세탁|수선|분실|폐기|반납|대여불가|예약/) {
+                %span.label.label-info.order-status
+                  = $order->status->name
+              -     }
+              -     when (/반납배송중|부분반납/) {
+                %span.label.label-warning.order-status
+                  = $order->status->name
+              -     }
+              -     when (/대여중/) {
+              -       my $late_fee = calc_late_fee($order);
+              -        if ($late_fee) {
+                %span.label.label-important.order-status
+                  = $order->status->name . '(연체)'
+                  %span.late-fee= "${late_fee}원"
+              -       }
+              -       else {
+                %span.label.label-warning.order-status
+                  = $order->status->name
+              -       }
+              -     }
+              -     default {
+                %span.label.order-status
+                  = $order->status->name
+              -     }
+              -   }
+              - }
+              - else {
+                %span.label.order-status 상태없음
               - }
           %td
-            = $order->rental_date->ymd . q{ ~ } . $order->target_date->ymd
-          %td= $order->user->name
+            = $order->rental_date ? $order->rental_date->ymd : q{}
+          %td
+            = $order->target_date ? $order->target_date->ymd : q{}
+          %td= $order->user ? $order->user->name : q{}
           %td= $order->staff_name
           %td
             - my $count = 0;

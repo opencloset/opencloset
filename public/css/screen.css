@@ -60,8 +60,8 @@
 .page-content #rental #clothes-table table td:nth-child(5) { text-align: right; }
 .page-content #order-table table th:first-child { width: 40px; }
 .page-content #order-table table th:nth-child(2) { width: 155px; }
-.page-content #order-table table th:nth-child(3) { width: 160px; }
-.page-content #order-table table th:nth-child(4), .page-content #order-table table th:nth-child(5) { width: 75px; }
+.page-content #order-table table th:nth-child(3), .page-content #order-table table th:nth-child(4) { width: 80px; }
+.page-content #order-table table th:nth-child(5), .page-content #order-table table th:nth-child(6) { width: 75px; }
 .page-content #order-id table th:first-child { width: 40px; }
 .page-content #order-id table th:nth-child(2) { width: 120px; }
 .page-content #order-id table th:nth-child(3) { width: 90px; }
