@@ -3431,7 +3431,14 @@ __DATA__
 -   breadcrumbs => [
 -     { text => $meta->{'menu-order'}{text} },
 -     { text => $meta->{$_id}{text} },
--   ];
+-   ],
+-   jses => [
+-     '/lib/bootstrap3-editable/js/bootstrap-editable.min.js',
+-   ],
+-   csses => [
+-     '/lib/bootstrap3-editable/css/bootstrap-editable.css',
+-   ],
+-   ;
 - title $meta->{$_id}{text};
 
 - my $order_price = order_price($order);
