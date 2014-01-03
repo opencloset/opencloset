@@ -176,6 +176,21 @@ __PACKAGE__->has_many(
   { cascade_copy => 0, cascade_delete => 0 },
 );
 
+=head2 order_staffs
+
+Type: has_many
+
+Related object: L<Opencloset::Schema::Result::Order>
+
+=cut
+
+__PACKAGE__->has_many(
+  "order_staffs",
+  "Opencloset::Schema::Result::Order",
+  { "foreign.staff_id" => "self.id" },
+  { cascade_copy => 0, cascade_delete => 0 },
+);
+
 =head2 orders
 
 Type: has_many
@@ -222,8 +237,8 @@ __PACKAGE__->might_have(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07038 @ 2013-12-17 14:02:02
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:5KEa9HL4WEHopcxhGyx3yg
+# Created by DBIx::Class::Schema::Loader v0.07038 @ 2014-01-03 09:27:59
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:TsOrVBiuUwqirNhH6uisGA
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

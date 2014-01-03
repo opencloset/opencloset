@@ -54,6 +54,11 @@ CREATE TABLE `user_info` (
   `knee`        INT DEFAULT NULL, -- 무릎 길이(cm)
   `foot`        INT DEFAULT NULL, -- 발 크기(mm)
 
+  --
+  -- etc
+  --
+  `staff`       BOOLEAN DEFAULT 0,
+
   PRIMARY KEY (`id`),
   UNIQUE KEY (`user_id`),
   UNIQUE KEY (`phone`),
@@ -175,13 +180,13 @@ CREATE TABLE `order` (
   `id`               INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `user_id`          INT UNSIGNED NOT NULL,
   `status_id`        INT UNSIGNED DEFAULT NULL,
+  `staff_id`         INT UNSIGNED DEFAULT NULL,
   `rental_date`      DATETIME DEFAULT NULL,
   `target_date`      DATETIME DEFAULT NULL,
   `return_date`      DATETIME DEFAULT NULL,
   `return_method`    VARCHAR(32) DEFAULT NULL,
   `payment_method`   VARCHAR(32) DEFAULT NULL,
   `l_payment_method` VARCHAR(32) DEFAULT NULL,
-  `staff_name`       VARCHAR(32) DEFAULT NULL,
   `desc`             TEXT DEFAULT NULL,
 
   -- guest info
@@ -198,8 +203,9 @@ CREATE TABLE `order` (
   `foot`             INT DEFAULT NULL, -- 발 크기(mm)
 
   PRIMARY KEY (`id`),
-  CONSTRAINT `fk_order1` FOREIGN KEY (`user_id`)   REFERENCES `user` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `fk_order2` FOREIGN KEY (`status_id`) REFERENCES `status` (`id`) ON DELETE CASCADE
+  CONSTRAINT `fk_order1` FOREIGN KEY (`user_id`)   REFERENCES `user`   (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_order2` FOREIGN KEY (`status_id`) REFERENCES `status` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_order3` FOREIGN KEY (`staff_id`)  REFERENCES `user`   (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
