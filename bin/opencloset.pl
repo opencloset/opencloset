@@ -583,29 +583,31 @@ group {
         return;
     };
 
-    post '/user'          => \&api_create_user;
-    get  '/user/:id'      => \&api_get_user;
-    put  '/user/:id'      => \&api_update_user;
-    del  '/user/:id'      => \&api_delete_user;
+    post '/user'           => \&api_create_user;
+    get  '/user/:id'       => \&api_get_user;
+    put  '/user/:id'       => \&api_update_user;
+    del  '/user/:id'       => \&api_delete_user;
 
-    get  '/user-list'     => \&api_get_user_list;
+    get  '/user-list'      => \&api_get_user_list;
 
-    post '/order'         => \&api_create_order;
-    get  '/order/:id'     => \&api_get_order;
-    put  '/order/:id'     => \&api_update_order;
-    del  '/order/:id'     => \&api_delete_order;
+    post '/order'          => \&api_create_order;
+    get  '/order/:id'      => \&api_get_order;
+    put  '/order/:id'      => \&api_update_order;
+    del  '/order/:id'      => \&api_delete_order;
 
-    get  '/order-list'    => \&api_get_order_list;
+    get  '/order-list'     => \&api_get_order_list;
 
-    post '/clothes'       => \&api_create_clothes;
-    get  '/clothes/:code' => \&api_get_clothes;
-    put  '/clothes/:code' => \&api_update_clothes;
-    del  '/clothes/:code' => \&api_delete_clothes;
+    post '/clothes'        => \&api_create_clothes;
+    get  '/clothes/:code'  => \&api_get_clothes;
+    put  '/clothes/:code'  => \&api_update_clothes;
+    del  '/clothes/:code'  => \&api_delete_clothes;
 
-    get  '/clothes-list'  => \&api_get_clothes_list;
-    put  '/clothes-list'  => \&api_update_clothes_list;
+    get  '/clothes-list'   => \&api_get_clothes_list;
+    put  '/clothes-list'   => \&api_update_clothes_list;
 
-    get  '/search/user'   => \&api_search_user;
+    get  '/search/user'    => \&api_search_user;
+
+    get  '/gui/staff-list' => \&api_gui_staff_list;
 
     sub api_create_user {
         my $self = shift;
@@ -1544,6 +1546,31 @@ group {
 
         $self->respond_to( json => { status => 200, json => \@data } );
     }
+
+    sub api_gui_staff_list {
+        my $self = shift;
+
+        #
+        # find staff
+        #
+        my @users = $DB->resultset('User')->search(
+            { 'user_info.staff' => 1 },
+            { join => 'user_info'    },
+        );
+        return $self->error( 404, {
+            str  => 'staff not found',
+            data => {},
+        }) unless @users;
+
+        #
+        # response
+        #
+        my @data;
+        push @data, { value => $_->id, text => $_->name } for @users;
+
+        $self->respond_to( json => { status => 200, json => \@data } );
+    }
+
 }; # end of API section
 
 get '/login';
@@ -2081,6 +2108,29 @@ get '/order/:id/delete' => sub {
     # response
     #
     $self->redirect_to('/order');
+};
+
+post '/order/:id/update' => sub {
+    my $self = shift;
+
+    #
+    # fetch params
+    #
+    my %search_params = $self->get_params(qw/ id /);
+    my %update_params = $self->get_params(qw/ name value pk /);
+
+    my $order = $self->get_order( \%search_params );
+    return unless $order;
+
+    #
+    # update column
+    #
+    $order->update({ $update_params{name} => $update_params{value} });
+
+    #
+    # response
+    #
+    $self->respond_to({ data => q{} });
 };
 
 any [qw/post put patch/] => '/orders/:id' => sub {
@@ -3468,7 +3518,24 @@ __DATA__
                                     .col-sm-3.no-padding-left
                                       담당자:
                                     .col-sm-8
-                                      %strong= $order->staff_name
+                                      :plain
+                                        <a
+                                          id               = "order-staff-name"
+                                          class            = "editable editable-click"
+                                          href             = "#"
+
+                                          data-mode        = "inline"
+                                          data-showbuttons = "false"
+                                          data-type        = "select"
+                                          data-emptytext   = "비어있음"
+
+                                          data-source      = "/api/gui/staff-list.json"
+                                          data-value       = "#{ $order->staff_id }"
+
+                                          data-url         = "/order/#{ $order->id }/update"
+                                          data-pk          = "#{ $order->id }"
+                                          data-name        = "staff_id"
+                                        ></a>
                                   %li.row
                                     .col-sm-1
                                       %i.icon-caret-right.blue
