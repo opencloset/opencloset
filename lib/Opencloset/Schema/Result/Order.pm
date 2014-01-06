@@ -48,6 +48,13 @@ __PACKAGE__->table("order");
   is_foreign_key: 1
   is_nullable: 1
 
+=head2 staff_id
+
+  data_type: 'integer'
+  extra: {unsigned => 1}
+  is_foreign_key: 1
+  is_nullable: 1
+
 =head2 rental_date
 
   data_type: 'datetime'
@@ -82,12 +89,6 @@ __PACKAGE__->table("order");
   size: 32
 
 =head2 l_payment_method
-
-  data_type: 'varchar'
-  is_nullable: 1
-  size: 32
-
-=head2 staff_name
 
   data_type: 'varchar'
   is_nullable: 1
@@ -178,6 +179,13 @@ __PACKAGE__->add_columns(
     is_foreign_key => 1,
     is_nullable => 1,
   },
+  "staff_id",
+  {
+    data_type => "integer",
+    extra => { unsigned => 1 },
+    is_foreign_key => 1,
+    is_nullable => 1,
+  },
   "rental_date",
   {
     data_type => "datetime",
@@ -204,8 +212,6 @@ __PACKAGE__->add_columns(
   "payment_method",
   { data_type => "varchar", is_nullable => 1, size => 32 },
   "l_payment_method",
-  { data_type => "varchar", is_nullable => 1, size => 32 },
-  "staff_name",
   { data_type => "varchar", is_nullable => 1, size => 32 },
   "desc",
   { data_type => "text", is_nullable => 1 },
@@ -277,6 +283,26 @@ __PACKAGE__->has_many(
   { cascade_copy => 0, cascade_delete => 0 },
 );
 
+=head2 staff
+
+Type: belongs_to
+
+Related object: L<Opencloset::Schema::Result::User>
+
+=cut
+
+__PACKAGE__->belongs_to(
+  "staff",
+  "Opencloset::Schema::Result::User",
+  { id => "staff_id" },
+  {
+    is_deferrable => 1,
+    join_type     => "LEFT",
+    on_delete     => "CASCADE",
+    on_update     => "RESTRICT",
+  },
+);
+
 =head2 status
 
 Type: belongs_to
@@ -323,8 +349,8 @@ Composing rels: L</order_clothes> -> clothes
 __PACKAGE__->many_to_many("clothes", "order_clothes", "clothes");
 
 
-# Created by DBIx::Class::Schema::Loader v0.07038 @ 2013-12-23 16:34:45
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:YkVjep07SZsc+feKcBadaQ
+# Created by DBIx::Class::Schema::Loader v0.07038 @ 2014-01-03 09:27:59
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:uUqNZQUFJa3G6TQS39hkWg
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

@@ -20,10 +20,10 @@ INSERT
 -- 기증자
 --
 INSERT
-  INTO `user_info` ( `id`, `user_id`, `phone`, `address`, `gender`, `birth`, `comment` )
+  INTO `user_info` ( `id`, `user_id`, `phone`, `address`, `gender`, `birth`, `comment`, `staff` )
   VALUES
-    ( 2, 2, '01012345678', '인천 송도',   'male',   1980, '열린옷장대표1' ),
-    ( 3, 3, '01024681357', '서울 신사동', 'female', 1979, '열린옷장대표2' )
+    ( 2, 2, '01012345678', '인천 송도',   'male',   1980, '열린옷장대표1', 1 ),
+    ( 3, 3, '01024681357', '서울 신사동', 'female', 1979, '열린옷장대표2', 1 )
     ;
 
 --
@@ -75,11 +75,11 @@ INSERT
 
 INSERT
   INTO `order` (
-    `id`,`user_id`,`status_id`,`rental_date`,`target_date`,`return_date`,
-    `desc`,`payment_method`,`staff_name`,`purpose`,`bust`,`waist`,`arm`,`leg`
+    `id`,`user_id`,`status_id`,`staff_id`,`rental_date`,`target_date`,`return_date`,
+    `desc`,`payment_method`,`purpose`,`bust`,`waist`,`arm`,`leg`
   )
   VALUES
-    (1,2,2,'2013-10-18','2013-10-21',NULL,NULL,'현금','김소령','입사면접',95,78,60,105);
+    (1,2,2,3,'2013-10-18','2013-10-21',NULL,NULL,'현금','입사면접',95,78,60,105);
 
 INSERT INTO `order_clothes` (`order_id`, `clothes_code`) VALUES (1,'0J002'), (1,'0P002');
 

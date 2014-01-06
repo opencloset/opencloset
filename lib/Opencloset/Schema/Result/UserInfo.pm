@@ -123,6 +123,12 @@ male/female
   data_type: 'integer'
   is_nullable: 1
 
+=head2 staff
+
+  data_type: 'tinyint'
+  default_value: 0
+  is_nullable: 1
+
 =cut
 
 __PACKAGE__->add_columns(
@@ -170,6 +176,8 @@ __PACKAGE__->add_columns(
   { data_type => "integer", is_nullable => 1 },
   "foot",
   { data_type => "integer", is_nullable => 1 },
+  "staff",
+  { data_type => "tinyint", default_value => 0, is_nullable => 1 },
 );
 
 =head1 PRIMARY KEY
@@ -228,8 +236,8 @@ __PACKAGE__->belongs_to(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07038 @ 2013-11-29 14:43:48
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:XzZdAdDXzTjw96UgRdOvvw
+# Created by DBIx::Class::Schema::Loader v0.07038 @ 2014-01-03 09:25:24
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:p6aiKttvfNsdWelYFh2YbA
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration
