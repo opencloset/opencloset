@@ -1,0 +1,43 @@
+% use utf8;
+<!-- FORGOT-BOX -->
+                <div id="forgot-box" class="forgot-box widget-box no-border">
+                  <div class="widget-body">
+                    <div class="widget-main">
+                      <h4 class="header red lighter bigger">
+                        <i class="icon-key"></i>
+                        비밀번호를 초기화합니다.
+                      </h4>
+
+                      <div class="space-6"></div>
+                      <p>
+                        비밀번호를 새로 설정하는 방법을 이메일로 전달드립니다.
+                        이메일 주소를 입력하세요.
+                      </p>
+
+                      <form>
+                        <fieldset>
+                          <label class="block clearfix">
+                            <span class="block input-icon input-icon-right">
+                              <input type="email" class="form-control" placeholder="이메일" />
+                              <i class="icon-envelope"></i>
+                            </span>
+                          </label>
+
+                          <div class="clearfix">
+                            <button type="button" class="width-35 pull-right btn btn-sm btn-danger">
+                              <i class="icon-lightbulb"></i>
+                              보내주세요!
+                            </button>
+                          </div>
+                        </fieldset>
+                      </form>
+                    </div><!-- /widget-main -->
+
+                    <div class="toolbar center">
+                      <a href="#" onclick="show_box('login-box'); return false;" class="back-to-login-link">
+                        로그인 페이지로 돌아가기
+                        <i class="icon-arrow-right"></i>
+                      </a>
+                    </div>
+                  </div><!-- /widget-body -->
+                </div><!-- /forgot-box -->

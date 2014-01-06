@@ -1,0 +1,323 @@
+- use utf8;
+- my $_id   = 'order-id';
+- my $meta = $sidebar->{meta};
+- layout 'default',
+-   active_id   => $_id,
+-   breadcrumbs => [
+-     { text => $meta->{'menu-order'}{text} },
+-     { text => $meta->{$_id}{text} },
+-   ],
+-   jses => [
+-     '/lib/bootstrap/js/date-time/moment.min.js',
+-     '/lib/bootstrap3-editable/js/bootstrap-editable.min.js',
+-   ],
+-   csses => [
+-     '/lib/bootstrap3-editable/css/bootstrap-editable.css',
+-   ],
+-   ;
+- title $meta->{$_id}{text};
+
+- my $order_price = order_price($order);
+- my $late_fee    = calc_late_fee($order);
+
+                .row
+                  .col-sm-10.col-sm-offset-1
+                    .widget-box.transparent.invoice-box
+                      /
+                      / body
+                      /
+                      .widget-body
+                        .widget-main
+                          .row
+                            /
+                            / 주문서 정보
+                            /
+                            .col-sm-6
+                              .row
+                                .col-xs-11.label.label-lg.label-info.arrowed-in.arrowed-right
+                                  %strong 주문서 정보
+                              .row
+                                %ul.list-unstyled.spaced
+                                  %li.row
+                                    .col-sm-1
+                                      %i.icon-caret-right.blue
+                                    .col-sm-3.no-padding-left
+                                      담당자:
+                                    .col-sm-8
+                                      :plain
+                                        <a
+                                          id               = "order-staff-name"
+                                          class            = "editable editable-click"
+                                          href             = "#"
+
+                                          data-disabled    = "#{ $order->status ? 'true' : 'false' }"
+                                          data-mode        = "inline"
+                                          data-showbuttons = "true"
+                                          data-type        = "select"
+                                          data-emptytext   = "비어있음"
+
+                                          data-source      = "/api/gui/staff-list.json"
+                                          data-value       = "#{ $order->staff_id }"
+
+                                          data-url         = "/order/#{ $order->id }/update"
+                                          data-pk          = "#{ $order->id }"
+                                          data-name        = "staff_id"
+                                        ></a>
+                                  %li.row
+                                    .col-sm-1
+                                      %i.icon-caret-right.blue
+                                    .col-sm-3.no-padding-left
+                                      대여일:
+                                    .col-sm-8
+                                      :plain
+                                        <a
+                                          id               = "order-rental-date"
+                                          class            = "editable editable-click"
+                                          href             = "#"
+
+                                          data-disabled    = "#{ $order->status ? 'true' : 'false' }"
+                                          data-mode        = "inline"
+                                          data-showbuttons = "true"
+                                          data-type        = "combodate"
+                                          data-emptytext   = "비어있음"
+
+                                          data-format      = 'YYYY-MM-DD'
+                                          data-viewformat  = 'YYYY-MM-DD'
+                                          data-template    = 'YYYY-MM-DD'
+                                          data-value       = "#{ $order->rental_date ? $order->rental_date->ymd : q{} }"
+
+                                          data-url         = "/order/#{ $order->id }/update"
+                                          data-pk          = "#{ $order->id }"
+                                          data-name        = "rental_date"
+                                        ></a>
+                                  %li.row
+                                    .col-sm-1
+                                      %i.icon-caret-right.blue
+                                    .col-sm-3.no-padding-left
+                                      반납 예정일:
+                                    .col-sm-8
+                                      :plain
+                                        <a
+                                          id               = "order-target-date"
+                                          class            = "editable editable-click"
+                                          href             = "#"
+
+                                          data-mode        = "inline"
+                                          data-showbuttons = "true"
+                                          data-type        = "combodate"
+                                          data-emptytext   = "비어있음"
+
+                                          data-format      = 'YYYY-MM-DD'
+                                          data-viewformat  = 'YYYY-MM-DD'
+                                          data-template    = 'YYYY-MM-DD'
+                                          data-value       = "#{ $order->target_date ? $order->target_date->ymd : q{} }"
+
+                                          data-url         = "/order/#{ $order->id }/update"
+                                          data-pk          = "#{ $order->id }"
+                                          data-name        = "target_date"
+                                        ></a>
+                                  %li.row
+                                    .col-sm-1
+                                      %i.icon-caret-right.blue
+                                    .col-sm-3.no-padding-left
+                                      대여비:
+                                    .col-sm-8
+                                      :plain
+                                        <a
+                                          id               = "order-payment-method"
+                                          class            = "editable editable-click"
+                                          href             = "#"
+
+                                          data-disabled    = "#{ $order->status ? 'true' : 'false' }"
+                                          data-mode        = "inline"
+                                          data-showbuttons = "true"
+                                          data-type        = "select"
+                                          data-emptytext   = "미납"
+
+                                          data-value       = "#{ $order->payment_method || q{} }"
+
+                                          data-url         = "/order/#{ $order->id }/update"
+                                          data-pk          = "#{ $order->id }"
+                                          data-name        = "payment_method"
+                                        ></a>
+                                      \/
+                                      %strong= commify($order_price) . '원'
+                                  %li.row
+                                    .col-sm-1
+                                      %i.icon-caret-right.blue
+                                    .col-sm-3.no-padding-left
+                                      연체료:
+                                    .col-sm-8
+                                      - if ($late_fee) {
+                                        %strong= $order->return_method || '미납'
+                                        \/
+                                        %strong= sprintf( "%s원", commify($late_fee) )
+                                        %br
+                                        %strong= sprintf( "%s일 x %s원 x 20%%", calc_overdue($order->target_date), commify($order_price) )
+                                      - }
+                                      - else {
+                                        %strong 해당사항 없음
+                                      - }
+                            /
+                            / 대여자 정보
+                            /
+                            .col-sm-6
+                              .row
+                                .col-xs-11.label.label-lg.label-success.arrowed-in.arrowed-right
+                                  %strong 대여자 정보
+                              .row
+                                %ul.list-unstyled.spaced
+                                  - if ( $order->user ) {
+                                    %li.row
+                                      .col-sm-1
+                                        %i.icon-caret-right.green
+                                      .col-sm-3.no-padding-left 이름:
+                                      .col-sm-8=                $order->user->name
+                                    %li.row
+                                      .col-sm-1
+                                        %i.icon-caret-right.green
+                                      .col-sm-3.no-padding-left 전자우편:
+                                      .col-sm-8=                $order->user->email
+                                    %li.row
+                                      .col-sm-1
+                                        %i.icon-caret-right.green
+                                      .col-sm-3.no-padding-left 전화번호:
+                                      .col-sm-8=                $order->user->user_info->phone
+                                    %li.row
+                                      .col-sm-1
+                                        %i.icon-caret-right.green
+                                      .col-sm-3.no-padding-left 주소:
+                                      .col-sm-8=                $order->user->user_info->address
+                                    %li.row
+                                      .col-sm-1
+                                        %i.icon-caret-right.green
+                                      .col-sm-3.no-padding-left 신체 치수:
+                                      .col-sm-8
+                                        %span.label.label-success= $order->user->user_info->height || '-'
+                                        %span.label.label-success= $order->user->user_info->weight || '-'
+                                        %br
+                                        %span.label.label-info=    $order->user->user_info->bust   || '-'
+                                        %span.label.label-info=    $order->user->user_info->waist  || '-'
+                                        %span.label.label-info=    $order->user->user_info->hip    || '-'
+                                        %br
+                                        %span.label.label-warning= $order->user->user_info->thigh  || '-'
+                                        %span.label.label-warning= $order->user->user_info->arm    || '-'
+                                        %span.label.label-warning= $order->user->user_info->leg    || '-'
+                                        %span.label.label-warning= $order->user->user_info->knee   || '-'
+                                        %span.label.label-warning= $order->user->user_info->foot   || '-'
+                                  - }
+                                  - else {
+                                    %li.row
+                                      .col-sm-1
+                                        %i.icon-caret-right.green
+                                      .col-sm-3.no-padding-left 이름:
+                                      .col-sm-8
+                                    %li.row
+                                      .col-sm-1
+                                        %i.icon-caret-right.green
+                                      .col-sm-3.no-padding-left 전자우편:
+                                      .col-sm-8
+                                    %li.row
+                                      .col-sm-1
+                                        %i.icon-caret-right.green
+                                      .col-sm-3.no-padding-left 전화번호:
+                                      .col-sm-8
+                                    %li.row
+                                      .col-sm-1
+                                        %i.icon-caret-right.green
+                                      .col-sm-3.no-padding-left 주소:
+                                      .col-sm-8
+                                    %li.row
+                                      .col-sm-1
+                                        %i.icon-caret-right.green
+                                      .col-sm-3.no-padding-left 신체 치수:
+                                      .col-sm-8
+                                        %span.label.label-success= '-'
+                                        %span.label.label-success= '-'
+                                        %br
+                                        %span.label.label-info=    '-'
+                                        %span.label.label-info=    '-'
+                                        %span.label.label-info=    '-'
+                                        %br
+                                        %span.label.label-warning= '-'
+                                        %span.label.label-warning= '-'
+                                        %span.label.label-warning= '-'
+                                        %span.label.label-warning= '-'
+                                        %span.label.label-warning= '-'
+                                  - }
+                          .space
+                          %div
+                            %table.table.table-striped.table-bordered.table-hover
+                              %thead
+                                %tr
+                                  %th.center #
+                                  %th 항목
+                                  %th 상태
+                                  %th 대여 가격
+                                  %th 기타
+                              %tbody
+                                - my $count = 0;
+                                - for my $detail ( $order->order_details ) {
+                                  %tr
+                                    %td.center= ++$count
+                                    - if ( $detail->clothes ) {
+                                      %td
+                                        %a{ :href => "/clothes/#{ $detail->clothes->code }" }= $detail->name
+                                      %td
+                                        - if ( $detail->status ) {
+                                          %span.order-status.label{ 'data-order-detail-status' => "#{ $detail->status->name }", 'data-order-late-fee' => "#{$late_fee}" }
+                                            = $detail->status->name
+                                        - }
+                                    - }
+                                    - else {
+                                      %td= $detail->name
+                                      %td
+                                    - }
+                                    %td
+                                      %span= commify($detail->price) . '원'
+                                    %td
+                                      :plain
+                                        <a
+                                          id               = "order-detail-#{ $detail->id }"
+                                          class            = "order-detail editable editable-click"
+                                          href             = "#"
+
+                                          data-mode        = "inline"
+                                          data-showbuttons = "true"
+                                          data-type        = "text"
+                                          data-emptytext   = "비어있음"
+
+                                          data-value       = "#{ $detail->desc || q{} }"
+
+                                          data-url         = "/order/#{ $order->id }/update"
+                                          data-pk          = "#{ $detail->id }"
+                                          data-name        = "detail-desc"
+                                        ></a>
+                                - }
+
+                          .hr.hr8.hr-double.hr-dotted
+
+                          .row
+                            .col-sm-3.pull-right
+                              %h4.pull-right
+                                총액:
+                                %span.red= commify($order_price) . "원"
+                            .col-sm-9.pull-left
+                              %div
+                                %strong 연체료는 연체일 x 대여금액의 20%입니다.
+                              = $order->desc || q{}
+
+                          .space-6
+                          .well
+                            열린옷장을 이용해주셔서 고맙습니다.
+                - unless ( $order->status ) {
+                  .row
+                    .col-sm-10.col-sm-offset-1
+                      .clearfix.form-actions
+                        %a#btn-order-confirm.btn.btn-info.pull-right{ :type => 'button', :href => "#", 'data-url' => "#{ url_for('/order/' . $order->id . '/update') }", 'data-redirect-url' => "#{ url_for('/order/' . $order->id) }", "data-order-id" => "#{ $order->id }" }
+                          %i.icon-ok.bigger-110
+                          주문 확정
+                        %a.btn.btn-danger.pull-right{ :type => 'button', :href => "#{ url_for('/order/' . $order->id . '/delete') }" }
+                          %i.icon-remove.bigger-110
+                          주문 지우기
+                - }

@@ -1,0 +1,64 @@
+% use utf8;
+<!-- LOGIN-BOX -->
+                <div id="login-box" class="login-box visible widget-box no-border">
+                  <div class="widget-body">
+                    <div class="widget-main">
+                      <h4 class="header blue lighter bigger">
+                        <i class="icon-lock green"></i>
+                        정보를 입력해주세요.
+                      </h4>
+
+                      <div class="space-6"></div>
+
+                      <form>
+                        <fieldset>
+                          <label class="block clearfix">
+                            <span class="block input-icon input-icon-right">
+                              <input type="text" class="form-control" placeholder="사용자 이름" />
+                              <i class="icon-user"></i>
+                            </span>
+                          </label>
+
+                          <label class="block clearfix">
+                            <span class="block input-icon input-icon-right">
+                              <input type="password" class="form-control" placeholder="비밀번호" />
+                              <i class="icon-key"></i>
+                            </span>
+                          </label>
+
+                          <div class="space"></div>
+
+                          <div class="clearfix">
+                            <label class="inline">
+                              <input type="checkbox" class="<%= $theme %>" />
+                              <span class="lbl"> 기억하기</span>
+                            </label>
+
+                            <button type="button" class="width-35 pull-right btn btn-sm btn-primary">
+                              <i class="icon-unlock"></i>
+                              로그인
+                            </button>
+                          </div>
+
+                          <div class="space-4"></div>
+                        </fieldset>
+                      </form>
+                    </div><!-- /widget-main -->
+
+                    <div class="toolbar clearfix">
+                      <div>
+                        <a href="#" onclick="show_box('forgot-box'); return false;" class="forgot-password-link">
+                          <i class="icon-arrow-left"></i>
+                          암호를 잊어버렸어요
+                        </a>
+                      </div>
+
+                      <div>
+                        <a href="#" onclick="show_box('signup-box'); return false;" class="user-signup-link">
+                          가입할래요
+                          <i class="icon-arrow-right"></i>
+                        </a>
+                      </div>
+                    </div>
+                  </div><!-- /widget-body -->
+                </div><!-- /login-box -->

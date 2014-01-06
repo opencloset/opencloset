@@ -1,0 +1,4 @@
+% use utf8;
+<!-- body js theme -->
+    <script src="/theme/<%= $theme %>/js/<%= $theme %>-elements.min.js"></script>
+    <script src="/theme/<%= $theme %>/js/<%= $theme %>.min.js"></script>
