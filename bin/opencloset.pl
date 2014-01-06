@@ -3483,6 +3483,7 @@ __DATA__
 -     { text => $meta->{$_id}{text} },
 -   ],
 -   jses => [
+-     '/lib/bootstrap/js/date-time/moment.min.js',
 -     '/lib/bootstrap3-editable/js/bootstrap-editable.min.js',
 -   ],
 -   csses => [
