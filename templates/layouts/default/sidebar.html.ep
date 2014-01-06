@@ -1,0 +1,92 @@
+% use utf8;
+<!-- SIDEBAR -->
+        <div class="sidebar" id="sidebar">
+          <div class="sidebar-shortcuts" id="sidebar-shortcuts">
+            <div class="sidebar-shortcuts-large" id="sidebar-shortcuts-large">
+              <button class="btn btn-success"> <i class="icon-signal"></i> </button>
+              <button class="btn btn-info"   > <i class="icon-pencil"></i> </button>
+              <button class="btn btn-warning"> <i class="icon-group" ></i> </button>
+              <button class="btn btn-danger" > <i class="icon-cogs"  ></i> </button>
+            </div>
+
+            <div class="sidebar-shortcuts-mini" id="sidebar-shortcuts-mini">
+              <span class="btn btn-success"></span>
+              <span class="btn btn-info"   ></span>
+              <span class="btn btn-warning"></span>
+              <span class="btn btn-danger" ></span>
+            </div>
+          </div><!-- #sidebar-shortcuts -->
+
+          % my $menu = begin
+          %   my ( $m, $items, $active_id, $level ) = @_;
+          %   my $space = $level ? q{  } x ( $level * 2 ) : q{};
+          %
+          <!-- sidebar items -->
+          <%= $space %><ul class="<%= $level ? "submenu" : "nav nav-list" %>">
+          %
+          %   for my $item (@$items) {
+          %     my $meta  = $sidebar->{meta}{$item->{id}};
+          %     my $icon  = $meta->{icon} ? "icon-$meta->{icon}" : $level ? "icon-double-angle-right" : q{};
+          %     my $link  = $meta->{link} // "/$item->{id}";
+          %
+          %     if ( $item->{id} eq $active_id ) {
+          %       if ( $item->{items} ) {
+          %
+            <%= $space %><li class="active">
+              <%= $space %><a href="<%= $link %>" class="dropdown-toggle">
+                <%= $space %><i class="<%= $icon %>"></i>
+                <%= $space %><span class="menu-text"> <%= $meta->{text} %> </span>
+                <%= $space %><b class="arrow icon-angle-down"></b>
+              <%= $space %></a>
+              %== $m->( $m, $item->{items}, $active_id, $level + 1 );
+            <%= $space %></li>
+          %
+          %       }
+          %       else {
+          %
+            <%= $space %><li class="active">
+              <%= $space %><a href="<%= $link %>">
+                <%= $space %><i class="<%= $icon %>"></i>
+                <%= $space %><span class="menu-text"> <%= $meta->{text} %> </span>
+              <%= $space %></a>
+            <%= $space %></li>
+          %
+          %       }
+          %     }
+          %     else {
+          %       if ( $item->{items} ) {
+          %
+            <%= $space %><li>
+              <%= $space %><a href="<%= $link %>" class="dropdown-toggle">
+                <%= $space %><i class="<%= $icon %>"></i>
+                <%= $space %><span class="menu-text"> <%= $meta->{text} %> </span>
+                <%= $space %><b class="arrow icon-angle-down"></b>
+              <%= $space %></a>
+              %== $m->( $m, $item->{items}, $active_id, $level + 1 );
+            <%= $space %></li>
+          %
+          %       }
+          %       else {
+          %
+            <%= $space %><li>
+              <%= $space %><a href="<%= $link %>">
+                <%= $space %><i class="<%= $icon %>"></i>
+                <%= $space %><span class="menu-text"> <%= $meta->{text} %> </span>
+              <%= $space %></a>
+            <%= $space %></li>
+          %
+          %       }
+          %     }
+          %   }
+          %
+          <%= $space %></ul> <!-- <%= $level ? "submenu" : "nav-list" %> -->
+          %
+          % end
+          %
+          %== $menu->( $menu, $sidebar->{items}, $active_id, 0 );
+          %
+
+          <div class="sidebar-collapse" id="sidebar-collapse">
+            <i class="icon-double-angle-left" data-icon1="icon-double-angle-left" data-icon2="icon-double-angle-right"></i>
+          </div>
+        </div> <!-- sidebar -->

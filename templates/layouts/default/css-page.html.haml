@@ -1,0 +1,13 @@
+- use utf8;
+/ css-page
+    / page specific
+    - my @include_csses = @$csses;
+    - #push @include_csses, "$active_id.css" if $active_id;
+    - for my $css (@include_csses) {
+    -   if ( $css =~ m{^/} ) {
+      %link{ :rel => 'stylesheet' :href => "#{ $css }" }
+    -   }
+    -   else {
+      %link{ :rel => 'stylesheet' :href => "/css/#{ $css }" }
+    -   }
+    - }

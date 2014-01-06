@@ -1,0 +1,35 @@
+% use utf8;
+<!-- BREADCRUMBS -->
+          <div class="breadcrumbs" id="breadcrumbs">
+            <ul class="breadcrumb">
+            % if (@$breadcrumbs) {
+              <li> <i class="icon-home home-icon"></i> <a href="/"><%= $sidebar->{meta}{home}{text} %></a> </li>
+            %   for my $i ( 0 .. $#$breadcrumbs ) {
+            %     my $b = $breadcrumbs->[$i];
+            %     if ( $i < $#$breadcrumbs ) {
+            %       if ( $b->{link} ) {
+              <li> <a href="<%= $b->{link} %>"><%= $b->{text} %></a> </li>
+            %       }
+            %       else {
+              <li> <%= $b->{text} %> </li>
+            %       }
+            %     }
+            %     else {
+              <li class="active"> <%= $b->{text} %> </li>
+            %     }
+            %   }
+            % }
+            % else {
+              <li class="active"> <i class="icon-home home-icon"></i> <a href="/"><%= $sidebar->{meta}{home}{text} %></a> </li>
+            % }
+            </ul><!-- .breadcrumb -->
+
+            <div class="nav-search" id="nav-search">
+              <form class="form-search">
+                <span class="input-icon">
+                  <input type="text" placeholder="검색 ..." class="nav-search-input" id="nav-search-input" autocomplete="off" />
+                  <i class="icon-search nav-search-icon"></i>
+                </span>
+              </form>
+            </div><!-- #nav-search -->
+          </div> <!-- breadcrumbs -->
