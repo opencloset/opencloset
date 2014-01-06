@@ -3459,8 +3459,8 @@ __DATA__
             = $order->rental_date ? $order->rental_date->ymd : q{}
           %td
             = $order->target_date ? $order->target_date->ymd : q{}
-          %td= $order->user ? $order->user->name : q{}
-          %td= $order->staff_name || q{}
+          %td= $order->user  ? $order->user->name  : q{}
+          %td= $order->staff ? $order->staff->name : q{}
           %td
             - my $count = 0;
             - for my $detail ( $order->order_details ) {
