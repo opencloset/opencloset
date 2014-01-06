@@ -5,3 +5,8 @@ $ ->
       $(el).html('연체중')
 
   $('#order-staff-name').editable()
+  $('#order-rental-date').editable({
+    combodate: {
+       minYear: 2014,
+    }
+  })

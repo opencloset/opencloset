@@ -7,7 +7,12 @@
         return $(el).html('연체중');
       }
     });
-    return $('#order-staff-name').editable();
+    $('#order-staff-name').editable();
+    return $('#order-rental-date').editable({
+      combodate: {
+        minYear: 2014
+      }
+    });
   });
 
 }).call(this);

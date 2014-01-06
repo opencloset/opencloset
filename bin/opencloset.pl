@@ -3542,11 +3542,26 @@ __DATA__
                                     .col-sm-3.no-padding-left
                                       대여일:
                                     .col-sm-8
-                                      - if ( $order->rental_date ) {
-                                        %strong= $order->rental_date->ymd
-                                      - }
-                                      - else {
-                                      - }
+                                      :plain
+                                        <a
+                                          id               = "order-rental-date"
+                                          class            = "editable editable-click"
+                                          href             = "#"
+
+                                          data-mode        = "inline"
+                                          data-showbuttons = "true"
+                                          data-type        = "combodate"
+                                          data-emptytext   = "비어있음"
+
+                                          data-format      = 'YYYY-MM-DD'
+                                          data-viewformat  = 'YYYY-MM-DD'
+                                          data-template    = 'YYYY-MM-DD'
+                                          data-value       = "#{ $order->rental_date ? $order->rental_date->ymd : q{} }"
+
+                                          data-url         = "/order/#{ $order->id }/update"
+                                          data-pk          = "#{ $order->id }"
+                                          data-name        = "rental_date"
+                                        ></a>
                                   %li.row
                                     .col-sm-1
                                       %i.icon-caret-right.blue
