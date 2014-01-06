@@ -3525,7 +3525,7 @@ __DATA__
                                           href             = "#"
 
                                           data-mode        = "inline"
-                                          data-showbuttons = "false"
+                                          data-showbuttons = "true"
                                           data-type        = "select"
                                           data-emptytext   = "비어있음"
 
