@@ -1151,7 +1151,7 @@ group {
             %extra_data = (
                 order => {
                     id          => $order->id,
-                    price       => $order->price,
+                    price       => $self->order_price($order),
                     clothes     => [ $order->clothes->get_column('code')->all ],
                     late_fee    => $self->calc_late_fee( $order, 'commify' ),
                     overdue     => $self->calc_overdue( $order->target_date ),
