@@ -1,0 +1,35 @@
+!!! 5
+%html
+  %head
+    %title= title . ' - ' . $site->{name}
+    = include 'layouts/default/meta'
+    = include 'layouts/default/before-css'
+    = include 'layouts/default/before-js'
+    = include 'layouts/default/theme'
+    = include 'layouts/default/css-page'
+    = include 'layouts/default/after-css'
+    = include 'layouts/default/after-js'
+
+  %body.login-layout
+    .main-container
+      .main-content
+        .row
+          .col-sm-10.col-sm-offset-1
+            .login-container
+              .center
+                %h1
+                  != $site->{icon} ? qq[<i class="icon-$site->{icon} orange"></i>] : q{};
+                  %span.white= $site->{name}
+              .center
+                %h1
+                %h4.blue
+                  != '&copy;'
+                  = "$company_name"
+              .space-6
+              .position-relative
+                = include 'layouts/login/login-box'
+                = include 'layouts/login/forgot-box'
+                = include 'layouts/login/signup-box'
+    = include 'layouts/default/body-js'
+    = include 'layouts/default/body-js-theme'
+    = include 'layouts/default/body-js-page'

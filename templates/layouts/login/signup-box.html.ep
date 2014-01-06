@@ -1,0 +1,75 @@
+% use utf8;
+<!-- SIGNUP-BOX -->
+                <div id="signup-box" class="signup-box widget-box no-border">
+                  <div class="widget-body">
+                    <div class="widget-main">
+                      <h4 class="header green lighter bigger">
+                        <i class="icon-group blue"></i>
+                        새로운 사용자 등록하기
+                      </h4>
+
+                      <div class="space-6"></div>
+                      <p> 등록을 위해 다음 내용을 입력해주세요. </p>
+
+                      <form>
+                        <fieldset>
+                          <label class="block clearfix">
+                            <span class="block input-icon input-icon-right">
+                              <input type="email" class="form-control" placeholder="이메일" />
+                              <i class="icon-envelope"></i>
+                            </span>
+                          </label>
+
+                          <label class="block clearfix">
+                            <span class="block input-icon input-icon-right">
+                              <input type="text" class="form-control" placeholder="사용자 이름" />
+                              <i class="icon-user"></i>
+                            </span>
+                          </label>
+
+                          <label class="block clearfix">
+                            <span class="block input-icon input-icon-right">
+                              <input type="password" class="form-control" placeholder="비밀번호" />
+                              <i class="icon-lock"></i>
+                            </span>
+                          </label>
+
+                          <label class="block clearfix">
+                            <span class="block input-icon input-icon-right">
+                              <input type="password" class="form-control" placeholder="비밀번호 확인" />
+                              <i class="icon-retweet"></i>
+                            </span>
+                          </label>
+
+                          <label class="block">
+                            <input type="checkbox" class="<%= $theme %>" />
+                            <span class="lbl">
+                              <a href="#">사용자 약관</a>에 동의합니다.
+                            </span>
+                          </label>
+
+                          <div class="space-24"></div>
+
+                          <div class="clearfix">
+                            <button type="reset" class="width-30 pull-left btn btn-sm">
+                              <i class="icon-refresh"></i>
+                              새로 쓰기
+                            </button>
+
+                            <button type="button" class="width-65 pull-right btn btn-sm btn-success">
+                              등록하기
+                              <i class="icon-arrow-right icon-on-right"></i>
+                            </button>
+                          </div>
+                        </fieldset>
+                      </form>
+                    </div>
+
+                    <div class="toolbar center">
+                      <a href="#" onclick="show_box('login-box'); return false;" class="back-to-login-link">
+                        <i class="icon-arrow-left"></i>
+                        로그인 페이지로 돌아가기
+                      </a>
+                    </div>
+                  </div><!-- /widget-body -->
+                </div><!-- /signup-box -->
