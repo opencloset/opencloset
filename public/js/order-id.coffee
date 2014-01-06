@@ -15,3 +15,10 @@ $ ->
        minYear: 2014,
     }
   })
+  $('#order-payment-method').editable({
+    source: ->
+      result = []
+      for m in [ '현금', '카드', '현금+카드' ]
+        result.push { value: m, text: m }
+      return result
+  })

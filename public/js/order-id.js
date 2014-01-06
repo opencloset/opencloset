@@ -13,9 +13,24 @@
         minYear: 2014
       }
     });
-    return $('#order-target-date').editable({
+    $('#order-target-date').editable({
       combodate: {
         minYear: 2014
+      }
+    });
+    return $('#order-payment-method').editable({
+      source: function() {
+        var m, result, _i, _len, _ref;
+        result = [];
+        _ref = ['현금', '카드', '현금+카드'];
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          m = _ref[_i];
+          result.push({
+            value: m,
+            text: m
+          });
+        }
+        return result;
       }
     });
   });

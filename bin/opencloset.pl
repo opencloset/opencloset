@@ -3594,7 +3594,23 @@ __DATA__
                                     .col-sm-3.no-padding-left
                                       대여비:
                                     .col-sm-8
-                                      %strong= $order->payment_method
+                                      :plain
+                                        <a
+                                          id               = "order-payment-method"
+                                          class            = "editable editable-click"
+                                          href             = "#"
+
+                                          data-mode        = "inline"
+                                          data-showbuttons = "true"
+                                          data-type        = "select"
+                                          data-emptytext   = "미납"
+
+                                          data-value       = "#{ $order->payment_method || q{} }"
+
+                                          data-url         = "/order/#{ $order->id }/update"
+                                          data-pk          = "#{ $order->id }"
+                                          data-name        = "payment_method"
+                                        ></a>
                                       \/
                                       %strong= commify($order_price) . '원'
                                   %li.row
