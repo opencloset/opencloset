@@ -2132,7 +2132,39 @@ post '/order/:id/update' => sub {
         }
     }
     else {
-        $order->update({ $update_params{name} => $update_params{value} });
+        if ( $update_params{name} eq 'status_id' ) {
+            my $guard = $DB->txn_scope_guard;
+            try {
+                #
+                # update order.status_id
+                #
+                $order->update({ $update_params{name} => $update_params{value} });
+
+                #
+                # update clothes.status_id
+                #
+                for my $clothes ( $order->clothes ) {
+                    $clothes->update({ $update_params{name} => $update_params{value} });
+                }
+
+                #
+                # update order_detail.status_id
+                #
+                for my $order_detail ( $order->order_details ) {
+                    next unless $order_detail->clothes;
+                    $order_detail->update({ $update_params{name} => $update_params{value} });
+                }
+
+                $guard->commit;
+            }
+            catch {
+                app->log->error("failed to update status of the order & clothes");
+                app->log->error($_);
+            };
+        }
+        else {
+            $order->update({ $update_params{name} => $update_params{value} });
+        }
     }
 
     #
@@ -3794,6 +3826,9 @@ __DATA__
                   .row
                     .col-sm-10.col-sm-offset-1
                       .clearfix.form-actions
+                        %a#btn-order-confirm.btn.btn-info.pull-right{ :type => 'button', :href => "#", 'data-url' => "#{ url_for('/order/' . $order->id . '/update') }", 'data-redirect-url' => "#{ url_for('/order/' . $order->id) }", "data-order-id" => "#{ $order->id }" }
+                          %i.icon-ok.bigger-110
+                          주문 확정
                         %a.btn.btn-danger.pull-right{ :type => 'button', :href => "#{ url_for('/order/' . $order->id . '/delete') }" }
                           %i.icon-remove.bigger-110
                           주문 지우기

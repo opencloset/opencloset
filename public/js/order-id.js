@@ -33,7 +33,35 @@
         return result;
       }
     });
-    return $('.order-detail').editable();
+    $('.order-detail').editable();
+    return $('#btn-order-confirm').click(function(e) {
+      var order_id, redirect_url, url;
+      url = $(e.target).data('url');
+      order_id = $(e.target).data('order-id');
+      redirect_url = $(e.target).data('redirect-url');
+      if (!url) {
+        return;
+      }
+      if (!order_id) {
+        return;
+      }
+      return $.ajax(url, {
+        type: 'POST',
+        data: {
+          id: order_id,
+          name: 'status_id',
+          value: 2,
+          pk: order_id
+        },
+        success: function(data, textStatus, jqXHR) {
+          return window.location.href = redirect_url;
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+          return alert('error', jqXHR.responseJSON.error);
+        },
+        complete: function(jqXHR, textStatus) {}
+      });
+    });
   });
 
 }).call(this);
