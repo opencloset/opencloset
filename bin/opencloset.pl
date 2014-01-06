@@ -3458,43 +3458,15 @@ __DATA__
             %a{ :href => "#{url_for('/order/' . $order->id)}" }= $order->id
           %td
             %a{ :href => "#{url_for('/order/' . $order->id)}" }
+              - my $status;
               - if ( $order->status ) {
-              -   use v5.14;
-              -   no warnings 'experimental';
-              -   given ( $order->status->name ) {
-              -     when ('대여가능') {
-                %span.label.label-success.order-status
-                  = $order->status->name
-              -     }
-              -     when (/세탁|수선|분실|폐기|반납|대여불가|예약/) {
-                %span.label.label-info.order-status
-                  = $order->status->name
-              -     }
-              -     when (/반납배송중|부분반납/) {
-                %span.label.label-warning.order-status
-                  = $order->status->name
-              -     }
-              -     when (/대여중/) {
-              -       my $late_fee = calc_late_fee($order);
-              -        if ($late_fee) {
-                %span.label.label-important.order-status
-                  = $order->status->name . '(연체)'
-                  %span.late-fee= commify($late_fee) . "원"
-              -       }
-              -       else {
-                %span.label.label-warning.order-status
-                  = $order->status->name
-              -       }
-              -     }
-              -     default {
-                %span.label.order-status
-                  = $order->status->name
-              -     }
+              -   $status = $order->status->name;
+              -   if ( $status eq '대여중' ) {
+              -     my $late_fee = calc_late_fee($order);
+              -     $status .= '(연체) ' . commify($late_fee) . '원' if $late_fee;
               -   }
               - }
-              - else {
-                %span.label.order-status 상태없음
-              - }
+              %span.label.order-status{ 'data-order-status' => "#{ $order->status ? $order->status->name : q{} }" }= $status || '상태없음'
           %td
             = $order->rental_date ? $order->rental_date->ymd : q{}
           %td
