@@ -18,7 +18,7 @@
         minYear: 2014
       }
     });
-    return $('#order-payment-method').editable({
+    $('#order-payment-method').editable({
       source: function() {
         var m, result, _i, _len, _ref;
         result = [];
@@ -33,6 +33,7 @@
         return result;
       }
     });
+    return $('.order-detail').editable();
   });
 
 }).call(this);

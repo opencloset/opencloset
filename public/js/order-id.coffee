@@ -22,3 +22,4 @@ $ ->
         result.push { value: m, text: m }
       return result
   })
+  $('.order-detail').editable()

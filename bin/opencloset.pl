@@ -2125,7 +2125,15 @@ post '/order/:id/update' => sub {
     #
     # update column
     #
-    $order->update({ $update_params{name} => $update_params{value} });
+    if ( $update_params{name} =~ s/^detail-// ) {
+        my $detail = $order->order_details({ id => $update_params{pk} });
+        if ($detail) {
+            $detail->update({ $update_params{name} => $update_params{value} });
+        }
+    }
+    else {
+        $order->update({ $update_params{name} => $update_params{value} });
+    }
 
     #
     # response
@@ -3748,7 +3756,23 @@ __DATA__
                                     %td
                                       %span= commify($detail->price) . '원'
                                     %td
-                                      %span= $detail->desc || q{}
+                                      :plain
+                                        <a
+                                          id               = "order-detail-#{ $detail->id }"
+                                          class            = "order-detail editable editable-click"
+                                          href             = "#"
+
+                                          data-mode        = "inline"
+                                          data-showbuttons = "true"
+                                          data-type        = "text"
+                                          data-emptytext   = "비어있음"
+
+                                          data-value       = "#{ $detail->desc || q{} }"
+
+                                          data-url         = "/order/#{ $order->id }/update"
+                                          data-pk          = "#{ $detail->id }"
+                                          data-name        = "detail-desc"
+                                        ></a>
                                 - }
 
                           .hr.hr8.hr-double.hr-dotted
