@@ -3429,60 +3429,6 @@ __DATA__
   </script>
 
 
-@@ order.html.haml
-- my $id   = 'order';
-- my $meta = $sidebar->{meta};
-- layout 'default',
--   active_id   => $id,
--   breadcrumbs => [
--     { text => $meta->{'menu-order'}{text} },
--     { text => $meta->{$id}{text} },
--   ];
-- title $meta->{$id}{text};
-
-#order-table
-  %table.table.table-striped.table-bordered.table-hover
-    %thead
-      %tr
-        %th.center #
-        %th 상태
-        %th 대여일
-        %th 반납 예정일
-        %th 대여자
-        %th 담당자
-        %th 기타
-    %tbody
-      - while ( my $order = $order_list->next ) {
-        %tr
-          %td.center
-            %a{ :href => "#{url_for('/order/' . $order->id)}" }= $order->id
-          %td
-            %a{ :href => "#{url_for('/order/' . $order->id)}" }
-              - my $status;
-              - if ( $order->status ) {
-              -   $status = $order->status->name;
-              -   if ( $status eq '대여중' ) {
-              -     my $late_fee = calc_late_fee($order);
-              -     $status .= '(연체) ' . commify($late_fee) . '원' if $late_fee;
-              -   }
-              - }
-              %span.label.order-status{ 'data-order-status' => "#{ $order->status ? $order->status->name : q{} }" }= $status || '상태없음'
-          %td
-            = $order->rental_date ? $order->rental_date->ymd : q{}
-          %td
-            = $order->target_date ? $order->target_date->ymd : q{}
-          %td= $order->user  ? $order->user->name  : q{}
-          %td= $order->staff ? $order->staff->name : q{}
-          %td
-            - my $count = 0;
-            - for my $detail ( $order->order_details ) {
-            -   next unless $detail->clothes;
-            -   ++$count;
-              = $count > 1 ? q{, } : q{}
-              %span
-                %a{ :href => '/clothes/#{ $detail->clothes->code }' }= $detail->clothes->category
-            - }
-      - }
 
 
 @@ order/id.html.haml
