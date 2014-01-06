@@ -3138,34 +3138,3 @@ __DATA__
               %button.btn.btn-next.btn-success{ "data-last" => "완료 " }
                 다음
                 %i.icon-arrow-right.icon-on-right
-
-
-@@ layouts/error.html.haml
-!!! 5
-%html
-  %head
-    %title= title . ' - ' . $site->{name}
-    = include 'layouts/default/meta'
-    = include 'layouts/default/before-css'
-    = include 'layouts/default/before-js'
-    = include 'layouts/default/theme'
-    = include 'layouts/default/after-css'
-    = include 'layouts/default/after-js'
-
-  %body
-    = include 'layouts/default/navbar'
-    #main-container.main-container
-      .main-container-inner
-        %a#menu-toggler.menu-toggler{:href = '#'}
-          %span.menu-text
-        = include 'layouts/default/sidebar'
-        .main-content
-          = include 'layouts/default/breadcrumbs'
-          .page-content
-            .row
-              .col-xs-12
-                / PAGE CONTENT BEGINS
-                = content
-                / PAGE CONTENT ENDS
-    = include 'layouts/default/body-js'
-    = include 'layouts/default/body-js-theme'
