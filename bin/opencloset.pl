@@ -2387,12 +2387,6 @@ app->start;
 
 __DATA__
 
-@@ login.html.haml
-- my $id = 'login';
-- layout 'login', active_id => $id;
-- title $sidebar->{meta}{login}{text};
-
-
 @@ home.html.haml
 - my $id   = 'home';
 - my $meta = $sidebar->{meta};
