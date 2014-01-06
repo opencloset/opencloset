@@ -3565,6 +3565,7 @@ __DATA__
                                           class            = "editable editable-click"
                                           href             = "#"
 
+                                          data-disabled    = "#{ $order->status ? 'true' : 'false' }"
                                           data-mode        = "inline"
                                           data-showbuttons = "true"
                                           data-type        = "select"
@@ -3589,6 +3590,7 @@ __DATA__
                                           class            = "editable editable-click"
                                           href             = "#"
 
+                                          data-disabled    = "#{ $order->status ? 'true' : 'false' }"
                                           data-mode        = "inline"
                                           data-showbuttons = "true"
                                           data-type        = "combodate"
@@ -3641,6 +3643,7 @@ __DATA__
                                           class            = "editable editable-click"
                                           href             = "#"
 
+                                          data-disabled    = "#{ $order->status ? 'true' : 'false' }"
                                           data-mode        = "inline"
                                           data-showbuttons = "true"
                                           data-type        = "select"
