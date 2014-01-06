@@ -4508,7 +4508,9 @@ __DATA__
                   %span.white= $site->{name}
               .center
                 %h1
-                %h4.blue= "&copy; $company_name"
+                %h4.blue
+                  != '&copy;'
+                  = "$company_name"
               .space-6
               .position-relative
                 = include 'layouts/login/login-box'
