@@ -8,7 +8,12 @@
       }
     });
     $('#order-staff-name').editable();
-    return $('#order-rental-date').editable({
+    $('#order-rental-date').editable({
+      combodate: {
+        minYear: 2014
+      }
+    });
+    return $('#order-target-date').editable({
       combodate: {
         minYear: 2014
       }

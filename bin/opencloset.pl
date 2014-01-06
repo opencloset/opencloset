@@ -3568,11 +3568,26 @@ __DATA__
                                     .col-sm-3.no-padding-left
                                       반납 예정일:
                                     .col-sm-8
-                                      - if ( $order->target_date ) {
-                                        %strong= $order->target_date->ymd
-                                      - }
-                                      - else {
-                                      - }
+                                      :plain
+                                        <a
+                                          id               = "order-target-date"
+                                          class            = "editable editable-click"
+                                          href             = "#"
+
+                                          data-mode        = "inline"
+                                          data-showbuttons = "true"
+                                          data-type        = "combodate"
+                                          data-emptytext   = "비어있음"
+
+                                          data-format      = 'YYYY-MM-DD'
+                                          data-viewformat  = 'YYYY-MM-DD'
+                                          data-template    = 'YYYY-MM-DD'
+                                          data-value       = "#{ $order->target_date ? $order->target_date->ymd : q{} }"
+
+                                          data-url         = "/order/#{ $order->id }/update"
+                                          data-pk          = "#{ $order->id }"
+                                          data-name        = "target_date"
+                                        ></a>
                                   %li.row
                                     .col-sm-1
                                       %i.icon-caret-right.blue

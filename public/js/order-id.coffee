@@ -10,3 +10,8 @@ $ ->
        minYear: 2014,
     }
   })
+  $('#order-target-date').editable({
+    combodate: {
+       minYear: 2014,
+    }
+  })
