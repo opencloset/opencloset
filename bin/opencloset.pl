@@ -114,14 +114,14 @@ helper sms2hr => sub {
 };
 
 helper order_price => sub {
-    my ( $self, $order ) = @_;
+    my ( $self, $order, $commify ) = @_;
 
     return 0 unless $order;
 
     my $price = 0;
     $price += $_->price for $order->order_details;
 
-    return $price;
+    return $commify ? $self->commify($price) : $price;
 };
 
 helper calc_overdue => sub {
@@ -1151,7 +1151,7 @@ group {
             %extra_data = (
                 order => {
                     id          => $order->id,
-                    price       => $self->order_price($order),
+                    price       => $self->order_price( $order, 'commify' ),
                     clothes     => [ $order->clothes->get_column('code')->all ],
                     late_fee    => $self->calc_late_fee( $order, 'commify' ),
                     overdue     => $self->calc_overdue( $order->target_date ),
@@ -1373,7 +1373,7 @@ group {
                 %extra_data = (
                     order => {
                         id          => $order->id,
-                        price       => $order->price,
+                        price       => $self->order_price( $order, 'commify' ),
                         clothes     => [ $order->clothes->get_column('code')->all ],
                         late_fee    => $self->calc_late_fee( $order, 'commify' ),
                         overdue     => $self->calc_overdue( $order->target_date ),
@@ -1912,7 +1912,7 @@ get '/clothes/:code' => sub {
         push @with, $self->cloth2hr($_cloth);
     }
 
-    my $overdue = $self->calc_overdue($order->target_date, DateTime->now);
+    my $overdue = $self->calc_overdue( $order->target_date, DateTime->now );
     my %columns = (
         %{ $self->cloth2hr($clothes) },
         rental_date => {
@@ -1926,7 +1926,7 @@ get '/clothes/:code' => sub {
             ymd => $order->target_date->ymd
         },
         order_id    => $order->id,
-        price       => $self->commify($order->price),
+        price       => $self->order_price( $order, 'commify' ),
         overdue     => $overdue,
         late_fee    => $self->calc_late_fee( $order, 'commify' ),
         clothes     => \@with,
