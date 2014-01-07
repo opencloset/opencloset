@@ -892,8 +892,8 @@ group {
         #
         my %order_params = $self->get_params(qw/
             user_id     status_id     rental_date    target_date
-            return_date return_method payment_method price
-            discount    late_fee      l_discount     l_payment_method
+            return_date return_method price_pay_with price
+            discount    late_fee      l_discount     late_fee_pay_with
             staff_name  comment       purpose        height
             weight      bust          waist          hip
             thigh       arm           leg            knee
@@ -943,8 +943,8 @@ group {
         my %params = $self->get_params(qw/
             id
             user_id     status_id     rental_date    target_date
-            return_date return_method payment_method price
-            discount    late_fee      l_discount     l_payment_method
+            return_date return_method price_pay_with price
+            discount    late_fee      l_discount     late_fee_pay_with
             staff_name  comment       purpose        height
             weight      bust          waist          hip
             thigh       arm           leg            knee
@@ -2156,7 +2156,7 @@ any [qw/post put patch/] => '/orders/:id' => sub {
     my $validator = $self->create_validator;
     unless ($order->status_id) {
         $validator->field('target_date')->required(1);
-        $validator->field('payment_method')->required(1);
+        $validator->field('price_pay_with')->required(1);
     }
     if ($order->status_id && $order->status_id == $Opencloset::Constant::STATUS_RENT) {
         $validator->field('return_method')->required(1);
@@ -2173,7 +2173,7 @@ any [qw/post put patch/] => '/orders/:id' => sub {
     ##       maybe should convert to DateTime object
     map {
         $order->$_($self->param($_)) if defined $self->param($_);
-    } qw/price discount target_date comment return_method late_fee l_discount payment_method staff_name/;
+    } qw/price discount target_date comment return_method late_fee l_discount price_pay_with staff_name/;
     my %status_to_be = (
         0 => $Opencloset::Constant::STATUS_RENT,
         $Opencloset::Constant::STATUS_RENT => $Opencloset::Constant::STATUS_RETURN,

@@ -76,7 +76,7 @@ INSERT
 INSERT
   INTO `order` (
     `id`,`user_id`,`status_id`,`staff_id`,`rental_date`,`target_date`,`return_date`,
-    `desc`,`payment_method`,`purpose`,`bust`,`waist`,`arm`,`leg`
+    `desc`,`price_pay_with`,`purpose`,`bust`,`waist`,`arm`,`leg`
   )
   VALUES
     (1,2,2,3,'2013-10-18','2013-10-21',NULL,NULL,'현금','입사면접',95,78,60,105);

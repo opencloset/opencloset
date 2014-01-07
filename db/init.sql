@@ -177,17 +177,17 @@ CREATE TABLE `satisfaction` (
 --
 
 CREATE TABLE `order` (
-  `id`               INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `user_id`          INT UNSIGNED NOT NULL,
-  `status_id`        INT UNSIGNED DEFAULT NULL,
-  `staff_id`         INT UNSIGNED DEFAULT NULL,
-  `rental_date`      DATETIME DEFAULT NULL,
-  `target_date`      DATETIME DEFAULT NULL,
-  `return_date`      DATETIME DEFAULT NULL,
-  `return_method`    VARCHAR(32) DEFAULT NULL,
-  `payment_method`   VARCHAR(32) DEFAULT NULL,
-  `l_payment_method` VARCHAR(32) DEFAULT NULL,
-  `desc`             TEXT DEFAULT NULL,
+  `id`                INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `user_id`           INT UNSIGNED NOT NULL,
+  `status_id`         INT UNSIGNED DEFAULT NULL,
+  `staff_id`          INT UNSIGNED DEFAULT NULL,
+  `rental_date`       DATETIME DEFAULT NULL,
+  `target_date`       DATETIME DEFAULT NULL,
+  `return_date`       DATETIME DEFAULT NULL,
+  `return_method`     VARCHAR(32) DEFAULT NULL,
+  `price_pay_with`    VARCHAR(32) DEFAULT NULL,
+  `late_fee_pay_with` VARCHAR(32) DEFAULT NULL,
+  `desc`              TEXT DEFAULT NULL,
 
   -- guest info
   `purpose`          VARCHAR(32),

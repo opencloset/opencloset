@@ -82,13 +82,13 @@ __PACKAGE__->table("order");
   is_nullable: 1
   size: 32
 
-=head2 payment_method
+=head2 price_pay_with
 
   data_type: 'varchar'
   is_nullable: 1
   size: 32
 
-=head2 l_payment_method
+=head2 late_fee_pay_with
 
   data_type: 'varchar'
   is_nullable: 1
@@ -209,9 +209,9 @@ __PACKAGE__->add_columns(
   },
   "return_method",
   { data_type => "varchar", is_nullable => 1, size => 32 },
-  "payment_method",
+  "price_pay_with",
   { data_type => "varchar", is_nullable => 1, size => 32 },
-  "l_payment_method",
+  "late_fee_pay_with",
   { data_type => "varchar", is_nullable => 1, size => 32 },
   "desc",
   { data_type => "text", is_nullable => 1 },
@@ -349,8 +349,8 @@ Composing rels: L</order_clothes> -> clothes
 __PACKAGE__->many_to_many("clothes", "order_clothes", "clothes");
 
 
-# Created by DBIx::Class::Schema::Loader v0.07038 @ 2014-01-03 09:27:59
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:uUqNZQUFJa3G6TQS39hkWg
+# Created by DBIx::Class::Schema::Loader v0.07038 @ 2014-01-07 13:04:06
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:hmtuvMtiro4mW6DnF4vPrQ
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration
