@@ -162,6 +162,31 @@ helper calc_late_fee => sub {
     return $commify ? $self->commify($late_fee) : $late_fee;
 };
 
+helper flatten_order => sub {
+    my ( $self, $order ) = @_;
+
+    return unless $order;
+
+    my %data = (
+        id          => $order->id,
+        price       => $self->order_price( $order, 'commify' ),
+        clothes     => [ $order->clothes->get_column('code')->all ],
+        late_fee    => $self->calc_late_fee( $order, 'commify' ),
+        overdue     => $self->calc_overdue( $order->target_date ),
+        rental_date => {
+            raw => $order->rental_date,
+            md  => $order->rental_date->month . '/' . $order->rental_date->day,
+            ymd => $order->rental_date->ymd
+        },
+        target_date => {
+            raw => $order->target_date,
+            md  => $order->target_date->month . '/' . $order->target_date->day,
+            ymd => $order->target_date->ymd
+        },
+    );
+
+    return \%data;
+};
 
 helper user_validator => sub {
     my $self = shift;
@@ -904,9 +929,9 @@ group {
         #
         # response
         #
-        my %data = ( $order->get_columns );
+        my $data = $self->flatten_order($order);
 
-        $self->respond_to( json => { status => 200, json => \%data } );
+        $self->respond_to( json => { status => 200, json => $data } );
     }
 
     sub api_update_order {
@@ -1018,7 +1043,9 @@ group {
         # response
         #
         my @data;
-        push @data, +{ $_->get_columns } for $rs->all;
+        for my $order ( $rs->all ) {
+            push @data, $self->flatten_order($order);
+        }
 
         $self->respond_to( json => { status => 200, json => \@data } );
     }
@@ -1147,27 +1174,7 @@ group {
         my %extra_data;
         # '대여중'인 항목만 주문서 정보를 포함합니다.
         my $order = $clothes->orders->find({ status_id => 2 });
-        if ($order) {
-            %extra_data = (
-                order => {
-                    id          => $order->id,
-                    price       => $self->order_price( $order, 'commify' ),
-                    clothes     => [ $order->clothes->get_column('code')->all ],
-                    late_fee    => $self->calc_late_fee( $order, 'commify' ),
-                    overdue     => $self->calc_overdue( $order->target_date ),
-                    rental_date => {
-                        raw => $order->rental_date,
-                        md  => $order->rental_date->month . '/' . $order->rental_date->day,
-                        ymd => $order->rental_date->ymd
-                    },
-                    target_date => {
-                        raw => $order->target_date,
-                        md  => $order->target_date->month . '/' . $order->target_date->day,
-                        ymd => $order->target_date->ymd
-                    },
-                },
-            );
-        }
+        $extra_data{order} = $self->flatten_order($order) if $order;
 
         #
         # response
@@ -1369,27 +1376,8 @@ group {
             # '대여중'인 항목만 주문서 정보를 포함합니다.
             my %extra_data;
             my $order = $clothes->orders->find({ status_id => 2 });
-            if ($order) {
-                %extra_data = (
-                    order => {
-                        id          => $order->id,
-                        price       => $self->order_price( $order, 'commify' ),
-                        clothes     => [ $order->clothes->get_column('code')->all ],
-                        late_fee    => $self->calc_late_fee( $order, 'commify' ),
-                        overdue     => $self->calc_overdue( $order->target_date ),
-                        rental_date => {
-                            raw => $order->rental_date,
-                            md  => $order->rental_date->month . '/' . $order->rental_date->day,
-                            ymd => $order->rental_date->ymd
-                        },
-                        target_date => {
-                            raw => $order->target_date,
-                            md  => $order->target_date->month . '/' . $order->target_date->day,
-                            ymd => $order->target_date->ymd
-                        },
-                    },
-                );
-            }
+            $extra_data{order} = $self->flatten_order($order) if $order;
+
             push @data, {
                 $clothes->get_columns,
                 %extra_data,
@@ -1912,24 +1900,9 @@ get '/clothes/:code' => sub {
         push @with, $self->cloth2hr($_cloth);
     }
 
-    my $overdue = $self->calc_overdue( $order->target_date, DateTime->now );
     my %columns = (
         %{ $self->cloth2hr($clothes) },
-        rental_date => {
-            raw => $order->rental_date,
-            md  => $order->rental_date->month . '/' . $order->rental_date->day,
-            ymd => $order->rental_date->ymd
-        },
-        target_date => {
-            raw => $order->target_date,
-            md  => $order->target_date->month . '/' . $order->target_date->day,
-            ymd => $order->target_date->ymd
-        },
-        order_id    => $order->id,
-        price       => $self->order_price( $order, 'commify' ),
-        overdue     => $overdue,
-        late_fee    => $self->calc_late_fee( $order, 'commify' ),
-        clothes     => \@with,
+        %{ $self->flatten_order($order) },
     );
 
     $self->respond_to(
