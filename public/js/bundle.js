@@ -131,7 +131,7 @@
           case 'pants':
             str = '바지';
             break;
-          case 'shirts':
+          case 'shirt':
             str = '셔츠';
             break;
           case 'shoes':

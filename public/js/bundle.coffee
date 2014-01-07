@@ -63,7 +63,7 @@ $ ->
         when 'jacket'    then str = '재킷'
         when 'onepiece'  then str = '원피스'
         when 'pants'     then str = '바지'
-        when 'shirts'    then str = '셔츠'
+        when 'shirt'     then str = '셔츠'
         when 'shoes'     then str = '신발'
         when 'skirt'     then str = '치마'
         when 'tie'       then str = '넥타이'
