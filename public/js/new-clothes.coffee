@@ -51,22 +51,22 @@ $ ->
   #
   # step3 - 의류 종류 선택 콤보박스
   #
-  clear_cloth_form = (show) ->
+  clear_clothes_form = (show) ->
     if show
       _.each ['bust','waist','hip','arm','length','foot'], (name) ->
-        $("#display-cloth-#{name}").show()
+        $("#display-clothes-#{name}").show()
     else
       _.each ['bust','waist','hip','arm','length','foot'], (name) ->
-        $("#display-cloth-#{name}").hide()
+        $("#display-clothes-#{name}").hide()
 
-    $('input[name=cloth-gender]').prop('checked', false)
-    $('#cloth-color').select2('val', '')
+    $('input[name=clothes-gender]').prop('checked', false)
+    $('#clothes-color').select2('val', '')
     _.each ['bust','waist','hip','arm','length','foot'], (name) ->
-      $("#cloth-#{name}").prop('disabled', true).val('')
+      $("#clothes-#{name}").prop('disabled', true).val('')
 
-  $('#cloth-type').select2( dropdownCssClass: 'bigdrop' )
+  $('#clothes-type').select2( dropdownCssClass: 'bigdrop' )
     .on 'change', (e) ->
-      clear_cloth_form false
+      clear_clothes_form false
       types = []
       #
       # check Opencloset::Constant
@@ -82,74 +82,74 @@ $ ->
         when 0x0010, 0x0020, 0x0100         then types = [                                         ] # Hat, Tie, Onepiece
         else                                     types = [                                         ]
       for type in types
-        $("#display-cloth-#{type}").show()
-        $("#cloth-#{type}").prop('disabled', false)
-  $('#cloth-color').select2()
+        $("#display-clothes-#{type}").show()
+        $("#clothes-#{type}").prop('disabled', false)
+  $('#clothes-color').select2()
 
-  $('#cloth-type').select2('val', '')
-  clear_cloth_form true
+  $('#clothes-type').select2('val', '')
+  clear_clothes_form true
 
   #
   # step3 - 의류 폼 초기화
   #
-  $('#btn-cloth-reset').click ->
-    $('#cloth-type').select2('val', '')
-    clear_cloth_form true
+  $('#btn-clothes-reset').click ->
+    $('#clothes-type').select2('val', '')
+    clear_clothes_form true
 
   #
   # step3 - 의류 추가
   #
-  $('#btn-cloth-add').click ->
+  $('#btn-clothes-add').click ->
     data =
       donor_id:         donorID,
-      cloth_type:       $('#cloth-type').val(),
-      cloth_type_str:   $('#cloth-type option:selected').text(),
-      cloth_gender:     $('input[name=cloth-gender]:checked').val()
-      cloth_gender_str: $('input[name=cloth-gender]:checked').next().text()
-      cloth_color:      $('#cloth-color').val(),
-      cloth_color_str:  $('#cloth-color option:selected').text(),
-      cloth_bust:       $('#cloth-bust').val(),
-      cloth_waist:      $('#cloth-waist').val(),
-      cloth_hip:        $('#cloth-hip').val(),
-      cloth_arm:        $('#cloth-arm').val(),
-      cloth_length:     $('#cloth-length').val(),
-      cloth_foot:       $('#cloth-foot').val(),
+      clothes_type:       $('#clothes-type').val(),
+      clothes_type_str:   $('#clothes-type option:selected').text(),
+      clothes_gender:     $('input[name=clothes-gender]:checked').val()
+      clothes_gender_str: $('input[name=clothes-gender]:checked').next().text()
+      clothes_color:      $('#clothes-color').val(),
+      clothes_color_str:  $('#clothes-color option:selected').text(),
+      clothes_bust:       $('#clothes-bust').val(),
+      clothes_waist:      $('#clothes-waist').val(),
+      clothes_hip:        $('#clothes-hip').val(),
+      clothes_arm:        $('#clothes-arm').val(),
+      clothes_length:     $('#clothes-length').val(),
+      clothes_foot:       $('#clothes-foot').val(),
 
-    return unless data.cloth_type
+    return unless data.clothes_type
 
     #
     # 입력한 의류 정보 검증
     #
     count = 0
     valid_count = 0
-    if $('#cloth-color').val()
+    if $('#clothes-color').val()
       count++
       valid_count++
     else
       count++
     $('#step3 input:enabled').each (i, el) ->
-      return unless /^cloth-/.test( $(el).attr('id') )
+      return unless /^clothes-/.test( $(el).attr('id') )
       count++
       valid_count++ if $(el).val() > 0
     return unless count == valid_count
 
-    compiled = _.template($('#tpl-new-cloth-cloth-item').html())
+    compiled = _.template($('#tpl-new-clothes-clothes-item').html())
     html = $(compiled(data))
-    $('#display-cloth-list').append(html)
+    $('#display-clothes-list').append(html)
 
-    $('#btn-cloth-reset').click()
-    $('#cloth-type').focus()
+    $('#btn-clothes-reset').click()
+    $('#clothes-type').focus()
 
   #
   # step3 - 추가한 모든 의류 선택 또는 해제
   #
-  $('#btn-cloth-select-all').click ->
+  $('#btn-clothes-select-all').click ->
     count   = 0
     checked = 0
-    $('input[name=cloth-list]').each (i, el) ->
+    $('input[name=clothes-list]').each (i, el) ->
       count++
       checked++ if $(el).prop('checked')
-    $('input[name=cloth-list]').prop( 'checked', ( checked < count ? true : false ) )
+    $('input[name=clothes-list]').prop( 'checked', ( checked < count ? true : false ) )
 
   #
   # 마법사 위젯
@@ -199,7 +199,7 @@ $ ->
               return false
             complete: (jqXHR, textStatus) ->
         when 3
-          return unless $("input[name=cloth-list]:checked").length
+          return unless $("input[name=clothes-list]:checked").length
           $.ajax '/clothes.json',
             type: 'POST'
             data: $('form').serialize()

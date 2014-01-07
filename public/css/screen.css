@@ -81,8 +81,8 @@
 .page-content #user-table table td:nth-child(3) [class^="icon-"], .page-content #user-table table td:nth-child(3) [class*=" icon-"] { width: 1.2em; }
 .page-content #new-borrower form .input-group { width: inherit; }
 .page-content #new-borrower form .tags { width: 100%; }
-.page-content #new-cloth form .input-group { width: inherit; }
-.page-content #new-cloth #s2id_cloth-type, .page-content #new-cloth #s2id_cloth-color { width: inherit !important; }
+.page-content #new-clothes form .input-group { width: inherit; }
+.page-content #new-clothes #s2id_clothes-type, .page-content #new-clothes #s2id_clothes-color { width: inherit !important; }
 .page-content .step-content .step-pane h3 { margin-top: 10px; margin-bottom: 20px; }
 
 .bigdrop .select2-results { max-height: 400px; }
