@@ -20,7 +20,7 @@
 - my $order_price = order_price($order);
 - my $late_fee    = calc_late_fee($order);
 
-                .row
+                .row#order{ 'data-order-id' => "#{ $order->id }" }
                   .col-sm-10.col-sm-offset-1
                     .widget-box.transparent.invoice-box
                       /
@@ -124,7 +124,7 @@
                                     .col-sm-8
                                       :plain
                                         <a
-                                          id               = "order-payment-method"
+                                          id               = "order-price-pay-with"
                                           class            = "editable editable-click"
                                           href             = "#"
 
@@ -134,11 +134,11 @@
                                           data-type        = "select"
                                           data-emptytext   = "미납"
 
-                                          data-value       = "#{ $order->payment_method || q{} }"
+                                          data-value       = "#{ $order->price_pay_with || q{} }"
 
                                           data-url         = "/order/#{ $order->id }/update"
                                           data-pk          = "#{ $order->id }"
-                                          data-name        = "payment_method"
+                                          data-name        = "price_pay_with"
                                         ></a>
                                       \/
                                       %strong= commify($order_price) . '원'
@@ -148,16 +148,19 @@
                                     .col-sm-3.no-padding-left
                                       연체료:
                                     .col-sm-8
-                                      - if ($late_fee) {
-                                        %strong= $order->return_method || '미납'
-                                        \/
-                                        %strong= sprintf( "%s원", commify($late_fee) )
-                                        %br
-                                        %strong= sprintf( "%s일 x %s원 x 20%%", calc_overdue($order->target_date), commify($order_price) )
-                                      - }
-                                      - else {
-                                        %strong 해당사항 없음
-                                      - }
+                                      #late-fee
+                                      :plain
+                                        <script id="tpl-late-fee" type="text/html">
+                                          <% if (late_fee) { %>
+                                            <strong> <%= return_date ? late_fee_pay_with : '미납' %> </strong>
+                                            /
+                                            <strong> <%= late_fee %>원 </strong>
+                                            <br />
+                                            <strong> <%= overdue %>일 x <%= price %>원 x 20% </strong>
+                                          <% } else { %>
+                                            <strong> 해당사항 없음 </strong>
+                                          <% } %>
+                                        </script>
                             /
                             / 대여자 정보
                             /

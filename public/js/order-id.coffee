@@ -1,4 +1,15 @@
 $ ->
+  updateLateFee = ->
+    order_id = $('#order').data('order-id')
+    $.ajax "/api/order/#{ order_id }.json",
+      type: 'GET'
+      success: (data, textStatus, jqXHR) ->
+        compiled = _.template( $('#tpl-late-fee').html() )
+        $("#late-fee").html( $(compiled(data)) )
+      error: (jqXHR, textStatus, errorThrown) ->
+      complete: (jqXHR, textStatus) ->
+  updateLateFee()
+
   $('span.order-status.label').each (i, el) ->
     $(el).addClass( OpenCloset.getStatusCss $(el).data('order-detail-status') )
     if $(el).data('order-detail-status') is '대여중' && $(el).data('order-late-fee') > 0
@@ -7,13 +18,15 @@ $ ->
   $('#order-staff-name').editable()
   $('#order-rental-date').editable({
     combodate:
-     minYear: 2014,
+     minYear: 2013,
   })
   $('#order-target-date').editable({
     combodate:
-     minYear: 2014,
+     minYear: 2013,
+    success: (response, newValue) ->
+      updateLateFee()
   })
-  $('#order-payment-method').editable({
+  $('#order-price-pay-with').editable({
     source: ->
       result = []
       for m in [ '현금', '카드', '현금+카드' ]
