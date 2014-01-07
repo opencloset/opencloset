@@ -54,9 +54,9 @@
                     .col-xs-12.col-sm-9
                       .search
                         .input-group
-                          %input#donor-search.form-control{ :name => 'donor-search' :type => 'text', :placeholder => '이름 또는 이메일, 휴대전화 번호' }
+                          %input#user-search.form-control{ :name => 'user-search' :type => 'text', :placeholder => '이름 또는 이메일, 휴대전화 번호' }
                           %span.input-group-btn
-                            %button#btn-donor-search.btn.btn-default.btn-sm{ :type => 'submit' }
+                            %button#btn-user-search.btn.btn-default.btn-sm{ :type => 'submit' }
                               %i.icon-search.bigger-110 검색
                   /
                   / 기증자 선택
@@ -64,16 +64,16 @@
                   .form-group.has-info
                     %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => "email" } 기증자 선택:
                     .col-xs-12.col-sm-9
-                      #donor-search-list
+                      #user-search-list
                         %div
                           %label.blue
                             %input.ace.valid{ :name => 'user-id', :type => 'radio', :value => '0' }
                             %span.lbl= ' 기증자를 모릅니다.'
                       :plain
-                        <script id="tpl-new-clothes-donor-id" type="text/html">
+                        <script id="tpl-user-id" type="text/html">
                           <div>
                             <label class="blue highlight">
-                              <input type="radio" class="ace valid" name="user-id" value="<%= user_id %>" data-donor-id="<%= id %>" data-user-id="<%= user_id %>">
+                              <input type="radio" class="ace valid" name="user-id" value="<%= id %>" data-user-id="<%= id %>">
                               <span class="lbl"> <%= name %> (<%= email %>)</span>
                               <span><%= address %></span>
                             </label>

@@ -1,46 +1,52 @@
 $ ->
   ## Global variable
   userID  = undefined
-  donorID = ''
 
   #
   # step1 - 기증자 검색과 기증자 선택을 연동합니다.
   #
-  add_registered_donor = ->
-    query = $('#donor-search').val()
+  addRegisteredUser = ->
+    query = $('#user-search').val()
 
     return unless query
 
-    $.ajax "/new-cloth.json",    # `/new-cloth` 로 donor 를 가져오는게 구림
+    $.ajax "/api/search/user.json",
       type: 'GET'
       data: { q: query }
-      success: (donors, textStatus, jqXHR) ->
-        compiled = _.template($('#tpl-new-cloth-donor-id').html())
-        _.each donors, (donor) ->
-          unless $("#donor-search-list input[data-donor-id='#{donor.id}']").length
-            $html = $(compiled(donor))
-            $html.find('input').attr('data-json', JSON.stringify(donor))
-            $("#donor-search-list").prepend($html)
+      success: (data, textStatus, jqXHR) ->
+        compiled = _.template($('#tpl-user-id').html())
+        _.each data, (user) ->
+          unless $("#user-search-list input[data-user-id='#{user.id}']").length
+            $html = $(compiled(user))
+            $html.find('input').attr('data-json', JSON.stringify(user))
+            $("#user-search-list").prepend($html)
       error: (jqXHR, textStatus, errorThrown) ->
-        alert('danger', jqXHR.responseJSON.error)
+        type = jqXHR.status is 404 ? 'warning' : 'danger'
+        alert(type, jqXHR.responseJSON.error.str)
       complete: (jqXHR, textStatus) ->
 
-  $('#donor-search').keypress (e) -> add_registered_donor() if e.keyCode is 13
-  $('#btn-donor-search').click -> add_registered_donor()
-
-  $('#donor-search-list').on 'click', ':radio', (e) ->
-    userID  = $(@).data('user-id')
-    donorID = $(@).data('donor-id')
+  $('#user-search-list').on 'click', ':radio', (e) ->
+    userID = $(@).data('user-id')
     return if $(@).val() is '0'
     g = JSON.parse($(@).attr('data-json'))
-    _.each ['name','email','gender','phone','age',
-            'address','donation_msg','comment'], (name) ->
+    _.each [
+      'name',
+      'email',
+      'phone',
+      'address',
+      'gender',
+      'birth',
+    ], (name) ->
       $input = $("input[name=#{name}]")
       if $input.attr('type') is 'radio' or $input.attr('type') is 'checkbox'
         $input.each (i, el) ->
           $(el).attr('checked', true) if $(el).val() is g[name]
       else
         $input.val(g[name])
+
+  $('#user-search').keypress (e) -> addRegisteredUser() if e.keyCode is 13
+  $('#btn-user-search').click -> addRegisteredUser()
+  addRegisteredUser()
 
   #
   # step3 - 의류 종류 선택 콤보박스
