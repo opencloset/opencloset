@@ -57,23 +57,41 @@ $ ->
   $('#order-desc').editable()
 
   $('#btn-order-confirm').click (e) ->
+    order_id     = $('#order').data('order-id')
     url          = $(e.target).data('url')
-    order_id     = $(e.target).data('order-id')
     redirect_url = $(e.target).data('redirect-url')
 
     return unless url
     return unless order_id
 
-    $.ajax url,
-      type: 'POST'
-      data: {
-        id:    order_id
-        name:  'status_id'
-        value: 2
-        pk:    order_id
-      }
+    $.ajax "/api/order/#{ order_id }.json",
+      type: 'GET'
       success: (data, textStatus, jqXHR) ->
-        window.location.href = redirect_url
+        unless data.staff_id
+          alert 'danger', '담당자를 입력하세요.'
+          return
+        unless data.rental_date
+          alert 'danger', '대여일을 입력하세요.'
+          return
+        unless data.target_date
+          alert 'danger', '반납 예정일을 입력하세요.'
+          return
+        unless data.price_pay_with
+          alert 'danger', '대여비 납부 여부를 확인하세요.'
+          return
+
+        $.ajax url,
+          type: 'POST'
+          data: {
+            id:    order_id
+            name:  'status_id'
+            value: 2
+            pk:    order_id
+          }
+          success: (data, textStatus, jqXHR) ->
+            window.location.href = redirect_url
+          error: (jqXHR, textStatus, errorThrown) ->
+            alert('danger', jqXHR.responseJSON.error)
+          complete: (jqXHR, textStatus) ->
       error: (jqXHR, textStatus, errorThrown) ->
-        alert('error', jqXHR.responseJSON.error)
       complete: (jqXHR, textStatus) ->

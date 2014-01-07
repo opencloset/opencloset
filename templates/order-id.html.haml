@@ -371,7 +371,7 @@
                   .row
                     .col-sm-10.col-sm-offset-1
                       .clearfix.form-actions
-                        %a#btn-order-confirm.btn.btn-info.pull-right{ :type => 'button', :href => "#", 'data-url' => "#{ url_for('/order/' . $order->id . '/update') }", 'data-redirect-url' => "#{ url_for('/order/' . $order->id) }", "data-order-id" => "#{ $order->id }" }
+                        %a#btn-order-confirm.btn.btn-info.pull-right{ :type => 'button', :href => "#", 'data-url' => "#{ url_for('/order/' . $order->id . '/update') }", 'data-redirect-url' => "#{ url_for('/order/' . $order->id) }" }
                           %i.icon-ok.bigger-110
                           주문 확정
                         %a.btn.btn-danger.pull-right{ :type => 'button', :href => "#{ url_for('/order/' . $order->id . '/delete') }" }
