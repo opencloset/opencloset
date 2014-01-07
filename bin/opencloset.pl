@@ -93,20 +93,6 @@ helper cloth2hr => sub {
     };
 };
 
-helper order2hr => sub {
-    my ($self, $order) = @_;
-
-    my @clothes_list;
-    for my $clothes ($order->cloths) {
-        push @clothes_list, $self->cloth2hr($clothes);
-    }
-
-    return {
-        $order->get_columns,
-        clothes_list => \@clothes_list
-    };
-};
-
 helper sms2hr => sub {
     my ($self, $sms) = @_;
 
@@ -168,22 +154,39 @@ helper flatten_order => sub {
     return unless $order;
 
     my %data = (
-        id          => $order->id,
+        $order->get_columns,
+        rental_date => undef,
+        target_date => undef,
+        return_date => undef,
         price       => $self->order_price( $order, 'commify' ),
         clothes     => [ $order->clothes->get_column('code')->all ],
         late_fee    => $self->calc_late_fee( $order, 'commify' ),
         overdue     => $self->calc_overdue( $order->target_date ),
-        rental_date => {
+    );
+
+    if ( $order->rental_date ) {
+        $data{rental_date} = {
             raw => $order->rental_date,
             md  => $order->rental_date->month . '/' . $order->rental_date->day,
             ymd => $order->rental_date->ymd
-        },
-        target_date => {
+        };
+    }
+
+    if ( $order->target_date ) {
+        $data{target_date} = {
             raw => $order->target_date,
             md  => $order->target_date->month . '/' . $order->target_date->day,
             ymd => $order->target_date->ymd
-        },
-    );
+        };
+    }
+
+    if ( $order->return_date ) {
+        $data{return_date} = {
+            raw => $order->return_date,
+            md  => $order->return_date->month . '/' . $order->return_date->day,
+            ymd => $order->return_date->ymd
+        };
+    }
 
     return \%data;
 };
@@ -538,10 +541,10 @@ helper delete_order => sub {
     #
     # delete order
     #
-    my %data = $order->get_columns;
+    my $data = $self->flatten_order($order);
     $order->delete;
 
-    return \%data;
+    return $data;
 };
 
 helper get_order_list => sub {
@@ -907,12 +910,12 @@ group {
         #
         # response
         #
-        my %data = ( $order->get_columns );
+        my $data = $self->flatten_order($order);
 
         $self->res->headers->header(
             'Location' => $self->url_for( '/api/order/' . $order->id ),
         );
-        $self->respond_to( json => { status => 201, json => \%data } );
+        $self->respond_to( json => { status => 201, json => $data } );
     }
 
     sub api_get_order {
@@ -1006,9 +1009,9 @@ group {
         #
         # response
         #
-        my %data = ( $order->get_columns );
+        my $data = $self->flatten_order($order);
 
-        $self->respond_to( json => { status => 200, json => \%data } );
+        $self->respond_to( json => { status => 200, json => $data } );
     }
 
     sub api_delete_order {
@@ -2249,7 +2252,7 @@ any [qw/post put patch/] => '/orders/:id' => sub {
     }
 
     $self->respond_to(
-        json => { json => $self->order2hr($order) },
+        json => { json => $self->flatten_order($order) },
         html => sub {
             $self->redirect_to($self->url_for);
         }
