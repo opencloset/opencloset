@@ -1575,6 +1575,7 @@ get '/login';
 
 get '/'             => 'home';
 get '/new-borrower' => 'new-borrower';
+get '/new-clothes'  => 'new-clothes';
 
 post '/users' => sub {
     my $self = shift;
@@ -1855,33 +1856,6 @@ put '/clothes' => sub {
         html => { template => 'clothes' }    # TODO: `clothes.html.haml`
     );
 };
-
-get '/new-clothes' => sub {
-    my $self = shift;
-
-    my $q  = $self->param('q') || q{};
-    my $rs = $DB->resultset('User')->search({
-        -or => [
-            id    => $q,
-            name  => $q,
-            phone => $q,
-            email => $q,
-        ],
-    });
-
-    my @users;
-    while ( my $user = $rs->next ) {
-        my %data = ( $user->user_info->get_columns, $user->get_columns );
-        delete @data{qw/ user_id password height weight bust waist hip thigh arm leg knee foot /};
-        push @users, \%data;
-    }
-
-    $self->respond_to(
-        json => { json     => \@users     },
-        html => { template => 'new-clothes' },
-    );
-};
-
 
 get '/clothes/:code' => sub {
     my $self = shift;
