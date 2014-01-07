@@ -24,7 +24,8 @@ $ ->
             $html.find('input').attr('data-json', JSON.stringify(user))
             $("#user-search-list").prepend($html)
       error: (jqXHR, textStatus, errorThrown) ->
-        alert('danger', jqXHR.responseJSON.error)
+        type = jqXHR.status is 404 ? 'warning' : 'danger'
+        alert(type, jqXHR.responseJSON.error.str)
       complete: (jqXHR, textStatus) ->
 
   $('#user-search-list').on 'click', ':radio', (e) ->

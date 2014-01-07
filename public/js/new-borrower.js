@@ -28,7 +28,11 @@
           });
         },
         error: function(jqXHR, textStatus, errorThrown) {
-          return alert('danger', jqXHR.responseJSON.error);
+          var type, _ref;
+          type = (_ref = jqXHR.status === 404) != null ? _ref : {
+            'warning': 'danger'
+          };
+          return alert(type, jqXHR.responseJSON.error.str);
         },
         complete: function(jqXHR, textStatus) {}
       });
