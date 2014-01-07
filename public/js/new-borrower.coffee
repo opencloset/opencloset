@@ -8,7 +8,7 @@ $ ->
   #
   # step1 - 대여자 검색과 대여자 선택을 연동합니다.
   #
-  add_registered_user = ->
+  addRegisteredUser = ->
     query = $('#user-search').val()
 
     return unless query
@@ -17,7 +17,7 @@ $ ->
       type: 'GET'
       data: { q: query }
       success: (data, textStatus, jqXHR) ->
-        compiled = _.template($('#tpl-new-borrower-user-id').html())
+        compiled = _.template($('#tpl-user-id').html())
         _.each data, (user) ->
           unless $("#user-search-list input[data-user-id='#{user.id}']").length
             $html = $(compiled(user))
@@ -56,9 +56,9 @@ $ ->
       else
         $input.val(g[name])
 
-  $('#user-search').keypress (e) -> add_registered_user() if e.keyCode is 13
-  $('#btn-user-search').click -> add_registered_user()
-  add_registered_user()
+  $('#user-search').keypress (e) -> addRegisteredUser() if e.keyCode is 13
+  $('#btn-user-search').click -> addRegisteredUser()
+  addRegisteredUser()
 
   #
   #
