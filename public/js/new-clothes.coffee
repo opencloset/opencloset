@@ -101,7 +101,7 @@ $ ->
   #
   $('#btn-clothes-add').click ->
     data =
-      donor_id:         donorID,
+      user_id:            userID,
       clothes_type:       $('#clothes-type').val(),
       clothes_type_str:   $('#clothes-type option:selected').text(),
       clothes_gender:     $('input[name=clothes-gender]:checked').val()
@@ -133,7 +133,7 @@ $ ->
       valid_count++ if $(el).val() > 0
     return unless count == valid_count
 
-    compiled = _.template($('#tpl-new-clothes-clothes-item').html())
+    compiled = _.template($('#tpl-clothes-item').html())
     html = $(compiled(data))
     $('#display-clothes-list').append(html)
 
@@ -177,9 +177,9 @@ $ ->
             data: $('form').serialize()
             success: (data, textStatus, jqXHR) ->
               userID = data.id
-              if donorID
+              if userID
                 ajax.type = 'PUT'
-                ajax.path = "/donors/#{donorID}.json"
+                ajax.path = "/donors/#{userID}.json"
               else
                 ajax.type = 'POST'
                 ajax.path = "/donors.json?user_id=#{userID}"
@@ -188,7 +188,7 @@ $ ->
                 type: ajax.type
                 data: $('form').serialize()
                 success: (data, textStatus, jqXHR) ->
-                  donorID = data.id
+                  userID = data.id
                   return true
                 error: (jqXHR, textStatus, errorThrown) ->
                   alert('danger', jqXHR.responseJSON.error)

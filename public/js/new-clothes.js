@@ -139,7 +139,7 @@
     $('#btn-clothes-add').click(function() {
       var compiled, count, data, html, valid_count;
       data = {
-        donor_id: donorID,
+        user_id: userID,
         clothes_type: $('#clothes-type').val(),
         clothes_type_str: $('#clothes-type option:selected').text(),
         clothes_gender: $('input[name=clothes-gender]:checked').val(),
@@ -176,7 +176,7 @@
       if (count !== valid_count) {
         return;
       }
-      compiled = _.template($('#tpl-new-clothes-clothes-item').html());
+      compiled = _.template($('#tpl-clothes-item').html());
       html = $(compiled(data));
       $('#display-clothes-list').append(html);
       $('#btn-clothes-reset').click();
@@ -221,9 +221,9 @@
             data: $('form').serialize(),
             success: function(data, textStatus, jqXHR) {
               userID = data.id;
-              if (donorID) {
+              if (userID) {
                 ajax.type = 'PUT';
-                ajax.path = "/donors/" + donorID + ".json";
+                ajax.path = "/donors/" + userID + ".json";
               } else {
                 ajax.type = 'POST';
                 ajax.path = "/donors.json?user_id=" + userID;
@@ -232,8 +232,7 @@
                 type: ajax.type,
                 data: $('form').serialize(),
                 success: function(data, textStatus, jqXHR) {
-                  var donorID;
-                  donorID = data.id;
+                  userID = data.id;
                   return true;
                 },
                 error: function(jqXHR, textStatus, errorThrown) {
