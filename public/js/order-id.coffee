@@ -6,14 +6,12 @@ $ ->
 
   $('#order-staff-name').editable()
   $('#order-rental-date').editable({
-    combodate: {
-       minYear: 2014,
-    }
+    combodate:
+     minYear: 2014,
   })
   $('#order-target-date').editable({
-    combodate: {
-       minYear: 2014,
-    }
+    combodate:
+     minYear: 2014,
   })
   $('#order-payment-method').editable({
     source: ->
