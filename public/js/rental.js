@@ -54,7 +54,7 @@
           },
           error: function(jqXHR, textStatus, errorThrown) {
             if (jqXHR.status === 404) {
-              return alert('error', "" + query + " 의류는 찾을 수 없습니다.");
+              return alert('warning', "" + query + " 의류는 찾을 수 없습니다.");
             }
           },
           complete: function(jqXHR, textStatus) {}
@@ -82,7 +82,7 @@
         },
         error: function(jqXHR, textStatus, errorThrown) {
           if (jqXHR.status === 404) {
-            return alert('error', "" + query + " 검색어와 관련있는 사용자는 찾을 수 없습니다.");
+            return alert('warning', "" + query + " 검색어와 관련있는 사용자는 찾을 수 없습니다.");
           }
         },
         complete: function(jqXHR, textStatus) {}
@@ -105,10 +105,10 @@
       });
       clothes = _.uniq(clothes);
       if (!user) {
-        return alert('대여할 사용자를 선택해 주세요');
+        return alert('danger', '대여할 사용자를 선택해 주세요');
       }
       if (!clothes) {
-        return alert('대여할 옷을 선택해 주세요.');
+        return alert('danger', '대여할 옷을 선택해 주세요.');
       }
       return $('#order-form').submit();
     });

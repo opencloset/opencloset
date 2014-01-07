@@ -28,7 +28,7 @@
           });
         },
         error: function(jqXHR, textStatus, errorThrown) {
-          return alert('error', jqXHR.responseJSON.error);
+          return alert('danger', jqXHR.responseJSON.error);
         },
         complete: function(jqXHR, textStatus) {}
       });
@@ -233,14 +233,14 @@
                   return true;
                 },
                 error: function(jqXHR, textStatus, errorThrown) {
-                  alert('error', jqXHR.responseJSON.error);
+                  alert('danger', jqXHR.responseJSON.error);
                   return false;
                 },
                 complete: function(jqXHR, textStatus) {}
               });
             },
             error: function(jqXHR, textStatus, errorThrown) {
-              alert('error', jqXHR.responseJSON.error);
+              alert('danger', jqXHR.responseJSON.error);
               return false;
             },
             complete: function(jqXHR, textStatus) {}
@@ -256,7 +256,7 @@
               return true;
             },
             error: function(jqXHR, textStatus, errorThrown) {
-              alert('error', jqXHR.responseJSON.error);
+              alert('danger', jqXHR.responseJSON.error);
               return false;
             },
             complete: function(jqXHR, textStatus) {}

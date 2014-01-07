@@ -22,7 +22,7 @@ $ ->
             $html.find('input').attr('data-json', JSON.stringify(donor))
             $("#donor-search-list").prepend($html)
       error: (jqXHR, textStatus, errorThrown) ->
-        alert('error', jqXHR.responseJSON.error)
+        alert('danger', jqXHR.responseJSON.error)
       complete: (jqXHR, textStatus) ->
 
   $('#donor-search').keypress (e) -> add_registered_donor() if e.keyCode is 13
@@ -185,11 +185,11 @@ $ ->
                   donorID = data.id
                   return true
                 error: (jqXHR, textStatus, errorThrown) ->
-                  alert('error', jqXHR.responseJSON.error)
+                  alert('danger', jqXHR.responseJSON.error)
                   return false
                 complete: (jqXHR, textStatus) ->
             error: (jqXHR, textStatus, errorThrown) ->
-              alert('error', jqXHR.responseJSON.error)
+              alert('danger', jqXHR.responseJSON.error)
               return false
             complete: (jqXHR, textStatus) ->
         when 3
@@ -200,7 +200,7 @@ $ ->
             success: (data, textStatus, jqXHR) ->
               return true
             error: (jqXHR, textStatus, errorThrown) ->
-              alert('error', jqXHR.responseJSON.error)
+              alert('danger', jqXHR.responseJSON.error)
               return false
             complete: (jqXHR, textStatus) ->
         else return

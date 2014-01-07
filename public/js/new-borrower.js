@@ -28,7 +28,7 @@
           });
         },
         error: function(jqXHR, textStatus, errorThrown) {
-          return alert('error', jqXHR.responseJSON.error);
+          return alert('danger', jqXHR.responseJSON.error);
         },
         complete: function(jqXHR, textStatus) {}
       });
@@ -87,7 +87,7 @@
           return alert('success', "" + to + " 번호로 SMS 가 발송되었습니다");
         },
         error: function(jqXHR, textStatus, errorThrown) {
-          return alert('error', jqXHR.responseJSON.error);
+          return alert('danger', jqXHR.responseJSON.error);
         },
         complete: function(jqXHR, textStatus) {
           return $this.removeClass('disabled');
@@ -123,7 +123,7 @@
               return true;
             },
             error: function(jqXHR, textStatus, errorThrown) {
-              alert('error', jqXHR.responseJSON.error);
+              alert('danger', jqXHR.responseJSON.error);
               return false;
             },
             complete: function(jqXHR, textStatus) {}
@@ -144,7 +144,7 @@
               return true;
             },
             error: function(jqXHR, textStatus, errorThrown) {
-              alert('error', jqXHR.responseJSON.error);
+              alert('danger', jqXHR.responseJSON.error);
               return false;
             },
             complete: function(jqXHR, textStatus) {}

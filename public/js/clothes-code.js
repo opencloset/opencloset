@@ -25,7 +25,7 @@
           return location.reload();
         },
         error: function(jqXHR, textStatus, errorThrown) {
-          return alert('error', jqXHR.responseJSON.error);
+          return alert('danger', jqXHR.responseJSON.error);
         },
         complete: function(jqXHR, textStatus) {
           return $this.removeClass('disabled');

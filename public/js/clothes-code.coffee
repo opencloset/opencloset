@@ -21,7 +21,7 @@ $ ->
       success: (data, textStatus, jqXHR) ->
         location.reload()
       error: (jqXHR, textStatus, errorThrown) ->
-        alert('error', jqXHR.responseJSON.error)
+        alert('danger', jqXHR.responseJSON.error)
       complete: (jqXHR, textStatus) ->
         $this.removeClass('disabled')
 

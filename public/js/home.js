@@ -50,7 +50,7 @@
           return $("#clothes-table table tbody").append($html);
         },
         error: function(jqXHR, textStatus, errorThrown) {
-          return alert('error', jqXHR.responseJSON.error);
+          return alert('danger', jqXHR.responseJSON.error);
         },
         complete: function(jqXHR, textStatus) {}
       });
@@ -96,12 +96,12 @@
               return _results;
             },
             error: function(jqXHR, textStatus, errorThrown) {
-              return alert('error', jqXHR.responseJSON.error);
+              return alert('danger', jqXHR.responseJSON.error);
             }
           });
         },
         error: function(jqXHR, textStatus, errorThrown) {
-          return alert('error', jqXHR.responseJSON.error);
+          return alert('danger', jqXHR.responseJSON.error);
         }
       });
       return $('#clothes-id').focus();

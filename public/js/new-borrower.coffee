@@ -24,7 +24,7 @@ $ ->
             $html.find('input').attr('data-json', JSON.stringify(user))
             $("#user-search-list").prepend($html)
       error: (jqXHR, textStatus, errorThrown) ->
-        alert('error', jqXHR.responseJSON.error)
+        alert('danger', jqXHR.responseJSON.error)
       complete: (jqXHR, textStatus) ->
 
   $('#user-search-list').on 'click', ':radio', (e) ->
@@ -82,7 +82,7 @@ $ ->
       success: (data, textStatus, jqXHR) ->
         alert('success', "#{to} 번호로 SMS 가 발송되었습니다")
       error: (jqXHR, textStatus, errorThrown) ->
-        alert('error', jqXHR.responseJSON.error)
+        alert('danger', jqXHR.responseJSON.error)
       complete: (jqXHR, textStatus) ->
         $this.removeClass('disabled')
 
@@ -113,7 +113,7 @@ $ ->
               userID = data.id
               return true
             error: (jqXHR, textStatus, errorThrown) ->
-              alert('error', jqXHR.responseJSON.error)
+              alert('danger', jqXHR.responseJSON.error)
               return false
             complete: (jqXHR, textStatus) ->
         when 3
@@ -131,7 +131,7 @@ $ ->
               userID = data.id
               return true
             error: (jqXHR, textStatus, errorThrown) ->
-              alert('error', jqXHR.responseJSON.error)
+              alert('danger', jqXHR.responseJSON.error)
               return false
             complete: (jqXHR, textStatus) ->
         else return
