@@ -6,6 +6,14 @@ $ ->
       success: (data, textStatus, jqXHR) ->
         compiled = _.template( $('#tpl-late-fee').html() )
         $("#late-fee").html( $(compiled(data)) )
+
+        $('#order-late-fee-pay-with').editable({
+          source: ->
+            result = []
+            for m in [ '현금', '카드', '현금+카드' ]
+              result.push { value: m, text: m }
+            return result
+        })
       error: (jqXHR, textStatus, errorThrown) ->
       complete: (jqXHR, textStatus) ->
   updateLateFee()

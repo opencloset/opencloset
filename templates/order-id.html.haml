@@ -152,7 +152,24 @@
                                       :plain
                                         <script id="tpl-late-fee" type="text/html">
                                           <% if (late_fee) { %>
-                                            <strong> <%= return_date ? late_fee_pay_with : '미납' %> </strong>
+                                            <a
+                                              id               = "order-late-fee-pay-with"
+                                              class            = "editable editable-click"
+                                              href             = "#"
+
+                                              data-disabled    = "<%= status ? 'true' : 'false' %>"
+                                              data-mode        = "inline"
+                                              data-showbuttons = "true"
+                                              data-type        = "select"
+                                              data-emptytext   = "미납"
+
+                                              data-value       = "<%= late_fee_pay_with || '' %>"
+
+                                              data-url         = "/order/<%= id %>/update"
+                                              data-pk          = "<%= id %>"
+                                              data-name        = "late_fee_pay_with"
+                                            ></a>
+
                                             /
                                             <strong> <%= late_fee %>원 </strong>
                                             <br />

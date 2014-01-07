@@ -10,7 +10,22 @@
         success: function(data, textStatus, jqXHR) {
           var compiled;
           compiled = _.template($('#tpl-late-fee').html());
-          return $("#late-fee").html($(compiled(data)));
+          $("#late-fee").html($(compiled(data)));
+          return $('#order-late-fee-pay-with').editable({
+            source: function() {
+              var m, result, _i, _len, _ref;
+              result = [];
+              _ref = ['현금', '카드', '현금+카드'];
+              for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+                m = _ref[_i];
+                result.push({
+                  value: m,
+                  text: m
+                });
+              }
+              return result;
+            }
+          });
         },
         error: function(jqXHR, textStatus, errorThrown) {},
         complete: function(jqXHR, textStatus) {}
