@@ -17,9 +17,6 @@
 -   ;
 - title $meta->{$_id}{text};
 
-- my $order_price = order_price($order);
-- my $late_fee    = calc_late_fee($order);
-
                 .row#order{ 'data-order-id' => "#{ $order->id }" }
                   .col-sm-10.col-sm-offset-1
                     .widget-box.transparent.invoice-box
@@ -141,7 +138,7 @@
                                           data-name        = "price_pay_with"
                                         ></a>
                                       \/
-                                      %strong= commify($order_price) . '원'
+                                      %strong.order-price 0원
                                   %li.row
                                     .col-sm-1
                                       %i.icon-caret-right.blue
@@ -285,7 +282,7 @@
                                         %a{ :href => "/clothes/#{ $detail->clothes->code }" }= $detail->name
                                       %td
                                         - if ( $detail->status ) {
-                                          %span.order-status.label{ 'data-order-detail-status' => "#{ $detail->status->name }", 'data-order-late-fee' => "#{$late_fee}" }
+                                          %span.order-status.label{ 'data-order-detail-status' => "#{ $detail->status->name }" }
                                             = $detail->status->name
                                         - }
                                     - }
@@ -294,11 +291,33 @@
                                       %td
                                     - }
                                     %td
-                                      %span= commify($detail->price) . '원'
+                                      - if ( $detail->name eq '에누리' ) {
+                                        :plain
+                                          <a
+                                            id               = "order-detail-price-#{ $detail->id }"
+                                            class            = "order-detail-discount editable editable-click"
+                                            href             = "#"
+
+                                            data-disabled    = "#{ $order->status ? 'true' : 'false' }"
+                                            data-mode        = "inline"
+                                            data-showbuttons = "true"
+                                            data-type        = "text"
+                                            data-emptytext   = "0"
+
+                                            data-value       = "#{ commify( $detail->price ) || q{} }"
+
+                                            data-url         = "/order/#{ $order->id }/update"
+                                            data-pk          = "#{ $detail->id }"
+                                            data-name        = "detail-price"
+                                          ></a>원
+                                      - }
+                                      - else {
+                                        %span= commify($detail->price) . '원'
+                                      - }
                                     %td
                                       :plain
                                         <a
-                                          id               = "order-detail-#{ $detail->id }"
+                                          id               = "order-detail-desc-#{ $detail->id }"
                                           class            = "order-detail editable editable-click"
                                           href             = "#"
 
@@ -321,7 +340,7 @@
                             .col-sm-3.pull-right
                               %h4.pull-right
                                 총액:
-                                %span.red= commify($order_price) . "원"
+                                %span.red.order-price 0원
                             .col-sm-9.pull-left
                               %div
                                 %strong 연체료는 연체일 x 대여금액의 20%입니다.

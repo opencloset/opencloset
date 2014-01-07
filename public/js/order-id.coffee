@@ -1,9 +1,17 @@
 $ ->
-  updateLateFee = ->
+  updateOrder = ->
     order_id = $('#order').data('order-id')
     $.ajax "/api/order/#{ order_id }.json",
       type: 'GET'
       success: (data, textStatus, jqXHR) ->
+        #
+        # update price
+        #
+        $(".order-price").html( OpenCloset.commify(data.price) + '원' )
+
+        #
+        # update late_fee
+        #
         compiled = _.template( $('#tpl-late-fee').html() )
         $("#late-fee").html( $(compiled(data)) )
 
@@ -16,12 +24,10 @@ $ ->
         })
       error: (jqXHR, textStatus, errorThrown) ->
       complete: (jqXHR, textStatus) ->
-  updateLateFee()
+  updateOrder()
 
   $('span.order-status.label').each (i, el) ->
     $(el).addClass( OpenCloset.getStatusCss $(el).data('order-detail-status') )
-    if $(el).data('order-detail-status') is '대여중' && $(el).data('order-late-fee') > 0
-      $(el).html('연체중')
 
   $('#order-staff-name').editable()
   $('#order-rental-date').editable({
@@ -32,7 +38,7 @@ $ ->
     combodate:
      minYear: 2013,
     success: (response, newValue) ->
-      updateLateFee()
+      updateOrder()
   })
   $('#order-price-pay-with').editable({
     source: ->
@@ -42,6 +48,12 @@ $ ->
       return result
   })
   $('.order-detail').editable()
+  $('.order-detail-discount').editable({
+    display: (value, sourceData, response) ->
+      $(this).html( OpenCloset.commify value )
+    success: (response, newValue) ->
+      updateOrder()
+  })
   $('#order-desc').editable()
 
   $('#btn-order-confirm').click (e) ->

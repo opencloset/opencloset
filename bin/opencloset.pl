@@ -453,6 +453,13 @@ helper create_order => sub {
                         price        => $clothes->price,
                     }) or die "failed to create a new order_detail\n";
                 }
+                #
+                # create order_detail for discount
+                #
+                $order->add_to_order_details({
+                    name  => '에누리',
+                    price => 0,
+                }) or die "failed to create a new order_detail for discount\n";
             }
 
             $guard->commit;
