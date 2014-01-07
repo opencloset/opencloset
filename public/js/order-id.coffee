@@ -23,6 +23,7 @@ $ ->
       return result
   })
   $('.order-detail').editable()
+  $('#order-desc').editable()
 
   $('#btn-order-confirm').click (e) ->
     url          = $(e.target).data('url')

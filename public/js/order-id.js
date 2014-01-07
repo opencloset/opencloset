@@ -34,6 +34,7 @@
       }
     });
     $('.order-detail').editable();
+    $('#order-desc').editable();
     return $('#btn-order-confirm').click(function(e) {
       var order_id, redirect_url, url;
       url = $(e.target).data('url');

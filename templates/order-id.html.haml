@@ -305,8 +305,26 @@
                             .col-sm-9.pull-left
                               %div
                                 %strong 연체료는 연체일 x 대여금액의 20%입니다.
-                              = $order->desc || q{}
+                              .space-6
+                              :plain
+                                <a
+                                  id               = "order-desc"
+                                  class            = "editable editable-click"
+                                  href             = "#"
 
+                                  data-disabled    = "false"
+                                  data-mode        = "inline"
+                                  data-showbuttons = "true"
+                                  data-type        = "textarea"
+                                  data-emptytext   = "비어있음"
+
+                                  data-value       = "#{ $order->desc || q{} }"
+
+                                  data-url         = "/order/#{ $order->id }/update"
+                                  data-pk          = "#{ $order->id }"
+                                  data-name        = "desc"
+                                ></a>
+                              .space-6
                           .space-6
                           .well
                             열린옷장을 이용해주셔서 고맙습니다.
