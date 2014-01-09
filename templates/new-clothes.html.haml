@@ -84,7 +84,7 @@
               /
               #step2.step-pane
                 %h3.lighter.block.green 기증자의 정보를 입력하세요.
-                %form#donor-info.form-horizontal{ :method => 'get', :novalidate="novalidate" }
+                %form#user-info.form-horizontal{ :method => 'get', :novalidate="novalidate" }
                   /
                   / 전자우편
                   /
@@ -162,14 +162,6 @@
 
                 .form-horizontal
                   .form-group.has-info
-                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'clothes-code' } 의류 코드:
-                    .col-xs-12.col-sm-9
-                      .clearfix
-                        %input#clothes-code.valid.col-xs-12.col-sm-6{ :name => 'clothes-code', :type => 'text' }
-
-                  .space-2
-
-                  .form-group.has-info
                     %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'clothes-type' } 종류:
                     .col-xs-12.col-sm-6
                       %select#clothes-type{ :name => 'clothes-type', 'data-placeholder' => '옷의 종류를 선택하세요', :size => '14' }
@@ -186,6 +178,14 @@
                         %option{ :value => "#{0x0100}"          } Onepiece
                         %option{ :value => "#{0x0200}"          } Skirt
                         %option{ :value => "#{0x0400}"          } Blouse
+
+                  .space-2
+
+                  .form-group.has-info
+                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'clothes-code' } 의류 코드:
+                    .col-xs-12.col-sm-9
+                      .clearfix
+                        %input#clothes-code.valid.col-xs-12.col-sm-6{ :name => 'clothes-code', :type => 'text' }
 
                   .space-2
 
@@ -306,17 +306,18 @@
                             <div>
                               <label>
                                 <input type="checkbox" class="ace valid" name="clothes-list"
-                                  value="<%= [ user_id, clothes_type, clothes_color, clothes_bust, clothes_waist, clothes_hip, clothes_arm, clothes_length, clothes_foot, clothes_gender ].join('-') %>"
-                                  data-donor-id="<%= user_id %>"
-                                  data-clothes-type="<%= clothes_type %>"
-                                  data-clothes-color="<%= clothes_color %>"
-                                  data-clothes-bust="<%= clothes_bust %>"
-                                  data-clothes-arm="<%= clothes_arm %>"
-                                  data-clothes-waist="<%= clothes_waist %>"
-                                  data-clothes-hip="<%= clothes_hip %>"
-                                  data-clothes-length="<%= clothes_length %>"
-                                  data-clothes-foot="<%= clothes_foot %>"
-                                  data-clothes-gender="<%= clothes_gender %>"
+                                  value="<%= [ user_id, clothes_code, clothes_type, clothes_color, clothes_bust, clothes_waist, clothes_hip, clothes_arm, clothes_length, clothes_foot, clothes_gender ].join('-') %>"
+                                  data-user-id        = "<%= user_id %>"
+                                  data-clothes-code   = "<%= clothes_code %>"
+                                  data-clothes-type   = "<%= clothes_type %>"
+                                  data-clothes-color  = "<%= clothes_color %>"
+                                  data-clothes-bust   = "<%= clothes_bust %>"
+                                  data-clothes-arm    = "<%= clothes_arm %>"
+                                  data-clothes-waist  = "<%= clothes_waist %>"
+                                  data-clothes-hip    = "<%= clothes_hip %>"
+                                  data-clothes-length = "<%= clothes_length %>"
+                                  data-clothes-foot   = "<%= clothes_foot %>"
+                                  data-clothes-gender = "<%= clothes_gender %>"
                                 />
                                 <%
                                   var clothes_detail = []
@@ -330,7 +331,7 @@
                                   if ( clothes_length       >  0          ) { clothes_detail.push( "기장("    + clothes_length    + "cm)" ) }
                                   if ( clothes_foot         >  0          ) { clothes_detail.push( "발 크기(" + clothes_foot      + "mm)" ) }
                                 %>
-                                <span class="lbl"> &nbsp; <%= clothes_type_str %>: <%= clothes_detail.join(', ') %> </span>
+                                <span class="lbl"> &nbsp; <%= clothes_type_str %>(<%= clothes_code %>): <%= clothes_detail.join(', ') %> </span>
                               </label>
                             </div>
                             <div class="space-4"></div>

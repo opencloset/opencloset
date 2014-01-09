@@ -17,7 +17,7 @@
         success: function(data, textStatus, jqXHR) {
           var compiled;
           compiled = _.template($('#tpl-user-id').html());
-          return _.each(data, function(user) {
+          _.each(data, function(user) {
             var $html;
             if (!$("#user-search-list input[data-user-id='" + user.id + "']").length) {
               $html = $(compiled(user));
@@ -25,6 +25,9 @@
               return $("#user-search-list").prepend($html);
             }
           });
+          if (data[0]) {
+            return $("input[name=user-id][value=" + data[0].id + "]").click();
+          }
         },
         error: function(jqXHR, textStatus, errorThrown) {
           var type, _ref;
@@ -76,6 +79,7 @@
           return $("#display-clothes-" + name).hide();
         });
       }
+      $('#clothes-code').val('');
       $('input[name=clothes-gender]').prop('checked', false);
       $('#clothes-color').select2('val', '');
       return _.each(['bust', 'waist', 'hip', 'arm', 'length', 'foot'], function(name) {
@@ -137,9 +141,10 @@
       return clear_clothes_form(true);
     });
     $('#btn-clothes-add').click(function() {
-      var compiled, count, data, html, valid_count;
+      var count, data, valid_count;
       data = {
         user_id: userID,
+        clothes_code: $('#clothes-code').val(),
         clothes_type: $('#clothes-type').val(),
         clothes_type_str: $('#clothes-type option:selected').text(),
         clothes_gender: $('input[name=clothes-gender]:checked').val(),
@@ -169,18 +174,40 @@
           return;
         }
         count++;
-        if ($(el).val() > 0) {
-          return valid_count++;
+        if ($(el).attr('id') === 'clothes-code') {
+          if (/^[a-z0-9]{4,5}$/i.test($(el).val())) {
+            return valid_count++;
+          }
+        } else {
+          if ($(el).val() > 0) {
+            return valid_count++;
+          }
         }
       });
       if (count !== valid_count) {
+        alert('warning', '빠진 항목이 있습니다.');
         return;
       }
-      compiled = _.template($('#tpl-clothes-item').html());
-      html = $(compiled(data));
-      $('#display-clothes-list').append(html);
-      $('#btn-clothes-reset').click();
-      return $('#clothes-type').focus();
+      return $.ajax("/api/clothes/" + data.clothes_code + ".json", {
+        type: 'GET',
+        dataType: 'json',
+        success: function(data, textStatus, jqXHR) {
+          return alert('warning', '이미 존재하는 의류 코드입니다.');
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+          var compiled, html;
+          if (jqXHR.status !== 404) {
+            alert('warning', '의류 코드 오류입니다.');
+            return;
+          }
+          compiled = _.template($('#tpl-clothes-item').html());
+          html = $(compiled(data));
+          $('#display-clothes-list').append(html);
+          $('#btn-clothes-reset').click();
+          return $('#clothes-type').focus();
+        },
+        complete: function(jqXHR, textStatus) {}
+      });
     });
     $('#btn-clothes-select-all').click(function() {
       var checked, count, _ref;
@@ -204,43 +231,25 @@
           return false;
         }
       }
+      if (info.direction !== 'next') {
+        return true;
+      }
       ajax = {};
       switch (info.step) {
         case 2:
-          if (!$('#donor-name').val()) {
-            return;
-          }
-          ajax.type = 'POST';
-          ajax.path = '/users.json';
           if (userID) {
             ajax.type = 'PUT';
-            ajax.path = "/users/" + userID + ".json";
+            ajax.path = "/api/user/" + userID + ".json";
+          } else {
+            ajax.type = 'POST';
+            ajax.path = '/api/user.json';
           }
           return $.ajax(ajax.path, {
             type: ajax.type,
             data: $('form').serialize(),
             success: function(data, textStatus, jqXHR) {
               userID = data.id;
-              if (userID) {
-                ajax.type = 'PUT';
-                ajax.path = "/donors/" + userID + ".json";
-              } else {
-                ajax.type = 'POST';
-                ajax.path = "/donors.json?user_id=" + userID;
-              }
-              return $.ajax(ajax.path, {
-                type: ajax.type,
-                data: $('form').serialize(),
-                success: function(data, textStatus, jqXHR) {
-                  userID = data.id;
-                  return true;
-                },
-                error: function(jqXHR, textStatus, errorThrown) {
-                  alert('danger', jqXHR.responseJSON.error);
-                  return false;
-                },
-                complete: function(jqXHR, textStatus) {}
-              });
+              return true;
             },
             error: function(jqXHR, textStatus, errorThrown) {
               alert('danger', jqXHR.responseJSON.error);
@@ -252,6 +261,8 @@
           if (!$("input[name=clothes-list]:checked").length) {
             return;
           }
+          console.log($('form').serialize());
+          return;
           return $.ajax('/clothes.json', {
             type: 'POST',
             data: $('form').serialize(),

@@ -20,6 +20,7 @@ $ ->
             $html = $(compiled(user))
             $html.find('input').attr('data-json', JSON.stringify(user))
             $("#user-search-list").prepend($html)
+        $("input[name=user-id][value=#{ data[0].id }]").click() if data[0]
       error: (jqXHR, textStatus, errorThrown) ->
         type = jqXHR.status is 404 ? 'warning' : 'danger'
         alert(type, jqXHR.responseJSON.error.str)
@@ -59,6 +60,7 @@ $ ->
       _.each ['bust','waist','hip','arm','length','foot'], (name) ->
         $("#display-clothes-#{name}").hide()
 
+    $('#clothes-code').val('')
     $('input[name=clothes-gender]').prop('checked', false)
     $('#clothes-color').select2('val', '')
     _.each ['bust','waist','hip','arm','length','foot'], (name) ->
@@ -102,6 +104,7 @@ $ ->
   $('#btn-clothes-add').click ->
     data =
       user_id:            userID,
+      clothes_code:       $('#clothes-code').val(),
       clothes_type:       $('#clothes-type').val(),
       clothes_type_str:   $('#clothes-type option:selected').text(),
       clothes_gender:     $('input[name=clothes-gender]:checked').val()
@@ -130,15 +133,31 @@ $ ->
     $('#step3 input:enabled').each (i, el) ->
       return unless /^clothes-/.test( $(el).attr('id') )
       count++
-      valid_count++ if $(el).val() > 0
-    return unless count == valid_count
+      if $(el).attr('id') is 'clothes-code'
+        valid_count++ if /^[a-z0-9]{4,5}$/i.test( $(el).val() )
+      else
+        valid_count++ if $(el).val() > 0
+    unless count == valid_count
+      alert('warning', '빠진 항목이 있습니다.')
+      return
 
-    compiled = _.template($('#tpl-clothes-item').html())
-    html = $(compiled(data))
-    $('#display-clothes-list').append(html)
+    $.ajax "/api/clothes/#{ data.clothes_code }.json",
+      type: 'GET'
+      dataType: 'json'
+      success: (data, textStatus, jqXHR) ->
+        alert('warning', '이미 존재하는 의류 코드입니다.')
+      error: (jqXHR, textStatus, errorThrown) ->
+        unless jqXHR.status is 404
+          alert('warning', '의류 코드 오류입니다.')
+          return
 
-    $('#btn-clothes-reset').click()
-    $('#clothes-type').focus()
+        compiled = _.template($('#tpl-clothes-item').html())
+        html = $(compiled(data))
+        $('#display-clothes-list').append(html)
+
+        $('#btn-clothes-reset').click()
+        $('#clothes-type').focus()
+      complete: (jqXHR, textStatus) ->
 
   #
   # step3 - 추가한 모든 의류 선택 또는 해제
@@ -160,46 +179,34 @@ $ ->
       if info.step is 1 && validation
         return false unless $('#validation-form').valid()
 
+      # "다음"으로 움직일 때만 Ajax 호출을 수행하고
+      # "이전"으로 움직일 때는 아무 동작도 수행하지 않습니다.
+      return true unless info.direction is 'next'
+
       ajax = {}
       switch info.step
         when 2
-          return unless $('#donor-name').val()
-
-          ajax.type = 'POST'
-          ajax.path = '/users.json'
-
           if userID
             ajax.type = 'PUT'
-            ajax.path = "/users/#{userID}.json"
+            ajax.path = "/api/user/#{userID}.json"
+          else
+            ajax.type = 'POST'
+            ajax.path = '/api/user.json'
 
           $.ajax ajax.path,
             type: ajax.type
             data: $('form').serialize()
             success: (data, textStatus, jqXHR) ->
               userID = data.id
-              if userID
-                ajax.type = 'PUT'
-                ajax.path = "/donors/#{userID}.json"
-              else
-                ajax.type = 'POST'
-                ajax.path = "/donors.json?user_id=#{userID}"
-
-              $.ajax ajax.path,
-                type: ajax.type
-                data: $('form').serialize()
-                success: (data, textStatus, jqXHR) ->
-                  userID = data.id
-                  return true
-                error: (jqXHR, textStatus, errorThrown) ->
-                  alert('danger', jqXHR.responseJSON.error)
-                  return false
-                complete: (jqXHR, textStatus) ->
+              return true
             error: (jqXHR, textStatus, errorThrown) ->
               alert('danger', jqXHR.responseJSON.error)
               return false
             complete: (jqXHR, textStatus) ->
         when 3
           return unless $("input[name=clothes-list]:checked").length
+          console.log $('form').serialize()
+          return
           $.ajax '/clothes.json',
             type: 'POST'
             data: $('form').serialize()
