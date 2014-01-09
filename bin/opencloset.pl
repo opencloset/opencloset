@@ -1031,10 +1031,21 @@ group {
         # fetch params
         #
         my %params = $self->get_params(qw/
-            arm   bust            category code
-            color compatible_code gender   group_id
-            hip   length          price    status_id
-            thigh user_id         waist
+            arm
+            bust
+            category
+            code
+            color
+            compatible_code
+            donation_id
+            gender
+            group_id
+            hip
+            length
+            price
+            status_id
+            thigh
+            waist
         /);
 
         #
@@ -1048,11 +1059,11 @@ group {
         $v->field(qw/ bust waist hip thigh arm length /)->each(sub {
             shift->regexp(qr/^\d{1,3}$/);
         });
-        $v->field('user_id')->regexp(qr/^\d*$/)->callback(sub {
+        $v->field('donation_id')->regexp(qr/^\d*$/)->callback(sub {
             my $val = shift;
 
-            return 1 if $DB->resultset('User')->find({ id => $val });
-            return ( 0, 'user not found using user_id' );
+            return 1 if $DB->resultset('Donation')->find({ id => $val });
+            return ( 0, 'donation not found using donation_id' );
         });
 
         $v->field('status_id')->regexp(qr/^\d*$/)->callback(sub {
@@ -1166,10 +1177,21 @@ group {
         # fetch params
         #
         my %params = $self->get_params(qw/
-            arm   bust            category code
-            color compatible_code gender   group_id
-            hip   length          price    status_id
-            thigh user_id         waist
+            arm
+            bust
+            category
+            code
+            color
+            compatible_code
+            donation_id
+            gender
+            group_id
+            hip
+            length
+            price
+            status_id
+            thigh
+            waist
         /);
 
         #
@@ -1183,11 +1205,11 @@ group {
         $v->field(qw/ bust waist hip thigh arm length /)->each(sub {
             shift->regexp(qr/^\d{1,3}$/);
         });
-        $v->field('user_id')->regexp(qr/^\d*$/)->callback(sub {
+        $v->field('donation_id')->regexp(qr/^\d*$/)->callback(sub {
             my $val = shift;
 
-            return 1 if $DB->resultset('User')->find({ id => $val });
-            return ( 0, 'user not found using user_id' );
+            return 1 if $DB->resultset('Donation')->find({ id => $val });
+            return ( 0, 'donation not found using donation_id' );
         });
 
         $v->field('status_id')->regexp(qr/^\d*$/)->callback(sub {
@@ -1372,10 +1394,21 @@ group {
         # fetch params
         #
         my %params = $self->get_params(qw/
-            arm   bust            category code
-            color compatible_code gender   group_id
-            hip   length          price    status_id
-            thigh user_id         waist
+            arm
+            bust
+            category
+            code
+            color
+            compatible_code
+            donation_id
+            gender
+            group_id
+            hip
+            length
+            price
+            status_id
+            thigh
+            waist
         /);
 
         #
@@ -1389,11 +1422,11 @@ group {
         $v->field(qw/ bust waist hip thigh arm length /)->each(sub {
             shift->regexp(qr/^\d{1,3}$/);
         });
-        $v->field('user_id')->regexp(qr/^\d*$/)->callback(sub {
+        $v->field('donation_id')->regexp(qr/^\d*$/)->callback(sub {
             my $val = shift;
 
-            return 1 if $DB->resultset('User')->find({ id => $val });
-            return ( 0, 'user not found using user_id' );
+            return 1 if $DB->resultset('Donation')->find({ id => $val });
+            return ( 0, 'donation not found using donation_id' );
         });
 
         $v->field('status_id')->regexp(qr/^\d*$/)->callback(sub {
