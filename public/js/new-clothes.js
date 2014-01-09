@@ -86,40 +86,41 @@
         return $("#clothes-" + name).prop('disabled', true).val('');
       });
     };
-    $('#clothes-type').select2({
+    $('#clothes-category').select2({
       dropdownCssClass: 'bigdrop'
     }).on('change', function(e) {
       var type, types, _i, _len, _results;
       clear_clothes_form(false);
       types = [];
-      switch (parseInt(e.val, 10)) {
-        case 0x0001 | 0x0002:
+      switch (e.val) {
+        case 'jacket,pants':
           types = ['bust', 'arm', 'waist', 'length'];
           break;
-        case 0x0001 | 0x0020:
+        case 'jacket,skirt':
           types = ['bust', 'arm', 'waist', 'hip', 'length'];
           break;
-        case 0x0001:
-        case 0x0004:
-        case 0x0080:
-        case 0x0400:
+        case 'jacket':
+        case 'shirt':
+        case 'coat':
+        case 'blouse':
           types = ['bust', 'arm'];
           break;
-        case 0x0002:
+        case 'pants':
           types = ['waist', 'length'];
           break;
-        case 0x0200:
+        case 'skirt':
           types = ['waist', 'hip', 'length'];
           break;
-        case 0x0008:
+        case 'shoes':
           types = ['foot'];
           break;
-        case 0x0040:
+        case 'waistcoat':
           types = ['waist'];
           break;
-        case 0x0010:
-        case 0x0020:
-        case 0x0100:
+        case 'hat':
+        case 'tie':
+        case 'onepiece':
+        case 'belt':
           types = [];
           break;
         default:
@@ -134,10 +135,10 @@
       return _results;
     });
     $('#clothes-color').select2();
-    $('#clothes-type').select2('val', '');
+    $('#clothes-category').select2('val', '');
     clear_clothes_form(true);
     $('#btn-clothes-reset').click(function() {
-      $('#clothes-type').select2('val', '');
+      $('#clothes-category').select2('val', '');
       return clear_clothes_form(true);
     });
     $('#btn-clothes-add').click(function() {
@@ -145,8 +146,8 @@
       data = {
         user_id: userID,
         clothes_code: $('#clothes-code').val(),
-        clothes_type: $('#clothes-type').val(),
-        clothes_type_str: $('#clothes-type option:selected').text(),
+        clothes_category: $('#clothes-category').val(),
+        clothes_category_str: $('#clothes-category option:selected').text(),
         clothes_gender: $('input[name=clothes-gender]:checked').val(),
         clothes_gender_str: $('input[name=clothes-gender]:checked').next().text(),
         clothes_color: $('#clothes-color').val(),
@@ -158,7 +159,7 @@
         clothes_length: $('#clothes-length').val(),
         clothes_foot: $('#clothes-foot').val()
       };
-      if (!data.clothes_type) {
+      if (!data.clothes_category) {
         return;
       }
       count = 0;
@@ -204,7 +205,7 @@
           html = $(compiled(data));
           $('#display-clothes-list').append(html);
           $('#btn-clothes-reset').click();
-          return $('#clothes-type').focus();
+          return $('#clothes-category').focus();
         },
         complete: function(jqXHR, textStatus) {}
       });
@@ -261,17 +262,50 @@
           if (!$("input[name=clothes-list]:checked").length) {
             return;
           }
-          console.log($('form').serialize());
-          return;
-          return $.ajax('/clothes.json', {
+          return $.ajax("/api/donation.json", {
             type: 'POST',
-            data: $('form').serialize(),
-            success: function(data, textStatus, jqXHR) {
-              return true;
+            data: {
+              user_id: userID,
+              message: $('#donation-comment').val()
+            },
+            success: function(donation, textStatus, jqXHR) {
+              return $.ajax("/api/group.json", {
+                type: 'POST',
+                success: function(group, textStatus, jqXHR) {
+                  return $("input[name=clothes-list]:checked").each(function(i, el) {
+                    return $.ajax("/api/clothes.json", {
+                      type: 'POST',
+                      data: {
+                        donation_id: donation.id,
+                        group_id: group.id,
+                        code: $(el).data('clothes-code'),
+                        category: $(el).data('clothes-category'),
+                        gender: $(el).data('clothes-gender'),
+                        color: $(el).data('clothes-color'),
+                        bust: $(el).data('clothes-bust'),
+                        waist: $(el).data('clothes-waist'),
+                        hip: $(el).data('clothes-hip'),
+                        arm: $(el).data('clothes-arm'),
+                        length: $(el).data('clothes-length'),
+                        foot: $(el).data('clothes-foot'),
+                        price: OpenCloset.getCategoryPrice($(el).data('clothes-category'))
+                      },
+                      success: function(data, textStatus, jqXHR) {},
+                      error: function(jqXHR, textStatus, errorThrown) {
+                        return alert('warning', jqXHR.responseJSON.error.str);
+                      },
+                      complete: function(jqXHR, textStatus) {}
+                    });
+                  });
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                  return alert('warning', jqXHR.responseJSON.error.str);
+                },
+                complete: function(jqXHR, textStatus) {}
+              });
             },
             error: function(jqXHR, textStatus, errorThrown) {
-              alert('danger', jqXHR.responseJSON.error);
-              return false;
+              return alert('warning', jqXHR.responseJSON.error.str);
             },
             complete: function(jqXHR, textStatus) {}
           });

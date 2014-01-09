@@ -66,36 +66,36 @@ $ ->
     _.each ['bust','waist','hip','arm','length','foot'], (name) ->
       $("#clothes-#{name}").prop('disabled', true).val('')
 
-  $('#clothes-type').select2( dropdownCssClass: 'bigdrop' )
+  $('#clothes-category').select2( dropdownCssClass: 'bigdrop' )
     .on 'change', (e) ->
       clear_clothes_form false
       types = []
       #
       # check Opencloset::Constant
       #
-      switch parseInt( e.val, 10 )
-        when 0x0001 | 0x0002                then types = [ 'bust', 'arm', 'waist', 'length'        ] # Jacket & Pants
-        when 0x0001 | 0x0020                then types = [ 'bust', 'arm', 'waist', 'hip', 'length' ] # Jacket & Skirts
-        when 0x0001, 0x0004, 0x0080, 0x0400 then types = [ 'bust', 'arm'                           ] # Jacket, Shirts, Coat, Blouse
-        when 0x0002                         then types = [ 'waist', 'length'                       ] # Pants
-        when 0x0200                         then types = [ 'waist', 'hip', 'length'                ] # Skirt
-        when 0x0008                         then types = [ 'foot'                                  ] # Shoes
-        when 0x0040                         then types = [ 'waist'                                 ] # Waistcoat
-        when 0x0010, 0x0020, 0x0100         then types = [                                         ] # Hat, Tie, Onepiece
-        else                                     types = [                                         ]
+      switch e.val
+        when 'jacket,pants'                      then types = [ 'bust', 'arm', 'waist', 'length'        ] # Jacket & Pants
+        when 'jacket,skirt'                      then types = [ 'bust', 'arm', 'waist', 'hip', 'length' ] # Jacket & Skirt
+        when 'jacket', 'shirt', 'coat', 'blouse' then types = [ 'bust', 'arm'                           ] # Jacket, Shirts, Coat, Blouse
+        when 'pants'                             then types = [ 'waist', 'length'                       ] # Pants
+        when 'skirt'                             then types = [ 'waist', 'hip', 'length'                ] # Skirt
+        when 'shoes'                             then types = [ 'foot'                                  ] # Shoes
+        when 'waistcoat'                         then types = [ 'waist'                                 ] # Waistcoat
+        when 'hat', 'tie', 'onepiece', 'belt'    then types = [                                         ] # Hat, Tie, Onepiece, Belt
+        else                                          types = [                                         ]
       for type in types
         $("#display-clothes-#{type}").show()
         $("#clothes-#{type}").prop('disabled', false)
   $('#clothes-color').select2()
 
-  $('#clothes-type').select2('val', '')
+  $('#clothes-category').select2('val', '')
   clear_clothes_form true
 
   #
   # step3 - 의류 폼 초기화
   #
   $('#btn-clothes-reset').click ->
-    $('#clothes-type').select2('val', '')
+    $('#clothes-category').select2('val', '')
     clear_clothes_form true
 
   #
@@ -103,22 +103,22 @@ $ ->
   #
   $('#btn-clothes-add').click ->
     data =
-      user_id:            userID,
-      clothes_code:       $('#clothes-code').val(),
-      clothes_type:       $('#clothes-type').val(),
-      clothes_type_str:   $('#clothes-type option:selected').text(),
-      clothes_gender:     $('input[name=clothes-gender]:checked').val()
-      clothes_gender_str: $('input[name=clothes-gender]:checked').next().text()
-      clothes_color:      $('#clothes-color').val(),
-      clothes_color_str:  $('#clothes-color option:selected').text(),
-      clothes_bust:       $('#clothes-bust').val(),
-      clothes_waist:      $('#clothes-waist').val(),
-      clothes_hip:        $('#clothes-hip').val(),
-      clothes_arm:        $('#clothes-arm').val(),
-      clothes_length:     $('#clothes-length').val(),
-      clothes_foot:       $('#clothes-foot').val(),
+      user_id:              userID,
+      clothes_code:         $('#clothes-code').val(),
+      clothes_category:     $('#clothes-category').val(),
+      clothes_category_str: $('#clothes-category option:selected').text(),
+      clothes_gender:       $('input[name=clothes-gender]:checked').val()
+      clothes_gender_str:   $('input[name=clothes-gender]:checked').next().text()
+      clothes_color:        $('#clothes-color').val(),
+      clothes_color_str:    $('#clothes-color option:selected').text(),
+      clothes_bust:         $('#clothes-bust').val(),
+      clothes_waist:        $('#clothes-waist').val(),
+      clothes_hip:          $('#clothes-hip').val(),
+      clothes_arm:          $('#clothes-arm').val(),
+      clothes_length:       $('#clothes-length').val(),
+      clothes_foot:         $('#clothes-foot').val(),
 
-    return unless data.clothes_type
+    return unless data.clothes_category
 
     #
     # 입력한 의류 정보 검증
@@ -156,7 +156,7 @@ $ ->
         $('#display-clothes-list').append(html)
 
         $('#btn-clothes-reset').click()
-        $('#clothes-type').focus()
+        $('#clothes-category').focus()
       complete: (jqXHR, textStatus) ->
 
   #
@@ -205,16 +205,55 @@ $ ->
             complete: (jqXHR, textStatus) ->
         when 3
           return unless $("input[name=clothes-list]:checked").length
-          console.log $('form').serialize()
-          return
-          $.ajax '/clothes.json',
+
+          #
+          # FIXME do we need a single API for transaction?
+          #
+
+          #
+          # create donation
+          #
+          $.ajax "/api/donation.json",
             type: 'POST'
-            data: $('form').serialize()
-            success: (data, textStatus, jqXHR) ->
-              return true
+            data:
+              user_id: userID
+              message: $('#donation-comment').val()
+            success: (donation, textStatus, jqXHR) ->
+              #
+              # create group
+              #
+              $.ajax "/api/group.json",
+                type: 'POST'
+                success: (group, textStatus, jqXHR) ->
+                  #
+                  # create clothes
+                  #
+                  $("input[name=clothes-list]:checked").each (i, el) ->
+                    $.ajax "/api/clothes.json",
+                      type: 'POST'
+                      data:
+                        donation_id: donation.id
+                        group_id:    group.id
+                        code:        $(el).data('clothes-code')
+                        category:    $(el).data('clothes-category')
+                        gender:      $(el).data('clothes-gender')
+                        color:       $(el).data('clothes-color')
+                        bust:        $(el).data('clothes-bust')
+                        waist:       $(el).data('clothes-waist')
+                        hip:         $(el).data('clothes-hip')
+                        arm:         $(el).data('clothes-arm')
+                        length:      $(el).data('clothes-length')
+                        foot:        $(el).data('clothes-foot')
+                        price:       OpenCloset.getCategoryPrice $(el).data('clothes-category')
+                      success: (data, textStatus, jqXHR) ->
+                      error: (jqXHR, textStatus, errorThrown) ->
+                        alert('warning', jqXHR.responseJSON.error.str)
+                      complete: (jqXHR, textStatus) ->
+                error: (jqXHR, textStatus, errorThrown) ->
+                  alert('warning', jqXHR.responseJSON.error.str)
+                complete: (jqXHR, textStatus) ->
             error: (jqXHR, textStatus, errorThrown) ->
-              alert('danger', jqXHR.responseJSON.error)
-              return false
+              alert('warning', jqXHR.responseJSON.error.str)
             complete: (jqXHR, textStatus) ->
         else return
 

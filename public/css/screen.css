@@ -82,7 +82,7 @@
 .page-content #new-borrower form .input-group { width: inherit; }
 .page-content #new-borrower form .tags { width: 100%; }
 .page-content #new-clothes form .input-group { width: inherit; }
-.page-content #new-clothes #s2id_clothes-type, .page-content #new-clothes #s2id_clothes-color { width: inherit !important; }
+.page-content #new-clothes #s2id_clothes-category, .page-content #new-clothes #s2id_clothes-color { width: inherit !important; }
 .page-content .step-content .step-pane h3 { margin-top: 10px; margin-bottom: 20px; }
 
 .bigdrop .select2-results { max-height: 400px; }
