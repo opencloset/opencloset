@@ -604,6 +604,8 @@ group {
     get  '/clothes-list'   => \&api_get_clothes_list;
     put  '/clothes-list'   => \&api_update_clothes_list;
 
+    post '/donation'       => \&api_create_donation;
+
     get  '/search/user'    => \&api_search_user;
 
     get  '/gui/staff-list' => \&api_gui_staff_list;
@@ -1479,6 +1481,59 @@ group {
         my %data = ();
 
         $self->respond_to( json => { status => 200, json => \%data } );
+    }
+
+    sub api_create_donation {
+        my $self = shift;
+
+        #
+        # fetch params
+        #
+        my %params = $self->get_params(qw/
+            user_id
+            message
+        /);
+
+        #
+        # validate params
+        #
+        my $v = $self->create_validator;
+        $v->field('user_id')->required(1)->regexp(qr/^\d*$/)->callback(sub {
+            my $val = shift;
+
+            return 1 if $DB->resultset('User')->find({ id => $val });
+            return ( 0, 'user not found using user_id' );
+        });
+
+        unless ( $self->validate( $v, \%params ) ) {
+            my @error_str;
+            while ( my ( $k, $v ) = each %{ $v->errors } ) {
+                push @error_str, "$k:$v";
+            }
+            return $self->error( 400, {
+                str  => join(',', @error_str),
+                data => $v->errors,
+            });
+        }
+
+        #
+        # create donation
+        #
+        my $donation = $DB->resultset('Donation')->create( \%params );
+        return $self->error( 500, {
+            str  => 'failed to create a new donation',
+            data => {},
+        }) unless $donation;
+
+        #
+        # response
+        #
+        my %data = ( $donation->get_columns );
+
+        $self->res->headers->header(
+            'Location' => $self->url_for( '/api/donation/' . $donation->id ),
+        );
+        $self->respond_to( json => { status => 201, json => \%data } );
     }
 
     #
