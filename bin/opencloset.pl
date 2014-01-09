@@ -1577,39 +1577,6 @@ get '/'             => 'home';
 get '/new-borrower' => 'new-borrower';
 get '/new-clothes'  => 'new-clothes';
 
-post '/guests' => sub {
-    my $self = shift;
-
-    my $validator = $self->guest_validator;
-    unless ( $self->validate($validator) ) {
-        my @error_str;
-        while ( my ( $k, $v ) = each %{ $validator->errors } ) {
-            push @error_str, "$k:$v";
-        }
-        return $self->error( 400, { str => join( ',', @error_str ), data => $validator->errors } );
-    }
-
-    return $self->error(400, 'invalid request') unless $self->param('user_id');
-
-    my $user = $DB->resultset('User')->find({ id => $self->param('user_id') });
-    return $self->error(404, 'not found user') unless $user;
-
-    $user->user_info->update({
-        map {
-            defined $self->param($_) ? ( $_ => $self->param($_) ) : ()
-        } qw( height weight bust waist hip thigh arm leg knee foot )
-    });
-
-    my %data = ( $user->user_info->get_columns, $user->get_columns );
-    delete @data{qw/ user_id password /};
-
-    $self->res->headers->header( 'Location' => $self->url_for( '/guests/' . $user->id ) );
-    $self->respond_to(
-        json => { json => \%data, status => 201 },
-        html => sub { $self->redirect_to( '/guests/' . $user->id ) },
-    );
-};
-
 get '/user/:id' => sub {
     my $self = shift;
 
