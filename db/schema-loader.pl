@@ -24,7 +24,6 @@ my $conf = eval path($conf_file)->slurp_utf8;
         naming                    => { ALL => 'v8' },
         moniker_map               => {
             clothes       => 'Clothes',
-            donor_clothes => 'DonorClothes',
             order_clothes => 'OrderClothes',
         },
         inflect_singular          => { clothes => 'clothes' },

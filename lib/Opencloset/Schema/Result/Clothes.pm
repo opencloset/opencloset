@@ -96,7 +96,7 @@ male/female/unisex
   default_value: 0
   is_nullable: 1
 
-=head2 user_id
+=head2 donation_id
 
   data_type: 'integer'
   default_value: 1
@@ -158,7 +158,7 @@ __PACKAGE__->add_columns(
   { data_type => "varchar", is_nullable => 0, size => 32 },
   "price",
   { data_type => "integer", default_value => 0, is_nullable => 1 },
-  "user_id",
+  "donation_id",
   {
     data_type => "integer",
     default_value => 1,
@@ -214,19 +214,24 @@ __PACKAGE__->add_unique_constraint("code", ["code"]);
 
 =head1 RELATIONS
 
-=head2 donor_clothes
+=head2 donation
 
-Type: has_many
+Type: belongs_to
 
-Related object: L<Opencloset::Schema::Result::DonorClothes>
+Related object: L<Opencloset::Schema::Result::Donation>
 
 =cut
 
-__PACKAGE__->has_many(
-  "donor_clothes",
-  "Opencloset::Schema::Result::DonorClothes",
-  { "foreign.clothes_code" => "self.code" },
-  { cascade_copy => 0, cascade_delete => 0 },
+__PACKAGE__->belongs_to(
+  "donation",
+  "Opencloset::Schema::Result::Donation",
+  { id => "donation_id" },
+  {
+    is_deferrable => 1,
+    join_type     => "LEFT",
+    on_delete     => "CASCADE",
+    on_update     => "RESTRICT",
+  },
 );
 
 =head2 group
@@ -314,26 +319,6 @@ __PACKAGE__->belongs_to(
   },
 );
 
-=head2 user
-
-Type: belongs_to
-
-Related object: L<Opencloset::Schema::Result::User>
-
-=cut
-
-__PACKAGE__->belongs_to(
-  "user",
-  "Opencloset::Schema::Result::User",
-  { id => "user_id" },
-  {
-    is_deferrable => 1,
-    join_type     => "LEFT",
-    on_delete     => "CASCADE",
-    on_update     => "RESTRICT",
-  },
-);
-
 =head2 orders
 
 Type: many_to_many
@@ -345,8 +330,8 @@ Composing rels: L</order_clothes> -> order
 __PACKAGE__->many_to_many("orders", "order_clothes", "order");
 
 
-# Created by DBIx::Class::Schema::Loader v0.07038 @ 2013-12-23 14:07:53
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:1O2M6OziwjFa+3ROp/UExQ
+# Created by DBIx::Class::Schema::Loader v0.07038 @ 2014-01-09 18:34:05
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:sS+X4ny02sZRMqVLgnZNlg
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

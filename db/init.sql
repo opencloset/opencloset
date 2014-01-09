@@ -111,6 +111,22 @@ CREATE TABLE `group` (
 INSERT INTO `group` (`id`) VALUES (1);
 
 --
+-- donation
+--
+
+CREATE TABLE `donation` (
+  `id`          INT UNSIGNED NOT NULL,
+  `user_id`     INT UNSIGNED NOT NULL,
+  `comment`     TEXT         DEFAULT NULL,
+  `create_date` DATETIME     DEFAULT NULL,
+
+  PRIMARY KEY (`id`),
+  CONSTRAINT `fk_donation1` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+INSERT INTO `donation` (`id`,`user_id`,`comment`,`create_date`) VALUES (1,1,'초기 생성용 기본 기증 정보',NOW());
+
+--
 -- clothes
 --
 
@@ -129,7 +145,7 @@ CREATE TABLE `clothes` (
   `category`    VARCHAR(32) NOT NULL,     -- 종류
   `price`       INT DEFAULT 0,            -- 대여 가격
 
-  `user_id`     INT UNSIGNED DEFAULT 1,
+  `donation_id` INT UNSIGNED DEFAULT 1,
   `status_id`   INT UNSIGNED DEFAULT 1,
   `group_id`    INT UNSIGNED DEFAULT 1,
 
@@ -144,9 +160,9 @@ CREATE TABLE `clothes` (
   INDEX (`thigh`),
   INDEX (`length`),
   INDEX (`category`),
-  CONSTRAINT `fk_clothes1` FOREIGN KEY (`user_id`)   REFERENCES `user`   (`id`) ON DELETE CASCADE,
-  CONSTRAINT `fk_clothes2` FOREIGN KEY (`status_id`) REFERENCES `status` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `fk_clothes3` FOREIGN KEY (`group_id`)  REFERENCES `group`  (`id`) ON DELETE CASCADE
+  CONSTRAINT `fk_clothes1` FOREIGN KEY (`donation_id`) REFERENCES `donation` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_clothes2` FOREIGN KEY (`status_id`)   REFERENCES `status`   (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_clothes3` FOREIGN KEY (`group_id`)    REFERENCES `group`    (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
@@ -238,21 +254,6 @@ CREATE TABLE `order_detail` (
   CONSTRAINT `fk_order_detail1` FOREIGN KEY (`order_id`)     REFERENCES `order`   (`id`)   ON DELETE CASCADE,
   CONSTRAINT `fk_order_detail2` FOREIGN KEY (`clothes_code`) REFERENCES `clothes` (`code`) ON DELETE CASCADE,
   CONSTRAINT `fk_order_detail3` FOREIGN KEY (`status_id`)    REFERENCES `status`  (`id`)   ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
---
--- donor_clothes
---
-
-CREATE TABLE `donor_clothes` (
-  `user_id`       INT UNSIGNED NOT NULL,
-  `clothes_code`  CHAR(5)      NOT NULL,
-  `comment`       TEXT DEFAULT NULL,
-  `donation_date` DATETIME DEFAULT NULL,
-
-  PRIMARY KEY (`user_id`, `clothes_code`),
-  CONSTRAINT `fk_donor_clothes1` FOREIGN KEY (`user_id`)      REFERENCES `user`    (`id`)   ON DELETE CASCADE,
-  CONSTRAINT `fk_donor_clothes2` FOREIGN KEY (`clothes_code`) REFERENCES `clothes` (`code`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `short_message` (
