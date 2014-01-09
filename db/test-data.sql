@@ -53,13 +53,13 @@ INSERT
     `donation_id`,`status_id`,`gender`,`color`,`compatible_code`
   )
   VALUES 
-    (1, '0J001', 94,   NULL, 51,   NULL, 'jacket', 15000, 1, 1, 'male', 'B', NULL),
-    (2, '0P001', NULL, 79,   NULL, 102,  'pants',  10000, 1, 1, 'male', 'B', NULL),
-    (3, '0S001', NULL, NULL, NULL, NULL, 'shirt',   5000, 2, 1, 'male', 'W', NULL),
-    (4, '0A001', NULL, NULL, NULL, NULL, 'shoes',   5000, 2, 1, 'male', 'B', NULL),
-    (5, '0T001', NULL, NULL, NULL, NULL, 'tie',     5000, 3, 1, 'male', 'B', NULL),
-    (6, '0J002', 99,   NULL, 55,   NULL, 'jacket', 15000, 4, 2, 'male', 'B', NULL),
-    (7, '0P002', NULL, 82,   NULL, 112,  'pants',  10000, 4, 2, 'male', 'B', NULL)
+    (1, '0J001', 94,  0, 51,   0, 'jacket', 10000, 1, 1, 'male', 'B', NULL),
+    (2, '0P001', 0,  79,  0, 102, 'pants',  10000, 1, 1, 'male', 'B', NULL),
+    (3, '0S001', 0,   0,  0,   0, 'shirt',   5000, 2, 1, 'male', 'W', NULL),
+    (4, '0A001', 0,   0,  0,   0, 'shoes',   5000, 2, 1, 'male', 'B', NULL),
+    (5, '0T001', 0,   0,  0,   0, 'tie',     2000, 3, 1, 'male', 'B', NULL),
+    (6, '0J002', 99,  0, 55,   0, 'jacket', 10000, 4, 2, 'male', 'B', NULL),
+    (7, '0P002', 0,  82,  0, 112, 'pants',  10000, 4, 2, 'male', 'B', NULL)
     ;
 
 INSERT

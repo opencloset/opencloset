@@ -43,31 +43,37 @@ __PACKAGE__->table("clothes");
 =head2 bust
 
   data_type: 'integer'
+  default_value: 0
   is_nullable: 1
 
 =head2 waist
 
   data_type: 'integer'
+  default_value: 0
   is_nullable: 1
 
 =head2 hip
 
   data_type: 'integer'
+  default_value: 0
   is_nullable: 1
 
 =head2 arm
 
   data_type: 'integer'
+  default_value: 0
   is_nullable: 1
 
 =head2 thigh
 
   data_type: 'integer'
+  default_value: 0
   is_nullable: 1
 
 =head2 length
 
   data_type: 'integer'
+  default_value: 0
   is_nullable: 1
 
 =head2 color
@@ -139,17 +145,17 @@ __PACKAGE__->add_columns(
   "code",
   { data_type => "char", is_nullable => 0, size => 5 },
   "bust",
-  { data_type => "integer", is_nullable => 1 },
+  { data_type => "integer", default_value => 0, is_nullable => 1 },
   "waist",
-  { data_type => "integer", is_nullable => 1 },
+  { data_type => "integer", default_value => 0, is_nullable => 1 },
   "hip",
-  { data_type => "integer", is_nullable => 1 },
+  { data_type => "integer", default_value => 0, is_nullable => 1 },
   "arm",
-  { data_type => "integer", is_nullable => 1 },
+  { data_type => "integer", default_value => 0, is_nullable => 1 },
   "thigh",
-  { data_type => "integer", is_nullable => 1 },
+  { data_type => "integer", default_value => 0, is_nullable => 1 },
   "length",
-  { data_type => "integer", is_nullable => 1 },
+  { data_type => "integer", default_value => 0, is_nullable => 1 },
   "color",
   { data_type => "varchar", is_nullable => 1, size => 32 },
   "gender",
@@ -330,8 +336,8 @@ Composing rels: L</order_clothes> -> order
 __PACKAGE__->many_to_many("orders", "order_clothes", "order");
 
 
-# Created by DBIx::Class::Schema::Loader v0.07038 @ 2014-01-09 18:34:05
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:sS+X4ny02sZRMqVLgnZNlg
+# Created by DBIx::Class::Schema::Loader v0.07038 @ 2014-01-09 22:25:05
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:K0hPjvfMPxVxhFhQYA9LwA
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

@@ -31,13 +31,19 @@ __PACKAGE__->table("group");
 
   data_type: 'integer'
   extra: {unsigned => 1}
+  is_auto_increment: 1
   is_nullable: 0
 
 =cut
 
 __PACKAGE__->add_columns(
   "id",
-  { data_type => "integer", extra => { unsigned => 1 }, is_nullable => 0 },
+  {
+    data_type => "integer",
+    extra => { unsigned => 1 },
+    is_auto_increment => 1,
+    is_nullable => 0,
+  },
 );
 
 =head1 PRIMARY KEY
@@ -70,8 +76,8 @@ __PACKAGE__->has_many(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07038 @ 2014-01-09 18:34:05
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:JMrRsctFNtFyqdENy3QAEQ
+# Created by DBIx::Class::Schema::Loader v0.07038 @ 2014-01-09 22:25:05
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:cV1psI+Q45MR6LG2SiOLXg
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

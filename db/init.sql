@@ -103,7 +103,7 @@ INSERT INTO `status` (`id`, `name`)
 --
 
 CREATE TABLE `group` (
-  `id`   INT UNSIGNED NOT NULL,
+  `id`   INT UNSIGNED NOT NULL AUTO_INCREMENT,
 
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -115,7 +115,7 @@ INSERT INTO `group` (`id`) VALUES (1);
 --
 
 CREATE TABLE `donation` (
-  `id`          INT UNSIGNED NOT NULL,
+  `id`          INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `user_id`     INT UNSIGNED NOT NULL,
   `message`     TEXT         DEFAULT NULL,
   `create_date` DATETIME     DEFAULT NULL,
@@ -133,17 +133,17 @@ INSERT INTO `donation` (`id`,`user_id`,`message`,`create_date`) VALUES (1,1,'초
 CREATE TABLE `clothes` (
   `id`          INT UNSIGNED NOT NULL AUTO_INCREMENT,
 
-  `code`        CHAR(5)     NOT NULL,     -- 바코드 품번
-  `bust`        INT         DEFAULT NULL, -- 가슴 둘레(cm)
-  `waist`       INT         DEFAULT NULL, -- 허리 둘레(cm)
-  `hip`         INT         DEFAULT NULL, -- 엉덩이 둘레(cm)
-  `arm`         INT         DEFAULT NULL, -- 팔 길이(cm)
-  `thigh`       INT         DEFAULT NULL, -- 허벅지 둘레(cm)
-  `length`      INT         DEFAULT NULL, -- 기장(cm) 또는 발 크기(mm)
+  `code`        CHAR(5)     NOT NULL,  -- 바코드 품번
+  `bust`        INT         DEFAULT 0, -- 가슴 둘레(cm)
+  `waist`       INT         DEFAULT 0, -- 허리 둘레(cm)
+  `hip`         INT         DEFAULT 0, -- 엉덩이 둘레(cm)
+  `arm`         INT         DEFAULT 0, -- 팔 길이(cm)
+  `thigh`       INT         DEFAULT 0, -- 허벅지 둘레(cm)
+  `length`      INT         DEFAULT 0, -- 기장(cm) 또는 발 크기(mm)
   `color`       VARCHAR(32) DEFAULT NULL,
   `gender`      VARCHAR(6)  DEFAULT NULL COMMENT 'male/female/unisex',
-  `category`    VARCHAR(32) NOT NULL,     -- 종류
-  `price`       INT DEFAULT 0,            -- 대여 가격
+  `category`    VARCHAR(32) NOT NULL,  -- 종류
+  `price`       INT DEFAULT 0,         -- 대여 가격
 
   `donation_id` INT UNSIGNED DEFAULT 1,
   `status_id`   INT UNSIGNED DEFAULT 1,

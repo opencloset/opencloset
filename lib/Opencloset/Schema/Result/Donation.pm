@@ -31,6 +31,7 @@ __PACKAGE__->table("donation");
 
   data_type: 'integer'
   extra: {unsigned => 1}
+  is_auto_increment: 1
   is_nullable: 0
 
 =head2 user_id
@@ -57,7 +58,12 @@ __PACKAGE__->table("donation");
 
 __PACKAGE__->add_columns(
   "id",
-  { data_type => "integer", extra => { unsigned => 1 }, is_nullable => 0 },
+  {
+    data_type => "integer",
+    extra => { unsigned => 1 },
+    is_auto_increment => 1,
+    is_nullable => 0,
+  },
   "user_id",
   {
     data_type => "integer",
@@ -122,8 +128,8 @@ __PACKAGE__->belongs_to(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07038 @ 2014-01-09 21:37:00
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:GPwQbgabiKRDlTTersVj/A
+# Created by DBIx::Class::Schema::Loader v0.07038 @ 2014-01-09 22:25:05
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:JxUkBHe6+8k05YJOOJIFgA
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration
