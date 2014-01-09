@@ -23,6 +23,7 @@ $ ->
             $html = $(compiled(user))
             $html.find('input').attr('data-json', JSON.stringify(user))
             $("#user-search-list").prepend($html)
+        $("input[name=user-id][value=#{ data[0].id }]").click() if data[0]
       error: (jqXHR, textStatus, errorThrown) ->
         type = jqXHR.status is 404 ? 'warning' : 'danger'
         alert(type, jqXHR.responseJSON.error.str)

@@ -18,7 +18,7 @@
         success: function(data, textStatus, jqXHR) {
           var compiled;
           compiled = _.template($('#tpl-user-id').html());
-          return _.each(data, function(user) {
+          _.each(data, function(user) {
             var $html;
             if (!$("#user-search-list input[data-user-id='" + user.id + "']").length) {
               $html = $(compiled(user));
@@ -26,6 +26,9 @@
               return $("#user-search-list").prepend($html);
             }
           });
+          if (data[0]) {
+            return $("input[name=user-id][value=" + data[0].id + "]").click();
+          }
         },
         error: function(jqXHR, textStatus, errorThrown) {
           var type, _ref;
