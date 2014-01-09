@@ -2025,28 +2025,6 @@ post '/order/:id/update' => sub {
     $self->respond_to({ data => q{} });
 };
 
-post '/donors' => sub {
-    my $self   = shift;
-
-    my $user = $DB->resultset('User')->find({ id => $self->param('user_id') });
-    return $self->error(404, 'not found user') unless $user;
-
-    $user->user_info->update({
-        map {
-            defined $self->param($_) ? ( $_ => $self->param($_) ) : ()
-        } qw()
-    });
-
-    my %data = ( $user->user_info->get_columns, $user->get_columns );
-    delete @data{qw/ user_id password /};
-
-    $self->res->headers->header('Location' => $self->url_for('/donors/' . $user->id));
-    $self->respond_to(
-        json => { json => \%data, status => 201                  },
-        html => sub { $self->redirect_to('/donors/' . $user->id) },
-    );
-};
-
 any [qw/put patch/] => '/donors/:id' => sub {
     my $self  = shift;
 
