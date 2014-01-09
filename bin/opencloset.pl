@@ -1577,30 +1577,6 @@ get '/'             => 'home';
 get '/new-borrower' => 'new-borrower';
 get '/new-clothes'  => 'new-clothes';
 
-post '/users' => sub {
-    my $self = shift;
-
-    my $validator = $self->user_validator;
-    unless ($self->validate($validator)) {
-        my @error_str;
-        while ( my ($k, $v) = each %{ $validator->errors } ) {
-            push @error_str, "$k:$v";
-        }
-        return $self->error( 400, { str => join(',', @error_str), data => $validator->errors } );
-    }
-
-    my $user = $self->create_user;
-    return $self->error(500, 'failed to create a new user') unless $user;
-
-    $self->res->headers->header('Location' => $self->url_for('/users/' . $user->id));
-    $self->respond_to(
-        json => { json => { $user->get_columns }, status => 201 },
-        html => sub {
-            $self->redirect_to('/users/' . $user->id);
-        }
-    );
-};
-
 any [qw/put patch/] => '/users/:id' => sub {
     my $self  = shift;
 
