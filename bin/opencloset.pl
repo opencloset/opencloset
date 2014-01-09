@@ -191,42 +191,6 @@ helper flatten_order => sub {
     return \%data;
 };
 
-helper user_validator => sub {
-    my $self = shift;
-
-    my $validator = $self->create_validator;
-    $validator->field('name')->required(1);
-    $validator->field('phone')->regexp(qr/^01\d{8,9}$/);
-    $validator->field('email')->email;
-    $validator->field('gender')->regexp(qr/^[12]$/);
-    $validator->field('age')->regexp(qr/^\d+$/);
-
-    ## TODO: check exist email and set to error
-    return $validator;
-};
-
-helper create_user => sub {
-    my $self = shift;
-
-    my %params;
-    map {
-        $params{$_} = $self->param($_) if defined $self->param($_)
-    } qw/name email password phone gender age address/;
-
-    return $DB->resultset('User')->find_or_create(\%params);
-};
-
-helper guest_validator => sub {
-    my $self = shift;
-
-    my $validator = $self->create_validator;
-    $validator->field([qw/bust waist arm length height weight/])
-        ->each(sub { shift->required(1)->regexp(qr/^\d+$/) });
-
-    ## TODO: validate `target_date`
-    return $validator;
-};
-
 helper create_cloth => sub {
     my ($self, %info) = @_;
 
