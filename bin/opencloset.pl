@@ -1602,33 +1602,6 @@ get '/user/:id' => sub {
     );
 } => 'user/id';
 
-any [qw/put patch/] => '/guests/:id' => sub {
-    my $self  = shift;
-
-    my $validator = $self->guest_validator;
-    unless ($self->validate($validator)) {
-        my @error_str;
-        while ( my ($k, $v) = each %{ $validator->errors } ) {
-            push @error_str, "$k:$v";
-        }
-        return $self->error( 400, { str => join(',', @error_str), data => $validator->errors } );
-    }
-
-    my $user = $DB->resultset('User')->find({ id => $self->param('user_id') });
-    return $self->error(404, 'not found user') unless $user;
-
-    $user->user_info->update({
-        map {
-            defined $self->param($_) ? ( $_ => $self->param($_) ) : ()
-        } qw( height weight bust waist hip thigh arm leg knee foot )
-    });
-
-    my %data = ( $user->user_info->get_columns, $user->get_columns );
-    delete @data{qw/ user_id password /};
-
-    $self->respond_to( json => { json => \%data } );
-};
-
 post '/clothes' => sub {
     my $self = shift;
 
