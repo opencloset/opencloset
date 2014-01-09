@@ -39,7 +39,7 @@ INSERT
     ;
 
 INSERT
-  INTO `donation` (`id`, `user_id`, `comment`, `create_date`)
+  INTO `donation` (`id`, `user_id`, `message`, `create_date`)
   VALUES
     (2, 2, '필요없어서 했습니다', NOW()),
     (3, 2, '남아서...',           NOW()),

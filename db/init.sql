@@ -117,14 +117,14 @@ INSERT INTO `group` (`id`) VALUES (1);
 CREATE TABLE `donation` (
   `id`          INT UNSIGNED NOT NULL,
   `user_id`     INT UNSIGNED NOT NULL,
-  `comment`     TEXT         DEFAULT NULL,
+  `message`     TEXT         DEFAULT NULL,
   `create_date` DATETIME     DEFAULT NULL,
 
   PRIMARY KEY (`id`),
   CONSTRAINT `fk_donation1` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-INSERT INTO `donation` (`id`,`user_id`,`comment`,`create_date`) VALUES (1,1,'초기 생성용 기본 기증 정보',NOW());
+INSERT INTO `donation` (`id`,`user_id`,`message`,`create_date`) VALUES (1,1,'초기 생성용 기본 기증 정보',NOW());
 
 --
 -- clothes

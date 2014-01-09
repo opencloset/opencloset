@@ -40,7 +40,7 @@ __PACKAGE__->table("donation");
   is_foreign_key: 1
   is_nullable: 0
 
-=head2 comment
+=head2 message
 
   data_type: 'text'
   is_nullable: 1
@@ -65,7 +65,7 @@ __PACKAGE__->add_columns(
     is_foreign_key => 1,
     is_nullable => 0,
   },
-  "comment",
+  "message",
   { data_type => "text", is_nullable => 1 },
   "create_date",
   {
@@ -122,8 +122,8 @@ __PACKAGE__->belongs_to(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07038 @ 2014-01-09 18:34:05
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:9YrgS3fgkIw6XuLdmrmxig
+# Created by DBIx::Class::Schema::Loader v0.07038 @ 2014-01-09 21:37:00
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:GPwQbgabiKRDlTTersVj/A
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration
