@@ -2025,24 +2025,6 @@ post '/order/:id/update' => sub {
     $self->respond_to({ data => q{} });
 };
 
-del '/orders/:id' => sub {
-    my $self = shift;
-
-    my $order = $DB->resultset('Order')->find({ id => $self->param('id') });
-    return $self->error(404, "Not found") unless $order;
-
-    for my $clothes ($order->cloths) {
-        $clothes->status_id($Opencloset::Constant::STATUS_AVAILABLE);
-        $clothes->update;
-    }
-
-    $order->delete;
-
-    $self->respond_to(
-        json => { json => {} },    # just 200 OK
-    );
-};
-
 post '/donors' => sub {
     my $self   = shift;
 
