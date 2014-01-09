@@ -1577,27 +1577,6 @@ get '/'             => 'home';
 get '/new-borrower' => 'new-borrower';
 get '/new-clothes'  => 'new-clothes';
 
-any [qw/put patch/] => '/users/:id' => sub {
-    my $self  = shift;
-
-    my $validator = $self->user_validator;
-    unless ($self->validate($validator)) {
-        my @error_str;
-        while ( my ($k, $v) = each %{ $validator->errors } ) {
-            push @error_str, "$k:$v";
-        }
-        return $self->error( 400, { str => join(',', @error_str), data => $validator->errors } );
-    }
-
-    my $rs   = $DB->resultset('User');
-    my $user = $rs->find({ id => $self->param('id') });
-    map { $user->$_($self->param($_)) } qw/name phone gender age address/;
-    $user->update;
-    $self->respond_to(
-        json => { json => { $user->get_columns } },
-    );
-};
-
 post '/guests' => sub {
     my $self = shift;
 
