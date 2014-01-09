@@ -1058,7 +1058,7 @@ group {
         my $v = $self->create_validator;
         $v->field('code')->required(1)->regexp(qr/^[A-Z0-9]{4,5}$/);
         $v->field('category')->required(1)->in(@CATEGORIES);
-        $v->field('gender')->in(qw/ male female /);
+        $v->field('gender')->in(qw/ male female unisex /);
         $v->field('price')->regexp(qr/^\d*$/);
         $v->field(qw/ bust waist hip thigh arm length /)->each(sub {
             shift->regexp(qr/^\d{1,3}$/);
