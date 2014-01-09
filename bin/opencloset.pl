@@ -191,42 +191,6 @@ helper flatten_order => sub {
     return \%data;
 };
 
-helper user_validator => sub {
-    my $self = shift;
-
-    my $validator = $self->create_validator;
-    $validator->field('name')->required(1);
-    $validator->field('phone')->regexp(qr/^01\d{8,9}$/);
-    $validator->field('email')->email;
-    $validator->field('gender')->regexp(qr/^[12]$/);
-    $validator->field('age')->regexp(qr/^\d+$/);
-
-    ## TODO: check exist email and set to error
-    return $validator;
-};
-
-helper create_user => sub {
-    my $self = shift;
-
-    my %params;
-    map {
-        $params{$_} = $self->param($_) if defined $self->param($_)
-    } qw/name email password phone gender age address/;
-
-    return $DB->resultset('User')->find_or_create(\%params);
-};
-
-helper guest_validator => sub {
-    my $self = shift;
-
-    my $validator = $self->create_validator;
-    $validator->field([qw/bust waist arm length height weight/])
-        ->each(sub { shift->required(1)->regexp(qr/^\d+$/) });
-
-    ## TODO: validate `target_date`
-    return $validator;
-};
-
 helper create_cloth => sub {
     my ($self, %info) = @_;
 
@@ -639,6 +603,10 @@ group {
 
     get  '/clothes-list'   => \&api_get_clothes_list;
     put  '/clothes-list'   => \&api_update_clothes_list;
+
+    post '/donation'       => \&api_create_donation;
+
+    post '/group'          => \&api_create_group;
 
     get  '/search/user'    => \&api_search_user;
 
@@ -1067,10 +1035,21 @@ group {
         # fetch params
         #
         my %params = $self->get_params(qw/
-            arm   bust            category code
-            color compatible_code gender   group_id
-            hip   length          price    status_id
-            thigh user_id         waist
+            arm
+            bust
+            category
+            code
+            color
+            compatible_code
+            donation_id
+            gender
+            group_id
+            hip
+            length
+            price
+            status_id
+            thigh
+            waist
         /);
 
         #
@@ -1079,16 +1058,16 @@ group {
         my $v = $self->create_validator;
         $v->field('code')->required(1)->regexp(qr/^[A-Z0-9]{4,5}$/);
         $v->field('category')->required(1)->in(@CATEGORIES);
-        $v->field('gender')->in(qw/ male female /);
+        $v->field('gender')->in(qw/ male female unisex /);
         $v->field('price')->regexp(qr/^\d*$/);
         $v->field(qw/ bust waist hip thigh arm length /)->each(sub {
             shift->regexp(qr/^\d{1,3}$/);
         });
-        $v->field('user_id')->regexp(qr/^\d*$/)->callback(sub {
+        $v->field('donation_id')->regexp(qr/^\d*$/)->callback(sub {
             my $val = shift;
 
-            return 1 if $DB->resultset('User')->find({ id => $val });
-            return ( 0, 'user not found using user_id' );
+            return 1 if $DB->resultset('Donation')->find({ id => $val });
+            return ( 0, 'donation not found using donation_id' );
         });
 
         $v->field('status_id')->regexp(qr/^\d*$/)->callback(sub {
@@ -1202,10 +1181,21 @@ group {
         # fetch params
         #
         my %params = $self->get_params(qw/
-            arm   bust            category code
-            color compatible_code gender   group_id
-            hip   length          price    status_id
-            thigh user_id         waist
+            arm
+            bust
+            category
+            code
+            color
+            compatible_code
+            donation_id
+            gender
+            group_id
+            hip
+            length
+            price
+            status_id
+            thigh
+            waist
         /);
 
         #
@@ -1219,11 +1209,11 @@ group {
         $v->field(qw/ bust waist hip thigh arm length /)->each(sub {
             shift->regexp(qr/^\d{1,3}$/);
         });
-        $v->field('user_id')->regexp(qr/^\d*$/)->callback(sub {
+        $v->field('donation_id')->regexp(qr/^\d*$/)->callback(sub {
             my $val = shift;
 
-            return 1 if $DB->resultset('User')->find({ id => $val });
-            return ( 0, 'user not found using user_id' );
+            return 1 if $DB->resultset('Donation')->find({ id => $val });
+            return ( 0, 'donation not found using donation_id' );
         });
 
         $v->field('status_id')->regexp(qr/^\d*$/)->callback(sub {
@@ -1408,10 +1398,21 @@ group {
         # fetch params
         #
         my %params = $self->get_params(qw/
-            arm   bust            category code
-            color compatible_code gender   group_id
-            hip   length          price    status_id
-            thigh user_id         waist
+            arm
+            bust
+            category
+            code
+            color
+            compatible_code
+            donation_id
+            gender
+            group_id
+            hip
+            length
+            price
+            status_id
+            thigh
+            waist
         /);
 
         #
@@ -1425,11 +1426,11 @@ group {
         $v->field(qw/ bust waist hip thigh arm length /)->each(sub {
             shift->regexp(qr/^\d{1,3}$/);
         });
-        $v->field('user_id')->regexp(qr/^\d*$/)->callback(sub {
+        $v->field('donation_id')->regexp(qr/^\d*$/)->callback(sub {
             my $val = shift;
 
-            return 1 if $DB->resultset('User')->find({ id => $val });
-            return ( 0, 'user not found using user_id' );
+            return 1 if $DB->resultset('Donation')->find({ id => $val });
+            return ( 0, 'donation not found using donation_id' );
         });
 
         $v->field('status_id')->regexp(qr/^\d*$/)->callback(sub {
@@ -1482,6 +1483,103 @@ group {
         my %data = ();
 
         $self->respond_to( json => { status => 200, json => \%data } );
+    }
+
+    sub api_create_donation {
+        my $self = shift;
+
+        #
+        # fetch params
+        #
+        my %params = $self->get_params(qw/
+            user_id
+            message
+        /);
+
+        #
+        # validate params
+        #
+        my $v = $self->create_validator;
+        $v->field('user_id')->required(1)->regexp(qr/^\d*$/)->callback(sub {
+            my $val = shift;
+
+            return 1 if $DB->resultset('User')->find({ id => $val });
+            return ( 0, 'user not found using user_id' );
+        });
+
+        unless ( $self->validate( $v, \%params ) ) {
+            my @error_str;
+            while ( my ( $k, $v ) = each %{ $v->errors } ) {
+                push @error_str, "$k:$v";
+            }
+            return $self->error( 400, {
+                str  => join(',', @error_str),
+                data => $v->errors,
+            });
+        }
+
+        #
+        # create donation
+        #
+        my $donation = $DB->resultset('Donation')->create( \%params );
+        return $self->error( 500, {
+            str  => 'failed to create a new donation',
+            data => {},
+        }) unless $donation;
+
+        #
+        # response
+        #
+        my %data = ( $donation->get_columns );
+
+        $self->res->headers->header(
+            'Location' => $self->url_for( '/api/donation/' . $donation->id ),
+        );
+        $self->respond_to( json => { status => 201, json => \%data } );
+    }
+
+    sub api_create_group {
+        my $self = shift;
+
+        #
+        # fetch params
+        #
+        my %params = $self->get_params(qw//);
+
+        #
+        # validate params
+        #
+        my $v = $self->create_validator;
+
+        unless ( $self->validate( $v, \%params ) ) {
+            my @error_str;
+            while ( my ( $k, $v ) = each %{ $v->errors } ) {
+                push @error_str, "$k:$v";
+            }
+            return $self->error( 400, {
+                str  => join(',', @error_str),
+                data => $v->errors,
+            });
+        }
+
+        #
+        # create group
+        #
+        my $group = $DB->resultset('Group')->create( \%params );
+        return $self->error( 500, {
+            str  => 'failed to create a new group',
+            data => {},
+        }) unless $group;
+
+        #
+        # response
+        #
+        my %data = ( $group->get_columns );
+
+        $self->res->headers->header(
+            'Location' => $self->url_for( '/api/group/' . $group->id ),
+        );
+        $self->respond_to( json => { status => 201, json => \%data } );
     }
 
     #
@@ -1575,84 +1673,7 @@ get '/login';
 
 get '/'             => 'home';
 get '/new-borrower' => 'new-borrower';
-
-post '/users' => sub {
-    my $self = shift;
-
-    my $validator = $self->user_validator;
-    unless ($self->validate($validator)) {
-        my @error_str;
-        while ( my ($k, $v) = each %{ $validator->errors } ) {
-            push @error_str, "$k:$v";
-        }
-        return $self->error( 400, { str => join(',', @error_str), data => $validator->errors } );
-    }
-
-    my $user = $self->create_user;
-    return $self->error(500, 'failed to create a new user') unless $user;
-
-    $self->res->headers->header('Location' => $self->url_for('/users/' . $user->id));
-    $self->respond_to(
-        json => { json => { $user->get_columns }, status => 201 },
-        html => sub {
-            $self->redirect_to('/users/' . $user->id);
-        }
-    );
-};
-
-any [qw/put patch/] => '/users/:id' => sub {
-    my $self  = shift;
-
-    my $validator = $self->user_validator;
-    unless ($self->validate($validator)) {
-        my @error_str;
-        while ( my ($k, $v) = each %{ $validator->errors } ) {
-            push @error_str, "$k:$v";
-        }
-        return $self->error( 400, { str => join(',', @error_str), data => $validator->errors } );
-    }
-
-    my $rs   = $DB->resultset('User');
-    my $user = $rs->find({ id => $self->param('id') });
-    map { $user->$_($self->param($_)) } qw/name phone gender age address/;
-    $user->update;
-    $self->respond_to(
-        json => { json => { $user->get_columns } },
-    );
-};
-
-post '/guests' => sub {
-    my $self = shift;
-
-    my $validator = $self->guest_validator;
-    unless ( $self->validate($validator) ) {
-        my @error_str;
-        while ( my ( $k, $v ) = each %{ $validator->errors } ) {
-            push @error_str, "$k:$v";
-        }
-        return $self->error( 400, { str => join( ',', @error_str ), data => $validator->errors } );
-    }
-
-    return $self->error(400, 'invalid request') unless $self->param('user_id');
-
-    my $user = $DB->resultset('User')->find({ id => $self->param('user_id') });
-    return $self->error(404, 'not found user') unless $user;
-
-    $user->user_info->update({
-        map {
-            defined $self->param($_) ? ( $_ => $self->param($_) ) : ()
-        } qw( height weight bust waist hip thigh arm leg knee foot )
-    });
-
-    my %data = ( $user->user_info->get_columns, $user->get_columns );
-    delete @data{qw/ user_id password /};
-
-    $self->res->headers->header( 'Location' => $self->url_for( '/guests/' . $user->id ) );
-    $self->respond_to(
-        json => { json => \%data, status => 201 },
-        html => sub { $self->redirect_to( '/guests/' . $user->id ) },
-    );
-};
+get '/new-clothes'  => 'new-clothes';
 
 get '/user/:id' => sub {
     my $self = shift;
@@ -1678,33 +1699,6 @@ get '/user/:id' => sub {
         html => { template => 'user/id' },
     );
 } => 'user/id';
-
-any [qw/put patch/] => '/guests/:id' => sub {
-    my $self  = shift;
-
-    my $validator = $self->guest_validator;
-    unless ($self->validate($validator)) {
-        my @error_str;
-        while ( my ($k, $v) = each %{ $validator->errors } ) {
-            push @error_str, "$k:$v";
-        }
-        return $self->error( 400, { str => join(',', @error_str), data => $validator->errors } );
-    }
-
-    my $user = $DB->resultset('User')->find({ id => $self->param('user_id') });
-    return $self->error(404, 'not found user') unless $user;
-
-    $user->user_info->update({
-        map {
-            defined $self->param($_) ? ( $_ => $self->param($_) ) : ()
-        } qw( height weight bust waist hip thigh arm leg knee foot )
-    });
-
-    my %data = ( $user->user_info->get_columns, $user->get_columns );
-    delete @data{qw/ user_id password /};
-
-    $self->respond_to( json => { json => \%data } );
-};
 
 post '/clothes' => sub {
     my $self = shift;
@@ -1855,33 +1849,6 @@ put '/clothes' => sub {
         html => { template => 'clothes' }    # TODO: `clothes.html.haml`
     );
 };
-
-get '/new-clothes' => sub {
-    my $self = shift;
-
-    my $q  = $self->param('q') || q{};
-    my $rs = $DB->resultset('User')->search({
-        -or => [
-            id    => $q,
-            name  => $q,
-            phone => $q,
-            email => $q,
-        ],
-    });
-
-    my @users;
-    while ( my $user = $rs->next ) {
-        my %data = ( $user->user_info->get_columns, $user->get_columns );
-        delete @data{qw/ user_id password height weight bust waist hip thigh arm leg knee foot /};
-        push @users, \%data;
-    }
-
-    $self->respond_to(
-        json => { json     => \@users     },
-        html => { template => 'new-clothes' },
-    );
-};
-
 
 get '/clothes/:code' => sub {
     my $self = shift;
@@ -2154,174 +2121,6 @@ post '/order/:id/update' => sub {
     # response
     #
     $self->respond_to({ data => q{} });
-};
-
-any [qw/post put patch/] => '/orders/:id' => sub {
-    my $self = shift;
-
-    # repeat codes; use `under`?
-    my $order = $DB->resultset('Order')->find({ id => $self->param('id') });
-    return $self->error(404, "Not found") unless $order;
-
-    my $validator = $self->create_validator;
-    unless ($order->status_id) {
-        $validator->field('target_date')->required(1);
-        $validator->field('price_pay_with')->required(1);
-    }
-    if ($order->status_id && $order->status_id == $Opencloset::Constant::STATUS_RENT) {
-        $validator->field('return_method')->required(1);
-    }
-    $validator->field([qw/price discount late_fee l_discount/])
-        ->each(sub { shift->regexp(qr/^\d+$/) });
-    $validator->field([qw/bust waist arm top_fit bottom_fit/])
-        ->each(sub { shift->regexp(qr/^[12345]$/) });
-
-    return $self->error(400, 'failed to validate')
-        unless $self->validate($validator);
-
-    ## Note: target_date INSERT as string likes '2013-01-01',
-    ##       maybe should convert to DateTime object
-    map {
-        $order->$_($self->param($_)) if defined $self->param($_);
-    } qw/price discount target_date comment return_method late_fee l_discount price_pay_with staff_name/;
-    my %status_to_be = (
-        0 => $Opencloset::Constant::STATUS_RENT,
-        $Opencloset::Constant::STATUS_RENT => $Opencloset::Constant::STATUS_RETURN,
-        $Opencloset::Constant::STATUS_PARTIAL_RETURN => $Opencloset::Constant::STATUS_RETURN,
-    );
-
-    my $guard = $DB->txn_scope_guard;
-    # BEGIN TRANSACTION ~
-    my $status_id = $status_to_be{$order->status_id || 0};
-    my @missing_clothes_list;
-    if ($status_id == $Opencloset::Constant::STATUS_RETURN) {
-        my $missing_clothes_list = $self->param('missing_clothes_list') || '';
-        if ($missing_clothes_list) {
-            $status_id = $Opencloset::Constant::STATUS_PARTIAL_RETURN;
-            @missing_clothes_list = $DB->resultset('Clothes')->search({
-                'me.code' => { -in => [split(/,/, $missing_clothes_list)] }
-            });
-        }
-    }
-
-    $order->status_id($status_id);
-    my $dt_parser = $DB->storage->datetime_parser;
-    if ($status_id == $Opencloset::Constant::STATUS_RETURN ||
-            $status_id == $Opencloset::Constant::STATUS_PARTIAL_RETURN) {
-        $order->return_date($dt_parser->format_datetime(DateTime->now()));
-    }
-    $order->rental_date($dt_parser->format_datetime(DateTime->now))
-        if $status_id == $Opencloset::Constant::STATUS_RENT;
-    $order->update;
-
-    for my $clothes ($order->cloths) {
-        if ($order->status_id == $Opencloset::Constant::STATUS_RENT) {
-            $clothes->status_id($Opencloset::Constant::STATUS_RENT);
-        }
-        else {
-            next if grep { $clothes->id == $_->id } @missing_clothes_list;
-
-            no warnings 'experimental';
-            given ( $clothes->category ) {
-                when ( /^(shoes|tie|hat)$/i ) {
-                    $clothes->status_id($Opencloset::Constant::STATUS_AVAILABLE);    # Shoes, Tie, Hat
-                }
-                default {
-                    if ($clothes->status_id != $Opencloset::Constant::STATUS_AVAILABLE) {
-                        $clothes->status_id($Opencloset::Constant::STATUS_WASHING);
-                    }
-                }
-            }
-        }
-        $clothes->update;
-    }
-
-    for my $clothes (@missing_clothes_list) {
-        $clothes->status_id($Opencloset::Constant::STATUS_PARTIAL_RETURN);
-        $clothes->update;
-    }
-    $guard->commit;
-    # ~ COMMIT
-
-    my %satisfaction;
-    map { $satisfaction{$_} = $self->param($_) } qw/bust waist arm top_fit bottom_fit/;
-
-    if (values %satisfaction) {
-        # $order
-        my $clothes = $order->cloths({ category => 'jacket' })->next;
-        if ($clothes) {
-            $DB->resultset('Satisfaction')->update_or_create({
-                %satisfaction,
-                guest_id  => $order->guest_id,
-                cloth_id => $clothes->id,
-            });
-        }
-    }
-
-    $self->respond_to(
-        json => { json => $self->flatten_order($order) },
-        html => sub {
-            $self->redirect_to($self->url_for);
-        }
-    );
-};
-
-del '/orders/:id' => sub {
-    my $self = shift;
-
-    my $order = $DB->resultset('Order')->find({ id => $self->param('id') });
-    return $self->error(404, "Not found") unless $order;
-
-    for my $clothes ($order->cloths) {
-        $clothes->status_id($Opencloset::Constant::STATUS_AVAILABLE);
-        $clothes->update;
-    }
-
-    $order->delete;
-
-    $self->respond_to(
-        json => { json => {} },    # just 200 OK
-    );
-};
-
-post '/donors' => sub {
-    my $self   = shift;
-
-    my $user = $DB->resultset('User')->find({ id => $self->param('user_id') });
-    return $self->error(404, 'not found user') unless $user;
-
-    $user->user_info->update({
-        map {
-            defined $self->param($_) ? ( $_ => $self->param($_) ) : ()
-        } qw()
-    });
-
-    my %data = ( $user->user_info->get_columns, $user->get_columns );
-    delete @data{qw/ user_id password /};
-
-    $self->res->headers->header('Location' => $self->url_for('/donors/' . $user->id));
-    $self->respond_to(
-        json => { json => \%data, status => 201                  },
-        html => sub { $self->redirect_to('/donors/' . $user->id) },
-    );
-};
-
-any [qw/put patch/] => '/donors/:id' => sub {
-    my $self  = shift;
-
-    my $user = $DB->resultset('User')->find({ id => $self->param('id') });
-    return $self->error(404, 'not found user') unless $user;
-
-    $user->user_info->update({
-        map {
-            defined $self->param($_) ? ( $_ => $self->param($_) ) : ()
-        } qw()
-    });
-
-    my %data = ( $user->user_info->get_columns, $user->get_columns );
-    delete @data{qw/ user_id password /};
-
-    $self->respond_to( json => { json => \%data } );
 };
 
 post '/sms' => sub {
@@ -2762,362 +2561,3 @@ __DATA__
 - if ($error) {
   %p.text-error= $error
 - }
-
-
-@@ new-clothes.html.haml
-- my $id   = 'new-clothes';
-- my $meta = $sidebar->{meta};
-- layout 'default',
--   active_id   => $id,
--   breadcrumbs => [
--     { text => $meta->{$id}{text} },
--   ],
--   jses => [
--     '/lib/bootstrap/js/fuelux/fuelux.wizard.min.js',
--   ];
-- title $meta->{$id}{text};
-
-#new-clothes
-  .row-fluid
-    .span12
-      .widget-box
-        .widget-header.widget-header-blue.widget-header-flat
-          %h4.lighter 새 옷 등록
-
-        .widget-body
-          .widget-main
-            /
-            / step navigation
-            /
-            #fuelux-wizard.row-fluid{ "data-target" => '#step-container' }
-              %ul.wizard-steps
-                %li.active{ "data-target" => "#step1" }
-                  %span.step  1
-                  %span.title 기증자 검색
-                %li{ "data-target" => "#step2" }
-                  %span.step  2
-                  %span.title 기증자 정보
-                %li{ "data-target" => "#step3" }
-                  %span.step  3
-                  %span.title 새 옷 등록
-                %li{ "data-target" => "#step4" }
-                  %span.step  4
-                  %span.title 등록 완료
-
-            %hr
-
-            #step-container.step-content.row-fluid.position-relative
-              /
-              / step1
-              /
-              #step1.step-pane.active
-                %h3.lighter.block.green 새 옷을 기증해주신 분이 누구신가요?
-                .form-horizontal
-                  /
-                  / 기증자 검색
-                  /
-                  .form-group.has-info
-                    %label.control-label.no-padding-right.col-xs-12.col-sm-3 기증자 검색:
-                    .col-xs-12.col-sm-9
-                      .search
-                        .input-group
-                          %input#donor-search.form-control{ :name => 'donor-search' :type => 'text', :placeholder => '이름 또는 이메일, 휴대전화 번호' }
-                          %span.input-group-btn
-                            %button#btn-donor-search.btn.btn-default.btn-sm{ :type => 'submit' }
-                              %i.icon-search.bigger-110 검색
-                  /
-                  / 기증자 선택
-                  /
-                  .form-group.has-info
-                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => "email" } 기증자 선택:
-                    .col-xs-12.col-sm-9
-                      #donor-search-list
-                        %div
-                          %label.blue
-                            %input.ace.valid{ :name => 'user-id', :type => 'radio', :value => '0' }
-                            %span.lbl= ' 기증자를 모릅니다.'
-                      :plain
-                        <script id="tpl-new-clothes-donor-id" type="text/html">
-                          <div>
-                            <label class="blue highlight">
-                              <input type="radio" class="ace valid" name="user-id" value="<%= user_id %>" data-donor-id="<%= id %>" data-user-id="<%= user_id %>">
-                              <span class="lbl"> <%= name %> (<%= email %>)</span>
-                              <span><%= address %></span>
-                            </label>
-                          </div>
-                        </script>
-              /
-              / step2
-              /
-              #step2.step-pane
-                %h3.lighter.block.green 기증자의 정보를 입력하세요.
-                %form#donor-info.form-horizontal{ :method => 'get', :novalidate="novalidate" }
-                  /
-                  / 이름
-                  /
-                  .form-group.has-info
-                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'donor-name' } 이름:
-                    .col-xs-12.col-sm-9
-                      .clearfix
-                        %input#donor-name.valid.col-xs-12.col-sm-6{ :name => 'name', :type => 'text' }
-
-                  .space-2
-
-                  /
-                  / 전자우편
-                  /
-                  .form-group.has-info
-                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'donor-email' } 전자우편:
-                    .col-xs-12.col-sm-9
-                      .clearfix
-                        %input#donor-email.valid.col-xs-12.col-sm-6{ :name => 'email', :type => 'text' }
-
-                  .space-2
-
-                  /
-                  / 나이
-                  /
-                  .form-group.has-info
-                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'donor-age' } 나이:
-                    .col-xs-12.col-sm-9
-                      .clearfix
-                        %input#donor-age.valid.col-xs-12.col-sm-3{ :name => 'age', :type => 'text' }
-
-                  .space-2
-
-                  /
-                  / 성별
-                  /
-                  .form-group.has-info
-                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'donor-gender' } 성별:
-                    .col-xs-12.col-sm-9
-                      %div
-                        %label.blue
-                          %input.ace.valid{ :name => 'gender', :type => 'radio', :value => '1' }
-                          %span.lbl= ' 남자'
-                      %div
-                        %label.blue
-                          %input.ace.valid{ :name => 'gender', :type => 'radio', :value => '2' }
-                          %span.lbl= ' 여자'
-
-                  .space-2
-
-                  /
-                  / 휴대전화
-                  /
-                  .form-group.has-info
-                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'donor-phone' } 휴대전화:
-                    .col-xs-12.col-sm-9
-                      .clearfix
-                        %input#donor-phone.valid.col-xs-12.col-sm-6{ :name => 'phone', :type => 'text' }
-
-                  .space-2
-
-                  /
-                  / 주소
-                  /
-                  .form-group.has-info
-                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'donor-address' } 주소:
-                    .col-xs-12.col-sm-9
-                      .clearfix
-                        %input#donor-address.valid.col-xs-12.col-sm-8{ :name => 'address', :type => 'text' }
-                  .form-group.has-info
-                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'donation-msg' } 전하실 말:
-                    .col-xs-12.col-sm-9
-                      .clearfix
-                        %textarea#donation-msg.valid.col-xs-12.col-sm-6{ :name => 'donation_msg' }
-                  .form-group.has-info
-                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'comment' } 기타:
-                    .col-xs-12.col-sm-9
-                      .clearfix
-                        %textarea#comment.valid.col-xs-12.col-sm-6{ :name => 'comment' }
-
-              /
-              / step3
-              /
-              #step3.step-pane
-                %h3.lighter.block.green 새로운 옷의 종류와 치수를 입력하세요.
-
-                .form-horizontal
-                  .form-group.has-info
-                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'clothes-type' } 종류:
-                    .col-xs-12.col-sm-6
-                      %select#clothes-type{ :name => 'clothes-type', 'data-placeholder' => '옷의 종류를 선택하세요', :size => '14' }
-                        %option{ :value => "#{0x0001 | 0x0002}" } Jacket & Pants
-                        %option{ :value => "#{0x0001 | 0x0020}" } Jacket & Skirts
-                        %option{ :value => "#{0x0001}"          } Jacket
-                        %option{ :value => "#{0x0002}"          } Pants
-                        %option{ :value => "#{0x0004}"          } Shirts
-                        %option{ :value => "#{0x0008}"          } Shoes
-                        %option{ :value => "#{0x0010}"          } Hat
-                        %option{ :value => "#{0x0020}"          } Tie
-                        %option{ :value => "#{0x0040}"          } Waistcoat
-                        %option{ :value => "#{0x0080}"          } Coat
-                        %option{ :value => "#{0x0100}"          } Onepiece
-                        %option{ :value => "#{0x0200}"          } Skirt
-                        %option{ :value => "#{0x0400}"          } Blouse
-
-                  .space-2
-
-                  .form-group.has-info
-                    %label.control-label.no-padding-right.col-xs-12.col-sm-3 성별:
-                    .col-xs-12.col-sm-9
-                      %div
-                        %label.blue
-                          %input.ace.valid{ :name => 'clothes-gender', :type => 'radio', :value => '1' }
-                          %span.lbl= ' 남성용'
-                      %div
-                        %label.blue
-                          %input.ace.valid{ :name => 'clothes-gender', :type => 'radio', :value => '2' }
-                          %span.lbl= ' 여성용'
-                      %div
-                        %label.blue
-                          %input.ace.valid{ :name => 'clothes-gender', :type => 'radio', :value => '3' }
-                          %span.lbl= ' 남여공용'
-
-                  #display-clothes-color
-                    .space-2
-
-                    .form-group.has-info
-                      %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'clothes-color' } 색상:
-                      .col-xs-12.col-sm-4
-                        %select#clothes-color{ :name => 'color', 'data-placeholder' => '옷의 색상을 선택하세요', :size => '6' }
-                          %option{ :value => 'B' } 검정(B)
-                          %option{ :value => 'N' } 감청(N)
-                          %option{ :value => 'G' } 회색(G)
-                          %option{ :value => 'R' } 빨강(R)
-                          %option{ :value => 'W' } 흰색(W)
-
-                  #display-clothes-bust
-                    .space-2
-
-                    .form-group.has-info
-                      %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'clothes-bust' } 가슴:
-                      .col-xs-12.col-sm-5
-                        .input-group
-                          %input#clothes-bust.valid.form-control{ :name => 'bust', :type => 'text' }
-                          %span.input-group-addon
-                            %i cm
-
-                  #display-clothes-arm
-                    .space-2
-
-                    .form-group.has-info
-                      %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'clothes-arm' } 팔 길이:
-                      .col-xs-12.col-sm-5
-                        .input-group
-                          %input#clothes-arm.valid.form-control{ :name => 'arm', :type => 'text' }
-                          %span.input-group-addon
-                            %i cm
-
-                  #display-clothes-waist
-                    .space-2
-
-                    .form-group.has-info
-                      %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'clothes-waist' } 허리:
-                      .col-xs-12.col-sm-5
-                        .input-group
-                          %input#clothes-waist.valid.form-control{ :name => 'waist', :type => 'text' }
-                          %span.input-group-addon
-                            %i cm
-
-                  #display-clothes-hip
-                    .space-2
-
-                    .form-group.has-info
-                      %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'clothes-hip' } 엉덩이:
-                      .col-xs-12.col-sm-5
-                        .input-group
-                          %input#clothes-hip.valid.form-control{ :name => 'hip', :type => 'text' }
-                          %span.input-group-addon
-                            %i cm
-
-                  #display-clothes-length
-                    .space-2
-
-                    .form-group.has-info
-                      %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'clothes-length' } 기장:
-                      .col-xs-12.col-sm-5
-                        .input-group
-                          %input#clothes-length.valid.form-control{ :name => 'length', :type => 'text' }
-                          %span.input-group-addon
-                            %i cm
-
-                  #display-clothes-foot
-                    .space-2
-
-                    .form-group.has-info
-                      %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'clothes-foot' } 발 크기:
-                      .col-xs-12.col-sm-5
-                        .input-group
-                          %input#clothes-foot.valid.form-control{ :name => 'foot', :type => 'text' }
-                          %span.input-group-addon
-                            %i mm
-
-                  .form-group.has-info
-                    %label.control-label.no-padding-right.col-xs-12.col-sm-3= ' '
-                    .col-xs-12.col-sm-5
-                      .input-group
-                        %button#btn-clothes-reset.btn.btn-default 지움
-                        %button#btn-clothes-add.btn.btn-primary 추가
-
-                  .hr.hr-dotted
-
-                  %form.form-horizontal{ :method => 'get', :novalidate => 'novalidate' }
-                    .form-group.has-info
-                      %label.control-label.no-padding-right.col-xs-12.col-sm-3
-                        추가할 의류 선택:
-                        %br
-                        %a#btn-clothes-select-all.btn.btn-xs.btn-success{ :role => 'button' } 모두 선택
-                      .col-xs-12.col-sm-9
-                        #display-clothes-list
-                        :plain
-                          <script id="tpl-new-clothes-clothes-item" type="text/html">
-                            <div>
-                              <label>
-                                <input type="checkbox" class="ace valid" name="clothes-list"
-                                  value="<%= [ donor_id, cloth_type, cloth_color, cloth_bust, cloth_waist, cloth_hip, cloth_arm, cloth_length, cloth_foot, cloth_gender ].join('-') %>"
-                                  data-donor-id="<%= donor_id %>"
-                                  data-clothes-type="<%= cloth_type %>"
-                                  data-clothes-color="<%= cloth_color %>"
-                                  data-clothes-bust="<%= cloth_bust %>"
-                                  data-clothes-arm="<%= cloth_arm %>"
-                                  data-clothes-waist="<%= cloth_waist %>"
-                                  data-clothes-hip="<%= cloth_hip %>"
-                                  data-clothes-length="<%= cloth_length %>"
-                                  data-clothes-foot="<%= cloth_foot %>"
-                                  data-clothes-gender="<%= cloth_gender %>"
-                                />
-                                <%
-                                  var cloth_detail = []
-                                  typeof yourvar != 'undefined'
-                                  if ( cloth_gender       >  0          ) { cloth_detail.push( cloth_gender_str                     ) }
-                                  if ( typeof cloth_color != 'undefined') { cloth_detail.push( "색상("    + cloth_color_str + ")"   ) }
-                                  if ( cloth_bust         >  0          ) { cloth_detail.push( "가슴("    + cloth_bust      + "cm)" ) }
-                                  if ( cloth_arm          >  0          ) { cloth_detail.push( "팔 길이(" + cloth_arm       + "cm)" ) }
-                                  if ( cloth_waist        >  0          ) { cloth_detail.push( "허리("    + cloth_waist     + "cm)" ) }
-                                  if ( cloth_hip          >  0          ) { cloth_detail.push( "엉덩이("  + cloth_hip       + "cm)" ) }
-                                  if ( cloth_length       >  0          ) { cloth_detail.push( "기장("    + cloth_length    + "cm)" ) }
-                                  if ( cloth_foot         >  0          ) { cloth_detail.push( "발 크기(" + cloth_foot      + "mm)" ) }
-                                %>
-                                <span class="lbl"> &nbsp; <%= cloth_type_str %>: <%= cloth_detail.join(', ') %> </span>
-                              </label>
-                            </div>
-                            <div class="space-4"></div>
-                          </script>
-
-              /
-              / step4
-              /
-              #step4.step-pane
-                %h3.lighter.block.green 등록이 완료되었습니다!
-
-            %hr
-
-            .wizard-actions.row-fluid
-              %button.btn.btn-prev{ :disabled => "disabled" }
-                %i.icon-arrow-left
-                이전
-              %button.btn.btn-next.btn-success{ "data-last" => "완료 " }
-                다음
-                %i.icon-arrow-right.icon-on-right

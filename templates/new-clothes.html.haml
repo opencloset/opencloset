@@ -1,0 +1,355 @@
+- use utf8;
+- my $id   = 'new-clothes';
+- my $meta = $sidebar->{meta};
+- layout 'default',
+-   active_id   => $id,
+-   breadcrumbs => [
+-     { text => $meta->{$id}{text} },
+-   ],
+-   jses => [ '/lib/bootstrap/js/fuelux/fuelux.wizard.min.js' ],
+-   ;
+- title $meta->{$id}{text};
+
+#new-clothes
+  .row-fluid
+    .span12
+      .widget-box
+        .widget-header.widget-header-blue.widget-header-flat
+          %h4.lighter 새 옷 등록
+
+        .widget-body
+          .widget-main
+            /
+            / step navigation
+            /
+            #fuelux-wizard.row-fluid{ "data-target" => '#step-container' }
+              %ul.wizard-steps
+                %li.active{ "data-target" => "#step1" }
+                  %span.step  1
+                  %span.title 기증자 검색
+                %li{ "data-target" => "#step2" }
+                  %span.step  2
+                  %span.title 기증자 정보
+                %li{ "data-target" => "#step3" }
+                  %span.step  3
+                  %span.title 새 옷 등록
+                %li{ "data-target" => "#step4" }
+                  %span.step  4
+                  %span.title 등록 완료
+
+            %hr
+
+            #step-container.step-content.row-fluid.position-relative
+              /
+              / step1
+              /
+              #step1.step-pane.active
+                %h3.lighter.block.green 새 옷을 기증해주신 분이 누구신가요?
+                .form-horizontal
+                  /
+                  / 기증자 검색
+                  /
+                  .form-group.has-info
+                    %label.control-label.no-padding-right.col-xs-12.col-sm-3 기증자 검색:
+                    .col-xs-12.col-sm-9
+                      .search
+                        .input-group
+                          %input#user-search.form-control{ :name => 'user-search' :type => 'text', :placeholder => '이름 또는 이메일, 휴대전화 번호' }
+                          %span.input-group-btn
+                            %button#btn-user-search.btn.btn-default.btn-sm{ :type => 'submit' }
+                              %i.icon-search.bigger-110 검색
+                  /
+                  / 기증자 선택
+                  /
+                  .form-group.has-info
+                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => "email" } 기증자 선택:
+                    .col-xs-12.col-sm-9
+                      #user-search-list
+                        %div
+                          %label.blue
+                            %input.ace.valid{ :name => 'user-id', :type => 'radio', :value => '0' }
+                            %span.lbl= ' 기증자를 모릅니다.'
+                      :plain
+                        <script id="tpl-user-id" type="text/html">
+                          <div>
+                            <label class="blue highlight">
+                              <input type="radio" class="ace valid" name="user-id" value="<%= id %>" data-user-id="<%= id %>">
+                              <span class="lbl"> <%= name %> (<%= email %>)</span>
+                              <span><%= address %></span>
+                            </label>
+                          </div>
+                        </script>
+              /
+              / step2
+              /
+              #step2.step-pane
+                %h3.lighter.block.green 기증자의 정보를 입력하세요.
+                %form#user-info.form-horizontal{ :method => 'get', :novalidate="novalidate" }
+                  /
+                  / 전자우편
+                  /
+                  .form-group.has-info
+                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'email' } 전자우편:
+                    .col-xs-12.col-sm-9
+                      .clearfix
+                        %input#email.valid.col-xs-12.col-sm-6{ :name => 'email', :type => 'text' }
+
+                  /
+                  / 이름
+                  /
+                  .form-group.has-info
+                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'name' } 이름:
+                    .col-xs-12.col-sm-9
+                      .clearfix
+                        %input#name.valid.col-xs-12.col-sm-6{ :name => 'name', :type => 'text' }
+
+                  /
+                  / 태어난 해
+                  /
+                  .form-group.has-info
+                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'birth' } 태어난 해:
+                    .col-xs-12.col-sm-9
+                      .clearfix
+                        %input#birth.valid.col-xs-12.col-sm-6{ :name => 'birth', :type => 'text' }
+
+                  /
+                  / 성별
+                  /
+                  .form-group.has-info
+                    %label.control-label.no-padding-right.col-xs-12.col-sm-3 성별:
+                    .col-xs-12.col-sm-9
+                      %div
+                        %label.blue
+                          %input.ace.valid{ :type => 'radio', :name => 'gender', :value => 'male' }
+                          %span.lbl= " 남자"
+                      %div
+                        %label.blue
+                          %input.ace.valid{ :type => 'radio', :name => 'gender', :value => 'female' }
+                          %span.lbl= " 여자"
+
+                  /
+                  / 휴대전화
+                  /
+                  .form-group.has-info
+                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'phone' } 휴대전화:
+                    .col-xs-12.col-sm-9
+                      .clearfix
+                        %input#phone.valid.col-xs-12.col-sm-6{ :name => 'phone', :type => 'tel' }
+
+                  /
+                  / 주소
+                  /
+                  .form-group.has-info
+                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'address' } 주소:
+                    .col-xs-12.col-sm-9
+                      .clearfix
+                        %input#address.valid.col-xs-12.col-sm-9{ :name => 'address', :type => 'text' }
+
+                  /
+                  / 기증 메시지
+                  /
+                  .form-group.has-info
+                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'donation-comment' } 전하실 말:
+                    .col-xs-12.col-sm-9
+                      .clearfix
+                        %textarea#donation-comment.valid.col-xs-12.col-sm-6{ :name => 'donation-comment', :type => 'text' }
+
+              /
+              / step3
+              /
+              #step3.step-pane
+                %h3.lighter.block.green 새로운 옷의 종류와 치수를 입력하세요.
+
+                .form-horizontal
+                  .form-group.has-info
+                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'clothes-category' } 종류:
+                    .col-xs-12.col-sm-6
+                      %select#clothes-category{ :name => 'clothes-category', 'data-placeholder' => '옷의 종류를 선택하세요', :size => '14' }
+                        %option{ :value => "jacket,pants" } Jacket & Pants
+                        %option{ :value => "jacket,skirt" } Jacket & Skirt
+                        %option{ :value => "jacket"       } Jacket
+                        %option{ :value => "pants"        } Pants
+                        %option{ :value => "shirt"        } Shirt
+                        %option{ :value => "shoes"        } Shoes
+                        %option{ :value => "hat"          } Hat
+                        %option{ :value => "tie"          } Tie
+                        %option{ :value => "waistcoat"    } Waistcoat
+                        %option{ :value => "coat"         } Coat
+                        %option{ :value => "onepiece"     } Onepiece
+                        %option{ :value => "skirt"        } Skirt
+                        %option{ :value => "blouse"       } Blouse
+                        %option{ :value => "belt"         } Belt
+
+                  .space-2
+
+                  .form-group.has-info
+                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'clothes-code' } 의류 코드:
+                    .col-xs-12.col-sm-9
+                      .clearfix
+                        %input#clothes-code.valid.col-xs-12.col-sm-6{ :name => 'clothes-code', :type => 'text' }
+
+                  .space-2
+
+                  .form-group.has-info
+                    %label.control-label.no-padding-right.col-xs-12.col-sm-3 성별:
+                    .col-xs-12.col-sm-9
+                      %div
+                        %label.blue
+                          %input.ace.valid{ :name => 'clothes-gender', :type => 'radio', :value => 'male' }
+                          %span.lbl= ' 남성용'
+                      %div
+                        %label.blue
+                          %input.ace.valid{ :name => 'clothes-gender', :type => 'radio', :value => 'female' }
+                          %span.lbl= ' 여성용'
+                      %div
+                        %label.blue
+                          %input.ace.valid{ :name => 'clothes-gender', :type => 'radio', :value => 'unisex' }
+                          %span.lbl= ' 남여공용'
+
+                  #display-clothes-color
+                    .space-2
+
+                    .form-group.has-info
+                      %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'clothes-color' } 색상:
+                      .col-xs-12.col-sm-4
+                        %select#clothes-color{ :name => 'color', 'data-placeholder' => '옷의 색상을 선택하세요', :size => '6' }
+                          %option{ :value => 'B' } 검정(B)
+                          %option{ :value => 'N' } 감청(N)
+                          %option{ :value => 'G' } 회색(G)
+                          %option{ :value => 'R' } 빨강(R)
+                          %option{ :value => 'W' } 흰색(W)
+
+                  #display-clothes-bust
+                    .space-2
+
+                    .form-group.has-info
+                      %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'clothes-bust' } 가슴:
+                      .col-xs-12.col-sm-5
+                        .input-group
+                          %input#clothes-bust.valid.form-control{ :name => 'bust', :type => 'text' }
+                          %span.input-group-addon
+                            %i cm
+
+                  #display-clothes-arm
+                    .space-2
+
+                    .form-group.has-info
+                      %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'clothes-arm' } 팔 길이:
+                      .col-xs-12.col-sm-5
+                        .input-group
+                          %input#clothes-arm.valid.form-control{ :name => 'arm', :type => 'text' }
+                          %span.input-group-addon
+                            %i cm
+
+                  #display-clothes-waist
+                    .space-2
+
+                    .form-group.has-info
+                      %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'clothes-waist' } 허리:
+                      .col-xs-12.col-sm-5
+                        .input-group
+                          %input#clothes-waist.valid.form-control{ :name => 'waist', :type => 'text' }
+                          %span.input-group-addon
+                            %i cm
+
+                  #display-clothes-hip
+                    .space-2
+
+                    .form-group.has-info
+                      %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'clothes-hip' } 엉덩이:
+                      .col-xs-12.col-sm-5
+                        .input-group
+                          %input#clothes-hip.valid.form-control{ :name => 'hip', :type => 'text' }
+                          %span.input-group-addon
+                            %i cm
+
+                  #display-clothes-length
+                    .space-2
+
+                    .form-group.has-info
+                      %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'clothes-length' } 기장:
+                      .col-xs-12.col-sm-5
+                        .input-group
+                          %input#clothes-length.valid.form-control{ :name => 'length', :type => 'text' }
+                          %span.input-group-addon
+                            %i cm
+
+                  #display-clothes-foot
+                    .space-2
+
+                    .form-group.has-info
+                      %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'clothes-foot' } 발 크기:
+                      .col-xs-12.col-sm-5
+                        .input-group
+                          %input#clothes-foot.valid.form-control{ :name => 'foot', :type => 'text' }
+                          %span.input-group-addon
+                            %i mm
+
+                  .form-group.has-info
+                    %label.control-label.no-padding-right.col-xs-12.col-sm-3= ' '
+                    .col-xs-12.col-sm-5
+                      .input-group
+                        %button#btn-clothes-reset.btn.btn-default 지움
+                        %button#btn-clothes-add.btn.btn-primary 추가
+
+                  .hr.hr-dotted
+
+                  %form.form-horizontal{ :method => 'get', :novalidate => 'novalidate' }
+                    .form-group.has-info
+                      %label.control-label.no-padding-right.col-xs-12.col-sm-3
+                        추가할 의류 선택:
+                        %br
+                        %a#btn-clothes-select-all.btn.btn-xs.btn-success{ :role => 'button' } 모두 선택
+                      .col-xs-12.col-sm-9
+                        #display-clothes-list
+                        :plain
+                          <script id="tpl-clothes-item" type="text/html">
+                            <div>
+                              <label>
+                                <input type="checkbox" class="ace valid" name="clothes-list"
+                                  value="<%= [ user_id, clothes_code, clothes_category, clothes_color, clothes_bust, clothes_waist, clothes_hip, clothes_arm, clothes_length, clothes_foot, clothes_gender ].join('-') %>"
+                                  data-user-id          = "<%= user_id %>"
+                                  data-clothes-code     = "<%= clothes_code %>"
+                                  data-clothes-category = "<%= clothes_category %>"
+                                  data-clothes-color    = "<%= clothes_color %>"
+                                  data-clothes-bust     = "<%= clothes_bust %>"
+                                  data-clothes-arm      = "<%= clothes_arm %>"
+                                  data-clothes-waist    = "<%= clothes_waist %>"
+                                  data-clothes-hip      = "<%= clothes_hip %>"
+                                  data-clothes-length   = "<%= clothes_length %>"
+                                  data-clothes-foot     = "<%= clothes_foot %>"
+                                  data-clothes-gender   = "<%= clothes_gender %>"
+                                />
+                                <%
+                                  var clothes_detail = []
+                                  typeof yourvar != 'undefined'
+                                  if ( typeof clothes_gender != 'undefined' ) { clothes_detail.push( clothes_gender_str ) }
+                                  if ( typeof clothes_color  != 'undefined' ) { clothes_detail.push( clothes_color_str  ) }
+                                  if ( clothes_bust   >  0 ) { clothes_detail.push( "가슴("    + clothes_bust      + "cm)" ) }
+                                  if ( clothes_arm    >  0 ) { clothes_detail.push( "팔 길이(" + clothes_arm       + "cm)" ) }
+                                  if ( clothes_waist  >  0 ) { clothes_detail.push( "허리("    + clothes_waist     + "cm)" ) }
+                                  if ( clothes_hip    >  0 ) { clothes_detail.push( "엉덩이("  + clothes_hip       + "cm)" ) }
+                                  if ( clothes_length >  0 ) { clothes_detail.push( "기장("    + clothes_length    + "cm)" ) }
+                                  if ( clothes_foot   >  0 ) { clothes_detail.push( "발 크기(" + clothes_foot      + "mm)" ) }
+                                %>
+                                <span class="lbl"> &nbsp; <%= clothes_category_str %>(<%= clothes_code %>): <%= clothes_detail.join(', ') %> </span>
+                              </label>
+                            </div>
+                            <div class="space-4"></div>
+                          </script>
+
+              /
+              / step4
+              /
+              #step4.step-pane
+                %h3.lighter.block.green 등록이 완료되었습니다!
+
+            %hr
+
+            .wizard-actions.row-fluid
+              %button.btn.btn-prev{ :disabled => "disabled" }
+                %i.icon-arrow-left
+                이전
+              %button.btn.btn-next.btn-success{ "data-last" => "완료 " }
+                다음
+                %i.icon-arrow-right.icon-on-right

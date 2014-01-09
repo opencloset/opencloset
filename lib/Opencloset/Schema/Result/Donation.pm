@@ -1,12 +1,12 @@
 use utf8;
-package Opencloset::Schema::Result::DonorClothes;
+package Opencloset::Schema::Result::Donation;
 
 # Created by DBIx::Class::Schema::Loader
 # DO NOT MODIFY THE FIRST PART OF THIS FILE
 
 =head1 NAME
 
-Opencloset::Schema::Result::DonorClothes
+Opencloset::Schema::Result::Donation
 
 =cut
 
@@ -19,13 +19,20 @@ use warnings;
 
 use base 'Opencloset::Schema::Base';
 
-=head1 TABLE: C<donor_clothes>
+=head1 TABLE: C<donation>
 
 =cut
 
-__PACKAGE__->table("donor_clothes");
+__PACKAGE__->table("donation");
 
 =head1 ACCESSORS
+
+=head2 id
+
+  data_type: 'integer'
+  extra: {unsigned => 1}
+  is_auto_increment: 1
+  is_nullable: 0
 
 =head2 user_id
 
@@ -34,28 +41,29 @@ __PACKAGE__->table("donor_clothes");
   is_foreign_key: 1
   is_nullable: 0
 
-=head2 clothes_code
-
-  data_type: 'char'
-  is_foreign_key: 1
-  is_nullable: 0
-  size: 5
-
-=head2 comment
+=head2 message
 
   data_type: 'text'
   is_nullable: 1
 
-=head2 donation_date
+=head2 create_date
 
   data_type: 'datetime'
   datetime_undef_if_invalid: 1
   inflate_datetime: 1
   is_nullable: 1
+  set_on_create: 1
 
 =cut
 
 __PACKAGE__->add_columns(
+  "id",
+  {
+    data_type => "integer",
+    extra => { unsigned => 1 },
+    is_auto_increment => 1,
+    is_nullable => 0,
+  },
   "user_id",
   {
     data_type => "integer",
@@ -63,16 +71,15 @@ __PACKAGE__->add_columns(
     is_foreign_key => 1,
     is_nullable => 0,
   },
-  "clothes_code",
-  { data_type => "char", is_foreign_key => 1, is_nullable => 0, size => 5 },
-  "comment",
+  "message",
   { data_type => "text", is_nullable => 1 },
-  "donation_date",
+  "create_date",
   {
     data_type => "datetime",
     datetime_undef_if_invalid => 1,
     inflate_datetime => 1,
     is_nullable => 1,
+    set_on_create => 1,
   },
 );
 
@@ -80,31 +87,29 @@ __PACKAGE__->add_columns(
 
 =over 4
 
-=item * L</user_id>
-
-=item * L</clothes_code>
+=item * L</id>
 
 =back
 
 =cut
 
-__PACKAGE__->set_primary_key("user_id", "clothes_code");
+__PACKAGE__->set_primary_key("id");
 
 =head1 RELATIONS
 
 =head2 clothes
 
-Type: belongs_to
+Type: has_many
 
 Related object: L<Opencloset::Schema::Result::Clothes>
 
 =cut
 
-__PACKAGE__->belongs_to(
+__PACKAGE__->has_many(
   "clothes",
   "Opencloset::Schema::Result::Clothes",
-  { code => "clothes_code" },
-  { is_deferrable => 1, on_delete => "CASCADE", on_update => "RESTRICT" },
+  { "foreign.donation_id" => "self.id" },
+  { cascade_copy => 0, cascade_delete => 0 },
 );
 
 =head2 user
@@ -123,8 +128,8 @@ __PACKAGE__->belongs_to(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07038 @ 2013-12-20 17:10:12
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:ivDWytyDekYF0hvZB9eYBA
+# Created by DBIx::Class::Schema::Loader v0.07038 @ 2014-01-09 22:25:05
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:JxUkBHe6+8k05YJOOJIFgA
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

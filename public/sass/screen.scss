@@ -295,14 +295,14 @@ $opencloset-darken-yellow: desaturate(darken($opencloset-yellow, 4%), 10%);
             }
         }
     }
-    #new-cloth {
+    #new-clothes {
         form {
             .input-group {
                 width: inherit;
             }
         }
-        #s2id_cloth-type,
-        #s2id_cloth-color {
+        #s2id_clothes-category,
+        #s2id_clothes-color {
             width: inherit !important;
         }
     }

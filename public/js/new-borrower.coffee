@@ -8,7 +8,7 @@ $ ->
   #
   # step1 - 대여자 검색과 대여자 선택을 연동합니다.
   #
-  add_registered_user = ->
+  addRegisteredUser = ->
     query = $('#user-search').val()
 
     return unless query
@@ -17,14 +17,16 @@ $ ->
       type: 'GET'
       data: { q: query }
       success: (data, textStatus, jqXHR) ->
-        compiled = _.template($('#tpl-new-borrower-user-id').html())
+        compiled = _.template($('#tpl-user-id').html())
         _.each data, (user) ->
           unless $("#user-search-list input[data-user-id='#{user.id}']").length
             $html = $(compiled(user))
             $html.find('input').attr('data-json', JSON.stringify(user))
             $("#user-search-list").prepend($html)
+        $("input[name=user-id][value=#{ data[0].id }]").click() if data[0]
       error: (jqXHR, textStatus, errorThrown) ->
-        alert('danger', jqXHR.responseJSON.error)
+        type = jqXHR.status is 404 ? 'warning' : 'danger'
+        alert(type, jqXHR.responseJSON.error.str)
       complete: (jqXHR, textStatus) ->
 
   $('#user-search-list').on 'click', ':radio', (e) ->
@@ -56,9 +58,9 @@ $ ->
       else
         $input.val(g[name])
 
-  $('#user-search').keypress (e) -> add_registered_user() if e.keyCode is 13
-  $('#btn-user-search').click -> add_registered_user()
-  add_registered_user()
+  $('#user-search').keypress (e) -> addRegisteredUser() if e.keyCode is 13
+  $('#btn-user-search').click -> addRegisteredUser()
+  addRegisteredUser()
 
   #
   #

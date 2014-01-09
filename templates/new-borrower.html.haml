@@ -6,7 +6,8 @@
 -   breadcrumbs => [
 -     { text => $meta->{$id}{text} },
 -   ],
--   jses => ['/lib/bootstrap/js/fuelux/fuelux.wizard.min.js'];
+-   jses => [ '/lib/bootstrap/js/fuelux/fuelux.wizard.min.js' ],
+-   ;
 - title $meta->{$id}{text};
 
 #new-borrower
@@ -69,7 +70,7 @@
                             %input.ace.valid{ :name => 'user-id', :type => 'radio', :value => '0' }
                             %span.lbl= ' 처음 방문했습니다.'
                       :plain
-                        <script id="tpl-new-borrower-user-id" type="text/html">
+                        <script id="tpl-user-id" type="text/html">
                           <div>
                             <label class="blue highlight">
                               <input type="radio" class="ace valid" name="user-id" value="<%= id %>" data-user-id="<%= id %>">

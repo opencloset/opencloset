@@ -70,6 +70,22 @@ $ ->
         when 'waistcoat' then str = '조끼'
         else                  str = undef
       return str
+    getCategoryPrice: (category) ->
+      switch category
+        when 'belt'      then price = 2000
+        when 'blouse'    then price = 5000
+        when 'coat'      then price = 10000
+        when 'hat'       then price = 2000
+        when 'jacket'    then price = 10000
+        when 'onepiece'  then price = 10000
+        when 'pants'     then price = 10000
+        when 'shirt'     then price = 5000
+        when 'shoes'     then price = 5000
+        when 'skirt'     then price = 10000
+        when 'tie'       then price = 2000
+        when 'waistcoat' then price = 5000
+        else                  price = 0
+      return price
     getMeasurementStr: (measurement) ->
       switch measurement
         when 'height' then str = '키'

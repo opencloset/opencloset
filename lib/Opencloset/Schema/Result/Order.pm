@@ -349,8 +349,8 @@ Composing rels: L</order_clothes> -> clothes
 __PACKAGE__->many_to_many("clothes", "order_clothes", "clothes");
 
 
-# Created by DBIx::Class::Schema::Loader v0.07038 @ 2014-01-07 13:04:06
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:hmtuvMtiro4mW6DnF4vPrQ
+# Created by DBIx::Class::Schema::Loader v0.07038 @ 2014-01-09 18:34:05
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:tI553eS0uEhwPBaJwasb+A
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration
