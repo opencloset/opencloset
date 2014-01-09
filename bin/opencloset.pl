@@ -2025,24 +2025,6 @@ post '/order/:id/update' => sub {
     $self->respond_to({ data => q{} });
 };
 
-any [qw/put patch/] => '/donors/:id' => sub {
-    my $self  = shift;
-
-    my $user = $DB->resultset('User')->find({ id => $self->param('id') });
-    return $self->error(404, 'not found user') unless $user;
-
-    $user->user_info->update({
-        map {
-            defined $self->param($_) ? ( $_ => $self->param($_) ) : ()
-        } qw()
-    });
-
-    my %data = ( $user->user_info->get_columns, $user->get_columns );
-    delete @data{qw/ user_id password /};
-
-    $self->respond_to( json => { json => \%data } );
-};
-
 post '/sms' => sub {
     my $self = shift;
 
