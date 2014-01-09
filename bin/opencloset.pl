@@ -606,6 +606,8 @@ group {
 
     post '/donation'       => \&api_create_donation;
 
+    post '/group'          => \&api_create_group;
+
     get  '/search/user'    => \&api_search_user;
 
     get  '/gui/staff-list' => \&api_gui_staff_list;
@@ -1532,6 +1534,50 @@ group {
 
         $self->res->headers->header(
             'Location' => $self->url_for( '/api/donation/' . $donation->id ),
+        );
+        $self->respond_to( json => { status => 201, json => \%data } );
+    }
+
+    sub api_create_group {
+        my $self = shift;
+
+        #
+        # fetch params
+        #
+        my %params = $self->get_params(qw//);
+
+        #
+        # validate params
+        #
+        my $v = $self->create_validator;
+
+        unless ( $self->validate( $v, \%params ) ) {
+            my @error_str;
+            while ( my ( $k, $v ) = each %{ $v->errors } ) {
+                push @error_str, "$k:$v";
+            }
+            return $self->error( 400, {
+                str  => join(',', @error_str),
+                data => $v->errors,
+            });
+        }
+
+        #
+        # create group
+        #
+        my $group = $DB->resultset('Group')->create( \%params );
+        return $self->error( 500, {
+            str  => 'failed to create a new group',
+            data => {},
+        }) unless $group;
+
+        #
+        # response
+        #
+        my %data = ( $group->get_columns );
+
+        $self->res->headers->header(
+            'Location' => $self->url_for( '/api/group/' . $group->id ),
         );
         $self->respond_to( json => { status => 201, json => \%data } );
     }
