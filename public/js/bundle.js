@@ -151,6 +151,50 @@
         }
         return str;
       },
+      getCategoryPrice: function(category) {
+        var price;
+        switch (category) {
+          case 'belt':
+            price = 2000;
+            break;
+          case 'blouse':
+            price = 5000;
+            break;
+          case 'coat':
+            price = 10000;
+            break;
+          case 'hat':
+            price = 2000;
+            break;
+          case 'jacket':
+            price = 10000;
+            break;
+          case 'onepiece':
+            price = 10000;
+            break;
+          case 'pants':
+            price = 10000;
+            break;
+          case 'shirt':
+            price = 5000;
+            break;
+          case 'shoes':
+            price = 5000;
+            break;
+          case 'skirt':
+            price = 10000;
+            break;
+          case 'tie':
+            price = 2000;
+            break;
+          case 'waistcoat':
+            price = 5000;
+            break;
+          default:
+            price = 0;
+        }
+        return price;
+      },
       getMeasurementStr: function(measurement) {
         var str;
         switch (measurement) {
