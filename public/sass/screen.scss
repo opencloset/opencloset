@@ -314,6 +314,17 @@ $opencloset-darken-yellow: desaturate(darken($opencloset-yellow, 4%), 10%);
             }
         }
     }
+    .profile-info-row {
+        .profile-info-name,
+        .profile-info-value {
+            min-height: 32px;
+        }
+    }
+    .profile-contact-links {
+        i[class^="icon-"]:before, [class*=" icon-"]:before {
+            width: 15px;
+        }
+    }
 }
 
 .bigdrop .select2-results {

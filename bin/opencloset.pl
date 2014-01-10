@@ -1708,10 +1708,20 @@ get '/user/:id' => sub {
     my $user = $self->get_user( \%params );
     return unless $user;
 
+    my $donated_clothes_count = 0;
+    $donated_clothes_count += $_->clothes->count for $user->donations;
+
+    my $rented_clothes_count = 0;
+    $rented_clothes_count += $_->clothes->count for $user->order_users;
+
     #
     # response
     #
-    $self->stash( user => $user );
+    $self->stash(
+        user                  => $user,
+        donated_clothes_count => $donated_clothes_count,
+        rented_clothes_count  => $rented_clothes_count,
+    );
 } => 'user-id';
 
 post '/clothes' => sub {

@@ -1,73 +1,169 @@
+- use utf8;
 - layout 'default';
 - title $user->name . '님';
 
-- my $status_id = 1;
+                %div
+                  #user-profile-1.user-profile.row
+                    /
+                    / left
+                    /
+                    .col-xs-12.col-sm-3.center
+                      %div
+                        %span.profile-picture
+                          %img.avatar.editable.img-responsive{ :src => 'https://pbs.twimg.com/profile_images/1814758551/keedi_bigger.jpg' }
+                        .space-4
+                        .width-80.label.label-info.label-xlg.arrowed-in.arrowed-in-right
+                          .inline.position-relative
+                            %a.user-title-label{ :href => '#' }
+                              %span.white= $user->name
 
-%ul
-  %li
-    %i.icon-user
-    %a{:href => "#{url_for('/guests/' . $user->id)}"} #{$user->name}
-    %span (#{$user->user_info->birth})
-  %li
-    %i.icon-map-marker
-    = $user->user_info->address
-  %li
-    %i.icon-envelope
-    %a{:href => "mailto:#{$user->email}"}= $user->email
-  %li= $user->user_info->phone
-  %li
-    %span #{$user->user_info->height} cm,
-    %span #{$user->user_info->weight} kg
+                      .space-6
 
-%div
-  %p
-    %a{:href => '/guests/#{$user->id}'}= $user->name
-    님
-    - if ( $user->update_date ) {
-      %strong= $user->update_date->ymd
-      %span 방문
-    - }
-    %div
-      %span.label= $user->user_info->height
-      %span.label= $user->user_info->weight
-      %span.label.label-info.search-label
-        %a{:href => "#{url_with('/search')->query([q => $user->user_info->bust])}///#{$status_id}"}= $user->user_info->bust
-      %span.label.label-info.search-label
-        %a{:href => "#{url_with('/search')->query([q => '/' . $user->user_info->waist . '//' . $status_id])}"}= $user->user_info->waist
-      %span.label= $user->user_info->hip
-      %span.label= $user->user_info->thigh
-      %span.label.label-info.search-label
-        %a{:href => "#{url_with('/search')->query([q => '//' . $user->user_info->arm])}/#{$status_id}"}= $user->user_info->arm
-      %span.label= $user->user_info->leg
-      %span.label= $user->user_info->knee
+                      .profile-contact-info
+                        .profile-contact-links.align-left
+                          %a.btn.btn-link{ :href => '#' }
+                            %i.icon-phone.bigger-120.green
+                            SMS 보내기
+                          %a.btn.btn-link{ :href => '#' }
+                            %i.icon-envelope.bigger-120.green
+                            메일 보내기
+                        .space-6
+                        .profile-social-links.center
+                          %a.tooltip-info{ :href => '#', 'data-original-title' => 'Visit my Facebook' }
+                            %i.middle.icon-facebook-sign.icon-2x.blue
+                          %a.tooltip-info{ :href => '#', 'data-original-title' => 'Visit my Twitter' }
+                            %i.middle.icon-twitter-sign.icon-2x.light-blue
+                          %a.tooltip-info{ :href => '#', 'data-original-title' => 'Visit my Pinterest' }
+                            %i.middle.icon-pinterest-sign.icon-2x.red
 
-%h3 주문내역
+                      .hr.hr12.dotted
 
-%ul
-  - for my $order ( $user->order_users ) {
-  -   next unless $order->status;
-  -
-  -   my $rental = $order->rental_date ? $order->rental_date->ymd : q{};
-  -   my $target = $order->target_date ? $order->target_date->ymd : q{};
-  -   my $return = $order->return_date ? $order->return_date->ymd : q{};
-  -
-    %li
-      %a{:href => "#{url_for('/orders/' . $order->id)}"}
-        - if ($order->status->name eq '대여중') {
-        -   if (calc_overdue($order->target_date, DateTime->now())) {
-          %span.label.label-important 연체중
-        -   }
-        -   else {
-          %span.label.label-important= $order->status->name
-        -   }
-          %span.highlight{:title => '대여일'}= $rental
-          ~
-          %span{:title => '반납예정일'}= $target
-        - }
-        - else {
-          %span.label= $order->status->name
-          %span.highlight{:title => '대여일'}= $rental
-          ~
-          %span.highlight{:title => '반납일'}= $return
-        - }
-  - }
+                      .clearfix
+                        .grid2
+                          %span.bigger-175.blue= $donated_clothes_count
+                          %br
+                          기증한 옷
+                        .grid2
+                          %span.bigger-175.blue= $rented_clothes_count
+                          %br
+                          빌렸던 옷
+                      .hr.hr16.dotted
+
+                    /
+                    / right
+                    /
+                    .col-xs-12.col-sm-9
+                      .widget-box.transparent
+                        /
+                        / header
+                        /
+                        .widget-header.widget-header-small
+                          %h4.blue.smaller
+                            %i.icon-user.orange
+                            사용자 정보
+                          .widget-toolbar.action-buttons
+                            %a{ :href => '#', 'data-action' => 'reload' }
+                              %i.icon-refresh.blue
+                            %a.pink{ :href => '#' }
+                              %i.icon-trash
+                        /
+                        / body
+                        /
+                        .widget-body
+                          .widget-main.padding-8
+                            .profile-user-info.profile-user-info-striped
+                              .profile-info-row
+                                .profile-info-name 이름
+                                .profile-info-value
+                                  %span.editable#user-name= $user->name
+                                  = $user->user_info->staff ? " (스태프)" : q{}
+
+                              .profile-info-row
+                                .profile-info-name 전자우편
+                                .profile-info-value
+                                  %span.editable#user-email= $user->email
+
+                              .profile-info-row
+                                .profile-info-name 휴대전화
+                                .profile-info-value
+                                  %span.editable#user-phone= $user->user_info->phone
+
+                              .profile-info-row
+                                .profile-info-name 주소
+                                .profile-info-value
+                                  %i.icon-map-marker.light-orange.bigger-110
+                                  %span.editable#user-address= $user->user_info->address
+
+                              .profile-info-row
+                                .profile-info-name 성별
+                                .profile-info-value
+                                  %span.editable#user-gender= $user->user_info->gender
+
+                              .profile-info-row
+                                .profile-info-name 태어난 해
+                                .profile-info-value
+                                  %span.editable#user-birth= $user->user_info->birth
+
+                              .profile-info-row
+                                .profile-info-name 설명
+                                .profile-info-value
+                                  %span.editable#user-comment= $user->user_info->comment
+
+                              .profile-info-row
+                                .profile-info-name 신체 치수
+                                .profile-info-value
+                                  %span.editable#user-body
+
+                      .space-20
+
+                      .widget-box.transparent
+                        /
+                        / header
+                        /
+                        .widget-header.widget-header-small
+                          %h4.blue.smaller
+                            %i.icon-rss.orange
+                            최근 주문 내역
+                          .widget-toolbar.action-buttons
+                            %a{ :href => '#', 'data-action' => 'reload' }
+                              %i.icon-refresh.blue
+                            %a.pink{ :href => '#' }
+                              %i.icon-trash
+                        /
+                        / body
+                        /
+                        .widget-body
+                          .widget-main.padding-8
+                            #profile-feed-1.profile-feed
+
+                              .profile-activity.clearfix
+                                %div
+                                  %img.pull-left{ :alt => "#{ $user->name }'s avatar", :src => 'https://pbs.twimg.com/profile_images/1814758551/keedi_bigger.jpg' }
+                                  %a.user{ :href => '#' }= $user->name
+                                  changed his profile photo.
+                                  %a{ :href => '#' } Take a look
+                                  .time
+                                    %i.icon-time.bigger-110
+                                    an hour ago
+                                .tools.action-buttons
+                                  %a.blue{ :href => '#' }
+                                    %i.icon-pencil.bigger-125
+                                  %a.red{ :href => '#' }
+                                    %i.icon-remove.bigger-125
+
+                              - for ( 1 .. 10 ) {
+                                .profile-activity.clearfix
+                                  %div
+                                    %img.pull-left{ :alt => "#{ $user->name }'s avatar", :src => 'https://pbs.twimg.com/profile_images/1814758551/keedi_bigger.jpg' }
+                                    %a.user{ :href => '#' }= $user->name
+                                    changed his profile photo.
+                                    %a{ :href => '#' } Take a look
+                                    .time
+                                      %i.icon-time.bigger-110
+                                      an hour ago
+                                  .tools.action-buttons
+                                    %a.blue{ :href => '#' }
+                                      %i.icon-pencil.bigger-125
+                                    %a.red{ :href => '#' }
+                                      %i.icon-remove.bigger-125
+                              - }
