@@ -1,6 +1,18 @@
 - use utf8;
-- layout 'default';
-- title $user->name . '님';
+- my $_id   = 'user-id';
+- my $meta = $sidebar->{meta};
+- layout 'default',
+-   active_id   => $_id,
+-   breadcrumbs => [
+-     { text => $meta->{user}{text} },
+-     { text => $meta->{$_id}{text} },
+-   ],
+-   jses => [
+-   ],
+-   csses => [
+-   ],
+-   ;
+- title $meta->{$_id}{text} . q{: } . $user->name . q{님};
 
                 %div
                   #user-profile-1.user-profile.row
