@@ -148,6 +148,20 @@ helper calc_late_fee => sub {
     return $commify ? $self->commify($late_fee) : $late_fee;
 };
 
+helper flatten_user => sub {
+    my ( $self, $user ) = @_;
+
+    return unless $user;
+
+    my %data = (
+        $user->user_info->get_columns,
+        $user->get_columns,
+    );
+    delete @data{qw/ user_id password /};
+
+    return \%data;
+};
+
 helper flatten_order => sub {
     my ( $self, $order ) = @_;
 
