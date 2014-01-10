@@ -325,6 +325,13 @@ $opencloset-darken-yellow: desaturate(darken($opencloset-yellow, 4%), 10%);
             width: 15px;
         }
     }
+    .profile-info-value.body-size > span + span:before {
+        border-bottom: 1px solid #FFFFFF;
+        color: #666666;
+        content: "";
+        display: inline;
+        margin: 0;
+    }
 }
 
 .bigdrop .select2-results {

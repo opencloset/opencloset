@@ -98,8 +98,19 @@
 
                               .profile-info-row
                                 .profile-info-name 신체 치수
-                                .profile-info-value
-                                  %span.editable#user-body
+                                .profile-info-value.body-size
+                                  %span.label.label-success= $user->user_info->height || '-'
+                                  %span.label.label-success= $user->user_info->weight || '-'
+                                  %br
+                                  %span.label.label-info=    $user->user_info->bust   || '-'
+                                  %span.label.label-info=    $user->user_info->waist  || '-'
+                                  %span.label.label-info=    $user->user_info->hip    || '-'
+                                  %br
+                                  %span.label.label-warning= $user->user_info->thigh  || '-'
+                                  %span.label.label-warning= $user->user_info->arm    || '-'
+                                  %span.label.label-warning= $user->user_info->leg    || '-'
+                                  %span.label.label-warning= $user->user_info->knee   || '-'
+                                  %span.label.label-warning= $user->user_info->foot   || '-'
 
                       .space-20
 

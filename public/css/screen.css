@@ -86,6 +86,7 @@
 .page-content .step-content .step-pane h3 { margin-top: 10px; margin-bottom: 20px; }
 .page-content .profile-info-row .profile-info-name, .page-content .profile-info-row .profile-info-value { min-height: 32px; }
 .page-content .profile-contact-links i[class^="icon-"]:before, .page-content .profile-contact-links [class*=" icon-"]:before { width: 15px; }
+.page-content .profile-info-value.body-size > span + span:before { border-bottom: 1px solid #FFFFFF; color: #666666; content: ""; display: inline; margin: 0; }
 
 .bigdrop .select2-results { max-height: 400px; }
 
