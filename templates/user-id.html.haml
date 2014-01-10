@@ -28,21 +28,29 @@
       %span 방문
     - }
     %div
+      %span.label= $user->user_info->height
+      %span.label= $user->user_info->weight
       %span.label.label-info.search-label
-        %a{:href => "#{url_with('/search')->query([q => $user->bust])}///#{$status_id}"}= $user->bust
+        %a{:href => "#{url_with('/search')->query([q => $user->user_info->bust])}///#{$status_id}"}= $user->user_info->bust
       %span.label.label-info.search-label
-        %a{:href => "#{url_with('/search')->query([q => '/' . $user->waist . '//' . $status_id])}"}= $user->waist
+        %a{:href => "#{url_with('/search')->query([q => '/' . $user->user_info->waist . '//' . $status_id])}"}= $user->user_info->waist
+      %span.label= $user->user_info->hip
+      %span.label= $user->user_info->thigh
       %span.label.label-info.search-label
-        %a{:href => "#{url_with('/search')->query([q => '//' . $user->arm])}/#{$status_id}"}= $user->arm
-      %span.label= $user->length
-      %span.label= $user->height
-      %span.label= $user->weight
+        %a{:href => "#{url_with('/search')->query([q => '//' . $user->user_info->arm])}/#{$status_id}"}= $user->user_info->arm
+      %span.label= $user->user_info->leg
+      %span.label= $user->user_info->knee
 
 %h3 주문내역
 
 %ul
-  - for my $order (@$orders) {
+  - for my $order ( $user->order_users ) {
   -   next unless $order->status;
+  -
+  -   my $rental = $order->rental_date ? $order->rental_date->ymd : q{};
+  -   my $target = $order->target_date ? $order->target_date->ymd : q{};
+  -   my $return = $order->return_date ? $order->return_date->ymd : q{};
+  -
     %li
       %a{:href => "#{url_for('/orders/' . $order->id)}"}
         - if ($order->status->name eq '대여중') {
@@ -52,14 +60,14 @@
         -   else {
           %span.label.label-important= $order->status->name
         -   }
-          %span.highlight{:title => '대여일'}= $order->rental_date->ymd
+          %span.highlight{:title => '대여일'}= $rental
           ~
-          %span{:title => '반납예정일'}= $order->target_date->ymd
+          %span{:title => '반납예정일'}= $target
         - }
         - else {
           %span.label= $order->status->name
-          %span.highlight{:title => '대여일'}= $order->rental_date->ymd
+          %span.highlight{:title => '대여일'}= $rental
           ~
-          %span.highlight{:title => '반납일'}= $order->return_date->ymd
+          %span.highlight{:title => '반납일'}= $return
         - }
   - }
