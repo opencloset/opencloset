@@ -155,6 +155,23 @@ __PACKAGE__->table("order");
   data_type: 'integer'
   is_nullable: 1
 
+=head2 create_date
+
+  data_type: 'datetime'
+  datetime_undef_if_invalid: 1
+  inflate_datetime: 1
+  is_nullable: 1
+  set_on_create: 1
+
+=head2 update_date
+
+  data_type: 'datetime'
+  datetime_undef_if_invalid: 1
+  inflate_datetime: 1
+  is_nullable: 1
+  set_on_create: 1
+  set_on_update: 1
+
 =cut
 
 __PACKAGE__->add_columns(
@@ -237,6 +254,23 @@ __PACKAGE__->add_columns(
   { data_type => "integer", is_nullable => 1 },
   "foot",
   { data_type => "integer", is_nullable => 1 },
+  "create_date",
+  {
+    data_type => "datetime",
+    datetime_undef_if_invalid => 1,
+    inflate_datetime => 1,
+    is_nullable => 1,
+    set_on_create => 1,
+  },
+  "update_date",
+  {
+    data_type                 => "datetime",
+    datetime_undef_if_invalid => 1,
+    inflate_datetime          => 1,
+    is_nullable               => 1,
+    set_on_create             => 1,
+    set_on_update             => 1,
+  },
 );
 
 =head1 PRIMARY KEY
@@ -349,8 +383,8 @@ Composing rels: L</order_clothes> -> clothes
 __PACKAGE__->many_to_many("clothes", "order_clothes", "clothes");
 
 
-# Created by DBIx::Class::Schema::Loader v0.07038 @ 2014-01-09 18:34:05
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:tI553eS0uEhwPBaJwasb+A
+# Created by DBIx::Class::Schema::Loader v0.07038 @ 2014-01-10 19:45:06
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:wwnHlbDEUu0C3tcF6s+jPQ
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

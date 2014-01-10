@@ -83,6 +83,11 @@
 .page-content #new-borrower form .tags { width: 100%; }
 .page-content #new-clothes form .input-group { width: inherit; }
 .page-content #new-clothes #s2id_clothes-category, .page-content #new-clothes #s2id_clothes-color { width: inherit !important; }
+.page-content #user-id .profile-info-row .profile-info-name, .page-content #user-id .profile-info-row .profile-info-value { min-height: 32px; }
+.page-content #user-id .profile-contact-links i[class^="icon-"]:before, .page-content #user-id .profile-contact-links [class*=" icon-"]:before { width: 15px; }
+.page-content #user-id .profile-info-value.body-size > span + span:before { border-bottom: 1px solid #FFFFFF; color: #666666; content: ""; display: inline; margin: 0; }
+.page-content #user-id .profile-info-value.body-size .label { width: 35px; }
+.page-content #user-id .profile-activity a.order-badge:hover { text-decoration: none; }
 .page-content .step-content .step-pane h3 { margin-top: 10px; margin-bottom: 20px; }
 
 .bigdrop .select2-results { max-height: 400px; }

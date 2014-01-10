@@ -65,10 +65,10 @@ INSERT
 INSERT
   INTO `order` (
     `id`,`user_id`,`status_id`,`staff_id`,`rental_date`,`target_date`,`return_date`,
-    `desc`,`price_pay_with`,`purpose`,`bust`,`waist`,`arm`,`leg`
+    `desc`,`price_pay_with`,`purpose`,`bust`,`waist`,`arm`,`leg`,`create_date`
   )
   VALUES
-    (1,2,2,3,'2013-10-18','2013-10-21',NULL,NULL,'현금','입사면접',95,78,60,105);
+    (1,2,2,3,'2013-10-18','2013-10-21',NULL,NULL,'현금','입사면접',95,78,60,105,NOW());
 
 INSERT INTO `order_clothes` (`order_id`, `clothes_code`) VALUES (1,'0J002'), (1,'0P002');
 

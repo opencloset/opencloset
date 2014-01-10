@@ -218,6 +218,9 @@ CREATE TABLE `order` (
   `knee`             INT DEFAULT NULL, -- 무릎 길이(cm)
   `foot`             INT DEFAULT NULL, -- 발 크기(mm)
 
+  `create_date`      DATETIME DEFAULT NULL,
+  `update_date`      DATETIME DEFAULT NULL,
+
   PRIMARY KEY (`id`),
   CONSTRAINT `fk_order1` FOREIGN KEY (`user_id`)   REFERENCES `user`   (`id`) ON DELETE CASCADE,
   CONSTRAINT `fk_order2` FOREIGN KEY (`status_id`) REFERENCES `status` (`id`) ON DELETE CASCADE,

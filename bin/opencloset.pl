@@ -148,6 +148,20 @@ helper calc_late_fee => sub {
     return $commify ? $self->commify($late_fee) : $late_fee;
 };
 
+helper flatten_user => sub {
+    my ( $self, $user ) = @_;
+
+    return unless $user;
+
+    my %data = (
+        $user->user_info->get_columns,
+        $user->get_columns,
+    );
+    delete @data{qw/ user_id password /};
+
+    return \%data;
+};
+
 helper flatten_order => sub {
     my ( $self, $order ) = @_;
 
@@ -331,6 +345,41 @@ helper get_params => sub {
     defined $params{$_} ? 1 : delete $params{$_} for keys %params;
 
     return %params;
+};
+
+helper get_user => sub {
+    my ( $self, $params ) = @_;
+
+    #
+    # validate params
+    #
+    my $v = $self->create_validator;
+    $v->field('id')->required(1)->regexp(qr/^\d+$/);
+    unless ( $self->validate( $v, $params ) ) {
+        my @error_str;
+        while ( my ( $k, $v ) = each %{ $v->errors } ) {
+            push @error_str, "$k:$v";
+        }
+        return $self->error( 400, {
+            str  => join(',', @error_str),
+            data => $v->errors,
+        });
+    }
+
+    #
+    # find user
+    #
+    my $user = $DB->resultset('User')->find( $params );
+    return $self->error( 404, {
+        str  => 'user not found',
+        data => {},
+    }) unless $user;
+    return $self->error( 404, {
+        str  => 'user info not found',
+        data => {},
+    }) unless $user->user_info;
+
+    return $user;
 };
 
 helper create_order => sub {
@@ -694,42 +743,15 @@ group {
         #
         my %params = $self->get_params(qw/ id /);
 
-        #
-        # validate params
-        #
-        my $v = $self->create_validator;
-        $v->field('id')->required(1)->regexp(qr/^\d+$/);
-        unless ( $self->validate( $v, \%params ) ) {
-            my @error_str;
-            while ( my ( $k, $v ) = each %{ $v->errors } ) {
-                push @error_str, "$k:$v";
-            }
-            return $self->error( 400, {
-                str  => join(',', @error_str),
-                data => $v->errors,
-            });
-        }
-
-        #
-        # find user
-        #
-        my $user = $DB->resultset('User')->find( \%params );
-        return $self->error( 404, {
-            str  => 'user not found',
-            data => {},
-        }) unless $user;
-        return $self->error( 404, {
-            str  => 'user info not found',
-            data => {},
-        }) unless $user->user_info;
+        my $user = $self->get_user( \%params );
+        return unless $user;
 
         #
         # response
         #
-        my %data = ( $user->user_info->get_columns, $user->get_columns );
-        delete @data{qw/ user_id password /};
+        my $data = $self->flatten_user($user);
 
-        $self->respond_to( json => { status => 200, json => \%data } );
+        $self->respond_to( json => { status => 200, json => $data } );
     }
 
     sub api_update_user {
@@ -1678,27 +1700,29 @@ get '/new-clothes'  => 'new-clothes';
 get '/user/:id' => sub {
     my $self = shift;
 
-    my $user = $DB->resultset('User')->find({ id => $self->param('id') });
-    return $self->error(404, 'not found user') unless $user;
+    #
+    # fetch params
+    #
+    my %params = $self->get_params(qw/ id /);
 
-    my @orders = $DB->resultset('Order')->search(
-        { guest_id => $self->param('id') },
-        { order_by => { -desc => 'rental_date' } },
-    );
+    my $user = $self->get_user( \%params );
+    return unless $user;
 
+    my $donated_clothes_count = 0;
+    $donated_clothes_count += $_->clothes->count for $user->donations;
+
+    my $rented_clothes_count = 0;
+    $rented_clothes_count += $_->clothes->count for $user->order_users;
+
+    #
+    # response
+    #
     $self->stash(
-        user   => $user,
-        orders => \@orders,
+        user                  => $user,
+        donated_clothes_count => $donated_clothes_count,
+        rented_clothes_count  => $rented_clothes_count,
     );
-
-    my %data = ( $user->user_info->get_columns, $user->get_columns );
-    delete @data{qw/ user_id password /};
-
-    $self->respond_to(
-        json => { json     => \%data      },
-        html => { template => 'user/id' },
-    );
-} => 'user/id';
+} => 'user-id';
 
 post '/clothes' => sub {
     my $self = shift;
@@ -2168,86 +2192,6 @@ app->secrets( app->defaults->{secrets} );
 app->start;
 
 __DATA__
-
-@@ user/id.html.haml
-- layout 'default';
-- title $user->name . '님';
-
-%ul
-  %li
-    %i.icon-user
-    %a{:href => "#{url_for('/guests/' . $user->id)}"} #{$user->name}
-    %span (#{$user->user_info->birth})
-  %li
-    %i.icon-map-marker
-    = $user->user_info->address
-  %li
-    %i.icon-envelope
-    %a{:href => "mailto:#{$user->email}"}= $user->email
-  %li= $user->user_info->phone
-  %li
-    %span #{$user->user_info->height} cm,
-    %span #{$user->user_info->weight} kg
-
-%div= include 'guests/breadcrumb', user => $user, status_id => 1;
-%h3 주문내역
-%ul
-  - for my $order (@$orders) {
-    - if ($order->status) {
-      %li
-        %a{:href => "#{url_for('/orders/' . $order->id)}"}
-          - if ($order->status->name eq '대여중') {
-            - if (calc_overdue($order->target_date, DateTime->now())) {
-              %span.label.label-important 연체중
-            - } else {
-              %span.label.label-important= $order->status->name
-            - }
-            %span.highlight{:title => '대여일'}= $order->rental_date->ymd
-            ~
-            %span{:title => '반납예정일'}= $order->target_date->ymd
-          - } else {
-            %span.label= $order->status->name
-            %span.highlight{:title => '대여일'}= $order->rental_date->ymd
-            ~
-            %span.highlight{:title => '반납일'}= $order->return_date->ymd
-          - }
-    - }
-  - }
-
-
-@@ guests/breadcrumb.html.haml
-%p
-  %a{:href => '/guests/#{$user->id}'}= $user->name
-  님
-  - if ( $user->update_date ) {
-    %strong= $user->update_date->ymd
-    %span 방문
-  - }
-  %div
-    %span.label.label-info.search-label
-      %a{:href => "#{url_with('/search')->query([q => $user->bust])}///#{$status_id}"}= $user->bust
-    %span.label.label-info.search-label
-      %a{:href => "#{url_with('/search')->query([q => '/' . $user->waist . '//' . $status_id])}"}= $user->waist
-    %span.label.label-info.search-label
-      %a{:href => "#{url_with('/search')->query([q => '//' . $user->arm])}/#{$status_id}"}= $user->arm
-    %span.label= $user->length
-    %span.label= $user->height
-    %span.label= $user->weight
-
-
-@@ donors/breadcrumb/radio.html.haml
-%input{:type => 'radio', :name => 'donor_id', :value => '#{$donor->id}'}
-%a{:href => '/donors/#{$donor->id}'}= $donor->user->name
-님
-%div
-  - if ($donor->email) {
-    %i.icon-envelope
-    %a{:href => "mailto:#{$donor->email}"}= $donor->email
-  - }
-  - if ($donor->user_info->phone) {
-    %div.muted= $donor->phone
-  - }
-
 
 @@ search.html.haml
 - my $id   = 'search';

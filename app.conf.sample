@@ -50,6 +50,8 @@ $db_opts->{AutoCommit} //= 1;
             'menu-order'   => { text => '주문서',        icon => 'file',     },
             'order'        => { text => '주문 목록',     icon => {},         desc => '지금까지 대여해간 주문서 목록입니다.' },
             'order-id'     => { text => '주문 내역',     icon => {},         desc => '주문서 내역입니다.', link => '#' },
+            'user'         => { text => '사용자',        icon => 'user',     desc => '사용자 목록입니다.', link => '#' },
+            'user-id'      => { text => '사용자 정보',   icon => 'user',     desc => '사용자 정보입니다.', link => '#' },
             'search'       => { text => '검색',          icon => 'search',   desc => '무엇을 찾으세요?'      },
             'login'        => { text => '로그인',        icon => 'lock',     },
         },
