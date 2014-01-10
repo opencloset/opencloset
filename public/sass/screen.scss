@@ -306,35 +306,42 @@ $opencloset-darken-yellow: desaturate(darken($opencloset-yellow, 4%), 10%);
             width: inherit !important;
         }
     }
+    #user-id {
+        .profile-info-row {
+            .profile-info-name,
+            .profile-info-value {
+                min-height: 32px;
+            }
+        }
+        .profile-contact-links {
+            i[class^="icon-"]:before, [class*=" icon-"]:before {
+                width: 15px;
+            }
+        }
+        .profile-info-value.body-size {
+            & > span + span:before {
+                border-bottom: 1px solid #FFFFFF;
+                color: #666666;
+                content: "";
+                display: inline;
+                margin: 0;
+            }
+            .label {
+                width: 35px;
+            }
+        }
+        .profile-activity {
+            a.order-badge:hover {
+                text-decoration: none;
+            }
+        }
+    }
     .step-content {
         .step-pane {
             h3 {
                 margin-top: 10px;
                 margin-bottom: 20px;
             }
-        }
-    }
-    .profile-info-row {
-        .profile-info-name,
-        .profile-info-value {
-            min-height: 32px;
-        }
-    }
-    .profile-contact-links {
-        i[class^="icon-"]:before, [class*=" icon-"]:before {
-            width: 15px;
-        }
-    }
-    .profile-info-value.body-size {
-        & > span + span:before {
-            border-bottom: 1px solid #FFFFFF;
-            color: #666666;
-            content: "";
-            display: inline;
-            margin: 0;
-        }
-        .label {
-            width: 35px;
         }
     }
 }

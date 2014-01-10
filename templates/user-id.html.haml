@@ -140,25 +140,21 @@
                         .widget-body
                           .widget-main.padding-8
                             #profile-feed-1.profile-feed
-
-                              .profile-activity.clearfix
-                                %div
-                                  %img.pull-left{ :alt => "#{ $user->name }'s avatar", :src => 'https://pbs.twimg.com/profile_images/1814758551/keedi_bigger.jpg' }
-                                  %a.user{ :href => '#' }= $user->name
-                                  changed his profile photo.
-                                  %a{ :href => '#' } Take a look
-                                  .time
-                                    %i.icon-time.bigger-110
-                                    an hour ago
-
-                              - for ( 1 .. 10 ) {
+                              - for my $order ( $user->order_users ) {
+                              -   my $late_fee = calc_late_fee($order);
                                 .profile-activity.clearfix
                                   %div
                                     %img.pull-left{ :alt => "#{ $user->name }'s avatar", :src => 'https://pbs.twimg.com/profile_images/1814758551/keedi_bigger.jpg' }
-                                    %a.user{ :href => '#' }= $user->name
-                                    changed his profile photo.
-                                    %a{ :href => '#' } Take a look
+                                    %a.order-badge{ :href => "/order/#{ $order->id }" }
+                                      %span.label.label-info.arrowed-right.arrowed-in
+                                        %strong 주문서
+                                        %time.js-relative-date{ :datetime => "#{ $order->rental_date }", :title => "#{ $order->rental_date->ymd }" }= $order->rental_date->month . '/' . $order->rental_date->day
+                                        ~
+                                        %time.js-relative-date{ :datetime => "#{ $order->target_date }", :title => "#{ $order->target_date->ymd }" }= $order->target_date->month . '/' . $order->target_date->day
+                                      %span.label.order-status{ 'data-status' => "#{ $order->status->name }", 'data-late-fee' => "#{ $late_fee }" }
+                                        %span.order-status-str= $order->status->name
+                                        %span.late-fee= $late_fee ? commify($late_fee) . q{원} : q{}
                                     .time
                                       %i.icon-time.bigger-110
-                                      an hour ago
+                                      = $order->create_date->ymd . q{ } . $order->create_date->hms
                               - }
