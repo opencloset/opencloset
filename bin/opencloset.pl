@@ -347,6 +347,41 @@ helper get_params => sub {
     return %params;
 };
 
+helper get_user => sub {
+    my ( $self, $params ) = @_;
+
+    #
+    # validate params
+    #
+    my $v = $self->create_validator;
+    $v->field('id')->required(1)->regexp(qr/^\d+$/);
+    unless ( $self->validate( $v, $params ) ) {
+        my @error_str;
+        while ( my ( $k, $v ) = each %{ $v->errors } ) {
+            push @error_str, "$k:$v";
+        }
+        return $self->error( 400, {
+            str  => join(',', @error_str),
+            data => $v->errors,
+        });
+    }
+
+    #
+    # find user
+    #
+    my $user = $DB->resultset('User')->find( $params );
+    return $self->error( 404, {
+        str  => 'user not found',
+        data => {},
+    }) unless $user;
+    return $self->error( 404, {
+        str  => 'user info not found',
+        data => {},
+    }) unless $user->user_info;
+
+    return $user;
+};
+
 helper create_order => sub {
     my ( $self, $order_params, $order_clothes_params ) = @_;
 
@@ -708,42 +743,15 @@ group {
         #
         my %params = $self->get_params(qw/ id /);
 
-        #
-        # validate params
-        #
-        my $v = $self->create_validator;
-        $v->field('id')->required(1)->regexp(qr/^\d+$/);
-        unless ( $self->validate( $v, \%params ) ) {
-            my @error_str;
-            while ( my ( $k, $v ) = each %{ $v->errors } ) {
-                push @error_str, "$k:$v";
-            }
-            return $self->error( 400, {
-                str  => join(',', @error_str),
-                data => $v->errors,
-            });
-        }
-
-        #
-        # find user
-        #
-        my $user = $DB->resultset('User')->find( \%params );
-        return $self->error( 404, {
-            str  => 'user not found',
-            data => {},
-        }) unless $user;
-        return $self->error( 404, {
-            str  => 'user info not found',
-            data => {},
-        }) unless $user->user_info;
+        my $user = $self->get_user( \%params );
+        return unless $user;
 
         #
         # response
         #
-        my %data = ( $user->user_info->get_columns, $user->get_columns );
-        delete @data{qw/ user_id password /};
+        my $data = $self->flatten_user($user);
 
-        $self->respond_to( json => { status => 200, json => \%data } );
+        $self->respond_to( json => { status => 200, json => $data } );
     }
 
     sub api_update_user {
@@ -1692,27 +1700,19 @@ get '/new-clothes'  => 'new-clothes';
 get '/user/:id' => sub {
     my $self = shift;
 
-    my $user = $DB->resultset('User')->find({ id => $self->param('id') });
-    return $self->error(404, 'not found user') unless $user;
+    #
+    # fetch params
+    #
+    my %params = $self->get_params(qw/ id /);
 
-    my @orders = $DB->resultset('Order')->search(
-        { guest_id => $self->param('id') },
-        { order_by => { -desc => 'rental_date' } },
-    );
+    my $user = $self->get_user( \%params );
+    return unless $user;
 
-    $self->stash(
-        user   => $user,
-        orders => \@orders,
-    );
-
-    my %data = ( $user->user_info->get_columns, $user->get_columns );
-    delete @data{qw/ user_id password /};
-
-    $self->respond_to(
-        json => { json     => \%data      },
-        html => { template => 'user/id' },
-    );
-} => 'user/id';
+    #
+    # response
+    #
+    $self->stash( user => $user );
+} => 'user-id';
 
 post '/clothes' => sub {
     my $self = shift;
