@@ -52,7 +52,7 @@ $ ->
         when '반납'       then id = 9
         when '부분반납'   then id = 10
         when '반납배송중' then id = 11
-        else                   id = undef
+        else                   id = undefined
       return id
     getCategoryStr: (category) ->
       switch category
@@ -68,7 +68,7 @@ $ ->
         when 'skirt'     then str = '치마'
         when 'tie'       then str = '넥타이'
         when 'waistcoat' then str = '조끼'
-        else                  str = undef
+        else                  str = undefined
       return str
     getCategoryPrice: (category) ->
       switch category
@@ -98,7 +98,7 @@ $ ->
         when 'leg'    then str = '다리 길이'
         when 'knee'   then str = '무릎 길이'
         when 'foot'   then str = '발 크기'
-        else               str = undef
+        else               str = undefined
       return str
     commify: (num) ->
       num += ''
