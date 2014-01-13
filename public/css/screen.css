@@ -90,6 +90,7 @@
 .page-content #user-id .profile-info-value.body-size .label { width: 35px; }
 .page-content #user-id .profile-activity img { width: 40px; height: 40px; }
 .page-content #user-id .profile-activity a.order-badge:hover { text-decoration: none; }
+.page-content #clothes-code .user-profile.row .grid2 a:hover { text-decoration: none; }
 .page-content .step-content .step-pane h3 { margin-top: 10px; margin-bottom: 20px; }
 
 .bigdrop .select2-results { max-height: 400px; }

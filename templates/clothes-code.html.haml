@@ -1,10 +1,10 @@
 - use utf8;
-- my $_id   = 'user-id';
+- my $_id   = 'clothes-code';
 - my $meta = $sidebar->{meta};
 - layout 'default',
 -   active_id   => $_id,
 -   breadcrumbs => [
--     { text => $meta->{user}{text} },
+-     { text => $meta->{clothes}{text} },
 -     { text => $meta->{$_id}{text} },
 -   ],
 -   jses => [
@@ -14,7 +14,7 @@
 -     '/lib/bootstrap3-editable/css/bootstrap-editable.css',
 -   ],
 -   ;
-- title $meta->{$_id}{text} . q{: } . $user->name . q{님};
+- title $meta->{$_id}{text} . q{: } . $clothes->code;
 
                 %div
                   #user-profile-1.user-profile.row
@@ -24,34 +24,26 @@
                     .col-xs-12.col-sm-3.center
                       %div
                         %span.profile-picture
-                          %img.avatar.img-responsive{ :src => '#{ get_gravatar( $user, 180 ) }' }
+                          %img.avatar.img-responsive{ :src => '' }
                         .space-4
                         .width-80.label.label-info.label-xlg.arrowed-in.arrowed-in-right
                           .inline.position-relative
-                            %span.white.user-name= $user->name
+                            %span.white.clothes-code= $clothes->code
 
                       .space-6
-
-                      .profile-contact-info
-                        .profile-contact-links.align-left
-                          %a.btn.btn-link{ :href => '#' }
-                            %i.icon-phone.bigger-120.green
-                            SMS 보내기
-                          %a.btn.btn-link{ :href => 'mailto:#{ $user->email }' }
-                            %i.icon-envelope.bigger-120.green
-                            메일 보내기
 
                       .hr.hr12.dotted
 
                       .clearfix
                         .grid2
-                          %span.bigger-175.blue= $donated_clothes_count
+                          %span.bigger-175.blue
+                            %a{ :href => "/user/#{ $clothes->donation->user->id }" }= $clothes->donation->user->name
                           %br
-                          기증한 옷
+                          기증자
                         .grid2
-                          %span.bigger-175.blue= $rented_clothes_count
+                          %span.bigger-175.blue= $rented_count
                           %br
-                          빌렸던 옷
+                          빌린 횟수
                       .hr.hr16.dotted
 
                     /
@@ -65,66 +57,63 @@
                         .widget-header.widget-header-small
                           %h4.blue.smaller
                             %i.icon-user.orange
-                            사용자 정보
+                            의류 정보
                         /
                         / body
                         /
                         .widget-body
                           .widget-main.padding-8
                             .profile-user-info.profile-user-info-striped
-                              #profile-user-info-data{ 'data-pk' => "#{ $user->id }", 'data-url' => "#{ url_for( '/api/user/'. $user->id . '.json' ) }" }
+                              #profile-clothes-info-data{ 'data-pk' => "#{ $clothes->code }", 'data-url' => "#{ url_for( '/api/clothes/'. $clothes->code . '.json' ) }" }
                               .profile-info-row
-                                .profile-info-name 이름
+                                .profile-info-name 품번
                                 .profile-info-value
-                                  %span.editable#user-name{ 'data-name' => 'name' }= $user->name
-                                  = $user->user_info->staff ? " (스태프)" : q{}
+                                  %span.clothes-code#clothes-code= $clothes->code
 
                               .profile-info-row
-                                .profile-info-name 전자우편
+                                .profile-info-name 종류
                                 .profile-info-value
-                                  %span.editable#user-email{ 'data-name' => 'email' }= $user->email
-
-                              .profile-info-row
-                                .profile-info-name 휴대전화
-                                .profile-info-value
-                                  %span.editable#user-phone{ 'data-name' => 'phone' }= $user->user_info->phone
-
-                              .profile-info-row
-                                .profile-info-name 주소
-                                .profile-info-value
-                                  %i.icon-map-marker.light-orange.bigger-110
-                                  %span.editable#user-address{ 'data-name' => 'address' }= $user->user_info->address
+                                  %span.editable#clothes-category{ 'data-name' => 'category', 'data-value' => "#{ $clothes->category }" }
 
                               .profile-info-row
                                 .profile-info-name 성별
                                 .profile-info-value
-                                  %span.editable#user-gender{ 'data-name' => 'gender', 'data-type' => 'select', 'data-value' => "#{ $user->user_info->gender }" }
+                                  %span.editable#clothes-gender{ 'data-name' => 'gender', 'data-value' => "#{ $clothes->gender }" }
 
                               .profile-info-row
-                                .profile-info-name 태어난 해
+                                .profile-info-name 색상
                                 .profile-info-value
-                                  %span.editable#user-birth{ 'data-name' => 'birth' }= $user->user_info->birth
+                                  %span.editable#clothes-color{ 'data-name' => 'color', 'data-value' => "#{ $clothes->color }" }
 
                               .profile-info-row
-                                .profile-info-name 설명
+                                .profile-info-name 가슴
                                 .profile-info-value
-                                  %span.editable#user-comment{ 'data-name' => 'name' }= $user->user_info->comment
+                                  %span.editable#clothes-bust{ 'data-name' => 'bust', 'data-value' => "#{ $clothes->bust }" }
 
                               .profile-info-row
-                                .profile-info-name 신체 치수
-                                .profile-info-value.body-size
-                                  %span.label.label-success= $user->user_info->height || '-'
-                                  %span.label.label-success= $user->user_info->weight || '-'
-                                  %br
-                                  %span.label.label-info=    $user->user_info->bust   || '-'
-                                  %span.label.label-info=    $user->user_info->waist  || '-'
-                                  %span.label.label-info=    $user->user_info->hip    || '-'
-                                  %br
-                                  %span.label.label-warning= $user->user_info->thigh  || '-'
-                                  %span.label.label-warning= $user->user_info->arm    || '-'
-                                  %span.label.label-warning= $user->user_info->leg    || '-'
-                                  %span.label.label-warning= $user->user_info->knee   || '-'
-                                  %span.label.label-warning= $user->user_info->foot   || '-'
+                                .profile-info-name 허리
+                                .profile-info-value
+                                  %span.editable#clothes-waist{ 'data-name' => 'waist', 'data-value' => "#{ $clothes->waist }" }
+
+                              .profile-info-row
+                                .profile-info-name 엉덩이
+                                .profile-info-value
+                                  %span.editable#clothes-hip{ 'data-name' => 'hip', 'data-value' => "#{ $clothes->hip }" }
+
+                              .profile-info-row
+                                .profile-info-name 팔 길이
+                                .profile-info-value
+                                  %span.editable#clothes-arm{ 'data-name' => 'arm', 'data-value' => "#{ $clothes->arm }" }
+
+                              .profile-info-row
+                                .profile-info-name 허벅지
+                                .profile-info-value
+                                  %span.editable#clothes-thigh{ 'data-name' => 'thigh', 'data-value' => "#{ $clothes->thigh }" }
+
+                              .profile-info-row
+                                .profile-info-name 길이
+                                .profile-info-value
+                                  %span.editable#clothes-length{ 'data-name' => 'length', 'data-value' => "#{ $clothes->length }" }
 
                       .space-20
 
@@ -142,12 +131,13 @@
                         .widget-body
                           .widget-main.padding-8
                             #profile-feed-1.profile-feed
-                              - for my $order ( $user->order_users ) {
+                              - for my $order_detail ( $clothes->order_details ) {
+                              -   my $order = $order_detail->order;
                               -   my $late_fee = calc_late_fee($order);
                                 .profile-activity.clearfix
                                   %div
-                                    %img.pull-left{ :alt => "#{ $user->name }'s avatar", :src => '#{ get_gravatar( $user, 36 ) }' }
-                                    = $user->name
+                                    %img.pull-left{ :alt => "#{ $order->user->name }'s avatar", :src => '#{ get_gravatar( $order->user, 36 ) }' }
+                                    = $order->user->name
                                     %a.order-badge{ :href => "/order/#{ $order->id }" }
                                       %span.label.label-info.arrowed-right.arrowed-in
                                         %strong 주문서
@@ -161,3 +151,4 @@
                                       %i.icon-time.bigger-110
                                       = $order->create_date->ymd . q{ } . $order->create_date->hms
                               - }
+

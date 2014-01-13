@@ -13,6 +13,7 @@
         mode: 'inline',
         showbuttons: 'true',
         emptytext: '비어있음',
+        pk: $('#profile-user-info-data').data('pk'),
         url: function(params) {
           var data, url;
           url = $('#profile-user-info-data').data('url');

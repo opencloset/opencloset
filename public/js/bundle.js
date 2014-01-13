@@ -103,7 +103,7 @@
             id = 11;
             break;
           default:
-            id = undef;
+            id = void 0;
         }
         return id;
       },
@@ -147,7 +147,7 @@
             str = '조끼';
             break;
           default:
-            str = undef;
+            str = void 0;
         }
         return str;
       },
@@ -229,9 +229,15 @@
             str = '발 크기';
             break;
           default:
-            str = undef;
+            str = void 0;
         }
         return str;
+      },
+      trimClothesCode: function(code) {
+        code = code.replace(/^\s+/, '');
+        code = code.replace(/\s+$/, '');
+        code = code.replace(/^0/, '');
+        return code;
       },
       commify: function(num) {
         var regex;

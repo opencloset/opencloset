@@ -218,6 +218,28 @@ helper flatten_order => sub {
     return \%data;
 };
 
+helper flatten_clothes => sub {
+    my ( $self, $clothes ) = @_;
+
+    return unless $clothes;
+
+    #
+    # additional information for clothes
+    #
+    my %extra_data;
+    # '대여중'인 항목만 주문서 정보를 포함합니다.
+    my $order = $clothes->orders->find({ status_id => 2 });
+    $extra_data{order} = $self->flatten_order($order) if $order;
+
+    my %data = (
+        $clothes->get_columns,
+        %extra_data,
+        status => $clothes->status->name,
+    );
+
+    return \%data;
+};
+
 helper create_cloth => sub {
     my ($self, %info) = @_;
 
@@ -691,6 +713,42 @@ helper get_order_list => sub {
     }) unless $rs->count;
 
     return $rs;
+};
+
+helper get_clothes => sub {
+    my ( $self, $params ) = @_;
+
+    #
+    # validate params
+    #
+    my $v = $self->create_validator;
+    $v->field('code')->required(1)->regexp(qr/^[A-Z0-9]{4,5}$/);
+    unless ( $self->validate( $v, $params ) ) {
+        my @error_str;
+        while ( my ( $k, $v ) = each %{ $v->errors } ) {
+            push @error_str, "$k:$v";
+        }
+        return $self->error( 400, {
+            str  => join(',', @error_str),
+            data => $v->errors,
+        });
+    }
+
+    #
+    # adjust params
+    #
+    $params->{code} = sprintf( '%05s', $params->{code} ) if length( $params->{code} ) == 4;
+
+    #
+    # find clothes
+    #
+    my $clothes = $DB->resultset('Clothes')->find( $params );
+    return $self->error( 404, {
+        str  => 'clothes not found',
+        data => {},
+    }) unless $clothes;
+
+    return $clothes;
 };
 
 #
@@ -1170,51 +1228,15 @@ group {
         #
         my %params = $self->get_params(qw/ code /);
 
-        #
-        # validate params
-        #
-        my $v = $self->create_validator;
-        $v->field('code')->required(1)->regexp(qr/^[A-Z0-9]{4,5}$/);
-        unless ( $self->validate( $v, \%params ) ) {
-            my @error_str;
-            while ( my ( $k, $v ) = each %{ $v->errors } ) {
-                push @error_str, "$k:$v";
-            }
-            return $self->error( 400, {
-                str  => join(',', @error_str),
-                data => $v->errors,
-            });
-        }
-
-        #
-        # adjust params
-        #
-        $params{code} = sprintf( '%05s', $params{code} ) if length( $params{code} ) == 4;
-
-        #
-        # find clothes
-        #
-        my $clothes = $DB->resultset('Clothes')->find( \%params );
-        return $self->error( 404, {
-            str  => 'clothes not found',
-            data => {},
-        }) unless $clothes;
-
-        #
-        # additional information for clothes
-        #
-        my %extra_data;
-        # '대여중'인 항목만 주문서 정보를 포함합니다.
-        my $order = $clothes->orders->find({ status_id => 2 });
-        $extra_data{order} = $self->flatten_order($order) if $order;
+        my $clothes = $self->get_clothes( \%params );
+        return unless $clothes;
 
         #
         # response
         #
-        my %data = ( $clothes->get_columns, %extra_data );
-        $data{status} = $clothes->status->name;
+        my $data = $self->flatten_clothes($clothes);
 
-        $self->respond_to( json => { status => 200, json => \%data } );
+        $self->respond_to( json => { status => 200, json => $data } );
     }
 
     sub api_update_clothes {
@@ -1313,9 +1335,9 @@ group {
         #
         # response
         #
-        my %data = ( $clothes->get_columns );
+        my $data = $self->flatten_clothes($clothes);
 
-        $self->respond_to( json => { status => 200, json => \%data } );
+        $self->respond_to( json => { status => 200, json => $data } );
     }
 
     sub api_delete_clothes {
@@ -1359,10 +1381,10 @@ group {
         #
         # delete & response
         #
-        my %data = ( $clothes->get_columns );
+        my $data = $self->flatten_clothes($clothes);
         $clothes->delete;
 
-        $self->respond_to( json => { status => 200, json => \%data } );
+        $self->respond_to( json => { status => 200, json => $data } );
     }
 
     sub api_get_clothes_list {
@@ -1415,18 +1437,7 @@ group {
         # additional information for clothes list
         #
         my @data;
-        for my $clothes (@clothes_list) {
-            # '대여중'인 항목만 주문서 정보를 포함합니다.
-            my %extra_data;
-            my $order = $clothes->orders->find({ status_id => 2 });
-            $extra_data{order} = $self->flatten_order($order) if $order;
-
-            push @data, {
-                $clothes->get_columns,
-                %extra_data,
-                status => $clothes->status->name,
-            };
-        }
+        push @data, $self->flatten_clothes($_) for @clothes_list;
 
         #
         # response
@@ -1745,210 +1756,28 @@ get '/user/:id' => sub {
     );
 } => 'user-id';
 
-post '/clothes' => sub {
-    my $self = shift;
-
-    my $validator  = $self->cloth_validator;
-    my @cloth_list = $self->param('clothes-list');
-
-    ###
-    ### validate
-    ###
-    for my $clothes (@cloth_list) {
-        my (
-            $donor_id, $category, $color, $bust,
-            $waist,    $hip,      $arm,   $thigh,
-            $length,   $gender,   $compatible_code,
-        ) = split /-/, $clothes;
-
-        my $is_valid = $self->validate($validator, {
-            category        => $category,
-            color           => $color,
-            bust            => $bust,
-            waist           => $waist,
-            hip             => $hip,
-            arm             => $arm,
-            thigh           => $thigh,
-            length          => $length,
-            gender          => $gender || 1,    # TODO: should get from params
-            compatible_code => $compatible_code,
-        });
-
-        unless ($is_valid) {
-            my @error_str;
-            while ( my ($k, $v) = each %{ $validator->errors } ) {
-                push @error_str, "$k:$v";
-            }
-            return $self->error( 400, { str => join(',', @error_str), data => $validator->errors } );
-        }
-    }
-
-    ###
-    ### create
-    ###
-    my @clothes_list;
-    for my $clothes (@cloth_list) {
-        my (
-            $donor_id, $category, $color, $bust,
-            $waist,    $hip,      $arm,   $thigh,
-            $length,   $gender,   $compatible_code,
-        ) = split /-/, $clothes;
-
-        my %cloth_info = (
-            color           => $color,
-            bust            => $bust,
-            waist           => $waist,
-            hip             => $hip,
-            arm             => $arm,
-            thigh           => $thigh,
-            length          => $length,
-            gender          => $gender || 1,    # TODO: should get from params
-            compatible_code => $compatible_code,
-        );
-
-        #
-        # TRANSACTION
-        #
-        my $guard = $DB->txn_scope_guard;
-        if ( $category =~ m/jacket/ && $category =~ m/pants/ ) {
-            my $c1 = $self->create_cloth( %cloth_info, category => 'jacket' );
-            my $c2 = $self->create_cloth( %cloth_info, category => 'pants'  );
-            return $self->error(500, '!!! failed to create a new clothes') unless ($c1 && $c2);
-
-            if ($donor_id) {
-                $c1->create_related('donor_cloths', { donor_id => $donor_id });
-                $c2->create_related('donor_cloths', { donor_id => $donor_id });
-            }
-
-            $c1->bottom_id($c2->id);
-            $c2->top_id($c1->id);
-            $c1->update;
-            $c2->update;
-
-            push @clothes_list, $c1, $c2;
-        }
-        elsif ( $category =~ m/jacket/ && $category =~ m/skirt/ ) {
-            my $c1 = $self->create_cloth( %cloth_info, category => 'jacket' );
-            my $c2 = $self->create_cloth( %cloth_info, category => 'skirt'  );
-            return $self->error(500, '!!! failed to create a new clothes') unless ($c1 && $c2);
-
-            if ($donor_id) {
-                $c1->create_related('donor_cloths', { donor_id => $donor_id });
-                $c2->create_related('donor_cloths', { donor_id => $donor_id });
-            }
-
-            $c1->bottom_id($c2->id);
-            $c2->top_id($c1->id);
-            $c1->update;
-            $c2->update;
-
-            push @clothes_list, $c1, $c2;
-        } else {
-            my $c = $self->create_cloth(%cloth_info);
-            return $self->error(500, '--- failed to create a new clothes') unless $c;
-
-            if ($donor_id) {
-                $c->create_related('donor_cloths', { donor_id => $donor_id });
-            }
-            push @clothes_list, $c;
-        }
-        $guard->commit;
-    }
-
-    ###
-    ### response
-    ###
-    ## 여러개가 될 수 있으므로 Location 헤더는 생략
-    ## $self->res->headers->header('Location' => $self->url_for('/clothes/' . $clothes->code));
-    $self->respond_to(
-        json => { json => [map { $self->cloth2hr($_) } @clothes_list], status => 201 },
-        html => sub {
-            $self->redirect_to('/clothes');
-        }
-    );
-};
-
-put '/clothes' => sub {
-    my $self = shift;
-
-    my $clothes_list = $self->param('clothes_list');
-    return $self->error(400, 'Nothing to change') unless $clothes_list;
-
-    my $status = $DB->resultset('Status')->find({ name => $self->param('status') });
-    return $self->error(400, 'Invalid status') unless $status;
-
-    my $rs    = $DB->resultset('Clothes')->search({ 'me.id' => { -in => [split(/,/, $clothes_list)] } });
-    my $guard = $DB->txn_scope_guard;
-    my @rows;
-    # BEGIN TRANSACTION ~
-    while (my $clothes = $rs->next) {
-        $clothes->status_id($status->id);
-        $clothes->update;
-        push @rows, { $clothes->get_columns };
-    }
-    # ~ COMMIT
-    $guard->commit;
-
-    $self->respond_to(
-        json => { json => [@rows] },
-        html => { template => 'clothes' }    # TODO: `clothes.html.haml`
-    );
-};
-
 get '/clothes/:code' => sub {
     my $self = shift;
-    my $code = $self->param('code');
-    my $clothes = $DB->resultset('Clothes')->find({ code => $code });
-    return $self->error(404, "Not found `$code`") unless $clothes;
 
-    my $co_rs = $clothes->cloth_orders->search({
-        'order.status_id' => { -in => [$Opencloset::Constant::STATUS_RENT, $clothes->status_id] },
-    }, {
-        join => 'order'
-    })->next;
+    #
+    # fetch params
+    #
+    my %params = $self->get_params(qw/ code /);
 
-    unless ($co_rs) {
-        $self->respond_to(
-            json => { json => $self->cloth2hr($clothes) },
-            html => { template => 'clothes/code', clothes => $clothes }    # also, CODEREF is OK
-        );
-        return;
-    }
+    my $clothes = $self->get_clothes( \%params );
+    return unless $clothes;
 
-    my @with;
-    my $order = $co_rs->order;
-    for my $_cloth ($order->cloths) {
-        next if $_cloth->id == $clothes->id;
-        push @with, $self->cloth2hr($_cloth);
-    }
+    my $rented_count = 0;
+    ++$rented_count for $clothes->order_details->search({ status_id => { '>' => 1 } });
 
-    my %columns = (
-        %{ $self->cloth2hr($clothes) },
-        %{ $self->flatten_order($order) },
+    #
+    # response
+    #
+    $self->stash(
+        clothes      => $clothes,
+        rented_count => $rented_count,
     );
-
-    $self->respond_to(
-        json => { json => { %columns } },
-        html => { template => 'clothes/code', clothes => $clothes }    # also, CODEREF is OK
-    );
-};
-
-any [qw/put patch/] => '/clothes/:code' => sub {
-    my $self = shift;
-    my $code = $self->param('code');
-    my $clothes = $DB->resultset('Clothes')->find({ code => $code });
-    return $self->error(404, "Not found `$code`") unless $clothes;
-
-    map {
-        $clothes->$_($self->param($_)) if defined $self->param($_);
-    } qw/bust waist arm length/;
-
-    $clothes->update;
-    $self->respond_to(
-        json => { json => $self->cloth2hr($clothes) },
-        html => { template => 'clothes/code', clothes => $clothes }    # also, CODEREF is OK
-    );
-};
+} => 'clothes-code';
 
 get '/search' => sub {
     my $self = shift;
