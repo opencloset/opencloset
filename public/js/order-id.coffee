@@ -32,11 +32,11 @@ $ ->
   $('#order-staff-name').editable()
   $('#order-rental-date').editable({
     combodate:
-     minYear: 2013,
+      minYear: 2013,
   })
   $('#order-target-date').editable({
     combodate:
-     minYear: 2013,
+      minYear: 2013,
     success: (response, newValue) ->
       updateOrder()
   })
