@@ -1783,23 +1783,6 @@ get '/clothes/:code' => sub {
     );
 };
 
-any [qw/put patch/] => '/clothes/:code' => sub {
-    my $self = shift;
-    my $code = $self->param('code');
-    my $clothes = $DB->resultset('Clothes')->find({ code => $code });
-    return $self->error(404, "Not found `$code`") unless $clothes;
-
-    map {
-        $clothes->$_($self->param($_)) if defined $self->param($_);
-    } qw/bust waist arm length/;
-
-    $clothes->update;
-    $self->respond_to(
-        json => { json => $self->cloth2hr($clothes) },
-        html => { template => 'clothes/code', clothes => $clothes }    # also, CODEREF is OK
-    );
-};
-
 get '/search' => sub {
     my $self = shift;
 
