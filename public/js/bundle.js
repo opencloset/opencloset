@@ -233,6 +233,12 @@
         }
         return str;
       },
+      trimClothesCode: function(code) {
+        code = code.replace(/^\s+/, '');
+        code = code.replace(/\s+$/, '');
+        code = code.replace(/^0/, '');
+        return code;
+      },
       commify: function(num) {
         var regex;
         num += '';

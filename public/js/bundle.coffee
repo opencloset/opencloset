@@ -100,6 +100,11 @@ $ ->
         when 'foot'   then str = '발 크기'
         else               str = undefined
       return str
+    trimClothesCode: (code) ->
+      code = code.replace /^\s+/, ''
+      code = code.replace /\s+$/, ''
+      code = code.replace /^0/, ''
+      return code
     commify: (num) ->
       num += ''
       regex = /(^[+-]?\d+)(\d{3})/

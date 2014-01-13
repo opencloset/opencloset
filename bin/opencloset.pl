@@ -1767,11 +1767,17 @@ get '/clothes/:code' => sub {
     my $clothes = $self->get_clothes( \%params );
     return unless $clothes;
 
+    my $rented_count = 0;
+    ++$rented_count for $clothes->order_details->search({ status_id => { '>' => 1 } });
+
     #
     # response
     #
-    $self->stash( clothes => $clothes );
-};
+    $self->stash(
+        clothes      => $clothes,
+        rented_count => $rented_count,
+    );
+} => 'clothes-code';
 
 get '/search' => sub {
     my $self = shift;

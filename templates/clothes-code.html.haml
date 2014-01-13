@@ -1,0 +1,154 @@
+- use utf8;
+- my $_id   = 'clothes-code';
+- my $meta = $sidebar->{meta};
+- layout 'default',
+-   active_id   => $_id,
+-   breadcrumbs => [
+-     { text => $meta->{clothes}{text} },
+-     { text => $meta->{$_id}{text} },
+-   ],
+-   jses => [
+-     '/lib/bootstrap3-editable/js/bootstrap-editable.min.js',
+-   ],
+-   csses => [
+-     '/lib/bootstrap3-editable/css/bootstrap-editable.css',
+-   ],
+-   ;
+- title $meta->{$_id}{text} . q{: } . $clothes->code;
+
+                %div
+                  #user-profile-1.user-profile.row
+                    /
+                    / left
+                    /
+                    .col-xs-12.col-sm-3.center
+                      %div
+                        %span.profile-picture
+                          %img.avatar.img-responsive{ :src => '' }
+                        .space-4
+                        .width-80.label.label-info.label-xlg.arrowed-in.arrowed-in-right
+                          .inline.position-relative
+                            %span.white.clothes-code= $clothes->code
+
+                      .space-6
+
+                      .hr.hr12.dotted
+
+                      .clearfix
+                        .grid2
+                          %span.bigger-175.blue
+                            %a{ :href => "/user/#{ $clothes->donation->user->id }" }= $clothes->donation->user->name
+                          %br
+                          기증자
+                        .grid2
+                          %span.bigger-175.blue= $rented_count
+                          %br
+                          빌린 횟수
+                      .hr.hr16.dotted
+
+                    /
+                    / right
+                    /
+                    .col-xs-12.col-sm-9
+                      .widget-box.transparent
+                        /
+                        / header
+                        /
+                        .widget-header.widget-header-small
+                          %h4.blue.smaller
+                            %i.icon-user.orange
+                            의류 정보
+                        /
+                        / body
+                        /
+                        .widget-body
+                          .widget-main.padding-8
+                            .profile-user-info.profile-user-info-striped
+                              #profile-clothes-info-data{ 'data-pk' => "#{ $clothes->code }", 'data-url' => "#{ url_for( '/api/clothes/'. $clothes->code . '.json' ) }" }
+                              .profile-info-row
+                                .profile-info-name 품번
+                                .profile-info-value
+                                  %span.clothes-code#clothes-code= $clothes->code
+
+                              .profile-info-row
+                                .profile-info-name 종류
+                                .profile-info-value
+                                  %span.editable#clothes-category{ 'data-name' => 'category', 'data-value' => "#{ $clothes->category }" }
+
+                              .profile-info-row
+                                .profile-info-name 성별
+                                .profile-info-value
+                                  %span.editable#clothes-gender{ 'data-name' => 'gender', 'data-value' => "#{ $clothes->gender }" }
+
+                              .profile-info-row
+                                .profile-info-name 색상
+                                .profile-info-value
+                                  %span.editable#clothes-color{ 'data-name' => 'color', 'data-value' => "#{ $clothes->color }" }
+
+                              .profile-info-row
+                                .profile-info-name 가슴
+                                .profile-info-value
+                                  %span.editable#clothes-bust{ 'data-name' => 'bust', 'data-value' => "#{ $clothes->bust }" }
+
+                              .profile-info-row
+                                .profile-info-name 허리
+                                .profile-info-value
+                                  %span.editable#clothes-waist{ 'data-name' => 'waist', 'data-value' => "#{ $clothes->waist }" }
+
+                              .profile-info-row
+                                .profile-info-name 엉덩이
+                                .profile-info-value
+                                  %span.editable#clothes-hip{ 'data-name' => 'hip', 'data-value' => "#{ $clothes->hip }" }
+
+                              .profile-info-row
+                                .profile-info-name 팔 길이
+                                .profile-info-value
+                                  %span.editable#clothes-arm{ 'data-name' => 'arm', 'data-value' => "#{ $clothes->arm }" }
+
+                              .profile-info-row
+                                .profile-info-name 허벅지
+                                .profile-info-value
+                                  %span.editable#clothes-thigh{ 'data-name' => 'thigh', 'data-value' => "#{ $clothes->thigh }" }
+
+                              .profile-info-row
+                                .profile-info-name 길이
+                                .profile-info-value
+                                  %span.editable#clothes-length{ 'data-name' => 'length', 'data-value' => "#{ $clothes->length }" }
+
+                      .space-20
+
+                      .widget-box.transparent
+                        /
+                        / header
+                        /
+                        .widget-header.widget-header-small
+                          %h4.blue.smaller
+                            %i.icon-rss.orange
+                            최근 주문 내역
+                        /
+                        / body
+                        /
+                        .widget-body
+                          .widget-main.padding-8
+                            #profile-feed-1.profile-feed
+                              - for my $order_detail ( $clothes->order_details ) {
+                              -   my $order = $order_detail->order;
+                              -   my $late_fee = calc_late_fee($order);
+                                .profile-activity.clearfix
+                                  %div
+                                    %img.pull-left{ :alt => "#{ $order->user->name }'s avatar", :src => '#{ get_gravatar( $order->user, 36 ) }' }
+                                    = $order->user->name
+                                    %a.order-badge{ :href => "/order/#{ $order->id }" }
+                                      %span.label.label-info.arrowed-right.arrowed-in
+                                        %strong 주문서
+                                        %time.js-relative-date{ :datetime => "#{ $order->rental_date }", :title => "#{ $order->rental_date->ymd }" }= $order->rental_date->month . '/' . $order->rental_date->day
+                                        ~
+                                        %time.js-relative-date{ :datetime => "#{ $order->target_date }", :title => "#{ $order->target_date->ymd }" }= $order->target_date->month . '/' . $order->target_date->day
+                                      %span.label.order-status{ 'data-status' => "#{ $order->status->name }", 'data-late-fee' => "#{ $late_fee }" }
+                                        %span.order-status-str= $order->status->name
+                                        %span.late-fee= $late_fee ? commify($late_fee) . q{원} : q{}
+                                    .time
+                                      %i.icon-time.bigger-110
+                                      = $order->create_date->ymd . q{ } . $order->create_date->hms
+                              - }
+
