@@ -147,6 +147,7 @@
                                 .profile-activity.clearfix
                                   %div
                                     %img.pull-left{ :alt => "#{ $user->name }'s avatar", :src => '#{ get_gravatar( $user, 36 ) }' }
+                                    = $user->name
                                     %a.order-badge{ :href => "/order/#{ $order->id }" }
                                       %span.label.label-info.arrowed-right.arrowed-in
                                         %strong 주문서
