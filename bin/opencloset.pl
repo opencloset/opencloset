@@ -715,6 +715,42 @@ helper get_order_list => sub {
     return $rs;
 };
 
+helper get_clothes => sub {
+    my ( $self, $params ) = @_;
+
+    #
+    # validate params
+    #
+    my $v = $self->create_validator;
+    $v->field('code')->required(1)->regexp(qr/^[A-Z0-9]{4,5}$/);
+    unless ( $self->validate( $v, $params ) ) {
+        my @error_str;
+        while ( my ( $k, $v ) = each %{ $v->errors } ) {
+            push @error_str, "$k:$v";
+        }
+        return $self->error( 400, {
+            str  => join(',', @error_str),
+            data => $v->errors,
+        });
+    }
+
+    #
+    # adjust params
+    #
+    $params->{code} = sprintf( '%05s', $params->{code} ) if length( $params->{code} ) == 4;
+
+    #
+    # find clothes
+    #
+    my $clothes = $DB->resultset('Clothes')->find( $params );
+    return $self->error( 404, {
+        str  => 'clothes not found',
+        data => {},
+    }) unless $clothes;
+
+    return $clothes;
+};
+
 #
 # API section
 #
@@ -1192,51 +1228,15 @@ group {
         #
         my %params = $self->get_params(qw/ code /);
 
-        #
-        # validate params
-        #
-        my $v = $self->create_validator;
-        $v->field('code')->required(1)->regexp(qr/^[A-Z0-9]{4,5}$/);
-        unless ( $self->validate( $v, \%params ) ) {
-            my @error_str;
-            while ( my ( $k, $v ) = each %{ $v->errors } ) {
-                push @error_str, "$k:$v";
-            }
-            return $self->error( 400, {
-                str  => join(',', @error_str),
-                data => $v->errors,
-            });
-        }
-
-        #
-        # adjust params
-        #
-        $params{code} = sprintf( '%05s', $params{code} ) if length( $params{code} ) == 4;
-
-        #
-        # find clothes
-        #
-        my $clothes = $DB->resultset('Clothes')->find( \%params );
-        return $self->error( 404, {
-            str  => 'clothes not found',
-            data => {},
-        }) unless $clothes;
-
-        #
-        # additional information for clothes
-        #
-        my %extra_data;
-        # '대여중'인 항목만 주문서 정보를 포함합니다.
-        my $order = $clothes->orders->find({ status_id => 2 });
-        $extra_data{order} = $self->flatten_order($order) if $order;
+        my $clothes = $self->get_clothes( \%params );
+        return unless $clothes;
 
         #
         # response
         #
-        my %data = ( $clothes->get_columns, %extra_data );
-        $data{status} = $clothes->status->name;
+        my $data = $self->flatten_clothes($clothes);
 
-        $self->respond_to( json => { status => 200, json => \%data } );
+        $self->respond_to( json => { status => 200, json => $data } );
     }
 
     sub api_update_clothes {
@@ -1758,40 +1758,19 @@ get '/user/:id' => sub {
 
 get '/clothes/:code' => sub {
     my $self = shift;
-    my $code = $self->param('code');
-    my $clothes = $DB->resultset('Clothes')->find({ code => $code });
-    return $self->error(404, "Not found `$code`") unless $clothes;
 
-    my $co_rs = $clothes->cloth_orders->search({
-        'order.status_id' => { -in => [$Opencloset::Constant::STATUS_RENT, $clothes->status_id] },
-    }, {
-        join => 'order'
-    })->next;
+    #
+    # fetch params
+    #
+    my %params = $self->get_params(qw/ code /);
 
-    unless ($co_rs) {
-        $self->respond_to(
-            json => { json => $self->cloth2hr($clothes) },
-            html => { template => 'clothes/code', clothes => $clothes }    # also, CODEREF is OK
-        );
-        return;
-    }
+    my $clothes = $self->get_clothes( \%params );
+    return unless $clothes;
 
-    my @with;
-    my $order = $co_rs->order;
-    for my $_cloth ($order->cloths) {
-        next if $_cloth->id == $clothes->id;
-        push @with, $self->cloth2hr($_cloth);
-    }
-
-    my %columns = (
-        %{ $self->cloth2hr($clothes) },
-        %{ $self->flatten_order($order) },
-    );
-
-    $self->respond_to(
-        json => { json => { %columns } },
-        html => { template => 'clothes/code', clothes => $clothes }    # also, CODEREF is OK
-    );
+    #
+    # response
+    #
+    $self->stash( clothes => $clothes );
 };
 
 get '/search' => sub {
