@@ -72,43 +72,43 @@
                         .widget-body
                           .widget-main.padding-8
                             .profile-user-info.profile-user-info-striped
-                              #profile-user-info-data{ 'data-url' => "#{ url_for( '/api/user/'. $user->id . '.json' ) }" }
+                              #profile-user-info-data{ 'data-pk' => "#{ $user->id }", 'data-url' => "#{ url_for( '/api/user/'. $user->id . '.json' ) }" }
                               .profile-info-row
                                 .profile-info-name 이름
                                 .profile-info-value
-                                  %span.editable#user-name{ 'data-pk' => "#{ $user->id }", 'data-name' => 'name' }= $user->name
+                                  %span.editable#user-name{ 'data-name' => 'name' }= $user->name
                                   = $user->user_info->staff ? " (스태프)" : q{}
 
                               .profile-info-row
                                 .profile-info-name 전자우편
                                 .profile-info-value
-                                  %span.editable#user-email{ 'data-pk' => "#{ $user->id }", 'data-name' => 'email' }= $user->email
+                                  %span.editable#user-email{ 'data-name' => 'email' }= $user->email
 
                               .profile-info-row
                                 .profile-info-name 휴대전화
                                 .profile-info-value
-                                  %span.editable#user-phone{ 'data-pk' => "#{ $user->id }", 'data-name' => 'phone' }= $user->user_info->phone
+                                  %span.editable#user-phone{ 'data-name' => 'phone' }= $user->user_info->phone
 
                               .profile-info-row
                                 .profile-info-name 주소
                                 .profile-info-value
                                   %i.icon-map-marker.light-orange.bigger-110
-                                  %span.editable#user-address{ 'data-pk' => "#{ $user->id }", 'data-name' => 'address' }= $user->user_info->address
+                                  %span.editable#user-address{ 'data-name' => 'address' }= $user->user_info->address
 
                               .profile-info-row
                                 .profile-info-name 성별
                                 .profile-info-value
-                                  %span.editable#user-gender{ 'data-pk' => "#{ $user->id }", 'data-name' => 'gender', 'data-type' => 'select', 'data-value' => "#{ $user->user_info->gender }" }
+                                  %span.editable#user-gender{ 'data-name' => 'gender', 'data-type' => 'select', 'data-value' => "#{ $user->user_info->gender }" }
 
                               .profile-info-row
                                 .profile-info-name 태어난 해
                                 .profile-info-value
-                                  %span.editable#user-birth{ 'data-pk' => "#{ $user->id }", 'data-name' => 'birth' }= $user->user_info->birth
+                                  %span.editable#user-birth{ 'data-name' => 'birth' }= $user->user_info->birth
 
                               .profile-info-row
                                 .profile-info-name 설명
                                 .profile-info-value
-                                  %span.editable#user-comment{ 'data-pk' => "#{ $user->id }", 'data-name' => 'name' }= $user->user_info->comment
+                                  %span.editable#user-comment{ 'data-name' => 'name' }= $user->user_info->comment
 
                               .profile-info-row
                                 .profile-info-name 신체 치수

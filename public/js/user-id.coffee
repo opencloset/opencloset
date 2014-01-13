@@ -11,6 +11,7 @@ $ ->
       mode:        'inline'
       showbuttons: 'true'
       emptytext:   '비어있음'
+      pk:          $('#profile-user-info-data').data('pk')
       url: (params) ->
         url = $('#profile-user-info-data').data('url')
         data = {}
