@@ -1745,33 +1745,6 @@ get '/user/:id' => sub {
     );
 } => 'user-id';
 
-put '/clothes' => sub {
-    my $self = shift;
-
-    my $clothes_list = $self->param('clothes_list');
-    return $self->error(400, 'Nothing to change') unless $clothes_list;
-
-    my $status = $DB->resultset('Status')->find({ name => $self->param('status') });
-    return $self->error(400, 'Invalid status') unless $status;
-
-    my $rs    = $DB->resultset('Clothes')->search({ 'me.id' => { -in => [split(/,/, $clothes_list)] } });
-    my $guard = $DB->txn_scope_guard;
-    my @rows;
-    # BEGIN TRANSACTION ~
-    while (my $clothes = $rs->next) {
-        $clothes->status_id($status->id);
-        $clothes->update;
-        push @rows, { $clothes->get_columns };
-    }
-    # ~ COMMIT
-    $guard->commit;
-
-    $self->respond_to(
-        json => { json => [@rows] },
-        html => { template => 'clothes' }    # TODO: `clothes.html.haml`
-    );
-};
-
 get '/clothes/:code' => sub {
     my $self = shift;
     my $code = $self->param('code');
