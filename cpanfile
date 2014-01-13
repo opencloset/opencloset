@@ -5,6 +5,7 @@ requires 'DBIx::Class::TimeStamp';
 requires 'Data::Pageset';
 requires 'DateTime';
 requires 'DateTime::Format::MySQL';
+requires 'Gravatar::URL';
 requires 'MojoX::Validator::Constraint::Email';
 requires 'Mojolicious::Lite';
 requires 'Mojolicious::Plugin::FillInFormLite';

@@ -71,6 +71,11 @@ $db_opts->{AutoCommit} //= 1;
     entries_per_page => 20,
 
     #
+    # avatar icon
+    #
+    avatar_icon => 'https://f.cloud.github.com/assets/138451/1897856/98a66e60-7bff-11e3-9318-ef8eae4ff285.png',
+
+    #
     # SMS
     #
     sms => {

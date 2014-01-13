@@ -22,7 +22,7 @@
                     .col-xs-12.col-sm-3.center
                       %div
                         %span.profile-picture
-                          %img.avatar.editable.img-responsive{ :src => 'https://pbs.twimg.com/profile_images/1814758551/keedi_bigger.jpg' }
+                          %img.avatar.img-responsive{ :src => '#{ get_gravatar( $user, 180 ) }' }
                         .space-4
                         .width-80.label.label-info.label-xlg.arrowed-in.arrowed-in-right
                           .inline.position-relative
@@ -144,7 +144,7 @@
                               -   my $late_fee = calc_late_fee($order);
                                 .profile-activity.clearfix
                                   %div
-                                    %img.pull-left{ :alt => "#{ $user->name }'s avatar", :src => 'https://pbs.twimg.com/profile_images/1814758551/keedi_bigger.jpg' }
+                                    %img.pull-left{ :alt => "#{ $user->name }'s avatar", :src => '#{ get_gravatar( $user, 36 ) }' }
                                     %a.order-badge{ :href => "/order/#{ $order->id }" }
                                       %span.label.label-info.arrowed-right.arrowed-in
                                         %strong 주문서

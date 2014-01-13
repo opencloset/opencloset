@@ -5,6 +5,7 @@ use Mojolicious::Lite;
 
 use Data::Pageset;
 use DateTime;
+use Gravatar::URL;
 use List::MoreUtils qw( zip );
 use SMS::Send::KR::CoolSMS;
 use SMS::Send;
@@ -54,6 +55,18 @@ helper error => sub {
     );
 
     return;
+};
+
+helper get_gravatar => sub {
+    my ( $self, $user, $size, %opts ) = @_;
+
+    $opts{default} ||= app->config->{avatar_icon};
+    $opts{email}   ||= $user->email;
+    $opts{size}    ||= $size;
+
+    my $url = Gravatar::URL::gravatar_url(%opts);
+
+    return $url;
 };
 
 helper cloth_validator => sub {

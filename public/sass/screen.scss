@@ -313,6 +313,12 @@ $opencloset-darken-yellow: desaturate(darken($opencloset-yellow, 4%), 10%);
                 min-height: 32px;
             }
         }
+        .profile-picture {
+            img.avatar {
+                width: 180px;
+                height: 180px;
+            }
+        }
         .profile-contact-links {
             i[class^="icon-"]:before, [class*=" icon-"]:before {
                 width: 15px;
@@ -331,6 +337,10 @@ $opencloset-darken-yellow: desaturate(darken($opencloset-yellow, 4%), 10%);
             }
         }
         .profile-activity {
+            img {
+                width: 40px;
+                height: 40px;
+            }
             a.order-badge:hover {
                 text-decoration: none;
             }
