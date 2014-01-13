@@ -40,8 +40,14 @@
             = $order->rental_date ? $order->rental_date->ymd : q{}
           %td
             = $order->target_date ? $order->target_date->ymd : q{}
-          %td= $order->user  ? $order->user->name  : q{}
-          %td= $order->staff ? $order->staff->name : q{}
+          %td
+            - if ( $order->user ) {
+              %a{ :href => "/user/#{ $order->user->id }" }= $order->user->name
+            - }
+          %td
+            - if ( $order->staff ) {
+              %a{ :href => "/user/#{ $order->staff->id }" }= $order->staff->name
+            - }
           %td
             - my $count = 0;
             - for my $detail ( $order->order_details ) {
