@@ -218,6 +218,28 @@ helper flatten_order => sub {
     return \%data;
 };
 
+helper flatten_clothes => sub {
+    my ( $self, $clothes ) = @_;
+
+    return unless $clothes;
+
+    #
+    # additional information for clothes
+    #
+    my %extra_data;
+    # '대여중'인 항목만 주문서 정보를 포함합니다.
+    my $order = $clothes->orders->find({ status_id => 2 });
+    $extra_data{order} = $self->flatten_order($order) if $order;
+
+    my %data = (
+        $clothes->get_columns,
+        %extra_data,
+        status => $clothes->status->name,
+    );
+
+    return \%data;
+};
+
 helper create_cloth => sub {
     my ($self, %info) = @_;
 
@@ -1313,9 +1335,9 @@ group {
         #
         # response
         #
-        my %data = ( $clothes->get_columns );
+        my $data = $self->flatten_clothes($clothes);
 
-        $self->respond_to( json => { status => 200, json => \%data } );
+        $self->respond_to( json => { status => 200, json => $data } );
     }
 
     sub api_delete_clothes {
@@ -1359,10 +1381,10 @@ group {
         #
         # delete & response
         #
-        my %data = ( $clothes->get_columns );
+        my $data = $self->flatten_clothes($clothes);
         $clothes->delete;
 
-        $self->respond_to( json => { status => 200, json => \%data } );
+        $self->respond_to( json => { status => 200, json => $data } );
     }
 
     sub api_get_clothes_list {
@@ -1415,18 +1437,7 @@ group {
         # additional information for clothes list
         #
         my @data;
-        for my $clothes (@clothes_list) {
-            # '대여중'인 항목만 주문서 정보를 포함합니다.
-            my %extra_data;
-            my $order = $clothes->orders->find({ status_id => 2 });
-            $extra_data{order} = $self->flatten_order($order) if $order;
-
-            push @data, {
-                $clothes->get_columns,
-                %extra_data,
-                status => $clothes->status->name,
-            };
-        }
+        push @data, $self->flatten_clothes($_) for @clothes_list;
 
         #
         # response
