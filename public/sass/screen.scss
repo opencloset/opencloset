@@ -142,6 +142,21 @@ $opencloset-darken-yellow: desaturate(darken($opencloset-yellow, 4%), 10%);
     }
 }
 
+.breadcrumb {
+    li a {
+        padding: 0;
+    }
+    li {
+        padding: 0 4px;
+    }
+    li:first-child a {
+        padding-left: 4px;
+    }
+    li:not(:first-child) {
+        padding-left: 0px;
+    }
+}
+
 .page-content {
     h1, h2, h3 {
         color: #2679B5;

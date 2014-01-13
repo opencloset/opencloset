@@ -44,6 +44,11 @@
 .ace-thumbnails > li .satisfaction ul { margin-left: 5px; }
 .ace-thumbnails > li .satisfaction li { list-style-type: none; }
 
+.breadcrumb li a { padding: 0; }
+.breadcrumb li { padding: 0 4px; }
+.breadcrumb li:first-child a { padding-left: 4px; }
+.breadcrumb li:not(:first-child) { padding-left: 0px; }
+
 .page-content h1, .page-content h2, .page-content h3 { color: #2679B5; font-weight: lighter; margin: 0 8px; padding: 0; }
 .page-content h1 { font-size: 24px; }
 .page-content h2 { font-size: 20px; }
