@@ -52,6 +52,8 @@ $db_opts->{AutoCommit} //= 1;
             'order-id'     => { text => '주문 내역',     icon => {},         desc => '주문서 내역입니다.', link => '#' },
             'user'         => { text => '사용자',        icon => 'user',     desc => '사용자 목록입니다.', link => '#' },
             'user-id'      => { text => '사용자 정보',   icon => 'user',     desc => '사용자 정보입니다.', link => '#' },
+            'clothes'      => { text => '의류',          icon => 'female',   desc => '의류 목록입니다.',   link => '#' },
+            'clothes-code' => { text => '의류 정보',     icon => 'female',   desc => '의류 정보입니다.',   link => '#' },
             'search'       => { text => '검색',          icon => 'search',   desc => '무엇을 찾으세요?'      },
             'login'        => { text => '로그인',        icon => 'lock',     },
         },
