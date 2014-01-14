@@ -1,4 +1,4 @@
 - use utf8;
-- my $id = 'login';
-- layout 'login', active_id => $id;
-- title $sidebar->{meta}{login}{text};
+- my $_id = 'login';
+- layout 'login', page_id => $_id;
+- title meta_text($_id);

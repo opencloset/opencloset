@@ -1,13 +1,10 @@
 - use utf8;
-- my $id   = 'order';
-- my $meta = $sidebar->{meta};
+- my $_id = 'order';
 - layout 'default',
--   active_id   => $id,
--   breadcrumbs => [
--     { text => $meta->{'menu-order'}{text} },
--     { text => $meta->{$id}{text} },
--   ];
-- title $meta->{$id}{text};
+-   page_id     => $_id,
+-   breadcrumbs => [ { text => meta_text($_id) } ]
+-   ;
+- title meta_text($_id);
 
 #order-table
   %table.table.table-striped.table-bordered.table-hover

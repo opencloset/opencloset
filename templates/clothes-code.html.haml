@@ -1,21 +1,16 @@
 - use utf8;
-- my $_id   = 'clothes-code';
-- my $meta = $sidebar->{meta};
+- my $_id = 'clothes-code';
 - layout 'default',
--   active_id   => $_id,
+-   page_id     => $_id,
 -   breadcrumbs => [
--     { text => $meta->{clothes}{text} },
--     { text => $meta->{$_id}{text} },
+-     { text => meta_text('clothes') },
+-     { text => meta_text($_id)      },
 -   ],
--   jses => [
--     '/lib/bootstrap3-editable/js/bootstrap-editable.min.js',
--   ],
--   csses => [
--     '/lib/bootstrap3-editable/css/bootstrap-editable.css',
--   ],
+-   jses  => [ '/lib/bootstrap3-editable/js/bootstrap-editable.min.js' ],
+-   csses => [ '/lib/bootstrap3-editable/css/bootstrap-editable.css'   ],
 -   ;
 - my $clothes_code = trim_clothes_code($clothes);
-- title $meta->{$_id}{text} . q{: } . $clothes_code;
+- title meta_text($_id) . qq{: $clothes_code};
 
                 %div
                   #user-profile-1.user-profile.row

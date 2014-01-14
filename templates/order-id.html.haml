@@ -1,21 +1,19 @@
 - use utf8;
-- my $_id   = 'order-id';
-- my $meta = $sidebar->{meta};
+- my $_id = 'order-id';
 - layout 'default',
--   active_id   => $_id,
+-   page_id     => $_id,
+-   active_id   => 'order',
 -   breadcrumbs => [
--     { text => $meta->{'menu-order'}{text} },
--     { text => $meta->{$_id}{text} },
+-     { text => meta_text('order'), link => url_for( meta_link('order') ) },
+-     { text => meta_text($_id) },
 -   ],
--   jses => [
+-   jses  => [
 -     '/lib/bootstrap/js/date-time/moment.min.js',
 -     '/lib/bootstrap3-editable/js/bootstrap-editable.min.js',
 -   ],
--   csses => [
--     '/lib/bootstrap3-editable/css/bootstrap-editable.css',
--   ],
+-   csses => [ '/lib/bootstrap3-editable/css/bootstrap-editable.css' ],
 -   ;
-- title $meta->{$_id}{text};
+- title meta_text($_id);
 
                 .row#order{ 'data-order-id' => "#{ $order->id }" }
                   .col-sm-10.col-sm-offset-1

@@ -1,14 +1,11 @@
 - use utf8;
-- my $id   = 'new-borrower';
-- my $meta = $sidebar->{meta};
+- my $_id = 'new-borrower';
 - layout 'default',
--   active_id   => $id,
--   breadcrumbs => [
--     { text => $meta->{$id}{text} },
--   ],
--   jses => [ '/lib/bootstrap/js/fuelux/fuelux.wizard.min.js' ],
+-   page_id     => $_id,
+-   breadcrumbs => [ { text => meta_text($_id) } ],
+-   jses        => [ '/lib/bootstrap/js/fuelux/fuelux.wizard.min.js' ],
 -   ;
-- title $meta->{$id}{text};
+- title meta_text($_id);
 
 #new-borrower
   .row-fluid

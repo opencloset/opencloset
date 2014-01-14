@@ -25,6 +25,7 @@ app->defaults( %{ plugin 'Config' => { default => {
     csses       => [],
     breadcrumbs => [],
     active_id   => q{},
+    page_id     => q{},
 }}});
 
 my $DB = Opencloset::Schema->connect({
@@ -55,6 +56,22 @@ helper error => sub {
     );
 
     return;
+};
+
+helper meta_link => sub {
+    my ( $self, $id ) = @_;
+
+    my $meta = app->config->{sidebar}{meta};
+
+    return $meta->{$id}{link} || $id;
+};
+
+helper meta_text => sub {
+    my ( $self, $id ) = @_;
+
+    my $meta = app->config->{sidebar}{meta};
+
+    return $meta->{$id}{text};
 };
 
 helper get_gravatar => sub {

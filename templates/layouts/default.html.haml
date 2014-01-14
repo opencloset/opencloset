@@ -23,11 +23,11 @@
           .page-content
             .page-header
               %h1
-                = $sidebar->{meta}{$active_id}{text} // q{}
+                = $sidebar->{meta}{$page_id}{text} // q{}
                 %small
                   %i.icon-double-angle-right
-                  = $sidebar->{meta}{$active_id}{desc} // q{}
-            .row{ :id => "#{$active_id}" }
+                  = $sidebar->{meta}{$page_id}{desc} // q{}
+            .row{ :id => "#{$page_id}" }
               .col-xs-12
                 / PAGE CONTENT BEGINS
                 = content

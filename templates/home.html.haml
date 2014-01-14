@@ -1,8 +1,7 @@
 - use utf8;
-- my $id   = 'home';
-- my $meta = $sidebar->{meta};
-- layout 'default', active_id => $id;
-- title $meta->{$id}{text};
+- my $_id = 'home';
+- layout 'default', page_id => $_id;
+- title meta_text($_id);
 
 .search
   %form#clothes-search-form

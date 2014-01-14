@@ -1,12 +1,10 @@
 - use utf8;
-- my $id   = 'rental';
-- my $meta = $sidebar->{meta};
+- my $_id   = 'rental';
 - layout 'default',
--   active_id   => $id,
--   breadcrumbs => [
--     { text => $meta->{$id}{text} },
--   ];
-- title $meta->{$id}{text};
+-   page_id     => $_id,
+-   breadcrumbs => [ { text => meta_text($_id) } ]
+-   ;
+- title meta_text($_id);
 
 .search
   %form#search-form

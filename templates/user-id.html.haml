@@ -1,20 +1,15 @@
 - use utf8;
 - my $_id   = 'user-id';
-- my $meta = $sidebar->{meta};
 - layout 'default',
--   active_id   => $_id,
+-   page_id     => $_id,
 -   breadcrumbs => [
--     { text => $meta->{user}{text} },
--     { text => $meta->{$_id}{text} },
+-     { text => meta_text('user') },
+-     { text => meta_text($_id)   },
 -   ],
--   jses => [
--     '/lib/bootstrap3-editable/js/bootstrap-editable.min.js',
--   ],
--   csses => [
--     '/lib/bootstrap3-editable/css/bootstrap-editable.css',
--   ],
+-   jses  => [ '/lib/bootstrap3-editable/js/bootstrap-editable.min.js' ],
+-   csses => [ '/lib/bootstrap3-editable/css/bootstrap-editable.css'   ],
 -   ;
-- title $meta->{$_id}{text} . q{: } . $user->name . q{님};
+- title meta_text($_id) . q{: } . $user->name . q{님};
 
                 %div
                   #user-profile-1.user-profile.row

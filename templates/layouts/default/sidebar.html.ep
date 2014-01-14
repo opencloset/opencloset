@@ -82,7 +82,7 @@
           <%= $space %></ul> <!-- <%= $level ? "submenu" : "nav-list" %> -->
           %
           % end
-          %
+          % $active_id ||= $page_id;
           %== $menu->( $menu, $sidebar->{items}, $active_id, 0 );
           %
 
