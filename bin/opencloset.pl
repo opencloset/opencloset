@@ -69,6 +69,15 @@ helper get_gravatar => sub {
     return $url;
 };
 
+helper trim_clothes_code => sub {
+    my ( $self, $clothes ) = @_;
+
+    my $code = $clothes->code;
+    $code =~ s/^0//;
+
+    return $code;
+};
+
 helper cloth_validator => sub {
     my $self = shift;
 

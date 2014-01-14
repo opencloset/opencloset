@@ -14,7 +14,8 @@
 -     '/lib/bootstrap3-editable/css/bootstrap-editable.css',
 -   ],
 -   ;
-- title $meta->{$_id}{text} . q{: } . $clothes->code;
+- my $clothes_code = trim_clothes_code($clothes);
+- title $meta->{$_id}{text} . q{: } . $clothes_code;
 
                 %div
                   #user-profile-1.user-profile.row
@@ -28,7 +29,7 @@
                         .space-4
                         .width-80.label.label-info.label-xlg.arrowed-in.arrowed-in-right
                           .inline.position-relative
-                            %span.white.clothes-code= $clothes->code
+                            %span.white.clothes-code= $clothes_code
 
                       .space-6
 
@@ -64,11 +65,11 @@
                         .widget-body
                           .widget-main.padding-8
                             .profile-user-info.profile-user-info-striped
-                              #profile-clothes-info-data{ 'data-pk' => "#{ $clothes->code }", 'data-url' => "#{ url_for( '/api/clothes/'. $clothes->code . '.json' ) }" }
+                              #profile-clothes-info-data{ 'data-pk' => "#{ $clothes_code }", 'data-url' => "#{ url_for( '/api/clothes/'. $clothes_code . '.json' ) }" }
                               .profile-info-row
                                 .profile-info-name 품번
                                 .profile-info-value
-                                  %span.clothes-code#clothes-code= $clothes->code
+                                  %span.clothes-code#clothes-code= $clothes_code
 
                               .profile-info-row
                                 .profile-info-name 종류

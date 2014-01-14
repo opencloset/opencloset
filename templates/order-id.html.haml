@@ -279,7 +279,7 @@
                                     %td.center= ++$count
                                     - if ( $detail->clothes ) {
                                       %td
-                                        %a{ :href => "/clothes/#{ $detail->clothes->code }" }= $detail->name
+                                        %a{ :href => "/clothes/#{ trim_clothes_code($detail->clothes) }" }= $detail->name
                                       %td
                                         - if ( $detail->status ) {
                                           %span.order-status.label{ 'data-order-detail-status' => "#{ $detail->status->name }" }
