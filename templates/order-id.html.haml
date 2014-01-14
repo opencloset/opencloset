@@ -43,7 +43,7 @@
                                         <a
                                           id               = "order-staff-name"
                                           class            = "editable editable-click"
-                                          href             = "#"
+                                          href             = "#{ $order->status ? url_for('/user/' . $order->staff_id) : '#' }"
 
                                           data-disabled    = "#{ $order->status ? 'true' : 'false' }"
                                           data-mode        = "inline"
@@ -187,7 +187,8 @@
                                       .col-sm-1
                                         %i.icon-caret-right.green
                                       .col-sm-3.no-padding-left 이름:
-                                      .col-sm-8=                $order->user->name
+                                      .col-sm-8
+                                        %a{ :href => "#{ url_for('/user/' . $order->user->id) }" }= $order->user->name
                                     %li.row
                                       .col-sm-1
                                         %i.icon-caret-right.green
