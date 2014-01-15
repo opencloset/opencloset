@@ -127,8 +127,8 @@
                         .widget-body
                           .widget-main.padding-8
                             #profile-feed-1.profile-feed
-                              - for my $order_detail ( $clothes->order_details ) {
-                              -   my $order = $order_detail->order;
+                              - for my $order ( map { $_->order } $clothes->order_details ) {
+                              -   next unless $order->status;
                               -   my $late_fee = calc_late_fee($order);
                                 .profile-activity.clearfix
                                   %div
