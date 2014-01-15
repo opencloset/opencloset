@@ -152,7 +152,7 @@ helper order_price => sub {
 helper calc_overdue => sub {
     my ( $self, $target_dt, $return_dt ) = @_;
 
-    return unless $target_dt;
+    return 0 unless $target_dt;
 
     $return_dt ||= DateTime->now;
 
