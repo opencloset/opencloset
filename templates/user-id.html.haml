@@ -138,6 +138,7 @@
                           .widget-main.padding-8
                             #profile-feed-1.profile-feed
                               - for my $order ( $user->order_users ) {
+                              -   next unless $order->status;
                               -   my $late_fee = calc_late_fee($order);
                                 .profile-activity.clearfix
                                   %div
