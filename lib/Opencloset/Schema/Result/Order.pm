@@ -55,6 +55,13 @@ __PACKAGE__->table("order");
   is_foreign_key: 1
   is_nullable: 1
 
+=head2 additional_day
+
+  data_type: 'integer'
+  default_value: 0
+  extra: {unsigned => 1}
+  is_nullable: 1
+
 =head2 rental_date
 
   data_type: 'datetime'
@@ -201,6 +208,13 @@ __PACKAGE__->add_columns(
     data_type => "integer",
     extra => { unsigned => 1 },
     is_foreign_key => 1,
+    is_nullable => 1,
+  },
+  "additional_day",
+  {
+    data_type => "integer",
+    default_value => 0,
+    extra => { unsigned => 1 },
     is_nullable => 1,
   },
   "rental_date",
@@ -383,8 +397,8 @@ Composing rels: L</order_clothes> -> clothes
 __PACKAGE__->many_to_many("clothes", "order_clothes", "clothes");
 
 
-# Created by DBIx::Class::Schema::Loader v0.07038 @ 2014-01-10 19:45:06
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:wwnHlbDEUu0C3tcF6s+jPQ
+# Created by DBIx::Class::Schema::Loader v0.07038 @ 2014-01-15 12:03:47
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:TgsXkLTA6l3D3m3UnpQl2A
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

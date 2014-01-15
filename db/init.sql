@@ -197,6 +197,7 @@ CREATE TABLE `order` (
   `user_id`           INT UNSIGNED NOT NULL,
   `status_id`         INT UNSIGNED DEFAULT NULL,
   `staff_id`          INT UNSIGNED DEFAULT NULL,
+  `additional_day`    INT UNSIGNED DEFAULT 0,
   `rental_date`       DATETIME DEFAULT NULL,
   `target_date`       DATETIME DEFAULT NULL,
   `return_date`       DATETIME DEFAULT NULL,
