@@ -52,7 +52,7 @@
                                           data-emptytext   = "비어있음"
 
                                           data-source      = "/api/gui/staff-list.json"
-                                          data-value       = "#{ $order->staff_id }"
+                                          data-value       = "#{ $order->staff_id || q{} }"
 
                                           data-url         = "/order/#{ $order->id }/update"
                                           data-pk          = "#{ $order->id }"
