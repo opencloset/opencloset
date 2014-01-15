@@ -154,7 +154,7 @@ helper calc_overdue => sub {
 
     return 0 unless $target_dt;
 
-    $return_dt ||= DateTime->now;
+    $return_dt ||= DateTime->now( time_zone => app->config->{timezone} );
 
     my $DAY_AS_SECONDS = 60 * 60 * 24;
 
@@ -1907,7 +1907,7 @@ get '/rental' => sub {
     ### To disable this warning for good set $ENV{DBIC_DT_SEARCH_OK} to true
     ###
     ### DateTime object 를 search 에 바로 사용하지 말고 parser 를 이용하라능 - @aanoaa
-    my $today     = DateTime->today( time_zone => 'Asia/Seoul' );
+    my $today     = DateTime->today( time_zone => app->config->{timezone} );
     my $dt_parser = $DB->storage->datetime_parser;
 
     my @users = $DB->resultset('User')->search(
@@ -2343,7 +2343,7 @@ __DATA__
           %a{:href => '/guests/#{$order->guest->id}'}= $order->guest->user->name
           님
           - if ($order->status && $order->status->name eq '대여중') {
-            - if (calc_overdue($order->target_date, DateTime->now())) {
+            - if (calc_overdue($order->target_date, DateTime->now( time_zone => $timezone ))) {
               %span.label.label-important 연체중
             - } else {
               %span.label.label-important= $order->status->name
