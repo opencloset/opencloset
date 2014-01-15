@@ -531,6 +531,7 @@ helper create_order => sub {
     #   need more validation but not now
     #   since columns are not perfect yet.
     #
+    $v->field('additional_day')->regexp(qr/^\d+$/);
     $v->field(qw/ height weight bust waist hip thigh arm leg knee foot /)->each(sub {
         shift->regexp(qr/^\d{1,3}$/);
     });
@@ -996,13 +997,32 @@ group {
         # fetch params
         #
         my %order_params = $self->get_params(qw/
-            user_id     status_id     rental_date    target_date
-            return_date return_method price_pay_with price
-            discount    late_fee      l_discount     late_fee_pay_with
-            staff_name  comment       purpose        height
-            weight      bust          waist          hip
-            thigh       arm           leg            knee
+            additional_day
+            arm
+            bust
+            comment
+            discount
             foot
+            height
+            hip
+            knee
+            l_discount
+            late_fee
+            late_fee_pay_with
+            leg
+            price
+            price_pay_with
+            purpose
+            rental_date
+            return_date
+            return_method
+            staff_name
+            status_id
+            target_date
+            thigh
+            user_id
+            waist
+            weight
         /);
         my %order_clothes_params = $self->get_params(qw/ clothes_code /);
 
@@ -1046,14 +1066,33 @@ group {
         # fetch params
         #
         my %params = $self->get_params(qw/
-            id
-            user_id     status_id     rental_date    target_date
-            return_date return_method price_pay_with price
-            discount    late_fee      l_discount     late_fee_pay_with
-            staff_name  comment       purpose        height
-            weight      bust          waist          hip
-            thigh       arm           leg            knee
+            additional_day
+            arm
+            bust
+            comment
+            discount
             foot
+            height
+            hip
+            id
+            knee
+            l_discount
+            late_fee
+            late_fee_pay_with
+            leg
+            price
+            price_pay_with
+            purpose
+            rental_date
+            return_date
+            return_method
+            staff_name
+            status_id
+            target_date
+            thigh
+            user_id
+            waist
+            weight
         /);
 
         #
@@ -1072,6 +1111,7 @@ group {
         #   need more validation but not now
         #   since columns are not perfect yet.
         #
+        $v->field('additional_day')->regexp(qr/^\d+$/);
         $v->field(qw/ height weight bust waist hip thigh arm leg knee foot /)->each(sub {
             shift->regexp(qr/^\d{1,3}$/);
         });
