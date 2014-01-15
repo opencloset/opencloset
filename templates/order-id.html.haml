@@ -15,7 +15,7 @@
 -   ;
 - title meta_text($_id);
 
-                .row#order{ 'data-order-id' => "#{ $order->id }" }
+                .row#order{ 'data-order-id' => "#{ $order->id }", 'data-url' => "#{ url_for( '/api/order/' . $order->id ) }" }
                   .col-sm-10.col-sm-offset-1
                     .widget-box.transparent.invoice-box
                       /
@@ -62,6 +62,30 @@
                                     .col-sm-1
                                       %i.icon-caret-right.blue
                                     .col-sm-3.no-padding-left
+                                      대여 기간:
+                                    .col-sm-8
+                                      :plain
+                                        <a
+                                          id               = "order-additional-day"
+                                          class            = "editable editable-click"
+                                          href             = "#"
+
+                                          data-disabled    = "#{ $order->status ? 'true' : 'false' }"
+                                          data-mode        = "inline"
+                                          data-showbuttons = "true"
+                                          data-type        = "select"
+                                          data-emptytext   = "비어있음"
+
+                                          data-value       = "#{ $order->additional_day }"
+
+                                          data-url         = "/order/#{ $order->id }/update"
+                                          data-pk          = "#{ $order->id }"
+                                          data-name        = "additional_day"
+                                        ></a>
+                                  %li.row
+                                    .col-sm-1
+                                      %i.icon-caret-right.blue
+                                    .col-sm-3.no-padding-left
                                       대여일:
                                     .col-sm-8
                                       :plain
@@ -71,18 +95,7 @@
                                           href             = "#"
 
                                           data-disabled    = "#{ $order->status ? 'true' : 'false' }"
-                                          data-mode        = "inline"
-                                          data-showbuttons = "true"
-                                          data-type        = "combodate"
-                                          data-emptytext   = "비어있음"
-
-                                          data-format      = 'YYYY-MM-DD'
-                                          data-viewformat  = 'YYYY-MM-DD'
-                                          data-template    = 'YYYY-MM-DD'
                                           data-value       = "#{ $order->rental_date ? $order->rental_date->ymd : q{} }"
-
-                                          data-url         = "/order/#{ $order->id }/update"
-                                          data-pk          = "#{ $order->id }"
                                           data-name        = "rental_date"
                                         ></a>
                                   %li.row
@@ -97,18 +110,7 @@
                                           class            = "editable editable-click"
                                           href             = "#"
 
-                                          data-mode        = "inline"
-                                          data-showbuttons = "true"
-                                          data-type        = "combodate"
-                                          data-emptytext   = "비어있음"
-
-                                          data-format      = 'YYYY-MM-DD'
-                                          data-viewformat  = 'YYYY-MM-DD'
-                                          data-template    = 'YYYY-MM-DD'
                                           data-value       = "#{ $order->target_date ? $order->target_date->ymd : q{} }"
-
-                                          data-url         = "/order/#{ $order->id }/update"
-                                          data-pk          = "#{ $order->id }"
                                           data-name        = "target_date"
                                         ></a>
                                   %li.row
