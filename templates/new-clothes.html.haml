@@ -5,7 +5,7 @@
 -   breadcrumbs => [ { text => meta_text($_id) } ],
 -   jses        => [ '/lib/bootstrap/js/fuelux/fuelux.wizard.min.js' ]
 -   ;
-- title $meta->{$_id}{text};
+- title meta_text($_id);
 
 #new-clothes
   .row-fluid
