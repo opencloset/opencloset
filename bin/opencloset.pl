@@ -593,14 +593,17 @@ helper create_order => sub {
                         status_id    => $clothes->status->id,
                         name         => join( q{ - }, $clothes->code, $clothes->category ),
                         price        => $clothes->price,
+                        final_price  => ( $clothes->price + $clothes->price * 0.2 * ($order_params->{additional_day} || 0) ),
+
                     }) or die "failed to create a new order_detail\n";
                 }
                 #
                 # create order_detail for discount
                 #
                 $order->add_to_order_details({
-                    name  => '에누리',
-                    price => 0,
+                    name        => '에누리',
+                    price       => 0,
+                    final_price => 0,
                 }) or die "failed to create a new order_detail for discount\n";
             }
 
