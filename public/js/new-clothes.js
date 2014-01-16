@@ -71,18 +71,18 @@
     addRegisteredUser();
     clear_clothes_form = function(show) {
       if (show) {
-        _.each(['bust', 'waist', 'hip', 'arm', 'length', 'foot'], function(name) {
+        _.each(['bust', 'waist', 'hip', 'belly', 'arm', 'length', 'foot'], function(name) {
           return $("#display-clothes-" + name).show();
         });
       } else {
-        _.each(['bust', 'waist', 'hip', 'arm', 'length', 'foot'], function(name) {
+        _.each(['bust', 'waist', 'hip', 'belly', 'arm', 'length', 'foot'], function(name) {
           return $("#display-clothes-" + name).hide();
         });
       }
       $('#clothes-code').val('');
       $('input[name=clothes-gender]').prop('checked', false);
       $('#clothes-color').select2('val', '');
-      return _.each(['bust', 'waist', 'hip', 'arm', 'length', 'foot'], function(name) {
+      return _.each(['bust', 'waist', 'hip', 'belly', 'arm', 'length', 'foot'], function(name) {
         return $("#clothes-" + name).prop('disabled', true).val('');
       });
     };
@@ -93,35 +93,35 @@
       clear_clothes_form(false);
       types = [];
       switch (e.val) {
-        case 'jacket,pants':
-          types = ['bust', 'arm', 'waist', 'length'];
-          break;
-        case 'jacket,skirt':
-          types = ['bust', 'arm', 'waist', 'hip', 'length'];
-          break;
         case 'jacket':
-        case 'shirt':
-        case 'coat':
-        case 'blouse':
-          types = ['bust', 'arm'];
+          types = ['bust', 'arm', 'belly'];
           break;
         case 'pants':
-          types = ['waist', 'length'];
+          types = ['waist', 'hip', 'length'];
+          break;
+        case 'shirt':
+          types = ['bust', 'arm', 'belly'];
+          break;
+        case 'waistcoat':
+          types = ['waist', 'belly'];
+          break;
+        case 'coat':
+          types = ['bust', 'arm', 'length'];
+          break;
+        case 'onepiece':
+          types = ['bust', 'waist', 'hip', 'arm', 'length'];
           break;
         case 'skirt':
           types = ['waist', 'hip', 'length'];
           break;
+        case 'blouse':
+          types = ['bust', 'arm'];
+          break;
+        case 'belt':
+          types = ['length'];
+          break;
         case 'shoes':
           types = ['foot'];
-          break;
-        case 'waistcoat':
-          types = ['waist'];
-          break;
-        case 'hat':
-        case 'tie':
-        case 'onepiece':
-        case 'belt':
-          types = [];
           break;
         default:
           types = [];
@@ -155,6 +155,7 @@
         clothes_bust: $('#clothes-bust').val(),
         clothes_waist: $('#clothes-waist').val(),
         clothes_hip: $('#clothes-hip').val(),
+        clothes_belly: $('#clothes-belly').val(),
         clothes_arm: $('#clothes-arm').val(),
         clothes_length: $('#clothes-length').val(),
         clothes_foot: $('#clothes-foot').val()
@@ -285,6 +286,7 @@
                         bust: $(el).data('clothes-bust'),
                         waist: $(el).data('clothes-waist'),
                         hip: $(el).data('clothes-hip'),
+                        belly: $(el).data('clothes-belly'),
                         arm: $(el).data('clothes-arm'),
                         length: $(el).data('clothes-length'),
                         foot: $(el).data('clothes-foot'),

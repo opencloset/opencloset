@@ -162,8 +162,6 @@
                     %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'clothes-category' } 종류:
                     .col-xs-12.col-sm-6
                       %select#clothes-category{ :name => 'clothes-category', 'data-placeholder' => '옷의 종류를 선택하세요', :size => '14' }
-                        %option{ :value => "jacket,pants" } Jacket & Pants
-                        %option{ :value => "jacket,skirt" } Jacket & Skirt
                         %option{ :value => "jacket"       } Jacket
                         %option{ :value => "pants"        } Pants
                         %option{ :value => "shirt"        } Shirt
@@ -220,10 +218,43 @@
                     .space-2
 
                     .form-group.has-info
-                      %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'clothes-bust' } 가슴:
+                      %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'clothes-bust' } 가슴 둘레:
                       .col-xs-12.col-sm-5
                         .input-group
                           %input#clothes-bust.valid.form-control{ :name => 'bust', :type => 'text' }
+                          %span.input-group-addon
+                            %i cm
+
+                  #display-clothes-waist
+                    .space-2
+
+                    .form-group.has-info
+                      %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'clothes-waist' } 허리 둘레:
+                      .col-xs-12.col-sm-5
+                        .input-group
+                          %input#clothes-waist.valid.form-control{ :name => 'waist', :type => 'text' }
+                          %span.input-group-addon
+                            %i cm
+
+                  #display-clothes-hip
+                    .space-2
+
+                    .form-group.has-info
+                      %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'clothes-hip' } 엉덩이 둘레:
+                      .col-xs-12.col-sm-5
+                        .input-group
+                          %input#clothes-hip.valid.form-control{ :name => 'hip', :type => 'text' }
+                          %span.input-group-addon
+                            %i cm
+
+                  #display-clothes-belly
+                    .space-2
+
+                    .form-group.has-info
+                      %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'clothes-belly' } 배 둘레:
+                      .col-xs-12.col-sm-5
+                        .input-group
+                          %input#clothes-belly.valid.form-control{ :name => 'belly', :type => 'text' }
                           %span.input-group-addon
                             %i cm
 
@@ -235,28 +266,6 @@
                       .col-xs-12.col-sm-5
                         .input-group
                           %input#clothes-arm.valid.form-control{ :name => 'arm', :type => 'text' }
-                          %span.input-group-addon
-                            %i cm
-
-                  #display-clothes-waist
-                    .space-2
-
-                    .form-group.has-info
-                      %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'clothes-waist' } 허리:
-                      .col-xs-12.col-sm-5
-                        .input-group
-                          %input#clothes-waist.valid.form-control{ :name => 'waist', :type => 'text' }
-                          %span.input-group-addon
-                            %i cm
-
-                  #display-clothes-hip
-                    .space-2
-
-                    .form-group.has-info
-                      %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'clothes-hip' } 엉덩이:
-                      .col-xs-12.col-sm-5
-                        .input-group
-                          %input#clothes-hip.valid.form-control{ :name => 'hip', :type => 'text' }
                           %span.input-group-addon
                             %i cm
 
