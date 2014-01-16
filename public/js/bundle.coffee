@@ -93,6 +93,7 @@ $ ->
         when 'bust'   then str = '가슴'
         when 'waist'  then str = '허리'
         when 'hip'    then str = '엉덩이'
+        when 'belly'  then str = '배'
         when 'thigh'  then str = '허벅지'
         when 'arm'    then str = '팔 길이'
         when 'leg'    then str = '다리 길이'
