@@ -48,12 +48,12 @@ CREATE TABLE `user_info` (
   `bust`        INT DEFAULT NULL, -- 가슴   둘레(cm)
   `waist`       INT DEFAULT NULL, -- 허리   둘레(cm)
   `hip`         INT DEFAULT NULL, -- 엉덩이 둘레(cm)
-  `belly`       INT DEFAULT NULL, -- 배 둘레(cm)
+  `belly`       INT DEFAULT NULL, -- 배     둘레(cm)
   `thigh`       INT DEFAULT NULL, -- 허벅지 둘레(cm)
-  `arm`         INT DEFAULT NULL, -- 팔   길이(cm)
-  `leg`         INT DEFAULT NULL, -- 다리 길이(cm)
-  `knee`        INT DEFAULT NULL, -- 무릎 길이(cm)
-  `foot`        INT DEFAULT NULL, -- 발 크기(mm)
+  `arm`         INT DEFAULT NULL, -- 팔     길이(cm)
+  `leg`         INT DEFAULT NULL, -- 다리   길이(cm)
+  `knee`        INT DEFAULT NULL, -- 무릎   길이(cm)
+  `foot`        INT DEFAULT NULL, -- 발     크기(mm)
 
   --
   -- etc
@@ -135,11 +135,11 @@ CREATE TABLE `clothes` (
   `id`          INT UNSIGNED NOT NULL AUTO_INCREMENT,
 
   `code`        CHAR(5)     NOT NULL,  -- 바코드 품번
-  `bust`        INT         DEFAULT 0, -- 가슴 둘레(cm)
-  `waist`       INT         DEFAULT 0, -- 허리 둘레(cm)
+  `bust`        INT         DEFAULT 0, -- 가슴   둘레(cm)
+  `waist`       INT         DEFAULT 0, -- 허리   둘레(cm)
   `hip`         INT         DEFAULT 0, -- 엉덩이 둘레(cm)
-  `belly`       INT         DEFAULT 0, -- 배 둘레(cm)
-  `arm`         INT         DEFAULT 0, -- 팔 길이(cm)
+  `belly`       INT         DEFAULT 0, -- 배     둘레(cm)
+  `arm`         INT         DEFAULT 0, -- 팔     길이(cm)
   `thigh`       INT         DEFAULT 0, -- 허벅지 둘레(cm)
   `length`      INT         DEFAULT 0, -- 기장(cm) 또는 발 크기(mm)
   `color`       VARCHAR(32) DEFAULT NULL,
@@ -158,6 +158,7 @@ CREATE TABLE `clothes` (
   INDEX (`bust`),
   INDEX (`waist`),
   INDEX (`hip`),
+  INDEX (`belly`),
   INDEX (`arm`),
   INDEX (`thigh`),
   INDEX (`length`),
@@ -215,10 +216,11 @@ CREATE TABLE `order` (
   `bust`             INT DEFAULT NULL, -- 가슴   둘레(cm)
   `waist`            INT DEFAULT NULL, -- 허리   둘레(cm)
   `hip`              INT DEFAULT NULL, -- 엉덩이 둘레(cm)
+  `belly`            INT DEFAULT NULL, -- 배     둘레(cm)
   `thigh`            INT DEFAULT NULL, -- 허벅지 둘레(cm)
-  `arm`              INT DEFAULT NULL, -- 팔   길이(cm)
-  `leg`              INT DEFAULT NULL, -- 다리 길이(cm)
-  `knee`             INT DEFAULT NULL, -- 무릎 길이(cm)
+  `arm`              INT DEFAULT NULL, -- 팔     길이(cm)
+  `leg`              INT DEFAULT NULL, -- 다리   길이(cm)
+  `knee`             INT DEFAULT NULL, -- 무릎   길이(cm)
   `foot`             INT DEFAULT NULL, -- 발 크기(mm)
 
   `create_date`      DATETIME DEFAULT NULL,
