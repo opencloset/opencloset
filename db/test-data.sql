@@ -32,10 +32,10 @@ INSERT
 INSERT
   INTO `user_info` (
     `id`, `user_id`, `phone`, `address`, `gender`, `birth`, `comment`,
-    `height`, `weight`, `bust`, `waist`, `hip`, `thigh`, `arm`, `leg`, `knee`, `foot`
+    `height`, `weight`, `bust`, `waist`, `hip`, `belly`, `thigh`, `arm`, `leg`, `knee`, `foot`
   )
   VALUES
-    ( 4, 4, '01011112222', '서울 사당동', 'male', 1982, '최초 대여자', 168, 59, 93, 78, NULL, NULL, 51, 102, NULL, NULL )
+    ( 4, 4, '01011112222', '서울 사당동', 'male', 1982, '최초 대여자', 168, 59, 93, 78, NULL, NULL, NULL, 51, 102, NULL, NULL )
     ;
 
 INSERT

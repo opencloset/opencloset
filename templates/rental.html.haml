@@ -53,7 +53,7 @@
           %th
             %span.label.label-success 키 / 몸무게
           %th
-            %span.label.label-info    가슴 / 허리 / 엉덩이
+            %span.label.label-info    가슴 / 허리 / 엉덩이 / 배
           %th
             %span.label.label-warning 허벅지 / 팔 / 다리 / 무릎 / 발
       %tbody
@@ -82,6 +82,7 @@
                 %span.label.label-info=    $user->user_info->bust   || '-'
                 %span.label.label-info=    $user->user_info->waist  || '-'
                 %span.label.label-info=    $user->user_info->hip    || '-'
+                %span.label.label-info=    $user->user_info->belly  || '-'
             %td
               %div
 

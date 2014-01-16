@@ -45,6 +45,7 @@ $ ->
       'bust',
       'waist',
       'hip',
+      'belly',
       'thigh',
       'arm',
       'leg',

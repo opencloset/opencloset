@@ -114,7 +114,7 @@ helper cloth_validator => sub {
     $validator->when('category')->regexp(qr/^shoes$/)
         ->then(sub { shift->field('length')->required(1) });
 
-    $validator->field(qw/ bust waist hip arm length /)
+    $validator->field(qw/ bust waist hip belly thigh arm length /)
         ->each(sub { shift->regexp(qr/^\d+$/) });
 
     return $validator;
@@ -468,7 +468,7 @@ helper update_user => sub {
     $v->field('phone')->regexp(qr/^\d+$/);
     $v->field('gender')->in(qw/ male female /);
     $v->field('birth')->regexp(qr/^(19|20)\d{2}$/);
-    $v->field(qw/ height weight bust waist hip thigh arm leg knee foot /)->each(sub {
+    $v->field(qw/ height weight bust waist hip belly thigh arm leg knee foot /)->each(sub {
         shift->regexp(qr/^\d{1,3}$/);
     });
     unless ( $self->validate( $v, { %$user_params, %$user_info_params } ) ) {
@@ -545,7 +545,7 @@ helper create_order => sub {
     #   since columns are not perfect yet.
     #
     $v->field('additional_day')->regexp(qr/^\d+$/);
-    $v->field(qw/ height weight bust waist hip thigh arm leg knee foot /)->each(sub {
+    $v->field(qw/ height weight bust waist hip belly thigh arm leg knee foot /)->each(sub {
         shift->regexp(qr/^\d{1,3}$/);
     });
     $v->field('clothes_code')->regexp(qr/^[A-Z0-9]{4,5}$/);
@@ -850,9 +850,22 @@ group {
         #
         my %user_params      = $self->get_params(qw/ name email password /);
         my %user_info_params = $self->get_params(qw/
-            phone  address gender birth comment
-            height weight  bust   waist hip
-            thigh  arm     leg    knee  foot
+            address
+            arm
+            belly
+            birth
+            bust
+            comment
+            foot
+            gender
+            height
+            hip
+            knee
+            leg
+            phone
+            thigh
+            waist
+            weight
         /);
 
         #
@@ -864,7 +877,7 @@ group {
         $v->field('phone')->regexp(qr/^\d+$/);
         $v->field('gender')->in(qw/ male female /);
         $v->field('birth')->regexp(qr/^(19|20)\d{2}$/);
-        $v->field(qw/ height weight bust waist hip thigh arm leg knee foot /)->each(sub {
+        $v->field(qw/ height weight bust waist hip belly thigh arm leg knee foot /)->each(sub {
             shift->regexp(qr/^\d{1,3}$/);
         });
         unless ( $self->validate( $v, { %user_params, %user_info_params } ) ) {
@@ -943,9 +956,22 @@ group {
         #
         my %user_params      = $self->get_params(qw/ id name email password /);
         my %user_info_params = $self->get_params(qw/
-            phone  address gender birth comment
-            height weight  bust   waist hip
-            thigh  arm     leg    knee  foot
+            address
+            arm
+            belly
+            birth
+            bust
+            comment
+            foot
+            gender
+            height
+            hip
+            knee
+            leg
+            phone
+            thigh
+            waist
+            weight
         /);
 
         my $user = $self->update_user( \%user_params, \%user_info_params );
@@ -1015,6 +1041,7 @@ group {
         my %order_params = $self->get_params(qw/
             additional_day
             arm
+            belly
             bust
             comment
             discount

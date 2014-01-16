@@ -213,6 +213,9 @@
           case 'hip':
             str = '엉덩이';
             break;
+          case 'belly':
+            str = '배';
+            break;
           case 'thigh':
             str = '허벅지';
             break;

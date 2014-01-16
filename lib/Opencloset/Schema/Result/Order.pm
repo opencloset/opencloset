@@ -137,6 +137,11 @@ __PACKAGE__->table("order");
   data_type: 'integer'
   is_nullable: 1
 
+=head2 belly
+
+  data_type: 'integer'
+  is_nullable: 1
+
 =head2 thigh
 
   data_type: 'integer'
@@ -257,6 +262,8 @@ __PACKAGE__->add_columns(
   "waist",
   { data_type => "integer", is_nullable => 1 },
   "hip",
+  { data_type => "integer", is_nullable => 1 },
+  "belly",
   { data_type => "integer", is_nullable => 1 },
   "thigh",
   { data_type => "integer", is_nullable => 1 },
@@ -397,8 +404,8 @@ Composing rels: L</order_clothes> -> clothes
 __PACKAGE__->many_to_many("clothes", "order_clothes", "clothes");
 
 
-# Created by DBIx::Class::Schema::Loader v0.07038 @ 2014-01-15 12:03:47
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:TgsXkLTA6l3D3m3UnpQl2A
+# Created by DBIx::Class::Schema::Loader v0.07038 @ 2014-01-16 15:04:35
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:UKDXReNEFFkHwYPW3/XxeQ
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration
