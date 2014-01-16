@@ -71,18 +71,18 @@
     addRegisteredUser();
     clear_clothes_form = function(show) {
       if (show) {
-        _.each(['bust', 'waist', 'hip', 'belly', 'arm', 'length', 'foot'], function(name) {
+        _.each(['bust', 'waist', 'hip', 'belly', 'thigh', 'arm', 'length', 'foot'], function(name) {
           return $("#display-clothes-" + name).show();
         });
       } else {
-        _.each(['bust', 'waist', 'hip', 'belly', 'arm', 'length', 'foot'], function(name) {
+        _.each(['bust', 'waist', 'hip', 'belly', 'thigh', 'arm', 'length', 'foot'], function(name) {
           return $("#display-clothes-" + name).hide();
         });
       }
       $('#clothes-code').val('');
       $('input[name=clothes-gender]').prop('checked', false);
       $('#clothes-color').select2('val', '');
-      return _.each(['bust', 'waist', 'hip', 'belly', 'arm', 'length', 'foot'], function(name) {
+      return _.each(['bust', 'waist', 'hip', 'belly', 'thigh', 'arm', 'length', 'foot'], function(name) {
         return $("#clothes-" + name).prop('disabled', true).val('');
       });
     };
@@ -97,7 +97,7 @@
           types = ['bust', 'arm', 'belly'];
           break;
         case 'pants':
-          types = ['waist', 'hip', 'length'];
+          types = ['waist', 'hip', 'thigh', 'length'];
           break;
         case 'shirt':
           types = ['bust', 'arm', 'belly'];
@@ -156,6 +156,7 @@
         clothes_waist: $('#clothes-waist').val(),
         clothes_hip: $('#clothes-hip').val(),
         clothes_belly: $('#clothes-belly').val(),
+        clothes_thigh: $('#clothes-thigh').val(),
         clothes_arm: $('#clothes-arm').val(),
         clothes_length: $('#clothes-length').val(),
         clothes_foot: $('#clothes-foot').val()
@@ -287,6 +288,7 @@
                         waist: $(el).data('clothes-waist'),
                         hip: $(el).data('clothes-hip'),
                         belly: $(el).data('clothes-belly'),
+                        thigh: $(el).data('clothes-thigh'),
                         arm: $(el).data('clothes-arm'),
                         length: $(el).data('clothes-length'),
                         foot: $(el).data('clothes-foot'),
