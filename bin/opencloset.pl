@@ -144,7 +144,21 @@ helper order_price => sub {
     return 0 unless $order;
 
     my $price = 0;
-    $price += $_->price for $order->order_details;
+    $price += $_->final_price for $order->order_details;
+
+    return $commify ? $self->commify($price) : $price;
+};
+
+helper order_clothes_price => sub {
+    my ( $self, $order, $commify ) = @_;
+
+    return 0 unless $order;
+
+    my $price = 0;
+    for ( $order->order_details ) {
+        next unless $_->clothes;
+        $price += $_->price;
+    }
 
     return $commify ? $self->commify($price) : $price;
 };
@@ -176,10 +190,8 @@ helper commify => sub {
 helper calc_late_fee => sub {
     my ( $self, $order, $commify ) = @_;
 
-    my $price = 0;
-    $price += $_->price for $order->order_details;
-
-    my $overdue  = $self->calc_overdue( $order->target_date );
+    my $price   = $self->order_clothes_price( $order, $commify );
+    my $overdue = $self->calc_overdue( $order->target_date );
     return 0 unless $overdue;
 
     my $late_fee = $price * 0.2 * $overdue;
