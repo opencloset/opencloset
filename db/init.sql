@@ -252,6 +252,7 @@ CREATE TABLE `order_detail` (
   `status_id`    INT UNSIGNED DEFAULT NULL,
   `name`         TEXT         NOT NULL,
   `price`        INT          DEFAULT 0,
+  `final_price`  INT          DEFAULT 0,
   `desc`         TEXT         DEFAULT NULL,
 
   PRIMARY KEY (`id`),
