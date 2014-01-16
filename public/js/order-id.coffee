@@ -37,7 +37,8 @@ $ ->
         result.push { value: m, text: "#{m + 3}박 #{m + 4}일" }
       return result
     success: (response, newValue) ->
-      autoSetByAdditionalDay newValue
+      $(this).data('value', newValue)
+      autoSetByAdditionalDay()
   })
   $('#order-rental-date').editable({
     mode:        'inline'
@@ -91,13 +92,32 @@ $ ->
       return result
   })
   $('.order-detail').editable()
-  $('.order-detail-discount').editable({
+
+  setOrderDetailFinalPrice = (order_detail_id) ->
+    day         = parseInt $('#order-additional-day').data('value')
+    price       = parseInt $("#order-detail-price-#{ order_detail_id }").data('value')
+    final_price = price + price * 0.2 * day
+    $( "#order-detail-final-price-#{ order_detail_id }" ).editable 'setValue', final_price
+    $( "#order-detail-final-price-#{ order_detail_id }" ).editable 'submit'
+
+  $('.order-detail-price').each (i, el) ->
+    $(el).editable({
+      display: (value, sourceData, response) ->
+        $(this).html( OpenCloset.commify value )
+      success: (response, newValue) ->
+        $(el).data('value', newValue)
+        updateOrder()
+        setOrderDetailFinalPrice $(el).data('pk')
+    })
+
+  $('#order-desc').editable()
+
+  $('.order-detail-final-price').editable({
     display: (value, sourceData, response) ->
       $(this).html( OpenCloset.commify value )
     success: (response, newValue) ->
       updateOrder()
   })
-  $('#order-desc').editable()
 
   $('#btn-order-confirm').click (e) ->
     order_id     = $('#order').data('order-id')
@@ -142,17 +162,24 @@ $ ->
       error: (jqXHR, textStatus, errorThrown) ->
       complete: (jqXHR, textStatus) ->
 
-  autoSetByAdditionalDay = (day) ->
+  autoSetByAdditionalDay = ->
     return if $('#order-additional-day').data('disabled')
 
-    day = parseInt(day) + 3
+    day = parseInt $('#order-additional-day').data('value')
 
     # 대여일을 오늘로 자동 설정
     $('#order-rental-date').editable 'setValue', moment().format('YYYY-MM-DD HH:mm:ss'), true
     $('#order-rental-date').editable 'submit'
 
     # 반납 예정일을 오늘을 기준으로 자동으로 계산
-    $('#order-target-date').editable 'setValue', moment().add('days', day).endOf('day').format('YYYY-MM-DD HH:mm:ss'), true
+    $('#order-target-date').editable 'setValue', moment().add('days', day + 3).endOf('day').format('YYYY-MM-DD HH:mm:ss'), true
     $('#order-target-date').editable 'submit'
 
-  autoSetByAdditionalDay( $('#order-additional-day').editable 'getValue', true )
+    # 주문표의 대여일을 자동 설정
+    $('#order table td:nth-child(5) span').html( "4+#{ day }일" )
+
+    # 주문표의 소계를 자동 설정
+    $('.order-detail-price').each (i, el) ->
+      setOrderDetailFinalPrice $(el).data('pk')
+
+  autoSetByAdditionalDay()

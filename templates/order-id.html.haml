@@ -168,9 +168,9 @@
                                             ></a>
 
                                             /
-                                            <strong> <%= late_fee %>원 </strong>
+                                            <strong> <%= OpenCloset.commify(late_fee) %>원 </strong>
                                             <br />
-                                            <strong> <%= overdue %>일 x <%= price %>원 x 20% </strong>
+                                            <strong> <%= overdue %>일 x <%= OpenCloset.commify(clothes_price) %>원 x 20% </strong>
                                           <% } else { %>
                                             <strong> 해당사항 없음 </strong>
                                           <% } %>
@@ -272,6 +272,8 @@
                                   %th 항목
                                   %th 상태
                                   %th 대여 가격
+                                  %th 기간
+                                  %th 소계
                                   %th 기타
                               %tbody
                                 - my $count = 0;
@@ -292,29 +294,45 @@
                                       %td
                                     - }
                                     %td
-                                      - if ( $detail->name eq '에누리' ) {
-                                        :plain
-                                          <a
-                                            id               = "order-detail-price-#{ $detail->id }"
-                                            class            = "order-detail-discount editable editable-click"
-                                            href             = "#"
+                                      :plain
+                                        <a
+                                          id               = "order-detail-price-#{ $detail->id }"
+                                          class            = "order-detail-price editable editable-click"
+                                          href             = "#"
 
-                                            data-disabled    = "#{ $order->status ? 'true' : 'false' }"
-                                            data-mode        = "inline"
-                                            data-showbuttons = "true"
-                                            data-type        = "text"
-                                            data-emptytext   = "0"
+                                          data-disabled    = "#{ $order->status ? 'true' : 'false' }"
+                                          data-mode        = "inline"
+                                          data-showbuttons = "true"
+                                          data-type        = "text"
+                                          data-emptytext   = "0"
 
-                                            data-value       = "#{ commify( $detail->price ) || q{} }"
+                                          data-value       = "#{ $detail->price || 0 }"
 
-                                            data-url         = "/order/#{ $order->id }/update"
-                                            data-pk          = "#{ $detail->id }"
-                                            data-name        = "detail-price"
-                                          ></a>원
-                                      - }
-                                      - else {
-                                        %span= commify($detail->price) . '원'
-                                      - }
+                                          data-url         = "/order/#{ $order->id }/update"
+                                          data-pk          = "#{ $detail->id }"
+                                          data-name        = "detail-price"
+                                        ></a>원
+                                    %td
+                                      %span= sprintf('4+%d일', $order->additional_day)
+                                    %td
+                                      :plain
+                                        <a
+                                          id               = "order-detail-final-price-#{ $detail->id }"
+                                          class            = "order-detail-final-price editable editable-click"
+                                          href             = "#"
+
+                                          data-disabled    = "#{ $order->status ? 'true' : 'false' }"
+                                          data-mode        = "inline"
+                                          data-showbuttons = "true"
+                                          data-type        = "text"
+                                          data-emptytext   = "0"
+
+                                          data-value       = "#{ $detail->final_price || 0 }"
+
+                                          data-url         = "/order/#{ $order->id }/update"
+                                          data-pk          = "#{ $detail->id }"
+                                          data-name        = "detail-final_price"
+                                        ></a>원
                                     %td
                                       :plain
                                         <a
