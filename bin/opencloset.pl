@@ -220,13 +220,14 @@ helper flatten_order => sub {
 
     my %data = (
         $order->get_columns,
-        rental_date => undef,
-        target_date => undef,
-        return_date => undef,
-        price       => $self->order_price( $order, 'commify' ),
-        clothes     => [ $order->clothes->get_column('code')->all ],
-        late_fee    => $self->calc_late_fee( $order, 'commify' ),
-        overdue     => $self->calc_overdue( $order->target_date ),
+        rental_date   => undef,
+        target_date   => undef,
+        return_date   => undef,
+        price         => $self->order_price($order),
+        clothes_price => $self->order_clothes_price($order),
+        clothes       => [ $order->clothes->get_column('code')->all ],
+        late_fee      => $self->calc_late_fee($order),
+        overdue       => $self->calc_overdue( $order->target_date ),
     );
 
     if ( $order->rental_date ) {
