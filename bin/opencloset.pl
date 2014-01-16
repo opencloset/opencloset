@@ -144,7 +144,21 @@ helper order_price => sub {
     return 0 unless $order;
 
     my $price = 0;
-    $price += $_->price for $order->order_details;
+    $price += $_->final_price for $order->order_details;
+
+    return $commify ? $self->commify($price) : $price;
+};
+
+helper order_clothes_price => sub {
+    my ( $self, $order, $commify ) = @_;
+
+    return 0 unless $order;
+
+    my $price = 0;
+    for ( $order->order_details ) {
+        next unless $_->clothes;
+        $price += $_->price;
+    }
 
     return $commify ? $self->commify($price) : $price;
 };
@@ -152,9 +166,9 @@ helper order_price => sub {
 helper calc_overdue => sub {
     my ( $self, $target_dt, $return_dt ) = @_;
 
-    return unless $target_dt;
+    return 0 unless $target_dt;
 
-    $return_dt ||= DateTime->now;
+    $return_dt ||= DateTime->now( time_zone => app->config->{timezone} );
 
     my $DAY_AS_SECONDS = 60 * 60 * 24;
 
@@ -176,10 +190,8 @@ helper commify => sub {
 helper calc_late_fee => sub {
     my ( $self, $order, $commify ) = @_;
 
-    my $price = 0;
-    $price += $_->price for $order->order_details;
-
-    my $overdue  = $self->calc_overdue( $order->target_date );
+    my $price   = $self->order_clothes_price( $order, $commify );
+    my $overdue = $self->calc_overdue( $order->target_date );
     return 0 unless $overdue;
 
     my $late_fee = $price * 0.2 * $overdue;
@@ -208,13 +220,14 @@ helper flatten_order => sub {
 
     my %data = (
         $order->get_columns,
-        rental_date => undef,
-        target_date => undef,
-        return_date => undef,
-        price       => $self->order_price( $order, 'commify' ),
-        clothes     => [ $order->clothes->get_column('code')->all ],
-        late_fee    => $self->calc_late_fee( $order, 'commify' ),
-        overdue     => $self->calc_overdue( $order->target_date ),
+        rental_date   => undef,
+        target_date   => undef,
+        return_date   => undef,
+        price         => $self->order_price($order),
+        clothes_price => $self->order_clothes_price($order),
+        clothes       => [ $order->clothes->get_column('code')->all ],
+        late_fee      => $self->calc_late_fee($order),
+        overdue       => $self->calc_overdue( $order->target_date ),
     );
 
     if ( $order->rental_date ) {
@@ -531,6 +544,7 @@ helper create_order => sub {
     #   need more validation but not now
     #   since columns are not perfect yet.
     #
+    $v->field('additional_day')->regexp(qr/^\d+$/);
     $v->field(qw/ height weight bust waist hip thigh arm leg knee foot /)->each(sub {
         shift->regexp(qr/^\d{1,3}$/);
     });
@@ -592,14 +606,17 @@ helper create_order => sub {
                         status_id    => $clothes->status->id,
                         name         => join( q{ - }, $clothes->code, $clothes->category ),
                         price        => $clothes->price,
+                        final_price  => ( $clothes->price + $clothes->price * 0.2 * ($order_params->{additional_day} || 0) ),
+
                     }) or die "failed to create a new order_detail\n";
                 }
                 #
                 # create order_detail for discount
                 #
                 $order->add_to_order_details({
-                    name  => '에누리',
-                    price => 0,
+                    name        => '에누리',
+                    price       => 0,
+                    final_price => 0,
                 }) or die "failed to create a new order_detail for discount\n";
             }
 
@@ -996,13 +1013,32 @@ group {
         # fetch params
         #
         my %order_params = $self->get_params(qw/
-            user_id     status_id     rental_date    target_date
-            return_date return_method price_pay_with price
-            discount    late_fee      l_discount     late_fee_pay_with
-            staff_name  comment       purpose        height
-            weight      bust          waist          hip
-            thigh       arm           leg            knee
+            additional_day
+            arm
+            bust
+            comment
+            discount
             foot
+            height
+            hip
+            knee
+            l_discount
+            late_fee
+            late_fee_pay_with
+            leg
+            price
+            price_pay_with
+            purpose
+            rental_date
+            return_date
+            return_method
+            staff_name
+            status_id
+            target_date
+            thigh
+            user_id
+            waist
+            weight
         /);
         my %order_clothes_params = $self->get_params(qw/ clothes_code /);
 
@@ -1046,14 +1082,33 @@ group {
         # fetch params
         #
         my %params = $self->get_params(qw/
-            id
-            user_id     status_id     rental_date    target_date
-            return_date return_method price_pay_with price
-            discount    late_fee      l_discount     late_fee_pay_with
-            staff_name  comment       purpose        height
-            weight      bust          waist          hip
-            thigh       arm           leg            knee
+            additional_day
+            arm
+            bust
+            comment
+            discount
             foot
+            height
+            hip
+            id
+            knee
+            l_discount
+            late_fee
+            late_fee_pay_with
+            leg
+            price
+            price_pay_with
+            purpose
+            rental_date
+            return_date
+            return_method
+            staff_name
+            status_id
+            target_date
+            thigh
+            user_id
+            waist
+            weight
         /);
 
         #
@@ -1072,6 +1127,7 @@ group {
         #   need more validation but not now
         #   since columns are not perfect yet.
         #
+        $v->field('additional_day')->regexp(qr/^\d+$/);
         $v->field(qw/ height weight bust waist hip thigh arm leg knee foot /)->each(sub {
             shift->regexp(qr/^\d{1,3}$/);
         });
@@ -1867,7 +1923,7 @@ get '/rental' => sub {
     ### To disable this warning for good set $ENV{DBIC_DT_SEARCH_OK} to true
     ###
     ### DateTime object 를 search 에 바로 사용하지 말고 parser 를 이용하라능 - @aanoaa
-    my $today     = DateTime->today( time_zone => 'Asia/Seoul' );
+    my $today     = DateTime->today( time_zone => app->config->{timezone} );
     my $dt_parser = $DB->storage->datetime_parser;
 
     my @users = $DB->resultset('User')->search(
@@ -2303,7 +2359,7 @@ __DATA__
           %a{:href => '/guests/#{$order->guest->id}'}= $order->guest->user->name
           님
           - if ($order->status && $order->status->name eq '대여중') {
-            - if (calc_overdue($order->target_date, DateTime->now())) {
+            - if (calc_overdue($order->target_date, DateTime->now( time_zone => $timezone ))) {
               %span.label.label-important 연체중
             - } else {
               %span.label.label-important= $order->status->name

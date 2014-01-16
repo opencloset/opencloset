@@ -243,16 +243,24 @@ $opencloset-darken-yellow: desaturate(darken($opencloset-yellow, 4%), 10%);
                 &:nth-child(3) {
                     width: 90px;
                 }
-                &:nth-child(4) {
-                    width: 80px;
+                &:nth-child(4),
+                &:nth-child(6) {
+                    width: 74px;
+                }
+                &:nth-child(5) {
+                    width: 60px;
                 }
             }
             td {
-                &:nth-child(4) {
+                &:nth-child(4),
+                &:nth-child(6) {
                     text-align: right;
                     input {
                         width: 100px;
                     }
+                }
+                &:nth-child(5) {
+                    text-align: right;
                 }
             }
         }

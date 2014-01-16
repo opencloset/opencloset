@@ -33,6 +33,11 @@ $db_opts->{AutoCommit} //= 1;
     },
 
     #
+    # 시간대 설정
+    #
+    timezone => 'Asia/Seoul',
+
+    #
     # site UI
     #
     secrets      => [

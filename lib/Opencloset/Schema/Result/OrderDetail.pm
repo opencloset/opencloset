@@ -66,6 +66,12 @@ __PACKAGE__->table("order_detail");
   default_value: 0
   is_nullable: 1
 
+=head2 final_price
+
+  data_type: 'integer'
+  default_value: 0
+  is_nullable: 1
+
 =head2 desc
 
   data_type: 'text'
@@ -100,6 +106,8 @@ __PACKAGE__->add_columns(
   "name",
   { data_type => "text", is_nullable => 0 },
   "price",
+  { data_type => "integer", default_value => 0, is_nullable => 1 },
+  "final_price",
   { data_type => "integer", default_value => 0, is_nullable => 1 },
   "desc",
   { data_type => "text", is_nullable => 1 },
@@ -175,8 +183,8 @@ __PACKAGE__->belongs_to(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07038 @ 2014-01-09 18:34:05
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:kr5SRSWYrtYI/+ilSf6btg
+# Created by DBIx::Class::Schema::Loader v0.07038 @ 2014-01-16 10:27:16
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:yD/F4FqLNhKwLFGoJpoWIw
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

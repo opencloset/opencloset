@@ -2112,7 +2112,11 @@ Makes editable any HTML element on the page. Applied as jQuery method.
                     }                     
                     
                     // perform ajax request
-                    $.ajax(ajaxOptions);
+                    if(typeof ajaxOptions.url === 'function') { //user's function
+                        editable.options.url.call(editable.options.scope, ajaxOptions.data);
+                    } else {
+                        $.ajax(ajaxOptions);
+                    }
                 } else { //client-side validation error
                     if(typeof config.error === 'function') {
                         config.error.call($elems, errors);
