@@ -227,10 +227,10 @@
                 %h3.lighter.block.green 다음 신체 치수를 입력해주세요.
                 %form.form-horizontal{ :method => 'get' }
                   /
-                  / 가슴
+                  / 가슴 둘레
                   /
                   .form-group.has-info
-                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'bust' } 가슴:
+                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'bust' } 가슴 둘레:
                     .col-xs-12.col-sm-5
                       .input-group
                         %input#bust.form-control.valid.col-xs-12.col-sm-6{ :name => 'bust', :type => 'text' }
@@ -238,10 +238,10 @@
                           %i cm
 
                   /
-                  / 허리
+                  / 허리 둘레
                   /
                   .form-group.has-info
-                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'waist' } 허리:
+                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'waist' } 허리 둘레:
                     .col-xs-12.col-sm-5
                       .input-group
                         %input#waist.form-control.valid.col-xs-12.col-sm-6{ :name => 'waist', :type => 'text' }
@@ -249,10 +249,10 @@
                           %i cm
 
                   /
-                  / 엉덩이
+                  / 엉덩이 둘레
                   /
                   .form-group.has-info
-                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'hip' } 엉덩이:
+                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'hip' } 엉덩이 둘레:
                     .col-xs-12.col-sm-5
                       .input-group
                         %input#hip.form-control.valid.col-xs-12.col-sm-6{ :name => 'hip', :type => 'text' }
@@ -260,10 +260,21 @@
                           %i cm
 
                   /
-                  / 허벅지
+                  / 배 둘레
                   /
                   .form-group.has-info
-                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'thigh' } 허벅지:
+                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'belly' } 배 둘레:
+                    .col-xs-12.col-sm-5
+                      .input-group
+                        %input#belly.form-control.valid.col-xs-12.col-sm-6{ :name => 'belly', :type => 'text' }
+                        %span.input-group-addon
+                          %i cm
+
+                  /
+                  / 허벅지 둘레
+                  /
+                  .form-group.has-info
+                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'thigh' } 허벅지 둘레:
                     .col-xs-12.col-sm-5
                       .input-group
                         %input#thigh.form-control.valid.col-xs-12.col-sm-6{ :name => 'thigh', :type => 'text' }
