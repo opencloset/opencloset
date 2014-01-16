@@ -58,23 +58,9 @@ $ ->
             else               value_str = ''
           $(this).html value_str
       when 'clothes-color'
-        params.type    = 'select'
-        params.source  = [
-          { value: 'B', text: '검정(B)' },
-          { value: 'N', text: '감청(N)' },
-          { value: 'G', text: '회색(G)' },
-          { value: 'R', text: '빨강(R)' },
-          { value: 'W', text: '흰색(W)' },
-        ]
-        params.display = (value) ->
-          switch value
-            when 'B' then value_str = '검정(B)'
-            when 'N' then value_str = '감청(N)'
-            when 'G' then value_str = '회색(G)'
-            when 'R' then value_str = '빨강(R)'
-            when 'W' then value_str = '흰색(W)'
-            else          value_str = ''
-          $(this).html value_str
+        params.type   = 'select'
+        params.source = []
+        params.source.push { value: color, text: color_str } for color, color_str of OpenCloset.color
       else
         params.type = 'text'
 
