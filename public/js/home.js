@@ -46,7 +46,7 @@
               $('#action-buttons').show();
             }
           }
-          $html.find('.order-status').addClass(OpenCloset.getStatusCss(data.status));
+          $html.find('.order-status').addClass(OpenCloset.status[data.status].css);
           return $("#clothes-table table tbody").append($html);
         },
         error: function(jqXHR, textStatus, errorThrown) {
@@ -68,7 +68,7 @@
       if (!clothes.length) {
         return;
       }
-      status_id = OpenCloset.getStatusId(this.innerHTML.replace(/^\s+|\s+$/g, ""));
+      status_id = OpenCloset.status[this.innerHTML.replace(/^\s+|\s+$/g, "")].id;
       $.ajax("/api/clothes-list.json", {
         type: 'PUT',
         data: $.param({
@@ -91,7 +91,7 @@
                 code = clothes.code.replace(/^0/, '');
                 _results.push($("#clothes-table table tbody tr[data-clothes-code='" + code + "'] td:nth-child(3) span.order-status").html(clothes.status).removeClass(function(i, c) {
                   return c;
-                }).addClass(['order-status', 'label', OpenCloset.getStatusCss(clothes.status)].join(' ')));
+                }).addClass(['order-status', 'label', OpenCloset.status[clothes.status].css].join(' ')));
               }
               return _results;
             },

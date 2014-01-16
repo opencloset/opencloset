@@ -2,7 +2,7 @@
 (function() {
   $(function() {
     $('.order-status').each(function(i, el) {
-      $(el).addClass(OpenCloset.getStatusCss($(el).data('status')));
+      $(el).addClass(OpenCloset.status[$(el).data('status')].css);
       if ($(el).data('late-fee') > 0) {
         return $(el).find('.order-status-str').html('연체중');
       }

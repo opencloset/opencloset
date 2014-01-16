@@ -161,19 +161,7 @@
                   .form-group.has-info
                     %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'clothes-category' } 종류:
                     .col-xs-12.col-sm-6
-                      %select#clothes-category{ :name => 'clothes-category', 'data-placeholder' => '옷의 종류를 선택하세요', :size => '12' }
-                        %option{ :value => "jacket"       } Jacket
-                        %option{ :value => "pants"        } Pants
-                        %option{ :value => "shirt"        } Shirt
-                        %option{ :value => "shoes"        } Shoes
-                        %option{ :value => "hat"          } Hat
-                        %option{ :value => "tie"          } Tie
-                        %option{ :value => "waistcoat"    } Waistcoat
-                        %option{ :value => "coat"         } Coat
-                        %option{ :value => "onepiece"     } Onepiece
-                        %option{ :value => "skirt"        } Skirt
-                        %option{ :value => "blouse"       } Blouse
-                        %option{ :value => "belt"         } Belt
+                      %input#clothes-category{ :name => 'clothes-category', :type => 'hidden', 'data-placeholder' => '옷의 종류를 선택하세요' }
 
                   .space-2
 

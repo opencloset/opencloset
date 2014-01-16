@@ -35,7 +35,7 @@ $ ->
           $html = $(compiled(data))
           $('#action-buttons').show() if data.status is '대여가능'
 
-        $html.find('.order-status').addClass( OpenCloset.getStatusCss data.status )
+        $html.find('.order-status').addClass OpenCloset.status[ data.status ].css
         $("#clothes-table table tbody").append($html)
       error: (jqXHR, textStatus, errorThrown) ->
         alert('danger', jqXHR.responseJSON.error)
@@ -52,7 +52,7 @@ $ ->
     clothes = _.uniq(clothes)
     return unless clothes.length
 
-    status_id = OpenCloset.getStatusId( this.innerHTML.replace /^\s+|\s+$/g, "" )
+    status_id = OpenCloset.status[ this.innerHTML.replace /^\s+|\s+$/g, "" ].id
 
     #
     # 체크한 의류 상태를 변경하는 api 호출
@@ -75,7 +75,7 @@ $ ->
               $("#clothes-table table tbody tr[data-clothes-code='#{code}'] td:nth-child(3) span.order-status")
                 .html(clothes.status)
                 .removeClass( (i, c) -> c )
-                .addClass [ 'order-status', 'label', OpenCloset.getStatusCss(clothes.status) ].join(' ')
+                .addClass [ 'order-status', 'label', OpenCloset.status[ clothes.status ].css ].join(' ')
           error: (jqXHR, textStatus, errorThrown) ->
             alert('danger', jqXHR.responseJSON.error)
       error: (jqXHR, textStatus, errorThrown) ->

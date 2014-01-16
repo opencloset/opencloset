@@ -25,175 +25,101 @@
       }
     });
     Window.prototype.OpenCloset = {
-      getStatusCss: function(status) {
-        var css;
-        switch (status) {
-          case '대여가능':
-            css = 'label-success';
-            break;
-          case '대여중':
-            css = 'label-important';
-            break;
-          case '대여불가':
-            css = 'label-inverse';
-            break;
-          case '예약':
-            css = 'label-inverse';
-            break;
-          case '세탁':
-            css = 'label-inverse';
-            break;
-          case '수선':
-            css = 'label-inverse';
-            break;
-          case '분실':
-            css = 'label-inverse';
-            break;
-          case '폐기':
-            css = 'label-inverse';
-            break;
-          case '반납':
-            css = 'label-inverse';
-            break;
-          case '부분반납':
-            css = 'label-warning';
-            break;
-          case '반납배송중':
-            css = 'label-warning';
-            break;
-          default:
-            css = '';
+      status: {
+        '대여가능': {
+          id: 1,
+          css: 'label-success'
+        },
+        '대여중': {
+          id: 2,
+          css: 'label-important'
+        },
+        '대여불가': {
+          id: 3,
+          css: 'label-inverse'
+        },
+        '예약': {
+          id: 4,
+          css: 'label-inverse'
+        },
+        '세탁': {
+          id: 5,
+          css: 'label-inverse'
+        },
+        '수선': {
+          id: 6,
+          css: 'label-inverse'
+        },
+        '분실': {
+          id: 7,
+          css: 'label-inverse'
+        },
+        '폐기': {
+          id: 8,
+          css: 'label-inverse'
+        },
+        '반납': {
+          id: 9,
+          css: 'label-inverse'
+        },
+        '부분반납': {
+          id: 10,
+          css: 'label-warning'
+        },
+        '반납배송중': {
+          id: 11,
+          css: 'label-warning'
         }
-        return css;
       },
-      getStatusId: function(status) {
-        var id;
-        switch (status) {
-          case '대여가능':
-            id = 1;
-            break;
-          case '대여중':
-            id = 2;
-            break;
-          case '대여불가':
-            id = 3;
-            break;
-          case '예약':
-            id = 4;
-            break;
-          case '세탁':
-            id = 5;
-            break;
-          case '수선':
-            id = 6;
-            break;
-          case '분실':
-            id = 7;
-            break;
-          case '폐기':
-            id = 8;
-            break;
-          case '반납':
-            id = 9;
-            break;
-          case '부분반납':
-            id = 10;
-            break;
-          case '반납배송중':
-            id = 11;
-            break;
-          default:
-            id = void 0;
+      category: {
+        belt: {
+          str: '벨트',
+          price: 2000
+        },
+        blouse: {
+          str: '블라우스',
+          price: 5000
+        },
+        coat: {
+          str: '코트',
+          price: 10000
+        },
+        hat: {
+          str: '모자',
+          price: 2000
+        },
+        jacket: {
+          str: '재킷',
+          price: 10000
+        },
+        onepiece: {
+          str: '원피스',
+          price: 10000
+        },
+        pants: {
+          str: '바지',
+          price: 10000
+        },
+        shirt: {
+          str: '셔츠',
+          price: 5000
+        },
+        shoes: {
+          str: '신발',
+          price: 5000
+        },
+        skirt: {
+          str: '치마',
+          price: 10000
+        },
+        tie: {
+          str: '넥타이',
+          price: 2000
+        },
+        waistcoat: {
+          str: '조끼',
+          price: 5000
         }
-        return id;
-      },
-      getCategoryStr: function(category) {
-        var str;
-        switch (category) {
-          case 'belt':
-            str = '벨트';
-            break;
-          case 'blouse':
-            str = '블라우스';
-            break;
-          case 'coat':
-            str = '코트';
-            break;
-          case 'hat':
-            str = '모자';
-            break;
-          case 'jacket':
-            str = '재킷';
-            break;
-          case 'onepiece':
-            str = '원피스';
-            break;
-          case 'pants':
-            str = '바지';
-            break;
-          case 'shirt':
-            str = '셔츠';
-            break;
-          case 'shoes':
-            str = '신발';
-            break;
-          case 'skirt':
-            str = '치마';
-            break;
-          case 'tie':
-            str = '넥타이';
-            break;
-          case 'waistcoat':
-            str = '조끼';
-            break;
-          default:
-            str = void 0;
-        }
-        return str;
-      },
-      getCategoryPrice: function(category) {
-        var price;
-        switch (category) {
-          case 'belt':
-            price = 2000;
-            break;
-          case 'blouse':
-            price = 5000;
-            break;
-          case 'coat':
-            price = 10000;
-            break;
-          case 'hat':
-            price = 2000;
-            break;
-          case 'jacket':
-            price = 10000;
-            break;
-          case 'onepiece':
-            price = 10000;
-            break;
-          case 'pants':
-            price = 10000;
-            break;
-          case 'shirt':
-            price = 5000;
-            break;
-          case 'shoes':
-            price = 5000;
-            break;
-          case 'skirt':
-            price = 10000;
-            break;
-          case 'tie':
-            price = 2000;
-            break;
-          case 'waistcoat':
-            price = 5000;
-            break;
-          default:
-            price = 0;
-        }
-        return price;
       },
       measurement: {
         height: '키',

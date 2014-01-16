@@ -27,7 +27,7 @@ $ ->
   updateOrder()
 
   $('span.order-status.label').each (i, el) ->
-    $(el).addClass( OpenCloset.getStatusCss $(el).data('order-detail-status') )
+    $(el).addClass OpenCloset.status[ $(el).data('order-detail-status') ].css
 
   $('#order-staff-name').editable()
   $('#order-additional-day').editable({

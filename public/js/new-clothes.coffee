@@ -66,7 +66,10 @@ $ ->
     _.each [ 'bust', 'waist', 'hip', 'belly', 'thigh', 'arm', 'length', 'foot' ], (name) ->
       $("#clothes-#{name}").prop('disabled', true).val('')
 
-  $('#clothes-category').select2( dropdownCssClass: 'bigdrop' )
+  $('#clothes-category').select2({
+    dropdownCssClass: 'bigdrop'
+    data:             ( { id: k, text: v.str } for k, v of OpenCloset.category )
+  })
     .on 'change', (e) ->
       clear_clothes_form false
       types = []
@@ -253,7 +256,7 @@ $ ->
                         arm:         $(el).data('clothes-arm')
                         length:      $(el).data('clothes-length')
                         foot:        $(el).data('clothes-foot')
-                        price:       OpenCloset.getCategoryPrice $(el).data('clothes-category')
+                        price:       OpenCloset.category[ $(el).data('clothes-category') ].price
                       success: (data, textStatus, jqXHR) ->
                       error: (jqXHR, textStatus, errorThrown) ->
                         alert('warning', jqXHR.responseJSON.error.str)

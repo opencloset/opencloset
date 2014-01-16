@@ -34,7 +34,7 @@
     };
     updateOrder();
     $('span.order-status.label').each(function(i, el) {
-      return $(el).addClass(OpenCloset.getStatusCss($(el).data('order-detail-status')));
+      return $(el).addClass(OpenCloset.status[$(el).data('order-detail-status')].css);
     });
     $('#order-staff-name').editable();
     $('#order-additional-day').editable({

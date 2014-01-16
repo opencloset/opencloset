@@ -2,7 +2,7 @@
 (function() {
   $(function() {
     $('.order-status').each(function(i, el) {
-      $(el).addClass(OpenCloset.getStatusCss($(el).data('status')));
+      $(el).addClass(OpenCloset.status[$(el).data('status')].css);
       if ($(el).data('late-fee') > 0) {
         return $(el).find('.order-status-str').html('연체중');
       }
@@ -11,7 +11,7 @@
       return $(el).html(OpenCloset.trimClothesCode($(el).html()));
     });
     return $('.editable').each(function(i, el) {
-      var category, color, color_str, params, _i, _len, _ref, _ref1;
+      var color, color_str, k, params, v, _ref;
       params = {
         mode: 'inline',
         showbuttons: 'true',
@@ -31,17 +31,21 @@
       switch ($(el).attr('id')) {
         case 'clothes-category':
           params.type = 'select';
-          params.source = [];
-          _ref = ['belt', 'blouse', 'coat', 'hat', 'jacket', 'onepiece', 'pants', 'shirt', 'shoes', 'skirt', 'tie', 'waistcoat'];
-          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-            category = _ref[_i];
-            params.source.push({
-              value: category,
-              text: OpenCloset.getCategoryStr(category)
-            });
-          }
+          params.source = (function() {
+            var _ref, _results;
+            _ref = OpenCloset.category;
+            _results = [];
+            for (k in _ref) {
+              v = _ref[k];
+              _results.push({
+                value: k,
+                text: v.str
+              });
+            }
+            return _results;
+          })();
           params.display = function(value) {
-            return $(this).html(OpenCloset.getCategoryStr(value));
+            return $(this).html(OpenCloset.category[value].str);
           };
           break;
         case 'clothes-gender':
@@ -79,9 +83,9 @@
         case 'clothes-color':
           params.type = 'select';
           params.source = [];
-          _ref1 = OpenCloset.color;
-          for (color in _ref1) {
-            color_str = _ref1[color];
+          _ref = OpenCloset.color;
+          for (color in _ref) {
+            color_str = _ref[color];
             params.source.push({
               value: color,
               text: color_str

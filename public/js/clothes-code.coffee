@@ -1,6 +1,6 @@
 $ ->
   $('.order-status').each (i, el) ->
-    $(el).addClass( OpenCloset.getStatusCss $(el).data('status') )
+    $(el).addClass OpenCloset.status[ $(el).data('status') ].css
     $(el).find('.order-status-str').html('연체중') if $(el).data('late-fee') > 0
 
   $('.clothes-code').each (i, el) ->
@@ -25,24 +25,10 @@ $ ->
 
     switch $(el).attr('id')
       when 'clothes-category'
-        params.type   = 'select'
-        params.source = []
-        params.source.push { value: category, text: OpenCloset.getCategoryStr(category) } for category in [
-          'belt',
-          'blouse',
-          'coat',
-          'hat',
-          'jacket',
-          'onepiece',
-          'pants',
-          'shirt',
-          'shoes',
-          'skirt',
-          'tie',
-          'waistcoat',
-        ]
+        params.type    = 'select'
+        params.source  = ( { value: k, text: v.str } for k, v of OpenCloset.category )
         params.display = (value) ->
-          $(this).html OpenCloset.getCategoryStr(value)
+          $(this).html OpenCloset.category[value].str
       when 'clothes-gender'
         params.type    = 'select'
         params.source  = [

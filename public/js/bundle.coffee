@@ -24,68 +24,31 @@ $ ->
   # common fuction for OpenCloset
   #
   Window::OpenCloset =
-    getStatusCss: (status) ->
-      switch status
-        when '대여가능'   then css = 'label-success'
-        when '대여중'     then css = 'label-important'
-        when '대여불가'   then css = 'label-inverse'
-        when '예약'       then css = 'label-inverse'
-        when '세탁'       then css = 'label-inverse'
-        when '수선'       then css = 'label-inverse'
-        when '분실'       then css = 'label-inverse'
-        when '폐기'       then css = 'label-inverse'
-        when '반납'       then css = 'label-inverse'
-        when '부분반납'   then css = 'label-warning'
-        when '반납배송중' then css = 'label-warning'
-        else                   css = ''
-      return css
-    getStatusId: (status) ->
-      switch status
-        when '대여가능'   then id = 1
-        when '대여중'     then id = 2
-        when '대여불가'   then id = 3
-        when '예약'       then id = 4
-        when '세탁'       then id = 5
-        when '수선'       then id = 6
-        when '분실'       then id = 7
-        when '폐기'       then id = 8
-        when '반납'       then id = 9
-        when '부분반납'   then id = 10
-        when '반납배송중' then id = 11
-        else                   id = undefined
-      return id
-    getCategoryStr: (category) ->
-      switch category
-        when 'belt'      then str = '벨트'
-        when 'blouse'    then str = '블라우스'
-        when 'coat'      then str = '코트'
-        when 'hat'       then str = '모자'
-        when 'jacket'    then str = '재킷'
-        when 'onepiece'  then str = '원피스'
-        when 'pants'     then str = '바지'
-        when 'shirt'     then str = '셔츠'
-        when 'shoes'     then str = '신발'
-        when 'skirt'     then str = '치마'
-        when 'tie'       then str = '넥타이'
-        when 'waistcoat' then str = '조끼'
-        else                  str = undefined
-      return str
-    getCategoryPrice: (category) ->
-      switch category
-        when 'belt'      then price = 2000
-        when 'blouse'    then price = 5000
-        when 'coat'      then price = 10000
-        when 'hat'       then price = 2000
-        when 'jacket'    then price = 10000
-        when 'onepiece'  then price = 10000
-        when 'pants'     then price = 10000
-        when 'shirt'     then price = 5000
-        when 'shoes'     then price = 5000
-        when 'skirt'     then price = 10000
-        when 'tie'       then price = 2000
-        when 'waistcoat' then price = 5000
-        else                  price = 0
-      return price
+    status:
+      '대여가능':   { id: 1,  css: 'label-success'   }
+      '대여중':     { id: 2,  css: 'label-important' }
+      '대여불가':   { id: 3,  css: 'label-inverse'   }
+      '예약':       { id: 4,  css: 'label-inverse'   }
+      '세탁':       { id: 5,  css: 'label-inverse'   }
+      '수선':       { id: 6,  css: 'label-inverse'   }
+      '분실':       { id: 7,  css: 'label-inverse'   }
+      '폐기':       { id: 8,  css: 'label-inverse'   }
+      '반납':       { id: 9,  css: 'label-inverse'   }
+      '부분반납':   { id: 10, css: 'label-warning'   }
+      '반납배송중': { id: 11, css: 'label-warning'   }
+    category:
+      belt:      { str: '벨트',     price: 2000  }
+      blouse:    { str: '블라우스', price: 5000  }
+      coat:      { str: '코트',     price: 10000 }
+      hat:       { str: '모자',     price: 2000  }
+      jacket:    { str: '재킷',     price: 10000 }
+      onepiece:  { str: '원피스',   price: 10000 }
+      pants:     { str: '바지',     price: 10000 }
+      shirt:     { str: '셔츠',     price: 5000  }
+      shoes:     { str: '신발',     price: 5000  }
+      skirt:     { str: '치마',     price: 10000 }
+      tie:       { str: '넥타이',   price: 2000  }
+      waistcoat: { str: '조끼',     price: 5000  }
     measurement:
       height: '키'
       weight: '몸무게'

@@ -27,7 +27,7 @@ $ ->
         dataType: 'json'
         success: (data, textStatus, jqXHR) ->
           data.code        = data.code.replace /^0/, ''
-          data.categoryStr = OpenCloset.getCategoryStr data.category
+          data.categoryStr = OpenCloset.category[ data.category ].str
           if data.status is '대여중'
             return if $("#clothes-table table tbody tr[data-order-id='#{data.order.id}']").length
             compiled = _.template($('#tpl-row-checkbox-disabled').html())
@@ -42,7 +42,7 @@ $ ->
             $html = $(compiled(data))
             $('#action-buttons').show() if data.status is '대여가능'
 
-          $html.find('.order-status').addClass(OpenCloset.getStatusCss data.status)
+          $html.find('.order-status').addClass OpenCloset.status[ data.status ].css
           $("#clothes-table table tbody").append($html)
         error: (jqXHR, textStatus, errorThrown) ->
           if jqXHR.status is 404

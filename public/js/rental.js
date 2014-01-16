@@ -27,7 +27,7 @@
           success: function(data, textStatus, jqXHR) {
             var $html, compiled, html;
             data.code = data.code.replace(/^0/, '');
-            data.categoryStr = OpenCloset.getCategoryStr(data.category);
+            data.categoryStr = OpenCloset.category[data.category].str;
             if (data.status === '대여중') {
               if ($("#clothes-table table tbody tr[data-order-id='" + data.order.id + "']").length) {
                 return;
@@ -49,7 +49,7 @@
                 $('#action-buttons').show();
               }
             }
-            $html.find('.order-status').addClass(OpenCloset.getStatusCss(data.status));
+            $html.find('.order-status').addClass(OpenCloset.status[data.status].css);
             return $("#clothes-table table tbody").append($html);
           },
           error: function(jqXHR, textStatus, errorThrown) {
