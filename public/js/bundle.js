@@ -195,46 +195,18 @@
         }
         return price;
       },
-      getMeasurementStr: function(measurement) {
-        var str;
-        switch (measurement) {
-          case 'height':
-            str = '키';
-            break;
-          case 'weight':
-            str = '몸무게';
-            break;
-          case 'bust':
-            str = '가슴';
-            break;
-          case 'waist':
-            str = '허리';
-            break;
-          case 'hip':
-            str = '엉덩이';
-            break;
-          case 'belly':
-            str = '배';
-            break;
-          case 'thigh':
-            str = '허벅지';
-            break;
-          case 'arm':
-            str = '팔 길이';
-            break;
-          case 'leg':
-            str = '다리 길이';
-            break;
-          case 'knee':
-            str = '무릎 길이';
-            break;
-          case 'foot':
-            str = '발 크기';
-            break;
-          default:
-            str = void 0;
-        }
-        return str;
+      measurement: {
+        height: '키',
+        weight: '몸무게',
+        bust: '가슴 둘레',
+        waist: '허리 둘레',
+        hip: '엉덩이 둘레',
+        belly: '배 둘레',
+        thigh: '허벅지 둘레',
+        arm: '팔 길이',
+        leg: '다리 길이',
+        knee: '무릎 길이',
+        foot: '발 크기'
       },
       color: {
         red: '빨강',

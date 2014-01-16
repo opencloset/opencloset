@@ -86,21 +86,18 @@ $ ->
         when 'waistcoat' then price = 5000
         else                  price = 0
       return price
-    getMeasurementStr: (measurement) ->
-      switch measurement
-        when 'height' then str = '키'
-        when 'weight' then str = '몸무게'
-        when 'bust'   then str = '가슴'
-        when 'waist'  then str = '허리'
-        when 'hip'    then str = '엉덩이'
-        when 'belly'  then str = '배'
-        when 'thigh'  then str = '허벅지'
-        when 'arm'    then str = '팔 길이'
-        when 'leg'    then str = '다리 길이'
-        when 'knee'   then str = '무릎 길이'
-        when 'foot'   then str = '발 크기'
-        else               str = undefined
-      return str
+    measurement:
+      height: '키'
+      weight: '몸무게'
+      bust:   '가슴 둘레'
+      waist:  '허리 둘레'
+      hip:    '엉덩이 둘레'
+      belly:  '배 둘레'
+      thigh:  '허벅지 둘레'
+      arm:    '팔 길이'
+      leg:    '다리 길이'
+      knee:   '무릎 길이'
+      foot:   '발 크기'
     color:
       red:    '빨강'
       orange: '주황'
