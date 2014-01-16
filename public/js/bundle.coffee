@@ -101,6 +101,19 @@ $ ->
         when 'foot'   then str = '발 크기'
         else               str = undefined
       return str
+    color:
+      red:    '빨강'
+      orange: '주황'
+      yellow: '노랑'
+      green:  '초록'
+      blue:   '파랑'
+      navy:   '남색'
+      purple: '보라'
+      white:  '흰색'
+      black:  '검정'
+      pink:   '분홍'
+      gray:   '회색'
+      brown:  '갈색'
     trimClothesCode: (code) ->
       code = code.replace /^\s+/, ''
       code = code.replace /\s+$/, ''

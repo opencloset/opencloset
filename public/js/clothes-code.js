@@ -11,7 +11,7 @@
       return $(el).html(OpenCloset.trimClothesCode($(el).html()));
     });
     return $('.editable').each(function(i, el) {
-      var category, params, _i, _len, _ref;
+      var category, color, color_str, params, _i, _len, _ref, _ref1;
       params = {
         mode: 'inline',
         showbuttons: 'true',
@@ -78,47 +78,15 @@
           break;
         case 'clothes-color':
           params.type = 'select';
-          params.source = [
-            {
-              value: 'B',
-              text: '검정(B)'
-            }, {
-              value: 'N',
-              text: '감청(N)'
-            }, {
-              value: 'G',
-              text: '회색(G)'
-            }, {
-              value: 'R',
-              text: '빨강(R)'
-            }, {
-              value: 'W',
-              text: '흰색(W)'
-            }
-          ];
-          params.display = function(value) {
-            var value_str;
-            switch (value) {
-              case 'B':
-                value_str = '검정(B)';
-                break;
-              case 'N':
-                value_str = '감청(N)';
-                break;
-              case 'G':
-                value_str = '회색(G)';
-                break;
-              case 'R':
-                value_str = '빨강(R)';
-                break;
-              case 'W':
-                value_str = '흰색(W)';
-                break;
-              default:
-                value_str = '';
-            }
-            return $(this).html(value_str);
-          };
+          params.source = [];
+          _ref1 = OpenCloset.color;
+          for (color in _ref1) {
+            color_str = _ref1[color];
+            params.source.push({
+              value: color,
+              text: color_str
+            });
+          }
           break;
         default:
           params.type = 'text';

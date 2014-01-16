@@ -161,7 +161,7 @@
                   .form-group.has-info
                     %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'clothes-category' } 종류:
                     .col-xs-12.col-sm-6
-                      %select#clothes-category{ :name => 'clothes-category', 'data-placeholder' => '옷의 종류를 선택하세요', :size => '14' }
+                      %select#clothes-category{ :name => 'clothes-category', 'data-placeholder' => '옷의 종류를 선택하세요', :size => '12' }
                         %option{ :value => "jacket"       } Jacket
                         %option{ :value => "pants"        } Pants
                         %option{ :value => "shirt"        } Shirt
@@ -206,13 +206,8 @@
 
                     .form-group.has-info
                       %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'clothes-color' } 색상:
-                      .col-xs-12.col-sm-4
-                        %select#clothes-color{ :name => 'color', 'data-placeholder' => '옷의 색상을 선택하세요', :size => '6' }
-                          %option{ :value => 'B' } 검정(B)
-                          %option{ :value => 'N' } 감청(N)
-                          %option{ :value => 'G' } 회색(G)
-                          %option{ :value => 'R' } 빨강(R)
-                          %option{ :value => 'W' } 흰색(W)
+                      .col-xs-12.col-sm-6
+                        %input#clothes-color{ :name => 'color', :type => 'hidden', 'data-placeholder' => '옷의 색상을 선택하세요' }
 
                   #display-clothes-bust
                     .space-2

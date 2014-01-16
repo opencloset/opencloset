@@ -88,7 +88,10 @@ $ ->
       for type in types
         $("#display-clothes-#{type}").show()
         $("#clothes-#{type}").prop('disabled', false)
-  $('#clothes-color').select2()
+  $('#clothes-color').select2({
+    dropdownCssClass: 'bigdrop'
+    data:             ( { id: color, text: color_str } for color, color_str of OpenCloset.color )
+  })
 
   $('#clothes-category').select2('val', '')
   clear_clothes_form true
