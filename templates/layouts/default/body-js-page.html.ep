@@ -5,7 +5,7 @@
     % my $asset = app->static->file("js/$page_id.js");
     % push @include_jses, "$page_id.js" if $page_id && $asset && $asset->is_file;
     % for my $js (@include_jses) {
-    %   if ( $js =~ m{^/} ) {
+    %   if ( $js =~ m{^(https?://|/)} ) {
           <script type="text/javascript" src="<%= $js %>"></script>
     %   }
     %   else {
