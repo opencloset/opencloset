@@ -162,3 +162,60 @@ $ ->
       setOrderDetailFinalPrice $(el).data('pk')
 
   autoSetByAdditionalDay()
+
+  #
+  # 반납 진행 버튼 클릭
+  #
+  $('#btn-return-process').click (e) ->
+    $(".return-process input[data-clothes-code]").prop 'checked', 0
+    $('.return-process').show()
+    $('.return-process-reverse').hide()
+    $('#clothes-search').val('').focus()
+
+  #
+  # 반납 취소 버튼 클릭
+  #
+  $('#btn-return-cancel').click (e) ->
+    $(".return-process input[data-clothes-code]").prop 'checked', 0
+    $('.return-process').hide()
+    $('.return-process-reverse').show()
+
+  #
+  # 부분 반납 및 전체 반납 버튼 활성 또는 비활성화
+  #
+  refreshReturnButton = ->
+    count = 0
+    total = 0
+    $(".return-process input[data-clothes-code]").each (i, el) ->
+      ++count if $(el).prop 'checked'
+      ++total
+    if count > 0
+      if count is total
+        $('#btn-return-all').removeClass('disabled')
+        $('#btn-return-part').addClass('disabled')
+      else
+        $('#btn-return-all').addClass('disabled')
+        $('#btn-return-part').removeClass('disabled')
+    else
+      $('#btn-return-all').addClass('disabled')
+      $('#btn-return-part').addClass('disabled')
+
+  #
+  # 주문서 목록의 체크박스 클릭시 반납 버튼 활성화 여부 갱신
+  #
+  $(".return-process input[data-clothes-code]").click -> refreshReturnButton()
+
+  #
+  # 검색한 의류 품번에 일치하는 주문서 목록의 체크박스에 체크
+  #
+  selectSearchedClothes = ->
+    clothes_code = OpenCloset.trimClothesCode $('#clothes-search').val()
+    $('#clothes-search').val('').focus()
+    $(".return-process input[data-clothes-code=#{ clothes_code }]").prop 'checked', 1
+    refreshReturnButton()
+
+  #
+  # 반납용 의류 품번 검색시 동작
+  #
+  $('#clothes-search').keypress (e) -> $('#btn-clothes-search').click() if e.keyCode is 13
+  $('#btn-clothes-search').click -> selectSearchedClothes()

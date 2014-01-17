@@ -269,17 +269,24 @@
                             %table.table.table-striped.table-bordered.table-hover
                               %thead
                                 %tr
+                                  %th.center.return-process
                                   %th.center #
                                   %th 항목
                                   %th 상태
-                                  %th 대여 가격
-                                  %th 기간
+                                  %th.return-process-reverse 대여 가격
+                                  %th.return-process-reverse 기간
                                   %th 소계
                                   %th 기타
                               %tbody
                                 - my $count = 0;
                                 - for my $detail ( $order->order_details ) {
                                   %tr
+                                    %td.center.return-process
+                                      - if ( $detail->clothes ) {
+                                        %label
+                                          %input.ace{ :type => 'checkbox', 'data-clothes-code' => "#{ trim_clothes_code($detail->clothes) }" }
+                                          %span.lbl
+                                      - }
                                     %td.center= ++$count
                                     - if ( $detail->clothes ) {
                                       %td
@@ -298,7 +305,7 @@
                                       %td= $detail->name
                                       %td
                                     - }
-                                    %td
+                                    %td.return-process-reverse
                                       :plain
                                         <a
                                           id               = "order-detail-price-#{ $detail->id }"
@@ -317,7 +324,7 @@
                                           data-pk          = "#{ $detail->id }"
                                           data-name        = "detail-price"
                                         ></a>원
-                                    %td
+                                    %td.return-process-reverse
                                       %span= sprintf('4+%d일', $order->additional_day)
                                     %td
                                       :plain
@@ -391,14 +398,36 @@
                           .space-6
                           .well
                             열린옷장을 이용해주셔서 고맙습니다.
-                - unless ( $order->status ) {
-                  .row
-                    .col-sm-10.col-sm-offset-1
-                      .clearfix.form-actions
+                .row
+                  .col-sm-10.col-sm-offset-1
+                    .clearfix.form-actions
+                      - if ( $order->status ) {
+                      -   if ( $order->status->name eq '대여중' ) {
+                        .search.pull-left.return-process
+                          .input-group
+                            %input#clothes-search.form-control{ :name => 'clothes-search' :type => 'text', :placeholder => '의류 품번' }
+                            %span.input-group-btn
+                              %button#btn-clothes-search.btn.btn-default.btn-sm{ :type => 'submit' }
+                                %i.icon-search.bigger-110 검색
+
+                        %a#btn-return-process.btn.btn-info.pull-right.return-process-reverse{ :type => 'button' }
+                          %i.icon-reply.bigger-110
+                          반납 진행
+                        %a#btn-return-all.btn.btn-success.disabled.pull-right.return-process{ :type => 'button' }
+                          %i.icon-ok.bigger-110
+                          전체 반납
+                        %a#btn-return-part.btn.btn-warning.disabled.pull-right.return-process{ :type => 'button' }
+                          부분 반납
+                        %a#btn-return-cancel.btn.btn-danger.pull-right.return-process{ :type => 'button' }
+                          %i.icon-remove.bigger-110
+                          반납 취소
+                      -   }
+                      - }
+                      - else {
                         %a#btn-order-confirm.btn.btn-info.pull-right{ :type => 'button', :href => "#", 'data-url' => "#{ url_for('/order/' . $order->id . '/update') }", 'data-redirect-url' => "#{ url_for('/order/' . $order->id) }" }
                           %i.icon-ok.bigger-110
                           주문 확정
                         %a.btn.btn-danger.pull-right{ :type => 'button', :href => "#{ url_for('/order/' . $order->id . '/delete') }" }
                           %i.icon-remove.bigger-110
                           주문 지우기
-                - }
+                      - }
