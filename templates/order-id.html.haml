@@ -285,9 +285,13 @@
                                       %td
                                         %a{ :href => "/clothes/#{ trim_clothes_code($detail->clothes) }" }= $detail->name
                                       %td
-                                        - if ( $detail->status ) {
+                                        - if ( $order->status && $detail->status ) {
                                           %span.order-status.label{ 'data-order-detail-status' => "#{ $detail->status->name }" }
                                             = $detail->status->name
+                                        - }
+                                        - else {
+                                          %span.order-status.label{ 'data-order-detail-status' => "#{ $detail->clothes->status->name }" }
+                                            = $detail->clothes->status->name
                                         - }
                                     - }
                                     - else {

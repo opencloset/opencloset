@@ -603,7 +603,6 @@ helper create_order => sub {
                     my $clothes = $DB->resultset('Clothes')->find({ code => $_ });
                     $order->add_to_order_details({
                         clothes_code => $clothes->code,
-                        status_id    => $clothes->status->id,
                         name         => join( q{ - }, $clothes->code, $clothes->category ),
                         price        => $clothes->price,
                         final_price  => ( $clothes->price + $clothes->price * 0.2 * ($order_params->{additional_day} || 0) ),
