@@ -324,4 +324,15 @@ __PACKAGE__->belongs_to(
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration
+
+=head2 orders
+
+Type: many_to_many
+
+Composing rels: L</order_details> -> order
+
+=cut
+
+__PACKAGE__->many_to_many("orders", "order_details", "order");
+
 1;
