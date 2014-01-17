@@ -261,7 +261,7 @@
       var clothes_code;
       clothes_code = OpenCloset.trimClothesCode($('#clothes-search').val());
       $('#clothes-search').val('').focus();
-      $(".return-process input[data-clothes-code=" + clothes_code + "]").prop('checked', 1);
+      $(".return-process input[data-clothes-code=" + clothes_code + "]").click();
       return refreshReturnButton();
     };
     $('#clothes-search').keypress(function(e) {
