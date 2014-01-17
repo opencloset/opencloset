@@ -308,21 +308,6 @@ __PACKAGE__->set_primary_key("id");
 
 =head1 RELATIONS
 
-=head2 order_clothes
-
-Type: has_many
-
-Related object: L<Opencloset::Schema::Result::OrderClothes>
-
-=cut
-
-__PACKAGE__->has_many(
-  "order_clothes",
-  "Opencloset::Schema::Result::OrderClothes",
-  { "foreign.order_id" => "self.id" },
-  { cascade_copy => 0, cascade_delete => 0 },
-);
-
 =head2 order_details
 
 Type: has_many
@@ -393,19 +378,9 @@ __PACKAGE__->belongs_to(
   { is_deferrable => 1, on_delete => "CASCADE", on_update => "RESTRICT" },
 );
 
-=head2 clothes
 
-Type: many_to_many
-
-Composing rels: L</order_clothes> -> clothes
-
-=cut
-
-__PACKAGE__->many_to_many("clothes", "order_clothes", "clothes");
-
-
-# Created by DBIx::Class::Schema::Loader v0.07038 @ 2014-01-16 15:04:35
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:UKDXReNEFFkHwYPW3/XxeQ
+# Created by DBIx::Class::Schema::Loader v0.07038 @ 2014-01-17 19:23:21
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:m2e6eSDdi4HZ0Pp3W0z7YQ
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

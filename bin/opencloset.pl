@@ -225,7 +225,7 @@ helper flatten_order => sub {
         return_date   => undef,
         price         => $self->order_price($order),
         clothes_price => $self->order_clothes_price($order),
-        clothes       => [ $order->clothes->get_column('code')->all ],
+        clothes       => [ $order->order_details({ clothes_code => { '!=' => undef } })->get_column('clothes_code')->all ],
         late_fee      => $self->calc_late_fee($order),
         overdue       => $self->calc_overdue( $order->target_date ),
     );
@@ -577,7 +577,6 @@ helper create_order => sub {
     # TRANSACTION:
     #
     #   - create order
-    #   - create order_clothes
     #   - create order_detail
     #
     my ( $order, $error ) = do {
@@ -591,12 +590,6 @@ helper create_order => sub {
 
             if ( $order_clothes_params && $order_clothes_params->{clothes_code} ) {
                 for ( @{ $order_clothes_params->{clothes_code} } ) {
-                    #
-                    # create order_clothes
-                    #
-                    $order->add_to_order_clothes({ clothes_code => $_ })
-                        or die "failed to create a new order_clothes\n";
-
                     #
                     # create order_detail
                     #

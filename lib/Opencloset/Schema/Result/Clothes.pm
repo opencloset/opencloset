@@ -268,21 +268,6 @@ __PACKAGE__->belongs_to(
   },
 );
 
-=head2 order_clothes
-
-Type: has_many
-
-Related object: L<Opencloset::Schema::Result::OrderClothes>
-
-=cut
-
-__PACKAGE__->has_many(
-  "order_clothes",
-  "Opencloset::Schema::Result::OrderClothes",
-  { "foreign.clothes_code" => "self.code" },
-  { cascade_copy => 0, cascade_delete => 0 },
-);
-
 =head2 order_details
 
 Type: has_many
@@ -333,19 +318,9 @@ __PACKAGE__->belongs_to(
   },
 );
 
-=head2 orders
 
-Type: many_to_many
-
-Composing rels: L</order_clothes> -> order
-
-=cut
-
-__PACKAGE__->many_to_many("orders", "order_clothes", "order");
-
-
-# Created by DBIx::Class::Schema::Loader v0.07038 @ 2014-01-16 12:38:35
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:Ti8/7BUFyNXhYfaHwOwoLw
+# Created by DBIx::Class::Schema::Loader v0.07038 @ 2014-01-17 19:23:21
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:I2c0Vs180eHcEbUd5JMW+w
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration
