@@ -68,7 +68,7 @@ INSERT
     `desc`,`price_pay_with`,`purpose`,`bust`,`waist`,`arm`,`leg`,`create_date`
   )
   VALUES
-    (1,2,2,3,'2013-10-18','2013-10-21',NULL,NULL,'현금','입사면접',95,78,60,105,NOW());
+    (1,2,2,3,'2013-10-18','2013-10-21 23:59:59',NULL,NULL,'현금','입사면접',95,78,60,105,NOW());
 
 INSERT
   INTO `order_detail` (`order_id`, `clothes_code`, `status_id`, `name`, `price`, `final_price`, `desc`)
