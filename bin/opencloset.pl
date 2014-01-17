@@ -610,6 +610,16 @@ helper create_order => sub {
                     price       => 0,
                     final_price => 0,
                 }) or die "failed to create a new order_detail for discount\n";
+                $order->add_to_order_details({
+                    name        => '연체료',
+                    price       => 0,
+                    final_price => 0,
+                }) or die "failed to create a new order_detail for late_fee\n";
+                $order->add_to_order_details({
+                    name        => '연체료 에누리',
+                    price       => 0,
+                    final_price => 0,
+                }) or die "failed to create a new order_detail for late_fee discount\n";
             }
 
             $guard->commit;
