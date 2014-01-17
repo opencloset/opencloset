@@ -15,8 +15,25 @@ $ ->
         compiled = _.template( $('#tpl-late-fee').html() )
         $("#late-fee").html( $(compiled(data)) )
 
+        #
+        # update late_fee discount
+        #
+        compiled = _.template( $('#tpl-late-fee-discount').html() )
+        $("#late-fee-discount").html( $(compiled(data)) )
+        $('#order-late-fee-discount').editable
+          display: (value, sourceData, response) ->
+            $(this).html( OpenCloset.commify value )
+          success: (response, newValue) ->
+            $('.late-fee-final').html OpenCloset.commify( data.late_fee + parseInt(newValue) )
+
+        #
+        # update late_fee final
+        #
+        compiled = _.template( $('#tpl-late-fee-final').html() )
+        $("#late-fee-final").html( $(compiled(data)) )
         $('#order-late-fee-pay-with').editable
           source: -> { value: m, text: m } for m in [ '현금', '카드', '현금+카드' ]
+
       error: (jqXHR, textStatus, errorThrown) ->
       complete: (jqXHR, textStatus) ->
   updateOrder()
@@ -181,16 +198,33 @@ $ ->
     $('.return-process-reverse').show()
 
   #
+  # 전체 반납 버튼 클릭
+  #
+  $('#btn-return-all').click (e) ->
+    count = countSelectedOrderDetail()
+    unless count.selected > 0 && count.selected is count.total
+      alert 'error', "반납할 항목을 선택하지 않았습니다."
+      return
+    console.log "hello world"
+
+  #
+  # 주문서 목록에서 선택된 항목과 선택할 수 있는 항목 총 개수를 반환
+  #
+  countSelectedOrderDetail = ->
+    selected = 0
+    total = 0
+    $(".return-process input[data-clothes-code]").each (i, el) ->
+      ++selected if $(el).prop 'checked'
+      ++total
+    { selected: selected, total: total }
+
+  #
   # 부분 반납 및 전체 반납 버튼 활성 또는 비활성화
   #
   refreshReturnButton = ->
-    count = 0
-    total = 0
-    $(".return-process input[data-clothes-code]").each (i, el) ->
-      ++count if $(el).prop 'checked'
-      ++total
-    if count > 0
-      if count is total
+    count = countSelectedOrderDetail()
+    if count.selected > 0
+      if count.selected is count.total
         $('#btn-return-all').removeClass('disabled')
         $('#btn-return-part').addClass('disabled')
       else
