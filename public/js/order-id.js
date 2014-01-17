@@ -214,7 +214,7 @@
       $('#order-rental-date').editable('submit');
       $('#order-target-date').editable('setValue', moment().add('days', day + 3).endOf('day').format('YYYY-MM-DD HH:mm:ss'), true);
       $('#order-target-date').editable('submit');
-      $('#order table td:nth-child(5) span').html("4+" + day + "일");
+      $('#order table td:nth-child(6) span').html("4+" + day + "일");
       return $('.order-detail-price').each(function(i, el) {
         return setOrderDetailFinalPrice($(el).data('pk'));
       });

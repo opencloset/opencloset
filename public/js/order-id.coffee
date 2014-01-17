@@ -155,7 +155,7 @@ $ ->
     $('#order-target-date').editable 'submit'
 
     # 주문표의 대여일을 자동 설정
-    $('#order table td:nth-child(5) span').html( "4+#{ day }일" )
+    $('#order table td:nth-child(6) span').html( "4+#{ day }일" )
 
     # 주문표의 소계를 자동 설정
     $('.order-detail-price').each (i, el) ->
