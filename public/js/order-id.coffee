@@ -15,13 +15,8 @@ $ ->
         compiled = _.template( $('#tpl-late-fee').html() )
         $("#late-fee").html( $(compiled(data)) )
 
-        $('#order-late-fee-pay-with').editable({
-          source: ->
-            result = []
-            for m in [ '현금', '카드', '현금+카드' ]
-              result.push { value: m, text: m }
-            return result
-        })
+        $('#order-late-fee-pay-with').editable
+          source: -> { value: m, text: m } for m in [ '현금', '카드', '현금+카드' ]
       error: (jqXHR, textStatus, errorThrown) ->
       complete: (jqXHR, textStatus) ->
   updateOrder()
@@ -30,17 +25,12 @@ $ ->
     $(el).addClass OpenCloset.status[ $(el).data('order-detail-status') ].css
 
   $('#order-staff-name').editable()
-  $('#order-additional-day').editable({
-    source: ->
-      result = []
-      for m in [ 0 .. 20 ]
-        result.push { value: m, text: "#{m + 3}박 #{m + 4}일" }
-      return result
+  $('#order-additional-day').editable
+    source:  -> { value: m, text: "#{m + 3}박 #{m + 4}일" } for m in [ 0 .. 20 ]
     success: (response, newValue) ->
       $(this).data('value', newValue)
       autoSetByAdditionalDay()
-  })
-  $('#order-rental-date').editable({
+  $('#order-rental-date').editable
     mode:        'inline'
     showbuttons: 'true'
     type:        'combodate'
@@ -61,8 +51,7 @@ $ ->
         data: data
     success: (response, newValue) ->
       updateOrder()
-  })
-  $('#order-target-date').editable({
+  $('#order-target-date').editable
     mode:        'inline'
     showbuttons: 'true'
     type:        'combodate'
@@ -83,14 +72,8 @@ $ ->
         data: data
     success: (response, newValue) ->
       updateOrder()
-  })
-  $('#order-price-pay-with').editable({
-    source: ->
-      result = []
-      for m in [ '현금', '카드', '현금+카드' ]
-        result.push { value: m, text: m }
-      return result
-  })
+  $('#order-price-pay-with').editable
+    source: -> { value: m, text: m } for m in [ '현금', '카드', '현금+카드' ]
   $('.order-detail').editable()
 
   setOrderDetailFinalPrice = (order_detail_id) ->
@@ -101,23 +84,19 @@ $ ->
     $( "#order-detail-final-price-#{ order_detail_id }" ).editable 'submit'
 
   $('.order-detail-price').each (i, el) ->
-    $(el).editable({
+    $(el).editable
       display: (value, sourceData, response) ->
         $(this).html( OpenCloset.commify value )
       success: (response, newValue) ->
         $(el).data('value', newValue)
         updateOrder()
         setOrderDetailFinalPrice $(el).data('pk')
-    })
 
   $('#order-desc').editable()
 
-  $('.order-detail-final-price').editable({
-    display: (value, sourceData, response) ->
-      $(this).html( OpenCloset.commify value )
-    success: (response, newValue) ->
-      updateOrder()
-  })
+  $('.order-detail-final-price').editable
+    display: (value, sourceData, response) -> $(this).html( OpenCloset.commify value )
+    success: (response, newValue) -> updateOrder()
 
   $('#btn-order-confirm').click (e) ->
     order_id     = $('#order').data('order-id')

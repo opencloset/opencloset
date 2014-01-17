@@ -14,17 +14,17 @@
           $("#late-fee").html($(compiled(data)));
           return $('#order-late-fee-pay-with').editable({
             source: function() {
-              var m, result, _i, _len, _ref;
-              result = [];
+              var m, _i, _len, _ref, _results;
               _ref = ['현금', '카드', '현금+카드'];
+              _results = [];
               for (_i = 0, _len = _ref.length; _i < _len; _i++) {
                 m = _ref[_i];
-                result.push({
+                _results.push({
                   value: m,
                   text: m
                 });
               }
-              return result;
+              return _results;
             }
           });
         },
@@ -39,15 +39,15 @@
     $('#order-staff-name').editable();
     $('#order-additional-day').editable({
       source: function() {
-        var m, result, _i;
-        result = [];
+        var m, _i, _results;
+        _results = [];
         for (m = _i = 0; _i <= 20; m = ++_i) {
-          result.push({
+          _results.push({
             value: m,
             text: "" + (m + 3) + "박 " + (m + 4) + "일"
           });
         }
-        return result;
+        return _results;
       },
       success: function(response, newValue) {
         $(this).data('value', newValue);
@@ -106,17 +106,17 @@
     });
     $('#order-price-pay-with').editable({
       source: function() {
-        var m, result, _i, _len, _ref;
-        result = [];
+        var m, _i, _len, _ref, _results;
         _ref = ['현금', '카드', '현금+카드'];
+        _results = [];
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
           m = _ref[_i];
-          result.push({
+          _results.push({
             value: m,
             text: m
           });
         }
-        return result;
+        return _results;
       }
     });
     $('.order-detail').editable();
