@@ -667,6 +667,112 @@ helper get_order => sub {
     return $order;
 };
 
+helper update_order => sub {
+    my ( $self, $order_params, $order_detail_params ) = @_;
+
+    #
+    # validate params
+    #
+    my $v = $self->create_validator;
+    $v->field('id')->required(1)->regexp(qr/^\d+$/);
+    $v->field('user_id')->regexp(qr/^\d+$/)->callback(sub {
+        my $val = shift;
+
+        return 1 if $DB->resultset('User')->find({ id => $val });
+        return ( 0, 'user not found using user_id' );
+    });
+    #
+    # FIXME
+    #   need more validation but not now
+    #   since columns are not perfect yet.
+    #
+    $v->field('additional_day')->regexp(qr/^\d+$/);
+    $v->field(qw/ height weight bust waist hip belly thigh arm leg knee foot /)->each(sub {
+        shift->regexp(qr/^\d{1,3}$/);
+    });
+    unless ( $self->validate( $v, { %$order_params, %$order_detail_params } ) ) {
+        my @error_str;
+        while ( my ( $k, $v ) = each %{ $v->errors } ) {
+            push @error_str, "$k:$v";
+        }
+        return $self->error( 400, {
+            str  => join(',', @error_str),
+            data => $v->errors,
+        });
+    }
+
+    #
+    # TRANSACTION:
+    #
+    #   - find   order
+    #   - update order
+    #   - update order_detail
+    #
+    my ( $order, $status, $error ) = do {
+        my $guard = $DB->txn_scope_guard;
+        try {
+            #
+            # find order
+            #
+            my $order = $DB->resultset('Order')->find({ id => $order_params->{id} });
+            die "order not found\n" unless $order;
+
+            #
+            # update order
+            #
+            {
+                my %_params = %$order_params;
+                delete $_params{id};
+                $order->update( \%_params ) or die "failed to update the order\n";
+            }
+
+            #
+            # update order_detail
+            #
+            if ( $order_detail_params && $order_detail_params->{id} ) {
+                my %_params = %$order_detail_params;
+                for my $i ( 0 .. $#{ $_params{id} } ) {
+                    my %p  = map { $_ => $_params{$_}[$i] } keys %_params;
+                    my $id = delete $p{id};
+
+                    my $order_detail = $DB->resultset('OrderDetail')->find({ id => $id });
+                    die "order_detail not found\n" unless $order_detail;
+                    $order_detail->update( \%p ) or die "failed to update the order_detail\n";
+                }
+            }
+
+            $guard->commit;
+
+            return $order;
+        }
+        catch {
+            chomp;
+            app->log->error("failed to create a new order & a new order_clothes");
+            app->log->error($_);
+
+            no warnings 'experimental';
+
+            my $status;
+            given ($_) {
+                $status = 404 when 'order not found';
+                default { $status = 500 }
+            }
+
+            return ( undef, $status, $_ );
+        };
+    };
+
+    #
+    # response
+    #
+    $self->error( $status, {
+        str  => $error,
+        data => {},
+    }), return unless $order;
+
+    return $order;
+};
+
 helper delete_order => sub {
     my ( $self, $params ) = @_;
 
@@ -1100,7 +1206,7 @@ group {
         #
         # fetch params
         #
-        my %params = $self->get_params(qw/
+        my %order_params = $self->get_params(qw/
             additional_day
             arm
             bust
@@ -1129,59 +1235,18 @@ group {
             waist
             weight
         /);
+        my %order_detail_params = $self->get_params(
+            [ order_detail_id           => 'id'           ],
+            [ order_detail_clothes_code => 'clothes_code' ],
+            [ order_detail_status_id    => 'status_id'    ],
+            [ order_detail_name         => 'name'         ],
+            [ order_detail_price        => 'price'        ],
+            [ order_detail_final_price  => 'final_price'  ],
+            [ order_detail_desc         => 'desc'         ],
+        );
 
-        #
-        # validate params
-        #
-        my $v = $self->create_validator;
-        $v->field('id')->required(1)->regexp(qr/^\d+$/);
-        $v->field('user_id')->regexp(qr/^\d+$/)->callback(sub {
-            my $val = shift;
-
-            return 1 if $DB->resultset('User')->find({ id => $val });
-            return ( 0, 'user not found using user_id' );
-        });
-        #
-        # FIXME
-        #   need more validation but not now
-        #   since columns are not perfect yet.
-        #
-        $v->field('additional_day')->regexp(qr/^\d+$/);
-        $v->field(qw/ height weight bust waist hip thigh arm leg knee foot /)->each(sub {
-            shift->regexp(qr/^\d{1,3}$/);
-        });
-        unless ( $self->validate( $v, \%params ) ) {
-            my @error_str;
-            while ( my ( $k, $v ) = each %{ $v->errors } ) {
-                push @error_str, "$k:$v";
-            }
-            return $self->error( 400, {
-                str  => join(',', @error_str),
-                data => $v->errors,
-            });
-        }
-
-        #
-        # find order
-        #
-        my $order = $DB->resultset('Order')->find({ id => $params{id} });
-        return $self->error( 404, {
-            str  => 'order not found',
-            data => {},
-        }) unless $order;
-
-        #
-        # update order
-        #
-        {
-            my %_params = %params;
-            delete $_params{id};
-            $order->update( \%_params )
-                or return $self->error( 500, {
-                    str  => 'failed to update a order',
-                    data => {},
-                });
-        }
+        my $order = $self->update_order( \%order_params, \%order_detail_params );
+        return unless $order;
 
         #
         # response
