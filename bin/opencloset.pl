@@ -164,7 +164,12 @@ helper order_clothes_price => sub {
 };
 
 helper calc_overdue => sub {
-    my ( $self, $target_dt, $return_dt ) = @_;
+    my ( $self, $order ) = @_;
+
+    return 0 unless $order
+
+    my $target_dt = $order->target_date;
+    my $return_dt = $order->return_date;
 
     return 0 unless $target_dt;
 
@@ -191,7 +196,7 @@ helper calc_late_fee => sub {
     my ( $self, $order, $commify ) = @_;
 
     my $price   = $self->order_clothes_price( $order, $commify );
-    my $overdue = $self->calc_overdue( $order->target_date );
+    my $overdue = $self->calc_overdue($order);
     return 0 unless $overdue;
 
     my $late_fee = $price * 0.2 * $overdue;
@@ -227,7 +232,7 @@ helper flatten_order => sub {
         clothes_price => $self->order_clothes_price($order),
         clothes       => [ $order->order_details({ clothes_code => { '!=' => undef } })->get_column('clothes_code')->all ],
         late_fee      => $self->calc_late_fee($order),
-        overdue       => $self->calc_overdue( $order->target_date ),
+        overdue       => $self->calc_overdue($order),
     );
 
     if ( $order->rental_date ) {
@@ -2443,7 +2448,7 @@ __DATA__
           %a{:href => '/guests/#{$order->guest->id}'}= $order->guest->user->name
           님
           - if ($order->status && $order->status->name eq '대여중') {
-            - if (calc_overdue($order->target_date, DateTime->now( time_zone => $timezone ))) {
+            - if ( calc_overdue($order) ) {
               %span.label.label-important 연체중
             - } else {
               %span.label.label-important= $order->status->name
