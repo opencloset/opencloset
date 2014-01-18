@@ -166,7 +166,7 @@ helper order_clothes_price => sub {
 helper calc_overdue => sub {
     my ( $self, $order ) = @_;
 
-    return 0 unless $order
+    return 0 unless $order;
 
     my $target_dt = $order->target_date;
     my $return_dt = $order->return_date;
