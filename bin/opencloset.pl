@@ -150,7 +150,7 @@ helper order_price => sub {
 };
 
 helper order_clothes_price => sub {
-    my ( $self, $order, $commify ) = @_;
+    my ( $self, $order ) = @_;
 
     return 0 unless $order;
 
@@ -160,7 +160,7 @@ helper order_clothes_price => sub {
         $price += $_->price;
     }
 
-    return $commify ? $self->commify($price) : $price;
+    return $price;
 };
 
 helper calc_overdue => sub {
@@ -193,15 +193,15 @@ helper commify => sub {
 };
 
 helper calc_late_fee => sub {
-    my ( $self, $order, $commify ) = @_;
+    my ( $self, $order ) = @_;
 
-    my $price   = $self->order_clothes_price( $order, $commify );
+    my $price   = $self->order_clothes_price($order);
     my $overdue = $self->calc_overdue($order);
     return 0 unless $overdue;
 
     my $late_fee = $price * 0.2 * $overdue;
 
-    return $commify ? $self->commify($late_fee) : $late_fee;
+    return $late_fee;
 };
 
 helper flatten_user => sub {
