@@ -139,14 +139,14 @@ helper sms2hr => sub {
 };
 
 helper order_price => sub {
-    my ( $self, $order, $commify ) = @_;
+    my ( $self, $order ) = @_;
 
     return 0 unless $order;
 
     my $price = 0;
     $price += $_->final_price for $order->order_details;
 
-    return $commify ? $self->commify($price) : $price;
+    return $price;
 };
 
 helper order_clothes_price => sub {
