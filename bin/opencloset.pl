@@ -705,7 +705,7 @@ helper update_order => sub {
     $v->field(qw/ height weight bust waist hip belly thigh arm leg knee foot /)->each(sub {
         shift->regexp(qr/^\d{1,3}$/);
     });
-    unless ( $self->validate( $v, { %$order_params, %$order_detail_params } ) ) {
+    unless ( $self->validate( $v, $order_params ) ) {
         my @error_str;
         while ( my ( $k, $v ) = each %{ $v->errors } ) {
             push @error_str, "$k:$v";
