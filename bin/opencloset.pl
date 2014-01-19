@@ -736,6 +736,7 @@ helper update_order => sub {
     #
     #   - find   order
     #   - update order
+    #   - update clothes status
     #   - update order_detail
     #
     my ( $order, $status, $error ) = do {
@@ -754,6 +755,16 @@ helper update_order => sub {
                 my %_params = %$order_params;
                 delete $_params{id};
                 $order->update( \%_params ) or die "failed to update the order\n";
+            }
+
+            #
+            # update clothes status
+            #
+            if ( $order_params->{status_id} ) {
+                for my $clothes ( $order->clothes ) {
+                    $clothes->update({ status_id => $order_params->{status_id} })
+                        or die "failed to update the clothes status\n";
+                }
             }
 
             #
