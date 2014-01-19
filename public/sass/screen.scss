@@ -232,34 +232,43 @@ $opencloset-darken-yellow: desaturate(darken($opencloset-yellow, 4%), 10%);
         }
     }
     #order-id {
+        .search {
+            width: 300px;
+        }
+        .return-process {
+            display: none;
+        }
         table {
             th {
                 &:first-child {
-                    width: 40px;
+                    width: 50px;
                 }
                 &:nth-child(2) {
-                    width: 120px;
+                    width: 40px;
                 }
                 &:nth-child(3) {
-                    width: 90px;
+                    width: 120px;
                 }
-                &:nth-child(4),
+                &:nth-child(4) {
+                    width: 80px;
+                }
+                &:nth-child(5),
+                &:nth-child(7) {
+                    width: 80px;
+                }
                 &:nth-child(6) {
-                    width: 74px;
-                }
-                &:nth-child(5) {
                     width: 60px;
                 }
             }
             td {
-                &:nth-child(4),
-                &:nth-child(6) {
+                &:nth-child(5),
+                &:nth-child(7) {
                     text-align: right;
                     input {
                         width: 100px;
                     }
                 }
-                &:nth-child(5) {
+                &:nth-child(6) {
                     text-align: right;
                 }
             }

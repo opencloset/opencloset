@@ -139,18 +139,32 @@ helper sms2hr => sub {
 };
 
 helper order_price => sub {
-    my ( $self, $order, $commify ) = @_;
+    my ( $self, $order ) = @_;
 
     return 0 unless $order;
 
     my $price = 0;
     $price += $_->final_price for $order->order_details;
 
-    return $commify ? $self->commify($price) : $price;
+    return $price;
+};
+
+helper order_stage0_price => sub {
+    my ( $self, $order ) = @_;
+
+    return 0 unless $order;
+
+    my $price = 0;
+    for ( $order->order_details ) {
+        next unless $_->stage == 0;
+        $price += $_->final_price;
+    }
+
+    return $price;
 };
 
 helper order_clothes_price => sub {
-    my ( $self, $order, $commify ) = @_;
+    my ( $self, $order ) = @_;
 
     return 0 unless $order;
 
@@ -160,11 +174,16 @@ helper order_clothes_price => sub {
         $price += $_->price;
     }
 
-    return $commify ? $self->commify($price) : $price;
+    return $price;
 };
 
 helper calc_overdue => sub {
-    my ( $self, $target_dt, $return_dt ) = @_;
+    my ( $self, $order ) = @_;
+
+    return 0 unless $order;
+
+    my $target_dt = $order->target_date;
+    my $return_dt = $order->return_date;
 
     return 0 unless $target_dt;
 
@@ -188,15 +207,15 @@ helper commify => sub {
 };
 
 helper calc_late_fee => sub {
-    my ( $self, $order, $commify ) = @_;
+    my ( $self, $order ) = @_;
 
-    my $price   = $self->order_clothes_price( $order, $commify );
-    my $overdue = $self->calc_overdue( $order->target_date );
+    my $price   = $self->order_clothes_price($order);
+    my $overdue = $self->calc_overdue($order);
     return 0 unless $overdue;
 
     my $late_fee = $price * 0.2 * $overdue;
 
-    return $commify ? $self->commify($late_fee) : $late_fee;
+    return $late_fee;
 };
 
 helper flatten_user => sub {
@@ -224,10 +243,11 @@ helper flatten_order => sub {
         target_date   => undef,
         return_date   => undef,
         price         => $self->order_price($order),
+        stage0_price  => $self->order_stage0_price($order),
         clothes_price => $self->order_clothes_price($order),
-        clothes       => [ $order->clothes->get_column('code')->all ],
+        clothes       => [ $order->order_details({ clothes_code => { '!=' => undef } })->get_column('clothes_code')->all ],
         late_fee      => $self->calc_late_fee($order),
-        overdue       => $self->calc_overdue( $order->target_date ),
+        overdue       => $self->calc_overdue($order),
     );
 
     if ( $order->rental_date ) {
@@ -253,6 +273,16 @@ helper flatten_order => sub {
             ymd => $order->return_date->ymd
         };
     }
+
+    return \%data;
+};
+
+helper flatten_order_detail => sub {
+    my ( $self, $order_detail ) = @_;
+
+    return unless $order_detail;
+
+    my %data = ( $order_detail->get_columns );
 
     return \%data;
 };
@@ -577,7 +607,6 @@ helper create_order => sub {
     # TRANSACTION:
     #
     #   - create order
-    #   - create order_clothes
     #   - create order_detail
     #
     my ( $order, $error ) = do {
@@ -592,18 +621,11 @@ helper create_order => sub {
             if ( $order_clothes_params && $order_clothes_params->{clothes_code} ) {
                 for ( @{ $order_clothes_params->{clothes_code} } ) {
                     #
-                    # create order_clothes
-                    #
-                    $order->add_to_order_clothes({ clothes_code => $_ })
-                        or die "failed to create a new order_clothes\n";
-
-                    #
                     # create order_detail
                     #
                     my $clothes = $DB->resultset('Clothes')->find({ code => $_ });
                     $order->add_to_order_details({
                         clothes_code => $clothes->code,
-                        status_id    => $clothes->status->id,
                         name         => join( q{ - }, $clothes->code, $clothes->category ),
                         price        => $clothes->price,
                         final_price  => ( $clothes->price + $clothes->price * 0.2 * ($order_params->{additional_day} || 0) ),
@@ -673,6 +695,181 @@ helper get_order => sub {
     }) unless $order;
 
     return $order;
+};
+
+helper update_order => sub {
+    my ( $self, $order_params, $order_detail_params ) = @_;
+
+    #
+    # validate params
+    #
+    my $v = $self->create_validator;
+    $v->field('id')->required(1)->regexp(qr/^\d+$/);
+    $v->field('user_id')->regexp(qr/^\d+$/)->callback(sub {
+        my $val = shift;
+
+        return 1 if $DB->resultset('User')->find({ id => $val });
+        return ( 0, 'user not found using user_id' );
+    });
+    #
+    # FIXME
+    #   need more validation but not now
+    #   since columns are not perfect yet.
+    #
+    $v->field('additional_day')->regexp(qr/^\d+$/);
+    $v->field(qw/ height weight bust waist hip belly thigh arm leg knee foot /)->each(sub {
+        shift->regexp(qr/^\d{1,3}$/);
+    });
+    unless ( $self->validate( $v, $order_params ) ) {
+        my @error_str;
+        while ( my ( $k, $v ) = each %{ $v->errors } ) {
+            push @error_str, "$k:$v";
+        }
+        return $self->error( 400, {
+            str  => join(',', @error_str),
+            data => $v->errors,
+        });
+    }
+
+    #
+    # TRANSACTION:
+    #
+    #   - find   order
+    #   - update order
+    #   - update clothes status
+    #   - update order_detail
+    #
+    my ( $order, $status, $error ) = do {
+        my $guard = $DB->txn_scope_guard;
+        try {
+            #
+            # find order
+            #
+            my $order = $DB->resultset('Order')->find({ id => $order_params->{id} });
+            die "order not found\n" unless $order;
+
+            #
+            # update order
+            #
+            {
+                my %_params = %$order_params;
+                delete $_params{id};
+                $order->update( \%_params ) or die "failed to update the order\n";
+            }
+
+            #
+            # update clothes status
+            #
+            if ( $order_params->{status_id} ) {
+                for my $clothes ( $order->clothes ) {
+                    $clothes->update({ status_id => $order_params->{status_id} })
+                        or die "failed to update the clothes status\n";
+                }
+            }
+
+            #
+            # update order_detail
+            #
+            if ( $order_detail_params && $order_detail_params->{id} ) {
+                my %_params = %$order_detail_params;
+                for my $i ( 0 .. $#{ $_params{id} } ) {
+                    my %p  = map { $_ => $_params{$_}[$i] } keys %_params;
+                    my $id = delete $p{id};
+
+                    my $order_detail = $DB->resultset('OrderDetail')->find({ id => $id });
+                    die "order_detail not found\n" unless $order_detail;
+                    $order_detail->update( \%p ) or die "failed to update the order_detail\n";
+                }
+            }
+
+            $guard->commit;
+
+            return $order;
+        }
+        catch {
+            chomp;
+            app->log->error("failed to create a new order & a new order_clothes");
+            app->log->error($_);
+
+            no warnings 'experimental';
+
+            my $status;
+            given ($_) {
+                $status = 404 when 'order not found';
+                default { $status = 500 }
+            }
+
+            return ( undef, $status, $_ );
+        };
+    };
+
+    #
+    # response
+    #
+    $self->error( $status, {
+        str  => $error,
+        data => {},
+    }), return unless $order;
+
+    return $order;
+};
+
+helper create_order_detail => sub {
+    my ( $self, $params ) = @_;
+
+    return unless $params;
+    return unless ref($params) eq 'HASH';
+
+    #
+    # validate params
+    #
+    my $v = $self->create_validator;
+    $v->field('order_id')->required(1)->regexp(qr/^\d+$/)->callback(sub {
+        my $val = shift;
+
+        return 1 if $DB->resultset('Order')->find({ id => $val });
+        return ( 0, 'order not found using order_id' );
+    });
+    $v->field('clothes_code')->regexp(qr/^[A-Z0-9]{4,5}$/)->callback(sub {
+        my $val = shift;
+
+        return 1 if $DB->resultset('Clothes')->find({ code => $val });
+        return ( 0, 'clothes not found using clothes_code' );
+    });
+    $v->field('status_id')->regexp(qr/^\d+$/)->callback(sub {
+        my $val = shift;
+
+        return 1 if $DB->resultset('Status')->find({ id => $val });
+        return ( 0, 'status not found using status_id' );
+    });
+    $v->field(qw/ price final_price /)
+        ->each( sub { shift->regexp(qr/^-?\d+$/) } );
+    $v->field('stage')->regexp(qr/^\d+$/);
+
+    unless ( $self->validate( $v, $params ) ) {
+        my @error_str;
+        while ( my ( $k, $v ) = each %{ $v->errors } ) {
+            push @error_str, "$k:$v";
+        }
+        $self->error( 400, {
+            str  => join(',', @error_str),
+            data => $v->errors,
+        }), return;
+    }
+
+    #
+    # adjust params
+    #
+    $params->{clothes_code} = sprintf( '%05s', $params->{clothes_code} )
+        if $params->{clothes_code} && length( $params->{clothes_code} ) == 4;
+
+    my $order_detail = $DB->resultset('OrderDetail')->create($params);
+    return $self->error( 500, {
+        str  => 'failed to create a new order_detail',
+        data => {},
+    }) unless $order_detail;
+
+    return $order_detail;
 };
 
 helper delete_order => sub {
@@ -825,6 +1022,8 @@ group {
     del  '/order/:id'      => \&api_delete_order;
 
     get  '/order-list'     => \&api_get_order_list;
+
+    post '/order_detail'   => \&api_create_order_detail;
 
     post '/clothes'        => \&api_create_clothes;
     get  '/clothes/:code'  => \&api_get_clothes;
@@ -1108,7 +1307,7 @@ group {
         #
         # fetch params
         #
-        my %params = $self->get_params(qw/
+        my %order_params = $self->get_params(qw/
             additional_day
             arm
             bust
@@ -1137,59 +1336,18 @@ group {
             waist
             weight
         /);
+        my %order_detail_params = $self->get_params(
+            [ order_detail_id           => 'id'           ],
+            [ order_detail_clothes_code => 'clothes_code' ],
+            [ order_detail_status_id    => 'status_id'    ],
+            [ order_detail_name         => 'name'         ],
+            [ order_detail_price        => 'price'        ],
+            [ order_detail_final_price  => 'final_price'  ],
+            [ order_detail_desc         => 'desc'         ],
+        );
 
-        #
-        # validate params
-        #
-        my $v = $self->create_validator;
-        $v->field('id')->required(1)->regexp(qr/^\d+$/);
-        $v->field('user_id')->regexp(qr/^\d+$/)->callback(sub {
-            my $val = shift;
-
-            return 1 if $DB->resultset('User')->find({ id => $val });
-            return ( 0, 'user not found using user_id' );
-        });
-        #
-        # FIXME
-        #   need more validation but not now
-        #   since columns are not perfect yet.
-        #
-        $v->field('additional_day')->regexp(qr/^\d+$/);
-        $v->field(qw/ height weight bust waist hip thigh arm leg knee foot /)->each(sub {
-            shift->regexp(qr/^\d{1,3}$/);
-        });
-        unless ( $self->validate( $v, \%params ) ) {
-            my @error_str;
-            while ( my ( $k, $v ) = each %{ $v->errors } ) {
-                push @error_str, "$k:$v";
-            }
-            return $self->error( 400, {
-                str  => join(',', @error_str),
-                data => $v->errors,
-            });
-        }
-
-        #
-        # find order
-        #
-        my $order = $DB->resultset('Order')->find({ id => $params{id} });
-        return $self->error( 404, {
-            str  => 'order not found',
-            data => {},
-        }) unless $order;
-
-        #
-        # update order
-        #
-        {
-            my %_params = %params;
-            delete $_params{id};
-            $order->update( \%_params )
-                or return $self->error( 500, {
-                    str  => 'failed to update a order',
-                    data => {},
-                });
-        }
+        my $order = $self->update_order( \%order_params, \%order_detail_params );
+        return unless $order;
 
         #
         # response
@@ -1236,6 +1394,37 @@ group {
         }
 
         $self->respond_to( json => { status => 200, json => \@data } );
+    }
+
+    sub api_create_order_detail {
+        my $self = shift;
+
+        #
+        # fetch params
+        #
+        my %params = $self->get_params(qw/
+            clothes_code
+            desc
+            final_price
+            name
+            order_id
+            price
+            stage
+            status_id
+        /);
+
+        my $order_detail = $self->create_order_detail( \%params );
+        return unless $order_detail;
+
+        #
+        # response
+        #
+        my $data = $self->flatten_order_detail($order_detail);
+
+        $self->res->headers->header(
+            'Location' => $self->url_for( '/api/order_detail/' . $order_detail->id ),
+        );
+        $self->respond_to( json => { status => 201, json => $data } );
     }
 
     sub api_create_clothes {
@@ -2386,7 +2575,7 @@ __DATA__
           %a{:href => '/guests/#{$order->guest->id}'}= $order->guest->user->name
           님
           - if ($order->status && $order->status->name eq '대여중') {
-            - if (calc_overdue($order->target_date, DateTime->now( time_zone => $timezone ))) {
+            - if ( calc_overdue($order) ) {
               %span.label.label-important 연체중
             - } else {
               %span.label.label-important= $order->status->name
