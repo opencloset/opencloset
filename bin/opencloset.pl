@@ -262,6 +262,16 @@ helper flatten_order => sub {
     return \%data;
 };
 
+helper flatten_order_detail => sub {
+    my ( $self, $order_detail ) = @_;
+
+    return unless $order_detail;
+
+    my %data = ( $order_detail->get_columns );
+
+    return \%data;
+};
+
 helper flatten_clothes => sub {
     my ( $self, $clothes ) = @_;
 
