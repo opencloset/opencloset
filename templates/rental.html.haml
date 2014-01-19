@@ -113,7 +113,7 @@
         <span><%= categoryStr %></span>
       </td> <!-- 종류 -->
       <td>
-        <span><%= price %>원</span>
+        <span><%= OpenCloset.commify(price) %>원</span>
       </td> <!-- 대여 가격 -->
       <td>
         <a href="/orders/<%= order.id %>"><span class="label label-info arrowed-right arrowed-in">
@@ -141,7 +141,7 @@
         <span><%= categoryStr %></span>
       </td> <!-- 종류 -->
       <td>
-        <span><%= price %>원</span>
+        <span><%= OpenCloset.commify(price) %>원</span>
       </td> <!-- 대여 가격 -->
       <td>
       </td> <!-- 기타 -->
