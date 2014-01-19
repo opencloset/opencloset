@@ -28,19 +28,22 @@ $ ->
         success: (data, textStatus, jqXHR) ->
           data.code        = data.code.replace /^0/, ''
           data.categoryStr = OpenCloset.category[ data.category ].str
+
+          return if $("#clothes-table table tbody tr[data-clothes-code='#{data.code}']").length
           if data.status is '대여중'
-            return if $("#clothes-table table tbody tr[data-order-id='#{data.order.id}']").length
-            compiled = _.template($('#tpl-row-checkbox-disabled').html())
+            compiled = _.template($('#tpl-row-checkbox-disabled-with-order').html())
             $html = $(compiled(data))
             if data.order.overdue
               compiled = _.template($('#tpl-overdue-paragraph').html())
               html     = compiled(data)
               $html.find("td:last-child").append(html)
-          else
-            return if $("#clothes-table table tbody tr[data-clothes-code='#{data.code}']").length
+          else if data.status is '대여가능'
             compiled = _.template($('#tpl-row-checkbox-enabled').html())
             $html = $(compiled(data))
             $('#action-buttons').show() if data.status is '대여가능'
+          else
+            compiled = _.template($('#tpl-row-checkbox-disabled-without-order').html())
+            $html = $(compiled(data))
 
           $html.find('.order-status').addClass OpenCloset.status[ data.status ].css
           $("#clothes-table table tbody").append($html)

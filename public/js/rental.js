@@ -28,26 +28,26 @@
             var $html, compiled, html;
             data.code = data.code.replace(/^0/, '');
             data.categoryStr = OpenCloset.category[data.category].str;
+            if ($("#clothes-table table tbody tr[data-clothes-code='" + data.code + "']").length) {
+              return;
+            }
             if (data.status === '대여중') {
-              if ($("#clothes-table table tbody tr[data-order-id='" + data.order.id + "']").length) {
-                return;
-              }
-              compiled = _.template($('#tpl-row-checkbox-disabled').html());
+              compiled = _.template($('#tpl-row-checkbox-disabled-with-order').html());
               $html = $(compiled(data));
               if (data.order.overdue) {
                 compiled = _.template($('#tpl-overdue-paragraph').html());
                 html = compiled(data);
                 $html.find("td:last-child").append(html);
               }
-            } else {
-              if ($("#clothes-table table tbody tr[data-clothes-code='" + data.code + "']").length) {
-                return;
-              }
+            } else if (data.status === '대여가능') {
               compiled = _.template($('#tpl-row-checkbox-enabled').html());
               $html = $(compiled(data));
               if (data.status === '대여가능') {
                 $('#action-buttons').show();
               }
+            } else {
+              compiled = _.template($('#tpl-row-checkbox-disabled-without-order').html());
+              $html = $(compiled(data));
             }
             $html.find('.order-status').addClass(OpenCloset.status[data.status].css);
             return $("#clothes-table table tbody").append($html);
