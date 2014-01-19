@@ -244,6 +244,7 @@ CREATE TABLE `order_detail` (
   `name`         TEXT         NOT NULL,
   `price`        INT          DEFAULT 0,
   `final_price`  INT          DEFAULT 0,
+  `stage`        INT          DEFAULT 0,
   `desc`         TEXT         DEFAULT NULL,
 
   PRIMARY KEY (`id`),
