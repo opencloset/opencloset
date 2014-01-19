@@ -4,9 +4,17 @@ $ ->
     $.ajax "/api/order/#{ order_id }.json",
       type: 'GET'
       success: (data, textStatus, jqXHR) ->
+        $('#order').data('order-clothes-price',     data.clothes_price)
+        $('#order').data('order-late-fee',          data.late_fee)
+        $('#order').data('order-late-fee-discount', 0)
+        $('#order').data('order-late-fee-final',    data.late_fee)
+        $('#order').data('order-late-fee-pay-with', data.late_fee_pay_with)
+        $('#order').data('order-overdue',           data.overdue)
+
         #
         # update price
         #
+        $(".order-stage0-price").html( OpenCloset.commify(data.stage0_price) + '원' )
         $(".order-price").html( OpenCloset.commify(data.price) + '원' )
 
         #
@@ -24,16 +32,19 @@ $ ->
           display: (value, sourceData, response) ->
             $(this).html( OpenCloset.commify value )
           success: (response, newValue) ->
-            $('.late-fee-final').html OpenCloset.commify( data.late_fee + parseInt(newValue) )
+            late_fee_discount = parseInt newValue
+            late_fee_final    = data.late_fee + late_fee_discount
+            $('.late-fee-final').html OpenCloset.commify(late_fee_final)
+            $('#order').data('order-late-fee-discount', late_fee_discount)
+            $('#order').data('order-late-fee-final',    late_fee_final)
 
         #
         # update late_fee final
         #
-        compiled = _.template( $('#tpl-late-fee-final').html() )
-        $("#late-fee-final").html( $(compiled(data)) )
-        $('#order-late-fee-pay-with').editable
-          source: -> { value: m, text: m } for m in [ '현금', '카드', '현금+카드' ]
-
+        if data.price is data.stage0_price
+          $('.late-fee-final').html OpenCloset.commify(data.late_fee) + '원'
+        else
+          $('.late-fee-final').html OpenCloset.commify(data.price - data.stage0_price) + '원'
       error: (jqXHR, textStatus, errorThrown) ->
       complete: (jqXHR, textStatus) ->
   updateOrder()
@@ -91,12 +102,20 @@ $ ->
       updateOrder()
   $('#order-price-pay-with').editable
     source: -> { value: m, text: m } for m in [ '현금', '카드', '현금+카드' ]
+  $('#order-late-fee-pay-with').editable
+    source: -> { value: m, text: m } for m in [ '현금', '카드', '현금+카드' ]
+    success: (response, newValue) ->
+      $('#order').data('order-late-fee-pay-with', newValue)
   $('.order-detail').editable()
 
   setOrderDetailFinalPrice = (order_detail_id) ->
+    is_clothes  = $("#order-detail-price-#{ order_detail_id }").data('is-clothes')
     day         = parseInt $('#order-additional-day').data('value')
     price       = parseInt $("#order-detail-price-#{ order_detail_id }").data('value')
-    final_price = price + price * 0.2 * day
+    if is_clothes
+      final_price = price + price * 0.2 * day
+    else
+      final_price = price * day
     $( "#order-detail-final-price-#{ order_detail_id }" ).editable 'setValue', final_price
     $( "#order-detail-final-price-#{ order_detail_id }" ).editable 'submit'
 
@@ -153,7 +172,7 @@ $ ->
           success: (data, textStatus, jqXHR) ->
             window.location.href = redirect_url
           error: (jqXHR, textStatus, errorThrown) ->
-            alert('danger', jqXHR.responseJSON.error)
+            alert 'danger', jqXHR.responseJSON.error
           complete: (jqXHR, textStatus) ->
       error: (jqXHR, textStatus, errorThrown) ->
       complete: (jqXHR, textStatus) ->
@@ -188,6 +207,7 @@ $ ->
     $('.return-process').show()
     $('.return-process-reverse').hide()
     $('#clothes-search').val('').focus()
+    $('#order-late-fee-pay-with').editable 'enable'
 
   #
   # 반납 취소 버튼 클릭
@@ -196,16 +216,80 @@ $ ->
     $(".return-process input[data-clothes-code]").prop 'checked', 0
     $('.return-process').hide()
     $('.return-process-reverse').show()
+    $('#order-late-fee-pay-with').editable 'disable'
+    $('#order-late-fee-pay-with').editable 'setValue', ''
+    $('#order-late-fee-pay-with').html '미납'
 
   #
   # 전체 반납 버튼 클릭
   #
   $('#btn-return-all').click (e) ->
+    redirect_url = $(e.target).data('redirect-url')
+
     count = countSelectedOrderDetail()
     unless count.selected > 0 && count.selected is count.total
       alert 'error', "반납할 항목을 선택하지 않았습니다."
       return
-    console.log "hello world"
+
+    order_id          = $('#order').data('order-id')
+    clothes_price     = $('#order').data('order-clothes-price')
+    late_fee          = $('#order').data('order-late-fee')
+    late_fee_discount = $('#order').data('order-late-fee-discount')
+    late_fee_final    = $('#order').data('order-late-fee-final')
+    late_fee_pay_with = $('#order').data('order-late-fee-pay-with')
+    overdue           = $('#order').data('order-overdue')
+
+    order_detail_id = []
+    $("input[data-clothes-code]").each (i, el) -> order_detail_id.push $(el).data('id')
+
+    order_detail_status_id = ( 9 for code in order_detail_id )
+
+    if late_fee_final > 0 and not late_fee_pay_with
+      alert 'danger', '연체료를 납부받지 않았습니다.'
+      return
+
+    #
+    # 연체료, 연체료 에누리 항목 추가
+    #
+    $.ajax "/api/order_detail.json",
+      type: 'POST'
+      data: {
+        order_id:    order_id
+        name:        '연체료'
+        price:       clothes_price * 0.2
+        final_price: late_fee
+        stage:       1
+        desc:        "#{OpenCloset.commify clothes_price}원 x 20% x #{overdue}일"
+      }
+      success: (data, textStatus, jqXHR) ->
+        $.ajax "/api/order_detail.json",
+          type: 'POST'
+          data: {
+            order_id:    order_id
+            name:        '연체료 에누리'
+            price:       Math.round( late_fee_discount / overdue )
+            final_price: late_fee_discount
+            stage:       1
+          }
+          success: (data, textStatus, jqXHR) ->
+            #
+            # 최종 반납
+            #
+            data =
+              status_id:              9
+              return_date:            moment().format('YYYY-MM-DD HH:mm:ss')
+              return_method:          '직접방문'
+              late_fee_pay_with:      late_fee_pay_with
+              order_detail_id:        order_detail_id
+              order_detail_status_id: order_detail_status_id
+            $.ajax "/api/order/#{ order_id }.json",
+              type:    'PUT'
+              data:    $.param(data, 1)
+              success: (data, textStatus, jqXHR) ->
+                #
+                # 주문서 페이지 리로드
+                #
+                window.location.href = redirect_url
 
   #
   # 주문서 목록에서 선택된 항목과 선택할 수 있는 항목 총 개수를 반환

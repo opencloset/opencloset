@@ -110,9 +110,18 @@
                                           class            = "editable editable-click"
                                           href             = "#"
 
+                                          data-disabled    = "#{ !$order->status || $order->status->name eq '대여중' ? 'false' : 'true' }"
+
                                           data-value       = "#{ $order->target_date ? $order->target_date->ymd : q{} }"
                                           data-name        = "target_date"
                                         ></a>
+                                  %li.row
+                                    .col-sm-1
+                                      %i.icon-caret-right.blue
+                                    .col-sm-3.no-padding-left
+                                      반납일:
+                                    .col-sm-8
+                                      = $order->return_date ? $order->return_date->ymd : q{}
                                   %li.row
                                     .col-sm-1
                                       %i.icon-caret-right.blue
@@ -138,7 +147,7 @@
                                           data-name        = "price_pay_with"
                                         ></a>
                                       \/
-                                      %strong.order-price 0원
+                                      %strong.order-stage0-price 0원
                                   - if ( $order->status && $order->status->name eq '대여중' ) {
                                     %li.row
                                       .col-sm-1
@@ -147,78 +156,36 @@
                                         연체료:
                                       .col-sm-8
                                         #late-fee
-                                        :plain
-                                          <script id="tpl-late-fee" type="text/html">
-                                            <% if (late_fee) { %>
-                                              <strong> <%= OpenCloset.commify(late_fee) %>원 </strong>
-                                              <span> ( = <%= overdue %>일 x <%= OpenCloset.commify(clothes_price) %>원 x 20% ) </span>
-                                            <% } else { %>
-                                              <strong> 해당사항 없음 </strong>
-                                            <% } %>
-                                          </script>
-                                    %li.row
+                                    %li.row.return-process
                                       .col-sm-1
                                         %i.icon-caret-right.blue
                                       .col-sm-3.no-padding-left
                                         연체료 에누리:
                                       .col-sm-8
                                         #late-fee-discount
-                                        :plain
-                                          <script id="tpl-late-fee-discount" type="text/html">
-                                            <% if (late_fee) { %>
-                                              <strong>
-                                              <a
-                                                id               = "order-late-fee-discount"
-                                                class            = "editable editable-click"
-                                                href             = "#"
-
-                                                data-disabled    = "<%= status_id === 2 ? 'true' : 'false' %>"
-                                                data-mode        = "inline"
-                                                data-showbuttons = "true"
-                                                data-type        = "text"
-                                                data-emptytext   = "0"
-
-                                                data-value       = "0"
-                                              ></a>원
-                                              </strong>
-                                            <% } else { %>
-                                              <strong> 해당사항 없음 </strong>
-                                            <% } %>
-                                          </script>
-                                    %li.row
-                                      .col-sm-1
-                                        %i.icon-caret-right.blue
-                                      .col-sm-3.no-padding-left
-                                        최종 연체료:
-                                      .col-sm-8
-                                        #late-fee-final
-                                        :plain
-                                          <script id="tpl-late-fee-final" type="text/html">
-                                            <% if (late_fee) { %>
-                                              <a
-                                                id               = "order-late-fee-pay-with"
-                                                class            = "editable editable-click"
-                                                href             = "#"
-
-                                                data-disabled    = "<%= status_id === 2 ? 'true' : 'false' %>"
-                                                data-mode        = "inline"
-                                                data-showbuttons = "true"
-                                                data-type        = "select"
-                                                data-emptytext   = "미납"
-
-                                                data-value       = "<%= late_fee_pay_with || '' %>"
-
-                                                data-url         = "/order/<%= id %>/update"
-                                                data-pk          = "<%= id %>"
-                                                data-name        = "late_fee_pay_with"
-                                              ></a>
-                                              /
-                                              <strong><span class="late-fee-final"><%= OpenCloset.commify(late_fee) %></span>원</strong>
-                                            <% } else { %>
-                                              <strong> 해당사항 없음 </strong>
-                                            <% } %>
-                                          </script>
                                   - }
+                                  %li.row
+                                    .col-sm-1
+                                      %i.icon-caret-right.blue
+                                    .col-sm-3.no-padding-left
+                                      최종 연체료:
+                                    .col-sm-8
+                                      :plain
+                                        <a
+                                          id               = "order-late-fee-pay-with"
+                                          class            = "editable editable-click"
+                                          href             = "#"
+
+                                          data-disabled    = "true"
+                                          data-mode        = "inline"
+                                          data-showbuttons = "true"
+                                          data-type        = "select"
+                                          data-emptytext   = "미납"
+
+                                          data-value       = "#{ $order->late_fee_pay_with || q{} }"
+                                        >#{ $order->late_fee_pay_with || q{미납} }</a>
+                                      \/
+                                      %strong.late-fee-final 0원
                             /
                             / 대여자 정보
                             /
@@ -328,7 +295,7 @@
                                     %td.center.return-process
                                       - if ( $detail->clothes ) {
                                         %label
-                                          %input.ace{ :type => 'checkbox', 'data-clothes-code' => "#{ trim_clothes_code($detail->clothes) }" }
+                                          %input.ace{ :type => 'checkbox', 'data-clothes-code' => "#{ trim_clothes_code($detail->clothes) }", 'data-id' => "#{ $detail->id }" }
                                           %span.lbl
                                       - }
                                     %td.center= ++$count
@@ -367,9 +334,16 @@
                                           data-url         = "/order/#{ $order->id }/update"
                                           data-pk          = "#{ $detail->id }"
                                           data-name        = "detail-price"
+
+                                          data-is-clothes  = "#{ $detail->clothes ? 'true' : 'false' }"
                                         ></a>원
                                     %td.return-process-reverse
-                                      %span= sprintf('4+%d일', $order->additional_day)
+                                      - if ( $detail->stage ) {
+                                        %span= sprintf('%d일', calc_overdue($order))
+                                      - }
+                                      - else {
+                                        %span= sprintf('4+%d일', $order->additional_day)
+                                      - }
                                     %td
                                       :plain
                                         <a
@@ -457,7 +431,7 @@
                         %a#btn-return-process.btn.btn-info.pull-right.return-process-reverse{ :type => 'button' }
                           %i.icon-reply.bigger-110
                           반납 진행
-                        %a#btn-return-all.btn.btn-success.disabled.pull-right.return-process{ :type => 'button' }
+                        %a#btn-return-all.btn.btn-success.disabled.pull-right.return-process{ :type => 'button', 'data-redirect-url' => "#{ url_for('/order/' . $order->id) }" }
                           %i.icon-ok.bigger-110
                           전체 반납
                         %a#btn-return-part.btn.btn-warning.disabled.pull-right.return-process{ :type => 'button' }
@@ -475,3 +449,34 @@
                           %i.icon-remove.bigger-110
                           주문 지우기
                       - }
+                :plain
+                  <script id="tpl-late-fee" type="text/html">
+                    <% if (late_fee) { %>
+                      <strong> <%= OpenCloset.commify(late_fee) %>원 </strong>
+                      <span> ( = <%= overdue %>일 x <%= OpenCloset.commify(clothes_price) %>원 x 20% ) </span>
+                    <% } else { %>
+                      <strong> 해당사항 없음 </strong>
+                    <% } %>
+                  </script>
+                :plain
+                  <script id="tpl-late-fee-discount" type="text/html">
+                    <% if (late_fee) { %>
+                      <strong>
+                      <a
+                        id               = "order-late-fee-discount"
+                        class            = "editable editable-click"
+                        href             = "#"
+
+                        data-disabled    = "<%= status_id === 2 ? 'true' : 'false' %>"
+                        data-mode        = "inline"
+                        data-showbuttons = "true"
+                        data-type        = "text"
+                        data-emptytext   = "0"
+
+                        data-value       = "0"
+                      ></a>원
+                      </strong>
+                    <% } else { %>
+                      <strong> 해당사항 없음 </strong>
+                    <% } %>
+                  </script>

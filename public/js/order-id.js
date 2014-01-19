@@ -9,6 +9,13 @@
         type: 'GET',
         success: function(data, textStatus, jqXHR) {
           var compiled;
+          $('#order').data('order-clothes-price', data.clothes_price);
+          $('#order').data('order-late-fee', data.late_fee);
+          $('#order').data('order-late-fee-discount', 0);
+          $('#order').data('order-late-fee-final', data.late_fee);
+          $('#order').data('order-late-fee-pay-with', data.late_fee_pay_with);
+          $('#order').data('order-overdue', data.overdue);
+          $(".order-stage0-price").html(OpenCloset.commify(data.stage0_price) + '원');
           $(".order-price").html(OpenCloset.commify(data.price) + '원');
           compiled = _.template($('#tpl-late-fee').html());
           $("#late-fee").html($(compiled(data)));
@@ -19,26 +26,19 @@
               return $(this).html(OpenCloset.commify(value));
             },
             success: function(response, newValue) {
-              return $('.late-fee-final').html(OpenCloset.commify(data.late_fee + parseInt(newValue)));
+              var late_fee_discount, late_fee_final;
+              late_fee_discount = parseInt(newValue);
+              late_fee_final = data.late_fee + late_fee_discount;
+              $('.late-fee-final').html(OpenCloset.commify(late_fee_final));
+              $('#order').data('order-late-fee-discount', late_fee_discount);
+              return $('#order').data('order-late-fee-final', late_fee_final);
             }
           });
-          compiled = _.template($('#tpl-late-fee-final').html());
-          $("#late-fee-final").html($(compiled(data)));
-          return $('#order-late-fee-pay-with').editable({
-            source: function() {
-              var m, _i, _len, _ref, _results;
-              _ref = ['현금', '카드', '현금+카드'];
-              _results = [];
-              for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-                m = _ref[_i];
-                _results.push({
-                  value: m,
-                  text: m
-                });
-              }
-              return _results;
-            }
-          });
+          if (data.price === data.stage0_price) {
+            return $('.late-fee-final').html(OpenCloset.commify(data.late_fee) + '원');
+          } else {
+            return $('.late-fee-final').html(OpenCloset.commify(data.price - data.stage0_price) + '원');
+          }
         },
         error: function(jqXHR, textStatus, errorThrown) {},
         complete: function(jqXHR, textStatus) {}
@@ -131,12 +131,35 @@
         return _results;
       }
     });
+    $('#order-late-fee-pay-with').editable({
+      source: function() {
+        var m, _i, _len, _ref, _results;
+        _ref = ['현금', '카드', '현금+카드'];
+        _results = [];
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          m = _ref[_i];
+          _results.push({
+            value: m,
+            text: m
+          });
+        }
+        return _results;
+      },
+      success: function(response, newValue) {
+        return $('#order').data('order-late-fee-pay-with', newValue);
+      }
+    });
     $('.order-detail').editable();
     setOrderDetailFinalPrice = function(order_detail_id) {
-      var day, final_price, price;
+      var day, final_price, is_clothes, price;
+      is_clothes = $("#order-detail-price-" + order_detail_id).data('is-clothes');
       day = parseInt($('#order-additional-day').data('value'));
       price = parseInt($("#order-detail-price-" + order_detail_id).data('value'));
-      final_price = price + price * 0.2 * day;
+      if (is_clothes) {
+        final_price = price + price * 0.2 * day;
+      } else {
+        final_price = price * day;
+      }
       $("#order-detail-final-price-" + order_detail_id).editable('setValue', final_price);
       return $("#order-detail-final-price-" + order_detail_id).editable('submit');
     };
@@ -236,21 +259,89 @@
       $(".return-process input[data-clothes-code]").prop('checked', 0);
       $('.return-process').show();
       $('.return-process-reverse').hide();
-      return $('#clothes-search').val('').focus();
+      $('#clothes-search').val('').focus();
+      return $('#order-late-fee-pay-with').editable('enable');
     });
     $('#btn-return-cancel').click(function(e) {
       $(".return-process input[data-clothes-code]").prop('checked', 0);
       $('.return-process').hide();
-      return $('.return-process-reverse').show();
+      $('.return-process-reverse').show();
+      $('#order-late-fee-pay-with').editable('disable');
+      $('#order-late-fee-pay-with').editable('setValue', '');
+      return $('#order-late-fee-pay-with').html('미납');
     });
     $('#btn-return-all').click(function(e) {
-      var count;
+      var clothes_price, code, count, late_fee, late_fee_discount, late_fee_final, late_fee_pay_with, order_detail_id, order_detail_status_id, order_id, overdue, redirect_url;
+      redirect_url = $(e.target).data('redirect-url');
       count = countSelectedOrderDetail();
       if (!(count.selected > 0 && count.selected === count.total)) {
         alert('error', "반납할 항목을 선택하지 않았습니다.");
         return;
       }
-      return console.log("hello world");
+      order_id = $('#order').data('order-id');
+      clothes_price = $('#order').data('order-clothes-price');
+      late_fee = $('#order').data('order-late-fee');
+      late_fee_discount = $('#order').data('order-late-fee-discount');
+      late_fee_final = $('#order').data('order-late-fee-final');
+      late_fee_pay_with = $('#order').data('order-late-fee-pay-with');
+      overdue = $('#order').data('order-overdue');
+      order_detail_id = [];
+      $("input[data-clothes-code]").each(function(i, el) {
+        return order_detail_id.push($(el).data('id'));
+      });
+      order_detail_status_id = (function() {
+        var _i, _len, _results;
+        _results = [];
+        for (_i = 0, _len = order_detail_id.length; _i < _len; _i++) {
+          code = order_detail_id[_i];
+          _results.push(9);
+        }
+        return _results;
+      })();
+      if (late_fee_final > 0 && !late_fee_pay_with) {
+        alert('danger', '연체료를 납부받지 않았습니다.');
+        return;
+      }
+      return $.ajax("/api/order_detail.json", {
+        type: 'POST',
+        data: {
+          order_id: order_id,
+          name: '연체료',
+          price: clothes_price * 0.2,
+          final_price: late_fee,
+          stage: 1,
+          desc: "" + (OpenCloset.commify(clothes_price)) + "원 x 20% x " + overdue + "일"
+        },
+        success: function(data, textStatus, jqXHR) {
+          return $.ajax("/api/order_detail.json", {
+            type: 'POST',
+            data: {
+              order_id: order_id,
+              name: '연체료 에누리',
+              price: Math.round(late_fee_discount / overdue),
+              final_price: late_fee_discount,
+              stage: 1
+            },
+            success: function(data, textStatus, jqXHR) {
+              data = {
+                status_id: 9,
+                return_date: moment().format('YYYY-MM-DD HH:mm:ss'),
+                return_method: '직접방문',
+                late_fee_pay_with: late_fee_pay_with,
+                order_detail_id: order_detail_id,
+                order_detail_status_id: order_detail_status_id
+              };
+              return $.ajax("/api/order/" + order_id + ".json", {
+                type: 'PUT',
+                data: $.param(data, 1),
+                success: function(data, textStatus, jqXHR) {
+                  return window.location.href = redirect_url;
+                }
+              });
+            }
+          });
+        }
+      });
     });
     countSelectedOrderDetail = function() {
       var selected, total;
