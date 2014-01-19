@@ -149,6 +149,20 @@ helper order_price => sub {
     return $price;
 };
 
+helper order_stage0_price => sub {
+    my ( $self, $order ) = @_;
+
+    return 0 unless $order;
+
+    my $price = 0;
+    for ( $order->order_details ) {
+        next unless $_->stage == 0;
+        $price += $_->final_price;
+    }
+
+    return $price;
+};
+
 helper order_clothes_price => sub {
     my ( $self, $order ) = @_;
 
@@ -229,6 +243,7 @@ helper flatten_order => sub {
         target_date   => undef,
         return_date   => undef,
         price         => $self->order_price($order),
+        stage0_price  => $self->order_stage0_price($order),
         clothes_price => $self->order_clothes_price($order),
         clothes       => [ $order->order_details({ clothes_code => { '!=' => undef } })->get_column('clothes_code')->all ],
         late_fee      => $self->calc_late_fee($order),
@@ -818,6 +833,7 @@ helper create_order_detail => sub {
     });
     $v->field(qw/ price final_price /)
         ->each( sub { shift->regexp(qr/^-?\d+$/) } );
+    $v->field('stage')->regexp(qr/^\d+$/);
 
     unless ( $self->validate( $v, $params ) ) {
         my @error_str;
@@ -1376,13 +1392,14 @@ group {
         # fetch params
         #
         my %params = $self->get_params(qw/
-            order_id
             clothes_code
-            status_id
-            name
-            price
-            final_price
             desc
+            final_price
+            name
+            order_id
+            price
+            stage
+            status_id
         /);
 
         my $order_detail = $self->create_order_detail( \%params );
