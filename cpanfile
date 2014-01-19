@@ -7,7 +7,7 @@ requires 'DateTime';
 requires 'DateTime::Format::MySQL';
 requires 'Gravatar::URL';
 requires 'MojoX::Validator::Constraint::Email';
-requires 'Mojolicious::Lite';
+requires 'Mojolicious','4.63';
 requires 'Mojolicious::Plugin::FillInFormLite';
 requires 'Mojolicious::Plugin::HamlRenderer';
 requires 'Mojolicious::Plugin::Validator';
