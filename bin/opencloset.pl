@@ -904,37 +904,39 @@ group {
         return;
     };
 
-    post '/user'           => \&api_create_user;
-    get  '/user/:id'       => \&api_get_user;
-    put  '/user/:id'       => \&api_update_user;
-    del  '/user/:id'       => \&api_delete_user;
+    post '/user'                  => \&api_create_user;
+    get  '/user/:id'              => \&api_get_user;
+    put  '/user/:id'              => \&api_update_user;
+    del  '/user/:id'              => \&api_delete_user;
 
-    get  '/user-list'      => \&api_get_user_list;
+    get  '/user-list'             => \&api_get_user_list;
 
-    post '/order'          => \&api_create_order;
-    get  '/order/:id'      => \&api_get_order;
-    put  '/order/:id'      => \&api_update_order;
-    del  '/order/:id'      => \&api_delete_order;
+    post '/order'                 => \&api_create_order;
+    get  '/order/:id'             => \&api_get_order;
+    put  '/order/:id'             => \&api_update_order;
+    del  '/order/:id'             => \&api_delete_order;
 
-    get  '/order-list'     => \&api_get_order_list;
+    put  '/order/:id/return-part' => \&api_return_part_order;
 
-    post '/order_detail'   => \&api_create_order_detail;
+    get  '/order-list'            => \&api_get_order_list;
 
-    post '/clothes'        => \&api_create_clothes;
-    get  '/clothes/:code'  => \&api_get_clothes;
-    put  '/clothes/:code'  => \&api_update_clothes;
-    del  '/clothes/:code'  => \&api_delete_clothes;
+    post '/order_detail'          => \&api_create_order_detail;
 
-    get  '/clothes-list'   => \&api_get_clothes_list;
-    put  '/clothes-list'   => \&api_update_clothes_list;
+    post '/clothes'               => \&api_create_clothes;
+    get  '/clothes/:code'         => \&api_get_clothes;
+    put  '/clothes/:code'         => \&api_update_clothes;
+    del  '/clothes/:code'         => \&api_delete_clothes;
 
-    post '/donation'       => \&api_create_donation;
+    get  '/clothes-list'          => \&api_get_clothes_list;
+    put  '/clothes-list'          => \&api_update_clothes_list;
 
-    post '/group'          => \&api_create_group;
+    post '/donation'              => \&api_create_donation;
 
-    get  '/search/user'    => \&api_search_user;
+    post '/group'                 => \&api_create_group;
 
-    get  '/gui/staff-list' => \&api_gui_staff_list;
+    get  '/search/user'           => \&api_search_user;
+
+    get  '/gui/staff-list'        => \&api_gui_staff_list;
 
     sub api_create_user {
         my $self = shift;
@@ -1275,6 +1277,145 @@ group {
         # response
         #
         $self->respond_to( json => { status => 200, json => $data } );
+    }
+
+    sub api_return_part_order {
+        my $self = shift;
+
+        #
+        # fetch params
+        #
+        my %order_params = $self->get_params(qw/
+            additional_day
+            arm
+            bust
+            comment
+            discount
+            foot
+            height
+            hip
+            id
+            knee
+            l_discount
+            late_fee
+            late_fee_pay_with
+            leg
+            price
+            price_pay_with
+            purpose
+            rental_date
+            return_date
+            return_method
+            staff_name
+            status_id
+            target_date
+            thigh
+            user_id
+            user_target_date
+            waist
+            weight
+        /);
+        my %order_detail_params = $self->get_params(
+            [ order_detail_id => 'id' ],
+        );
+
+        #
+        # update the order
+        #
+        my $order = $self->get_order( { id => $order_params{id} } );
+        return unless $order;
+        {
+            my %_params = (
+                id        => [],
+                status_id => [],
+            );
+            for my $order_detail ( $order->order_details ) {
+                next unless $order_detail->clothes;
+                push @{ $_params{id}        }, $order_detail->id;
+                push @{ $_params{status_id} }, 9;
+            }
+            $order = $self->update_order(
+                \%order_params,
+                \%_params,
+            );
+            return unless $order;
+        }
+
+        #
+        # create new order
+        #
+        $order_params{additional_day}   = $order->additional_day;
+        $order_params{desc}             = $order->desc;
+        $order_params{parent_id}        = $order->id;
+        $order_params{purpose}          = $order->purpose;
+        $order_params{rental_date}      = $order->rental_date;
+        $order_params{target_date}      = $order->target_date;
+        $order_params{user_id}          = $order->user_id;
+        $order_params{user_target_date} = $order->user_target_date;
+
+        delete $order_params{id};
+        delete $order_params{late_fee_pay_with};
+        delete $order_params{price_pay_with};
+        delete $order_params{return_date};
+        delete $order_params{return_method};
+        delete $order_params{status_id};
+
+        my $new_order;
+        {
+            my $pre_price       = 0;
+            my $pre_final_price = 0;
+
+            my @clothes_code;
+            my @price;
+            my @final_price;
+            my @name;
+            for my $order_detail (
+                $order->order_details->search(
+                    {
+                        -and => [
+                            id => { -not_in => $order_detail_params{id} },
+                            clothes_code => { '!=' => undef },
+                        ],
+                    }
+                )->all
+                )
+            {
+                push @clothes_code, $order_detail->clothes_code;
+                push @price,        $order_detail->price;
+                push @final_price,  $order_detail->final_price;
+                push @name,         $order_detail->name;
+
+                $pre_price       -= $order_detail->price;
+                $pre_final_price -= $order_detail->final_price;
+            }
+
+            push @clothes_code, undef;
+            push @name,         '이전 주문 납부';
+            push @price,        $pre_price;
+            push @final_price,  $pre_final_price;
+
+            $new_order = $self->create_order(
+                \%order_params,
+                {
+                    clothes_code => \@clothes_code,
+                    name         => \@name,
+                    status_id    => [ map 2, @clothes_code ],
+                    price        => \@price,
+                    final_price  => \@final_price,
+                },
+            );
+            return unless $new_order;
+        }
+
+        #
+        # response
+        #
+        my $data = $self->flatten_order($new_order);
+
+        $self->res->headers->header(
+            'Location' => $self->url_for( '/api/order/' . $order->id ),
+        );
+        $self->respond_to( json => { status => 201, json => $data } );
     }
 
     sub api_get_order_list {
