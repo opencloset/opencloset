@@ -161,7 +161,7 @@ helper flatten_order => sub {
     my $order_stage0_price = 0;
     for my $order_detail ( $order->order_details ) {
         $order_price        += $order_detail->final_price;
-        $order_stage0_price += $_->final_price if $order_detail->stage == 0;
+        $order_stage0_price += $order_detail->final_price if $order_detail->stage == 0;
     }
 
     my %data = (
