@@ -200,6 +200,7 @@ CREATE TABLE `order` (
   `user_id`           INT UNSIGNED NOT NULL,
   `status_id`         INT UNSIGNED DEFAULT NULL,
   `staff_id`          INT UNSIGNED DEFAULT NULL,
+  `parent_id`         INT UNSIGNED DEFAULT NULL,
   `additional_day`    INT UNSIGNED DEFAULT 0,
   `rental_date`       DATETIME DEFAULT NULL,
   `target_date`       DATETIME DEFAULT NULL,
@@ -230,7 +231,8 @@ CREATE TABLE `order` (
   PRIMARY KEY (`id`),
   CONSTRAINT `fk_order1` FOREIGN KEY (`user_id`)   REFERENCES `user`   (`id`) ON DELETE CASCADE,
   CONSTRAINT `fk_order2` FOREIGN KEY (`status_id`) REFERENCES `status` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `fk_order3` FOREIGN KEY (`staff_id`)  REFERENCES `user`   (`id`) ON DELETE CASCADE
+  CONSTRAINT `fk_order3` FOREIGN KEY (`staff_id`)  REFERENCES `user`   (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_order4` FOREIGN KEY (`parent_id`) REFERENCES `order`  (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --

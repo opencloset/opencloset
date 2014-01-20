@@ -55,6 +55,13 @@ __PACKAGE__->table("order");
   is_foreign_key: 1
   is_nullable: 1
 
+=head2 parent_id
+
+  data_type: 'integer'
+  extra: {unsigned => 1}
+  is_foreign_key: 1
+  is_nullable: 1
+
 =head2 additional_day
 
   data_type: 'integer'
@@ -222,6 +229,13 @@ __PACKAGE__->add_columns(
     is_foreign_key => 1,
     is_nullable => 1,
   },
+  "parent_id",
+  {
+    data_type => "integer",
+    extra => { unsigned => 1 },
+    is_foreign_key => 1,
+    is_nullable => 1,
+  },
   "additional_day",
   {
     data_type => "integer",
@@ -337,6 +351,41 @@ __PACKAGE__->has_many(
   { cascade_copy => 0, cascade_delete => 0 },
 );
 
+=head2 orders
+
+Type: has_many
+
+Related object: L<Opencloset::Schema::Result::Order>
+
+=cut
+
+__PACKAGE__->has_many(
+  "orders",
+  "Opencloset::Schema::Result::Order",
+  { "foreign.parent_id" => "self.id" },
+  { cascade_copy => 0, cascade_delete => 0 },
+);
+
+=head2 parent
+
+Type: belongs_to
+
+Related object: L<Opencloset::Schema::Result::Order>
+
+=cut
+
+__PACKAGE__->belongs_to(
+  "parent",
+  "Opencloset::Schema::Result::Order",
+  { id => "parent_id" },
+  {
+    is_deferrable => 1,
+    join_type     => "LEFT",
+    on_delete     => "CASCADE",
+    on_update     => "RESTRICT",
+  },
+);
+
 =head2 staff
 
 Type: belongs_to
@@ -393,8 +442,8 @@ __PACKAGE__->belongs_to(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07038 @ 2014-01-20 10:57:39
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:ea3XPkAuFip9eEMnFFk12A
+# Created by DBIx::Class::Schema::Loader v0.07038 @ 2014-01-20 13:54:34
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:a2dAkS9xCxs/ki/829QIOw
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration
