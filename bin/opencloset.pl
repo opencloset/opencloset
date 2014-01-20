@@ -83,31 +83,6 @@ helper trim_clothes_code => sub {
     return $code;
 };
 
-helper cloth_validator => sub {
-    my $self = shift;
-
-    my $validator = $self->create_validator;
-    $validator->field('category')->required(1);
-    $validator->field('gender')->required(1)->regexp(qr/^[123]$/);
-
-    # jacket
-    $validator->when('category')->regexp(qr/jacket/)
-        ->then(sub { shift->field(qw/ bust arm /)->required(1) });
-
-    # pants, skirts
-    $validator->when('category')->regexp(qr/(pants|skirt)/)
-        ->then(sub { shift->field(qw/ waist length /)->required(1) });
-
-    # shoes
-    $validator->when('category')->regexp(qr/^shoes$/)
-        ->then(sub { shift->field('length')->required(1) });
-
-    $validator->field(qw/ bust waist hip belly thigh arm length /)
-        ->each(sub { shift->regexp(qr/^\d+$/) });
-
-    return $validator;
-};
-
 helper cloth2hr => sub {
     my ($self, $clothes) = @_;
 
