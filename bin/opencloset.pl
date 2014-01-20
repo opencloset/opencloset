@@ -644,64 +644,6 @@ helper update_order => sub {
     return $order;
 };
 
-helper create_order_detail => sub {
-    my ( $self, $params ) = @_;
-
-    return unless $params;
-    return unless ref($params) eq 'HASH';
-
-    #
-    # validate params
-    #
-    my $v = $self->create_validator;
-    $v->field('order_id')->required(1)->regexp(qr/^\d+$/)->callback(sub {
-        my $val = shift;
-
-        return 1 if $DB->resultset('Order')->find({ id => $val });
-        return ( 0, 'order not found using order_id' );
-    });
-    $v->field('clothes_code')->regexp(qr/^[A-Z0-9]{4,5}$/)->callback(sub {
-        my $val = shift;
-
-        return 1 if $DB->resultset('Clothes')->find({ code => $val });
-        return ( 0, 'clothes not found using clothes_code' );
-    });
-    $v->field('status_id')->regexp(qr/^\d+$/)->callback(sub {
-        my $val = shift;
-
-        return 1 if $DB->resultset('Status')->find({ id => $val });
-        return ( 0, 'status not found using status_id' );
-    });
-    $v->field(qw/ price final_price /)
-        ->each( sub { shift->regexp(qr/^-?\d+$/) } );
-    $v->field('stage')->regexp(qr/^\d+$/);
-
-    unless ( $self->validate( $v, $params ) ) {
-        my @error_str;
-        while ( my ( $k, $v ) = each %{ $v->errors } ) {
-            push @error_str, "$k:$v";
-        }
-        $self->error( 400, {
-            str  => join(',', @error_str),
-            data => $v->errors,
-        }), return;
-    }
-
-    #
-    # adjust params
-    #
-    $params->{clothes_code} = sprintf( '%05s', $params->{clothes_code} )
-        if $params->{clothes_code} && length( $params->{clothes_code} ) == 4;
-
-    my $order_detail = $DB->resultset('OrderDetail')->create($params);
-    return $self->error( 500, {
-        str  => 'failed to create a new order_detail',
-        data => {},
-    }) unless $order_detail;
-
-    return $order_detail;
-};
-
 helper delete_order => sub {
     my ( $self, $params ) = @_;
 
@@ -783,6 +725,64 @@ helper get_order_list => sub {
     }) unless $rs->count;
 
     return $rs;
+};
+
+helper create_order_detail => sub {
+    my ( $self, $params ) = @_;
+
+    return unless $params;
+    return unless ref($params) eq 'HASH';
+
+    #
+    # validate params
+    #
+    my $v = $self->create_validator;
+    $v->field('order_id')->required(1)->regexp(qr/^\d+$/)->callback(sub {
+        my $val = shift;
+
+        return 1 if $DB->resultset('Order')->find({ id => $val });
+        return ( 0, 'order not found using order_id' );
+    });
+    $v->field('clothes_code')->regexp(qr/^[A-Z0-9]{4,5}$/)->callback(sub {
+        my $val = shift;
+
+        return 1 if $DB->resultset('Clothes')->find({ code => $val });
+        return ( 0, 'clothes not found using clothes_code' );
+    });
+    $v->field('status_id')->regexp(qr/^\d+$/)->callback(sub {
+        my $val = shift;
+
+        return 1 if $DB->resultset('Status')->find({ id => $val });
+        return ( 0, 'status not found using status_id' );
+    });
+    $v->field(qw/ price final_price /)
+        ->each( sub { shift->regexp(qr/^-?\d+$/) } );
+    $v->field('stage')->regexp(qr/^\d+$/);
+
+    unless ( $self->validate( $v, $params ) ) {
+        my @error_str;
+        while ( my ( $k, $v ) = each %{ $v->errors } ) {
+            push @error_str, "$k:$v";
+        }
+        $self->error( 400, {
+            str  => join(',', @error_str),
+            data => $v->errors,
+        }), return;
+    }
+
+    #
+    # adjust params
+    #
+    $params->{clothes_code} = sprintf( '%05s', $params->{clothes_code} )
+        if $params->{clothes_code} && length( $params->{clothes_code} ) == 4;
+
+    my $order_detail = $DB->resultset('OrderDetail')->create($params);
+    return $self->error( 500, {
+        str  => 'failed to create a new order_detail',
+        data => {},
+    }) unless $order_detail;
+
+    return $order_detail;
 };
 
 helper get_clothes => sub {
