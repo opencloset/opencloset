@@ -100,6 +100,25 @@ $ ->
         data: data
     success: (response, newValue) ->
       updateOrder()
+  $('#order-user-target-date').editable
+    mode:        'inline'
+    showbuttons: 'true'
+    type:        'combodate'
+    emptytext:   '비어있음'
+
+    format:      'YYYY-MM-DD'
+    viewformat:  'YYYY-MM-DD'
+    template:    'YYYY-MM-DD'
+
+    combodate:
+      minYear: 2013,
+    url: (params) ->
+      url = $('#order').data('url')
+      data = {}
+      data[params.name] = params.value + ' 23:59:59'
+      $.ajax url,
+        type: 'PUT'
+        data: data
   $('#order-price-pay-with').editable
     source: -> { value: m, text: m } for m in [ '현금', '카드', '현금+카드' ]
   $('#order-late-fee-pay-with').editable
@@ -189,6 +208,10 @@ $ ->
     # 반납 예정일을 오늘을 기준으로 자동으로 계산
     $('#order-target-date').editable 'setValue', moment().add('days', day + 3).endOf('day').format('YYYY-MM-DD HH:mm:ss'), true
     $('#order-target-date').editable 'submit'
+    #
+    # 반납 희망일을 오늘을 기준으로 자동으로 계산
+    $('#order-user-target-date').editable 'setValue', moment().add('days', day + 3).endOf('day').format('YYYY-MM-DD HH:mm:ss'), true
+    $('#order-user-target-date').editable 'submit'
 
     # 주문표의 대여일을 자동 설정
     $('#order table td:nth-child(6) span').html( "4+#{ day }일" )
