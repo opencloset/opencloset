@@ -2431,13 +2431,3 @@ __DATA__
     </a>
   </li>
 </ul>
-
-
-@@ bad_request.html.haml
-- layout 'default';
-- title 'Bad request';
-
-%h1 400 Bad request
-- if ($error) {
-  %p.text-error= $error
-- }
