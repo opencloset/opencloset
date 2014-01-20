@@ -83,31 +83,6 @@ helper trim_clothes_code => sub {
     return $code;
 };
 
-helper order_price => sub {
-    my ( $self, $order ) = @_;
-
-    return 0 unless $order;
-
-    my $price = 0;
-    $price += $_->final_price for $order->order_details;
-
-    return $price;
-};
-
-helper order_stage0_price => sub {
-    my ( $self, $order ) = @_;
-
-    return 0 unless $order;
-
-    my $price = 0;
-    for ( $order->order_details ) {
-        next unless $_->stage == 0;
-        $price += $_->final_price;
-    }
-
-    return $price;
-};
-
 helper order_clothes_price => sub {
     my ( $self, $order ) = @_;
 
@@ -182,13 +157,20 @@ helper flatten_order => sub {
 
     return unless $order;
 
+    my $order_price        = 0;
+    my $order_stage0_price = 0;
+    for my $order_detail ( $order->order_details ) {
+        $order_price        += $order_detail->final_price;
+        $order_stage0_price += $_->final_price if $order_detail->stage == 0;
+    }
+
     my %data = (
         $order->get_columns,
         rental_date   => undef,
         target_date   => undef,
         return_date   => undef,
-        price         => $self->order_price($order),
-        stage0_price  => $self->order_stage0_price($order),
+        price         => $order_price,
+        stage0_price  => $order_stage0_price,
         clothes_price => $self->order_clothes_price($order),
         clothes       => [ $order->order_details({ clothes_code => { '!=' => undef } })->get_column('clothes_code')->all ],
         late_fee      => $self->calc_late_fee($order),
