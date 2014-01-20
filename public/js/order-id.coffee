@@ -10,6 +10,7 @@ $ ->
         $('#order').data('order-late-fee-final',    data.late_fee)
         $('#order').data('order-late-fee-pay-with', data.late_fee_pay_with)
         $('#order').data('order-overdue',           data.overdue)
+        $('#order').data('order-parent-id',         data.parent_id)
 
         #
         # update price
@@ -34,7 +35,7 @@ $ ->
           success: (response, newValue) ->
             late_fee_discount = parseInt newValue
             late_fee_final    = data.late_fee + late_fee_discount
-            $('.late-fee-final').html OpenCloset.commify(late_fee_final)
+            $('.late-fee-final').html OpenCloset.commify(late_fee_final) + '원'
             $('#order').data('order-late-fee-discount', late_fee_discount)
             $('#order').data('order-late-fee-final',    late_fee_final)
 
@@ -129,8 +130,12 @@ $ ->
 
   setOrderDetailFinalPrice = (order_detail_id) ->
     is_clothes  = $("#order-detail-price-#{ order_detail_id }").data('is-clothes')
+    is_pre_paid = $("#order-detail-price-#{ order_detail_id }").data('is-pre-paid')
     day         = parseInt $('#order-additional-day').data('value')
     price       = parseInt $("#order-detail-price-#{ order_detail_id }").data('value')
+
+    return if is_pre_paid
+
     if is_clothes
       final_price = price + price * 0.2 * day
     else
@@ -201,17 +206,30 @@ $ ->
 
     day = parseInt $('#order-additional-day').data('value')
 
-    # 대여일을 오늘로 자동 설정
-    $('#order-rental-date').editable 'setValue', moment().format('YYYY-MM-DD HH:mm:ss'), true
-    $('#order-rental-date').editable 'submit'
+    parent_id = parseInt $('#order').data('order-parent-id')
+    if parent_id
+      rental_date = $('#order-rental-date').editable 'getValue', true
+      new_date    = moment(rental_date).add('days', day + 3).endOf('day')
 
-    # 반납 예정일을 오늘을 기준으로 자동으로 계산
-    $('#order-target-date').editable 'setValue', moment().add('days', day + 3).endOf('day').format('YYYY-MM-DD HH:mm:ss'), true
-    $('#order-target-date').editable 'submit'
-    #
-    # 반납 희망일을 오늘을 기준으로 자동으로 계산
-    $('#order-user-target-date').editable 'setValue', moment().add('days', day + 3).endOf('day').format('YYYY-MM-DD HH:mm:ss'), true
-    $('#order-user-target-date').editable 'submit'
+      # 반납 예정일을 대여일을 기준으로 자동으로 계산
+      $('#order-target-date').editable 'setValue', new_date.format('YYYY-MM-DD HH:mm:ss'), true
+      $('#order-target-date').editable 'submit'
+
+      # 반납 희망일을 대여일을 기준으로 자동으로 계산
+      $('#order-user-target-date').editable 'setValue', new_date.format('YYYY-MM-DD HH:mm:ss'), true
+      $('#order-user-target-date').editable 'submit'
+    else
+      # 대여일을 오늘로 자동 설정
+      $('#order-rental-date').editable 'setValue', moment().format('YYYY-MM-DD HH:mm:ss'), true
+      $('#order-rental-date').editable 'submit'
+
+      # 반납 예정일을 오늘을 기준으로 자동으로 계산
+      $('#order-target-date').editable 'setValue', moment().add('days', day + 3).endOf('day').format('YYYY-MM-DD HH:mm:ss'), true
+      $('#order-target-date').editable 'submit'
+
+      # 반납 희망일을 오늘을 기준으로 자동으로 계산
+      $('#order-user-target-date').editable 'setValue', moment().add('days', day + 3).endOf('day').format('YYYY-MM-DD HH:mm:ss'), true
+      $('#order-user-target-date').editable 'submit'
 
     # 주문표의 대여일을 자동 설정
     $('#order table td:nth-child(6) span').html( "4+#{ day }일" )
@@ -306,6 +324,76 @@ $ ->
               order_detail_id:        order_detail_id
               order_detail_status_id: order_detail_status_id
             $.ajax "/api/order/#{ order_id }.json",
+              type:    'PUT'
+              data:    $.param(data, 1)
+              success: (data, textStatus, jqXHR) ->
+                #
+                # 주문서 페이지 리로드
+                #
+                window.location.href = redirect_url
+
+  #
+  # 부분 반납 버튼 클릭
+  #
+  $('#btn-return-part').click (e) ->
+    redirect_url = $(e.target).data('redirect-url')
+
+    count = countSelectedOrderDetail()
+    unless count.selected > 0
+      alert 'error', "반납할 항목을 선택하지 않았습니다."
+      return
+
+    order_id          = $('#order').data('order-id')
+    clothes_price     = $('#order').data('order-clothes-price')
+    late_fee          = $('#order').data('order-late-fee')
+    late_fee_discount = $('#order').data('order-late-fee-discount')
+    late_fee_final    = $('#order').data('order-late-fee-final')
+    late_fee_pay_with = $('#order').data('order-late-fee-pay-with')
+    overdue           = $('#order').data('order-overdue')
+
+    order_detail_id = []
+    $("input[data-clothes-code]").each (i, el) ->
+      return unless $(el).prop 'checked'
+      order_detail_id.push $(el).data('id')
+
+    if late_fee_final > 0 and not late_fee_pay_with
+      alert 'danger', '연체료를 납부받지 않았습니다.'
+      return
+
+    #
+    # 연체료, 연체료 에누리 항목 추가
+    #
+    $.ajax "/api/order_detail.json",
+      type: 'POST'
+      data: {
+        order_id:    order_id
+        name:        '연체료'
+        price:       clothes_price * 0.2
+        final_price: late_fee
+        stage:       1
+        desc:        "#{OpenCloset.commify clothes_price}원 x 20% x #{overdue}일"
+      }
+      success: (data, textStatus, jqXHR) ->
+        $.ajax "/api/order_detail.json",
+          type: 'POST'
+          data: {
+            order_id:    order_id
+            name:        '연체료 에누리'
+            price:       Math.round( late_fee_discount / overdue )
+            final_price: late_fee_discount
+            stage:       1
+          }
+          success: (data, textStatus, jqXHR) ->
+            #
+            # 부분 반납
+            #
+            data =
+              status_id:              9
+              return_date:            moment().format('YYYY-MM-DD HH:mm:ss')
+              return_method:          '직접방문'
+              late_fee_pay_with:      late_fee_pay_with
+              order_detail_id:        order_detail_id
+            $.ajax "/api/order/#{ order_id }/return-part.json",
               type:    'PUT'
               data:    $.param(data, 1)
               success: (data, textStatus, jqXHR) ->

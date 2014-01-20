@@ -15,7 +15,7 @@
 -   ;
 - title meta_text($_id);
 
-                .row#order{ 'data-order-id' => "#{ $order->id }", 'data-url' => "#{ url_for( '/api/order/' . $order->id ) }" }
+                .row#order{ 'data-order-id' => "#{ $order->id }", 'data-order-parent-id' => "#{ $order->parent_id // q{} } ", 'data-url' => "#{ url_for( '/api/order/' . $order->id ) }" }
                   .col-sm-10.col-sm-offset-1
                     .widget-box.transparent.invoice-box
                       /
@@ -348,6 +348,7 @@
                                           data-name        = "detail-price"
 
                                           data-is-clothes  = "#{ $detail->clothes ? 'true' : 'false' }"
+                                          data-is-pre-paid = "#{ $detail->name eq '이전 주문 납부' ? 'true' : 'false' }"
                                         ></a>원
                                     %td.return-process-reverse
                                       - if ( $detail->stage ) {
@@ -446,7 +447,7 @@
                         %a#btn-return-all.btn.btn-success.disabled.pull-right.return-process{ :type => 'button', 'data-redirect-url' => "#{ url_for('/order/' . $order->id) }" }
                           %i.icon-ok.bigger-110
                           전체 반납
-                        %a#btn-return-part.btn.btn-warning.disabled.pull-right.return-process{ :type => 'button' }
+                        %a#btn-return-part.btn.btn-warning.disabled.pull-right.return-process{ :type => 'button', 'data-redirect-url' => "#{ url_for('/order/' . $order->id) }" }
                           부분 반납
                         %a#btn-return-cancel.btn.btn-danger.pull-right.return-process{ :type => 'button' }
                           %i.icon-remove.bigger-110

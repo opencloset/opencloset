@@ -15,6 +15,7 @@
           $('#order').data('order-late-fee-final', data.late_fee);
           $('#order').data('order-late-fee-pay-with', data.late_fee_pay_with);
           $('#order').data('order-overdue', data.overdue);
+          $('#order').data('order-parent-id', data.parent_id);
           $(".order-stage0-price").html(OpenCloset.commify(data.stage0_price) + '원');
           $(".order-price").html(OpenCloset.commify(data.price) + '원');
           compiled = _.template($('#tpl-late-fee').html());
@@ -29,7 +30,7 @@
               var late_fee_discount, late_fee_final;
               late_fee_discount = parseInt(newValue);
               late_fee_final = data.late_fee + late_fee_discount;
-              $('.late-fee-final').html(OpenCloset.commify(late_fee_final));
+              $('.late-fee-final').html(OpenCloset.commify(late_fee_final) + '원');
               $('#order').data('order-late-fee-discount', late_fee_discount);
               return $('#order').data('order-late-fee-final', late_fee_final);
             }
@@ -173,10 +174,14 @@
     });
     $('.order-detail').editable();
     setOrderDetailFinalPrice = function(order_detail_id) {
-      var day, final_price, is_clothes, price;
+      var day, final_price, is_clothes, is_pre_paid, price;
       is_clothes = $("#order-detail-price-" + order_detail_id).data('is-clothes');
+      is_pre_paid = $("#order-detail-price-" + order_detail_id).data('is-pre-paid');
       day = parseInt($('#order-additional-day').data('value'));
       price = parseInt($("#order-detail-price-" + order_detail_id).data('value'));
+      if (is_pre_paid) {
+        return;
+      }
       if (is_clothes) {
         final_price = price + price * 0.2 * day;
       } else {
@@ -262,17 +267,27 @@
       });
     });
     autoSetByAdditionalDay = function() {
-      var day;
+      var day, new_date, parent_id, rental_date;
       if ($('#order-additional-day').data('disabled')) {
         return;
       }
       day = parseInt($('#order-additional-day').data('value'));
-      $('#order-rental-date').editable('setValue', moment().format('YYYY-MM-DD HH:mm:ss'), true);
-      $('#order-rental-date').editable('submit');
-      $('#order-target-date').editable('setValue', moment().add('days', day + 3).endOf('day').format('YYYY-MM-DD HH:mm:ss'), true);
-      $('#order-target-date').editable('submit');
-      $('#order-user-target-date').editable('setValue', moment().add('days', day + 3).endOf('day').format('YYYY-MM-DD HH:mm:ss'), true);
-      $('#order-user-target-date').editable('submit');
+      parent_id = parseInt($('#order').data('order-parent-id'));
+      if (parent_id) {
+        rental_date = $('#order-rental-date').editable('getValue', true);
+        new_date = moment(rental_date).add('days', day + 3).endOf('day');
+        $('#order-target-date').editable('setValue', new_date.format('YYYY-MM-DD HH:mm:ss'), true);
+        $('#order-target-date').editable('submit');
+        $('#order-user-target-date').editable('setValue', new_date.format('YYYY-MM-DD HH:mm:ss'), true);
+        $('#order-user-target-date').editable('submit');
+      } else {
+        $('#order-rental-date').editable('setValue', moment().format('YYYY-MM-DD HH:mm:ss'), true);
+        $('#order-rental-date').editable('submit');
+        $('#order-target-date').editable('setValue', moment().add('days', day + 3).endOf('day').format('YYYY-MM-DD HH:mm:ss'), true);
+        $('#order-target-date').editable('submit');
+        $('#order-user-target-date').editable('setValue', moment().add('days', day + 3).endOf('day').format('YYYY-MM-DD HH:mm:ss'), true);
+        $('#order-user-target-date').editable('submit');
+      }
       $('#order table td:nth-child(6) span').html("4+" + day + "일");
       return $('.order-detail-price').each(function(i, el) {
         return setOrderDetailFinalPrice($(el).data('pk'));
@@ -356,6 +371,72 @@
                 order_detail_status_id: order_detail_status_id
               };
               return $.ajax("/api/order/" + order_id + ".json", {
+                type: 'PUT',
+                data: $.param(data, 1),
+                success: function(data, textStatus, jqXHR) {
+                  return window.location.href = redirect_url;
+                }
+              });
+            }
+          });
+        }
+      });
+    });
+    $('#btn-return-part').click(function(e) {
+      var clothes_price, count, late_fee, late_fee_discount, late_fee_final, late_fee_pay_with, order_detail_id, order_id, overdue, redirect_url;
+      redirect_url = $(e.target).data('redirect-url');
+      count = countSelectedOrderDetail();
+      if (!(count.selected > 0)) {
+        alert('error', "반납할 항목을 선택하지 않았습니다.");
+        return;
+      }
+      order_id = $('#order').data('order-id');
+      clothes_price = $('#order').data('order-clothes-price');
+      late_fee = $('#order').data('order-late-fee');
+      late_fee_discount = $('#order').data('order-late-fee-discount');
+      late_fee_final = $('#order').data('order-late-fee-final');
+      late_fee_pay_with = $('#order').data('order-late-fee-pay-with');
+      overdue = $('#order').data('order-overdue');
+      order_detail_id = [];
+      $("input[data-clothes-code]").each(function(i, el) {
+        if (!$(el).prop('checked')) {
+          return;
+        }
+        return order_detail_id.push($(el).data('id'));
+      });
+      if (late_fee_final > 0 && !late_fee_pay_with) {
+        alert('danger', '연체료를 납부받지 않았습니다.');
+        return;
+      }
+      return $.ajax("/api/order_detail.json", {
+        type: 'POST',
+        data: {
+          order_id: order_id,
+          name: '연체료',
+          price: clothes_price * 0.2,
+          final_price: late_fee,
+          stage: 1,
+          desc: "" + (OpenCloset.commify(clothes_price)) + "원 x 20% x " + overdue + "일"
+        },
+        success: function(data, textStatus, jqXHR) {
+          return $.ajax("/api/order_detail.json", {
+            type: 'POST',
+            data: {
+              order_id: order_id,
+              name: '연체료 에누리',
+              price: Math.round(late_fee_discount / overdue),
+              final_price: late_fee_discount,
+              stage: 1
+            },
+            success: function(data, textStatus, jqXHR) {
+              data = {
+                status_id: 9,
+                return_date: moment().format('YYYY-MM-DD HH:mm:ss'),
+                return_method: '직접방문',
+                late_fee_pay_with: late_fee_pay_with,
+                order_detail_id: order_detail_id
+              };
+              return $.ajax("/api/order/" + order_id + "/return-part.json", {
                 type: 'PUT',
                 data: $.param(data, 1),
                 success: function(data, textStatus, jqXHR) {
