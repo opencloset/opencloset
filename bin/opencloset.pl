@@ -2010,8 +2010,8 @@ get '/order/:id' => sub {
     #
     # response
     #
-    $self->stash( order => $order );
-} => 'order-id';
+    $self->render( 'order-id', order => $order );
+};
 
 get '/order/:id/delete' => sub {
     my $self = shift;
