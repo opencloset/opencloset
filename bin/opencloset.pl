@@ -83,18 +83,6 @@ helper trim_clothes_code => sub {
     return $code;
 };
 
-helper cloth2hr => sub {
-    my ($self, $clothes) = @_;
-
-    return {
-        $clothes->get_columns,
-        donor    => $clothes->donor ? $clothes->user->name : '',
-        category => $clothes->category,
-        price    => $self->commify($clothes->price),
-        status   => $clothes->status->name,
-    };
-};
-
 helper sms2hr => sub {
     my ($self, $sms) = @_;
 
