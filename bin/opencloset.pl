@@ -236,23 +236,6 @@ helper flatten_clothes => sub {
     return \%data;
 };
 
-helper _q => sub {
-    my ($self, %params) = @_;
-
-    my $q = $self->param('q') || q{};
-    my ( $bust, $waist, $arm, $status_id, $category ) = split /\//, $q;
-    my %q = (
-        bust     => $bust      || '',
-        waist    => $waist     || '',
-        arm      => $arm       || '',
-        status   => $status_id || '',
-        category => $category  || '',
-        %params,
-    );
-
-    return join '/', ( $q{bust}, $q{waist}, $q{arm}, $q{status}, $q{category} );
-};
-
 helper get_params => sub {
     my ( $self, @keys ) = @_;
 
