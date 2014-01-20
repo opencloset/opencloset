@@ -38,21 +38,9 @@ my $DB = Opencloset::Schema->connect({
 helper error => sub {
     my ($self, $status, $error) = @_;
 
-    ## TODO: `ok.haml.html`, `bad_request.haml.html`, `internal_error.haml.html`
-    my %error_map = (
-        200 => 'ok',
-        400 => 'bad_request',
-        404 => 'not_found',
-        500 => 'internal_error',
-    );
-
     $self->respond_to(
-        json => { json => { error => $error || '' }, status => $status },
-        html => {
-            template => $error_map{$status},
-            error    => $error || '',
-            status   => $status
-        }
+        json => { status => $status, json  => { error => $error || q{} } },
+        html => { status => $status, error => $error->{str} || q{}       },
     );
 
     return;
