@@ -399,7 +399,7 @@ helper update_user => sub {
 };
 
 helper create_order => sub {
-    my ( $self, $order_params, $order_clothes_params ) = @_;
+    my ( $self, $order_params, $order_detail_params ) = @_;
 
     return unless $order_params;
     return unless ref($order_params) eq 'HASH';
@@ -407,42 +407,59 @@ helper create_order => sub {
     #
     # validate params
     #
-    my $v = $self->create_validator;
-    $v->field('user_id')->required(1)->regexp(qr/^\d+$/)->callback(sub {
-        my $val = shift;
+    {
+        my $v = $self->create_validator;
+        $v->field('user_id')->required(1)->regexp(qr/^\d+$/)->callback(sub {
+            my $val = shift;
 
-        return 1 if $DB->resultset('User')->find({ id => $val });
-        return ( 0, 'user not found using user_id' );
-    });
-    #
-    # FIXME
-    #   need more validation but not now
-    #   since columns are not perfect yet.
-    #
-    $v->field('additional_day')->regexp(qr/^\d+$/);
-    $v->field(qw/ height weight bust waist hip belly thigh arm leg knee foot /)->each(sub {
-        shift->regexp(qr/^\d{1,3}$/);
-    });
-    $v->field('clothes_code')->regexp(qr/^[A-Z0-9]{4,5}$/);
-    unless ( $self->validate( $v, { %$order_params, %$order_clothes_params } ) ) {
-        my @error_str;
-        while ( my ( $k, $v ) = each %{ $v->errors } ) {
-            push @error_str, "$k:$v";
+            return 1 if $DB->resultset('User')->find({ id => $val });
+            return ( 0, 'user not found using user_id' );
+        });
+        $v->field('additional_day')->regexp(qr/^\d+$/);
+        $v->field(qw/ height weight bust waist hip belly thigh arm leg knee foot /)->each(sub {
+            shift->regexp(qr/^\d{1,3}$/);
+        });
+        unless ( $self->validate( $v, $order_params ) ) {
+            my @error_str;
+            while ( my ( $k, $v ) = each %{ $v->errors } ) {
+                push @error_str, "$k:$v";
+            }
+            $self->error( 400, {
+                str  => join(',', @error_str),
+                data => $v->errors,
+            }), return;
         }
-        $self->error( 400, {
-            str  => join(',', @error_str),
-            data => $v->errors,
-        }), return;
+    }
+    {
+        my $v = $self->create_validator;
+        $v->field('clothes_code')->regexp(qr/^[A-Z0-9]{4,5}$/)->callback(sub {
+            my $val = shift;
+
+            $val = sprintf( '%05s', $val ) if length $val == 4;
+
+            return 1 if $DB->resultset('Clothes')->find({ code => $val });
+            return ( 0, 'clothes not found using clothes_code' );
+        });
+        unless ( $self->validate( $v, $order_detail_params ) ) {
+            my @error_str;
+            while ( my ( $k, $v ) = each %{ $v->errors } ) {
+                push @error_str, "$k:$v";
+            }
+            $self->error( 400, {
+                str  => join(',', @error_str),
+                data => $v->errors,
+            }), return;
+        }
     }
 
     #
     # adjust params
     #
-    if ( $order_clothes_params && $order_clothes_params->{clothes_code} ) {
-        $order_clothes_params->{clothes_code} = [ $order_clothes_params->{clothes_code} ]
-            unless ref $order_clothes_params->{clothes_code};
+    if ( $order_detail_params && $order_detail_params->{clothes_code} ) {
+        $order_detail_params->{clothes_code} = [ $order_detail_params->{clothes_code} ]
+            unless ref $order_detail_params->{clothes_code};
 
-        for ( @{ $order_clothes_params->{clothes_code} } ) {
+        for ( @{ $order_detail_params->{clothes_code} } ) {
             next unless length == 4;
             $_ = sprintf( '%05s', $_ );
         }
@@ -463,33 +480,60 @@ helper create_order => sub {
             my $order = $DB->resultset('Order')->create( $order_params );
             die "failed to create a new order\n" unless $order;
 
-            if ( $order_clothes_params && $order_clothes_params->{clothes_code} ) {
-                for ( @{ $order_clothes_params->{clothes_code} } ) {
-                    #
-                    # create order_detail
-                    #
-                    my $clothes = $DB->resultset('Clothes')->find({ code => $_ });
-                    $order->add_to_order_details({
-                        clothes_code => $clothes->code,
-                        name         => join(
+            #
+            # create order_detail
+            #
+            my ( $f_key ) = keys %$order_detail_params;
+            return $order unless $f_key;
+            unless ( ref $order_detail_params->{$f_key} ) {
+                $order_detail_params->{$_} = [ $order_detail_params->{$_} ] for keys %$order_detail_params;
+            }
+            for ( my $i = 0; $i < @{ $order_detail_params->{$f_key} }; ++$i ) {
+                my %params;
+                for my $k ( keys %$order_detail_params ) {
+                    $params{$k} = $order_detail_params->{$k}[$i];
+                }
+
+                if ( $params{clothes_code} ) {
+                    if (   defined $params{name}
+                        && defined $params{price}
+                        && defined $params{final_price} )
+                    {
+                        $order->add_to_order_details( \%params )
+                            or die "failed to create a new order_detail\n";
+                    }
+                    else {
+                        my $clothes = $DB->resultset('Clothes')->find({ code => $params{clothes_code} });
+
+                        my $name = $params{name} // join(
                             q{ - },
                             $self->trim_clothes_code($clothes),
-                            app->config->{category}{$clothes->category}{str},
-                        ),
-                        price        => $clothes->price,
-                        final_price  => ( $clothes->price + $clothes->price * 0.2 * ($order_params->{additional_day} || 0) ),
+                            app->config->{category}{ $clothes->category }{str},
+                        );
+                        my $price       = $params{price} // $clothes->price;
+                        my $final_price = $params{final_price} // (
+                            $clothes->price + $clothes->price * 0.2 * ($order_params->{additional_day} || 0)
+                        );
 
-                    }) or die "failed to create a new order_detail\n";
+                        $order->add_to_order_details({
+                            %params,
+                            clothes_code => $clothes->code,
+                            name         => $name,
+                            price        => $price,
+                            final_price  => $final_price,
+                        }) or die "failed to create a new order_detail\n";
+                    }
                 }
-                #
-                # create order_detail for discount
-                #
-                $order->add_to_order_details({
-                    name        => '에누리',
-                    price       => 0,
-                    final_price => 0,
-                }) or die "failed to create a new order_detail for discount\n";
+                else {
+                    $order->add_to_order_details( \%params )
+                        or die "failed to create a new order_detail\n";
+                }
             }
+            $order->add_to_order_details({
+                name        => '에누리',
+                price       => 0,
+                final_price => 0,
+            }) or die "failed to create a new order_detail for discount\n";
 
             $guard->commit;
 
@@ -764,6 +808,8 @@ helper create_order_detail => sub {
     });
     $v->field('clothes_code')->regexp(qr/^[A-Z0-9]{4,5}$/)->callback(sub {
         my $val = shift;
+
+        $val = sprintf( '%05s', $val ) if length $val == 4;
 
         return 1 if $DB->resultset('Clothes')->find({ code => $val });
         return ( 0, 'clothes not found using clothes_code' );
@@ -1116,9 +1162,15 @@ group {
             waist
             weight
         /);
-        my %order_clothes_params = $self->get_params(qw/ clothes_code /);
-
-        my $order = $self->create_order( \%order_params, \%order_clothes_params );
+        my %order_detail_params = $self->get_params(
+            [ order_detail_clothes_code => 'clothes_code' ],
+            [ order_detail_status_id    => 'status_id'    ],
+            [ order_detail_name         => 'name'         ],
+            [ order_detail_price        => 'price'        ],
+            [ order_detail_final_price  => 'final_price'  ],
+            [ order_detail_desc         => 'desc'         ],
+        );
+        my $order = $self->create_order( \%order_params, \%order_detail_params );
         return unless $order;
 
         #
@@ -1988,10 +2040,10 @@ post '/order' => sub {
     #
     # fetch params
     #
-    my %order_params         = $self->get_params(qw/ user_id /);
-    my %order_clothes_params = $self->get_params(qw/ clothes_code /);
+    my %order_params        = $self->get_params(qw/ user_id /);
+    my %order_detail_params = $self->get_params(qw/ clothes_code /);
 
-    my $order = $self->create_order( \%order_params, \%order_clothes_params );
+    my $order = $self->create_order( \%order_params, \%order_detail_params );
     return unless $order;
 
     #
