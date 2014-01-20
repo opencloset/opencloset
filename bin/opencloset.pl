@@ -83,12 +83,6 @@ helper trim_clothes_code => sub {
     return $code;
 };
 
-helper sms2hr => sub {
-    my ($self, $sms) = @_;
-
-    return { $sms->get_columns };
-};
-
 helper order_price => sub {
     my ( $self, $order ) = @_;
 
