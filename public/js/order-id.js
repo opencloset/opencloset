@@ -116,6 +116,28 @@
         return updateOrder();
       }
     });
+    $('#order-user-target-date').editable({
+      mode: 'inline',
+      showbuttons: 'true',
+      type: 'combodate',
+      emptytext: '비어있음',
+      format: 'YYYY-MM-DD',
+      viewformat: 'YYYY-MM-DD',
+      template: 'YYYY-MM-DD',
+      combodate: {
+        minYear: 2013
+      },
+      url: function(params) {
+        var data, url;
+        url = $('#order').data('url');
+        data = {};
+        data[params.name] = params.value + ' 23:59:59';
+        return $.ajax(url, {
+          type: 'PUT',
+          data: data
+        });
+      }
+    });
     $('#order-price-pay-with').editable({
       source: function() {
         var m, _i, _len, _ref, _results;
@@ -249,6 +271,8 @@
       $('#order-rental-date').editable('submit');
       $('#order-target-date').editable('setValue', moment().add('days', day + 3).endOf('day').format('YYYY-MM-DD HH:mm:ss'), true);
       $('#order-target-date').editable('submit');
+      $('#order-user-target-date').editable('setValue', moment().add('days', day + 3).endOf('day').format('YYYY-MM-DD HH:mm:ss'), true);
+      $('#order-user-target-date').editable('submit');
       $('#order table td:nth-child(6) span').html("4+" + day + "일");
       return $('.order-detail-price').each(function(i, el) {
         return setOrderDetailFinalPrice($(el).data('pk'));

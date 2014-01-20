@@ -76,6 +76,13 @@ __PACKAGE__->table("order");
   inflate_datetime: 1
   is_nullable: 1
 
+=head2 user_target_date
+
+  data_type: 'datetime'
+  datetime_undef_if_invalid: 1
+  inflate_datetime: 1
+  is_nullable: 1
+
 =head2 return_date
 
   data_type: 'datetime'
@@ -236,6 +243,13 @@ __PACKAGE__->add_columns(
     inflate_datetime => 1,
     is_nullable => 1,
   },
+  "user_target_date",
+  {
+    data_type => "datetime",
+    datetime_undef_if_invalid => 1,
+    inflate_datetime => 1,
+    is_nullable => 1,
+  },
   "return_date",
   {
     data_type => "datetime",
@@ -379,8 +393,8 @@ __PACKAGE__->belongs_to(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07038 @ 2014-01-17 19:23:21
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:m2e6eSDdi4HZ0Pp3W0z7YQ
+# Created by DBIx::Class::Schema::Loader v0.07038 @ 2014-01-20 10:57:39
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:ea3XPkAuFip9eEMnFFk12A
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

@@ -203,6 +203,7 @@ CREATE TABLE `order` (
   `additional_day`    INT UNSIGNED DEFAULT 0,
   `rental_date`       DATETIME DEFAULT NULL,
   `target_date`       DATETIME DEFAULT NULL,
+  `user_target_date`  DATETIME DEFAULT NULL,
   `return_date`       DATETIME DEFAULT NULL,
   `return_method`     VARCHAR(32) DEFAULT NULL,
   `price_pay_with`    VARCHAR(32) DEFAULT NULL,

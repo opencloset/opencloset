@@ -166,15 +166,16 @@ helper flatten_order => sub {
 
     my %data = (
         $order->get_columns,
-        rental_date   => undef,
-        target_date   => undef,
-        return_date   => undef,
-        price         => $order_price,
-        stage0_price  => $order_stage0_price,
-        clothes_price => $self->order_clothes_price($order),
-        clothes       => [ $order->order_details({ clothes_code => { '!=' => undef } })->get_column('clothes_code')->all ],
-        late_fee      => $self->calc_late_fee($order),
-        overdue       => $self->calc_overdue($order),
+        rental_date      => undef,
+        target_date      => undef,
+        user_target_date => undef,
+        return_date      => undef,
+        price            => $order_price,
+        stage0_price     => $order_stage0_price,
+        clothes_price    => $self->order_clothes_price($order),
+        clothes          => [ $order->order_details({ clothes_code => { '!=' => undef } })->get_column('clothes_code')->all ],
+        late_fee         => $self->calc_late_fee($order),
+        overdue          => $self->calc_overdue($order),
     );
 
     if ( $order->rental_date ) {
@@ -190,6 +191,14 @@ helper flatten_order => sub {
             raw => $order->target_date,
             md  => $order->target_date->month . '/' . $order->target_date->day,
             ymd => $order->target_date->ymd
+        };
+    }
+
+    if ( $order->user_target_date ) {
+        $data{user_target_date} = {
+            raw => $order->user_target_date,
+            md  => $order->user_target_date->month . '/' . $order->user_target_date->day,
+            ymd => $order->user_target_date->ymd
         };
     }
 
@@ -1093,6 +1102,7 @@ group {
             target_date
             thigh
             user_id
+            user_target_date
             waist
             weight
         /);
@@ -1163,6 +1173,7 @@ group {
             target_date
             thigh
             user_id
+            user_target_date
             waist
             weight
         /);

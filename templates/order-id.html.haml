@@ -36,8 +36,7 @@
                                   %li.row
                                     .col-sm-1
                                       %i.icon-caret-right.blue
-                                    .col-sm-3.no-padding-left
-                                      담당자:
+                                    .col-sm-3.no-padding-left 담당자:
                                     .col-sm-8
                                       :plain
                                         <a
@@ -61,8 +60,7 @@
                                   %li.row
                                     .col-sm-1
                                       %i.icon-caret-right.blue
-                                    .col-sm-3.no-padding-left
-                                      대여 기간:
+                                    .col-sm-3.no-padding-left 대여 기간:
                                     .col-sm-8
                                       :plain
                                         <a
@@ -85,8 +83,7 @@
                                   %li.row
                                     .col-sm-1
                                       %i.icon-caret-right.blue
-                                    .col-sm-3.no-padding-left
-                                      대여일:
+                                    .col-sm-3.no-padding-left 대여일:
                                     .col-sm-8
                                       :plain
                                         <a
@@ -101,8 +98,7 @@
                                   %li.row
                                     .col-sm-1
                                       %i.icon-caret-right.blue
-                                    .col-sm-3.no-padding-left
-                                      반납 예정일:
+                                    .col-sm-3.no-padding-left 반납 예정일:
                                     .col-sm-8
                                       :plain
                                         <a
@@ -118,15 +114,13 @@
                                   %li.row
                                     .col-sm-1
                                       %i.icon-caret-right.blue
-                                    .col-sm-3.no-padding-left
-                                      반납일:
+                                    .col-sm-3.no-padding-left 반납일:
                                     .col-sm-8
                                       = $order->return_date ? $order->return_date->ymd : q{}
                                   %li.row
                                     .col-sm-1
                                       %i.icon-caret-right.blue
-                                    .col-sm-3.no-padding-left
-                                      대여비:
+                                    .col-sm-3.no-padding-left 대여비:
                                     .col-sm-8
                                       :plain
                                         <a
@@ -152,23 +146,20 @@
                                     %li.row
                                       .col-sm-1
                                         %i.icon-caret-right.blue
-                                      .col-sm-3.no-padding-left
-                                        연체료:
+                                      .col-sm-3.no-padding-left 연체료:
                                       .col-sm-8
                                         #late-fee
                                     %li.row.return-process
                                       .col-sm-1
                                         %i.icon-caret-right.blue
-                                      .col-sm-3.no-padding-left
-                                        연체료 에누리:
+                                      .col-sm-3.no-padding-left 연체료 에누리:
                                       .col-sm-8
                                         #late-fee-discount
                                   - }
                                   %li.row
                                     .col-sm-1
                                       %i.icon-caret-right.blue
-                                    .col-sm-3.no-padding-left
-                                      최종 연체료:
+                                    .col-sm-3.no-padding-left 최종 연체료:
                                     .col-sm-8
                                       :plain
                                         <a
@@ -202,6 +193,22 @@
                                       .col-sm-3.no-padding-left 이름:
                                       .col-sm-8
                                         %a{ :href => "#{ url_for('/user/' . $order->user->id) }" }= $order->user->name
+                                    %li.row
+                                      .col-sm-1
+                                        %i.icon-caret-right.green
+                                      .col-sm-3.no-padding-left 반납 희망일:
+                                      .col-sm-8
+                                        :plain
+                                          <a
+                                            id               = "order-user-target-date"
+                                            class            = "editable editable-click"
+                                            href             = "#"
+
+                                            data-disabled    = "#{ !$order->status || $order->status->name eq '대여중' ? 'false' : 'true' }"
+
+                                            data-value       = "#{ $order->user_target_date ? $order->user_target_date->ymd : q{} }"
+                                            data-name        = "user_target_date"
+                                          ></a>
                                     %li.row
                                       .col-sm-1
                                         %i.icon-caret-right.green
@@ -241,6 +248,11 @@
                                       .col-sm-1
                                         %i.icon-caret-right.green
                                       .col-sm-3.no-padding-left 이름:
+                                      .col-sm-8
+                                    %li.row
+                                      .col-sm-1
+                                        %i.icon-caret-right.green
+                                      .col-sm-3.no-padding-left 반납 희망일:
                                       .col-sm-8
                                     %li.row
                                       .col-sm-1
