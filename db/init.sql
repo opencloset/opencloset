@@ -169,6 +169,31 @@ CREATE TABLE `clothes` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
+-- tag
+--
+
+CREATE TABLE `tag` (
+  `id`   INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `name` CHAR(128)    NOT NULL,
+
+  PRIMARY KEY (`id`),
+  UNIQUE KEY (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- clothes_tag
+--
+
+CREATE TABLE `clothes_tag` (
+  `clothes_code` CHAR(5)      NOT NULL,
+  `tag_id`       INT UNSIGNED NOT NULL,
+
+  PRIMARY KEY (`clothes_code`, `tag_id`),
+  CONSTRAINT `fk_clothes_tag1` FOREIGN KEY (`clothes_code`) REFERENCES `clothes` (`code`) ON DELETE CASCADE,
+  CONSTRAINT `fk_clothes_tag2` FOREIGN KEY (`tag_id`)       REFERENCES `tag`     (`id`)   ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
 -- satisfaction
 --
 

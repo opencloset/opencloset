@@ -228,6 +228,21 @@ __PACKAGE__->add_unique_constraint("code", ["code"]);
 
 =head1 RELATIONS
 
+=head2 clothes_tags
+
+Type: has_many
+
+Related object: L<Opencloset::Schema::Result::ClothesTag>
+
+=cut
+
+__PACKAGE__->has_many(
+  "clothes_tags",
+  "Opencloset::Schema::Result::ClothesTag",
+  { "foreign.clothes_code" => "self.code" },
+  { cascade_copy => 0, cascade_delete => 0 },
+);
+
 =head2 donation
 
 Type: belongs_to
@@ -318,9 +333,19 @@ __PACKAGE__->belongs_to(
   },
 );
 
+=head2 tags
 
-# Created by DBIx::Class::Schema::Loader v0.07038 @ 2014-01-17 19:23:21
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:I2c0Vs180eHcEbUd5JMW+w
+Type: many_to_many
+
+Composing rels: L</clothes_tags> -> tag
+
+=cut
+
+__PACKAGE__->many_to_many("tags", "clothes_tags", "tag");
+
+
+# Created by DBIx::Class::Schema::Loader v0.07038 @ 2014-01-21 10:17:29
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:E4CvJaqvuVIrO6Qsdh6PlA
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration
