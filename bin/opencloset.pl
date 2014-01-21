@@ -18,8 +18,6 @@ plugin 'validator';
 plugin 'haml_renderer';
 plugin 'FillInFormLite';
 
-my @CATEGORIES = qw( jacket pants shirt shoes hat tie waistcoat coat onepiece skirt blouse belt );
-
 app->defaults( %{ plugin 'Config' => { default => {
     jses        => [],
     csses       => [],
@@ -1493,7 +1491,7 @@ group {
         #
         my $v = $self->create_validator;
         $v->field('code')->required(1)->regexp(qr/^[A-Z0-9]{4,5}$/);
-        $v->field('category')->required(1)->in(@CATEGORIES);
+        $v->field('category')->required(1)->in( keys %{ app->config->{category} } );
         $v->field('gender')->in(qw/ male female unisex /);
         $v->field('price')->regexp(qr/^\d*$/);
         $v->field(qw/ bust waist hip thigh arm length /)->each(sub {
@@ -1603,7 +1601,7 @@ group {
         #
         my $v = $self->create_validator;
         $v->field('code')->required(1)->regexp(qr/^[A-Z0-9]{4,5}$/);
-        $v->field('category')->in(@CATEGORIES);
+        $v->field('category')->in( keys %{ app->config->{category} } );
         $v->field('gender')->in(qw/ male female unisex /);
         $v->field('price')->regexp(qr/^\d*$/);
         $v->field(qw/ bust waist hip thigh arm length /)->each(sub {
@@ -1809,7 +1807,7 @@ group {
         #
         my $v = $self->create_validator;
         $v->field('code')->required(1)->regexp(qr/^[A-Z0-9]{4,5}$/);
-        $v->field('category')->in(@CATEGORIES);
+        $v->field('category')->in( keys %{ app->config->{category} } );
         $v->field('gender')->in(qw/ male female unisex /);
         $v->field('price')->regexp(qr/^\d*$/);
         $v->field(qw/ bust waist hip thigh arm length /)->each(sub {
