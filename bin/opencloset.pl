@@ -931,6 +931,7 @@ group {
     post '/tag'                   => \&api_create_tag;
     get  '/tag/:id'               => \&api_get_tag;
     put  '/tag/:id'               => \&api_update_tag;
+    del  '/tag/:id'               => \&api_delete_tag;
 
     post '/donation'              => \&api_create_donation;
 
@@ -2011,6 +2012,51 @@ group {
         #
         my %data = $tag->get_columns;
 
+        $self->respond_to( json => { status => 200, json => \%data } );
+    }
+
+    sub api_delete_tag {
+        my $self = shift;
+
+        #
+        # fetch params
+        #
+        my %params = $self->get_params(qw/ id /);
+
+        #
+        # validate params
+        #
+        my $v = $self->create_validator;
+        $v->field('id')->required(1)->regexp(qr/^\d*$/);
+        unless ( $self->validate( $v, \%params ) ) {
+            my @error_str;
+            while ( my ( $k, $v ) = each %{ $v->errors } ) {
+                push @error_str, "$k:$v";
+            }
+            return $self->error( 400, {
+                str  => join(',', @error_str),
+                data => $v->errors,
+            });
+        }
+
+        #
+        # find tag
+        #
+        my $tag = $DB->resultset('Tag')->find( \%params );
+        return $self->error( 404, {
+            str  => 'tag not found',
+            data => {},
+        }) unless $tag;
+
+        #
+        # delete tag
+        #
+        my %data = $tag->get_columns;
+        $tag->delete;
+
+        #
+        # response
+        #
         $self->respond_to( json => { status => 200, json => \%data } );
     }
 
