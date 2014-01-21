@@ -2,9 +2,13 @@
 - my $_id   = 'tag';
 - layout 'default',
 -   page_id     => $_id,
--   breadcrumbs => [ { text => meta_text($_id) } ]
+-   breadcrumbs => [ { text => meta_text($_id) } ],
+-   jses  => [ '/lib/bootstrap3-editable/js/bootstrap-editable.min.js' ],
+-   csses => [ '/lib/bootstrap3-editable/css/bootstrap-editable.css'   ],
 -   ;
 - title meta_text($_id);
+
+#tag-data{ 'data-base-url' => "#{ url_for('/api/tag') }" }
 
 .tag-add
   %form#add-form
@@ -29,7 +33,6 @@
         %tr
           %td
             %span.tag-action
-              %button.btn.btn-xs.btn-danger 제거
-            %span
-              = $tag->name
+              %button.btn.btn-xs.btn-danger{ 'data-tag-id' => "#{ $tag->id }" } 제거
+            %span.editable{ :id => "tag-id-#{ $tag->id }", 'data-pk' => "#{ $tag->id }", 'data-name' => 'name', 'data-value' => "#{ $tag->name }" }
       - }

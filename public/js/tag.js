@@ -5,15 +5,56 @@
     $('#btn-tag-add').click(function(e) {
       return $('#add-form').trigger('submit');
     });
-    return $('#add-form').submit(function(e) {
+    $('#add-form').submit(function(e) {
       var query;
       e.preventDefault();
       query = $('#query').val();
       $('#query').val('').focus();
       if (!query) {
-        return;
+
       }
-      return console.log(query);
+    });
+    return $('.editable').each(function(i, el) {
+      var id, params;
+      params = {
+        mode: 'inline',
+        showbuttons: 'true',
+        emptytext: '비어있음',
+        url: function(params) {
+          var base_url, data;
+          if (!params.value) {
+            return alert('danger', '변경할 태그 이름을 입력하세요.');
+          }
+          base_url = $('#tag-data').data('base-url');
+          data = {};
+          data[params.name] = params.value;
+          return $.ajax("" + base_url + "/" + params.pk + ".json", {
+            type: 'PUT',
+            data: data
+          });
+        },
+        error: function(response, newValue) {
+          var msg;
+          msg = response.responseJSON.error.str;
+          switch (response.status) {
+            case 404:
+              msg = "" + params.value + " 태그를 찾을 수 없습니다.";
+              break;
+            case 500:
+              if (msg === 'duplicate tag.name') {
+                msg = "" + newValue + " 태그가 이미 존재합니다.";
+              }
+          }
+          return msg;
+        }
+      };
+      id = $(el).attr('id');
+      if (0) {
+
+      } else {
+        params.type = 'text';
+      }
+      return $(el).editable(params);
     });
   });
 
