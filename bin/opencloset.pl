@@ -36,15 +36,20 @@ my $DB = Opencloset::Schema->connect({
 helper error => sub {
     my ($self, $status, $error) = @_;
 
+    app->log->error( $error->{str} );
+
     no warnings 'experimental';
+    my $template;
     given ($status) {
-        $self->render_not_found                when 404;
-        $self->render_exception($error->{str}) when 500;
+        $template = 'bad_request' when 400;
+        $template = 'not_found'   when 404;
+        $template = 'exception'   when 500;
+        default { $template = 'unknown' }
     }
 
     $self->respond_to(
         json => { status => $status, json  => { error => $error || q{} } },
-        html => { status => $status, error => $error->{str} || q{}       },
+        html => { status => $status, error => $error->{str} || q{}, template => $template },
     );
 
     return;
@@ -927,6 +932,11 @@ group {
 
     get  '/clothes-list'          => \&api_get_clothes_list;
     put  '/clothes-list'          => \&api_update_clothes_list;
+
+    post '/tag'                   => \&api_create_tag;
+    get  '/tag/:id'               => \&api_get_tag;
+    put  '/tag/:id'               => \&api_update_tag;
+    del  '/tag/:id'               => \&api_delete_tag;
 
     post '/donation'              => \&api_create_donation;
 
@@ -1872,6 +1882,254 @@ group {
         $self->respond_to( json => { status => 200, json => \%data } );
     }
 
+    sub api_create_tag {
+        my $self = shift;
+
+        #
+        # fetch params
+        #
+        my %params = $self->get_params(qw/ name /);
+
+        #
+        # validate params
+        #
+        my $v = $self->create_validator;
+        $v->field('name')->required(1)->regexp(qr/^.+$/);
+        unless ( $self->validate( $v, \%params ) ) {
+            my @error_str;
+            while ( my ( $k, $v ) = each %{ $v->errors } ) {
+                push @error_str, "$k:$v";
+            }
+            return $self->error( 400, {
+                str  => join(',', @error_str),
+                data => $v->errors,
+            });
+        }
+
+        my ( $tag, $status, $error ) = do {
+            try {
+                #
+                # create tag
+                #
+                my $tag = $DB->resultset('Tag')->create( \%params );
+                die "failed to create a new tag\n" unless $tag;
+
+                return $tag;
+            }
+            catch {
+                chomp;
+                my $err = $_;
+
+                no warnings 'experimental';
+                given ($err) {
+                    when ( /DBIx::Class::Storage::DBI::_dbh_execute\(\): DBI Exception:.*Duplicate entry.*for key 'name'/ ) {
+                        $err = 'duplicate tag.name';
+                    }
+                }
+
+                return ( undef, 400, $err );
+            };
+        };
+
+        $self->error( $status, {
+            str  => $error,
+            data => {},
+        }), return unless $tag;
+
+        #
+        # response
+        #
+        my %data = $tag->get_columns;
+
+        $self->res->headers->header(
+            'Location' => $self->url_for( '/api/tag/' . $tag->id ),
+        );
+        $self->respond_to( json => { status => 201, json => \%data } );
+    }
+
+    sub api_get_tag {
+        my $self = shift;
+
+        #
+        # fetch params
+        #
+        my %params = $self->get_params(qw/ id /);
+
+        #
+        # validate params
+        #
+        my $v = $self->create_validator;
+        $v->field('id')->required(1)->regexp(qr/^\d*$/);
+        unless ( $self->validate( $v, \%params ) ) {
+            my @error_str;
+            while ( my ( $k, $v ) = each %{ $v->errors } ) {
+                push @error_str, "$k:$v";
+            }
+            return $self->error( 400, {
+                str  => join(',', @error_str),
+                data => $v->errors,
+            });
+        }
+
+        #
+        # find tag
+        #
+        my $tag = $DB->resultset('Tag')->find({ id => $params{id} });
+        return $self->error( 404, {
+            str  => 'tag not found',
+            data => {},
+        }) unless $tag;
+
+        #
+        # response
+        #
+        my %data = $tag->get_columns;
+
+        $self->respond_to( json => { status => 200, json => \%data } );
+    }
+
+    sub api_update_tag {
+        my $self = shift;
+
+        #
+        # fetch params
+        #
+        my %params = $self->get_params(qw/ id name /);
+
+        #
+        # validate params
+        #
+        my $v = $self->create_validator;
+        $v->field('id')->required(1)->regexp(qr/^\d*$/);
+        $v->field('name')->required(1)->regexp(qr/^.+$/);
+        unless ( $self->validate( $v, \%params ) ) {
+            my @error_str;
+            while ( my ( $k, $v ) = each %{ $v->errors } ) {
+                push @error_str, "$k:$v";
+            }
+            return $self->error( 400, {
+                str  => join(',', @error_str),
+                data => $v->errors,
+            });
+        }
+
+        #
+        # TRANSACTION:
+        #
+        my ( $tag, $status, $error ) = do {
+            my $guard = $DB->txn_scope_guard;
+            try {
+                #
+                # find tag
+                #
+                my $tag = $DB->resultset('Tag')->find({ id => $params{id} });
+                die "tag not found\n" unless $tag;
+
+                #
+                # update tag
+                #
+                delete $params{id};
+                try {
+                    $tag->update( \%params ) or die "failed to update the tag\n";
+                }
+                catch {
+                    chomp;
+                    my $err = $_;
+
+                    no warnings 'experimental';
+                    given ($err) {
+                        when ( /DBIx::Class::Storage::DBI::_dbh_execute\(\): DBI Exception:.*Duplicate entry.*for key 'name'/ ) {
+                            $err = 'duplicate tag.name';
+                        }
+                    }
+
+                    die "$err\n";
+                };
+
+                $guard->commit;
+
+                return $tag;
+            }
+            catch {
+                chomp;
+                my $err = $_;
+                app->log->error("failed to find & update the tag");
+
+                no warnings 'experimental';
+
+                my $status;
+                given ($err) {
+                    $status = 404 when 'tag not found';
+                    $status = 500 when 'failed to update the tag';
+                    $status = 400 when 'duplicate tag.name';
+                    default { $status = 500 }
+                }
+
+                return ( undef, $status, $err );
+            };
+        };
+
+        #
+        # response
+        #
+        $self->error( $status, {
+            str  => $error,
+            data => {},
+        }), return unless $tag;
+
+        #
+        # response
+        #
+        my %data = $tag->get_columns;
+
+        $self->respond_to( json => { status => 200, json => \%data } );
+    }
+
+    sub api_delete_tag {
+        my $self = shift;
+
+        #
+        # fetch params
+        #
+        my %params = $self->get_params(qw/ id /);
+
+        #
+        # validate params
+        #
+        my $v = $self->create_validator;
+        $v->field('id')->required(1)->regexp(qr/^\d*$/);
+        unless ( $self->validate( $v, \%params ) ) {
+            my @error_str;
+            while ( my ( $k, $v ) = each %{ $v->errors } ) {
+                push @error_str, "$k:$v";
+            }
+            return $self->error( 400, {
+                str  => join(',', @error_str),
+                data => $v->errors,
+            });
+        }
+
+        #
+        # find tag
+        #
+        my $tag = $DB->resultset('Tag')->find({ id => $params{id} });
+        return $self->error( 404, {
+            str  => 'tag not found',
+            data => {},
+        }) unless $tag;
+
+        #
+        # delete tag
+        #
+        my %data = $tag->get_columns;
+        $tag->delete;
+
+        #
+        # response
+        #
+        $self->respond_to( json => { status => 200, json => \%data } );
+    }
+
     sub api_create_donation {
         my $self = shift;
 
@@ -2061,6 +2319,15 @@ get '/login';
 get '/'             => 'home';
 get '/new-borrower' => 'new-borrower';
 get '/new-clothes'  => 'new-clothes';
+
+get '/tag' => sub {
+    my $self = shift;
+
+    #
+    # response
+    #
+    $self->stash( 'tag_rs' => $DB->resultset('Tag') );
+};
 
 get '/user/:id' => sub {
     my $self = shift;

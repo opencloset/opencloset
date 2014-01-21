@@ -103,6 +103,9 @@
 .page-content #clothes-code .user-profile.row .grid2 a:hover { text-decoration: none; }
 .page-content #clothes-code .profile-activity img { width: 40px; height: 40px; }
 .page-content #clothes-code .profile-activity a.order-badge:hover { text-decoration: none; }
+.page-content #tag .tag-add { width: 300px; }
+.page-content #tag table td .btn-xs { border-width: 2px; font-size: 12px; line-height: 18px; padding: 0 4px; }
+.page-content #tag table td .tag-action { margin-right: 10px; }
 .page-content .step-content .step-pane h3 { margin-top: 10px; margin-bottom: 20px; }
 
 .bigdrop .select2-results { max-height: 400px; }

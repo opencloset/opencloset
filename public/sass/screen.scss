@@ -394,6 +394,25 @@ $opencloset-darken-yellow: desaturate(darken($opencloset-yellow, 4%), 10%);
             }
         }
     }
+    #tag {
+        .tag-add {
+            width: 300px;
+        }
+        table {
+            td {
+                .btn-xs {
+                    border-width: 2px;
+                    font-size: 12px;
+                    line-height: 18px;
+                    padding: 0 4px;
+                }
+                .tag-action {
+                    margin-right: 10px;
+                }
+            }
+        }
+
+    }
     .step-content {
         .step-pane {
             h3 {
