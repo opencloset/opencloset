@@ -1994,23 +1994,68 @@ group {
         }
 
         #
-        # find tag
+        # TRANSACTION:
         #
-        my $tag = $DB->resultset('Tag')->find( \%params );
-        return $self->error( 404, {
-            str  => 'tag not found',
-            data => {},
-        }) unless $tag;
+        my ( $tag, $status, $error ) = do {
+            my $guard = $DB->txn_scope_guard;
+            try {
+                #
+                # find tag
+                #
+                my $tag = $DB->resultset('Tag')->find({ id => $params{id} });
+                die "tag not found\n" unless $tag;
+
+                #
+                # update tag
+                #
+                delete $params{id};
+                try {
+                    $tag->update( \%params ) or die "failed to update the tag\n";
+                }
+                catch {
+                    chomp;
+                    my $err = $_;
+
+                    no warnings 'experimental';
+                    given ($err) {
+                        when ( /DBIx::Class::Storage::DBI::_dbh_execute\(\): DBI Exception:.*Duplicate entry.*for key 'name'/ ) {
+                            $err = 'duplicate tag.name';
+                        }
+                    }
+
+                    die "$err\n";
+                };
+
+                $guard->commit;
+
+                return $tag;
+            }
+            catch {
+                chomp;
+                my $err = $_;
+                app->log->error("failed to find & update the tag");
+
+                no warnings 'experimental';
+
+                my $status;
+                given ($err) {
+                    $status = 404 when 'tag not found';
+                    $status = 500 when 'failed to update the tag';
+                    $status = 500 when 'duplicate tag.name';
+                    default { $status = 500 }
+                }
+
+                return ( undef, $status, $err );
+            };
+        };
 
         #
-        # update tag
+        # response
         #
-        delete $params{id};
-        $tag = $DB->resultset('Tag')->update( \%params );
-        return $self->error( 500, {
-            str  => 'failed to update the tag',
+        $self->error( $status, {
+            str  => $error,
             data => {},
-        }) unless $tag;
+        }), return unless $tag;
 
         #
         # response
