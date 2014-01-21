@@ -928,6 +928,8 @@ group {
     get  '/clothes-list'          => \&api_get_clothes_list;
     put  '/clothes-list'          => \&api_update_clothes_list;
 
+    post '/tag'                   => \&api_create_tag;
+
     post '/donation'              => \&api_create_donation;
 
     post '/group'                 => \&api_create_group;
@@ -1870,6 +1872,51 @@ group {
         my %data = ();
 
         $self->respond_to( json => { status => 200, json => \%data } );
+    }
+
+    sub api_create_tag {
+        my $self = shift;
+
+        #
+        # fetch params
+        #
+        my %params = $self->get_params(qw/ id name /);
+
+        #
+        # validate params
+        #
+        my $v = $self->create_validator;
+        $v->field('id')->required(1)->regexp(qr/^\d*$/);
+        $v->field('name')->required(1)->regexp(qr/^.+$/);
+        unless ( $self->validate( $v, \%params ) ) {
+            my @error_str;
+            while ( my ( $k, $v ) = each %{ $v->errors } ) {
+                push @error_str, "$k:$v";
+            }
+            return $self->error( 400, {
+                str  => join(',', @error_str),
+                data => $v->errors,
+            });
+        }
+
+        #
+        # create tag
+        #
+        my $tag = $DB->resultset('Tag')->create( \%params );
+        return $self->error( 500, {
+            str  => 'failed to create a new tag',
+            data => {},
+        }) unless $tag;
+
+        #
+        # response
+        #
+        my %data = $tag->get_columns;
+
+        $self->res->headers->header(
+            'Location' => $self->url_for( '/api/tag/' . $tag->id ),
+        );
+        $self->respond_to( json => { status => 201, json => \%data } );
     }
 
     sub api_create_donation {
