@@ -2061,6 +2061,7 @@ get '/login';
 get '/'             => 'home';
 get '/new-borrower' => 'new-borrower';
 get '/new-clothes'  => 'new-clothes';
+get '/tag';
 
 get '/user/:id' => sub {
     my $self = shift;
