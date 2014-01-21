@@ -1906,14 +1906,35 @@ group {
             });
         }
 
-        #
-        # create tag
-        #
-        my $tag = $DB->resultset('Tag')->create( \%params );
-        return $self->error( 500, {
-            str  => 'failed to create a new tag',
+        my ( $tag, $status, $error ) = do {
+            try {
+                #
+                # create tag
+                #
+                my $tag = $DB->resultset('Tag')->create( \%params );
+                die "failed to create a new tag\n" unless $tag;
+
+                return $tag;
+            }
+            catch {
+                chomp;
+                my $err = $_;
+
+                no warnings 'experimental';
+                given ($err) {
+                    when ( /DBIx::Class::Storage::DBI::_dbh_execute\(\): DBI Exception:.*Duplicate entry.*for key 'name'/ ) {
+                        $err = 'duplicate tag.name';
+                    }
+                }
+
+                return ( undef, 400, $err );
+            };
+        };
+
+        $self->error( $status, {
+            str  => $error,
             data => {},
-        }) unless $tag;
+        }), return unless $tag;
 
         #
         # response
