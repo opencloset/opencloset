@@ -930,6 +930,8 @@ group {
     put  '/clothes/:code'         => \&api_update_clothes;
     del  '/clothes/:code'         => \&api_delete_clothes;
 
+    put  '/clothes/:code/tag'     => \&api_update_clothes_tag;
+
     get  '/clothes-list'          => \&api_get_clothes_list;
     put  '/clothes-list'          => \&api_update_clothes_list;
 
@@ -1726,6 +1728,104 @@ group {
         #
         my $data = $self->flatten_clothes($clothes);
         $clothes->delete;
+
+        $self->respond_to( json => { status => 200, json => $data } );
+    }
+
+    sub api_update_clothes_tag {
+        my $self = shift;
+
+        #
+        # fetch params
+        #
+        my %params = $self->get_params(qw/ clothes_code tag_id /);
+
+        #
+        # validate params
+        #
+        my $v = $self->create_validator;
+        $v->field('clothes_code')->required(1)->regexp(qr/^[A-Z0-9]{4,5}$/)->callback(sub {
+            my $val = shift;
+
+            $val = sprintf( '%05s', $val ) if length $val == 4;
+
+            return 1 if $DB->resultset('Clothes')->find({ code => $val });
+            return ( 0, 'clothes not found using clothes_code' );
+        });
+        $v->field('tag_id')->required(1)->regexp(qr/^\d+$/)->callback(sub {
+            my $val = shift;
+
+            return 1 if $DB->resultset('Tag')->find({ id => $val });
+            return ( 0, 'tag not found using tag_id' );
+        });
+        unless ( $self->validate( $v, \%params ) ) {
+            my @error_str;
+            while ( my ( $k, $v ) = each %{ $v->errors } ) {
+                push @error_str, "$k:$v";
+            }
+            return $self->error( 400, {
+                str  => join(',', @error_str),
+                data => $v->errors,
+            });
+        }
+
+        #
+        # adjust params
+        #
+        $params{clothes_code} = [ $params{clothes_code} ] unless ref $params{clothes_code} eq 'ARRAY';
+        $params{tag_id}       = [ $params{tag_id}       ] unless ref $params{tag_id}       eq 'ARRAY';
+        for my $clothes_code ( @{ $params{clothes_code} } ) {
+            next unless length($clothes_code) == 4;
+            $clothes_code = sprintf( '%05s', $clothes_code );
+        }
+
+        #
+        # TRANSACTION:
+        #
+        my ( $clothes_tag, $status, $error ) = do {
+            my $guard = $DB->txn_scope_guard;
+            try {
+                #
+                # remove existing clothes tag data
+                #
+                $DB->resultset('ClothesTag')->search({ clothes_code => $params{clothes_code} })->delete_all;
+
+                #
+                # update new clothes tag data
+                #
+                my @clothes_tags;
+                for ( my $i = 0; $i < @{ $params{clothes_code} }; ++$i ) {
+                    my $clothes_tag = $DB->resultset('ClothesTag')->create({
+                        clothes_code => $params{clothes_code}[$i],
+                        tag_id       => $params{tag_id}[$i],
+                    });
+                    push @clothes_tags, $clothes_tag;
+                }
+
+                $guard->commit;
+
+                return \@clothes_tags;
+            }
+            catch {
+                chomp;
+                my $err = $_;
+                app->log->error("failed to delete & update the clothes_tag");
+
+                no warnings 'experimental';
+
+                my $status;
+                given ($err) {
+                    default { $status = 500 }
+                }
+
+                return ( undef, $status, $err );
+            };
+        };
+
+        #
+        # response
+        #
+        my $data = {};
 
         $self->respond_to( json => { status => 200, json => $data } );
     }
