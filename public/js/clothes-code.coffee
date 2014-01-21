@@ -6,7 +6,18 @@ $ ->
   $('.clothes-code').each (i, el) ->
     $(el).html OpenCloset.trimClothesCode $(el).html()
 
-  $(".chosen-select").chosen({ width: '90%' })
+  $(".chosen-select").chosen({ width: '90%' }).change ->
+    tag_list     = $(this).val()
+    clothes_code = $(this).data('clothes-code')
+    base_url     = $(this).data('base-url')
+
+    data = {}
+    data.clothes_code = ( clothes_code for t in tag_list )
+    data.tag_id       = tag_list
+
+    $.ajax "#{ base_url }/clothes/#{ clothes_code }/tag.json",
+      type: 'PUT'
+      data: $.param(data, 1)
 
   #
   # inline editable field

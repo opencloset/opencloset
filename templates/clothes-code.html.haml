@@ -125,7 +125,7 @@
                               .profile-info-row
                                 .profile-info-name 태그
                                 .profile-info-value
-                                  %select.chosen-select.tag-input-style#clothes-tag{ 'data-placeholder' => '태그를 선택하세요' :multiple => '' }
+                                  %select.chosen-select.tag-input-style#clothes-tag{ 'data-placeholder' => '태그를 선택하세요' :multiple => '', 'data-clothes-code' => "#{ trim_clothes_code($clothes) }", 'data-base-url' => "#{ url_for('/api') }" }
                                     - no warnings 'experimental';
                                     - my $clothes_tag_ids = [ map { $_->id } $clothes->tags ];
                                     - while ( my $tag = $tag_rs->next ) {
