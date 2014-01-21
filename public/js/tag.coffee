@@ -1,4 +1,7 @@
 $ ->
+  #
+  # 태그 더하기
+  #
   $('#query').focus()
   $('#btn-tag-add').click (e) ->
     $('#add-form').trigger('submit')
@@ -27,6 +30,27 @@ $ ->
               msg = "\"#{query}\" 태그가 이미 존재합니다."
         alert 'danger', msg
 
+  #
+  # 태그 지우기
+  #
+  $('.btn-tag-remove').click (e) ->
+    tag_id = $(this).data('tag-id')
+    return unless tag_id
+
+    base_url = $('#tag-data').data('base-url')
+    $.ajax "#{ base_url }/#{ tag_id }.json",
+      type: 'DELETE'
+      success: (data, textStatus, jqXHR) ->
+        $(".tag-id-#{ data.id }").remove()
+      error: (jqXHR, textStatus, errorThrown) ->
+        msg = jqXHR.responseJSON.error.str
+        switch jqXHR.status
+          when 404 then msg = "\"#{query}\" 태그를 찾을 수 없습니다."
+        alert 'danger', msg
+
+  #
+  # inline editable field
+  #
   makeEditable = (el) ->
     params =
       mode:        'inline'
@@ -58,6 +82,6 @@ $ ->
     $(el).editable params
 
   #
-  # inline editable field
+  # 태그 갱신
   #
   $('.editable').each (i, el) -> makeEditable el

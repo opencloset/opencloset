@@ -40,6 +40,29 @@
         }
       });
     });
+    $('.btn-tag-remove').click(function(e) {
+      var base_url, tag_id;
+      tag_id = $(this).data('tag-id');
+      if (!tag_id) {
+        return;
+      }
+      base_url = $('#tag-data').data('base-url');
+      return $.ajax("" + base_url + "/" + tag_id + ".json", {
+        type: 'DELETE',
+        success: function(data, textStatus, jqXHR) {
+          return $(".tag-id-" + data.id).remove();
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+          var msg;
+          msg = jqXHR.responseJSON.error.str;
+          switch (jqXHR.status) {
+            case 404:
+              msg = "\"" + query + "\" 태그를 찾을 수 없습니다.";
+          }
+          return alert('danger', msg);
+        }
+      });
+    });
     makeEditable = function(el) {
       var id, params;
       params = {
