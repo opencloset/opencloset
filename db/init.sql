@@ -180,6 +180,15 @@ CREATE TABLE `tag` (
   UNIQUE KEY (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+INSERT
+  INTO `tag` (`id`,`name`)
+  VALUES
+    (1,'봄'),
+    (2,'여름'),
+    (3,'가을'),
+    (4,'겨울')
+    ;
+
 --
 -- clothes_tag
 --
