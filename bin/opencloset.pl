@@ -1954,7 +1954,7 @@ group {
         #
         # find tag
         #
-        my $tag = $DB->resultset('Tag')->find( \%params );
+        my $tag = $DB->resultset('Tag')->find({ id => $params{id} });
         return $self->error( 404, {
             str  => 'tag not found',
             data => {},
@@ -2047,7 +2047,7 @@ group {
         #
         # find tag
         #
-        my $tag = $DB->resultset('Tag')->find( \%params );
+        my $tag = $DB->resultset('Tag')->find({ id => $params{id} });
         return $self->error( 404, {
             str  => 'tag not found',
             data => {},
