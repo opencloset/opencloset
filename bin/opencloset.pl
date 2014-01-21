@@ -1139,23 +1139,20 @@ group {
             arm
             belly
             bust
-            comment
-            discount
+            desc
             foot
             height
             hip
             knee
-            l_discount
-            late_fee
             late_fee_pay_with
             leg
-            price
+            parent_id
             price_pay_with
             purpose
             rental_date
             return_date
             return_method
-            staff_name
+            staff_id
             status_id
             target_date
             thigh
@@ -1214,25 +1211,23 @@ group {
         my %order_params = $self->get_params(qw/
             additional_day
             arm
+            belly
             bust
-            comment
-            discount
+            desc
             foot
             height
             hip
             id
             knee
-            l_discount
-            late_fee
             late_fee_pay_with
             leg
-            price
+            parent_id
             price_pay_with
             purpose
             rental_date
             return_date
             return_method
-            staff_name
+            staff_id
             status_id
             target_date
             thigh
@@ -1288,25 +1283,23 @@ group {
         my %order_params = $self->get_params(qw/
             additional_day
             arm
+            belly
             bust
-            comment
-            discount
+            desc
             foot
             height
             hip
             id
             knee
-            l_discount
-            late_fee
             late_fee_pay_with
             leg
-            price
+            parent_id
             price_pay_with
             purpose
             rental_date
             return_date
             return_method
-            staff_name
+            staff_id
             status_id
             target_date
             thigh
