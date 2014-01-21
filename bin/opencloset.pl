@@ -930,6 +930,7 @@ group {
 
     post '/tag'                   => \&api_create_tag;
     get  '/tag/:id'               => \&api_get_tag;
+    put  '/tag/:id'               => \&api_update_tag;
 
     post '/donation'              => \&api_create_donation;
 
@@ -1950,6 +1951,58 @@ group {
         my $tag = $DB->resultset('Tag')->find( \%params );
         return $self->error( 404, {
             str  => 'tag not found',
+            data => {},
+        }) unless $tag;
+
+        #
+        # response
+        #
+        my %data = $tag->get_columns;
+
+        $self->respond_to( json => { status => 200, json => \%data } );
+    }
+
+    sub api_update_tag {
+        my $self = shift;
+
+        #
+        # fetch params
+        #
+        my %params = $self->get_params(qw/ id name /);
+
+        #
+        # validate params
+        #
+        my $v = $self->create_validator;
+        $v->field('id')->required(1)->regexp(qr/^\d*$/);
+        $v->field('name')->required(1)->regexp(qr/^.+$/);
+        unless ( $self->validate( $v, \%params ) ) {
+            my @error_str;
+            while ( my ( $k, $v ) = each %{ $v->errors } ) {
+                push @error_str, "$k:$v";
+            }
+            return $self->error( 400, {
+                str  => join(',', @error_str),
+                data => $v->errors,
+            });
+        }
+
+        #
+        # find tag
+        #
+        my $tag = $DB->resultset('Tag')->find( \%params );
+        return $self->error( 404, {
+            str  => 'tag not found',
+            data => {},
+        }) unless $tag;
+
+        #
+        # update tag
+        #
+        delete $params{id};
+        $tag = $DB->resultset('Tag')->update( \%params );
+        return $self->error( 500, {
+            str  => 'failed to update the tag',
             data => {},
         }) unless $tag;
 
