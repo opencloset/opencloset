@@ -36,15 +36,20 @@ my $DB = Opencloset::Schema->connect({
 helper error => sub {
     my ($self, $status, $error) = @_;
 
+    app->log->error( $error->{str} );
+
     no warnings 'experimental';
+    my $template;
     given ($status) {
-        $self->render_not_found                when 404;
-        $self->render_exception($error->{str}) when 500;
+        $template = 'bad_request' when 400;
+        $template = 'not_found'   when 404;
+        $template = 'exception'   when 500;
+        default { $template = 'unknown' }
     }
 
     $self->respond_to(
         json => { status => $status, json  => { error => $error || q{} } },
-        html => { status => $status, error => $error->{str} || q{}       },
+        html => { status => $status, error => $error->{str} || q{}, template => $template },
     );
 
     return;
