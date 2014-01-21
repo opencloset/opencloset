@@ -2376,6 +2376,7 @@ get '/clothes/:code' => sub {
     $self->stash(
         clothes      => $clothes,
         rented_count => $rented_count,
+        tag_rs       => $DB->resultset('Tag'),
     );
 } => 'clothes-code';
 

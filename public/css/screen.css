@@ -103,6 +103,12 @@
 .page-content #clothes-code .user-profile.row .grid2 a:hover { text-decoration: none; }
 .page-content #clothes-code .profile-activity img { width: 40px; height: 40px; }
 .page-content #clothes-code .profile-activity a.order-badge:hover { text-decoration: none; }
+.page-content #clothes-code .chosen-container-multi .chosen-choices { min-height: 100px; }
+.page-content #clothes-code .chosen-container-multi .chosen-choices li.search-field input[type="text"] { height: 25px; }
+.page-content #clothes-code .chosen-container-multi .chosen-choices li.search-choice .search-choice-close { background: none; }
+.page-content #clothes-code .chosen-container-multi .chosen-choices li.search-choice .search-choice-close:before { content: "\f00d"; display: inline-block; color: #888; font-family: FontAwesome; font-size: 13px; position: absolute; right: 5px; top: -1px; }
+.page-content #clothes-code .chosen-container-multi .chosen-choices li.search-choice .search-choice-close:hover { text-decoration: none; }
+.page-content #clothes-code .chosen-container-multi .chosen-choices li.search-choice .search-choice-close:hover:before { color: #464646; }
 .page-content #tag .tag-add { width: 300px; }
 .page-content #tag table td .btn-xs { border-width: 2px; font-size: 12px; line-height: 18px; padding: 0 4px; }
 .page-content #tag table td .tag-action { margin-right: 10px; }

@@ -10,6 +10,9 @@
     $('.clothes-code').each(function(i, el) {
       return $(el).html(OpenCloset.trimClothesCode($(el).html()));
     });
+    $(".chosen-select").chosen({
+      width: '90%'
+    });
     return $('.editable').each(function(i, el) {
       var color, color_str, k, params, v, _ref;
       params = {

@@ -6,6 +6,8 @@ $ ->
   $('.clothes-code').each (i, el) ->
     $(el).html OpenCloset.trimClothesCode $(el).html()
 
+  $(".chosen-select").chosen({ width: '90%' })
+
   #
   # inline editable field
   #
