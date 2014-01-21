@@ -38,11 +38,11 @@
           msg = response.responseJSON.error.str;
           switch (response.status) {
             case 404:
-              msg = "" + params.value + " 태그를 찾을 수 없습니다.";
+              msg = "\"" + params.value + "\" 태그를 찾을 수 없습니다.";
               break;
-            case 500:
+            case 400:
               if (msg === 'duplicate tag.name') {
-                msg = "" + newValue + " 태그가 이미 존재합니다.";
+                msg = "\"" + newValue + "\" 태그가 이미 존재합니다.";
               }
           }
           return msg;

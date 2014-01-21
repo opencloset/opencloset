@@ -2041,7 +2041,7 @@ group {
                 given ($err) {
                     $status = 404 when 'tag not found';
                     $status = 500 when 'failed to update the tag';
-                    $status = 500 when 'duplicate tag.name';
+                    $status = 400 when 'duplicate tag.name';
                     default { $status = 500 }
                 }
 
