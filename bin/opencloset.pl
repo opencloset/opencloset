@@ -2061,7 +2061,15 @@ get '/login';
 get '/'             => 'home';
 get '/new-borrower' => 'new-borrower';
 get '/new-clothes'  => 'new-clothes';
-get '/tag';
+
+get '/tag' => sub {
+    my $self = shift;
+
+    #
+    # response
+    #
+    $self->stash( 'tag_rs' => $DB->resultset('Tag') );
+};
 
 get '/user/:id' => sub {
     my $self = shift;

@@ -6,4 +6,30 @@
 -   ;
 - title meta_text($_id);
 
-Hello World
+.tag-add
+  %form#add-form
+    .input-group
+      %input#query.form-control{ :type => 'text', :placeholder => '등록할 태그를 입력하세요.' }
+      %span.input-group-btn
+        %button#btn-tag-add.btn.btn-sm.btn-default{ :type => 'button' }
+          %i.icon-plus.bigger-110
+          추가
+
+.space-8
+
+#tag-table
+  %h2 전체 태그 목록입니다.
+  .space-4
+  %table.table.table-striped.table-bordered.table-hover
+    %thead
+      %tr
+        %th 태그 이름
+    %tbody
+      - while ( my $tag = $tag_rs->next ) {
+        %tr
+          %td
+            %span.tag-action
+              %button.btn.btn-xs.btn-danger 제거
+            %span
+              = $tag->name
+      - }
