@@ -9,10 +9,25 @@ $ ->
     $('#query').val('').focus()
     return unless query
 
-  #
-  # inline editable field
-  #
-  $('.editable').each (i, el) ->
+    base_url = $('#tag-data').data('base-url')
+    $.ajax "#{ base_url }.json",
+      type: 'POST'
+      data: { name: query }
+      success: (data, textStatus, jqXHR) ->
+        compiled = _.template($('#tpl-tag').html())
+        html = $(compiled(data))
+        $("#tag-table table tbody").append(html)
+
+        makeEditable "#tag-id-#{ data.id }"
+      error: (jqXHR, textStatus, errorThrown) ->
+        msg = jqXHR.responseJSON.error.str
+        switch jqXHR.status
+          when 400
+            if msg is 'duplicate tag.name'
+              msg = "\"#{query}\" 태그가 이미 존재합니다."
+        alert 'danger', msg
+
+  makeEditable = (el) ->
     params =
       mode:        'inline'
       showbuttons: 'true'
@@ -41,3 +56,8 @@ $ ->
       params.type = 'text'
 
     $(el).editable params
+
+  #
+  # inline editable field
+  #
+  $('.editable').each (i, el) -> makeEditable el

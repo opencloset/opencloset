@@ -36,3 +36,16 @@
               %button.btn.btn-xs.btn-danger{ 'data-tag-id' => "#{ $tag->id }" } 제거
             %span.editable{ :id => "tag-id-#{ $tag->id }", 'data-pk' => "#{ $tag->id }", 'data-name' => 'name', 'data-value' => "#{ $tag->name }" }
       - }
+
+:plain
+  <script id="tpl-tag" type="text/html">
+    <tr>
+      <td>
+        <span class="tag-action">
+          <button class="btn btn-xs btn-danger" data-tag-id="<%= id %>">제거</button>
+        </span>
+        <span class="editable" id="tag-id-<%= id %>" data-pk="<%= id %>" data-name="name" data-value="<%= name %>">
+        </span>
+      </td>
+    </tr>
+  </script>
