@@ -70,9 +70,20 @@
                         <script id="tpl-user-id" type="text/html">
                           <div>
                             <label class="blue highlight">
-                              <input type="radio" class="ace valid" name="user-id" value="<%= id %>" data-user-id="<%= id %>">
-                              <span class="lbl"> <%= name %> (<%= email %>)</span>
+                              <input type="radio" class="ace valid" name="user-donation-id" value="<%= id %>" data-type="user" data-user-id="<%= id %>">
+                              <span class="lbl"> 기증자: <%= name %> (<%= email %>)</span>
                               <span><%= address %></span>
+                            </label>
+                          </div>
+                        </script>
+                      :plain
+                        <script id="tpl-donation-id" type="text/html">
+                          <div>
+                            <label class="blue highlight">
+                              <input type="radio" class="ace valid" name="user-donation-id" value="<%= id %>" data-type="donation" data-user-id="<%= user.id %>" data-donation-id="<%= id %>">
+                              <span class="lbl"> 기증: <%= user.name %> (<%= user.email %>)</span>
+                              <span><%= message %></span>
+                              <span><%= create_date.ymd %></span>
                             </label>
                           </div>
                         </script>
@@ -146,10 +157,10 @@
                   / 기증 메시지
                   /
                   .form-group.has-info
-                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'donation-comment' } 전하실 말:
+                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'donation-message' } 전하실 말:
                     .col-xs-12.col-sm-9
                       .clearfix
-                        %textarea#donation-comment.valid.col-xs-12.col-sm-6{ :name => 'donation-comment', :type => 'text' }
+                        %textarea#donation-message.valid.col-xs-12.col-sm-6{ :name => 'donation-message', :type => 'text' }
 
               /
               / step3
@@ -195,7 +206,7 @@
                     .form-group.has-info
                       %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'clothes-color' } 색상:
                       .col-xs-12.col-sm-6
-                        %input#clothes-color{ :name => 'color', :type => 'hidden', 'data-placeholder' => '옷의 색상을 선택하세요' }
+                        %input#clothes-color{ :name => 'clothes-color', :type => 'hidden', 'data-placeholder' => '옷의 색상을 선택하세요' }
 
                   #display-clothes-bust
                     .space-2

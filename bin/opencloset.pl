@@ -945,6 +945,7 @@ group {
     post '/group'                 => \&api_create_group;
 
     get  '/search/user'           => \&api_search_user;
+    get  '/search/donation'       => \&api_search_donation;
 
     get  '/gui/staff-list'        => \&api_gui_staff_list;
 
@@ -2381,6 +2382,81 @@ group {
         for my $user (@users) {
             my %inner = ( $user->user_info->get_columns, $user->get_columns );
             delete @inner{qw/ user_id password /};
+
+            push @data, \%inner;
+        }
+
+        $self->respond_to( json => { status => 200, json => \@data } );
+    }
+
+    #
+    # FIXME
+    #   parameter is wired.
+    #   but it seemed enough for opencloset now
+    #
+    sub api_search_donation {
+        my $self = shift;
+
+        #
+        # fetch params
+        #
+        my %params = $self->get_params(qw/ q /);
+
+        #
+        # validate params
+        #
+        my $v = $self->create_validator;
+        $v->field('q')->required(1);
+        unless ( $self->validate( $v, \%params ) ) {
+            my @error_str;
+            while ( my ( $k, $v ) = each %{ $v->errors } ) {
+                push @error_str, "$k:$v";
+            }
+            return $self->error( 400, {
+                str  => join(',', @error_str),
+                data => $v->errors,
+            });
+        }
+
+        #
+        # find user
+        #
+        my @users = $DB->resultset('User')->search(
+            {
+                -or => [
+                    'me.name'         => $params{q},
+                    'me.email'        => $params{q},
+                    'user_info.phone' => $params{q},
+                ],
+            },
+            { join => 'user_info' },
+        );
+        return $self->error( 404, {
+            str  => 'user not found',
+            data => {},
+        }) unless @users;
+
+        #
+        # gather donation
+        #
+        my @donations = map { $_->donations } @users;
+
+        #
+        # response
+        #
+        my @data;
+        for my $donation (@donations) {
+            my %user  = ( $donation->user->user_info->get_columns, $donation->user->get_columns );
+            delete @user{qw/ user_id password /};
+
+            my %inner = $donation->get_columns;
+            delete @inner{qw/ user_id /};
+            $inner{user}        = \%user;
+            $inner{create_date} = {
+                raw => $donation->create_date,
+                md  => $donation->create_date->month . '/' . $donation->create_date->day,
+                ymd => $donation->create_date->ymd
+            };
 
             push @data, \%inner;
         }

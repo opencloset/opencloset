@@ -1,14 +1,17 @@
 $ ->
   ## Global variable
-  userID  = undefined
+  userID     = undefined
+  donationID = undefined
 
   #
   # step1 - 기증자 검색과 기증자 선택을 연동합니다.
   #
-  addRegisteredUser = ->
+  addRegisteredUserAndDonation = ->
     query = $('#user-search').val()
 
     return unless query
+
+    $("input[name=user-donation-id]").parent().removeClass("highlight")
 
     $.ajax "/api/search/user.json",
       type: 'GET'
@@ -20,16 +23,42 @@ $ ->
             $html = $(compiled(user))
             $html.find('input').attr('data-json', JSON.stringify(user))
             $("#user-search-list").prepend($html)
-        $("input[name=user-id][value=#{ data[0].id }]").click() if data[0]
+        $("input[name=user-donation-id][data-type=user][value=#{ data[0].id }]").click() if data[0]
+      error: (jqXHR, textStatus, errorThrown) ->
+        type = jqXHR.status is 404 ? 'warning' : 'danger'
+        alert(type, jqXHR.responseJSON.error.str)
+      complete: (jqXHR, textStatus) ->
+
+    $.ajax "/api/search/donation.json",
+      type: 'GET'
+      data: { q: query }
+      success: (data, textStatus, jqXHR) ->
+        compiled = _.template($('#tpl-donation-id').html())
+        _.each data, (donation) ->
+          unless $("#user-search-list input[data-donation-id='#{donation.id}']").length
+            $html = $(compiled(donation))
+            $html.find('input').attr('data-json', JSON.stringify(donation))
+            $("#user-search-list").prepend($html)
       error: (jqXHR, textStatus, errorThrown) ->
         type = jqXHR.status is 404 ? 'warning' : 'danger'
         alert(type, jqXHR.responseJSON.error.str)
       complete: (jqXHR, textStatus) ->
 
   $('#user-search-list').on 'click', ':radio', (e) ->
-    userID = $(@).data('user-id')
+    userID     = $(@).data('user-id')
+    donationID = $(@).data('donation-id')
+
     return if $(@).val() is '0'
-    g = JSON.parse($(@).attr('data-json'))
+
+    if donationID
+      donation = $(@).data('json')
+      user     = donation.user
+      $("#donation-message").val(donation.message)
+      $("#donation-message").prop('disabled', true)
+    else
+      user = $(@).data('json')
+      $("#donation-message").prop('disabled', false)
+
     _.each [
       'name',
       'email',
@@ -41,13 +70,13 @@ $ ->
       $input = $("input[name=#{name}]")
       if $input.attr('type') is 'radio' or $input.attr('type') is 'checkbox'
         $input.each (i, el) ->
-          $(el).attr('checked', true) if $(el).val() is g[name]
+          $(el).attr('checked', true) if $(el).val() is user[name]
       else
-        $input.val(g[name])
+        $input.val(user[name])
 
-  $('#user-search').keypress (e) -> addRegisteredUser() if e.keyCode is 13
-  $('#btn-user-search').click -> addRegisteredUser()
-  addRegisteredUser()
+  $('#user-search').keypress (e) -> addRegisteredUserAndDonation() if e.keyCode is 13
+  $('#btn-user-search').click -> addRegisteredUserAndDonation()
+  addRegisteredUserAndDonation()
 
   #
   # step3 - 의류 종류 선택 콤보박스
@@ -143,10 +172,11 @@ $ ->
     $('#step3 input:enabled').each (i, el) ->
       return unless /^clothes-/.test( $(el).attr('id') )
       count++
-      if $(el).attr('id') is 'clothes-code'
-        valid_count++ if /^[a-z0-9]{4,5}$/i.test( $(el).val() )
-      else
-        valid_count++ if $(el).val() > 0
+      switch $(el).attr('id')
+        when 'clothes-code'     then valid_count++ if /^[a-z0-9]{4,5}$/i.test( $(el).val() )
+        when 'clothes-color'    then valid_count++ if $(el).val()
+        when 'clothes-category' then valid_count++ if $(el).val()
+        else                         valid_count++ if $(el).val() > 0
     unless count == valid_count
       alert('warning', '빠진 항목이 있습니다.')
       return
@@ -220,53 +250,58 @@ $ ->
           # FIXME do we need a single API for transaction?
           #
 
-          #
-          # create donation
-          #
-          $.ajax "/api/donation.json",
-            type: 'POST'
-            data:
-              user_id: userID
-              message: $('#donation-comment').val()
-            success: (donation, textStatus, jqXHR) ->
-              #
-              # create group
-              #
-              $.ajax "/api/group.json",
-                type: 'POST'
-                success: (group, textStatus, jqXHR) ->
-                  #
-                  # create clothes
-                  #
-                  $("input[name=clothes-list]:checked").each (i, el) ->
-                    $.ajax "/api/clothes.json",
-                      type: 'POST'
-                      data:
-                        donation_id: donation.id
-                        group_id:    group.id
-                        code:        $(el).data('clothes-code')
-                        category:    $(el).data('clothes-category')
-                        gender:      $(el).data('clothes-gender')
-                        color:       $(el).data('clothes-color')
-                        bust:        $(el).data('clothes-bust')
-                        waist:       $(el).data('clothes-waist')
-                        hip:         $(el).data('clothes-hip')
-                        belly:       $(el).data('clothes-belly')
-                        thigh:       $(el).data('clothes-thigh')
-                        arm:         $(el).data('clothes-arm')
-                        length:      $(el).data('clothes-length')
-                        foot:        $(el).data('clothes-foot')
-                        price:       OpenCloset.category[ $(el).data('clothes-category') ].price
-                      success: (data, textStatus, jqXHR) ->
-                      error: (jqXHR, textStatus, errorThrown) ->
-                        alert('warning', jqXHR.responseJSON.error.str)
-                      complete: (jqXHR, textStatus) ->
-                error: (jqXHR, textStatus, errorThrown) ->
-                  alert('warning', jqXHR.responseJSON.error.str)
-                complete: (jqXHR, textStatus) ->
-            error: (jqXHR, textStatus, errorThrown) ->
-              alert('warning', jqXHR.responseJSON.error.str)
-            complete: (jqXHR, textStatus) ->
+          createGroupClothes = (donationID) ->
+            #
+            # create group
+            #
+            $.ajax "/api/group.json",
+              type: 'POST'
+              success: (group, textStatus, jqXHR) ->
+                #
+                # create clothes
+                #
+                $("input[name=clothes-list]:checked").each (i, el) ->
+                  $.ajax "/api/clothes.json",
+                    type: 'POST'
+                    data:
+                      donation_id: donationID
+                      group_id:    group.id
+                      code:        $(el).data('clothes-code')
+                      category:    $(el).data('clothes-category')
+                      gender:      $(el).data('clothes-gender')
+                      color:       $(el).data('clothes-color')
+                      bust:        $(el).data('clothes-bust')
+                      waist:       $(el).data('clothes-waist')
+                      hip:         $(el).data('clothes-hip')
+                      belly:       $(el).data('clothes-belly')
+                      thigh:       $(el).data('clothes-thigh')
+                      arm:         $(el).data('clothes-arm')
+                      length:      $(el).data('clothes-length')
+                      foot:        $(el).data('clothes-foot')
+                      price:       OpenCloset.category[ $(el).data('clothes-category') ].price
+                    success: (data, textStatus, jqXHR) ->
+                    error: (jqXHR, textStatus, errorThrown) ->
+                      alert('warning', jqXHR.responseJSON.error.str)
+                    complete: (jqXHR, textStatus) ->
+              error: (jqXHR, textStatus, errorThrown) ->
+                alert('warning', jqXHR.responseJSON.error.str)
+              complete: (jqXHR, textStatus) ->
+
+          if donationID
+            createGroupClothes donationID
+          else
+            #
+            # create donation
+            #
+            $.ajax "/api/donation.json",
+              type: 'POST'
+              data:
+                user_id: userID
+                message: $('#donation-message').val()
+              success: (donation, textStatus, jqXHR)  -> createGroupClothes donation.id
+              error: (jqXHR, textStatus, errorThrown) ->
+                alert('warning', jqXHR.responseJSON.error.str)
+              complete: (jqXHR, textStatus) ->
         else return
 
     .on 'finished', (e) ->
