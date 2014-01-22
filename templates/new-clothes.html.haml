@@ -71,8 +71,19 @@
                           <div>
                             <label class="blue highlight">
                               <input type="radio" class="ace valid" name="user-id" value="<%= id %>" data-user-id="<%= id %>">
-                              <span class="lbl"> <%= name %> (<%= email %>)</span>
+                              <span class="lbl"> 기증자: <%= name %> (<%= email %>)</span>
                               <span><%= address %></span>
+                            </label>
+                          </div>
+                        </script>
+                      :plain
+                        <script id="tpl-donation-id" type="text/html">
+                          <div>
+                            <label class="blue highlight">
+                              <input type="radio" class="ace valid" name="donation-id" value="<%= id %>" data-donation-id="<%= id %>">
+                              <span class="lbl"> 기증: <%= user.name %> (<%= user.email %>)</span>
+                              <span><%= message %></span>
+                              <span><%= create_date.ymd %></span>
                             </label>
                           </div>
                         </script>

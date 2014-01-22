@@ -5,7 +5,7 @@ $ ->
   #
   # step1 - 기증자 검색과 기증자 선택을 연동합니다.
   #
-  addRegisteredUser = ->
+  addRegisteredUserAndDonation = ->
     query = $('#user-search').val()
 
     return unless query
@@ -14,6 +14,7 @@ $ ->
       type: 'GET'
       data: { q: query }
       success: (data, textStatus, jqXHR) ->
+        $("input[name=user-id]").parent().removeClass("highlight")
         compiled = _.template($('#tpl-user-id').html())
         _.each data, (user) ->
           unless $("#user-search-list input[data-user-id='#{user.id}']").length
@@ -21,6 +22,22 @@ $ ->
             $html.find('input').attr('data-json', JSON.stringify(user))
             $("#user-search-list").prepend($html)
         $("input[name=user-id][value=#{ data[0].id }]").click() if data[0]
+      error: (jqXHR, textStatus, errorThrown) ->
+        type = jqXHR.status is 404 ? 'warning' : 'danger'
+        alert(type, jqXHR.responseJSON.error.str)
+      complete: (jqXHR, textStatus) ->
+
+    $.ajax "/api/search/donation.json",
+      type: 'GET'
+      data: { q: query }
+      success: (data, textStatus, jqXHR) ->
+        $("input[name=donation-id]").parent().removeClass("highlight")
+        compiled = _.template($('#tpl-donation-id').html())
+        _.each data, (donation) ->
+          unless $("#user-search-list input[data-donation-id='#{donation.id}']").length
+            $html = $(compiled(donation))
+            $html.find('input').attr('data-json', JSON.stringify(donation))
+            $("#user-search-list").prepend($html)
       error: (jqXHR, textStatus, errorThrown) ->
         type = jqXHR.status is 404 ? 'warning' : 'danger'
         alert(type, jqXHR.responseJSON.error.str)
@@ -45,9 +62,9 @@ $ ->
       else
         $input.val(g[name])
 
-  $('#user-search').keypress (e) -> addRegisteredUser() if e.keyCode is 13
-  $('#btn-user-search').click -> addRegisteredUser()
-  addRegisteredUser()
+  $('#user-search').keypress (e) -> addRegisteredUserAndDonation() if e.keyCode is 13
+  $('#btn-user-search').click -> addRegisteredUserAndDonation()
+  addRegisteredUserAndDonation()
 
   #
   # step3 - 의류 종류 선택 콤보박스
