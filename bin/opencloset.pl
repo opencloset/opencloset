@@ -11,7 +11,6 @@ use SMS::Send::KR::CoolSMS;
 use SMS::Send;
 use Try::Tiny;
 
-use Opencloset::Constant;
 use Opencloset::Schema;
 
 plugin 'validator';

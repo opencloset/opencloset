@@ -102,9 +102,6 @@ $ ->
     .on 'change', (e) ->
       clear_clothes_form false
       types = []
-      #
-      # check Opencloset::Constant
-      #
       switch e.val
         when 'jacket'    then types = [ 'bust', 'arm', 'belly'                  ]
         when 'pants'     then types = [ 'waist', 'hip', 'thigh', 'length'       ]
