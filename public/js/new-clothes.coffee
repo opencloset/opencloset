@@ -51,9 +51,11 @@ $ ->
     return if $(@).val() is '0'
 
     if donationID
-      g = $(@).data('json').user
+      donation = $(@).data('json')
+      user     = donation.user
+      $("#donation-message").val(donation.message)
     else
-      g = $(@).data('json')
+      user = $(@).data('json')
 
     _.each [
       'name',
@@ -66,9 +68,9 @@ $ ->
       $input = $("input[name=#{name}]")
       if $input.attr('type') is 'radio' or $input.attr('type') is 'checkbox'
         $input.each (i, el) ->
-          $(el).attr('checked', true) if $(el).val() is g[name]
+          $(el).attr('checked', true) if $(el).val() is user[name]
       else
-        $input.val(g[name])
+        $input.val(user[name])
 
   $('#user-search').keypress (e) -> addRegisteredUserAndDonation() if e.keyCode is 13
   $('#btn-user-search').click -> addRegisteredUserAndDonation()

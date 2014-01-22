@@ -68,28 +68,30 @@
       });
     };
     $('#user-search-list').on('click', ':radio', function(e) {
-      var g;
+      var donation, user;
       userID = $(this).data('user-id');
       donationID = $(this).data('donation-id');
       if ($(this).val() === '0') {
         return;
       }
       if (donationID) {
-        g = $(this).data('json').user;
+        donation = $(this).data('json');
+        user = donation.user;
+        $("#donation-message").val(donation.message);
       } else {
-        g = $(this).data('json');
+        user = $(this).data('json');
       }
       return _.each(['name', 'email', 'phone', 'address', 'gender', 'birth'], function(name) {
         var $input;
         $input = $("input[name=" + name + "]");
         if ($input.attr('type') === 'radio' || $input.attr('type') === 'checkbox') {
           return $input.each(function(i, el) {
-            if ($(el).val() === g[name]) {
+            if ($(el).val() === user[name]) {
               return $(el).attr('checked', true);
             }
           });
         } else {
-          return $input.val(g[name]);
+          return $input.val(user[name]);
         }
       });
     });
