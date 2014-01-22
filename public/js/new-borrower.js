@@ -162,7 +162,7 @@
       e.preventDefault();
       bust = $("input[name=bust]").val();
       waist = $("input[name=waist]").val();
-      location.href = "/search?q=" + (parseInt(bust) + 3) + "/" + waist + "//1/&gid=" + userID;
+      location.href = "/new-borrower";
       return false;
     }).on('stepclick', function(e) {});
     why = $('#user-why').tag({
