@@ -261,123 +261,60 @@ $ ->
     $('#order-late-fee-pay-with').editable 'setValue', ''
     $('#order-late-fee-pay-with').html '미납'
 
-  #
-  # 전체 반납 버튼 클릭
-  #
-  $('#btn-return-all').click (e) ->
-    redirect_url = $(e.target).data('redirect-url')
-
-    count = countSelectedOrderDetail()
-    unless count.selected > 0 && count.selected is count.total
-      alert 'error', "반납할 항목을 선택하지 않았습니다."
-      return
-
-    order_id          = $('#order').data('order-id')
-    clothes_price     = $('#order').data('order-clothes-price')
-    late_fee          = $('#order').data('order-late-fee')
-    late_fee_discount = $('#order').data('order-late-fee-discount')
-    late_fee_final    = $('#order').data('order-late-fee-final')
-    late_fee_pay_with = $('#order').data('order-late-fee-pay-with')
-    overdue           = $('#order').data('order-overdue')
-
-    order_detail_id = []
-    $("input[data-clothes-code]").each (i, el) -> order_detail_id.push $(el).data('id')
-
-    order_detail_status_id = ( 9 for code in order_detail_id )
-
-    if late_fee_final > 0 and not late_fee_pay_with
-      alert 'danger', '연체료를 납부받지 않았습니다.'
-      return
-
-    #
-    # 연체료, 연체료 에누리 항목 추가
-    #
-    $.ajax "/api/order_detail.json",
-      type: 'POST'
-      data: {
-        order_id:    order_id
-        name:        '연체료'
-        price:       clothes_price * 0.2
-        final_price: late_fee
-        stage:       1
-        desc:        "#{OpenCloset.commify clothes_price}원 x 20% x #{overdue}일"
-      }
-      success: (data, textStatus, jqXHR) ->
-        $.ajax "/api/order_detail.json",
-          type: 'POST'
-          data: {
-            order_id:    order_id
-            name:        '연체료 에누리'
-            price:       Math.round( late_fee_discount / overdue )
-            final_price: late_fee_discount
-            stage:       1
-          }
-          success: (data, textStatus, jqXHR) ->
-            #
-            # 최종 반납
-            #
-            data =
-              status_id:              9
-              return_date:            moment().format('YYYY-MM-DD HH:mm:ss')
-              return_method:          '직접방문'
-              late_fee_pay_with:      late_fee_pay_with
-              order_detail_id:        order_detail_id
-              order_detail_status_id: order_detail_status_id
-            $.ajax "/api/order/#{ order_id }.json",
-              type:    'PUT'
-              data:    $.param(data, 1)
-              success: (data, textStatus, jqXHR) ->
-                #
-                # 주문서 페이지 리로드
-                #
-                window.location.href = redirect_url
-
-  #
-  # 부분 반납 버튼 클릭
-  #
-  $('#btn-return-part').click (e) ->
-    redirect_url = $(e.target).data('redirect-url')
-
-    count = countSelectedOrderDetail()
-    unless count.selected > 0
-      alert 'error', "반납할 항목을 선택하지 않았습니다."
-      return
-
-    order_id          = $('#order').data('order-id')
-    clothes_price     = $('#order').data('order-clothes-price')
-    late_fee          = $('#order').data('order-late-fee')
-    late_fee_discount = $('#order').data('order-late-fee-discount')
-    late_fee_final    = $('#order').data('order-late-fee-final')
-    late_fee_pay_with = $('#order').data('order-late-fee-pay-with')
-    overdue           = $('#order').data('order-overdue')
-
-    order_detail_id = []
-    $("input[data-clothes-code]").each (i, el) ->
-      return unless $(el).prop 'checked'
-      order_detail_id.push $(el).data('id')
-
-    if late_fee_final > 0 and not late_fee_pay_with
-      alert 'danger', '연체료를 납부받지 않았습니다.'
-      return
-
-    returnPart = ->
+  returnClothesReal = (is_part, redirect_url, order_id, late_fee_pay_with) ->
+    if is_part
       #
       # 부분 반납
       #
+      order_detail_id = []
+      $("input[data-clothes-code]").each (i, el) ->
+        return unless $(el).prop 'checked'
+        order_detail_id.push $(el).data('id')
+
+      url  = "/api/order/#{ order_id }/return-part.json"
       data =
         status_id:              9
         return_date:            moment().format('YYYY-MM-DD HH:mm:ss')
         return_method:          '직접방문'
         late_fee_pay_with:      late_fee_pay_with
         order_detail_id:        order_detail_id
-      $.ajax "/api/order/#{ order_id }/return-part.json",
-        type:    'PUT'
-        data:    $.param(data, 1)
-        success: (data, textStatus, jqXHR) ->
-          #
-          # 주문서 페이지 리로드
-          #
-          window.location.href = redirect_url
+    else
+      #
+      # 최종 반납
+      #
+      order_detail_id = []
+      $("input[data-clothes-code]").each (i, el) -> order_detail_id.push $(el).data('id')
+      order_detail_status_id = ( 9 for code in order_detail_id )
+
+      url  = "/api/order/#{ order_id }.json"
+      data =
+        status_id:              9
+        return_date:            moment().format('YYYY-MM-DD HH:mm:ss')
+        return_method:          '직접방문'
+        late_fee_pay_with:      late_fee_pay_with
+        order_detail_id:        order_detail_id
+        order_detail_status_id: order_detail_status_id
+    $.ajax url,
+      type:    'PUT'
+      data:    $.param(data, 1)
+      success: (data, textStatus, jqXHR) ->
+        #
+        # 주문서 페이지 리로드
+        #
+        window.location.href = redirect_url
+
+  returnOrder = (is_part, redirect_url) ->
+    order_id          = $('#order').data('order-id')
+    clothes_price     = $('#order').data('order-clothes-price')
+    late_fee          = $('#order').data('order-late-fee')
+    late_fee_discount = $('#order').data('order-late-fee-discount')
+    late_fee_final    = $('#order').data('order-late-fee-final')
+    late_fee_pay_with = $('#order').data('order-late-fee-pay-with')
+    overdue           = $('#order').data('order-overdue')
+
+    if late_fee_final > 0 and not late_fee_pay_with
+      alert 'danger', '연체료를 납부받지 않았습니다.'
+      return
 
     #
     # 연체료, 연체료 에누리 항목 추가
@@ -404,9 +341,31 @@ $ ->
               stage:       1
             }
             success: (data, textStatus, jqXHR) ->
-              returnPart()
+              returnClothesReal is_part, redirect_url, order_id, late_fee_pay_with
         else
-          returnPart()
+          returnClothesReal is_part, redirect_url, order_id, late_fee_pay_with
+
+  #
+  # 전체 반납 버튼 클릭
+  #
+  $('#btn-return-all').click (e) ->
+    redirect_url = $(e.target).data('redirect-url')
+    count        = countSelectedOrderDetail()
+    unless count.selected > 0 && count.selected is count.total
+      alert 'error', "반납할 항목을 선택하지 않았습니다."
+      return
+    returnOrder 0, redirect_url
+
+  #
+  # 부분 반납 버튼 클릭
+  #
+  $('#btn-return-part').click (e) ->
+    redirect_url = $(e.target).data('redirect-url')
+    count        = countSelectedOrderDetail()
+    unless count.selected > 0
+      alert 'error', "반납할 항목을 선택하지 않았습니다."
+      return
+    returnOrder 1, redirect_url
 
   #
   # 주문서 목록에서 선택된 항목과 선택할 수 있는 항목 총 개수를 반환
