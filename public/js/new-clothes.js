@@ -78,8 +78,10 @@
         donation = $(this).data('json');
         user = donation.user;
         $("#donation-message").val(donation.message);
+        $("#donation-message").prop('disabled', true);
       } else {
         user = $(this).data('json');
+        $("#donation-message").prop('disabled', false);
       }
       return _.each(['name', 'email', 'phone', 'address', 'gender', 'birth'], function(name) {
         var $input;

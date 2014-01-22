@@ -54,8 +54,10 @@ $ ->
       donation = $(@).data('json')
       user     = donation.user
       $("#donation-message").val(donation.message)
+      $("#donation-message").prop('disabled', true)
     else
       user = $(@).data('json')
+      $("#donation-message").prop('disabled', false)
 
     _.each [
       'name',
