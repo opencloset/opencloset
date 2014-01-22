@@ -382,7 +382,7 @@
               type: 'POST',
               data: {
                 user_id: userID,
-                message: $('#donation-comment').val()
+                message: $('#donation-message').val()
               },
               success: function(donation, textStatus, jqXHR) {
                 return createGroupClothes(donation.id);

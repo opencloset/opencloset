@@ -293,7 +293,7 @@ $ ->
               type: 'POST'
               data:
                 user_id: userID
-                message: $('#donation-comment').val()
+                message: $('#donation-message').val()
               success: (donation, textStatus, jqXHR)  -> createGroupClothes donation.id
               error: (jqXHR, textStatus, errorThrown) ->
                 alert('warning', jqXHR.responseJSON.error.str)
