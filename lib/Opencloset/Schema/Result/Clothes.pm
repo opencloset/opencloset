@@ -34,6 +34,30 @@ __PACKAGE__->table("clothes");
   is_auto_increment: 1
   is_nullable: 0
 
+=head2 donation_id
+
+  data_type: 'integer'
+  default_value: 1
+  extra: {unsigned => 1}
+  is_foreign_key: 1
+  is_nullable: 1
+
+=head2 status_id
+
+  data_type: 'integer'
+  default_value: 1
+  extra: {unsigned => 1}
+  is_foreign_key: 1
+  is_nullable: 1
+
+=head2 group_id
+
+  data_type: 'integer'
+  default_value: 1
+  extra: {unsigned => 1}
+  is_foreign_key: 1
+  is_nullable: 1
+
 =head2 code
 
   data_type: 'char'
@@ -108,30 +132,6 @@ male/female/unisex
   default_value: 0
   is_nullable: 1
 
-=head2 donation_id
-
-  data_type: 'integer'
-  default_value: 1
-  extra: {unsigned => 1}
-  is_foreign_key: 1
-  is_nullable: 1
-
-=head2 status_id
-
-  data_type: 'integer'
-  default_value: 1
-  extra: {unsigned => 1}
-  is_foreign_key: 1
-  is_nullable: 1
-
-=head2 group_id
-
-  data_type: 'integer'
-  default_value: 1
-  extra: {unsigned => 1}
-  is_foreign_key: 1
-  is_nullable: 1
-
 =head2 compatible_code
 
   data_type: 'varchar'
@@ -147,6 +147,30 @@ __PACKAGE__->add_columns(
     extra => { unsigned => 1 },
     is_auto_increment => 1,
     is_nullable => 0,
+  },
+  "donation_id",
+  {
+    data_type => "integer",
+    default_value => 1,
+    extra => { unsigned => 1 },
+    is_foreign_key => 1,
+    is_nullable => 1,
+  },
+  "status_id",
+  {
+    data_type => "integer",
+    default_value => 1,
+    extra => { unsigned => 1 },
+    is_foreign_key => 1,
+    is_nullable => 1,
+  },
+  "group_id",
+  {
+    data_type => "integer",
+    default_value => 1,
+    extra => { unsigned => 1 },
+    is_foreign_key => 1,
+    is_nullable => 1,
   },
   "code",
   { data_type => "char", is_nullable => 0, size => 5 },
@@ -172,30 +196,6 @@ __PACKAGE__->add_columns(
   { data_type => "varchar", is_nullable => 0, size => 32 },
   "price",
   { data_type => "integer", default_value => 0, is_nullable => 1 },
-  "donation_id",
-  {
-    data_type => "integer",
-    default_value => 1,
-    extra => { unsigned => 1 },
-    is_foreign_key => 1,
-    is_nullable => 1,
-  },
-  "status_id",
-  {
-    data_type => "integer",
-    default_value => 1,
-    extra => { unsigned => 1 },
-    is_foreign_key => 1,
-    is_nullable => 1,
-  },
-  "group_id",
-  {
-    data_type => "integer",
-    default_value => 1,
-    extra => { unsigned => 1 },
-    is_foreign_key => 1,
-    is_nullable => 1,
-  },
   "compatible_code",
   { data_type => "varchar", is_nullable => 1, size => 32 },
 );
@@ -344,8 +344,8 @@ Composing rels: L</clothes_tags> -> tag
 __PACKAGE__->many_to_many("tags", "clothes_tags", "tag");
 
 
-# Created by DBIx::Class::Schema::Loader v0.07038 @ 2014-01-21 10:17:29
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:E4CvJaqvuVIrO6Qsdh6PlA
+# Created by DBIx::Class::Schema::Loader v0.07038 @ 2014-01-22 10:40:44
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:pIdhi50+KMnU+rEFqtdMJw
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

@@ -63,7 +63,7 @@ CREATE TABLE `user_info` (
   PRIMARY KEY (`id`),
   UNIQUE KEY (`user_id`),
   UNIQUE KEY (`phone`),
-  CONSTRAINT `fk_guest1` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE
+  CONSTRAINT `fk_user_info1` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 INSERT
@@ -118,6 +118,7 @@ INSERT INTO `group` (`id`) VALUES (1);
 CREATE TABLE `donation` (
   `id`          INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `user_id`     INT UNSIGNED NOT NULL,
+
   `message`     TEXT         DEFAULT NULL,
   `create_date` DATETIME     DEFAULT NULL,
 
@@ -133,6 +134,9 @@ INSERT INTO `donation` (`id`,`user_id`,`message`,`create_date`) VALUES (1,1,'초
 
 CREATE TABLE `clothes` (
   `id`          INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `donation_id` INT UNSIGNED DEFAULT 1,
+  `status_id`   INT UNSIGNED DEFAULT 1,
+  `group_id`    INT UNSIGNED DEFAULT 1,
 
   `code`        CHAR(5)     NOT NULL,  -- 바코드 품번
   `bust`        INT         DEFAULT 0, -- 가슴   둘레(cm)
@@ -146,10 +150,6 @@ CREATE TABLE `clothes` (
   `gender`      VARCHAR(6)  DEFAULT NULL COMMENT 'male/female/unisex',
   `category`    VARCHAR(32) NOT NULL,  -- 종류
   `price`       INT DEFAULT 0,         -- 대여 가격
-
-  `donation_id` INT UNSIGNED DEFAULT 1,
-  `status_id`   INT UNSIGNED DEFAULT 1,
-  `group_id`    INT UNSIGNED DEFAULT 1,
 
   `compatible_code` VARCHAR(32) DEFAULT NULL,
 
@@ -240,6 +240,7 @@ CREATE TABLE `order` (
   `status_id`         INT UNSIGNED DEFAULT NULL,
   `staff_id`          INT UNSIGNED DEFAULT NULL,
   `parent_id`         INT UNSIGNED DEFAULT NULL,
+
   `additional_day`    INT UNSIGNED DEFAULT 0,
   `rental_date`       DATETIME DEFAULT NULL,
   `target_date`       DATETIME DEFAULT NULL,
@@ -283,6 +284,7 @@ CREATE TABLE `order_detail` (
   `order_id`     INT UNSIGNED NOT NULL,
   `clothes_code` CHAR(5)      DEFAULT NULL,
   `status_id`    INT UNSIGNED DEFAULT NULL,
+
   `name`         TEXT         NOT NULL,
   `price`        INT          DEFAULT 0,
   `final_price`  INT          DEFAULT 0,
