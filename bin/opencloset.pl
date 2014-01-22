@@ -2598,9 +2598,40 @@ get '/order' => sub {
     #
     # fetch params
     #
-    my %params = $self->get_params(qw/ id /);
+    my %params        = $self->get_params(qw/ id /);
+    my %search_params = $self->get_params(qw/ status /);
 
     my $rs = $self->get_order_list( \%params );
+
+    #
+    # undef  - 상태없음
+    # rental - 대여중 (2)
+    # return - 반납 (9)
+    # late   - 연체중
+    #
+    {
+        no warnings 'experimental';
+        given ( $search_params{status} ) {
+            $rs = $rs->search({ status_id => { '=' => undef } }) when 'undef';
+            $rs = $rs->search({ status_id => 9 })                when 'return';
+            when ('rental') {
+                $rs = $rs->search({
+                    -and => [
+                        status_id   => 2,
+                        target_date => { '>=' => DateTime->now },
+                    ],
+                });
+            }
+            when ('late') {
+                $rs = $rs->search({
+                    -and => [
+                        status_id   => 2,
+                        target_date => { '<' => DateTime->now },
+                    ],
+                });
+            }
+        }
+    }
 
     #
     # response

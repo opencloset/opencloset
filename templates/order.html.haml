@@ -6,6 +6,24 @@
 -   ;
 - title meta_text($_id);
 
+%div
+  %span
+    %a{ :href => "#{ url_for('/order') }" } 전체보기
+  %span= '|'
+  %span
+    %a{ :href => "#{ url_for('/order?status=late') }" } 연체중
+  %span= '|'
+  %span
+    %a{ :href => "#{ url_for('/order?status=rental') }" } 대여중
+  %span= '|'
+  %span
+    %a{ :href => "#{ url_for('/order?status=return') }" } 반납
+  %span= '|'
+  %span
+    %a{ :href => "#{ url_for('/order?status=undef') }" } 상태없음
+
+.space-4
+
 #order-table
   %table.table.table-striped.table-bordered.table-hover
     %thead
