@@ -383,7 +383,7 @@
       });
     });
     $('#btn-return-part').click(function(e) {
-      var clothes_price, count, late_fee, late_fee_discount, late_fee_final, late_fee_pay_with, order_detail_id, order_id, overdue, redirect_url;
+      var clothes_price, count, late_fee, late_fee_discount, late_fee_final, late_fee_pay_with, order_detail_id, order_id, overdue, redirect_url, returnPart;
       redirect_url = $(e.target).data('redirect-url');
       count = countSelectedOrderDetail();
       if (!(count.selected > 0)) {
@@ -408,6 +408,23 @@
         alert('danger', '연체료를 납부받지 않았습니다.');
         return;
       }
+      returnPart = function() {
+        var data;
+        data = {
+          status_id: 9,
+          return_date: moment().format('YYYY-MM-DD HH:mm:ss'),
+          return_method: '직접방문',
+          late_fee_pay_with: late_fee_pay_with,
+          order_detail_id: order_detail_id
+        };
+        return $.ajax("/api/order/" + order_id + "/return-part.json", {
+          type: 'PUT',
+          data: $.param(data, 1),
+          success: function(data, textStatus, jqXHR) {
+            return window.location.href = redirect_url;
+          }
+        });
+      };
       return $.ajax("/api/order_detail.json", {
         type: 'POST',
         data: {
@@ -419,32 +436,23 @@
           desc: "" + (OpenCloset.commify(clothes_price)) + "원 x 20% x " + overdue + "일"
         },
         success: function(data, textStatus, jqXHR) {
-          return $.ajax("/api/order_detail.json", {
-            type: 'POST',
-            data: {
-              order_id: order_id,
-              name: '연체료 에누리',
-              price: Math.round(late_fee_discount / overdue),
-              final_price: late_fee_discount,
-              stage: 1
-            },
-            success: function(data, textStatus, jqXHR) {
-              data = {
-                status_id: 9,
-                return_date: moment().format('YYYY-MM-DD HH:mm:ss'),
-                return_method: '직접방문',
-                late_fee_pay_with: late_fee_pay_with,
-                order_detail_id: order_detail_id
-              };
-              return $.ajax("/api/order/" + order_id + "/return-part.json", {
-                type: 'PUT',
-                data: $.param(data, 1),
-                success: function(data, textStatus, jqXHR) {
-                  return window.location.href = redirect_url;
-                }
-              });
-            }
-          });
+          if (late_fee_final > 0 && late_fee_pay_with) {
+            return $.ajax("/api/order_detail.json", {
+              type: 'POST',
+              data: {
+                order_id: order_id,
+                name: '연체료 에누리',
+                price: Math.round(late_fee_discount / overdue),
+                final_price: late_fee_discount,
+                stage: 1
+              },
+              success: function(data, textStatus, jqXHR) {
+                return returnPart();
+              }
+            });
+          } else {
+            return returnPart();
+          }
         }
       });
     });

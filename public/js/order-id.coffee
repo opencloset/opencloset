@@ -360,6 +360,25 @@ $ ->
       alert 'danger', '연체료를 납부받지 않았습니다.'
       return
 
+    returnPart = ->
+      #
+      # 부분 반납
+      #
+      data =
+        status_id:              9
+        return_date:            moment().format('YYYY-MM-DD HH:mm:ss')
+        return_method:          '직접방문'
+        late_fee_pay_with:      late_fee_pay_with
+        order_detail_id:        order_detail_id
+      $.ajax "/api/order/#{ order_id }/return-part.json",
+        type:    'PUT'
+        data:    $.param(data, 1)
+        success: (data, textStatus, jqXHR) ->
+          #
+          # 주문서 페이지 리로드
+          #
+          window.location.href = redirect_url
+
     #
     # 연체료, 연체료 에누리 항목 추가
     #
@@ -374,33 +393,20 @@ $ ->
         desc:        "#{OpenCloset.commify clothes_price}원 x 20% x #{overdue}일"
       }
       success: (data, textStatus, jqXHR) ->
-        $.ajax "/api/order_detail.json",
-          type: 'POST'
-          data: {
-            order_id:    order_id
-            name:        '연체료 에누리'
-            price:       Math.round( late_fee_discount / overdue )
-            final_price: late_fee_discount
-            stage:       1
-          }
-          success: (data, textStatus, jqXHR) ->
-            #
-            # 부분 반납
-            #
-            data =
-              status_id:              9
-              return_date:            moment().format('YYYY-MM-DD HH:mm:ss')
-              return_method:          '직접방문'
-              late_fee_pay_with:      late_fee_pay_with
-              order_detail_id:        order_detail_id
-            $.ajax "/api/order/#{ order_id }/return-part.json",
-              type:    'PUT'
-              data:    $.param(data, 1)
-              success: (data, textStatus, jqXHR) ->
-                #
-                # 주문서 페이지 리로드
-                #
-                window.location.href = redirect_url
+        if late_fee_final > 0 and late_fee_pay_with
+          $.ajax "/api/order_detail.json",
+            type: 'POST'
+            data: {
+              order_id:    order_id
+              name:        '연체료 에누리'
+              price:       Math.round( late_fee_discount / overdue )
+              final_price: late_fee_discount
+              stage:       1
+            }
+            success: (data, textStatus, jqXHR) ->
+              returnPart()
+        else
+          returnPart()
 
   #
   # 주문서 목록에서 선택된 항목과 선택할 수 있는 항목 총 개수를 반환
