@@ -121,9 +121,9 @@ $ ->
         type: 'PUT'
         data: data
   $('#order-price-pay-with').editable
-    source: -> { value: m, text: m } for m in [ '현금', '카드', '현금+카드' ]
+    source: -> { value: m, text: m } for m in OpenCloset.payWith
   $('#order-late-fee-pay-with').editable
-    source: -> { value: m, text: m } for m in [ '현금', '카드', '현금+카드' ]
+    source: -> { value: m, text: m } for m in OpenCloset.payWith
     success: (response, newValue) ->
       $('#order').data('order-late-fee-pay-with', newValue)
   $('.order-detail').editable()

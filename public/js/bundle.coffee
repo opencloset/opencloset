@@ -74,6 +74,12 @@ $ ->
       pink:   '분홍'
       gray:   '회색'
       brown:  '갈색'
+    payWith: [
+      '현금',
+      '카드',
+      '현금+카드',
+      '계좌 이체',
+    ]
     trimClothesCode: (code) ->
       code = code.replace /^\s+/, ''
       code = code.replace /\s+$/, ''
