@@ -961,6 +961,7 @@ group {
     put  '/sms/:id'               => \&api_update_sms;
 
     get  '/search/user'           => \&api_search_user;
+    get  '/search/user/late'      => \&api_search_late_user;
     get  '/search/donation'       => \&api_search_donation;
     get  '/search/sms'            => \&api_search_sms;
 
@@ -2514,6 +2515,49 @@ group {
                 ],
             },
             { join => 'user_info' },
+        );
+        return $self->error( 404, {
+            str  => 'user not found',
+            data => {},
+        }) unless @users;
+
+        #
+        # response
+        #
+        my @data;
+        for my $user (@users) {
+            my %inner = ( $user->user_info->get_columns, $user->get_columns );
+            delete @inner{qw/ user_id password /};
+
+            push @data, \%inner;
+        }
+
+        $self->respond_to( json => { status => 200, json => \@data } );
+    }
+
+    #
+    # FIXME
+    #   parameter is wired.
+    #   but it seemed enough for opencloset now
+    #
+    sub api_search_late_user {
+        my $self = shift;
+
+        #
+        # find user
+        #
+        my $now = $DB->storage->datetime_parser->format_datetime(
+            DateTime->now( time_zone => app->config->{timezone} ),
+        );
+        my @users = $DB->resultset('User')->search(
+            {
+                -and => [
+                    'order_users.target_date'      => { '<' => $now },
+                    'order_users.user_target_date' => { '<' => $now },
+                    'order_users.status_id'        => 2,
+                ],
+            },
+            { join => 'order_users' },
         );
         return $self->error( 404, {
             str  => 'user not found',
