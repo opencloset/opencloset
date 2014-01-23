@@ -466,6 +466,22 @@ helper create_order => sub {
             $_ = sprintf( '%05s', $_ );
         }
     }
+    {
+        #
+        # override body measurement(size) from user's data
+        #
+        my $user = $self->get_user({ id => $order_params->{user_id} });
+        #
+        # we believe user is exist since parameter validator
+        #
+        for (qw/ height weight bust waist hip belly thigh arm leg knee foot /) {
+            next if     defined $order_params->{$_};
+            next unless defined $user->user_info->$_;
+
+            app->log->debug( "overriding $_ from user for order creation" );
+            $order_params->{$_} = $user->user_info->$_;
+        }
+    }
 
     #
     # TRANSACTION:
