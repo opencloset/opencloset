@@ -7,6 +7,7 @@ use Data::Pageset;
 use DateTime;
 use Gravatar::URL;
 use List::MoreUtils qw( zip );
+use List::Util qw( sum );
 use SMS::Send::KR::CoolSMS;
 use SMS::Send;
 use Try::Tiny;
@@ -464,6 +465,22 @@ helper create_order => sub {
         for ( @{ $order_detail_params->{clothes_code} } ) {
             next unless length == 4;
             $_ = sprintf( '%05s', $_ );
+        }
+    }
+    {
+        #
+        # override body measurement(size) from user's data
+        #
+        my $user = $self->get_user({ id => $order_params->{user_id} });
+        #
+        # we believe user is exist since parameter validator
+        #
+        for (qw/ height weight bust waist hip belly thigh arm leg knee foot /) {
+            next if     defined $order_params->{$_};
+            next unless defined $user->user_info->$_;
+
+            app->log->debug( "overriding $_ from user for order creation" );
+            $order_params->{$_} = $user->user_info->$_;
         }
     }
 
@@ -2544,12 +2561,41 @@ get '/clothes/:code' => sub {
     return unless $clothes;
 
     my $rented_count = 0;
-    ++$rented_count for $clothes->order_details->search({ status_id => { '>' => 1 } });
+    my @measurements = qw(
+        height
+        weight
+        bust
+        waist
+        hip
+        belly
+        thigh
+        arm
+        leg
+        knee
+        foot
+    );
+    my %average_size = map { $_ => [] } @measurements;
+    for my $order_detail ( $clothes->order_details->search({ status_id => { '!=' => undef } }) ) {
+        ++$rented_count;
+        for (@measurements) {
+            next unless $order_detail->order->$_;
+            push @{ $average_size{$_} }, $order_detail->order->$_;
+        }
+    }
+    for (@measurements) {
+        if ( @{ $average_size{$_} } ) {
+            $average_size{$_} = ( sum @{ $average_size{$_} } ) / @{ $average_size{$_} };
+        }
+        else {
+            $average_size{$_} = 0;
+        }
+    }
 
     #
     # response
     #
     $self->stash(
+        average_size => \%average_size,
         clothes      => $clothes,
         rented_count => $rented_count,
         tag_rs       => $DB->resultset('Tag'),
