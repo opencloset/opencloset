@@ -961,6 +961,7 @@ group {
 
     get  '/search/user'           => \&api_search_user;
     get  '/search/donation'       => \&api_search_donation;
+    get  '/search/sms'            => \&api_search_sms;
 
     get  '/gui/staff-list'        => \&api_gui_staff_list;
 
@@ -2521,6 +2522,53 @@ group {
 
             push @data, \%inner;
         }
+
+        $self->respond_to( json => { status => 200, json => \@data } );
+    }
+
+    #
+    # FIXME
+    #   parameter is wired.
+    #   but it seemed enough for opencloset now
+    #
+    sub api_search_sms {
+        my $self = shift;
+
+        #
+        # fetch params
+        #
+        my %params = $self->get_params(qw/ status /);
+
+        #
+        # validate params
+        #
+        my $v = $self->create_validator;
+        $v->field('status')->required(1);
+        unless ( $self->validate( $v, \%params ) ) {
+            my @error_str;
+            while ( my ( $k, $v ) = each %{ $v->errors } ) {
+                push @error_str, "$k:$v";
+            }
+            return $self->error( 400, {
+                str  => join(',', @error_str),
+                data => $v->errors,
+            });
+        }
+
+        #
+        # find sms
+        #
+        my @sms_list = $DB->resultset('SMS')->search({ status => $params{status} });
+        return $self->error( 404, {
+            str  => 'sms not found',
+            data => {},
+        }) unless @sms_list;
+
+        #
+        # response
+        #
+        my @data;
+        push @data, { $_->get_columns } for @sms_list;
 
         $self->respond_to( json => { status => 200, json => \@data } );
     }
