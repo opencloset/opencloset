@@ -305,8 +305,10 @@ CREATE TABLE `sms` (
   `text`        VARCHAR(256) NOT NULL,
 
   `ret`         INT          DEFAULT NULL,
+  `status`      VARCHAR(7)   DEFAULT 'pending',
   `sent_date`   DATETIME     DEFAULT NULL,
   `create_date` DATETIME     DEFAULT NULL,
 
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  INDEX (`status`)
 );

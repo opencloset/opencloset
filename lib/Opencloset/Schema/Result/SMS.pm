@@ -57,6 +57,13 @@ __PACKAGE__->table("sms");
   data_type: 'integer'
   is_nullable: 1
 
+=head2 status
+
+  data_type: 'varchar'
+  default_value: 'pending'
+  is_nullable: 1
+  size: 7
+
 =head2 sent_date
 
   data_type: 'datetime'
@@ -90,6 +97,13 @@ __PACKAGE__->add_columns(
   { data_type => "varchar", is_nullable => 0, size => 256 },
   "ret",
   { data_type => "integer", is_nullable => 1 },
+  "status",
+  {
+    data_type => "varchar",
+    default_value => "pending",
+    is_nullable => 1,
+    size => 7,
+  },
   "sent_date",
   {
     data_type => "datetime",
@@ -120,8 +134,8 @@ __PACKAGE__->add_columns(
 __PACKAGE__->set_primary_key("id");
 
 
-# Created by DBIx::Class::Schema::Loader v0.07038 @ 2014-01-23 14:23:18
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:Wn5dJgqiNTSCltO467NHxw
+# Created by DBIx::Class::Schema::Loader v0.07038 @ 2014-01-23 15:13:10
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:WfiDeeejTZweg+VegxsTpA
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

@@ -2350,7 +2350,7 @@ group {
         #
         # fetch params
         #
-        my %params = $self->get_params(qw/ from to text /);
+        my %params = $self->get_params(qw/ from to text status /);
 
         #
         # validate params
@@ -2359,6 +2359,7 @@ group {
         $v->field(qw/ from to /)
             ->each( sub { shift->required(1)->regexp(qr/^\d+$/) } );
         $v->field('text')->required(1)->regexp(qr/^.+$/);
+        $v->field('status')->in(qw/ pending sending sent /);
 
         unless ( $self->validate( $v, \%params ) ) {
             my @error_str;
