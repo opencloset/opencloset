@@ -297,11 +297,16 @@ CREATE TABLE `order_detail` (
   CONSTRAINT `fk_order_detail3` FOREIGN KEY (`status_id`)    REFERENCES `status`  (`id`)   ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-CREATE TABLE `short_message` (
-  `id`        INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `from`      VARCHAR(32) NOT NULL,
-  `to`        VARCHAR(32) NOT NULL,
-  `msg`       VARCHAR(128) DEFAULT NULL,
-  `sent_date` DATETIME DEFAULT NULL,
+CREATE TABLE `sms` (
+  `id`          INT UNSIGNED NOT NULL AUTO_INCREMENT,
+
+  `from`        VARCHAR(12)  NOT NULL,
+  `to`          VARCHAR(12)  NOT NULL,
+  `text`        VARCHAR(256) NOT NULL,
+
+  `ret`         INT          DEFAULT NULL,
+  `sent_date`   DATETIME     DEFAULT NULL,
+  `create_date` DATETIME     DEFAULT NULL,
+
   PRIMARY KEY (`id`)
 );

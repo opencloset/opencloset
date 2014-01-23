@@ -1,12 +1,12 @@
 use utf8;
-package Opencloset::Schema::Result::ShortMessage;
+package Opencloset::Schema::Result::SMS;
 
 # Created by DBIx::Class::Schema::Loader
 # DO NOT MODIFY THE FIRST PART OF THIS FILE
 
 =head1 NAME
 
-Opencloset::Schema::Result::ShortMessage
+Opencloset::Schema::Result::SMS
 
 =cut
 
@@ -19,11 +19,11 @@ use warnings;
 
 use base 'Opencloset::Schema::Base';
 
-=head1 TABLE: C<short_message>
+=head1 TABLE: C<sms>
 
 =cut
 
-__PACKAGE__->table("short_message");
+__PACKAGE__->table("sms");
 
 =head1 ACCESSORS
 
@@ -38,19 +38,24 @@ __PACKAGE__->table("short_message");
 
   data_type: 'varchar'
   is_nullable: 0
-  size: 32
+  size: 12
 
 =head2 to
 
   data_type: 'varchar'
   is_nullable: 0
-  size: 32
+  size: 12
 
-=head2 msg
+=head2 text
 
   data_type: 'varchar'
+  is_nullable: 0
+  size: 256
+
+=head2 ret
+
+  data_type: 'integer'
   is_nullable: 1
-  size: 128
 
 =head2 sent_date
 
@@ -58,6 +63,14 @@ __PACKAGE__->table("short_message");
   datetime_undef_if_invalid: 1
   inflate_datetime: 1
   is_nullable: 1
+
+=head2 create_date
+
+  data_type: 'datetime'
+  datetime_undef_if_invalid: 1
+  inflate_datetime: 1
+  is_nullable: 1
+  set_on_create: 1
 
 =cut
 
@@ -70,17 +83,27 @@ __PACKAGE__->add_columns(
     is_nullable => 0,
   },
   "from",
-  { data_type => "varchar", is_nullable => 0, size => 32 },
+  { data_type => "varchar", is_nullable => 0, size => 12 },
   "to",
-  { data_type => "varchar", is_nullable => 0, size => 32 },
-  "msg",
-  { data_type => "varchar", is_nullable => 1, size => 128 },
+  { data_type => "varchar", is_nullable => 0, size => 12 },
+  "text",
+  { data_type => "varchar", is_nullable => 0, size => 256 },
+  "ret",
+  { data_type => "integer", is_nullable => 1 },
   "sent_date",
   {
     data_type => "datetime",
     datetime_undef_if_invalid => 1,
     inflate_datetime => 1,
     is_nullable => 1,
+  },
+  "create_date",
+  {
+    data_type => "datetime",
+    datetime_undef_if_invalid => 1,
+    inflate_datetime => 1,
+    is_nullable => 1,
+    set_on_create => 1,
   },
 );
 
@@ -97,8 +120,8 @@ __PACKAGE__->add_columns(
 __PACKAGE__->set_primary_key("id");
 
 
-# Created by DBIx::Class::Schema::Loader v0.07038 @ 2014-01-09 18:34:05
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:FZ1ok+JnDMIk4PoqNCWLCQ
+# Created by DBIx::Class::Schema::Loader v0.07038 @ 2014-01-23 14:23:18
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:Wn5dJgqiNTSCltO467NHxw
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

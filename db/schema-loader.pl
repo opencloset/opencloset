@@ -25,8 +25,12 @@ my $conf = eval path($conf_file)->slurp_utf8;
         moniker_map               => {
             clothes       => 'Clothes',
             order_clothes => 'OrderClothes',
+            sms           => 'SMS',
         },
-        inflect_singular          => { clothes => 'clothes' },
+        inflect_singular          => {
+            clothes => 'clothes',
+            sms     => 'sms',
+        },
         skip_load_external        => 1,
         relationships             => 1,
         col_collision_map         => 'column_%s',
