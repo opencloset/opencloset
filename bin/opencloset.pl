@@ -3,7 +3,6 @@
 use v5.18;
 use Mojolicious::Lite;
 
-use Data::Pageset;
 use DateTime;
 use Gravatar::URL;
 use List::MoreUtils qw( zip );
