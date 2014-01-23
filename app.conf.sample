@@ -99,6 +99,10 @@ $db_opts->{AutoCommit} //= 1;
         waistcoat => { str => '조끼',     price => 5000  },
     },
 
+    'opencloset-sms-notifier.pl' => {
+        delay => 60,
+    },
+
     #
     # SMS
     #
