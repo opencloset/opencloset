@@ -8,8 +8,6 @@ use DateTime;
 use Gravatar::URL;
 use List::MoreUtils qw( zip );
 use List::Util qw( sum );
-use SMS::Send::KR::CoolSMS;
-use SMS::Send;
 use Try::Tiny;
 
 use Opencloset::Schema;
@@ -2798,47 +2796,6 @@ post '/order/:id/update' => sub {
     # response
     #
     $self->respond_to({ data => q{} });
-};
-
-post '/sms' => sub {
-    my $self = shift;
-
-    my $validator = $self->create_validator;
-    $validator->field('to')->required(1)->regexp(qr/^0\d{9,10}$/);
-    return $self->error(400, 'Bad receipent') unless $self->validate($validator);
-
-    my $to     = $self->param('to');
-    my $from   = app->config->{sms}{sender};
-    my $text   = app->config->{sms}{text};
-    my $sender = SMS::Send->new(
-        'KR::CoolSMS',
-        _ssl      => 1,
-        _user     => app->config->{sms}{username},
-        _password => app->config->{sms}{password},
-        _type     => 'sms',
-        _from     => $from,
-    );
-
-    my $sent = $sender->send_sms(
-        text => $text,
-        to   => $to,
-    );
-
-    return $self->error(500, $sent->{reason}) unless $sent;
-
-    my $sms = $DB->resultset('ShortMessage')->create({
-        from => $from,
-        to   => $to,
-        msg  => $text,
-    });
-
-    $self->res->headers->header('Location' => $self->url_for('/sms/' . $sms->id));
-    $self->respond_to(
-        json => { json => { $sms->get_columns }, status => 201 },
-        html => sub {
-            $self->redirect_to('/sms/' . $sms->id);    # TODO: GET /sms/:id
-        }
-    );
 };
 
 app->secrets( app->defaults->{secrets} );
