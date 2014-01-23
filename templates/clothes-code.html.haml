@@ -48,6 +48,23 @@
                           빌린 횟수
                       .hr.hr16.dotted
 
+                      %div
+                        %span.label.label-success= $average_size->{height} || '-'
+                        %span.label.label-success= $average_size->{weight} || '-'
+                        %br
+                        %span.label.label-info=    $average_size->{bust}   || '-'
+                        %span.label.label-info=    $average_size->{waist}  || '-'
+                        %span.label.label-info=    $average_size->{hip}    || '-'
+                        %span.label.label-info=    $average_size->{belly}  || '-'
+                        %br
+                        %span.label.label-warning= $average_size->{thigh}  || '-'
+                        %span.label.label-warning= $average_size->{arm}    || '-'
+                        %span.label.label-warning= $average_size->{leg}    || '-'
+                        %span.label.label-warning= $average_size->{knee}   || '-'
+                        %span.label.label-warning= $average_size->{foot}   || '-'
+
+                      .hr.hr16.dotted
+
                     /
                     / right
                     /
