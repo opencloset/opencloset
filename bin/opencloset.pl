@@ -958,6 +958,7 @@ group {
     post '/group'                 => \&api_create_group;
 
     post '/sms'                   => \&api_create_sms;
+    put  '/sms/:id'               => \&api_update_sms;
 
     get  '/search/user'           => \&api_search_user;
     get  '/search/donation'       => \&api_search_donation;
@@ -2388,6 +2389,88 @@ group {
             'Location' => $self->url_for( '/api/sms/' . $sms->id ),
         );
         $self->respond_to( json => { status => 201, json => \%data } );
+    }
+
+    sub api_update_sms {
+        my $self = shift;
+
+        #
+        # fetch params
+        #
+        my %params = $self->get_params(qw/ id from to text status /);
+
+        #
+        # validate params
+        #
+        my $v = $self->create_validator;
+        $v->field('id')->required(1)->regexp(qr/^\d+$/);
+        $v->field(qw/ from to /)
+            ->each( sub { shift->regexp(qr/^\d+$/) } );
+        $v->field('text')->regexp(qr/^.+$/);
+        $v->field('status')->in(qw/ pending sending sent /);
+
+        unless ( $self->validate( $v, \%params ) ) {
+            my @error_str;
+            while ( my ( $k, $v ) = each %{ $v->errors } ) {
+                push @error_str, "$k:$v";
+            }
+            $self->error( 400, {
+                str  => join(',', @error_str),
+                data => $v->errors,
+            }), return;
+        }
+
+        #
+        # TRANSACTION:
+        #
+        my ( $sms, $status, $error ) = do {
+            my $guard = $DB->txn_scope_guard;
+            try {
+                #
+                # find sms
+                #
+                my $sms = $DB->resultset('SMS')->find({ id => $params{id} });
+                die "sms not found\n" unless $sms;
+
+                #
+                # update sms
+                #
+                delete $params{id};
+                $sms->update( \%params ) or die "failed to update the sms\n";
+
+                $guard->commit;
+
+                return $sms;
+            }
+            catch {
+                chomp;
+                my $err = $_;
+                app->log->error("failed to find & update the sms");
+
+                no warnings 'experimental';
+
+                my $status;
+                given ($err) {
+                    $status = 404 when 'sms not found';
+                    $status = 500 when 'failed to update the sms';
+                    default { $status = 500 }
+                }
+
+                return ( undef, $status, $err );
+            };
+        };
+
+        $self->error( $status, {
+            str  => $error,
+            data => {},
+        }), return unless $sms;
+
+        #
+        # response
+        #
+        my %data = ( $sms->get_columns );
+
+        $self->respond_to( json => { status => 200, json => \%data } );
     }
 
     #
