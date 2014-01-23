@@ -124,7 +124,7 @@ helper calc_overdue => sub {
 
     my $dur = $epoch2 - $epoch1;
     return 0 if $dur < 0;
-    return int($dur / $DAY_AS_SECONDS);
+    return int($dur / $DAY_AS_SECONDS) + 1;
 };
 
 helper commify => sub {
