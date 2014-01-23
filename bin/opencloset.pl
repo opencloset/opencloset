@@ -1738,7 +1738,10 @@ group {
         #
         # fetch params
         #
-        my %params = $self->get_params(qw/ clothes_code tag_id /);
+        my %params = $self->get_params(
+            [ code => 'clothes_code' ],
+            'tag_id'
+        );
 
         #
         # validate params
@@ -1752,7 +1755,7 @@ group {
             return 1 if $DB->resultset('Clothes')->find({ code => $val });
             return ( 0, 'clothes not found using clothes_code' );
         });
-        $v->field('tag_id')->required(1)->regexp(qr/^\d+$/)->callback(sub {
+        $v->field('tag_id')->regexp(qr/^\d+$/)->callback(sub {
             my $val = shift;
 
             return 1 if $DB->resultset('Tag')->find({ id => $val });
@@ -1772,12 +1775,8 @@ group {
         #
         # adjust params
         #
-        $params{clothes_code} = [ $params{clothes_code} ] unless ref $params{clothes_code} eq 'ARRAY';
-        $params{tag_id}       = [ $params{tag_id}       ] unless ref $params{tag_id}       eq 'ARRAY';
-        for my $clothes_code ( @{ $params{clothes_code} } ) {
-            next unless length($clothes_code) == 4;
-            $clothes_code = sprintf( '%05s', $clothes_code );
-        }
+        $params{clothes_code} = sprintf( '%05s', $params{clothes_code} )
+            if length $params{clothes_code} == 4;
 
         #
         # TRANSACTION:
@@ -1790,16 +1789,18 @@ group {
                 #
                 $DB->resultset('ClothesTag')->search({ clothes_code => $params{clothes_code} })->delete_all;
 
-                #
-                # update new clothes tag data
-                #
                 my @clothes_tags;
-                for ( my $i = 0; $i < @{ $params{clothes_code} }; ++$i ) {
-                    my $clothes_tag = $DB->resultset('ClothesTag')->create({
-                        clothes_code => $params{clothes_code}[$i],
-                        tag_id       => $params{tag_id}[$i],
-                    });
-                    push @clothes_tags, $clothes_tag;
+                if ( $params{tag_id} ) {
+                    #
+                    # update new clothes tag data
+                    #
+                    for my $tag_id ( ref($params{tag_id}) eq 'ARRAY' ? @{ $params{tag_id} } : ( $params{tag_id} ) ) {
+                        my $clothes_tag = $DB->resultset('ClothesTag')->create({
+                            clothes_code => $params{clothes_code},
+                            tag_id       => $tag_id,
+                        });
+                        push @clothes_tags, $clothes_tag;
+                    }
                 }
 
                 $guard->commit;

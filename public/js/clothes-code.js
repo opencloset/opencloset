@@ -13,24 +13,15 @@
     $(".chosen-select").chosen({
       width: '90%'
     }).change(function() {
-      var base_url, clothes_code, data, t, tag_list;
+      var base_url, clothes_code, tag_list;
       tag_list = $(this).val();
       clothes_code = $(this).data('clothes-code');
       base_url = $(this).data('base-url');
-      data = {};
-      data.clothes_code = (function() {
-        var _i, _len, _results;
-        _results = [];
-        for (_i = 0, _len = tag_list.length; _i < _len; _i++) {
-          t = tag_list[_i];
-          _results.push(clothes_code);
-        }
-        return _results;
-      })();
-      data.tag_id = tag_list;
       return $.ajax("" + base_url + "/clothes/" + clothes_code + "/tag.json", {
         type: 'PUT',
-        data: $.param(data, 1)
+        data: $.param({
+          tag_id: tag_list
+        }, 1)
       });
     });
     return $('.editable').each(function(i, el) {
