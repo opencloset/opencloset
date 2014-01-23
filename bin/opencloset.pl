@@ -957,6 +957,8 @@ group {
 
     post '/group'                 => \&api_create_group;
 
+    post '/sms'                   => \&api_create_sms;
+
     get  '/search/user'           => \&api_search_user;
     get  '/search/donation'       => \&api_search_donation;
 
@@ -2338,6 +2340,50 @@ group {
 
         $self->res->headers->header(
             'Location' => $self->url_for( '/api/group/' . $group->id ),
+        );
+        $self->respond_to( json => { status => 201, json => \%data } );
+    }
+
+    sub api_create_sms {
+        my $self = shift;
+
+        #
+        # fetch params
+        #
+        my %params = $self->get_params(qw/ from to text /);
+
+        #
+        # validate params
+        #
+        my $v = $self->create_validator;
+        $v->field(qw/ from to /)
+            ->each( sub { shift->required(1)->regexp(qr/^\d+$/) } );
+        $v->field('text')->required(1)->regexp(qr/^.+$/);
+
+        unless ( $self->validate( $v, \%params ) ) {
+            my @error_str;
+            while ( my ( $k, $v ) = each %{ $v->errors } ) {
+                push @error_str, "$k:$v";
+            }
+            $self->error( 400, {
+                str  => join(',', @error_str),
+                data => $v->errors,
+            }), return;
+        }
+
+        my $sms = $DB->resultset('SMS')->create( \%params );
+        return $self->error( 404, {
+            str  => 'failed to create a new sms',
+            data => {},
+        }) unless $sms;
+
+        #
+        # response
+        #
+        my %data = ( $sms->get_columns );
+
+        $self->res->headers->header(
+            'Location' => $self->url_for( '/api/sms/' . $sms->id ),
         );
         $self->respond_to( json => { status => 201, json => \%data } );
     }
