@@ -2,12 +2,12 @@ use v5.18;
 use strict;
 use warnings;
 
-use Opencloset::Util;
+use OpenCloset::Util;
 
-my $CONF = Opencloset::Util::load_config('app.conf');
+my $CONF = OpenCloset::Util::load_config('app.conf');
 
 {
-    schema_class => "Opencloset::Schema",
+    schema_class => "OpenCloset::Schema",
     connect_info => {
         dsn  => $CONF->{database}{dsn},
         user => $CONF->{database}{user},
@@ -29,7 +29,7 @@ my $CONF = Opencloset::Util::load_config('app.conf');
         skip_load_external        => 1,
         relationships             => 1,
         col_collision_map         => 'column_%s',
-        result_base_class         => 'Opencloset::Schema::Base',
+        result_base_class         => 'OpenCloset::Schema::Base',
         overwrite_modifications   => 1,
         datetime_undef_if_invalid => 1,
         custom_column_info        => sub {

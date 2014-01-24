@@ -9,7 +9,7 @@ use List::MoreUtils qw( zip );
 use List::Util qw( sum );
 use Try::Tiny;
 
-use Opencloset::Schema;
+use OpenCloset::Schema;
 
 plugin 'validator';
 plugin 'haml_renderer';
@@ -23,7 +23,7 @@ app->defaults( %{ plugin 'Config' => { default => {
     page_id     => q{},
 }}});
 
-my $DB = Opencloset::Schema->connect({
+my $DB = OpenCloset::Schema->connect({
     dsn      => app->config->{database}{dsn},
     user     => app->config->{database}{user},
     password => app->config->{database}{pass},

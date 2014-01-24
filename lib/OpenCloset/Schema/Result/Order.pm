@@ -1,23 +1,23 @@
 use utf8;
-package Opencloset::Schema::Result::Order;
+package OpenCloset::Schema::Result::Order;
 
 # Created by DBIx::Class::Schema::Loader
 # DO NOT MODIFY THE FIRST PART OF THIS FILE
 
 =head1 NAME
 
-Opencloset::Schema::Result::Order
+OpenCloset::Schema::Result::Order
 
 =cut
 
 use strict;
 use warnings;
 
-=head1 BASE CLASS: L<Opencloset::Schema::Base>
+=head1 BASE CLASS: L<OpenCloset::Schema::Base>
 
 =cut
 
-use base 'Opencloset::Schema::Base';
+use base 'OpenCloset::Schema::Base';
 
 =head1 TABLE: C<order>
 
@@ -340,13 +340,13 @@ __PACKAGE__->set_primary_key("id");
 
 Type: has_many
 
-Related object: L<Opencloset::Schema::Result::OrderDetail>
+Related object: L<OpenCloset::Schema::Result::OrderDetail>
 
 =cut
 
 __PACKAGE__->has_many(
   "order_details",
-  "Opencloset::Schema::Result::OrderDetail",
+  "OpenCloset::Schema::Result::OrderDetail",
   { "foreign.order_id" => "self.id" },
   { cascade_copy => 0, cascade_delete => 0 },
 );
@@ -355,13 +355,13 @@ __PACKAGE__->has_many(
 
 Type: has_many
 
-Related object: L<Opencloset::Schema::Result::Order>
+Related object: L<OpenCloset::Schema::Result::Order>
 
 =cut
 
 __PACKAGE__->has_many(
   "orders",
-  "Opencloset::Schema::Result::Order",
+  "OpenCloset::Schema::Result::Order",
   { "foreign.parent_id" => "self.id" },
   { cascade_copy => 0, cascade_delete => 0 },
 );
@@ -370,13 +370,13 @@ __PACKAGE__->has_many(
 
 Type: belongs_to
 
-Related object: L<Opencloset::Schema::Result::Order>
+Related object: L<OpenCloset::Schema::Result::Order>
 
 =cut
 
 __PACKAGE__->belongs_to(
   "parent",
-  "Opencloset::Schema::Result::Order",
+  "OpenCloset::Schema::Result::Order",
   { id => "parent_id" },
   {
     is_deferrable => 1,
@@ -390,13 +390,13 @@ __PACKAGE__->belongs_to(
 
 Type: belongs_to
 
-Related object: L<Opencloset::Schema::Result::User>
+Related object: L<OpenCloset::Schema::Result::User>
 
 =cut
 
 __PACKAGE__->belongs_to(
   "staff",
-  "Opencloset::Schema::Result::User",
+  "OpenCloset::Schema::Result::User",
   { id => "staff_id" },
   {
     is_deferrable => 1,
@@ -410,13 +410,13 @@ __PACKAGE__->belongs_to(
 
 Type: belongs_to
 
-Related object: L<Opencloset::Schema::Result::Status>
+Related object: L<OpenCloset::Schema::Result::Status>
 
 =cut
 
 __PACKAGE__->belongs_to(
   "status",
-  "Opencloset::Schema::Result::Status",
+  "OpenCloset::Schema::Result::Status",
   { id => "status_id" },
   {
     is_deferrable => 1,
@@ -430,20 +430,20 @@ __PACKAGE__->belongs_to(
 
 Type: belongs_to
 
-Related object: L<Opencloset::Schema::Result::User>
+Related object: L<OpenCloset::Schema::Result::User>
 
 =cut
 
 __PACKAGE__->belongs_to(
   "user",
-  "Opencloset::Schema::Result::User",
+  "OpenCloset::Schema::Result::User",
   { id => "user_id" },
   { is_deferrable => 1, on_delete => "CASCADE", on_update => "RESTRICT" },
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07038 @ 2014-01-20 13:54:34
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:a2dAkS9xCxs/ki/829QIOw
+# Created by DBIx::Class::Schema::Loader v0.07038 @ 2014-01-24 15:02:59
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:u5hceObyu3a7EwLz8I77qA
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

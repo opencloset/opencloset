@@ -10,9 +10,9 @@ use JSON;
 use SMS::Send::KR::CoolSMS;
 use SMS::Send;
 
-use Opencloset::Util;
+use OpenCloset::Util;
 
-my $CONF = Opencloset::Util::load_config(
+my $CONF = OpenCloset::Util::load_config(
     'app.conf',
     $Script,
     delay      => 60,
@@ -22,7 +22,7 @@ my $CONF = Opencloset::Util::load_config(
 my $continue = 1;
 $SIG{TERM} = sub { $continue = 0;        };
 $SIG{HUP}  = sub {
-    $CONF = Opencloset::Util::load_config(
+    $CONF = OpenCloset::Util::load_config(
         'app.conf',
         $Script,
         delay      => 60,

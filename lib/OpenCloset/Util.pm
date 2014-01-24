@@ -1,4 +1,4 @@
-package Opencloset::Util;
+package OpenCloset::Util;
 # ABSTRACT: Random snippets of code that OpenCloset wants
 
 use v5.18;

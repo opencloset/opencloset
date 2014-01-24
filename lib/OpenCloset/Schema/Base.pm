@@ -1,4 +1,4 @@
-package Opencloset::Schema::Base;
+package OpenCloset::Schema::Base;
 
 use strict;
 use warnings;

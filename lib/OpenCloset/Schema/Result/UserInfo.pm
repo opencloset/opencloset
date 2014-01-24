@@ -1,23 +1,23 @@
 use utf8;
-package Opencloset::Schema::Result::UserInfo;
+package OpenCloset::Schema::Result::UserInfo;
 
 # Created by DBIx::Class::Schema::Loader
 # DO NOT MODIFY THE FIRST PART OF THIS FILE
 
 =head1 NAME
 
-Opencloset::Schema::Result::UserInfo
+OpenCloset::Schema::Result::UserInfo
 
 =cut
 
 use strict;
 use warnings;
 
-=head1 BASE CLASS: L<Opencloset::Schema::Base>
+=head1 BASE CLASS: L<OpenCloset::Schema::Base>
 
 =cut
 
-use base 'Opencloset::Schema::Base';
+use base 'OpenCloset::Schema::Base';
 
 =head1 TABLE: C<user_info>
 
@@ -231,20 +231,20 @@ __PACKAGE__->add_unique_constraint("user_id", ["user_id"]);
 
 Type: belongs_to
 
-Related object: L<Opencloset::Schema::Result::User>
+Related object: L<OpenCloset::Schema::Result::User>
 
 =cut
 
 __PACKAGE__->belongs_to(
   "user",
-  "Opencloset::Schema::Result::User",
+  "OpenCloset::Schema::Result::User",
   { id => "user_id" },
   { is_deferrable => 1, on_delete => "CASCADE", on_update => "RESTRICT" },
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07038 @ 2014-01-16 12:38:35
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:ua5UM5wOcuscf295yv41WQ
+# Created by DBIx::Class::Schema::Loader v0.07038 @ 2014-01-24 15:02:06
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:zhCDfaf31fh5vIRcDkQrYA
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

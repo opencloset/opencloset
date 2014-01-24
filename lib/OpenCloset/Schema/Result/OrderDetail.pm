@@ -1,23 +1,23 @@
 use utf8;
-package Opencloset::Schema::Result::OrderDetail;
+package OpenCloset::Schema::Result::OrderDetail;
 
 # Created by DBIx::Class::Schema::Loader
 # DO NOT MODIFY THE FIRST PART OF THIS FILE
 
 =head1 NAME
 
-Opencloset::Schema::Result::OrderDetail
+OpenCloset::Schema::Result::OrderDetail
 
 =cut
 
 use strict;
 use warnings;
 
-=head1 BASE CLASS: L<Opencloset::Schema::Base>
+=head1 BASE CLASS: L<OpenCloset::Schema::Base>
 
 =cut
 
-use base 'Opencloset::Schema::Base';
+use base 'OpenCloset::Schema::Base';
 
 =head1 TABLE: C<order_detail>
 
@@ -139,13 +139,13 @@ __PACKAGE__->set_primary_key("id");
 
 Type: belongs_to
 
-Related object: L<Opencloset::Schema::Result::Clothes>
+Related object: L<OpenCloset::Schema::Result::Clothes>
 
 =cut
 
 __PACKAGE__->belongs_to(
   "clothes",
-  "Opencloset::Schema::Result::Clothes",
+  "OpenCloset::Schema::Result::Clothes",
   { code => "clothes_code" },
   {
     is_deferrable => 1,
@@ -159,13 +159,13 @@ __PACKAGE__->belongs_to(
 
 Type: belongs_to
 
-Related object: L<Opencloset::Schema::Result::Order>
+Related object: L<OpenCloset::Schema::Result::Order>
 
 =cut
 
 __PACKAGE__->belongs_to(
   "order",
-  "Opencloset::Schema::Result::Order",
+  "OpenCloset::Schema::Result::Order",
   { id => "order_id" },
   { is_deferrable => 1, on_delete => "CASCADE", on_update => "RESTRICT" },
 );
@@ -174,13 +174,13 @@ __PACKAGE__->belongs_to(
 
 Type: belongs_to
 
-Related object: L<Opencloset::Schema::Result::Status>
+Related object: L<OpenCloset::Schema::Result::Status>
 
 =cut
 
 __PACKAGE__->belongs_to(
   "status",
-  "Opencloset::Schema::Result::Status",
+  "OpenCloset::Schema::Result::Status",
   { id => "status_id" },
   {
     is_deferrable => 1,
@@ -191,8 +191,8 @@ __PACKAGE__->belongs_to(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07038 @ 2014-01-19 15:55:33
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:AScr1HYLkGXwPlJ9lQLLiA
+# Created by DBIx::Class::Schema::Loader v0.07038 @ 2014-01-24 15:02:06
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:paQexXCFv821+1oT2D0aMA
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

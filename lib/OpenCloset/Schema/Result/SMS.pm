@@ -1,23 +1,23 @@
 use utf8;
-package Opencloset::Schema::Result::SMS;
+package OpenCloset::Schema::Result::SMS;
 
 # Created by DBIx::Class::Schema::Loader
 # DO NOT MODIFY THE FIRST PART OF THIS FILE
 
 =head1 NAME
 
-Opencloset::Schema::Result::SMS
+OpenCloset::Schema::Result::SMS
 
 =cut
 
 use strict;
 use warnings;
 
-=head1 BASE CLASS: L<Opencloset::Schema::Base>
+=head1 BASE CLASS: L<OpenCloset::Schema::Base>
 
 =cut
 
-use base 'Opencloset::Schema::Base';
+use base 'OpenCloset::Schema::Base';
 
 =head1 TABLE: C<sms>
 
@@ -134,8 +134,8 @@ __PACKAGE__->add_columns(
 __PACKAGE__->set_primary_key("id");
 
 
-# Created by DBIx::Class::Schema::Loader v0.07038 @ 2014-01-23 15:13:10
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:WfiDeeejTZweg+VegxsTpA
+# Created by DBIx::Class::Schema::Loader v0.07038 @ 2014-01-24 15:02:06
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:6usM2QJD0Vhc7gnnBnXf5g
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration
