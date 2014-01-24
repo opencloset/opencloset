@@ -11,19 +11,29 @@ use Path::Tiny;
 use SMS::Send::KR::CoolSMS;
 use SMS::Send;
 
-my $conf;
-my $opt;
-
-load_config();
-$opt->{delay}      //= 60;
-$opt->{send_delay} //= 1;
+my $CONF = load_config();
 
 my $continue = 1;
-$SIG{TERM} = sub { $continue = 0; };
-$SIG{HUP}  = sub { load_config()  };
+$SIG{TERM} = sub { $continue = 0;        };
+$SIG{HUP}  = sub { $CONF = load_config() };
 while ($continue) {
     do_work();
-    sleep $opt->{delay};
+    sleep $CONF->{delay};
+}
+
+#
+# load from app.conf
+#
+sub load_config {
+    my $conf_file = 'app.conf';
+    die "cannot find config file" unless -e $conf_file;
+    my $conf = eval path($conf_file)->slurp_utf8;
+
+    # default
+    $conf->{$Script}{delay}      //= 60;
+    $conf->{$Script}{send_delay} //= 1;
+
+    return $conf->{$Script};
 }
 
 sub do_work {
@@ -45,7 +55,7 @@ sub do_work {
         #
         update_sms( $sms, status => 'sent', ret => $ret || 0 );
 
-        sleep $opt->{send_delay};
+        sleep $CONF->{send_delay};
     }
 }
 
@@ -54,7 +64,7 @@ sub do_work {
 #
 sub get_pending_sms_list {
     my $res = HTTP::Tiny->new->get(
-        "$opt->{base_url}/search/sms.json?"
+        "$CONF->{base_url}/search/sms.json?"
         . HTTP::Tiny->www_form_urlencode({ status => 'pending' })
     );
     return unless $res->{success};
@@ -72,7 +82,7 @@ sub update_sms {
 
     my $id = $sms->id;
     my $res = HTTP::Tiny->new->put(
-        "$opt->{base_url}/sms/$id.json",
+        "$CONF->{base_url}/sms/$id.json",
         {
             content => HTTP::Tiny->www_form_urlencode(\%params),
             headers => { 'content-type' => 'application/x-www-form-urlencoded' },
@@ -93,8 +103,8 @@ sub send_sms {
     my $sender = SMS::Send->new(
         'KR::CoolSMS',
         _ssl      => 1,
-        _user     => $conf->{user},
-        _password => $conf->{pass},
+        _user     => $CONF->{user},
+        _password => $CONF->{pass},
         _type     => 'sms',
         _from     => $sms->{from},
     );
@@ -105,14 +115,4 @@ sub send_sms {
     );
 
     return $sent->{success};
-}
-
-#
-# load from app.conf
-#
-sub load_config {
-    my $conf_file = 'app.conf';
-    die "cannot find config file" unless -e $conf_file;
-    $conf = eval path($conf_file)->slurp_utf8;
-    $opt  = $conf->{$Script};
 }
