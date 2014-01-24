@@ -115,9 +115,9 @@ $db_opts->{AutoCommit} //= 1;
         workers   => {
             send_sms_to_late_users => {
                 cron     => '0 9 * * *',
-                cron     => '* * * * *',
                 base_url => 'http://localhost:7723/api',
                 from     => '07075837521',
+                text_fmt => "%s님 대여하신 의류가 연체되었습니다. -열린옷장",
                 timeout  => 3,
             },
         },
