@@ -1,23 +1,23 @@
 use utf8;
-package Opencloset::Schema::Result::Tag;
+package OpenCloset::Schema::Result::Tag;
 
 # Created by DBIx::Class::Schema::Loader
 # DO NOT MODIFY THE FIRST PART OF THIS FILE
 
 =head1 NAME
 
-Opencloset::Schema::Result::Tag
+OpenCloset::Schema::Result::Tag
 
 =cut
 
 use strict;
 use warnings;
 
-=head1 BASE CLASS: L<Opencloset::Schema::Base>
+=head1 BASE CLASS: L<OpenCloset::Schema::Base>
 
 =cut
 
-use base 'Opencloset::Schema::Base';
+use base 'OpenCloset::Schema::Base';
 
 =head1 TABLE: C<tag>
 
@@ -86,13 +86,13 @@ __PACKAGE__->add_unique_constraint("name", ["name"]);
 
 Type: has_many
 
-Related object: L<Opencloset::Schema::Result::ClothesTag>
+Related object: L<OpenCloset::Schema::Result::ClothesTag>
 
 =cut
 
 __PACKAGE__->has_many(
   "clothes_tags",
-  "Opencloset::Schema::Result::ClothesTag",
+  "OpenCloset::Schema::Result::ClothesTag",
   { "foreign.tag_id" => "self.id" },
   { cascade_copy => 0, cascade_delete => 0 },
 );
@@ -108,8 +108,8 @@ Composing rels: L</clothes_tags> -> clothes
 __PACKAGE__->many_to_many("clothes", "clothes_tags", "clothes");
 
 
-# Created by DBIx::Class::Schema::Loader v0.07038 @ 2014-01-21 10:17:29
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:d5P7JQYtSDItEVcYqpRoAQ
+# Created by DBIx::Class::Schema::Loader v0.07038 @ 2014-01-24 15:02:06
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:7A/4MDnc9HYcI0mz4QZqVw
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

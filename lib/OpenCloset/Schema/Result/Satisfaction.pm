@@ -1,23 +1,23 @@
 use utf8;
-package Opencloset::Schema::Result::Satisfaction;
+package OpenCloset::Schema::Result::Satisfaction;
 
 # Created by DBIx::Class::Schema::Loader
 # DO NOT MODIFY THE FIRST PART OF THIS FILE
 
 =head1 NAME
 
-Opencloset::Schema::Result::Satisfaction
+OpenCloset::Schema::Result::Satisfaction
 
 =cut
 
 use strict;
 use warnings;
 
-=head1 BASE CLASS: L<Opencloset::Schema::Base>
+=head1 BASE CLASS: L<OpenCloset::Schema::Base>
 
 =cut
 
-use base 'Opencloset::Schema::Base';
+use base 'OpenCloset::Schema::Base';
 
 =head1 TABLE: C<satisfaction>
 
@@ -126,13 +126,13 @@ __PACKAGE__->set_primary_key("user_id", "clothes_code");
 
 Type: belongs_to
 
-Related object: L<Opencloset::Schema::Result::Clothes>
+Related object: L<OpenCloset::Schema::Result::Clothes>
 
 =cut
 
 __PACKAGE__->belongs_to(
   "clothes",
-  "Opencloset::Schema::Result::Clothes",
+  "OpenCloset::Schema::Result::Clothes",
   { code => "clothes_code" },
   { is_deferrable => 1, on_delete => "CASCADE", on_update => "RESTRICT" },
 );
@@ -141,20 +141,20 @@ __PACKAGE__->belongs_to(
 
 Type: belongs_to
 
-Related object: L<Opencloset::Schema::Result::User>
+Related object: L<OpenCloset::Schema::Result::User>
 
 =cut
 
 __PACKAGE__->belongs_to(
   "user",
-  "Opencloset::Schema::Result::User",
+  "OpenCloset::Schema::Result::User",
   { id => "user_id" },
   { is_deferrable => 1, on_delete => "CASCADE", on_update => "RESTRICT" },
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07038 @ 2014-01-09 18:34:05
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:MdvtQt9VlCBnUUc5FAf7iQ
+# Created by DBIx::Class::Schema::Loader v0.07038 @ 2014-01-24 15:02:06
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:AC8KFpMynP3smG1bbIF1uA
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

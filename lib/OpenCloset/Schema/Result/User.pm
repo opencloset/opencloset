@@ -1,23 +1,23 @@
 use utf8;
-package Opencloset::Schema::Result::User;
+package OpenCloset::Schema::Result::User;
 
 # Created by DBIx::Class::Schema::Loader
 # DO NOT MODIFY THE FIRST PART OF THIS FILE
 
 =head1 NAME
 
-Opencloset::Schema::Result::User
+OpenCloset::Schema::Result::User
 
 =cut
 
 use strict;
 use warnings;
 
-=head1 BASE CLASS: L<Opencloset::Schema::Base>
+=head1 BASE CLASS: L<OpenCloset::Schema::Base>
 
 =cut
 
-use base 'Opencloset::Schema::Base';
+use base 'OpenCloset::Schema::Base';
 
 =head1 TABLE: C<user>
 
@@ -150,13 +150,13 @@ __PACKAGE__->add_unique_constraint("email", ["email"]);
 
 Type: has_many
 
-Related object: L<Opencloset::Schema::Result::Donation>
+Related object: L<OpenCloset::Schema::Result::Donation>
 
 =cut
 
 __PACKAGE__->has_many(
   "donations",
-  "Opencloset::Schema::Result::Donation",
+  "OpenCloset::Schema::Result::Donation",
   { "foreign.user_id" => "self.id" },
   { cascade_copy => 0, cascade_delete => 0 },
 );
@@ -165,13 +165,13 @@ __PACKAGE__->has_many(
 
 Type: has_many
 
-Related object: L<Opencloset::Schema::Result::Order>
+Related object: L<OpenCloset::Schema::Result::Order>
 
 =cut
 
 __PACKAGE__->has_many(
   "order_staffs",
-  "Opencloset::Schema::Result::Order",
+  "OpenCloset::Schema::Result::Order",
   { "foreign.staff_id" => "self.id" },
   { cascade_copy => 0, cascade_delete => 0 },
 );
@@ -180,13 +180,13 @@ __PACKAGE__->has_many(
 
 Type: has_many
 
-Related object: L<Opencloset::Schema::Result::Order>
+Related object: L<OpenCloset::Schema::Result::Order>
 
 =cut
 
 __PACKAGE__->has_many(
   "order_users",
-  "Opencloset::Schema::Result::Order",
+  "OpenCloset::Schema::Result::Order",
   { "foreign.user_id" => "self.id" },
   { cascade_copy => 0, cascade_delete => 0 },
 );
@@ -195,13 +195,13 @@ __PACKAGE__->has_many(
 
 Type: has_many
 
-Related object: L<Opencloset::Schema::Result::Satisfaction>
+Related object: L<OpenCloset::Schema::Result::Satisfaction>
 
 =cut
 
 __PACKAGE__->has_many(
   "satisfactions",
-  "Opencloset::Schema::Result::Satisfaction",
+  "OpenCloset::Schema::Result::Satisfaction",
   { "foreign.user_id" => "self.id" },
   { cascade_copy => 0, cascade_delete => 0 },
 );
@@ -210,20 +210,20 @@ __PACKAGE__->has_many(
 
 Type: might_have
 
-Related object: L<Opencloset::Schema::Result::UserInfo>
+Related object: L<OpenCloset::Schema::Result::UserInfo>
 
 =cut
 
 __PACKAGE__->might_have(
   "user_info",
-  "Opencloset::Schema::Result::UserInfo",
+  "OpenCloset::Schema::Result::UserInfo",
   { "foreign.user_id" => "self.id" },
   { cascade_copy => 0, cascade_delete => 0 },
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07038 @ 2014-01-09 18:34:05
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:PK8WBepbZJXv64yh/IytUA
+# Created by DBIx::Class::Schema::Loader v0.07038 @ 2014-01-24 15:02:06
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:TY2yBb0ocNFS1PHeMdiQ8g
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

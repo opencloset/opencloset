@@ -1,23 +1,23 @@
 use utf8;
-package Opencloset::Schema::Result::Group;
+package OpenCloset::Schema::Result::Group;
 
 # Created by DBIx::Class::Schema::Loader
 # DO NOT MODIFY THE FIRST PART OF THIS FILE
 
 =head1 NAME
 
-Opencloset::Schema::Result::Group
+OpenCloset::Schema::Result::Group
 
 =cut
 
 use strict;
 use warnings;
 
-=head1 BASE CLASS: L<Opencloset::Schema::Base>
+=head1 BASE CLASS: L<OpenCloset::Schema::Base>
 
 =cut
 
-use base 'Opencloset::Schema::Base';
+use base 'OpenCloset::Schema::Base';
 
 =head1 TABLE: C<group>
 
@@ -64,20 +64,20 @@ __PACKAGE__->set_primary_key("id");
 
 Type: has_many
 
-Related object: L<Opencloset::Schema::Result::Clothes>
+Related object: L<OpenCloset::Schema::Result::Clothes>
 
 =cut
 
 __PACKAGE__->has_many(
   "clothes",
-  "Opencloset::Schema::Result::Clothes",
+  "OpenCloset::Schema::Result::Clothes",
   { "foreign.group_id" => "self.id" },
   { cascade_copy => 0, cascade_delete => 0 },
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07038 @ 2014-01-09 22:25:05
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:cV1psI+Q45MR6LG2SiOLXg
+# Created by DBIx::Class::Schema::Loader v0.07038 @ 2014-01-24 15:02:06
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:bWTM0Ng/JwlEnn4HfS7Nsg
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

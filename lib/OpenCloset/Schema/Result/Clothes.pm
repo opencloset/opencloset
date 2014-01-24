@@ -1,23 +1,23 @@
 use utf8;
-package Opencloset::Schema::Result::Clothes;
+package OpenCloset::Schema::Result::Clothes;
 
 # Created by DBIx::Class::Schema::Loader
 # DO NOT MODIFY THE FIRST PART OF THIS FILE
 
 =head1 NAME
 
-Opencloset::Schema::Result::Clothes
+OpenCloset::Schema::Result::Clothes
 
 =cut
 
 use strict;
 use warnings;
 
-=head1 BASE CLASS: L<Opencloset::Schema::Base>
+=head1 BASE CLASS: L<OpenCloset::Schema::Base>
 
 =cut
 
-use base 'Opencloset::Schema::Base';
+use base 'OpenCloset::Schema::Base';
 
 =head1 TABLE: C<clothes>
 
@@ -232,13 +232,13 @@ __PACKAGE__->add_unique_constraint("code", ["code"]);
 
 Type: has_many
 
-Related object: L<Opencloset::Schema::Result::ClothesTag>
+Related object: L<OpenCloset::Schema::Result::ClothesTag>
 
 =cut
 
 __PACKAGE__->has_many(
   "clothes_tags",
-  "Opencloset::Schema::Result::ClothesTag",
+  "OpenCloset::Schema::Result::ClothesTag",
   { "foreign.clothes_code" => "self.code" },
   { cascade_copy => 0, cascade_delete => 0 },
 );
@@ -247,13 +247,13 @@ __PACKAGE__->has_many(
 
 Type: belongs_to
 
-Related object: L<Opencloset::Schema::Result::Donation>
+Related object: L<OpenCloset::Schema::Result::Donation>
 
 =cut
 
 __PACKAGE__->belongs_to(
   "donation",
-  "Opencloset::Schema::Result::Donation",
+  "OpenCloset::Schema::Result::Donation",
   { id => "donation_id" },
   {
     is_deferrable => 1,
@@ -267,13 +267,13 @@ __PACKAGE__->belongs_to(
 
 Type: belongs_to
 
-Related object: L<Opencloset::Schema::Result::Group>
+Related object: L<OpenCloset::Schema::Result::Group>
 
 =cut
 
 __PACKAGE__->belongs_to(
   "group",
-  "Opencloset::Schema::Result::Group",
+  "OpenCloset::Schema::Result::Group",
   { id => "group_id" },
   {
     is_deferrable => 1,
@@ -287,13 +287,13 @@ __PACKAGE__->belongs_to(
 
 Type: has_many
 
-Related object: L<Opencloset::Schema::Result::OrderDetail>
+Related object: L<OpenCloset::Schema::Result::OrderDetail>
 
 =cut
 
 __PACKAGE__->has_many(
   "order_details",
-  "Opencloset::Schema::Result::OrderDetail",
+  "OpenCloset::Schema::Result::OrderDetail",
   { "foreign.clothes_code" => "self.code" },
   { cascade_copy => 0, cascade_delete => 0 },
 );
@@ -302,13 +302,13 @@ __PACKAGE__->has_many(
 
 Type: has_many
 
-Related object: L<Opencloset::Schema::Result::Satisfaction>
+Related object: L<OpenCloset::Schema::Result::Satisfaction>
 
 =cut
 
 __PACKAGE__->has_many(
   "satisfactions",
-  "Opencloset::Schema::Result::Satisfaction",
+  "OpenCloset::Schema::Result::Satisfaction",
   { "foreign.clothes_code" => "self.code" },
   { cascade_copy => 0, cascade_delete => 0 },
 );
@@ -317,13 +317,13 @@ __PACKAGE__->has_many(
 
 Type: belongs_to
 
-Related object: L<Opencloset::Schema::Result::Status>
+Related object: L<OpenCloset::Schema::Result::Status>
 
 =cut
 
 __PACKAGE__->belongs_to(
   "status",
-  "Opencloset::Schema::Result::Status",
+  "OpenCloset::Schema::Result::Status",
   { id => "status_id" },
   {
     is_deferrable => 1,
@@ -344,8 +344,8 @@ Composing rels: L</clothes_tags> -> tag
 __PACKAGE__->many_to_many("tags", "clothes_tags", "tag");
 
 
-# Created by DBIx::Class::Schema::Loader v0.07038 @ 2014-01-22 10:40:44
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:pIdhi50+KMnU+rEFqtdMJw
+# Created by DBIx::Class::Schema::Loader v0.07038 @ 2014-01-24 15:02:59
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:TSUtWPCg9hZG4kNDlSFuEQ
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

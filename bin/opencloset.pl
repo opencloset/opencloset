@@ -3,16 +3,13 @@
 use v5.18;
 use Mojolicious::Lite;
 
-use Data::Pageset;
 use DateTime;
 use Gravatar::URL;
 use List::MoreUtils qw( zip );
 use List::Util qw( sum );
-use SMS::Send::KR::CoolSMS;
-use SMS::Send;
 use Try::Tiny;
 
-use Opencloset::Schema;
+use OpenCloset::Schema;
 
 plugin 'validator';
 plugin 'haml_renderer';
@@ -26,7 +23,7 @@ app->defaults( %{ plugin 'Config' => { default => {
     page_id     => q{},
 }}});
 
-my $DB = Opencloset::Schema->connect({
+my $DB = OpenCloset::Schema->connect({
     dsn      => app->config->{database}{dsn},
     user     => app->config->{database}{user},
     password => app->config->{database}{pass},
@@ -960,8 +957,13 @@ group {
 
     post '/group'                 => \&api_create_group;
 
+    post '/sms'                   => \&api_create_sms;
+    put  '/sms/:id'               => \&api_update_sms;
+
     get  '/search/user'           => \&api_search_user;
+    get  '/search/user/late'      => \&api_search_late_user;
     get  '/search/donation'       => \&api_search_donation;
+    get  '/search/sms'            => \&api_search_sms;
 
     get  '/gui/staff-list'        => \&api_gui_staff_list;
 
@@ -2345,6 +2347,133 @@ group {
         $self->respond_to( json => { status => 201, json => \%data } );
     }
 
+    sub api_create_sms {
+        my $self = shift;
+
+        #
+        # fetch params
+        #
+        my %params = $self->get_params(qw/ from to text status /);
+
+        #
+        # validate params
+        #
+        my $v = $self->create_validator;
+        $v->field(qw/ from to /)
+            ->each( sub { shift->required(1)->regexp(qr/^\d+$/) } );
+        $v->field('text')->required(1)->regexp(qr/^.+$/);
+        $v->field('status')->in(qw/ pending sending sent /);
+
+        unless ( $self->validate( $v, \%params ) ) {
+            my @error_str;
+            while ( my ( $k, $v ) = each %{ $v->errors } ) {
+                push @error_str, "$k:$v";
+            }
+            $self->error( 400, {
+                str  => join(',', @error_str),
+                data => $v->errors,
+            }), return;
+        }
+
+        my $sms = $DB->resultset('SMS')->create( \%params );
+        return $self->error( 404, {
+            str  => 'failed to create a new sms',
+            data => {},
+        }) unless $sms;
+
+        #
+        # response
+        #
+        my %data = ( $sms->get_columns );
+
+        $self->res->headers->header(
+            'Location' => $self->url_for( '/api/sms/' . $sms->id ),
+        );
+        $self->respond_to( json => { status => 201, json => \%data } );
+    }
+
+    sub api_update_sms {
+        my $self = shift;
+
+        #
+        # fetch params
+        #
+        my %params = $self->get_params(qw/ id from to text status /);
+
+        #
+        # validate params
+        #
+        my $v = $self->create_validator;
+        $v->field('id')->required(1)->regexp(qr/^\d+$/);
+        $v->field(qw/ from to /)
+            ->each( sub { shift->regexp(qr/^\d+$/) } );
+        $v->field('text')->regexp(qr/^.+$/);
+        $v->field('status')->in(qw/ pending sending sent /);
+
+        unless ( $self->validate( $v, \%params ) ) {
+            my @error_str;
+            while ( my ( $k, $v ) = each %{ $v->errors } ) {
+                push @error_str, "$k:$v";
+            }
+            $self->error( 400, {
+                str  => join(',', @error_str),
+                data => $v->errors,
+            }), return;
+        }
+
+        #
+        # TRANSACTION:
+        #
+        my ( $sms, $status, $error ) = do {
+            my $guard = $DB->txn_scope_guard;
+            try {
+                #
+                # find sms
+                #
+                my $sms = $DB->resultset('SMS')->find({ id => $params{id} });
+                die "sms not found\n" unless $sms;
+
+                #
+                # update sms
+                #
+                delete $params{id};
+                $sms->update( \%params ) or die "failed to update the sms\n";
+
+                $guard->commit;
+
+                return $sms;
+            }
+            catch {
+                chomp;
+                my $err = $_;
+                app->log->error("failed to find & update the sms");
+
+                no warnings 'experimental';
+
+                my $status;
+                given ($err) {
+                    $status = 404 when 'sms not found';
+                    $status = 500 when 'failed to update the sms';
+                    default { $status = 500 }
+                }
+
+                return ( undef, $status, $err );
+            };
+        };
+
+        $self->error( $status, {
+            str  => $error,
+            data => {},
+        }), return unless $sms;
+
+        #
+        # response
+        #
+        my %data = ( $sms->get_columns );
+
+        $self->respond_to( json => { status => 200, json => \%data } );
+    }
+
     #
     # FIXME
     #   parameter is wired.
@@ -2386,6 +2515,49 @@ group {
                 ],
             },
             { join => 'user_info' },
+        );
+        return $self->error( 404, {
+            str  => 'user not found',
+            data => {},
+        }) unless @users;
+
+        #
+        # response
+        #
+        my @data;
+        for my $user (@users) {
+            my %inner = ( $user->user_info->get_columns, $user->get_columns );
+            delete @inner{qw/ user_id password /};
+
+            push @data, \%inner;
+        }
+
+        $self->respond_to( json => { status => 200, json => \@data } );
+    }
+
+    #
+    # FIXME
+    #   parameter is wired.
+    #   but it seemed enough for opencloset now
+    #
+    sub api_search_late_user {
+        my $self = shift;
+
+        #
+        # find user
+        #
+        my $now = $DB->storage->datetime_parser->format_datetime(
+            DateTime->now( time_zone => app->config->{timezone} ),
+        );
+        my @users = $DB->resultset('User')->search(
+            {
+                -and => [
+                    'order_users.target_date'      => { '<' => $now },
+                    'order_users.user_target_date' => { '<' => $now },
+                    'order_users.status_id'        => 2,
+                ],
+            },
+            { join => 'order_users' },
         );
         return $self->error( 404, {
             str  => 'user not found',
@@ -2477,6 +2649,53 @@ group {
 
             push @data, \%inner;
         }
+
+        $self->respond_to( json => { status => 200, json => \@data } );
+    }
+
+    #
+    # FIXME
+    #   parameter is wired.
+    #   but it seemed enough for opencloset now
+    #
+    sub api_search_sms {
+        my $self = shift;
+
+        #
+        # fetch params
+        #
+        my %params = $self->get_params(qw/ status /);
+
+        #
+        # validate params
+        #
+        my $v = $self->create_validator;
+        $v->field('status')->required(1);
+        unless ( $self->validate( $v, \%params ) ) {
+            my @error_str;
+            while ( my ( $k, $v ) = each %{ $v->errors } ) {
+                push @error_str, "$k:$v";
+            }
+            return $self->error( 400, {
+                str  => join(',', @error_str),
+                data => $v->errors,
+            });
+        }
+
+        #
+        # find sms
+        #
+        my @sms_list = $DB->resultset('SMS')->search({ status => $params{status} });
+        return $self->error( 404, {
+            str  => 'sms not found',
+            data => {},
+        }) unless @sms_list;
+
+        #
+        # response
+        #
+        my @data;
+        push @data, { $_->get_columns } for @sms_list;
 
         $self->respond_to( json => { status => 200, json => \@data } );
     }
@@ -2798,47 +3017,6 @@ post '/order/:id/update' => sub {
     # response
     #
     $self->respond_to({ data => q{} });
-};
-
-post '/sms' => sub {
-    my $self = shift;
-
-    my $validator = $self->create_validator;
-    $validator->field('to')->required(1)->regexp(qr/^0\d{9,10}$/);
-    return $self->error(400, 'Bad receipent') unless $self->validate($validator);
-
-    my $to     = $self->param('to');
-    my $from   = app->config->{sms}{sender};
-    my $text   = app->config->{sms}{text};
-    my $sender = SMS::Send->new(
-        'KR::CoolSMS',
-        _ssl      => 1,
-        _user     => app->config->{sms}{username},
-        _password => app->config->{sms}{password},
-        _type     => 'sms',
-        _from     => $from,
-    );
-
-    my $sent = $sender->send_sms(
-        text => $text,
-        to   => $to,
-    );
-
-    return $self->error(500, $sent->{reason}) unless $sent;
-
-    my $sms = $DB->resultset('ShortMessage')->create({
-        from => $from,
-        to   => $to,
-        msg  => $text,
-    });
-
-    $self->res->headers->header('Location' => $self->url_for('/sms/' . $sms->id));
-    $self->respond_to(
-        json => { json => { $sms->get_columns }, status => 201 },
-        html => sub {
-            $self->redirect_to('/sms/' . $sms->id);    # TODO: GET /sms/:id
-        }
-    );
 };
 
 app->secrets( app->defaults->{secrets} );

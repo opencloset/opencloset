@@ -1,23 +1,23 @@
 use utf8;
-package Opencloset::Schema::Result::Donation;
+package OpenCloset::Schema::Result::Donation;
 
 # Created by DBIx::Class::Schema::Loader
 # DO NOT MODIFY THE FIRST PART OF THIS FILE
 
 =head1 NAME
 
-Opencloset::Schema::Result::Donation
+OpenCloset::Schema::Result::Donation
 
 =cut
 
 use strict;
 use warnings;
 
-=head1 BASE CLASS: L<Opencloset::Schema::Base>
+=head1 BASE CLASS: L<OpenCloset::Schema::Base>
 
 =cut
 
-use base 'Opencloset::Schema::Base';
+use base 'OpenCloset::Schema::Base';
 
 =head1 TABLE: C<donation>
 
@@ -101,13 +101,13 @@ __PACKAGE__->set_primary_key("id");
 
 Type: has_many
 
-Related object: L<Opencloset::Schema::Result::Clothes>
+Related object: L<OpenCloset::Schema::Result::Clothes>
 
 =cut
 
 __PACKAGE__->has_many(
   "clothes",
-  "Opencloset::Schema::Result::Clothes",
+  "OpenCloset::Schema::Result::Clothes",
   { "foreign.donation_id" => "self.id" },
   { cascade_copy => 0, cascade_delete => 0 },
 );
@@ -116,20 +116,20 @@ __PACKAGE__->has_many(
 
 Type: belongs_to
 
-Related object: L<Opencloset::Schema::Result::User>
+Related object: L<OpenCloset::Schema::Result::User>
 
 =cut
 
 __PACKAGE__->belongs_to(
   "user",
-  "Opencloset::Schema::Result::User",
+  "OpenCloset::Schema::Result::User",
   { id => "user_id" },
   { is_deferrable => 1, on_delete => "CASCADE", on_update => "RESTRICT" },
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07038 @ 2014-01-09 22:25:05
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:JxUkBHe6+8k05YJOOJIFgA
+# Created by DBIx::Class::Schema::Loader v0.07038 @ 2014-01-24 15:02:06
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:obTUCGHZOZX3TPLG26CXvQ
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

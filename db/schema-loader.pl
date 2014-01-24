@@ -2,22 +2,17 @@ use v5.18;
 use strict;
 use warnings;
 
-use Path::Tiny;
+use OpenCloset::Util;
 
-#
-# load from app.conf
-#
-my $conf_file = 'app.conf';
-die "cannot find config file" unless -e $conf_file;
-my $conf = eval path($conf_file)->slurp_utf8;
+my $CONF = OpenCloset::Util::load_config('app.conf');
 
 {
-    schema_class => "Opencloset::Schema",
+    schema_class => "OpenCloset::Schema",
     connect_info => {
-        dsn  => $conf->{database}{dsn},
-        user => $conf->{database}{user},
-        pass => $conf->{database}{pass},
-        %{ $conf->{database}{opts} },
+        dsn  => $CONF->{database}{dsn},
+        user => $CONF->{database}{user},
+        pass => $CONF->{database}{pass},
+        %{ $CONF->{database}{opts} },
     },
     loader_options => {
         dump_directory            => 'lib',
@@ -25,12 +20,16 @@ my $conf = eval path($conf_file)->slurp_utf8;
         moniker_map               => {
             clothes       => 'Clothes',
             order_clothes => 'OrderClothes',
+            sms           => 'SMS',
         },
-        inflect_singular          => { clothes => 'clothes' },
+        inflect_singular          => {
+            clothes => 'clothes',
+            sms     => 'sms',
+        },
         skip_load_external        => 1,
         relationships             => 1,
         col_collision_map         => 'column_%s',
-        result_base_class         => 'Opencloset::Schema::Base',
+        result_base_class         => 'OpenCloset::Schema::Base',
         overwrite_modifications   => 1,
         datetime_undef_if_invalid => 1,
         custom_column_info        => sub {
