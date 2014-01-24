@@ -311,4 +311,4 @@ CREATE TABLE `sms` (
 
   PRIMARY KEY (`id`),
   INDEX (`status`)
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
