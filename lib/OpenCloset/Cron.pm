@@ -7,6 +7,7 @@ use MooX::Types::MooseLike::Base qw( ArrayRef Int );
 use namespace::clean -except => 'meta';
 
 extends qw( Object::Event );
+with    qw( OpenCloset::Role::Ping );
 
 use AnyEvent;
 use AnyEvent::Timer::Cron;
