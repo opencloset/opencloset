@@ -112,8 +112,14 @@ $db_opts->{AutoCommit} //= 1;
         ping_port => 5001,
         delay     => 10,
         ae_log    => 'filter=debug:log=stderr',
-        cron      => {
-            'send_sms_to_late_users' => '0 9 * * *',
+        workers   => {
+            send_sms_to_late_users => {
+                cron     => '0 9 * * *',
+                cron     => '* * * * *',
+                base_url => 'http://localhost:7723/api',
+                from     => '07075837521',
+                timeout  => 3,
+            },
         },
     },
 
