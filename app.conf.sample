@@ -108,6 +108,15 @@ $db_opts->{AutoCommit} //= 1;
         pass       => q{},
     },
 
+    'opencloset-cron.pl' => {
+        ping_port => 5001,
+        delay     => 10,
+        ae_log    => 'filter=debug:log=stderr',
+        cron      => {
+            'send_sms_to_late_users' => '0 9 * * *',
+        },
+    },
+
     #
     # SMS
     #
