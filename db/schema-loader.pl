@@ -2,22 +2,17 @@ use v5.18;
 use strict;
 use warnings;
 
-use Path::Tiny;
+use Opencloset::Util;
 
-#
-# load from app.conf
-#
-my $conf_file = 'app.conf';
-die "cannot find config file" unless -e $conf_file;
-my $conf = eval path($conf_file)->slurp_utf8;
+my $CONF = Opencloset::Util::load_config('app.conf');
 
 {
     schema_class => "Opencloset::Schema",
     connect_info => {
-        dsn  => $conf->{database}{dsn},
-        user => $conf->{database}{user},
-        pass => $conf->{database}{pass},
-        %{ $conf->{database}{opts} },
+        dsn  => $CONF->{database}{dsn},
+        user => $CONF->{database}{user},
+        pass => $CONF->{database}{pass},
+        %{ $CONF->{database}{opts} },
     },
     loader_options => {
         dump_directory            => 'lib',

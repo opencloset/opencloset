@@ -7,33 +7,31 @@ use warnings;
 use FindBin qw( $Script );
 use HTTP::Tiny;
 use JSON;
-use Path::Tiny;
 use SMS::Send::KR::CoolSMS;
 use SMS::Send;
 
-my $CONF = load_config();
+use Opencloset::Util;
+
+my $CONF = Opencloset::Util::load_config(
+    'app.conf',
+    $Script,
+    delay      => 60,
+    send_delay => 1,
+);
 
 my $continue = 1;
 $SIG{TERM} = sub { $continue = 0;        };
-$SIG{HUP}  = sub { $CONF = load_config() };
+$SIG{HUP}  = sub {
+    $CONF = Opencloset::Util::load_config(
+        'app.conf',
+        $Script,
+        delay      => 60,
+        send_delay => 1,
+    );
+};
 while ($continue) {
     do_work();
     sleep $CONF->{delay};
-}
-
-#
-# load from app.conf
-#
-sub load_config {
-    my $conf_file = 'app.conf';
-    die "cannot find config file" unless -e $conf_file;
-    my $conf = eval path($conf_file)->slurp_utf8;
-
-    # default
-    $conf->{$Script}{delay}      //= 60;
-    $conf->{$Script}{send_delay} //= 1;
-
-    return $conf->{$Script};
 }
 
 sub do_work {
