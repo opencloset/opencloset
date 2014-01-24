@@ -9,6 +9,9 @@ use AnyEvent::HTTPD;
 use AnyEvent;
 use Scalar::Util qw( weaken );
 
+use OpenCloset::Patch::AnyEvent::HTTPD;
+use OpenCloset::Patch::Object::Event;
+
 has ping_port => (
     is       => 'ro',
     isa      => Int,
