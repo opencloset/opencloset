@@ -47,7 +47,10 @@ sub do_work {
         #
         # sending sms
         #
-        $ret = send_sms($sms);
+        # if fake_sms is set then fake sending sms
+        # then return true always
+        #
+        $ret = !$CONF->{fake_sms} ? send_sms($sms) : 1;
         next unless $ret;
 
         #

@@ -100,6 +100,7 @@ $db_opts->{AutoCommit} //= 1;
     },
 
     'opencloset-sms-notifier.pl' => {
+        fake_sms   => 1,
         delay      => 60,
         send_delay => 1,
         base_url   => 'http://localhost:5000/api',
