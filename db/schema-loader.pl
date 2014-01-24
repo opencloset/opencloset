@@ -2,9 +2,11 @@ use v5.18;
 use strict;
 use warnings;
 
+use FindBin qw( $Bin );
+
 use OpenCloset::Util;
 
-my $CONF = OpenCloset::Util::load_config('app.conf');
+my $CONF = OpenCloset::Util::load_config("$Bin/../app.conf");
 
 {
     schema_class => "OpenCloset::Schema",

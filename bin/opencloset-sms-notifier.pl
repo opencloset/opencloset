@@ -4,7 +4,7 @@ use v5.18;
 use strict;
 use warnings;
 
-use FindBin qw( $Script );
+use FindBin qw( $Bin $Script );
 use HTTP::Tiny;
 use JSON;
 use SMS::Send::KR::CoolSMS;
@@ -13,7 +13,7 @@ use SMS::Send;
 use OpenCloset::Util;
 
 my $CONF = OpenCloset::Util::load_config(
-    'app.conf',
+    "$Bin/../app.conf",
     $Script,
     delay      => 60,
     send_delay => 1,
@@ -23,7 +23,7 @@ my $continue = 1;
 $SIG{TERM} = sub { $continue = 0;        };
 $SIG{HUP}  = sub {
     $CONF = OpenCloset::Util::load_config(
-        'app.conf',
+        "$Bin/../app.conf",
         $Script,
         delay      => 60,
         send_delay => 1,
