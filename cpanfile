@@ -14,7 +14,6 @@ requires 'HTTP::Tiny';
 requires 'JSON';
 requires 'List::MoreUtils';
 requires 'List::Util';
-requires 'MojoX::Validator::Constraint::Email';
 requires 'Mojolicious','4.63';
 requires 'Mojolicious::Plugin::FillInFormLite';
 requires 'Mojolicious::Plugin::HamlRenderer';
