@@ -378,6 +378,20 @@ helper update_user => sub {
 
         my %_user_params = %$user_params;
         delete $_user_params{id};
+
+        if ( $_user_params{create_date} ) {
+            $_user_params{create_date} = DateTime->from_epoch(
+                epoch     => $_user_params{create_date},
+                time_zone => app->config->{timezone},
+            );
+        }
+        if ( $_user_params{update_date} ) {
+            $_user_params{update_date} = DateTime->from_epoch(
+                epoch     => $_user_params{update_date},
+                time_zone => app->config->{timezone},
+            );
+        }
+
         $user->update( \%_user_params )
             or return $self->error( 500, {
                 str  => 'failed to update a user',
@@ -973,7 +987,13 @@ group {
         #
         # fetch params
         #
-        my %user_params      = $self->get_params(qw/ name email password /);
+        my %user_params = $self->get_params(qw/
+            name
+            email
+            password
+            create_date
+            update_date
+        /);
         my %user_info_params = $self->get_params(qw/
             address
             arm
@@ -1022,7 +1042,21 @@ group {
         my $user = do {
             my $guard = $DB->txn_scope_guard;
 
-            my $user = $DB->resultset('User')->create(\%user_params);
+            my %_user_params = %user_params;
+            if ( $_user_params{create_date} ) {
+                $_user_params{create_date} = DateTime->from_epoch(
+                    epoch     => $_user_params{create_date},
+                    time_zone => app->config->{timezone},
+                );
+            }
+            if ( $_user_params{update_date} ) {
+                $_user_params{update_date} = DateTime->from_epoch(
+                    epoch     => $_user_params{update_date},
+                    time_zone => app->config->{timezone},
+                );
+            }
+
+            my $user = $DB->resultset('User')->create(\%_user_params);
             return $self->error( 500, {
                 str  => 'failed to create a new user',
                 data => {},
@@ -1079,7 +1113,13 @@ group {
         #
         # fetch params
         #
-        my %user_params      = $self->get_params(qw/ id name email password /);
+        my %user_params = $self->get_params(qw/
+            name
+            email
+            password
+            create_date
+            update_date
+        /);
         my %user_info_params = $self->get_params(qw/
             address
             arm
