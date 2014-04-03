@@ -21,7 +21,19 @@ CREATE TABLE `user` (
   UNIQUE  KEY (`email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-INSERT INTO `user` (`id`,`name`,`email`) VALUES (1,'열린옷장','opencloset@opencloset.net');
+INSERT INTO `user` (`id`,`name`,`email`)
+  VALUES
+    (1, '열린옷장','opencloset@opencloset.net'),
+    (2, '열린옷장01','staff01@opencloset.net'),
+    (3, '열린옷장02','staff02@opencloset.net'),
+    (4, '열린옷장03','staff03@opencloset.net'),
+    (5, '열린옷장04','staff04@opencloset.net'),
+    (6, '열린옷장05','staff05@opencloset.net'),
+    (7, '열린옷장06','staff06@opencloset.net'),
+    (8, '열린옷장07','staff07@opencloset.net'),
+    (9, '열린옷장08','staff08@opencloset.net'),
+    (10,'열린옷장09','staff09@opencloset.net')
+    ;
 
 --
 -- user_info
@@ -67,9 +79,18 @@ CREATE TABLE `user_info` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 INSERT
-  INTO `user_info` ( `id`, `user_id`, `phone`, `address`, `gender`, `birth`, `comment` )
+  INTO `user_info` ( `id`, `user_id`, `phone`, `address`, `gender`, `birth`, `comment`, `staff` )
   VALUES
-    ( 1, 1, '07075837521', '서울특별시 광진구 화양동 48-3 웅진빌딩 403호', 'male', 2012, '열린옷장' )
+    (  1,  1, '07075837521', '서울특별시 광진구 화양동 48-3 웅진빌딩 403호', NULL, 2012, '열린옷장', 1 ),
+    (  2,  2, '99999889991', '서울특별시 광진구 화양동 48-3 웅진빌딩 403호', NULL, NULL, '열린옷장 스태프 01', 1 ),
+    (  3,  3, '99999889992', '서울특별시 광진구 화양동 48-3 웅진빌딩 403호', NULL, NULL, '열린옷장 스태프 02', 1 ),
+    (  4,  4, '99999889993', '서울특별시 광진구 화양동 48-3 웅진빌딩 403호', NULL, NULL, '열린옷장 스태프 03', 1 ),
+    (  5,  5, '99999889994', '서울특별시 광진구 화양동 48-3 웅진빌딩 403호', NULL, NULL, '열린옷장 스태프 04', 1 ),
+    (  6,  6, '99999889995', '서울특별시 광진구 화양동 48-3 웅진빌딩 403호', NULL, NULL, '열린옷장 스태프 05', 1 ),
+    (  7,  7, '99999889996', '서울특별시 광진구 화양동 48-3 웅진빌딩 403호', NULL, NULL, '열린옷장 스태프 06', 1 ),
+    (  8,  8, '99999889997', '서울특별시 광진구 화양동 48-3 웅진빌딩 403호', NULL, NULL, '열린옷장 스태프 07', 1 ),
+    (  9,  9, '99999889998', '서울특별시 광진구 화양동 48-3 웅진빌딩 403호', NULL, NULL, '열린옷장 스태프 08', 1 ),
+    ( 10, 10, '99999889999', '서울특별시 광진구 화양동 48-3 웅진빌딩 403호', NULL, NULL, '열린옷장 스태프 09', 1 )
     ;
 
 --
