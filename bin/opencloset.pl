@@ -2299,6 +2299,7 @@ group {
         my %params = $self->get_params(qw/
             user_id
             message
+            create_date
         /);
 
         #
@@ -2326,11 +2327,21 @@ group {
         #
         # create donation
         #
-        my $donation = $DB->resultset('Donation')->create( \%params );
-        return $self->error( 500, {
-            str  => 'failed to create a new donation',
-            data => {},
-        }) unless $donation;
+        my $donation;
+        {
+            my %_params = %params;
+            if ( $_params{create_date} ) {
+                $_params{create_date} = DateTime->from_epoch(
+                    epoch     => $_params{create_date},
+                    time_zone => app->config->{timezone},
+                );
+            }
+            $donation = $DB->resultset('Donation')->create( \%_params );
+            return $self->error( 500, {
+                str  => 'failed to create a new donation',
+                data => {},
+            }) unless $donation;
+        }
 
         #
         # response
