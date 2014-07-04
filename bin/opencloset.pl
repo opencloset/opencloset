@@ -1541,6 +1541,7 @@ group {
         #
         my %params = $self->get_params(qw/
             arm
+            belly
             bust
             category
             code
@@ -1565,7 +1566,7 @@ group {
         $v->field('category')->required(1)->in( keys %{ app->config->{category} } );
         $v->field('gender')->in(qw/ male female unisex /);
         $v->field('price')->regexp(qr/^\d*$/);
-        $v->field(qw/ bust waist hip thigh arm length /)->each(sub {
+        $v->field(qw/ belly bust waist hip thigh arm length /)->each(sub {
             shift->regexp(qr/^\d{1,3}$/);
         });
         $v->field('donation_id')->regexp(qr/^\d*$/)->callback(sub {
@@ -1651,6 +1652,7 @@ group {
         #
         my %params = $self->get_params(qw/
             arm
+            belly
             bust
             category
             code
@@ -1675,7 +1677,7 @@ group {
         $v->field('category')->in( keys %{ app->config->{category} } );
         $v->field('gender')->in(qw/ male female unisex /);
         $v->field('price')->regexp(qr/^\d*$/);
-        $v->field(qw/ bust waist hip thigh arm length /)->each(sub {
+        $v->field(qw/ belly bust waist hip thigh arm length /)->each(sub {
             shift->regexp(qr/^\d{1,3}$/);
         });
         $v->field('donation_id')->regexp(qr/^\d*$/)->callback(sub {
