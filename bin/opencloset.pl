@@ -7,6 +7,8 @@ use DateTime;
 use Gravatar::URL;
 use List::MoreUtils qw( zip );
 use List::Util qw( sum );
+use Mojo::Util qw( encode );
+use Text::CSV;
 use Try::Tiny;
 
 use OpenCloset::Schema;
@@ -914,6 +916,134 @@ helper get_clothes => sub {
     }) unless $clothes;
 
     return $clothes;
+};
+
+#
+# csv section
+#
+group {
+    under '/csv';
+
+    get '/user'    => \&csv_get_user;
+    get '/clothes' => \&csv_get_clothes;
+
+    sub csv_get_user {
+        my $self = shift;
+
+        my $csv = Text::CSV->new({
+            binary => 1,
+            eol    => "\n",
+        }) or return $self->error( 500, {
+            str  => "Cannot use CSV: " . Text::CSV->error_diag,
+            data => {},
+        });
+
+        my $dt = DateTime->now( time_zone => app->config->{timezone} );
+        my $filename = 'user-' . $dt->ymd(q{}) . '-' . $dt->hms(q{}) . '.csv';
+
+        $self->res->headers->content_disposition( "attachment; filename=$filename" );
+
+        my $rs = $DB->resultset('User');
+        my $cb_finish; $cb_finish = sub {
+            my $self = shift;
+
+            my $user = $rs->next;
+            $self->finish, return unless $user;
+
+            $csv->combine(
+                $user->id,
+                $user->name,
+                $user->email,
+                $user->create_date,
+                $user->user_info->phone,
+                $user->user_info->address,
+                $user->user_info->gender,
+                $user->user_info->birth,
+            );
+            $self->write_chunk( encode( 'UTF-8', $csv->string ) => $cb_finish );
+        };
+
+        $csv->combine(qw/
+            id
+            name
+            email
+            createdate
+            phone
+            address
+            gender
+            birth
+        /);
+        $self->write_chunk( encode( 'UTF-8', $csv->string ) => $cb_finish );
+
+        #
+        # response
+        #
+        $self->res->headers->content_type('text/plain');
+    }
+
+    sub csv_get_clothes {
+        my $self = shift;
+
+        my $csv = Text::CSV->new({
+            binary => 1,
+            eol    => "\n",
+        }) or return $self->error( 500, {
+            str  => "Cannot use CSV: " . Text::CSV->error_diag,
+            data => {},
+        });
+
+        my $dt = DateTime->now( time_zone => app->config->{timezone} );
+        my $filename = 'clothes-' . $dt->ymd(q{}) . '-' . $dt->hms(q{}) . '.csv';
+
+        $self->res->headers->content_disposition( "attachment; filename=$filename" );
+
+        my $rs = $DB->resultset('Clothes');
+        my $cb_finish; $cb_finish = sub {
+            my $self = shift;
+
+            my $clothes = $rs->next;
+            $self->finish, return unless $clothes;
+
+            $csv->combine(
+                $clothes->id,
+                $clothes->code,
+                $clothes->category,
+                $clothes->gender,
+                $clothes->color,
+                $clothes->bust,
+                $clothes->waist,
+                $clothes->hip,
+                $clothes->belly,
+                $clothes->arm,
+                $clothes->thigh,
+                $clothes->length,
+                $clothes->compatible_code,
+            );
+            $self->write_chunk( encode( 'UTF-8', $csv->string ) => $cb_finish );
+        };
+
+        $csv->combine(qw/
+            id
+            code
+            category
+            gender
+            color
+            bust
+            waist
+            hip
+            belly
+            arm
+            thigh
+            length
+            compatible_code
+        /);
+        $self->write_chunk( encode( 'UTF-8', $csv->string ) => $cb_finish );
+
+        #
+        # response
+        #
+        $self->res->headers->content_type('text/plain');
+    }
 };
 
 #
