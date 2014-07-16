@@ -817,7 +817,7 @@ helper get_order_list => sub {
     return $self->error( 404, {
         str  => 'order list not found',
         data => {},
-    }) unless $rs->count;
+    }) if $rs->count == 0 && !$params->{allow_empty};
 
     return $rs;
 };
@@ -3050,7 +3050,10 @@ get '/order' => sub {
     my %params        = $self->get_params(qw/ id /);
     my %search_params = $self->get_params(qw/ status /);
 
-    my $rs = $self->get_order_list( \%params );
+    my $rs = $self->get_order_list({
+        %params,
+        allow_empty => 1,
+    });
 
     #
     # undef  - 상태없음
