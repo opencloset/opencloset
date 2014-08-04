@@ -51,12 +51,12 @@
                           <div class="space-24"></div>
 
                           <div class="clearfix">
-                            <button type="reset" class="width-30 pull-left btn btn-sm">
+                            <button type="reset" class="width-40 pull-left btn btn-sm">
                               <i class="icon-refresh"></i>
                               새로 쓰기
                             </button>
 
-                            <button type="button" class="width-65 pull-right btn btn-sm btn-success">
+                            <button type="button" class="width-55 pull-right btn btn-sm btn-success">
                               등록하기
                               <i class="icon-arrow-right icon-on-right"></i>
                             </button>
