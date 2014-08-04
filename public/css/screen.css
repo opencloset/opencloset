@@ -125,3 +125,8 @@
 .btn-red { background-color: #f00 !important; border-color: #f00; }
 
 .btn-whites { background-color: #d3d3d3 !important; border-color: #d3d3d3 !important; color: black !important; }
+
+.login-box .toolbar > div:first-child { padding-left: 10px; }
+.login-box .toolbar > div:first-child > a { margin: 0; }
+.login-box .toolbar > div:first-child + div { padding-right: 10px; }
+.login-box .toolbar > div:first-child + div > a { margin: 0; }

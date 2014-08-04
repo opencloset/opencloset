@@ -475,3 +475,20 @@ $opencloset-darken-yellow: desaturate(darken($opencloset-yellow, 4%), 10%);
     border-color: #d3d3d3 !important;
     color: black !important;
 }
+
+.login-box {
+    .toolbar {
+        > div:first-child {
+            padding-left: 10px;
+            > a {
+                margin: 0;
+            }
+            + div {
+                padding-right: 10px;
+                > a {
+                    margin: 0;
+                }
+            }
+        }
+    }
+}
