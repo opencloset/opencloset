@@ -3,6 +3,7 @@
 use v5.18;
 use Mojolicious::Lite;
 
+use Data::Pageset;
 use DateTime;
 use Gravatar::URL;
 use List::MoreUtils qw( zip );
@@ -412,6 +413,52 @@ helper update_user => sub {
     }
 
     return $user;
+};
+
+helper get_user_list => sub {
+    my ( $self, $params ) = @_;
+
+    #
+    # validate params
+    #
+    my $v = $self->create_validator;
+    $v->field('id')->regexp(qr/^\d+$/);
+    unless ( $self->validate( $v, $params ) ) {
+        my @error_str;
+        while ( my ( $k, $v ) = each %{ $v->errors } ) {
+            push @error_str, "$k:$v";
+        }
+        return $self->error( 400, {
+            str  => join(',', @error_str),
+            data => $v->errors,
+        });
+    }
+
+    #
+    # adjust params
+    #
+    $params->{id} = [ $params->{id} ]
+        if defined $params->{id} && not ref $params->{id} eq 'ARRAY';
+
+    #
+    # find user
+    #
+    my $rs;
+    if ( defined $params->{id} ) {
+        $rs
+            = $DB->resultset('User')
+            ->search({ id => $params->{id} })
+            ;
+    }
+    else {
+        $rs = $DB->resultset('User');
+    }
+    return $self->error( 404, {
+        str  => 'user list not found',
+        data => {},
+    }) if $rs->count == 0 && !$params->{allow_empty};
+
+    return $rs;
 };
 
 helper create_order => sub {
@@ -2922,6 +2969,59 @@ get '/tag' => sub {
     # response
     #
     $self->stash( 'tag_rs' => $DB->resultset('Tag') );
+};
+
+get '/user' => sub {
+    my $self = shift;
+
+    #
+    # fetch params
+    #
+    my %params = $self->get_params(qw/ id /);
+
+    my $p = $self->param('p') || 1;
+    my $s = $self->param('s') || 10;
+    my $q = $self->param('q');
+    my $cond = $q
+        ? [
+        { 'name'             => { like => "%$q%" } },
+        { 'email'            => { like => "%$q%" } },
+        { 'user_info.phone'  => { like => "%$q%" } },
+        { 'user_info.address'=> { like => "%$q%" } },
+        { 'user_info.birth'  => { like => "%$q%" } },
+        { 'user_info.gender' => $q },
+        ]
+        : {};
+
+    my $rs = $self->get_user_list({
+        %params,
+        allow_empty => 1,
+    });
+    $rs = $rs->search(
+        $cond,
+        {
+            join     => 'user_info',
+            order_by => { -asc => 'id' },
+            page     => $p,
+            rows     => $s,
+        },
+    );
+
+    my $pageset = Data::Pageset->new({
+        total_entries    => $rs->pager->total_entries,
+        entries_per_page => $rs->pager->entries_per_page,
+        pages_per_set    => 5,
+        current_page     => $p,
+    });
+
+    #
+    # response
+    #
+    $self->stash(
+        user_list => $rs,
+        pageset   => $pageset,
+    );
+    $self->respond_to( html => { status => 200 } );
 };
 
 get '/user/:id' => sub {
