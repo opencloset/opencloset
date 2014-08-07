@@ -14,10 +14,6 @@ use Try::Tiny;
 
 use OpenCloset::Schema;
 
-plugin 'validator';
-plugin 'haml_renderer';
-plugin 'FillInFormLite';
-
 app->defaults( %{ plugin 'Config' => { default => {
     jses        => [],
     csses       => [],
@@ -32,6 +28,38 @@ my $DB = OpenCloset::Schema->connect({
     password => app->config->{database}{pass},
     %{ app->config->{database}{opts} },
 });
+
+plugin 'validator';
+plugin 'haml_renderer';
+plugin 'FillInFormLite';
+
+plugin 'authentication' => {
+    autoload_user => 1,
+    load_user     => sub {
+        my ( $app, $uid ) = @_;
+
+        my $user_obj = $DB->resultset('User')->find({ id => $uid });
+
+        return $user_obj
+    },
+    session_key   => 'access_token',
+    validate_user => sub {
+        my ( $self, $user, $pass, $extradata ) = @_;
+
+        my $user_obj = $DB->resultset('User')->find({ email => $user });
+        unless ($user_obj) {
+            app->log->warn("cannot find such user: $user");
+            return;
+        }
+
+        unless ( $user_obj->check_password($pass) ) {
+            app->log->warn("$user\'s password is wrong");
+            return;
+        }
+
+        return $user_obj->id;
+    },
+};
 
 helper error => sub {
     my ($self, $status, $error) = @_;
@@ -2960,6 +2988,29 @@ group {
 }; # end of API section
 
 get '/login';
+post '/login' => sub {
+    my $self = shift;
+
+    my $username = $self->param('username');
+    my $password = $self->param('password');
+    my $remember = $self->param('remember');
+
+    if ( $self->authenticate($username, $password) ) {
+        $self->session->{expiration} = $remember ? $self->app->config->{expire}{remember} : $self->app->config->{expire}{default},
+        $self->redirect_to($self->url_for('/'));
+    }
+    else {
+        $self->flash(error => 'Failed to Authentication');
+        $self->redirect_to($self->url_for('/login'));
+    }
+};
+
+get '/logout' => sub {
+    my $self = shift;
+
+    $self->logout;
+    $self->redirect_to( $self->url_for('/login') );
+};
 
 get '/'             => 'home';
 get '/new-borrower' => 'new-borrower';

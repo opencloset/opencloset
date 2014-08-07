@@ -10,18 +10,18 @@
 
                       <div class="space-6"></div>
 
-                      <form>
+                      <form method="post" action="<%= url_for('/login') %>">
                         <fieldset>
                           <label class="block clearfix">
                             <span class="block input-icon input-icon-right">
-                              <input type="text" class="form-control" placeholder="사용자 이름" />
+                              <input name="username" type="text" class="form-control" placeholder="전자우편 주소" />
                               <i class="icon-user"></i>
                             </span>
                           </label>
 
                           <label class="block clearfix">
                             <span class="block input-icon input-icon-right">
-                              <input type="password" class="form-control" placeholder="비밀번호" />
+                              <input name="password" type="password" class="form-control" placeholder="비밀번호" />
                               <i class="icon-key"></i>
                             </span>
                           </label>
@@ -30,11 +30,11 @@
 
                           <div class="clearfix">
                             <label class="inline">
-                              <input type="checkbox" class="<%= $theme %>" />
+                              <input name="remember" type="checkbox" class="<%= $theme %>" />
                               <span class="lbl"> 기억하기</span>
                             </label>
 
-                            <button type="button" class="width-35 pull-right btn btn-sm btn-primary">
+                            <button type="submit" class="width-35 pull-right btn btn-sm btn-primary">
                               <i class="icon-unlock"></i>
                               로그인
                             </button>
