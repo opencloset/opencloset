@@ -3,6 +3,32 @@
 use v5.18;
 use Mojolicious::Lite;
 
+#
+# redirect to login rather than not found page
+#
+#   https://groups.google.com/forum/#!topic/mojolicious/UbY9Ac9unfY
+#   https://github.com/kraih/mojo/compare/69fbd6807611ec209eff4147b511c8c324a80118...d9145abedbbebe226f9f6f3b22488de88809ba4d
+#
+{
+    package OpenCloset::Web::Controller;
+
+    use base 'Mojolicious::Controller';
+
+    sub render_not_found {
+        my ( $self, $e ) = @_;
+
+        if ( !$self->is_user_authenticated ) {
+            $self->redirect_to( $self->url_for('/login') );
+            return;
+        }
+
+        Mojolicious::Controller::_development( 'not_found', @_ );
+    }
+
+    1;
+}
+app->controller_class("OpenCloset::Web::Controller");
+
 use Data::Pageset;
 use DateTime;
 use Gravatar::URL;
