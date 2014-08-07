@@ -349,6 +349,7 @@ helper update_user => sub {
     $v->field(qw/ height weight bust waist hip belly thigh arm leg knee foot /)->each(sub {
         shift->regexp(qr/^\d{1,3}$/);
     });
+    $v->field('staff')->in( 0, 1 );
     unless ( $self->validate( $v, { %$user_params, %$user_info_params } ) ) {
         my @error_str;
         while ( my ( $k, $v ) = each %{ $v->errors } ) {
@@ -1291,6 +1292,7 @@ group {
         # fetch params
         #
         my %user_params = $self->get_params(qw/
+            id
             name
             email
             password
@@ -1311,6 +1313,7 @@ group {
             knee
             leg
             phone
+            staff
             thigh
             waist
             weight

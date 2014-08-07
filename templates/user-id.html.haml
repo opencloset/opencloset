@@ -72,7 +72,11 @@
                                 .profile-info-name 이름
                                 .profile-info-value
                                   %span.editable#user-name{ 'data-name' => 'name' }= $user->name
-                                  = $user->user_info->staff ? " (스태프)" : q{}
+
+                              .profile-info-row
+                                .profile-info-name 분류
+                                .profile-info-value
+                                  %span.editable#user-staff{ 'data-name' => 'staff', 'data-type' => 'select', 'data-value' => "#{ $user->user_info->staff }" }
 
                               .profile-info-row
                                 .profile-info-name 전자우편
