@@ -133,4 +133,12 @@ $db_opts->{AutoCommit} //= 1;
         username => $ENV{OPENCLOSET_COOLSMS_USER} || 'opencloset',
         password => $ENV{OPENCLOSET_COOLSMS_PASS} || '',
     },
+
+    #
+    # session
+    #
+    expire => {
+        default  => 3600,
+        remember => 86400,
+    },
 };
