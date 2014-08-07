@@ -2987,6 +2987,18 @@ group {
 
 }; # end of API section
 
+under '/' => sub {
+    my $self = shift;
+
+    my $req = $self->req;
+    if ( !$self->is_user_authenticated && $req->url->path ne '/login' ) {
+        $self->redirect_to( $self->url_for('/login') );
+        return;
+    }
+
+    return 1;
+};
+
 get '/login';
 post '/login' => sub {
     my $self = shift;
@@ -2997,11 +3009,11 @@ post '/login' => sub {
 
     if ( $self->authenticate($username, $password) ) {
         $self->session->{expiration} = $remember ? $self->app->config->{expire}{remember} : $self->app->config->{expire}{default},
-        $self->redirect_to($self->url_for('/'));
+        $self->redirect_to( $self->url_for('/') );
     }
     else {
         $self->flash(error => 'Failed to Authentication');
-        $self->redirect_to($self->url_for('/login'));
+        $self->redirect_to( $self->url_for('/login') );
     }
 };
 
