@@ -285,6 +285,10 @@ $opencloset-darken-yellow: desaturate(darken($opencloset-yellow, 4%), 10%);
         &:first-child {
             width: 40px;
         }
+        &:nth-child(7),
+        &:nth-child(8) {
+            width: 100px;
+        }
     }
     #user-table table {
         th, td {

@@ -81,6 +81,7 @@
 .page-content #order-id ul li.row { margin-left: 0; margin-right: 0; }
 .page-content #order-id .input-large { width: 400px !important; }
 .page-content #user-list-table table th:first-child { width: 40px; }
+.page-content #user-list-table table th:nth-child(7), .page-content #user-list-table table th:nth-child(8) { width: 100px; }
 .page-content #user-table table th:nth-child(5), .page-content #user-table table td:nth-child(5) { border-right: none; }
 .page-content #user-table table th:nth-child(6), .page-content #user-table table td:nth-child(6) { border-right: none; border-left: none; }
 .page-content #user-table table th:nth-child(7), .page-content #user-table table td:nth-child(7) { border-left: none; }
