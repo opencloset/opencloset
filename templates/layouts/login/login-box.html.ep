@@ -14,8 +14,8 @@
                         <fieldset>
                           <label class="block clearfix">
                             <span class="block input-icon input-icon-right">
-                              <input name="username" type="text" class="form-control" placeholder="전자우편 주소" />
-                              <i class="icon-user"></i>
+                              <input name="email" type="email" class="form-control" placeholder="전자우편" />
+                              <i class="icon-envelope"></i>
                             </span>
                           </label>
 

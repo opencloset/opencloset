@@ -3029,7 +3029,7 @@ get '/login';
 post '/login' => sub {
     my $self = shift;
 
-    my $username = $self->param('username');
+    my $username = $self->param('email');
     my $password = $self->param('password');
     my $remember = $self->param('remember');
 
