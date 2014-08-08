@@ -10,15 +10,18 @@
 
                       <div class="space-6"></div>
                       <p>
-                        비밀번호를 새로 설정하는 방법을 이메일로 전달드립니다.
-                        이메일 주소를 입력하세요.
+                        비밀번호를 새로 설정하는 방법을 전자우편으로 보내드립니다.
+                        전자우편 주소를 입력하세요.
+                      </p>
+                      <p>
+                        전자우편 주소를 모른다면 직원을 불러주세요. :)
                       </p>
 
                       <form>
                         <fieldset>
                           <label class="block clearfix">
                             <span class="block input-icon input-icon-right">
-                              <input type="email" class="form-control" placeholder="이메일" />
+                              <input type="email" class="form-control" placeholder="전자우편" />
                               <i class="icon-envelope"></i>
                             </span>
                           </label>
