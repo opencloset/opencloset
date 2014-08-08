@@ -9,40 +9,52 @@
                       </h4>
 
                       <div class="space-6"></div>
-                      <p> 등록을 위해 다음 내용을 입력해주세요. </p>
+                      <p>
+                        등록을 위해 다음 내용을 입력해주세요.
+                      </p>
+                      <p>
+                        전자우편 주소를 모른다면 직원을 불러주세요. :)
+                      </p>
 
-                      <form>
+                      <form method="post" action="<%= url_for('/signup') %>">
                         <fieldset>
                           <label class="block clearfix">
                             <span class="block input-icon input-icon-right">
-                              <input type="email" class="form-control" placeholder="이메일" />
+                              <input name="email" type="email" class="form-control" placeholder="전자우편" />
                               <i class="icon-envelope"></i>
                             </span>
                           </label>
 
                           <label class="block clearfix">
                             <span class="block input-icon input-icon-right">
-                              <input type="text" class="form-control" placeholder="사용자 이름" />
-                              <i class="icon-user"></i>
-                            </span>
-                          </label>
-
-                          <label class="block clearfix">
-                            <span class="block input-icon input-icon-right">
-                              <input type="password" class="form-control" placeholder="비밀번호" />
+                              <input name="password" type="password" class="form-control" placeholder="비밀번호" />
                               <i class="icon-lock"></i>
                             </span>
                           </label>
 
                           <label class="block clearfix">
                             <span class="block input-icon input-icon-right">
-                              <input type="password" class="form-control" placeholder="비밀번호 확인" />
+                              <input name="confirm_password" type="password" class="form-control" placeholder="비밀번호 확인" />
                               <i class="icon-retweet"></i>
                             </span>
                           </label>
 
+                          <label class="block clearfix">
+                            <span class="block input-icon input-icon-right">
+                              <input name="name" type="text" class="form-control" placeholder="이름" />
+                              <i class="icon-user"></i>
+                            </span>
+                          </label>
+
+                          <label class="block clearfix">
+                            <span class="block input-icon input-icon-right">
+                              <input name="phone" type="tel" class="form-control" placeholder="전화번호" />
+                              <i class="icon-phone"></i>
+                            </span>
+                          </label>
+
                           <label class="block">
-                            <input type="checkbox" class="<%= $theme %>" />
+                            <input name="agree" type="checkbox" class="<%= $theme %>" />
                             <span class="lbl">
                               <a href="#">사용자 약관</a>에 동의합니다.
                             </span>
@@ -56,7 +68,7 @@
                               새로 쓰기
                             </button>
 
-                            <button type="button" class="width-55 pull-right btn btn-sm btn-success">
+                            <button type="submit" class="width-55 pull-right btn btn-sm btn-success">
                               등록하기
                               <i class="icon-arrow-right icon-on-right"></i>
                             </button>

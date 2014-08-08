@@ -15,6 +15,7 @@ requires 'JSON';
 requires 'List::MoreUtils';
 requires 'List::Util';
 requires 'Mojolicious','4.63';
+requires 'Mojolicious::Plugin::Authentication';
 requires 'Mojolicious::Plugin::FillInFormLite';
 requires 'Mojolicious::Plugin::HamlRenderer';
 requires 'Mojolicious::Plugin::Validator';

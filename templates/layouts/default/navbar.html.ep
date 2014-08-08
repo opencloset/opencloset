@@ -248,7 +248,7 @@
                     <li> <a href="#"> <i class="icon-cog"></i> 설정 </a> </li>
                     <li> <a href="#"> <i class="icon-user"></i> 프로필 </a> </li>
                     <li class="divider"></li>
-                    <li> <a href="#"> <i class="icon-off"></i> 로그아웃 </a> </li>
+                    <li> <a href="/logout"> <i class="icon-off"></i> 로그아웃 </a> </li>
                   </ul>
                 </li> <!-- opencloset-darken-yellow -->
 
