@@ -3072,7 +3072,7 @@ get '/user' => sub {
     my %params = $self->get_params(qw/ id /);
 
     my $p = $self->param('p') || 1;
-    my $s = $self->param('s') || 10;
+    my $s = $self->param('s') || app->config->{entries_per_page};
     my $q = $self->param('q');
     my $cond = $q
         ? [
