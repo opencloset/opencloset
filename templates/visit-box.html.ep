@@ -1,0 +1,59 @@
+% use utf8;
+<!-- VISIT-BOX -->
+                <div id="visit-box" class="visit-box visible widget-box no-border">
+                  <div class="widget-body">
+                    <div class="widget-main">
+                      <h4 class="header blue lighter bigger">
+                        <i class="icon-group green"></i>
+                        방문 양식 작성하기
+                      </h4>
+
+                      <div class="space-6"></div>
+                      <p>
+                        정장 대여를 위해 다음 내용을 입력해주세요.
+                      </p>
+                      <p>
+                        휴대전화가 없다면 직원을 불러주세요. :)
+                      </p>
+
+                      <form method="post" action="<%= url_for('/visit') %>">
+                        <fieldset>
+                          <label class="block clearfix">
+                            <span class="block input-icon input-icon-right">
+                              <input name="name" type="text" class="form-control" placeholder="이름" />
+                              <i class="icon-user"></i>
+                            </span>
+                          </label>
+
+                          <label class="block clearfix">
+                            <span class="block input-icon input-icon-right">
+                              <input name="phone" type="tel" class="form-control" placeholder="휴대전화" />
+                              <i class="icon-phone"></i>
+                            </span>
+                          </label>
+
+                          <label class="block">
+                            <input name="agree" type="checkbox" class="<%= $theme %>" />
+                            <span class="lbl">
+                              <a href="#">사용자 약관</a>에 동의합니다.
+                            </span>
+                          </label>
+
+                          <div class="space-12"></div>
+
+                          <div class="clearfix">
+                            <button type="reset" class="width-40 pull-left btn btn-sm">
+                              <i class="icon-refresh"></i>
+                              새로 쓰기
+                            </button>
+
+                            <button type="submit" class="width-55 pull-right btn btn-sm btn-primary">
+                              SMS 인증하기
+                              <i class="icon-arrow-right icon-on-right"></i>
+                            </button>
+                          </div>
+                        </fieldset>
+                      </form>
+                    </div>
+                  </div><!-- /widget-body -->
+                </div><!-- /visit-box -->
