@@ -18,7 +18,7 @@ use Mojolicious::Lite;
         my ( $self, $e ) = @_;
 
         if ( !$self->is_user_authenticated ) {
-            $self->redirect_to( $self->url_for('/login') );
+            $self->redirect_to( $self->url_for('/visit') );
             return;
         }
 
@@ -3016,13 +3016,14 @@ group {
 under '/' => sub {
     my $self = shift;
 
-    my $req = $self->req;
-    if ( !$self->is_user_authenticated && $req->url->path ne '/login' ) {
-        $self->redirect_to( $self->url_for('/login') );
-        return;
-    }
+    my $req_path = $self->req->url->path;
+    return 1 if $self->is_user_authenticated;
+    return 1 if $req_path eq '/login';
+    return 1 if $req_path eq '/visit';
 
-    return 1;
+    $self->redirect_to( $self->url_for('/visit') );
+
+    return;
 };
 
 get '/login';
