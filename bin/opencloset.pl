@@ -3050,6 +3050,17 @@ get '/logout' => sub {
     $self->redirect_to( $self->url_for('/login') );
 };
 
+get '/visit';
+post '/visit' => sub {
+    my $self = shift;
+
+    my $name  = $self->param('name');
+    my $phone = $self->param('phone');
+
+    app->log->debug("name: $name");
+    app->log->debug("phone: $phone");
+};
+
 get '/'             => 'home';
 get '/new-borrower' => 'new-borrower';
 get '/new-clothes'  => 'new-clothes';
