@@ -1,3 +1,4 @@
+- use utf8;
 !!! 5
 %html
   %head
@@ -27,9 +28,9 @@
                   = "$company_name"
               .space-6
               .position-relative
-                = include 'layouts/login/login-box'
-                = include 'layouts/login/forgot-box'
-                = include 'layouts/login/signup-box'
+                / PAGE CONTENT BEGINS
+                = content
+                / PAGE CONTENT ENDS
     = include 'layouts/default/body-js'
     = include 'layouts/default/body-js-theme'
     = include 'layouts/default/body-js-page'
