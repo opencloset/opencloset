@@ -10,3 +10,9 @@ app.conf
 
 # editor swap files
 *.swp
+
+# log directory
+log/
+
+# local npm install modules
+node_modules/
