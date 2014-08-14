@@ -57,3 +57,43 @@
                     </div>
                   </div><!-- /widget-body -->
                 </div><!-- /visit-box -->
+
+                <div id="modal-service" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="serviceModalLabel" aria-hidden="true">
+                  <div class="modal-dialog">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title" id="serviceModalLabel">
+                          열린옷장 서비스 이용약관
+                        </h4>
+                      </div>
+                      <div class="modal-body" style="height: 250px; overflow-y: auto;">
+                        %= include 'service'
+                      </div>
+                      <div class="modal-footer">
+                        <button id="btn-service-disagree" type="button" class="btn btn-danger" >동의하지 않습니다</button>
+                        <button id="btn-service-agree"    type="button" class="btn btn-primary">동의합니다</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div id="modal-privacy" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="privacyModalLabel" aria-hidden="true">
+                  <div class="modal-dialog">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title" id="privacyModalLabel">
+                          열린옷장 개인정보 이용안내
+                        </h4>
+                      </div>
+                      <div class="modal-body" style="height: 250px; overflow-y: auto;">
+                        %= include 'privacy'
+                      </div>
+                      <div class="modal-footer">
+                        <button id="btn-privacy-disagree" type="button" class="btn btn-danger" >동의하지 않습니다</button>
+                        <button id="btn-privacy-agree"    type="button" class="btn btn-primary">동의합니다</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
