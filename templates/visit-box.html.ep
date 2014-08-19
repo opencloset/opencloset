@@ -9,14 +9,24 @@
                       </h4>
 
                       <div class="space-6"></div>
-                      <p>
-                        정장 대여를 위해 다음 내용을 입력해주세요.
-                      </p>
-                      <p>
-                        휴대전화가 없다면 직원을 불러주세요. :)
-                      </p>
 
-                      <form method="post" action="<%= url_for('/visit') %>">
+                      <div>
+                        <p>
+                          정장 대여를 위해 다음 내용을 입력해주세요.
+                        </p>
+                        <p>
+                          휴대전화가 없다면 직원을 불러주세요. :)
+                        </p>
+                      </div>
+
+                      <div class="space-6"></div>
+
+                      <div id="visit-alert">
+                      </div>
+
+                      <div class="space-6"></div>
+
+                      <form id="visit-form" method="post" action="<%= url_for('/visit') %>">
                         <fieldset>
                           <label class="block clearfix">
                             <span class="block input-icon input-icon-right">
@@ -33,22 +43,50 @@
                           </label>
 
                           <label class="block">
-                            <input name="agree" type="checkbox" class="<%= $theme %>" />
+                            <input name="service" type="checkbox" class="<%= $theme %>" />
                             <span class="lbl">
-                              <a href="#">사용자 약관</a>에 동의합니다.
+                              <a href="#modal-service" data-toggle="modal">
+                                <strong>서비스 이용약관</strong>에 동의합니다.
+                              </a>
                             </span>
                           </label>
+
+                          <label class="block">
+                            <input name="privacy" type="checkbox" class="<%= $theme %>" />
+                            <span class="lbl">
+                              <a href="#modal-privacy" data-toggle="modal">
+                                <strong>개인정보 이용안내</strong>에 동의합니다.
+                              </a>
+                            </span>
+                          </label>
+
+                          <label class="block clearfix sms">
+                            <span class="block input-icon input-icon-right">
+                              <input name="sms" type="text" class="form-control" placeholder="인증번호" />
+                              <i class="icon-key"></i>
+                            </span>
+                          </label>
+                          <div class="sms">
+                            <p>
+                              남은 시간: <span id="sms-remain-seconds"></span>초
+                            </p>
+                            <p>
+                              인증번호가 전송되지 않을 경우 직원을 불러주세요.
+                            </p>
+                          </div>
 
                           <div class="space-12"></div>
 
                           <div class="clearfix">
-                            <button type="reset" class="width-40 pull-left btn btn-sm">
+                            <button id="btn-sms-reset" type="reset" class="width-40 pull-left btn btn-sm">
                               <i class="icon-refresh"></i>
                               새로 쓰기
                             </button>
 
-                            <button type="submit" class="width-55 pull-right btn btn-sm btn-primary">
-                              SMS 인증하기
+                            <button id="btn-sms-confirm" class="width-55 pull-right btn btn-sm btn-primary">
+                              <span id="btn-sms-confirm-label">
+                                SMS 인증하기
+                              </span>
                               <i class="icon-arrow-right icon-on-right"></i>
                             </button>
                           </div>

@@ -3055,11 +3055,17 @@ get '/visit';
 post '/visit' => sub {
     my $self = shift;
 
-    my $name  = $self->param('name');
-    my $phone = $self->param('phone');
+    my $name    = $self->param('name');
+    my $phone   = $self->param('phone');
+    my $service = $self->param('service');
+    my $privacy = $self->param('privacy');
+    my $sms     = $self->param('sms');
 
     app->log->debug("name: $name");
     app->log->debug("phone: $phone");
+    app->log->debug("service: $service");
+    app->log->debug("privacy: $privacy");
+    app->log->debug("sms: $sms");
 };
 
 get '/'             => 'home';

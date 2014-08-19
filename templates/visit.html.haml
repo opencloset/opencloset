@@ -1,6 +1,11 @@
 - use utf8;
 - my $_id = 'visit';
-- layout 'notlogin', page_id => $_id;
+- layout 'notlogin',
+-   page_id => $_id,
+-   jses  => [
+-     '/lib/bootstrap/js/date-time/moment.min.js',
+-   ],
+-   ;
 - title meta_text($_id);
 
 = include 'visit-box'
