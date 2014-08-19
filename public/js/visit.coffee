@@ -31,11 +31,11 @@ $ ->
       $(this).prop( "checked", false )
       $("#modal-privacy").modal('show')
 
+  setTimeout ->
+    $('.alert').remove()
+  , 3000
   visitError = (msg) ->
     $('#visit-alert').prepend("<div class=\"alert alert-danger\"><button class=\"close\" type=\"button\" data-dismiss=\"alert\">&times;</button>#{msg}</div>")
-    setTimeout ->
-      $('.alert').remove()
-    , 3000
 
   beforeSendSMS = () ->
     $(".sms").removeClass('block').hide()
@@ -98,17 +98,43 @@ $ ->
       #   - submit 버튼 레이블 변경
       #   - 남은 시간 표시
       #
-      $(".sms").addClass('block').show()
-      $("#btn-sms-confirm-label").html('SMS 인증하기')
+      $.ajax "/api/search/user.json",
+        type: 'GET'
+        data: { q: phone }
+        success: (data, textStatus, jqXHR) ->
+          unless data.length == 1
+            visitError '휴대전화가 중복되었습니다.'
+            return
 
-      validate_end = moment().add('m', 3)
-      $("#sms-remain-seconds").html( validate_end.diff( moment(), 'seconds' ) )
-      timer = setInterval () ->
-        validate_remain = validate_end.diff( moment(), 'seconds' )
-        if validate_remain > 0
-          $("#sms-remain-seconds").html(validate_remain)
-        else
-          $("#sms-remain-seconds").html(0)
-          $("#btn-sms-confirm").prop( "disabled", true )
-          clearInterval(timer)
-      , 500
+          user = data[0]
+          unless /^\d+$/.test( user.phone )
+            visitError '유효하지 않은 휴대전화입니다.'
+            return
+
+          if /^999/.test( user.phone )
+            visitError '전송 불가능한 휴대전화입니다.'
+            return
+
+          unless user.name == name
+            visitError '이름과 휴대전화가 일치하지 않습니다.'
+            return
+
+          OpenCloset.sendSMSValidation(phone)
+
+          $(".sms").addClass('block').show()
+          $("#btn-sms-confirm-label").html('SMS 인증하기')
+
+          validate_end = moment().add('m', 3)
+          $("#sms-remain-seconds").html( validate_end.diff( moment(), 'seconds' ) )
+          timer = setInterval () ->
+            validate_remain = validate_end.diff( moment(), 'seconds' )
+            if validate_remain > 0
+              $("#sms-remain-seconds").html(validate_remain)
+            else
+              $("#sms-remain-seconds").html(0)
+              $("#btn-sms-confirm").prop( "disabled", true )
+              clearInterval(timer)
+          , 500
+        error: (jqXHR, textStatus, errorThrown) ->
+          type = jqXHR.status is 404 ? 'warning' : 'danger'
+          visitError '휴대전화가 일치하는 사용자가 없습니다.'

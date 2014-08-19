@@ -22,6 +22,12 @@
                       <div class="space-6"></div>
 
                       <div id="visit-alert">
+                        % if ($alert) {
+                          <div class="alert alert-danger">
+                            <button class="close" type="button" data-dismiss="alert">&times;</button>
+                            <%= $alert %>
+                          </div>
+                        % }
                       </div>
 
                       <div class="space-6"></div>

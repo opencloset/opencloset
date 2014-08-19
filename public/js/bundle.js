@@ -163,6 +163,29 @@
           num = num.replace(regex, '$1' + ',' + '$2');
         }
         return num;
+      },
+      sendSMS: function(to, text) {
+        return $.ajax("/api/sms.json", {
+          type: 'POST',
+          data: {
+            from: '07075837521',
+            to: to,
+            text: text
+          },
+          success: function(data, textStatus, jqXHR) {},
+          error: function(jqXHR, textStatus, errorThrown) {}
+        });
+      },
+      sendSMSValidation: function(to) {
+        return $.ajax("/api/sms/validation.json", {
+          type: 'POST',
+          data: {
+            from: '07075837521',
+            to: to
+          },
+          success: function(data, textStatus, jqXHR) {},
+          error: function(jqXHR, textStatus, errorThrown) {}
+        });
       }
     };
   });

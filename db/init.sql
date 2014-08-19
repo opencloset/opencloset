@@ -14,6 +14,7 @@ CREATE TABLE `user` (
   `name`        VARCHAR(32)  NOT NULL, -- realname
   `email`       VARCHAR(128) DEFAULT NULL,
   `password`    CHAR(50)     DEFAULT NULL COMMENT 'first 40 length for digest, after 10 length for salt(random)',
+  `expires`     INT(11)      DEFAULT NULL,
   `create_date` DATETIME     DEFAULT NULL,
   `update_date` DATETIME     DEFAULT NULL,
 
