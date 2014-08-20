@@ -48,6 +48,7 @@ app->defaults( %{ plugin 'Config' => { default => {
     active_id   => q{},
     page_id     => q{},
     alert       => q{},
+    type        => q{},
 }}});
 
 my $DB = OpenCloset::Schema->connect({
@@ -2812,7 +2813,7 @@ group {
         }) unless $user->user_info;
 
         my $password = String::Random->new->randregex('\d\d\d\d\d\d');
-        my $expires  = DateTime->now( time_zone => app->config->{timezone} )->add( minutes => 3 );
+        my $expires  = DateTime->now( time_zone => app->config->{timezone} )->add( minutes => 5 );
         $user->update({
             password => $password,
             expires  => $expires->epoch,
@@ -3132,21 +3133,32 @@ get '/logout' => sub {
     $self->redirect_to( $self->url_for('/login') );
 };
 
-get '/visit';
-post '/visit' => sub {
+any '/visit' => sub {
     my $self = shift;
 
+    my $type    = $self->param('type') || q{};
     my $name    = $self->param('name');
     my $phone   = $self->param('phone');
     my $service = $self->param('service');
     my $privacy = $self->param('privacy');
     my $sms     = $self->param('sms');
 
+    my $email   = $self->param('email');
+    my $gender  = $self->param('gender');
+    my $address = $self->param('address');
+    my $birth   = $self->param('birth');
+
+    app->log->debug("type: $type");
     app->log->debug("name: $name");
     app->log->debug("phone: $phone");
     app->log->debug("service: $service");
     app->log->debug("privacy: $privacy");
     app->log->debug("sms: $sms");
+
+    app->log->debug("email: $email");
+    app->log->debug("gender: $gender");
+    app->log->debug("address: $address");
+    app->log->debug("birth: $birth");
 
     #
     # find user
@@ -3159,7 +3171,6 @@ post '/visit' => sub {
         { join => 'user_info' },
     );
     my $user = shift @users;
-
     unless ($user) {
         app->log->warn( 'user not found' );
         return;
@@ -3183,6 +3194,31 @@ post '/visit' => sub {
         $self->stash( alert => '인증코드가 유효하지 않습니다.' );
         return;
     }
+
+    if ( $type eq 'visit-info' ) {
+        my %user_params;
+        my %user_info_params;
+
+        $user_params{id}           = $user->id;
+        $user_params{email}        = $email   if $email   && $email   ne $user->email;
+        $user_info_params{gender}  = $gender  if $gender  && $gender  ne $user->user_info->gender;
+        $user_info_params{address} = $address if $address && $address ne $user->user_info->address;
+        $user_info_params{birth}   = $birth   if $birth   && $birth   ne $user->user_info->birth;
+
+        $user = $self->update_user( \%user_params, \%user_info_params );
+    }
+
+    $self->stash(
+        type    => $type,
+        name    => $user->name,
+        email   => $user->email,
+        gender  => $user->user_info->gender,
+        phone   => $user->user_info->phone,
+        address => $user->user_info->address,
+        birth   => $user->user_info->birth,
+        sms     => $sms,
+    );
+
 };
 
 get '/'             => 'home';

@@ -15,7 +15,7 @@
                           정장 대여를 위해 다음 내용을 입력해주세요.
                         </p>
                         <p>
-                          휴대전화가 없다면 직원을 불러주세요. :)
+                          휴대전화가 없거나 번호가 변경되었다면 직원을 불러주세요. :)
                         </p>
                       </div>
 
@@ -33,6 +33,7 @@
                       <div class="space-6"></div>
 
                       <form id="visit-form" method="post" action="<%= url_for('/visit') %>">
+                        <input type="hidden" name="type" value="visit-info">
                         <fieldset>
                           <label class="block clearfix">
                             <span class="block input-icon input-icon-right">
@@ -45,6 +46,47 @@
                             <span class="block input-icon input-icon-right">
                               <input name="phone" type="tel" class="form-control" placeholder="휴대전화" />
                               <i class="icon-phone"></i>
+                            </span>
+                          </label>
+
+                          <label class="block clearfix signup">
+                            <div class="control-group">
+                              <label class="control-label bolder">성별</label>
+
+                              <div class="radio">
+                                <label>
+                                  <input type="radio" class="ace" name="gender" value="male">
+                                  <span class="lbl"> 남자</span>
+                                </label>
+                              </div>
+
+                              <div class="radio">
+                                <label>
+                                  <input type="radio" class="ace" name="gender" value="female">
+                                  <span class="lbl"> 여자</span>
+                                </label>
+                              </div>
+                            </div>
+                          </label>
+
+                          <label class="block clearfix signup">
+                            <span class="block input-icon input-icon-right">
+                              <input name="email" type="email" class="form-control" placeholder="전자우편" />
+                              <i class="icon-envelope"></i>
+                            </span>
+                          </label>
+
+                          <label class="block clearfix signup">
+                            <span class="block input-icon input-icon-right">
+                              <input name="address" type="text" class="form-control" placeholder="주소" />
+                              <i class="icon-home"></i>
+                            </span>
+                          </label>
+
+                          <label class="block clearfix signup">
+                            <span class="block input-icon input-icon-right">
+                              <input name="birth" type="text" class="form-control" placeholder="생년" />
+                              <i class="icon-calendar"></i>
                             </span>
                           </label>
 

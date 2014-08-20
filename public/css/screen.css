@@ -135,3 +135,5 @@
 .login-box .toolbar > div:first-child > a { margin: 0; }
 .login-box .toolbar > div:first-child + div { padding-right: 10px; }
 .login-box .toolbar > div:first-child + div > a { margin: 0; }
+
+.visit-box label.control-label, .visit-info-box label.control-label { margin-bottom: 0; }

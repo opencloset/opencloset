@@ -515,3 +515,10 @@ $opencloset-darken-yellow: desaturate(darken($opencloset-yellow, 4%), 10%);
         }
     }
 }
+
+.visit-box,
+.visit-info-box {
+    label.control-label {
+        margin-bottom: 0;
+    }
+}

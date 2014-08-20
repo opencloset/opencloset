@@ -1,0 +1,110 @@
+% use utf8;
+<!-- VISIT-INFO-BOX -->
+                <div id="visit-info-box" class="visit-info-box visible widget-box no-border">
+                  <div class="widget-body">
+                    <div class="widget-main">
+                      <h4 class="header blue lighter bigger">
+                        <i class="icon-group green"></i>
+                        대여자 정보 변경
+                      </h4>
+
+                      <div class="space-6"></div>
+
+                      <div>
+                        <p>
+                          이전 입력 정보와 달라진 부분이 있다면 최신 내용으로 변경해주세요.
+                        </p>
+                      </div>
+
+                      <div class="space-6"></div>
+
+                      <div id="visit-alert">
+                        % if ($alert) {
+                          <div class="alert alert-danger">
+                            <button class="close" type="button" data-dismiss="alert">&times;</button>
+                            <%= $alert %>
+                          </div>
+                        % }
+                      </div>
+
+                      <div class="space-6"></div>
+
+                      <form id="visit-info-form" method="post" action="<%= url_for('/visit') %>">
+                        <input type="hidden" name="type" value="visit-info">
+                        <fieldset>
+                          <label class="block clearfix">
+                            <span class="block input-icon input-icon-right">
+                              <input name="name" type="text" class="form-control" placeholder="이름" value="<%= $name %>" readonly />
+                              <i class="icon-user"></i>
+                            </span>
+                          </label>
+
+                          <label class="block clearfix">
+                            <span class="block input-icon input-icon-right">
+                              <input name="phone" type="tel" class="form-control" placeholder="휴대전화" value="<%= $phone %>" readonly />
+                              <i class="icon-phone"></i>
+                            </span>
+                          </label>
+
+                          <label class="block clearfix">
+                            <div class="control-group">
+                              <label class="control-label bolder">성별</label>
+
+                              <div class="radio">
+                                <label>
+                                  <input type="radio" class="ace" name="gender" value="male" <%= $gender eq 'male' ? 'checked' : q{} %>>
+                                  <span class="lbl"> 남자</span>
+                                </label>
+                              </div>
+
+                              <div class="radio">
+                                <label>
+                                  <input type="radio" class="ace" name="gender" value="female" <%= $gender eq 'female' ? 'checked' : q{} %>>
+                                  <span class="lbl"> 여자</span>
+                                </label>
+                              </div>
+                            </div>
+                          </label>
+
+                          <label class="block clearfix">
+                            <span class="block input-icon input-icon-right">
+                              <input name="email" type="email" class="form-control" placeholder="전자우편" value="<%= $email %>" />
+                              <i class="icon-envelope"></i>
+                            </span>
+                          </label>
+
+                          <label class="block clearfix">
+                            <span class="block input-icon input-icon-right">
+                              <input name="address" type="text" class="form-control" placeholder="주소" value="<%= $address %>" />
+                              <i class="icon-home"></i>
+                            </span>
+                          </label>
+
+                          <label class="block clearfix">
+                            <span class="block input-icon input-icon-right">
+                              <input name="birth" type="text" class="form-control" placeholder="생년" value="<%= $birth %>" />
+                              <i class="icon-calendar"></i>
+                            </span>
+                          </label>
+
+                          <label class="block clearfix">
+                            <span class="block input-icon input-icon-right">
+                              <input name="sms" type="text" class="form-control" placeholder="인증번호" value="<%= $sms %>" />
+                              <i class="icon-key"></i>
+                            </span>
+                          </label>
+
+                          <div class="space-12"></div>
+
+                          <div class="clearfix">
+                            <button type="submit" class="width-100 pull-right btn btn-sm btn-primary">
+                              <span>
+                                대여 신청
+                              </span>
+                            </button>
+                          </div>
+                        </fieldset>
+                      </form>
+                    </div>
+                  </div><!-- /widget-body -->
+                </div><!-- /visit-info-box -->
