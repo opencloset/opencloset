@@ -157,7 +157,7 @@
                         %= include 'service'
                       </div>
                       <div class="modal-footer">
-                        <button id="btn-service-disagree" type="button" class="btn btn-danger" >동의하지 않습니다</button>
+                        <button id="btn-service-disagree" type="button" class="btn btn-danger" >거부합니다</button>
                         <button id="btn-service-agree"    type="button" class="btn btn-primary">동의합니다</button>
                       </div>
                     </div>
@@ -177,7 +177,7 @@
                         %= include 'privacy'
                       </div>
                       <div class="modal-footer">
-                        <button id="btn-privacy-disagree" type="button" class="btn btn-danger" >동의하지 않습니다</button>
+                        <button id="btn-privacy-disagree" type="button" class="btn btn-danger" >거부합니다</button>
                         <button id="btn-privacy-agree"    type="button" class="btn btn-primary">동의합니다</button>
                       </div>
                     </div>
