@@ -30,7 +30,7 @@
                       <div class="space-6"></div>
 
                       <form id="visit-info-form" method="post" action="<%= url_for('/visit') %>">
-                        <input type="hidden" name="type" value="visit-info">
+                        <input type="hidden" name="type" value="visit">
                         <fieldset>
                           <label class="block clearfix">
                             <span class="block input-icon input-icon-right">

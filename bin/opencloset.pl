@@ -3195,7 +3195,7 @@ any '/visit' => sub {
         return;
     }
 
-    if ( $type eq 'visit-info' ) {
+    if ( $type eq 'visit' ) {
         my %user_params;
         my %user_info_params;
 
