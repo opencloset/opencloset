@@ -18,7 +18,7 @@ use Mojolicious::Lite;
         my ( $self, $e ) = @_;
 
         if ( !$self->is_user_authenticated ) {
-            $self->redirect_to( $self->url_for('/login') );
+            $self->redirect_to( $self->url_for('/visit') );
             return;
         }
 
@@ -35,6 +35,7 @@ use Gravatar::URL;
 use List::MoreUtils qw( zip );
 use List::Util qw( sum );
 use Mojo::Util qw( encode );
+use String::Random;
 use Text::CSV;
 use Try::Tiny;
 
@@ -46,6 +47,8 @@ app->defaults( %{ plugin 'Config' => { default => {
     breadcrumbs => [],
     active_id   => q{},
     page_id     => q{},
+    alert       => q{},
+    type        => q{},
 }}});
 
 my $DB = OpenCloset::Schema->connect({
@@ -397,6 +400,7 @@ helper update_user => sub {
     my $v = $self->create_validator;
     $v->field('id')->required(1)->regexp(qr/^\d+$/);
     $v->field('email')->email;
+    $v->field('expires')->regexp(qr/^\d+$/);
     $v->field('phone')->regexp(qr/^\d+$/);
     $v->field('gender')->in(qw/ male female /);
     $v->field('birth')->regexp(qr/^(19|20)\d{2}$/);
@@ -1205,6 +1209,7 @@ group {
 
     post '/sms'                   => \&api_create_sms;
     put  '/sms/:id'               => \&api_update_sms;
+    post '/sms/validation'        => \&api_create_sms_validation;
 
     get  '/search/user'           => \&api_search_user;
     get  '/search/user/late'      => \&api_search_late_user;
@@ -1350,6 +1355,7 @@ group {
             name
             email
             password
+            expires
             create_date
             update_date
         /);
@@ -2761,6 +2767,82 @@ group {
         $self->respond_to( json => { status => 200, json => \%data } );
     }
 
+    sub api_create_sms_validation {
+        my $self = shift;
+
+        #
+        # fetch params
+        #
+        my %params = $self->get_params(qw/ from to status /);
+
+        #
+        # validate params
+        #
+        my $v = $self->create_validator;
+        $v->field(qw/ from to /)
+            ->each( sub { shift->required(1)->regexp(qr/^\d+$/) } );
+        $v->field('status')->in(qw/ pending sending sent /);
+
+        unless ( $self->validate( $v, \%params ) ) {
+            my @error_str;
+            while ( my ( $k, $v ) = each %{ $v->errors } ) {
+                push @error_str, "$k:$v";
+            }
+            $self->error( 400, {
+                str  => join(',', @error_str),
+                data => $v->errors,
+            }), return;
+        }
+
+        #
+        # find user
+        #
+        my @users = $DB->resultset('User')->search(
+            { 'user_info.phone' => $params{to} },
+            { join => 'user_info' },
+        );
+        my $user = shift @users;
+
+        return $self->error( 404, {
+            str  => 'user not found',
+            data => {},
+        }) unless $user;
+        return $self->error( 404, {
+            str  => 'user info not found',
+            data => {},
+        }) unless $user->user_info;
+
+        my $password = String::Random->new->randregex('\d\d\d\d\d\d');
+        my $expires  = DateTime->now( time_zone => app->config->{timezone} )->add( minutes => 5 );
+        $user->update({
+            password => $password,
+            expires  => $expires->epoch,
+        }) or return $self->error( 500, {
+            str  => 'failed to update a user',
+            data => {},
+        });
+        app->log->debug( "sent temporary password: to($params{to}) password($password)" );
+
+        my $sms = $DB->resultset('SMS')->create({
+            %params,
+            text => "열린옷장 인증번호: $password",
+        });
+        return $self->error( 404, {
+            str  => 'failed to create a new sms',
+            data => {},
+        }) unless $sms;
+
+        #
+        # response
+        #
+        my %data = ( $sms->get_columns );
+
+        $self->res->headers->header(
+            'Location' => $self->url_for( '/api/sms/' . $sms->id ),
+        );
+        $self->respond_to( json => { status => 201, json => \%data } );
+    }
+
     #
     # FIXME
     #   parameter is wired.
@@ -3016,13 +3098,14 @@ group {
 under '/' => sub {
     my $self = shift;
 
-    my $req = $self->req;
-    if ( !$self->is_user_authenticated && $req->url->path ne '/login' ) {
-        $self->redirect_to( $self->url_for('/login') );
-        return;
-    }
+    my $req_path = $self->req->url->path;
+    return 1 if $self->is_user_authenticated;
+    return 1 if $req_path eq '/login';
+    return 1 if $req_path eq '/visit';
 
-    return 1;
+    $self->redirect_to( $self->url_for('/visit') );
+
+    return;
 };
 
 get '/login';
@@ -3048,6 +3131,94 @@ get '/logout' => sub {
 
     $self->logout;
     $self->redirect_to( $self->url_for('/login') );
+};
+
+any '/visit' => sub {
+    my $self = shift;
+
+    my $type    = $self->param('type') || q{};
+    my $name    = $self->param('name');
+    my $phone   = $self->param('phone');
+    my $service = $self->param('service');
+    my $privacy = $self->param('privacy');
+    my $sms     = $self->param('sms');
+
+    my $email   = $self->param('email');
+    my $gender  = $self->param('gender');
+    my $address = $self->param('address');
+    my $birth   = $self->param('birth');
+
+    app->log->debug("type: $type");
+    app->log->debug("name: $name");
+    app->log->debug("phone: $phone");
+    app->log->debug("service: $service");
+    app->log->debug("privacy: $privacy");
+    app->log->debug("sms: $sms");
+
+    app->log->debug("email: $email");
+    app->log->debug("gender: $gender");
+    app->log->debug("address: $address");
+    app->log->debug("birth: $birth");
+
+    #
+    # find user
+    #
+    my @users = $DB->resultset('User')->search(
+        {
+            'me.name'         => $name,
+            'user_info.phone' => $phone,
+        },
+        { join => 'user_info' },
+    );
+    my $user = shift @users;
+    unless ($user) {
+        app->log->warn( 'user not found' );
+        return;
+    }
+    unless ($user->user_info) {
+        app->log->warn( 'user_info not found' );
+        return;
+    }
+
+    #
+    # validate code
+    #
+    my $now = DateTime->now( time_zone => app->config->{timezone} )->epoch;
+    unless ( $user->expires && $user->expires > $now ) {
+        app->log->warn( $user->email . "\'s password is expired" );
+        $self->stash( alert => '인증코드가 만료되었습니다.' );
+        return;
+    }
+    unless ( $user->check_password($sms) ) {
+        app->log->warn( $user->email . "\'s password is wrong" );
+        $self->stash( alert => '인증코드가 유효하지 않습니다.' );
+        return;
+    }
+
+    if ( $type eq 'visit-info' ) {
+        my %user_params;
+        my %user_info_params;
+
+        $user_params{id}           = $user->id;
+        $user_params{email}        = $email   if $email   && $email   ne $user->email;
+        $user_info_params{gender}  = $gender  if $gender  && $gender  ne $user->user_info->gender;
+        $user_info_params{address} = $address if $address && $address ne $user->user_info->address;
+        $user_info_params{birth}   = $birth   if $birth   && $birth   ne $user->user_info->birth;
+
+        $user = $self->update_user( \%user_params, \%user_info_params );
+    }
+
+    $self->stash(
+        type    => $type,
+        name    => $user->name,
+        email   => $user->email,
+        gender  => $user->user_info->gender,
+        phone   => $user->user_info->phone,
+        address => $user->user_info->address,
+        birth   => $user->user_info->birth,
+        sms     => $sms,
+    );
+
 };
 
 get '/'             => 'home';

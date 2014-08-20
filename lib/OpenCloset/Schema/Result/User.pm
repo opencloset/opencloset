@@ -58,6 +58,11 @@ __PACKAGE__->table("user");
 
 first 40 length for digest, after 10 length for salt(random)
 
+=head2 expires
+
+  data_type: 'integer'
+  is_nullable: 1
+
 =head2 create_date
 
   data_type: 'datetime'
@@ -99,6 +104,8 @@ __PACKAGE__->add_columns(
     is_nullable         => 1,
     size                => 50,
   },
+  "expires",
+  { data_type => "integer", is_nullable => 1 },
   "create_date",
   {
     data_type => "datetime",
@@ -222,8 +229,8 @@ __PACKAGE__->might_have(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07038 @ 2014-01-24 15:02:06
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:TY2yBb0ocNFS1PHeMdiQ8g
+# Created by DBIx::Class::Schema::Loader v0.07040 @ 2014-08-19 14:03:46
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:8dPTycFC3QfIrUBhG8Agpg
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

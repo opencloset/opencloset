@@ -1,0 +1,185 @@
+% use utf8;
+<!-- VISIT-BOX -->
+                <div id="visit-box" class="visit-box visible widget-box no-border">
+                  <div class="widget-body">
+                    <div class="widget-main">
+                      <h4 class="header blue lighter bigger">
+                        <i class="icon-group green"></i>
+                        방문 양식 작성하기
+                      </h4>
+
+                      <div class="space-6"></div>
+
+                      <div>
+                        <p>
+                          정장 대여를 위해 다음 내용을 입력해주세요.
+                        </p>
+                        <p>
+                          휴대전화가 없거나 번호가 변경되었다면 직원을 불러주세요. :)
+                        </p>
+                      </div>
+
+                      <div class="space-6"></div>
+
+                      <div id="visit-alert">
+                        % if ($alert) {
+                          <div class="alert alert-danger">
+                            <button class="close" type="button" data-dismiss="alert">&times;</button>
+                            <%= $alert %>
+                          </div>
+                        % }
+                      </div>
+
+                      <div class="space-6"></div>
+
+                      <form id="visit-form" method="post" action="<%= url_for('/visit') %>">
+                        <input type="hidden" name="type" value="visit-info">
+                        <fieldset>
+                          <label class="block clearfix">
+                            <span class="block input-icon input-icon-right">
+                              <input name="name" type="text" class="form-control" placeholder="이름" />
+                              <i class="icon-user"></i>
+                            </span>
+                          </label>
+
+                          <label class="block clearfix">
+                            <span class="block input-icon input-icon-right">
+                              <input name="phone" type="tel" class="form-control" placeholder="휴대전화" />
+                              <i class="icon-phone"></i>
+                            </span>
+                          </label>
+
+                          <label class="block clearfix signup">
+                            <div class="control-group">
+                              <label class="control-label bolder">성별</label>
+
+                              <div class="radio">
+                                <label>
+                                  <input type="radio" class="ace" name="gender" value="male">
+                                  <span class="lbl"> 남자</span>
+                                </label>
+                              </div>
+
+                              <div class="radio">
+                                <label>
+                                  <input type="radio" class="ace" name="gender" value="female">
+                                  <span class="lbl"> 여자</span>
+                                </label>
+                              </div>
+                            </div>
+                          </label>
+
+                          <label class="block clearfix signup">
+                            <span class="block input-icon input-icon-right">
+                              <input name="email" type="email" class="form-control" placeholder="전자우편" />
+                              <i class="icon-envelope"></i>
+                            </span>
+                          </label>
+
+                          <label class="block clearfix signup">
+                            <span class="block input-icon input-icon-right">
+                              <input name="address" type="text" class="form-control" placeholder="주소" />
+                              <i class="icon-home"></i>
+                            </span>
+                          </label>
+
+                          <label class="block clearfix signup">
+                            <span class="block input-icon input-icon-right">
+                              <input name="birth" type="text" class="form-control" placeholder="생년" />
+                              <i class="icon-calendar"></i>
+                            </span>
+                          </label>
+
+                          <label class="block">
+                            <input name="service" type="checkbox" class="<%= $theme %>" />
+                            <span class="lbl">
+                              <a href="#modal-service" data-toggle="modal">
+                                <strong>서비스 이용약관</strong>에 동의합니다.
+                              </a>
+                            </span>
+                          </label>
+
+                          <label class="block">
+                            <input name="privacy" type="checkbox" class="<%= $theme %>" />
+                            <span class="lbl">
+                              <a href="#modal-privacy" data-toggle="modal">
+                                <strong>개인정보 이용안내</strong>에 동의합니다.
+                              </a>
+                            </span>
+                          </label>
+
+                          <label class="block clearfix sms">
+                            <span class="block input-icon input-icon-right">
+                              <input name="sms" type="text" class="form-control" placeholder="인증번호" />
+                              <i class="icon-key"></i>
+                            </span>
+                          </label>
+                          <div class="sms">
+                            <p>
+                              남은 시간: <span id="sms-remain-seconds"></span>초
+                            </p>
+                            <p>
+                              인증번호가 전송되지 않을 경우 직원을 불러주세요.
+                            </p>
+                          </div>
+
+                          <div class="space-12"></div>
+
+                          <div class="clearfix">
+                            <button id="btn-sms-reset" type="reset" class="width-40 pull-left btn btn-sm">
+                              <i class="icon-refresh"></i>
+                              새로 쓰기
+                            </button>
+
+                            <button id="btn-sms-confirm" class="width-55 pull-right btn btn-sm btn-primary">
+                              <span id="btn-sms-confirm-label">
+                                SMS 인증하기
+                              </span>
+                              <i class="icon-arrow-right icon-on-right"></i>
+                            </button>
+                          </div>
+                        </fieldset>
+                      </form>
+                    </div>
+                  </div><!-- /widget-body -->
+                </div><!-- /visit-box -->
+
+                <div id="modal-service" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="serviceModalLabel" aria-hidden="true">
+                  <div class="modal-dialog">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title" id="serviceModalLabel">
+                          열린옷장 서비스 이용약관
+                        </h4>
+                      </div>
+                      <div class="modal-body" style="height: 250px; overflow-y: auto;">
+                        %= include 'service'
+                      </div>
+                      <div class="modal-footer">
+                        <button id="btn-service-disagree" type="button" class="btn btn-danger" >동의하지 않습니다</button>
+                        <button id="btn-service-agree"    type="button" class="btn btn-primary">동의합니다</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div id="modal-privacy" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="privacyModalLabel" aria-hidden="true">
+                  <div class="modal-dialog">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title" id="privacyModalLabel">
+                          열린옷장 개인정보 이용안내
+                        </h4>
+                      </div>
+                      <div class="modal-body" style="height: 250px; overflow-y: auto;">
+                        %= include 'privacy'
+                      </div>
+                      <div class="modal-footer">
+                        <button id="btn-privacy-disagree" type="button" class="btn btn-danger" >동의하지 않습니다</button>
+                        <button id="btn-privacy-agree"    type="button" class="btn btn-primary">동의합니다</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>

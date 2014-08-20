@@ -91,6 +91,23 @@ $ ->
       while (regex.test(num))
         num = num.replace(regex, '$1' + ',' + '$2')
       return num
+    sendSMS: (to, text) ->
+      $.ajax "/api/sms.json",
+        type: 'POST'
+        data:
+          from: '07075837521'
+          to:   to
+          text: text
+        success: (data, textStatus, jqXHR) ->
+        error: (jqXHR, textStatus, errorThrown) ->
+    sendSMSValidation: (to) ->
+      $.ajax "/api/sms/validation.json",
+        type: 'POST'
+        data:
+          from: '07075837521'
+          to:   to
+        success: (data, textStatus, jqXHR) ->
+        error: (jqXHR, textStatus, errorThrown) ->
 
   #
   # return nothing
