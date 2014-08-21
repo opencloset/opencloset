@@ -91,8 +91,6 @@
 .page-content #user-table table th:nth-child(4) { width: 100px; }
 .page-content #user-table table td { vertical-align: middle; }
 .page-content #user-table table td:nth-child(3) [class^="icon-"], .page-content #user-table table td:nth-child(3) [class*=" icon-"] { width: 1.2em; }
-.page-content #new-borrower form .input-group { width: inherit; }
-.page-content #new-borrower form .tags { width: 100%; }
 .page-content #new-clothes form .input-group { width: inherit; }
 .page-content #new-clothes #s2id_clothes-category, .page-content #new-clothes #s2id_clothes-color { width: inherit !important; }
 .page-content #user-id .profile-info-row .profile-info-name, .page-content #user-id .profile-info-row .profile-info-value { min-height: 32px; }

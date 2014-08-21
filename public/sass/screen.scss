@@ -326,16 +326,6 @@ $opencloset-darken-yellow: desaturate(darken($opencloset-yellow, 4%), 10%);
             }
         }
     }
-    #new-borrower {
-        form {
-            .input-group {
-                width: inherit;
-            }
-            .tags {
-                width: 100%;
-            }
-        }
-    }
     #new-clothes {
         form {
             .input-group {

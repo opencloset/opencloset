@@ -3244,7 +3244,6 @@ any '/visit' => sub {
 };
 
 get '/'             => 'home';
-get '/new-borrower' => 'new-borrower';
 get '/new-clothes'  => 'new-clothes';
 
 get '/tag' => sub {

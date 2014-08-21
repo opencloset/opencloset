@@ -49,7 +49,6 @@ $db_opts->{AutoCommit} //= 1;
     sidebar      => {
         meta => {
             'home'         => { text => '첫 화면',       icon => 'home',     desc => '열린 옷장 재고 관리 시스템입니다.', link => '/' },
-            'new-borrower' => { text => '새로운 대여자', icon => 'edit',     desc => '손님이 처음 오셨나요?' },
             'rental'       => { text => '대여',          icon => 'share',    desc => '어떤 옷을 빌려가나요?' },
             'new-clothes'  => { text => '새 옷',         icon => 'gift',     desc => '새 옷을 기증 받으셨나요?' },
             'order'        => { text => '주문서',        icon => 'file',     desc => '지금까지 대여해간 주문서 목록입니다.', link => '/order' },
@@ -63,7 +62,6 @@ $db_opts->{AutoCommit} //= 1;
         },
         items => [
             { id => 'home'         },
-            { id => 'new-borrower' },
             { id => 'rental'       },
             { id => 'new-clothes'  },
             { id => 'order'        },
