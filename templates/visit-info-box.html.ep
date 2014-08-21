@@ -137,7 +137,7 @@
                           <div class="space-12"></div>
 
                           <div class="clearfix">
-                            <button type="submit" class="width-100 pull-right btn btn-sm btn-primary">
+                            <button id="btn-info" type="submit" class="width-100 pull-right btn btn-sm btn-primary">
                               <span>
                                 대여 신청
                               </span>

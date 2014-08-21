@@ -218,3 +218,117 @@ $ ->
               signup = true
             else
               visitError '서버 오류가 발생했습니다.'
+
+  #
+  # 개인정보 갱신 버튼 클릭
+  #
+  $('#btn-info').click (e) ->
+    e.preventDefault()
+
+    name    = $("input[name=name]").val()
+    phone   = $("input[name=phone]").val()
+    sms     = $("input[name=sms]").val()
+
+    gender  = $("input[name=gender]:checked").val()
+    email   = $("input[name=email]").val()
+    address = $("input[name=address]").val()
+    birth   = $("input[name=birth]").val()
+    height  = $("input[name=height]").val()
+    weight  = $("input[name=weight]").val()
+    purpose = $("input[name=purpose]").val()
+    company = $("input[name=company]").val()
+
+    if name && phone && sms && gender && email && address && birth && height && weight && purpose && company
+      $('#visit-info-form').submit()
+    else
+      #
+      # 이름 점검
+      #
+      unless name
+        visitError '이름을 입력해주세요.'
+        return
+
+      #
+      # 휴대전화 점검
+      #
+      unless phone
+        visitError '휴대전화를 입력해주세요.'
+        return
+      unless /^\d+$/.test( phone )
+        visitError '유효하지 않은 휴대전화입니다.'
+        return
+      if /^999/.test( phone )
+        visitError '전송 불가능한 휴대전화입니다.'
+        return
+
+      #
+      # 인증번호 점검
+      #
+      unless sms
+        visitError '인증번호를 입력해주세요.'
+        return
+
+      #
+      # 성별 점검
+      #
+      unless gender
+        visitError '성별을 입력해주세요.'
+        return
+
+      #
+      # 전자우편 점검
+      #
+      unless email
+        visitError '전자우편을 입력해주세요.'
+        return
+
+      #
+      # 주소 점검
+      #
+      unless address
+        visitError '주소를 입력해주세요.'
+        return
+
+      #
+      # 생년 점검
+      #
+      unless birth
+        visitError '생년을 입력해주세요.'
+        return
+      unless /^(19|20)|\d\d$/.test( birth )
+        visitError '유효하지 않은 생년입니다.'
+        return
+
+      #
+      # 키 점검
+      #
+      unless height
+        visitError '키를 입력해주세요.'
+        return
+      unless /^\d+$/.test( height )
+        visitError '유효하지 않은 키입니다.'
+        return
+
+      #
+      # 몸무게 점검
+      #
+      unless weight
+        visitError '몸무게를 입력해주세요.'
+        return
+      unless /^\d+$/.test( weight )
+        visitError '유효하지 않은 몸무게입니다.'
+        return
+
+      #
+      # 대여 목적 점검
+      #
+      unless purpose
+        visitError '대여 목적을 입력해주세요.'
+        return
+
+      #
+      # 응시 기업 및 분야 점검
+      #
+      unless company
+        visitError '응시 기업 및 분야를 입력해주세요.'
+        return
