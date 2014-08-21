@@ -124,7 +124,13 @@ __PACKAGE__->table("order");
 
   data_type: 'varchar'
   is_nullable: 1
-  size: 32
+  size: 128
+
+=head2 company
+
+  data_type: 'varchar'
+  is_nullable: 1
+  size: 128
 
 =head2 height
 
@@ -280,7 +286,9 @@ __PACKAGE__->add_columns(
   "desc",
   { data_type => "text", is_nullable => 1 },
   "purpose",
-  { data_type => "varchar", is_nullable => 1, size => 32 },
+  { data_type => "varchar", is_nullable => 1, size => 128 },
+  "company",
+  { data_type => "varchar", is_nullable => 1, size => 128 },
   "height",
   { data_type => "integer", is_nullable => 1 },
   "weight",
@@ -442,8 +450,8 @@ __PACKAGE__->belongs_to(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07038 @ 2014-01-24 15:02:59
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:u5hceObyu3a7EwLz8I77qA
+# Created by DBIx::Class::Schema::Loader v0.07040 @ 2014-08-21 15:11:51
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:yBg8BohpUVnrZIKqnhF40g
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration
