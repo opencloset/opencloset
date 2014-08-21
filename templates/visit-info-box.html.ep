@@ -88,6 +88,46 @@
                           </label>
 
                           <label class="block clearfix">
+                            <div class="input-group">
+                              <input name="height" type="text" class="form-control" placeholder="키" value="<%= $height %>" />
+                              <span class="input-group-addon">
+                                <i>cm</i>
+                              </span>
+                            </div>
+                          </label>
+
+                          <label class="block clearfix">
+                            <div class="input-group">
+                              <input name="weight" type="text" class="form-control" placeholder="몸무게" value="<%= $weight %>" />
+                              <span class="input-group-addon">
+                                <i>kg</i>
+                              </span>
+                            </div>
+                          </label>
+
+                          <label class="block clearfix">
+                            <span class="block input-icon input-icon-right">
+                              <input name="purpose" type="text" class="form-control" placeholder="대여 목적" />
+                              <p>
+                                <span class="label label-info clickable"> 입사면접 </span>
+                                <span class="label label-info clickable"> 사진촬영 </span>
+                                <span class="label label-info clickable"> 결혼식 </span>
+                                <span class="label label-info clickable"> 장례식 </span>
+                                <span class="label label-info clickable"> 입학식 </span>
+                                <span class="label label-info clickable"> 졸업식 </span>
+                                <span class="label label-info clickable"> 세미나 </span>
+                                <span class="label label-info clickable"> 발표 </span>
+                              </p>
+                            </span>
+                          </label>
+
+                          <label class="block clearfix">
+                            <span class="block input-icon input-icon-right">
+                              <input name="company" type="text" class="form-control" placeholder="응시 기업 및 분야" />
+                            </span>
+                          </label>
+
+                          <label class="block clearfix">
                             <span class="block input-icon input-icon-right">
                               <input name="sms" type="text" class="form-control" placeholder="인증번호" value="<%= $sms %>" />
                               <i class="icon-key"></i>

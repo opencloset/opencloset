@@ -3222,6 +3222,8 @@ any '/visit' => sub {
         address => $user->user_info->address,
         birth   => $user->user_info->birth,
         sms     => $sms,
+        height  => $user->user_info->height,
+        weight  => $user->user_info->weight,
     );
 
 };

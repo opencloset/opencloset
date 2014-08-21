@@ -3,6 +3,11 @@
   $(function() {
     var beforeSendSMS, signup, validateSMS, visitError;
     signup = false;
+    $("input[name=purpose] + p .clickable.label").click(function() {
+      var text;
+      text = $(this).text();
+      return $("input[name=purpose]").prop("value", $.trim(text));
+    });
     $("#btn-service-disagree").click(function(e) {
       $("input[name=service]").prop("checked", false);
       $("#modal-service .modal-body").scrollTop(0);

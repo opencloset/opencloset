@@ -2,6 +2,13 @@ $ ->
   signup = false
 
   #
+  # 대여 목적
+  #
+  $("input[name=purpose] + p .clickable.label").click ->
+    text = $(@).text()
+    $("input[name=purpose]").prop( "value", $.trim(text) )
+
+  #
   # 사용자 약관
   #
   $("#btn-service-disagree").click (e) ->
