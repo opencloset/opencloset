@@ -1243,6 +1243,7 @@ group {
             birth
             bust
             comment
+            company
             foot
             gender
             height
@@ -1250,6 +1251,7 @@ group {
             knee
             leg
             phone
+            purpose
             thigh
             waist
             weight
@@ -1371,6 +1373,7 @@ group {
             birth
             bust
             comment
+            company
             foot
             gender
             height
@@ -1378,6 +1381,7 @@ group {
             knee
             leg
             phone
+            purpose
             staff
             thigh
             waist
@@ -3152,6 +3156,10 @@ any '/visit' => sub {
     my $gender  = $self->param('gender');
     my $address = $self->param('address');
     my $birth   = $self->param('birth');
+    my $height  = $self->param('height');
+    my $weight  = $self->param('weight');
+    my $purpose = $self->param('purpose');
+    my $company = $self->param('company');
 
     app->log->debug("type: $type");
     app->log->debug("name: $name");
@@ -3164,6 +3172,10 @@ any '/visit' => sub {
     app->log->debug("gender: $gender");
     app->log->debug("address: $address");
     app->log->debug("birth: $birth");
+    app->log->debug("height: $height");
+    app->log->debug("weight: $weight");
+    app->log->debug("purpose: $purpose");
+    app->log->debug("company: $company");
 
     #
     # find user
@@ -3209,6 +3221,10 @@ any '/visit' => sub {
         $user_info_params{gender}  = $gender  if $gender  && $gender  ne $user->user_info->gender;
         $user_info_params{address} = $address if $address && $address ne $user->user_info->address;
         $user_info_params{birth}   = $birth   if $birth   && $birth   ne $user->user_info->birth;
+        $user_info_params{height}  = $height  if $height  && $height  ne $user->user_info->height;
+        $user_info_params{weight}  = $weight  if $weight  && $weight  ne $user->user_info->weight;
+        $user_info_params{purpose} = $purpose if $purpose && $purpose ne $user->user_info->purpose;
+        $user_info_params{company} = $company if $company && $company ne $user->user_info->company;
 
         $user = $self->update_user( \%user_params, \%user_info_params );
     }
@@ -3225,7 +3241,6 @@ any '/visit' => sub {
         height  => $user->user_info->height,
         weight  => $user->user_info->weight,
     );
-
 };
 
 get '/'             => 'home';
