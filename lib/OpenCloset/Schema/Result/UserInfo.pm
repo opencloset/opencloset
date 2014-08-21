@@ -134,6 +134,18 @@ male/female
   default_value: 0
   is_nullable: 1
 
+=head2 purpose
+
+  data_type: 'varchar'
+  is_nullable: 1
+  size: 128
+
+=head2 company
+
+  data_type: 'varchar'
+  is_nullable: 1
+  size: 128
+
 =cut
 
 __PACKAGE__->add_columns(
@@ -185,6 +197,10 @@ __PACKAGE__->add_columns(
   { data_type => "integer", is_nullable => 1 },
   "staff",
   { data_type => "tinyint", default_value => 0, is_nullable => 1 },
+  "purpose",
+  { data_type => "varchar", is_nullable => 1, size => 128 },
+  "company",
+  { data_type => "varchar", is_nullable => 1, size => 128 },
 );
 
 =head1 PRIMARY KEY
@@ -243,8 +259,8 @@ __PACKAGE__->belongs_to(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07038 @ 2014-01-24 15:02:06
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:zhCDfaf31fh5vIRcDkQrYA
+# Created by DBIx::Class::Schema::Loader v0.07040 @ 2014-08-21 15:11:51
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:TFhH9mbqpleBJkZ/sEO2UA
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration
