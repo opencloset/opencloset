@@ -58,6 +58,7 @@ $db_opts->{AutoCommit} //= 1;
             'clothes'      => { text => '의류',          icon => 'female',   desc => '의류 목록입니다.',   link => '#' },
             'clothes-code' => { text => '의류 정보',     icon => 'female',   desc => '의류 정보입니다.',   link => '#' },
             'tag'          => { text => '태그',          icon => 'tag',      desc => '태그 정보입니다.' },
+            'booking'      => { text => '예약',          icon => 'calendar', desc => '예약 정보입니다.',   link => '/booking' },
             'login'        => { text => '로그인',        icon => 'lock',     },
         },
         items => [
@@ -67,6 +68,7 @@ $db_opts->{AutoCommit} //= 1;
             { id => 'order'        },
             { id => 'user'         },
             { id => 'tag'          },
+            { id => 'booking'      },
         ],
     },
 
