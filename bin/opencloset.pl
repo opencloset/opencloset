@@ -3670,5 +3670,59 @@ get '/booking/:ymd' => sub {
     );
 };
 
+get '/booking/:ymd/open' => sub {
+    my $self = shift;
+
+    #
+    # fetch params
+    #
+    my %params = $self->get_params(qw/ ymd /);
+
+    unless ( $params{ymd} ) {
+        app->log->warn( "ymd is required" );
+        $self->redirect_to( $self->url_for('/booking') );
+        return;
+    }
+
+    unless ( $params{ymd} =~ m/^(\d{4})-(\d{2})-(\d{2})$/ ) {
+        app->log->warn( "invalid ymd format: $params{ymd}" );
+        $self->redirect_to( $self->url_for('/booking') );
+        return;
+    }
+
+    my $dt_start = try {
+        DateTime->new(
+            time_zone => app->config->{timezone},
+            year      => $1,
+            month     => $2,
+            day       => $3,
+        );
+    };
+    unless ($dt_start) {
+        app->log->warn( "cannot create start datetime object" );
+        $self->redirect_to( $self->url_for('/booking') );
+        return;
+    }
+
+    for my $gender ( qw/ male female / ) {
+        for my $key ( sort keys %{ app->config->{booking}{$gender} } ) {
+            my $value = app->config->{booking}{$gender}{$key};
+
+            my ( $h, $m ) = split /:/, $key, 2;
+            my $dt = $dt_start->clone;
+            $dt->set_hour($h);
+            $dt->set_minute($m);
+
+            $DB->resultset('Booking')->find_or_create({
+                date   => $dt,
+                gender => $gender,
+                slot   => $value,
+            });
+        }
+    }
+
+    $self->redirect_to( $self->url_for( '/booking/' . $dt_start->ymd ) );
+};
+
 app->secrets( app->defaults->{secrets} );
 app->start;
