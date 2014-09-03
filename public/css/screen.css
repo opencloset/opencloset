@@ -112,6 +112,10 @@
 .page-content #tag .tag-add { width: 300px; }
 .page-content #tag table td .btn-xs { border-width: 2px; font-size: 12px; line-height: 18px; padding: 0 4px; }
 .page-content #tag table td .tag-action { margin-right: 10px; }
+.page-content #booking #booking-table table tr:first-child th:first-child { width: 80px; }
+.page-content #booking #booking-table table tr th { text-align: center; }
+.page-content #booking #booking-table table tr th.slot { width: 100px; }
+.page-content #booking #booking-table table td:first-child { text-align: center; }
 .page-content .step-content .step-pane h3 { margin-top: 10px; margin-bottom: 20px; }
 .page-content .dataTables_wrapper table { margin-bottom: 0; }
 .page-content .dataTables_wrapper .row:last-child { background-color: #eff3f8; border-bottom: 1px solid #e0e0e0; padding-bottom: 12px; padding-top: 12px; }
