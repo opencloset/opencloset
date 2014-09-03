@@ -316,6 +316,16 @@ helper flatten_clothes => sub {
     return \%data;
 };
 
+helper flatten_booking => sub {
+    my ( $self, $booking ) = @_;
+
+    return unless $booking;
+
+    my %data = $booking->get_columns;
+
+    return \%data;
+};
+
 helper get_params => sub {
     my ( $self, @keys ) = @_;
 
@@ -3587,6 +3597,77 @@ post '/order/:id/update' => sub {
     # response
     #
     $self->respond_to({ data => q{} });
+};
+
+get '/booking' => sub {
+    my $self = shift;
+
+    my $dt_today = DateTime->now( time_zone => app->config->{timezone} );
+    $self->redirect_to( $self->url_for( '/booking/' . $dt_today->ymd ) );
+};
+
+get '/booking/:ymd' => sub {
+    my $self = shift;
+
+    #
+    # fetch params
+    #
+    my %params = $self->get_params(qw/ ymd /);
+
+    unless ( $params{ymd} ) {
+        app->log->warn( "ymd is required" );
+        $self->redirect_to( $self->url_for('/booking') );
+        return;
+    }
+
+    unless ( $params{ymd} =~ m/^(\d{4})-(\d{2})-(\d{2})$/ ) {
+        app->log->warn( "invalid ymd format: $params{ymd}" );
+        $self->redirect_to( $self->url_for('/booking') );
+        return;
+    }
+
+    my $dt_start = try {
+        DateTime->new(
+            time_zone => app->config->{timezone},
+            year      => $1,
+            month     => $2,
+            day       => $3,
+        );
+    };
+    unless ($dt_start) {
+        app->log->warn( "cannot create start datetime object" );
+        $self->redirect_to( $self->url_for('/booking') );
+        return;
+    }
+
+    my $dt_end = $dt_start->clone->add( hours => 24, seconds => -1 );
+    unless ($dt_end) {
+        app->log->warn( "cannot create end datetime object" );
+        $self->redirect_to( $self->url_for('/booking') );
+        return;
+    }
+
+    my $dtf        = $DB->storage->datetime_parser;
+    my $booking_rs = $DB->resultset('Booking')->search(
+        {
+            date => {
+                -between => [
+                    $dtf->format_datetime($dt_start),
+                    $dtf->format_datetime($dt_end),
+                ],
+            },
+        },
+        {
+            order_by => { -asc => 'date' },
+        },
+    );
+
+    $self->render(
+        'booking',
+        booking_rs => $booking_rs,
+        dt_start   => $dt_start,
+        dt_end     => $dt_end,
+    );
 };
 
 app->secrets( app->defaults->{secrets} );
