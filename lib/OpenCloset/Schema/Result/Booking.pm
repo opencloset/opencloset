@@ -129,4 +129,15 @@ __PACKAGE__->has_many(
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration
+
+=head2 users
+
+Type: many_to_many
+
+Related object: L<OpenCloset::Schema::Result::User>
+
+=cut
+
+__PACKAGE__->many_to_many( "users", "user_bookings", "user" );
+
 1;
