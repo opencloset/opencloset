@@ -32,9 +32,8 @@
 -   my @users = $booking->users;
 -   for my $user (@users) {
 -     my $gender = $user->user_info->gender;
--     my $slots  = $booking_times{$hm}{$gender}{users};
--     $slots     = [] unless $slots;
--     push @$slots, $user;
+-     $booking_times{$hm}{$gender}{users} = [] unless $booking_times{$hm}{$gender}{users};
+-     push @{ $booking_times{$hm}{$gender}{users} }, $user;
 -   }
 - }
 
@@ -82,7 +81,7 @@
             %td
               - if ($users) {
               -   for my $u (@$users) {
-                = $u->name;
+                %a{ :href => "#{ url_for( '/user/' . $u->id ) }" }= $u->name
               -   }
               - }
           - }

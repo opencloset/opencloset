@@ -140,4 +140,15 @@ Related object: L<OpenCloset::Schema::Result::User>
 
 __PACKAGE__->many_to_many( "users", "user_bookings", "user" );
 
+=head1 Additional ACCESSORS
+
+=head2 user_count
+
+https://metacpan.org/pod/DBIx::Class::Manual::Cookbook#Using-database-functions-or-stored-procedures
+https://metacpan.org/pod/DBIx::Class::Manual::Cookbook#Using-SQL-functions-on-the-left-hand-side-of-a-comparison
+
+=cut
+
+__PACKAGE__->mk_group_accessors( column => 'user_count' );
+
 1;

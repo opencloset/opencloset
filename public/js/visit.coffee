@@ -4,9 +4,10 @@ $ ->
   #
   # 대여 목적
   #
-  $("input[name=purpose] + p .clickable.label").click ->
-    text = $(@).text()
-    $("input[name=purpose]").prop( "value", $.trim(text) )
+  $(".purpose .clickable.label").click ->
+    old_purpose = $("input[name=purpose]").val()
+    new_purpose = $(@).text()
+    $("input[name=purpose]").prop( "value", $.trim( "#{old_purpose} #{new_purpose}" ) )
 
   #
   # 사용자 약관
@@ -235,10 +236,11 @@ $ ->
     birth   = $("input[name=birth]").val()
     height  = $("input[name=height]").val()
     weight  = $("input[name=weight]").val()
+    booking = $("input[name=booking]").val()
     purpose = $("input[name=purpose]").val()
     company = $("input[name=company]").val()
 
-    if name && phone && sms && gender && email && address && birth && height && weight && purpose && company
+    if name && phone && sms && gender && email && address && birth && height && weight && booking && purpose && company
       $('#visit-info-form').submit()
     else
       #
@@ -320,6 +322,13 @@ $ ->
         return
 
       #
+      # 방문 일자 점검
+      #
+      unless booking
+        visitError '방문 일자를 선택해주세요.'
+        return
+
+      #
       # 대여 목적 점검
       #
       unless purpose
@@ -332,3 +341,51 @@ $ ->
       unless company
         visitError '응시 기업 및 분야를 입력해주세요.'
         return
+
+  #
+  # 방문 일자 선택 버튼 클릭
+  #
+  $('#btn-booking').click (e) ->
+    e.preventDefault()
+
+    gender = $("input[name=gender]:checked").val()
+
+    $.ajax "/api/gui/booking-list.json",
+      type: 'GET'
+      data:
+        gender: gender
+      success: (data, textStatus, jqXHR) ->
+        #
+        # update booking
+        #
+        $("#booking-list").html('')
+        for booking in data
+          compiled = _.template( $('#tpl-booking').html() )
+          $("#booking-list").append( $(compiled(booking)) )
+      error: (jqXHR, textStatus, errorThrown) ->
+        console.log jqXHR.status
+
+  #
+  # 방문 일자 모달의 취소 버튼
+  #
+  $("#btn-booking-cancel").click (e) ->
+    $("#modal-booking .modal-body").scrollTop(0)
+    $("#modal-booking").modal('hide')
+
+  #
+  # 방문 일자 모달의 확인 버튼
+  #
+  $("#btn-booking-confirm").click (e) ->
+    booking = $("input[type='radio'][name='booking_id']:checked")
+    if booking
+      $("input[name=booking]").prop( "value", booking.data('id') )
+      $("#lbl-booking").html(" - #{booking.data('ymd')} #{booking.data('hm')}")
+      $("#modal-booking .modal-body").scrollTop(0)
+      $("#modal-booking").modal('hide')
+
+  #
+  # 성별 변경시 방문 일자를 다시 선택하게 함
+  #
+  $("input[name=gender]").click (e) ->
+    $("input[name=booking]").prop( "value", '' )
+    $("#lbl-booking").html('')

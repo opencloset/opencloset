@@ -1233,6 +1233,7 @@ group {
 
     get  '/gui/staff-list'        => \&api_gui_staff_list;
     put  '/gui/booking/:id'       => \&api_gui_update_booking;
+    get  '/gui/booking-list'      => \&api_gui_booking_list;
 
     sub api_create_user {
         my $self = shift;
@@ -3168,6 +3169,119 @@ group {
         $self->respond_to( json => { status => 200, json => $data } );
     }
 
+    sub api_gui_booking_list {
+        my $self = shift;
+
+        #
+        # fetch params
+        #
+        my %params = $self->get_params(qw/ gender /);
+
+        #
+        # validate params
+        #
+        my $v = $self->create_validator;
+        $v->field('gender')->in(qw/ male female /);
+        unless ( $self->validate( $v, \%params ) ) {
+            my @error_str;
+            while ( my ( $k, $v ) = each %{ $v->errors } ) {
+                push @error_str, "$k:$v";
+            }
+            return $self->error( 400, {
+                str  => join(',', @error_str),
+                data => $v->errors,
+            });
+        }
+
+        #
+        # find booking
+        #
+        my $dt_start = DateTime->now( time_zone => app->config->{timezone} );
+        unless ($dt_start) {
+            my $msg = "cannot create start datetime object";
+            app->log->warn($msg);
+            $self->error( 500, {
+                str  => $msg,
+                data => {},
+            });
+            return;
+        }
+
+        my $dt_end = $dt_start->clone->truncate( to => 'day' )->add( hours => 24 * 15, seconds => -1 );
+        unless ($dt_end) {
+            my $msg = "cannot create end datetime object";
+            app->log->warn($msg);
+            $self->error( 500, {
+                str  => $msg,
+                data => {},
+            });
+            return;
+        }
+
+        my $dtf = $DB->storage->datetime_parser;
+
+        #
+        # SELECT
+        #     `me`.`id`,
+        #     `me`.`date`,
+        #     `me`.`gender`,
+        #     `me`.`slot`,
+        #     COUNT( `user_bookings`.`user_id` ) AS `user_count`
+        # FROM `booking` `me`
+        # LEFT JOIN `user_booking` `user_bookings`
+        # ON `user_bookings`.`booking_id` = `me`.`id`
+        # WHERE
+        #     (
+        #         ( `me`.`date` BETWEEN ? AND ? )
+        #         AND `me`.`gender` = ?
+        #         AND `me`.`id` IS NOT NULL
+        #     )
+        # GROUP BY `me`.`id`
+        # HAVING COUNT(user_bookings.user_id) < me.slot
+        # ORDER BY `me`.`date` ASC
+        #
+        # http://stackoverflow.com/questions/5285448/mysql-select-only-not-null-values
+        #
+        my $booking_rs = $DB->resultset('Booking')->search(
+            {
+                'me.id'     => { '!=' => undef },
+                'me.gender' => $params{gender},
+                'me.date'   => {
+                    -between => [
+                        $dtf->format_datetime($dt_start),
+                        $dtf->format_datetime($dt_end),
+                    ],
+                },
+            },
+            {
+                '+columns' => [
+                    { user_count => { count => 'user_bookings.user_id', -as => 'user_count' } },
+                ],
+                join       => 'user_bookings',
+                group_by   => [ qw/ me.id / ],
+                having     => \[ 'COUNT(user_bookings.user_id) < me.slot' ],
+                order_by   => { -asc => 'me.date' },
+            },
+        );
+
+        my @booking_list = $booking_rs->all;
+        return $self->error( 404, {
+            str  => 'booking list not found',
+            data => {},
+        }) unless @booking_list;
+
+        #
+        # additional information for clothes list
+        #
+        my @data;
+        push @data, $self->flatten_booking($_) for @booking_list;
+
+        #
+        # response
+        #
+        $self->respond_to( json => { status => 200, json => \@data } );
+    }
+
 }; # end of API section
 
 under '/' => sub {
@@ -3224,6 +3338,7 @@ any '/visit' => sub {
     my $birth   = $self->param('birth');
     my $height  = $self->param('height');
     my $weight  = $self->param('weight');
+    my $booking = $self->param('booking');
     my $purpose = $self->param('purpose');
     my $company = $self->param('company');
 
@@ -3240,6 +3355,7 @@ any '/visit' => sub {
     app->log->debug("birth: $birth");
     app->log->debug("height: $height");
     app->log->debug("weight: $weight");
+    app->log->debug("booking: $booking");
     app->log->debug("purpose: $purpose");
     app->log->debug("company: $company");
 
@@ -3293,6 +3409,7 @@ any '/visit' => sub {
         $user_info_params{company} = $company if $company && $company ne $user->user_info->company;
 
         $user = $self->update_user( \%user_params, \%user_info_params );
+        $user->create_related( 'user_bookings', { booking_id => $booking } );
     }
 
     $self->stash(
