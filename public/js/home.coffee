@@ -21,6 +21,7 @@ $ ->
       dataType: 'json'
       success: (data, textStatus, jqXHR) ->
         data.code = data.code.replace /^0/, ''
+        data.statusCode = OpenCloset.status[ data.status ].id
         if data.status is '대여중'
           return if $("#clothes-table table tbody tr[data-order-id='#{data.order.id}']").length
           compiled = _.template($('#tpl-row-checkbox-clothes-with-order').html())
@@ -42,13 +43,35 @@ $ ->
       complete: (jqXHR, textStatus) ->
 
   #
+  # 테이블의 의류 목록을 상태별로 분리해서 표시
+  #
+  showStatusOnly = (code) ->
+    if code == 'all'
+      $(".clothes-status").show()
+    else
+      $(".clothes-status").hide()
+      $(".clothes-status-#{code}").show()
+
+  $('#clothes-status-all').click (e) -> showStatusOnly 'all'
+  $('#clothes-status-1').click (e)   -> showStatusOnly 1
+  $('#clothes-status-2').click (e)   -> showStatusOnly 2
+  $('#clothes-status-3').click (e)   -> showStatusOnly 3
+  $('#clothes-status-4').click (e)   -> showStatusOnly 4
+  $('#clothes-status-5').click (e)   -> showStatusOnly 5
+  $('#clothes-status-6').click (e)   -> showStatusOnly 6
+  $('#clothes-status-7').click (e)   -> showStatusOnly 7
+  $('#clothes-status-8').click (e)   -> showStatusOnly 8
+  $('#clothes-status-9').click (e)   -> showStatusOnly 9
+  $('#clothes-status-11').click (e)  -> showStatusOnly 11
+
+  #
   # 의류 목록에서 선택한 항목의 상태 변경
   #
   $('#action-buttons li > a').click (e) ->
     clothes = []
     $('#clothes-table input:checked').each (i, el) ->
       return if $(el).attr('id') is 'input-check-all'
-      clothes.push($(el).data('clothes-code'))
+      clothes.push($(el).data('clothes-code')) if $(el).is(':visible')
     clothes = _.uniq(clothes)
     return unless clothes.length
 

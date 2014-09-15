@@ -16,6 +16,42 @@
 
 .space-8
 
+%div
+  %span
+    %a#clothes-status-all 전체보기
+  %span= '|'
+  %span
+    %a#clothes-status-1 대여가능
+  %span= '|'
+  %span
+    %a#clothes-status-2 대여중
+  %span= '|'
+  %span
+    %a#clothes-status-3 대여불가
+  %span= '|'
+  %span
+    %a#clothes-status-4 예약
+  %span= '|'
+  %span
+    %a#clothes-status-5 세탁
+  %span= '|'
+  %span
+    %a#clothes-status-6 수선
+  %span= '|'
+  %span
+    %a#clothes-status-7 분실
+  %span= '|'
+  %span
+    %a#clothes-status-8 폐기
+  %span= '|'
+  %span
+    %a#clothes-status-9 반납
+  %span= '|'
+  %span
+    %a#clothes-status-11 반납배송중
+
+.space-4
+
 #clothes-table
   %table.table.table-striped.table-bordered.table-hover
     %thead
@@ -46,7 +82,7 @@
 
 :plain
   <script id="tpl-row-checkbox-clothes-with-order" type="text/html">
-    <tr data-order-id="<%= order.id %>">
+    <tr class="clothes-status clothes-status-<%= statusCode %>" data-order-id="<%= order.id %>">
       <td class="center">
         <label>
           <input class="ace" type="checkbox" disabled>
@@ -76,7 +112,7 @@
 
 :plain
   <script id="tpl-row-checkbox-clothes" type="text/html">
-    <tr class="row-checkbox" data-clothes-code="<%= code %>">
+    <tr class="row-checkbox clothes-status clothes-status-<%= statusCode %>" data-clothes-code="<%= code %>">
       <td class="center">
         <label>
           <input class="ace" type="checkbox" <%= status == '대여중' ? 'disabled' : '' %> data-clothes-code="<%= code %>">
