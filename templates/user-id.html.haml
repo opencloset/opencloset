@@ -110,21 +110,59 @@
                                   %span.editable#user-comment{ 'data-name' => 'comment' }= $user->user_info->comment
 
                               .profile-info-row
-                                .profile-info-name 신체 치수
-                                .profile-info-value.body-size
-                                  %span.label.label-success= $user->user_info->height || '-'
-                                  %span.label.label-success= $user->user_info->weight || '-'
-                                  %br
-                                  %span.label.label-info=    $user->user_info->bust   || '-'
-                                  %span.label.label-info=    $user->user_info->waist  || '-'
-                                  %span.label.label-info=    $user->user_info->hip    || '-'
-                                  %span.label.label-info=    $user->user_info->belly  || '-'
-                                  %br
-                                  %span.label.label-warning= $user->user_info->thigh  || '-'
-                                  %span.label.label-warning= $user->user_info->arm    || '-'
-                                  %span.label.label-warning= $user->user_info->leg    || '-'
-                                  %span.label.label-warning= $user->user_info->knee   || '-'
-                                  %span.label.label-warning= $user->user_info->foot   || '-'
+                                .profile-info-name 키
+                                .profile-info-value
+                                  %span.editable#user-height{ 'data-name' => 'height' }= $user->user_info->height
+
+                              .profile-info-row
+                                .profile-info-name 몸무게
+                                .profile-info-value
+                                  %span.editable#user-weight{ 'data-name' => 'weight' }= $user->user_info->weight
+
+                              .profile-info-row
+                                .profile-info-name 가슴 둘레
+                                .profile-info-value
+                                  %span.editable#user-bust{ 'data-name' => 'bust' }= $user->user_info->bust
+
+                              .profile-info-row
+                                .profile-info-name 허리 둘레
+                                .profile-info-value
+                                  %span.editable#user-waist{ 'data-name' => 'waist' }= $user->user_info->waist
+
+                              .profile-info-row
+                                .profile-info-name 엉덩이 둘레
+                                .profile-info-value
+                                  %span.editable#user-hip{ 'data-name' => 'hip' }= $user->user_info->hip
+
+                              .profile-info-row
+                                .profile-info-name 배 둘레
+                                .profile-info-value
+                                  %span.editable#user-belly{ 'data-name' => 'belly' }= $user->user_info->belly
+
+                              .profile-info-row
+                                .profile-info-name 허벅지 둘레
+                                .profile-info-value
+                                  %span.editable#user-thigh{ 'data-name' => 'thigh' }= $user->user_info->thigh
+
+                              .profile-info-row
+                                .profile-info-name 팔 길이
+                                .profile-info-value
+                                  %span.editable#user-arm{ 'data-name' => 'arm' }= $user->user_info->arm
+
+                              .profile-info-row
+                                .profile-info-name 다리 길이
+                                .profile-info-value
+                                  %span.editable#user-leg{ 'data-name' => 'leg' }= $user->user_info->leg
+
+                              .profile-info-row
+                                .profile-info-name 무릎 길이
+                                .profile-info-value
+                                  %span.editable#user-knee{ 'data-name' => 'knee' }= $user->user_info->knee
+
+                              .profile-info-row
+                                .profile-info-name 발 크기
+                                .profile-info-value
+                                  %span.editable#user-foot{ 'data-name' => 'foot' }= $user->user_info->foot
 
                       .space-20
 
