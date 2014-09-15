@@ -3,10 +3,11 @@
   $(function() {
     var beforeSendSMS, signup, validateSMS, visitError;
     signup = false;
-    $("input[name=purpose] + p .clickable.label").click(function() {
-      var text;
-      text = $(this).text();
-      return $("input[name=purpose]").prop("value", $.trim(text));
+    $(".purpose .clickable.label").click(function() {
+      var new_purpose, old_purpose;
+      old_purpose = $("input[name=purpose]").val();
+      new_purpose = $(this).text();
+      return $("input[name=purpose]").prop("value", $.trim("" + old_purpose + " " + new_purpose));
     });
     $("#btn-service-disagree").click(function(e) {
       $("input[name=service]").prop("checked", false);
@@ -192,8 +193,8 @@
         }
       }
     });
-    return $('#btn-info').click(function(e) {
-      var address, birth, company, email, gender, height, name, phone, purpose, sms, weight;
+    $('#btn-info').click(function(e) {
+      var address, birth, booking, company, email, gender, height, name, phone, purpose, sms, weight;
       e.preventDefault();
       name = $("input[name=name]").val();
       phone = $("input[name=phone]").val();
@@ -204,9 +205,10 @@
       birth = $("input[name=birth]").val();
       height = $("input[name=height]").val();
       weight = $("input[name=weight]").val();
+      booking = $("input[name=booking]").val();
       purpose = $("input[name=purpose]").val();
       company = $("input[name=company]").val();
-      if (name && phone && sms && gender && email && address && birth && height && weight && purpose && company) {
+      if (name && phone && sms && gender && email && address && birth && height && weight && booking && purpose && company) {
         return $('#visit-info-form').submit();
       } else {
         if (!name) {
@@ -265,6 +267,10 @@
           visitError('유효하지 않은 몸무게입니다.');
           return;
         }
+        if (!booking) {
+          visitError('방문 일자를 선택해주세요.');
+          return;
+        }
         if (!purpose) {
           visitError('대여 목적을 입력해주세요.');
           return;
@@ -273,6 +279,49 @@
           visitError('응시 기업 및 분야를 입력해주세요.');
         }
       }
+    });
+    $('#btn-booking').click(function(e) {
+      var gender;
+      e.preventDefault();
+      gender = $("input[name=gender]:checked").val();
+      return $.ajax("/api/gui/booking-list.json", {
+        type: 'GET',
+        data: {
+          gender: gender
+        },
+        success: function(data, textStatus, jqXHR) {
+          var booking, compiled, _i, _len, _results;
+          $("#booking-list").html('');
+          _results = [];
+          for (_i = 0, _len = data.length; _i < _len; _i++) {
+            booking = data[_i];
+            compiled = _.template($('#tpl-booking').html());
+            _results.push($("#booking-list").append($(compiled(booking))));
+          }
+          return _results;
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+          return console.log(jqXHR.status);
+        }
+      });
+    });
+    $("#btn-booking-cancel").click(function(e) {
+      $("#modal-booking .modal-body").scrollTop(0);
+      return $("#modal-booking").modal('hide');
+    });
+    $("#btn-booking-confirm").click(function(e) {
+      var booking;
+      booking = $("input[type='radio'][name='booking_id']:checked");
+      if (booking) {
+        $("input[name=booking]").prop("value", booking.data('id'));
+        $("#lbl-booking").html(" - " + (booking.data('ymd')) + " " + (booking.data('hm')));
+        $("#modal-booking .modal-body").scrollTop(0);
+        return $("#modal-booking").modal('hide');
+      }
+    });
+    return $("input[name=gender]").click(function(e) {
+      $("input[name=booking]").prop("value", '');
+      return $("#lbl-booking").html('');
     });
   });
 

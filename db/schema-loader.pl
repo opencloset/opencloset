@@ -58,6 +58,12 @@ my $CONF = OpenCloset::Util::load_config('app.conf');
                         inflate_datetime => 1,
                     };
                 }
+                when ('date') {
+                    return +{
+                        %$col_info,
+                        inflate_datetime => 1,
+                    };
+                }
                 when ('password') {
                     return +{
                         %$col_info,

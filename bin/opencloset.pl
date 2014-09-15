@@ -316,6 +316,16 @@ helper flatten_clothes => sub {
     return \%data;
 };
 
+helper flatten_booking => sub {
+    my ( $self, $booking ) = @_;
+
+    return unless $booking;
+
+    my %data = $booking->get_columns;
+
+    return \%data;
+};
+
 helper get_params => sub {
     my ( $self, @keys ) = @_;
 
@@ -1222,6 +1232,8 @@ group {
     get  '/search/sms'            => \&api_search_sms;
 
     get  '/gui/staff-list'        => \&api_gui_staff_list;
+    put  '/gui/booking/:id'       => \&api_gui_update_booking;
+    get  '/gui/booking-list'      => \&api_gui_booking_list;
 
     sub api_create_user {
         my $self = shift;
@@ -3102,6 +3114,174 @@ group {
         $self->respond_to( json => { status => 200, json => \@data } );
     }
 
+    sub api_gui_update_booking {
+        my $self = shift;
+
+        #
+        # fetch params
+        #
+        my %params = $self->get_params(qw/ id date slot gender /);
+
+        #
+        # validate params
+        #
+        my $v = $self->create_validator;
+        $v->field('id')->required(1)->regexp(qr/^\d+$/);
+        $v->field('slot')->regexp(qr/^\d+$/);
+        $v->field('gender')->in(qw/ male female /);
+        unless ( $self->validate( $v, \%params ) ) {
+            my @error_str;
+            while ( my ( $k, $v ) = each %{ $v->errors } ) {
+                push @error_str, "$k:$v";
+            }
+            return $self->error( 400, {
+                str  => join(',', @error_str),
+                data => $v->errors,
+            });
+        }
+
+        #
+        # find booking
+        #
+        my $booking = $DB->resultset('Booking')->find({ id => $params{id} });
+        return $self->error( 404, {
+            str  => 'booking not found',
+            data => {},
+        }) unless $booking;
+
+        #
+        # update booking
+        #
+        my %_params = %params;
+        delete $_params{id};
+
+        $booking->update( \%_params )
+            or return $self->error( 500, {
+                str  => 'failed to update a booking',
+                data => {},
+            });
+
+        #
+        # response
+        #
+        my $data = $self->flatten_booking($booking);
+
+        $self->respond_to( json => { status => 200, json => $data } );
+    }
+
+    sub api_gui_booking_list {
+        my $self = shift;
+
+        #
+        # fetch params
+        #
+        my %params = $self->get_params(qw/ gender /);
+
+        #
+        # validate params
+        #
+        my $v = $self->create_validator;
+        $v->field('gender')->in(qw/ male female /);
+        unless ( $self->validate( $v, \%params ) ) {
+            my @error_str;
+            while ( my ( $k, $v ) = each %{ $v->errors } ) {
+                push @error_str, "$k:$v";
+            }
+            return $self->error( 400, {
+                str  => join(',', @error_str),
+                data => $v->errors,
+            });
+        }
+
+        #
+        # find booking
+        #
+        my $dt_start = DateTime->now( time_zone => app->config->{timezone} );
+        unless ($dt_start) {
+            my $msg = "cannot create start datetime object";
+            app->log->warn($msg);
+            $self->error( 500, {
+                str  => $msg,
+                data => {},
+            });
+            return;
+        }
+
+        my $dt_end = $dt_start->clone->truncate( to => 'day' )->add( hours => 24 * 15, seconds => -1 );
+        unless ($dt_end) {
+            my $msg = "cannot create end datetime object";
+            app->log->warn($msg);
+            $self->error( 500, {
+                str  => $msg,
+                data => {},
+            });
+            return;
+        }
+
+        my $dtf = $DB->storage->datetime_parser;
+
+        #
+        # SELECT
+        #     `me`.`id`,
+        #     `me`.`date`,
+        #     `me`.`gender`,
+        #     `me`.`slot`,
+        #     COUNT( `user_bookings`.`user_id` ) AS `user_count`
+        # FROM `booking` `me`
+        # LEFT JOIN `user_booking` `user_bookings`
+        # ON `user_bookings`.`booking_id` = `me`.`id`
+        # WHERE
+        #     (
+        #         ( `me`.`date` BETWEEN ? AND ? )
+        #         AND `me`.`gender` = ?
+        #         AND `me`.`id` IS NOT NULL
+        #     )
+        # GROUP BY `me`.`id`
+        # HAVING COUNT(user_bookings.user_id) < me.slot
+        # ORDER BY `me`.`date` ASC
+        #
+        # http://stackoverflow.com/questions/5285448/mysql-select-only-not-null-values
+        #
+        my $booking_rs = $DB->resultset('Booking')->search(
+            {
+                'me.id'     => { '!=' => undef },
+                'me.gender' => $params{gender},
+                'me.date'   => {
+                    -between => [
+                        $dtf->format_datetime($dt_start),
+                        $dtf->format_datetime($dt_end),
+                    ],
+                },
+            },
+            {
+                '+columns' => [
+                    { user_count => { count => 'user_bookings.user_id', -as => 'user_count' } },
+                ],
+                join       => 'user_bookings',
+                group_by   => [ qw/ me.id / ],
+                having     => \[ 'COUNT(user_bookings.user_id) < me.slot' ],
+                order_by   => { -asc => 'me.date' },
+            },
+        );
+
+        my @booking_list = $booking_rs->all;
+        return $self->error( 404, {
+            str  => 'booking list not found',
+            data => {},
+        }) unless @booking_list;
+
+        #
+        # additional information for clothes list
+        #
+        my @data;
+        push @data, $self->flatten_booking($_) for @booking_list;
+
+        #
+        # response
+        #
+        $self->respond_to( json => { status => 200, json => \@data } );
+    }
+
 }; # end of API section
 
 under '/' => sub {
@@ -3158,6 +3338,7 @@ any '/visit' => sub {
     my $birth   = $self->param('birth');
     my $height  = $self->param('height');
     my $weight  = $self->param('weight');
+    my $booking = $self->param('booking');
     my $purpose = $self->param('purpose');
     my $company = $self->param('company');
 
@@ -3174,6 +3355,7 @@ any '/visit' => sub {
     app->log->debug("birth: $birth");
     app->log->debug("height: $height");
     app->log->debug("weight: $weight");
+    app->log->debug("booking: $booking");
     app->log->debug("purpose: $purpose");
     app->log->debug("company: $company");
 
@@ -3227,6 +3409,7 @@ any '/visit' => sub {
         $user_info_params{company} = $company if $company && $company ne $user->user_info->company;
 
         $user = $self->update_user( \%user_params, \%user_info_params );
+        $user->create_related( 'user_bookings', { booking_id => $booking } );
     }
 
     $self->stash(
@@ -3587,6 +3770,131 @@ post '/order/:id/update' => sub {
     # response
     #
     $self->respond_to({ data => q{} });
+};
+
+get '/booking' => sub {
+    my $self = shift;
+
+    my $dt_today = DateTime->now( time_zone => app->config->{timezone} );
+    $self->redirect_to( $self->url_for( '/booking/' . $dt_today->ymd ) );
+};
+
+get '/booking/:ymd' => sub {
+    my $self = shift;
+
+    #
+    # fetch params
+    #
+    my %params = $self->get_params(qw/ ymd /);
+
+    unless ( $params{ymd} ) {
+        app->log->warn( "ymd is required" );
+        $self->redirect_to( $self->url_for('/booking') );
+        return;
+    }
+
+    unless ( $params{ymd} =~ m/^(\d{4})-(\d{2})-(\d{2})$/ ) {
+        app->log->warn( "invalid ymd format: $params{ymd}" );
+        $self->redirect_to( $self->url_for('/booking') );
+        return;
+    }
+
+    my $dt_start = try {
+        DateTime->new(
+            time_zone => app->config->{timezone},
+            year      => $1,
+            month     => $2,
+            day       => $3,
+        );
+    };
+    unless ($dt_start) {
+        app->log->warn( "cannot create start datetime object" );
+        $self->redirect_to( $self->url_for('/booking') );
+        return;
+    }
+
+    my $dt_end = $dt_start->clone->add( hours => 24, seconds => -1 );
+    unless ($dt_end) {
+        app->log->warn( "cannot create end datetime object" );
+        $self->redirect_to( $self->url_for('/booking') );
+        return;
+    }
+
+    my $dtf        = $DB->storage->datetime_parser;
+    my $booking_rs = $DB->resultset('Booking')->search(
+        {
+            date => {
+                -between => [
+                    $dtf->format_datetime($dt_start),
+                    $dtf->format_datetime($dt_end),
+                ],
+            },
+        },
+        {
+            order_by => { -asc => 'date' },
+        },
+    );
+
+    $self->render(
+        'booking',
+        booking_rs => $booking_rs,
+        dt_start   => $dt_start,
+        dt_end     => $dt_end,
+    );
+};
+
+get '/booking/:ymd/open' => sub {
+    my $self = shift;
+
+    #
+    # fetch params
+    #
+    my %params = $self->get_params(qw/ ymd /);
+
+    unless ( $params{ymd} ) {
+        app->log->warn( "ymd is required" );
+        $self->redirect_to( $self->url_for('/booking') );
+        return;
+    }
+
+    unless ( $params{ymd} =~ m/^(\d{4})-(\d{2})-(\d{2})$/ ) {
+        app->log->warn( "invalid ymd format: $params{ymd}" );
+        $self->redirect_to( $self->url_for('/booking') );
+        return;
+    }
+
+    my $dt_start = try {
+        DateTime->new(
+            time_zone => app->config->{timezone},
+            year      => $1,
+            month     => $2,
+            day       => $3,
+        );
+    };
+    unless ($dt_start) {
+        app->log->warn( "cannot create start datetime object" );
+        $self->redirect_to( $self->url_for('/booking') );
+        return;
+    }
+
+    for my $gender ( qw/ male female / ) {
+        for my $key ( sort keys %{ app->config->{booking}{$gender} } ) {
+            my $value = app->config->{booking}{$gender}{$key};
+
+            my ( $h, $m ) = split /:/, $key, 2;
+            my $dt = $dt_start->clone;
+            $dt->set_hour($h);
+            $dt->set_minute($m);
+
+            $DB->resultset('Booking')->find_or_create({
+                date   => $dt,
+                gender => $gender,
+                slot   => $value,
+            });
+        }
+    }
+
+    $self->redirect_to( $self->url_for( '/booking/' . $dt_start->ymd ) );
 };
 
 app->secrets( app->defaults->{secrets} );

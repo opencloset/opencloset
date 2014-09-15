@@ -322,6 +322,39 @@ CREATE TABLE `order_detail` (
   CONSTRAINT `fk_order_detail3` FOREIGN KEY (`status_id`)    REFERENCES `status`  (`id`)   ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+--
+-- booking
+--
+
+CREATE TABLE `booking` (
+  `id`          INT UNSIGNED NOT NULL AUTO_INCREMENT,
+
+  `date`        DATETIME     NOT NULL,
+  `gender`      VARCHAR(6)   NOT NULL COMMENT 'male/female',
+  `slot`        INT UNSIGNED NOT NULL,
+
+  PRIMARY KEY (`id`),
+  UNIQUE  KEY ( `date`, `gender` )
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- user_booking
+--
+
+CREATE TABLE `user_booking` (
+  `id`           INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `user_id`      INT UNSIGNED NOT NULL,
+  `booking_id`   INT UNSIGNED NOT NULL,
+
+  PRIMARY KEY (`id`),
+  CONSTRAINT `fk_user_booking1` FOREIGN KEY (`user_id`)    REFERENCES `user`    (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_user_booking2` FOREIGN KEY (`booking_id`) REFERENCES `booking` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- sms
+--
+
 CREATE TABLE `sms` (
   `id`          INT UNSIGNED NOT NULL AUTO_INCREMENT,
 

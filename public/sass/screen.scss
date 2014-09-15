@@ -439,6 +439,30 @@ $opencloset-darken-yellow: desaturate(darken($opencloset-yellow, 4%), 10%);
         }
 
     }
+    #booking {
+        #booking-table table {
+            tr {
+                &:first-child {
+                    th {
+                        &:first-child {
+                            width: 80px;
+                        }
+                    }
+                }
+                th {
+                    text-align: center;
+                }
+                th.slot {
+                    width: 100px;
+                }
+            }
+            td {
+                &:first-child {
+                    text-align: center;
+                }
+            }
+        }
+    }
     .step-content {
         .step-pane {
             h3 {
