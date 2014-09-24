@@ -49,7 +49,7 @@ $ ->
           $("#clothes-table table tbody").append($html)
         error: (jqXHR, textStatus, errorThrown) ->
           if jqXHR.status is 404
-            alert 'warning', "#{query} 의류는 찾을 수 없습니다."
+            OpenCloset.alert 'warning', "#{query} 의류는 찾을 수 없습니다."
         complete: (jqXHR, textStatus) ->
     #
     # 사용자 검색 및 결과 테이블 갱신
@@ -66,7 +66,7 @@ $ ->
           $("#user-table table tbody").append($html)
       error: (jqXHR, textStatus, errorThrown) ->
         if jqXHR.status is 404
-          alert 'warning', "#{query} 검색어와 관련있는 사용자는 찾을 수 없습니다."
+          OpenCloset.alert 'warning', "#{query} 검색어와 관련있는 사용자는 찾을 수 없습니다."
       complete: (jqXHR, textStatus) ->
 
   #
@@ -88,7 +88,7 @@ $ ->
       clothes.push($(el).data('clothes-code'))
     clothes = _.uniq(clothes)
 
-    return alert('danger', '대여할 사용자를 선택해 주세요') unless user
-    return alert('danger', '대여할 옷을 선택해 주세요.')    unless clothes
+    return OpenCloset.alert('danger', '대여할 사용자를 선택해 주세요') unless user
+    return OpenCloset.alert('danger', '대여할 옷을 선택해 주세요.')    unless clothes
 
     $('#order-form').submit()

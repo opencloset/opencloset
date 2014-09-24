@@ -52,7 +52,7 @@
           return $("#clothes-table table tbody").append($html);
         },
         error: function(jqXHR, textStatus, errorThrown) {
-          return alert('danger', jqXHR.responseJSON.error);
+          return OpenCloset.alert('danger', jqXHR.responseJSON.error);
         },
         complete: function(jqXHR, textStatus) {}
       });
@@ -141,12 +141,12 @@
               return _results;
             },
             error: function(jqXHR, textStatus, errorThrown) {
-              return alert('danger', jqXHR.responseJSON.error);
+              return OpenCloset.alert('danger', jqXHR.responseJSON.error);
             }
           });
         },
         error: function(jqXHR, textStatus, errorThrown) {
-          return alert('danger', jqXHR.responseJSON.error);
+          return OpenCloset.alert('danger', jqXHR.responseJSON.error);
         }
       });
       return $('#clothes-id').focus();

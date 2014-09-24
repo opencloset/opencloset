@@ -1,15 +1,4 @@
 $ ->
-  Window::_alert = Window::alert
-  Window::alert = (cls, msg) ->
-    unless msg
-      msg = cls
-      cls = 'info'
-    # error, success, info
-    $('.main-content').prepend("<div class=\"alert alert-#{cls}\">#{msg}</div>")
-    setTimeout ->
-      $('.alert').remove()
-    , 3000
-  
   pathname = location.pathname
   $('.navbar .nav > li').each (i, el) ->
     if pathname is $(el).children('a').attr('href') then $(el).addClass('active')
@@ -24,6 +13,15 @@ $ ->
   # common fuction for OpenCloset
   #
   Window::OpenCloset =
+    alert: (cls, msg) ->
+      unless msg
+        msg = cls
+        cls = 'info'
+      # error, success, info
+      $('.main-content').prepend("<div class=\"alert alert-#{cls}\">#{msg}</div>")
+      setTimeout ->
+        $('.alert').remove()
+      , 3000
     status:
       '대여가능':   { id: 1,  css: 'label-success'   }
       '대여중':     { id: 2,  css: 'label-important' }

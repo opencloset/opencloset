@@ -26,7 +26,7 @@ $ ->
         $("input[name=user-donation-id][data-type=user][value=#{ data[0].id }]").click() if data[0]
       error: (jqXHR, textStatus, errorThrown) ->
         type = jqXHR.status is 404 ? 'warning' : 'danger'
-        alert(type, jqXHR.responseJSON.error.str)
+        OpenCloset.alert(type, jqXHR.responseJSON.error.str)
       complete: (jqXHR, textStatus) ->
 
     $.ajax "/api/search/donation.json",
@@ -41,7 +41,7 @@ $ ->
             $("#user-search-list").prepend($html)
       error: (jqXHR, textStatus, errorThrown) ->
         type = jqXHR.status is 404 ? 'warning' : 'danger'
-        alert(type, jqXHR.responseJSON.error.str)
+        OpenCloset.alert(type, jqXHR.responseJSON.error.str)
       complete: (jqXHR, textStatus) ->
 
   $('#user-search-list').on 'click', ':radio', (e) ->
@@ -175,17 +175,17 @@ $ ->
         when 'clothes-category' then valid_count++ if $(el).val()
         else                         valid_count++ if $(el).val() > 0
     unless count == valid_count
-      alert('warning', '빠진 항목이 있습니다.')
+      OpenCloset.alert('warning', '빠진 항목이 있습니다.')
       return
 
     $.ajax "/api/clothes/#{ data.clothes_code }.json",
       type: 'GET'
       dataType: 'json'
       success: (data, textStatus, jqXHR) ->
-        alert('warning', '이미 존재하는 의류 코드입니다.')
+        OpenCloset.alert('warning', '이미 존재하는 의류 코드입니다.')
       error: (jqXHR, textStatus, errorThrown) ->
         unless jqXHR.status is 404
-          alert('warning', '의류 코드 오류입니다.')
+          OpenCloset.alert('warning', '의류 코드 오류입니다.')
           return
 
         compiled = _.template($('#tpl-clothes-item').html())
@@ -237,7 +237,7 @@ $ ->
               userID = data.id
               return true
             error: (jqXHR, textStatus, errorThrown) ->
-              alert('danger', jqXHR.responseJSON.error)
+              OpenCloset.alert('danger', jqXHR.responseJSON.error)
               return false
             complete: (jqXHR, textStatus) ->
         when 3
@@ -278,10 +278,10 @@ $ ->
                       price:       OpenCloset.category[ $(el).data('clothes-category') ].price
                     success: (data, textStatus, jqXHR) ->
                     error: (jqXHR, textStatus, errorThrown) ->
-                      alert('warning', jqXHR.responseJSON.error.str)
+                      OpenCloset.alert('warning', jqXHR.responseJSON.error.str)
                     complete: (jqXHR, textStatus) ->
               error: (jqXHR, textStatus, errorThrown) ->
-                alert('warning', jqXHR.responseJSON.error.str)
+                OpenCloset.alert('warning', jqXHR.responseJSON.error.str)
               complete: (jqXHR, textStatus) ->
 
           if donationID
@@ -297,7 +297,7 @@ $ ->
                 message: $('#donation-message').val()
               success: (donation, textStatus, jqXHR)  -> createGroupClothes donation.id
               error: (jqXHR, textStatus, errorThrown) ->
-                alert('warning', jqXHR.responseJSON.error.str)
+                OpenCloset.alert('warning', jqXHR.responseJSON.error.str)
               complete: (jqXHR, textStatus) ->
         else return
 

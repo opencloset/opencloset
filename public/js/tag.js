@@ -36,7 +36,7 @@
                 msg = "\"" + query + "\" 태그가 이미 존재합니다.";
               }
           }
-          return alert('danger', msg);
+          return OpenCloset.alert('danger', msg);
         }
       });
     });
@@ -59,7 +59,7 @@
             case 404:
               msg = "\"" + query + "\" 태그를 찾을 수 없습니다.";
           }
-          return alert('danger', msg);
+          return OpenCloset.alert('danger', msg);
         }
       });
     });
@@ -72,7 +72,7 @@
         url: function(params) {
           var base_url, data;
           if (!params.value) {
-            return alert('danger', '변경할 태그 이름을 입력하세요.');
+            return OpenCloset.alert('danger', '변경할 태그 이름을 입력하세요.');
           }
           base_url = $('#tag-data').data('base-url');
           data = {};

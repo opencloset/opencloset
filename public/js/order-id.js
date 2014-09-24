@@ -226,23 +226,23 @@
         type: 'GET',
         success: function(data, textStatus, jqXHR) {
           if (!data.staff_id) {
-            alert('danger', '담당자를 입력하세요.');
+            OpenCloset.alert('danger', '담당자를 입력하세요.');
             return;
           }
           if (!(data.additional_day >= 0)) {
-            alert('danger', '대여 기간을 입력하세요.');
+            OpenCloset.alert('danger', '대여 기간을 입력하세요.');
             return;
           }
           if (!data.rental_date) {
-            alert('danger', '대여일을 입력하세요.');
+            OpenCloset.alert('danger', '대여일을 입력하세요.');
             return;
           }
           if (!data.target_date) {
-            alert('danger', '반납 예정일을 입력하세요.');
+            OpenCloset.alert('danger', '반납 예정일을 입력하세요.');
             return;
           }
           if (!data.price_pay_with) {
-            alert('danger', '대여비 납부 여부를 확인하세요.');
+            OpenCloset.alert('danger', '대여비 납부 여부를 확인하세요.');
             return;
           }
           return $.ajax(url, {
@@ -257,7 +257,7 @@
               return window.location.href = redirect_url;
             },
             error: function(jqXHR, textStatus, errorThrown) {
-              return alert('danger', jqXHR.responseJSON.error);
+              return OpenCloset.alert('danger', jqXHR.responseJSON.error);
             },
             complete: function(jqXHR, textStatus) {}
           });
@@ -369,7 +369,7 @@
       late_fee_pay_with = $('#order').data('order-late-fee-pay-with');
       overdue = $('#order').data('order-overdue');
       if (late_fee_final > 0 && !late_fee_pay_with) {
-        alert('danger', '연체료를 납부받지 않았습니다.');
+        OpenCloset.alert('danger', '연체료를 납부받지 않았습니다.');
         return;
       }
       return $.ajax("/api/order_detail.json", {
@@ -408,7 +408,7 @@
       redirect_url = $(e.target).data('redirect-url');
       count = countSelectedOrderDetail();
       if (!(count.selected > 0 && count.selected === count.total)) {
-        alert('error', "반납할 항목을 선택하지 않았습니다.");
+        OpenCloset.alert('error', "반납할 항목을 선택하지 않았습니다.");
         return;
       }
       return returnOrder(0, redirect_url);
@@ -418,7 +418,7 @@
       redirect_url = $(e.target).data('redirect-url');
       count = countSelectedOrderDetail();
       if (!(count.selected > 0)) {
-        alert('error', "반납할 항목을 선택하지 않았습니다.");
+        OpenCloset.alert('error', "반납할 항목을 선택하지 않았습니다.");
         return;
       }
       return returnOrder(1, redirect_url);

@@ -170,19 +170,19 @@ $ ->
       type: 'GET'
       success: (data, textStatus, jqXHR) ->
         unless data.staff_id
-          alert 'danger', '담당자를 입력하세요.'
+          OpenCloset.alert 'danger', '담당자를 입력하세요.'
           return
         unless data.additional_day >= 0
-          alert 'danger', '대여 기간을 입력하세요.'
+          OpenCloset.alert 'danger', '대여 기간을 입력하세요.'
           return
         unless data.rental_date
-          alert 'danger', '대여일을 입력하세요.'
+          OpenCloset.alert 'danger', '대여일을 입력하세요.'
           return
         unless data.target_date
-          alert 'danger', '반납 예정일을 입력하세요.'
+          OpenCloset.alert 'danger', '반납 예정일을 입력하세요.'
           return
         unless data.price_pay_with
-          alert 'danger', '대여비 납부 여부를 확인하세요.'
+          OpenCloset.alert 'danger', '대여비 납부 여부를 확인하세요.'
           return
 
         $.ajax url,
@@ -196,7 +196,7 @@ $ ->
           success: (data, textStatus, jqXHR) ->
             window.location.href = redirect_url
           error: (jqXHR, textStatus, errorThrown) ->
-            alert 'danger', jqXHR.responseJSON.error
+            OpenCloset.alert 'danger', jqXHR.responseJSON.error
           complete: (jqXHR, textStatus) ->
       error: (jqXHR, textStatus, errorThrown) ->
       complete: (jqXHR, textStatus) ->
@@ -313,7 +313,7 @@ $ ->
     overdue           = $('#order').data('order-overdue')
 
     if late_fee_final > 0 and not late_fee_pay_with
-      alert 'danger', '연체료를 납부받지 않았습니다.'
+      OpenCloset.alert 'danger', '연체료를 납부받지 않았습니다.'
       return
 
     #
@@ -352,7 +352,7 @@ $ ->
     redirect_url = $(e.target).data('redirect-url')
     count        = countSelectedOrderDetail()
     unless count.selected > 0 && count.selected is count.total
-      alert 'error', "반납할 항목을 선택하지 않았습니다."
+      OpenCloset.alert 'error', "반납할 항목을 선택하지 않았습니다."
       return
     returnOrder 0, redirect_url
 
@@ -363,7 +363,7 @@ $ ->
     redirect_url = $(e.target).data('redirect-url')
     count        = countSelectedOrderDetail()
     unless count.selected > 0
-      alert 'error', "반납할 항목을 선택하지 않았습니다."
+      OpenCloset.alert 'error', "반납할 항목을 선택하지 않았습니다."
       return
     returnOrder 1, redirect_url
 

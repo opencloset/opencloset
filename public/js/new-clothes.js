@@ -36,7 +36,7 @@
           type = (_ref = jqXHR.status === 404) != null ? _ref : {
             'warning': 'danger'
           };
-          return alert(type, jqXHR.responseJSON.error.str);
+          return OpenCloset.alert(type, jqXHR.responseJSON.error.str);
         },
         complete: function(jqXHR, textStatus) {}
       });
@@ -62,7 +62,7 @@
           type = (_ref = jqXHR.status === 404) != null ? _ref : {
             'warning': 'danger'
           };
-          return alert(type, jqXHR.responseJSON.error.str);
+          return OpenCloset.alert(type, jqXHR.responseJSON.error.str);
         },
         complete: function(jqXHR, textStatus) {}
       });
@@ -265,19 +265,19 @@
         }
       });
       if (count !== valid_count) {
-        alert('warning', '빠진 항목이 있습니다.');
+        OpenCloset.alert('warning', '빠진 항목이 있습니다.');
         return;
       }
       return $.ajax("/api/clothes/" + data.clothes_code + ".json", {
         type: 'GET',
         dataType: 'json',
         success: function(data, textStatus, jqXHR) {
-          return alert('warning', '이미 존재하는 의류 코드입니다.');
+          return OpenCloset.alert('warning', '이미 존재하는 의류 코드입니다.');
         },
         error: function(jqXHR, textStatus, errorThrown) {
           var compiled, html;
           if (jqXHR.status !== 404) {
-            alert('warning', '의류 코드 오류입니다.');
+            OpenCloset.alert('warning', '의류 코드 오류입니다.');
             return;
           }
           compiled = _.template($('#tpl-clothes-item').html());
@@ -332,7 +332,7 @@
               return true;
             },
             error: function(jqXHR, textStatus, errorThrown) {
-              alert('danger', jqXHR.responseJSON.error);
+              OpenCloset.alert('danger', jqXHR.responseJSON.error);
               return false;
             },
             complete: function(jqXHR, textStatus) {}
@@ -367,14 +367,14 @@
                     },
                     success: function(data, textStatus, jqXHR) {},
                     error: function(jqXHR, textStatus, errorThrown) {
-                      return alert('warning', jqXHR.responseJSON.error.str);
+                      return OpenCloset.alert('warning', jqXHR.responseJSON.error.str);
                     },
                     complete: function(jqXHR, textStatus) {}
                   });
                 });
               },
               error: function(jqXHR, textStatus, errorThrown) {
-                return alert('warning', jqXHR.responseJSON.error.str);
+                return OpenCloset.alert('warning', jqXHR.responseJSON.error.str);
               },
               complete: function(jqXHR, textStatus) {}
             });
@@ -392,7 +392,7 @@
                 return createGroupClothes(donation.id);
               },
               error: function(jqXHR, textStatus, errorThrown) {
-                return alert('warning', jqXHR.responseJSON.error.str);
+                return OpenCloset.alert('warning', jqXHR.responseJSON.error.str);
               },
               complete: function(jqXHR, textStatus) {}
             });

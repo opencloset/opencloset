@@ -28,7 +28,7 @@ $ ->
           when 400
             if msg is 'duplicate tag.name'
               msg = "\"#{query}\" 태그가 이미 존재합니다."
-        alert 'danger', msg
+        OpenCloset.alert 'danger', msg
 
   #
   # 태그 지우기
@@ -46,7 +46,7 @@ $ ->
         msg = jqXHR.responseJSON.error.str
         switch jqXHR.status
           when 404 then msg = "\"#{query}\" 태그를 찾을 수 없습니다."
-        alert 'danger', msg
+        OpenCloset.alert 'danger', msg
 
   #
   # inline editable field
@@ -57,7 +57,7 @@ $ ->
       showbuttons: 'true'
       emptytext:   '비어있음'
       url: (params) ->
-        return alert('danger', '변경할 태그 이름을 입력하세요.') unless params.value
+        return OpenCloset.alert('danger', '변경할 태그 이름을 입력하세요.') unless params.value
 
         base_url = $('#tag-data').data('base-url')
         data = {}

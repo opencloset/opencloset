@@ -39,7 +39,7 @@ $ ->
         $html.find('.order-status').addClass OpenCloset.status[ data.status ].css
         $("#clothes-table table tbody").append($html)
       error: (jqXHR, textStatus, errorThrown) ->
-        alert('danger', jqXHR.responseJSON.error)
+        OpenCloset.alert('danger', jqXHR.responseJSON.error)
       complete: (jqXHR, textStatus) ->
 
   #
@@ -100,9 +100,9 @@ $ ->
                 .removeClass( (i, c) -> c )
                 .addClass [ 'order-status', 'label', OpenCloset.status[ clothes.status ].css ].join(' ')
           error: (jqXHR, textStatus, errorThrown) ->
-            alert('danger', jqXHR.responseJSON.error)
+            OpenCloset.alert('danger', jqXHR.responseJSON.error)
       error: (jqXHR, textStatus, errorThrown) ->
-        alert('danger', jqXHR.responseJSON.error)
+        OpenCloset.alert('danger', jqXHR.responseJSON.error)
     $('#clothes-id').focus()
 
   #

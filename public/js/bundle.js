@@ -2,17 +2,6 @@
 (function() {
   $(function() {
     var pathname;
-    Window.prototype._alert = Window.prototype.alert;
-    Window.prototype.alert = function(cls, msg) {
-      if (!msg) {
-        msg = cls;
-        cls = 'info';
-      }
-      $('.main-content').prepend("<div class=\"alert alert-" + cls + "\">" + msg + "</div>");
-      return setTimeout(function() {
-        return $('.alert').remove();
-      }, 3000);
-    };
     pathname = location.pathname;
     $('.navbar .nav > li').each(function(i, el) {
       if (pathname === $(el).children('a').attr('href')) {
@@ -25,6 +14,16 @@
       }
     });
     Window.prototype.OpenCloset = {
+      alert: function(cls, msg) {
+        if (!msg) {
+          msg = cls;
+          cls = 'info';
+        }
+        $('.main-content').prepend("<div class=\"alert alert-" + cls + "\">" + msg + "</div>");
+        return setTimeout(function() {
+          return $('.alert').remove();
+        }, 3000);
+      },
       status: {
         '대여가능': {
           id: 1,
