@@ -86,6 +86,22 @@ __PACKAGE__->add_columns(
 
 __PACKAGE__->set_primary_key("id");
 
+=head1 UNIQUE CONSTRAINTS
+
+=head2 C<user_id>
+
+=over 4
+
+=item * L</user_id>
+
+=item * L</booking_id>
+
+=back
+
+=cut
+
+__PACKAGE__->add_unique_constraint("user_id", ["user_id", "booking_id"]);
+
 =head1 RELATIONS
 
 =head2 booking
@@ -119,8 +135,8 @@ __PACKAGE__->belongs_to(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07040 @ 2014-08-28 16:11:59
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:YN1LZQsMVBkn2XZW4x5f4w
+# Created by DBIx::Class::Schema::Loader v0.07040 @ 2014-09-25 18:18:26
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:Yr6nIogsIpZxycXn7jCBMg
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration
