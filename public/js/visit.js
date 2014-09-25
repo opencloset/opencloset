@@ -281,9 +281,10 @@
       }
     });
     $('#btn-booking').click(function(e) {
-      var gender;
+      var gender, old_booking_id;
       e.preventDefault();
       gender = $("input[name=gender]:checked").val();
+      old_booking_id = $("input[name=booking]").prop("value");
       return $.ajax("/api/gui/booking-list.json", {
         type: 'GET',
         data: {
@@ -296,7 +297,8 @@
           for (_i = 0, _len = data.length; _i < _len; _i++) {
             booking = data[_i];
             compiled = _.template($('#tpl-booking').html());
-            _results.push($("#booking-list").append($(compiled(booking))));
+            $("#booking-list").append($(compiled(booking)));
+            _results.push($("input[type='radio'][name='booking_id'][value='" + old_booking_id + "']").prop("checked", true));
           }
           return _results;
         },

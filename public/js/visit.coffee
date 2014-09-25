@@ -348,7 +348,8 @@ $ ->
   $('#btn-booking').click (e) ->
     e.preventDefault()
 
-    gender = $("input[name=gender]:checked").val()
+    gender         = $("input[name=gender]:checked").val()
+    old_booking_id = $("input[name=booking]").prop("value")
 
     $.ajax "/api/gui/booking-list.json",
       type: 'GET'
@@ -362,6 +363,7 @@ $ ->
         for booking in data
           compiled = _.template( $('#tpl-booking').html() )
           $("#booking-list").append( $(compiled(booking)) )
+          $("input[type='radio'][name='booking_id'][value='#{ old_booking_id }']").prop( "checked", true )
       error: (jqXHR, textStatus, errorThrown) ->
         console.log jqXHR.status
 
