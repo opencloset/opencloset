@@ -18,37 +18,37 @@
 
 %div
   %span
-    %a#clothes-status-all 전체보기
+    %a#clothes-status-all= sprintf "전체보기 (%d)", $status->{all};
   %span= '|'
   %span
-    %a#clothes-status-1 대여가능
+    %a#clothes-status-1= sprintf " 대여가능 (%d)", $status->{1};
   %span= '|'
   %span
-    %a#clothes-status-2 대여중
+    %a#clothes-status-2= sprintf " 대여중 (%d)", $status->{2};
   %span= '|'
   %span
-    %a#clothes-status-3 대여불가
+    %a#clothes-status-3= sprintf " 대여불가 (%d)", $status->{3};
   %span= '|'
   %span
-    %a#clothes-status-4 예약
+    %a#clothes-status-4= sprintf " 예약 (%d)", $status->{4};
   %span= '|'
   %span
-    %a#clothes-status-5 세탁
+    %a#clothes-status-5= sprintf " 세탁 (%d)", $status->{5};
   %span= '|'
   %span
-    %a#clothes-status-6 수선
+    %a#clothes-status-6= sprintf " 수선 (%d)", $status->{6};
   %span= '|'
   %span
-    %a#clothes-status-7 분실
+    %a#clothes-status-7= sprintf " 분실 (%d)", $status->{7};
   %span= '|'
   %span
-    %a#clothes-status-8 폐기
+    %a#clothes-status-8= sprintf " 폐기 (%d)", $status->{8};
   %span= '|'
   %span
-    %a#clothes-status-9 반납
+    %a#clothes-status-9= sprintf " 반납 (%d)", $status->{9};
   %span= '|'
   %span
-    %a#clothes-status-11 반납배송중
+    %a#clothes-status-11= sprintf " 반납배송중 (%d)", $status->{11};
 
 .space-4
 

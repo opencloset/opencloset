@@ -3426,7 +3426,41 @@ any '/visit' => sub {
     );
 };
 
-get '/'             => 'home';
+get '/' => sub {
+    my $self = shift;
+
+    my $rs = $DB->resultset('Clothes')->search(
+        undef,
+        {
+            select   => [ 'status_id', { count => 'me.status_id' } ],
+            as       => [ qw/ id count / ],
+            group_by => [ qw/ status_id / ],
+            order_by => [ qw/ status_id / ],
+        },
+    );
+
+    my %status = (
+        all => $DB->resultset('Clothes')->count,
+        1   => 0,
+        2   => 0,
+        3   => 0,
+        4   => 0,
+        5   => 0,
+        6   => 0,
+        7   => 0,
+        8   => 0,
+        9   => 0,
+        11  => 0,
+    );
+    while ( my $s = $rs->next ) {
+        my $id    = $s->get_column('id');
+        my $count = $s->get_column('count');
+        $status{$id} = $count;
+    }
+
+    $self->render( 'home', status => \%status );
+};
+
 get '/new-clothes'  => 'new-clothes';
 
 get '/tag' => sub {
