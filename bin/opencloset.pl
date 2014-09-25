@@ -3412,6 +3412,16 @@ any '/visit' => sub {
         $user->create_related( 'user_bookings', { booking_id => $booking } );
     }
 
+    my $booking_obj = do {
+        my $dt_now = DateTime->now( time_zone => app->config->{timezone} );
+        my $dtf    = $DB->storage->datetime_parser;
+        my $rs     = $user->search_related('user_bookings')->search_related('booking', {
+            date => { '>' => $dtf->format_datetime($dt_now) },
+        });
+
+        $rs->next;
+    };
+
     $self->stash(
         type    => $type,
         name    => $user->name,
@@ -3423,6 +3433,9 @@ any '/visit' => sub {
         sms     => $sms,
         height  => $user->user_info->height,
         weight  => $user->user_info->weight,
+        purpose => $user->user_info->purpose,
+        company => $user->user_info->company,
+        booking => $booking_obj,
     );
 };
 
