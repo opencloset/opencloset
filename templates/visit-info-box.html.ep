@@ -119,6 +119,7 @@
                             </button>
                           </label>
                           <input name="booking" type="hidden" class="form-control" value="<%= $booking ? $booking->id : '' %>" />
+                          <input name="booking-saved" type="hidden" class="form-control" value="<%= $booking ? $booking->id : '' %>" />
 
                           <label class="block clearfix">
                             <span class="block input-icon input-icon-right">

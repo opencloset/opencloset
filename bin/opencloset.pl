@@ -3332,15 +3332,16 @@ any '/visit' => sub {
     my $privacy = $self->param('privacy');
     my $sms     = $self->param('sms');
 
-    my $email   = $self->param('email');
-    my $gender  = $self->param('gender');
-    my $address = $self->param('address');
-    my $birth   = $self->param('birth');
-    my $height  = $self->param('height');
-    my $weight  = $self->param('weight');
-    my $booking = $self->param('booking');
-    my $purpose = $self->param('purpose');
-    my $company = $self->param('company');
+    my $email         = $self->param('email');
+    my $gender        = $self->param('gender');
+    my $address       = $self->param('address');
+    my $birth         = $self->param('birth');
+    my $height        = $self->param('height');
+    my $weight        = $self->param('weight');
+    my $booking       = $self->param('booking');
+    my $booking_saved = $self->param('booking-saved');
+    my $purpose       = $self->param('purpose');
+    my $company       = $self->param('company');
 
     app->log->debug("type: $type");
     app->log->debug("name: $name");
@@ -3356,6 +3357,7 @@ any '/visit' => sub {
     app->log->debug("height: $height");
     app->log->debug("weight: $weight");
     app->log->debug("booking: $booking");
+    app->log->debug("booking-saved: $booking_saved");
     app->log->debug("purpose: $purpose");
     app->log->debug("company: $company");
 
@@ -3409,7 +3411,14 @@ any '/visit' => sub {
         $user_info_params{company} = $company if $company && $company ne $user->user_info->company;
 
         $user = $self->update_user( \%user_params, \%user_info_params );
-        $user->create_related( 'user_bookings', { booking_id => $booking } );
+
+        if ($booking_saved) {
+            my $user_booking = $user->find_related( 'user_bookings', { booking_id => $booking_saved } );
+            $user_booking->update({ booking_id => $booking }) if $user_booking;
+        }
+        else {
+            $user->create_related( 'user_bookings', { booking_id => $booking } );
+        }
     }
 
     my $booking_obj = do {
