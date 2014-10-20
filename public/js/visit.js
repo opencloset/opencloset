@@ -196,7 +196,6 @@
     $('#btn-booking-cancel').click(function(e) {
       var name, phone, sms;
       e.preventDefault();
-      console.log('cancel the booking');
       name = $("input[name=name]").val();
       phone = $("input[name=phone]").val();
       sms = $("input[name=sms]").val();

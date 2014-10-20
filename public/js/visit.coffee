@@ -225,7 +225,6 @@ $ ->
   #
   $('#btn-booking-cancel').click (e) ->
     e.preventDefault()
-    console.log 'cancel the booking'
 
     name    = $("input[name=name]").val()
     phone   = $("input[name=phone]").val()
