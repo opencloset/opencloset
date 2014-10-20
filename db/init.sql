@@ -347,6 +347,7 @@ CREATE TABLE `user_booking` (
   `booking_id`   INT UNSIGNED NOT NULL,
 
   PRIMARY KEY (`id`),
+  UNIQUE  KEY ( `user_id`, `booking_id` ),
   CONSTRAINT `fk_user_booking1` FOREIGN KEY (`user_id`)    REFERENCES `user`    (`id`) ON DELETE CASCADE,
   CONSTRAINT `fk_user_booking2` FOREIGN KEY (`booking_id`) REFERENCES `booking` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;

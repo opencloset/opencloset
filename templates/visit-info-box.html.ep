@@ -111,14 +111,19 @@
                                 방문 일자 선택
                               </span>
                               <span id="lbl-booking">
+                                % if ($booking) {
+                                %   my $ymdhm = sprintf( '%s %02d:%02d', $booking->date->ymd, $booking->date->hour, $booking->date->minute );
+                                - <%= $ymdhm %>
+                                % }
                               </span>
                             </button>
                           </label>
-                          <input name="booking" type="hidden" class="form-control" />
+                          <input name="booking" type="hidden" class="form-control" value="<%= $booking ? $booking->id : '' %>" />
+                          <input name="booking-saved" type="hidden" class="form-control" value="<%= $booking ? $booking->id : '' %>" />
 
                           <label class="block clearfix">
                             <span class="block input-icon input-icon-right">
-                              <input name="purpose" type="text" class="form-control" placeholder="대여 목적" />
+                              <input name="purpose" type="text" class="form-control" placeholder="대여 목적" value="<%= $purpose %>" />
                               <p> 아래 목록에 없으면 직접 입력해주세요. </p>
                               <p class="purpose">
                                 <span class="label label-info clickable"> 입사면접 </span>
@@ -135,7 +140,7 @@
 
                           <label class="block clearfix">
                             <span class="block input-icon input-icon-right">
-                              <input name="company" type="text" class="form-control" placeholder="응시 기업 및 분야" />
+                              <input name="company" type="text" class="form-control" placeholder="응시 기업 및 분야" value="<%= $company %>" />
                             </span>
                           </label>
 
@@ -149,12 +154,21 @@
                           <div class="space-12"></div>
 
                           <div class="clearfix">
-                            <button id="btn-info" type="submit" class="width-100 pull-right btn btn-sm btn-primary">
+                            <button id="btn-booking-cancel" class="width-40 pull-left btn btn-sm btn-danger">
                               <span>
-                                대여 신청
+                                <i class="icon-remove"></i>
+                                예약 취소
+                              </span>
+                            </button>
+
+                            <button id="btn-info" type="submit" class="width-55 pull-right btn btn-sm btn-primary">
+                              <span>
+                                <i class="icon-ok"></i>
+                                예약 신청
                               </span>
                             </button>
                           </div>
+
                         </fieldset>
                       </form>
                     </div>
@@ -184,8 +198,8 @@
                         </table>
                       </div>
                       <div class="modal-footer">
-                        <button id="btn-booking-cancel"  type="button" class="btn btn-danger" >취소</button>
-                        <button id="btn-booking-confirm" type="button" class="btn btn-primary">확인</button>
+                        <button id="btn-booking-modal-cancel"  type="button" class="btn btn-danger" >취소</button>
+                        <button id="btn-booking-modal-confirm" type="button" class="btn btn-primary">확인</button>
                       </div>
                     </div>
                   </div>

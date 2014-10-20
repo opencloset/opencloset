@@ -193,6 +193,38 @@
         }
       }
     });
+    $('#btn-booking-cancel').click(function(e) {
+      var name, phone, sms;
+      e.preventDefault();
+      console.log('cancel the booking');
+      name = $("input[name=name]").val();
+      phone = $("input[name=phone]").val();
+      sms = $("input[name=sms]").val();
+      if (name && phone && sms) {
+        $("input[name=booking]").prop("value", '-1');
+        return $('#visit-info-form').submit();
+      } else {
+        if (!name) {
+          visitError('이름을 입력해주세요.');
+          return;
+        }
+        if (!phone) {
+          visitError('휴대전화를 입력해주세요.');
+          return;
+        }
+        if (!/^\d+$/.test(phone)) {
+          visitError('유효하지 않은 휴대전화입니다.');
+          return;
+        }
+        if (/^999/.test(phone)) {
+          visitError('전송 불가능한 휴대전화입니다.');
+          return;
+        }
+        if (!sms) {
+          visitError('인증번호를 입력해주세요.');
+        }
+      }
+    });
     $('#btn-info').click(function(e) {
       var address, birth, booking, company, email, gender, height, name, phone, purpose, sms, weight;
       e.preventDefault();
@@ -281,9 +313,10 @@
       }
     });
     $('#btn-booking').click(function(e) {
-      var gender;
+      var gender, old_booking_id;
       e.preventDefault();
       gender = $("input[name=gender]:checked").val();
+      old_booking_id = $("input[name=booking]").prop("value");
       return $.ajax("/api/gui/booking-list.json", {
         type: 'GET',
         data: {
@@ -296,7 +329,8 @@
           for (_i = 0, _len = data.length; _i < _len; _i++) {
             booking = data[_i];
             compiled = _.template($('#tpl-booking').html());
-            _results.push($("#booking-list").append($(compiled(booking))));
+            $("#booking-list").append($(compiled(booking)));
+            _results.push($("input[type='radio'][name='booking_id'][value='" + old_booking_id + "']").prop("checked", true));
           }
           return _results;
         },
@@ -305,11 +339,11 @@
         }
       });
     });
-    $("#btn-booking-cancel").click(function(e) {
+    $("#btn-booking-modal-cancel").click(function(e) {
       $("#modal-booking .modal-body").scrollTop(0);
       return $("#modal-booking").modal('hide');
     });
-    $("#btn-booking-confirm").click(function(e) {
+    $("#btn-booking-modal-confirm").click(function(e) {
       var booking;
       booking = $("input[type='radio'][name='booking_id']:checked");
       if (booking) {

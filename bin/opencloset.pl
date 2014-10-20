@@ -3332,15 +3332,16 @@ any '/visit' => sub {
     my $privacy = $self->param('privacy');
     my $sms     = $self->param('sms');
 
-    my $email   = $self->param('email');
-    my $gender  = $self->param('gender');
-    my $address = $self->param('address');
-    my $birth   = $self->param('birth');
-    my $height  = $self->param('height');
-    my $weight  = $self->param('weight');
-    my $booking = $self->param('booking');
-    my $purpose = $self->param('purpose');
-    my $company = $self->param('company');
+    my $email         = $self->param('email');
+    my $gender        = $self->param('gender');
+    my $address       = $self->param('address');
+    my $birth         = $self->param('birth');
+    my $height        = $self->param('height');
+    my $weight        = $self->param('weight');
+    my $booking       = $self->param('booking');
+    my $booking_saved = $self->param('booking-saved');
+    my $purpose       = $self->param('purpose');
+    my $company       = $self->param('company');
 
     app->log->debug("type: $type");
     app->log->debug("name: $name");
@@ -3356,6 +3357,7 @@ any '/visit' => sub {
     app->log->debug("height: $height");
     app->log->debug("weight: $weight");
     app->log->debug("booking: $booking");
+    app->log->debug("booking-saved: $booking_saved");
     app->log->debug("purpose: $purpose");
     app->log->debug("company: $company");
 
@@ -3408,9 +3410,45 @@ any '/visit' => sub {
         $user_info_params{purpose} = $purpose if $purpose && $purpose ne $user->user_info->purpose;
         $user_info_params{company} = $company if $company && $company ne $user->user_info->company;
 
-        $user = $self->update_user( \%user_params, \%user_info_params );
-        $user->create_related( 'user_bookings', { booking_id => $booking } );
+        if ( $booking == -1 ) {
+            #
+            # 예약 취소
+            #
+            my $user_booking = $user->find_related( 'user_bookings', { booking_id => $booking_saved } );
+            $user_booking->delete if $user_booking;
+        }
+        else {
+            $user = $self->update_user( \%user_params, \%user_info_params );
+            if ($booking_saved) {
+                #
+                # 이미 예약 정보가 저장되어 있는 경우 - 예약 변경 상황
+                #
+                my $user_booking = $user->find_related( 'user_bookings', { booking_id => $booking_saved } );
+                if ( $booking != $booking_saved ) {
+                    #
+                    # 변경한 예약 정보가 기존 정보와 다를 경우 갱신함
+                    #
+                    $user_booking->update({ booking_id => $booking }) if $user_booking;
+                }
+            }
+            else {
+                #
+                # 예약 정보가 없는 경우 - 신규 예약 신청 상황
+                #
+                $user->create_related( 'user_bookings', { booking_id => $booking } );
+            }
+        }
     }
+
+    my $booking_obj = do {
+        my $dt_now = DateTime->now( time_zone => app->config->{timezone} );
+        my $dtf    = $DB->storage->datetime_parser;
+        my $rs     = $user->search_related('user_bookings')->search_related('booking', {
+            date => { '>' => $dtf->format_datetime($dt_now) },
+        });
+
+        $rs->next;
+    };
 
     $self->stash(
         type    => $type,
@@ -3423,6 +3461,9 @@ any '/visit' => sub {
         sms     => $sms,
         height  => $user->user_info->height,
         weight  => $user->user_info->weight,
+        purpose => $user->user_info->purpose,
+        company => $user->user_info->company,
+        booking => $booking_obj,
     );
 };
 

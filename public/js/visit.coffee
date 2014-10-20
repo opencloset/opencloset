@@ -223,6 +223,48 @@ $ ->
   #
   # 개인정보 갱신 버튼 클릭
   #
+  $('#btn-booking-cancel').click (e) ->
+    e.preventDefault()
+    console.log 'cancel the booking'
+
+    name    = $("input[name=name]").val()
+    phone   = $("input[name=phone]").val()
+    sms     = $("input[name=sms]").val()
+
+    if name && phone && sms
+      $("input[name=booking]").prop( "value", '-1' )
+      $('#visit-info-form').submit()
+    else
+      #
+      # 이름 점검
+      #
+      unless name
+        visitError '이름을 입력해주세요.'
+        return
+
+      #
+      # 휴대전화 점검
+      #
+      unless phone
+        visitError '휴대전화를 입력해주세요.'
+        return
+      unless /^\d+$/.test( phone )
+        visitError '유효하지 않은 휴대전화입니다.'
+        return
+      if /^999/.test( phone )
+        visitError '전송 불가능한 휴대전화입니다.'
+        return
+
+      #
+      # 인증번호 점검
+      #
+      unless sms
+        visitError '인증번호를 입력해주세요.'
+        return
+
+  #
+  # 개인정보 갱신 버튼 클릭
+  #
   $('#btn-info').click (e) ->
     e.preventDefault()
 
@@ -348,7 +390,8 @@ $ ->
   $('#btn-booking').click (e) ->
     e.preventDefault()
 
-    gender = $("input[name=gender]:checked").val()
+    gender         = $("input[name=gender]:checked").val()
+    old_booking_id = $("input[name=booking]").prop("value")
 
     $.ajax "/api/gui/booking-list.json",
       type: 'GET'
@@ -362,20 +405,21 @@ $ ->
         for booking in data
           compiled = _.template( $('#tpl-booking').html() )
           $("#booking-list").append( $(compiled(booking)) )
+          $("input[type='radio'][name='booking_id'][value='#{ old_booking_id }']").prop( "checked", true )
       error: (jqXHR, textStatus, errorThrown) ->
         console.log jqXHR.status
 
   #
   # 방문 일자 모달의 취소 버튼
   #
-  $("#btn-booking-cancel").click (e) ->
+  $("#btn-booking-modal-cancel").click (e) ->
     $("#modal-booking .modal-body").scrollTop(0)
     $("#modal-booking").modal('hide')
 
   #
   # 방문 일자 모달의 확인 버튼
   #
-  $("#btn-booking-confirm").click (e) ->
+  $("#btn-booking-modal-confirm").click (e) ->
     booking = $("input[type='radio'][name='booking_id']:checked")
     if booking
       $("input[name=booking]").prop( "value", booking.data('id') )
