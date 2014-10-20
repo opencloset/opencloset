@@ -3410,25 +3410,33 @@ any '/visit' => sub {
         $user_info_params{purpose} = $purpose if $purpose && $purpose ne $user->user_info->purpose;
         $user_info_params{company} = $company if $company && $company ne $user->user_info->company;
 
-        $user = $self->update_user( \%user_params, \%user_info_params );
-
-        if ($booking_saved) {
+        if ( $booking == -1 ) {
             #
-            # 이미 예약 정보가 저장되어 있는 경우 - 예약 변경 상황
+            # 예약 취소
             #
-            if ( $booking != $booking_saved ) {
-                #
-                # 변경한 예약 정보가 기존 정보와 다를 경우 갱신함
-                #
-                my $user_booking = $user->find_related( 'user_bookings', { booking_id => $booking_saved } );
-                $user_booking->update({ booking_id => $booking }) if $user_booking;
-            }
+            my $user_booking = $user->find_related( 'user_bookings', { booking_id => $booking_saved } );
+            $user_booking->delete if $user_booking;
         }
         else {
-            #
-            # 예약 정보가 없는 경우 - 신규 예약 신청 상황
-            #
-            $user->create_related( 'user_bookings', { booking_id => $booking } );
+            $user = $self->update_user( \%user_params, \%user_info_params );
+            if ($booking_saved) {
+                #
+                # 이미 예약 정보가 저장되어 있는 경우 - 예약 변경 상황
+                #
+                my $user_booking = $user->find_related( 'user_bookings', { booking_id => $booking_saved } );
+                if ( $booking != $booking_saved ) {
+                    #
+                    # 변경한 예약 정보가 기존 정보와 다를 경우 갱신함
+                    #
+                    $user_booking->update({ booking_id => $booking }) if $user_booking;
+                }
+            }
+            else {
+                #
+                # 예약 정보가 없는 경우 - 신규 예약 신청 상황
+                #
+                $user->create_related( 'user_bookings', { booking_id => $booking } );
+            }
         }
     }
 
