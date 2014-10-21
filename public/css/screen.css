@@ -116,6 +116,7 @@
 .page-content #booking #booking-table table tr th { text-align: center; }
 .page-content #booking #booking-table table tr th.slot { width: 100px; }
 .page-content #booking #booking-table table td:first-child { text-align: center; }
+.page-content #timetable .timetable-people { height: 36px; }
 .page-content .step-content .step-pane h3 { margin-top: 10px; margin-bottom: 20px; }
 .page-content .dataTables_wrapper table { margin-bottom: 0; }
 .page-content .dataTables_wrapper .row:last-child { background-color: #eff3f8; border-bottom: 1px solid #e0e0e0; padding-bottom: 12px; padding-top: 12px; }
