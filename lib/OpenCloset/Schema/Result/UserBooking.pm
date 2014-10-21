@@ -48,6 +48,29 @@ __PACKAGE__->table("user_booking");
   is_foreign_key: 1
   is_nullable: 0
 
+=head2 status
+
+  data_type: 'varchar'
+  is_nullable: 1
+  size: 16
+
+=head2 create_date
+
+  data_type: 'datetime'
+  datetime_undef_if_invalid: 1
+  inflate_datetime: 1
+  is_nullable: 1
+  set_on_create: 1
+
+=head2 update_date
+
+  data_type: 'datetime'
+  datetime_undef_if_invalid: 1
+  inflate_datetime: 1
+  is_nullable: 1
+  set_on_create: 1
+  set_on_update: 1
+
 =cut
 
 __PACKAGE__->add_columns(
@@ -71,6 +94,25 @@ __PACKAGE__->add_columns(
     extra => { unsigned => 1 },
     is_foreign_key => 1,
     is_nullable => 0,
+  },
+  "status",
+  { data_type => "varchar", is_nullable => 1, size => 16 },
+  "create_date",
+  {
+    data_type => "datetime",
+    datetime_undef_if_invalid => 1,
+    inflate_datetime => 1,
+    is_nullable => 1,
+    set_on_create => 1,
+  },
+  "update_date",
+  {
+    data_type                 => "datetime",
+    datetime_undef_if_invalid => 1,
+    inflate_datetime          => 1,
+    is_nullable               => 1,
+    set_on_create             => 1,
+    set_on_update             => 1,
   },
 );
 
@@ -135,8 +177,8 @@ __PACKAGE__->belongs_to(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07040 @ 2014-09-25 18:18:26
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:Yr6nIogsIpZxycXn7jCBMg
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2014-10-21 16:37:00
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:TcnHQM/A6lSaESWQyLMi8g
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

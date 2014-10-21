@@ -345,6 +345,9 @@ CREATE TABLE `user_booking` (
   `id`           INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `user_id`      INT UNSIGNED NOT NULL,
   `booking_id`   INT UNSIGNED NOT NULL,
+  `status`       VARCHAR(16)  DEFAULT NULL COMMENT 'NULL/visiting',
+  `create_date`  DATETIME     DEFAULT NULL,
+  `update_date`  DATETIME     DEFAULT NULL,
 
   PRIMARY KEY (`id`),
   UNIQUE  KEY ( `user_id`, `booking_id` ),
