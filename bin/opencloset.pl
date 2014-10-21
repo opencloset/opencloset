@@ -326,6 +326,16 @@ helper flatten_booking => sub {
     return \%data;
 };
 
+helper flatten_user_booking => sub {
+    my ( $self, $user_booking ) = @_;
+
+    return unless $user_booking;
+
+    my %data = $user_booking->get_columns;
+
+    return \%data;
+};
+
 helper get_params => sub {
     my ( $self, @keys ) = @_;
 
@@ -1234,6 +1244,7 @@ group {
     get  '/gui/staff-list'        => \&api_gui_staff_list;
     put  '/gui/booking/:id'       => \&api_gui_update_booking;
     get  '/gui/booking-list'      => \&api_gui_booking_list;
+    put  '/gui/user-booking/:id'  => \&api_gui_update_user_booking;
 
     sub api_create_user {
         my $self = shift;
@@ -3280,6 +3291,60 @@ group {
         # response
         #
         $self->respond_to( json => { status => 200, json => \@data } );
+    }
+
+    sub api_gui_update_user_booking {
+        my $self = shift;
+
+        #
+        # fetch params
+        #
+        my %params = $self->get_params(qw/ id status /);
+
+        #
+        # validate params
+        #
+        my $v = $self->create_validator;
+        $v->field('id')->required(1)->regexp(qr/^\d+$/);
+        $v->field('status')->in([ qw/ visiting / ]);
+        unless ( $self->validate( $v, \%params ) ) {
+            my @error_str;
+            while ( my ( $k, $v ) = each %{ $v->errors } ) {
+                push @error_str, "$k:$v";
+            }
+            return $self->error( 400, {
+                str  => join(',', @error_str),
+                data => $v->errors,
+            });
+        }
+
+        #
+        # find user_booking
+        #
+        my $user_booking = $DB->resultset('UserBooking')->find({ id => $params{id} });
+        return $self->error( 404, {
+            str  => 'user_booking not found',
+            data => {},
+        }) unless $user_booking;
+
+        #
+        # update user_booking
+        #
+        my %_params = %params;
+        delete $_params{id};
+
+        $user_booking->update( \%_params )
+            or return $self->error( 500, {
+                str  => 'failed to update a user_booking',
+                data => {},
+            });
+
+        #
+        # response
+        #
+        my $data = $self->flatten_user_booking($user_booking);
+
+        $self->respond_to( json => { status => 200, json => $data } );
     }
 
 }; # end of API section
