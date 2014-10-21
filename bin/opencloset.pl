@@ -326,6 +326,16 @@ helper flatten_booking => sub {
     return \%data;
 };
 
+helper flatten_user_booking => sub {
+    my ( $self, $user_booking ) = @_;
+
+    return unless $user_booking;
+
+    my %data = $user_booking->get_columns;
+
+    return \%data;
+};
+
 helper get_params => sub {
     my ( $self, @keys ) = @_;
 
@@ -1234,6 +1244,7 @@ group {
     get  '/gui/staff-list'        => \&api_gui_staff_list;
     put  '/gui/booking/:id'       => \&api_gui_update_booking;
     get  '/gui/booking-list'      => \&api_gui_booking_list;
+    put  '/gui/user-booking/:id'  => \&api_gui_update_user_booking;
 
     sub api_create_user {
         my $self = shift;
@@ -3282,6 +3293,60 @@ group {
         $self->respond_to( json => { status => 200, json => \@data } );
     }
 
+    sub api_gui_update_user_booking {
+        my $self = shift;
+
+        #
+        # fetch params
+        #
+        my %params = $self->get_params(qw/ id status /);
+
+        #
+        # validate params
+        #
+        my $v = $self->create_validator;
+        $v->field('id')->required(1)->regexp(qr/^\d+$/);
+        $v->field('status')->in([ qw/ visiting / ]);
+        unless ( $self->validate( $v, \%params ) ) {
+            my @error_str;
+            while ( my ( $k, $v ) = each %{ $v->errors } ) {
+                push @error_str, "$k:$v";
+            }
+            return $self->error( 400, {
+                str  => join(',', @error_str),
+                data => $v->errors,
+            });
+        }
+
+        #
+        # find user_booking
+        #
+        my $user_booking = $DB->resultset('UserBooking')->find({ id => $params{id} });
+        return $self->error( 404, {
+            str  => 'user_booking not found',
+            data => {},
+        }) unless $user_booking;
+
+        #
+        # update user_booking
+        #
+        my %_params = %params;
+        delete $_params{id};
+
+        $user_booking->update( \%_params )
+            or return $self->error( 500, {
+                str  => 'failed to update a user_booking',
+                data => {},
+            });
+
+        #
+        # response
+        #
+        my $data = $self->flatten_user_booking($user_booking);
+
+        $self->respond_to( json => { status => 200, json => $data } );
+    }
+
 }; # end of API section
 
 under '/' => sub {
@@ -3970,6 +4035,77 @@ get '/booking/:ymd/open' => sub {
     }
 
     $self->redirect_to( $self->url_for( '/booking/' . $dt_start->ymd ) );
+};
+
+get '/timetable' => sub {
+    my $self = shift;
+
+    my $dt_today = DateTime->now( time_zone => app->config->{timezone} );
+    $self->redirect_to( $self->url_for( '/timetable/' . $dt_today->ymd ) );
+};
+
+get '/timetable/:ymd' => sub {
+    my $self = shift;
+
+    #
+    # fetch params
+    #
+    my %params = $self->get_params(qw/ ymd /);
+
+    unless ( $params{ymd} ) {
+        app->log->warn( "ymd is required" );
+        $self->redirect_to( $self->url_for('/timetable') );
+        return;
+    }
+
+    unless ( $params{ymd} =~ m/^(\d{4})-(\d{2})-(\d{2})$/ ) {
+        app->log->warn( "invalid ymd format: $params{ymd}" );
+        $self->redirect_to( $self->url_for('/timetable') );
+        return;
+    }
+
+    my $dt_start = try {
+        DateTime->new(
+            time_zone => app->config->{timezone},
+            year      => $1,
+            month     => $2,
+            day       => $3,
+        );
+    };
+    unless ($dt_start) {
+        app->log->warn( "cannot create start datetime object" );
+        $self->redirect_to( $self->url_for('/timetable') );
+        return;
+    }
+
+    my $dt_end = $dt_start->clone->add( hours => 24, seconds => -1 );
+    unless ($dt_end) {
+        app->log->warn( "cannot create end datetime object" );
+        $self->redirect_to( $self->url_for('/timetable') );
+        return;
+    }
+
+    my $dtf        = $DB->storage->datetime_parser;
+    my $booking_rs = $DB->resultset('Booking')->search(
+        {
+            date => {
+                -between => [
+                    $dtf->format_datetime($dt_start),
+                    $dtf->format_datetime($dt_end),
+                ],
+            },
+        },
+        {
+            order_by => { -asc => 'date' },
+        },
+    );
+
+    $self->render(
+        'timetable',
+        booking_rs => $booking_rs,
+        dt_start   => $dt_start,
+        dt_end     => $dt_end,
+    );
 };
 
 app->secrets( app->defaults->{secrets} );

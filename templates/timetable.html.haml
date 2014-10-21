@@ -1,0 +1,78 @@
+- use utf8;
+- my $_id = 'timetable';
+- layout 'default',
+-   page_id     => $_id,
+-   jses  => [ '/lib/bootstrap3-editable/js/bootstrap-editable.min.js' ],
+-   csses => [ '/lib/bootstrap3-editable/css/bootstrap-editable.css'   ],
+-   ;
+- title meta_text($_id);
+
+- my @times = qw(
+-   10:00
+-   10:30
+-   11:00
+-   11:30
+-   12:00
+-   12:30
+-   13:00
+-   13:30
+-   14:00
+-   14:30
+-   15:00
+-   15:30
+-   16:00
+-   16:30
+-   17:00
+-   17:30
+- );
+- my %booking_times;
+- while ( my $booking = $booking_rs->next ) {
+-   my $hm = sprintf '%02d:%02d', $booking->date->hour, $booking->date->minute;
+-   $booking_times{$hm}{$booking->gender}{booking} = $booking;
+-   my @users = $booking->users;
+-   my @user_bookings = $booking->user_bookings;
+-   for my $user_booking (@user_bookings) {
+-     my $gender = $user_booking->user->user_info->gender;
+-     $booking_times{$hm}{$gender}{users} = [] unless $booking_times{$hm}{$gender}{users};
+-     push @{ $booking_times{$hm}{$gender}{user_bookings} }, $user_booking;
+-   }
+- }
+
+.search
+  %form#search-form
+    .input-group
+      %input#query.form-control{ :placeholder => '날짜를 고르세요', 'data-date-format' => 'yyyy-mm-dd' }
+
+.space-8
+
+#timetable-table
+  %h2= $dt_start->ymd . ' 방문 현황'
+  .space-4
+  #timetable-data{ 'data-url' => "#{ url_for('/api/gui/user-booking') }" }
+  - use List::MoreUtils;
+  - my $it = List::MoreUtils::natatime( 2, @times );
+  - while ( my @vals = $it->() ) {
+    .row
+      - for my $time (@vals) {
+        .col-sm-6
+          .widget-box
+            .widget-header.widget-header-flat.widget-header-small
+              %h5.widget-title
+                %i.ace-icon.icon-pushpin
+                = $time
+              .widget-toolbar.no-border
+            .widget-body
+              .widget-main
+                %div.timetable-people
+                  - my $ubs = $booking_times{$time}{male}->{user_bookings} || [];
+                  - for my $ub (@$ubs) {
+                    %span.btn.btn-sm.timetable-person{ :class => "#{ $ub->status ? '' : 'btn-success' }", 'data-id' => "#{ $ub->id }", 'data-status' => "#{ $ub->status }" }= $ub->user->name
+                  - }
+                .hr.hr8.hr-double
+                %div.timetable-people
+                  - my $ubs = $booking_times{$time}{female}->{user_bookings} || [];
+                  - for my $ub (@$ubs) {
+                    %span.btn.btn-sm.timetable-person{ 'data-id' => "#{ $ub->id }", 'data-status' => "#{ $ub->status }" }= $ub->user->name
+                  - }
+      - }
+  - }

@@ -463,6 +463,11 @@ $opencloset-darken-yellow: desaturate(darken($opencloset-yellow, 4%), 10%);
             }
         }
     }
+    #timetable {
+        .timetable-people {
+            height: 36px;
+        }
+    }
     .step-content {
         .step-pane {
             h3 {
