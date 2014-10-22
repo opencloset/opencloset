@@ -4108,5 +4108,9 @@ get '/timetable/:ymd' => sub {
     );
 };
 
+get '/sms' => sub {
+    my $self = shift;
+};
+
 app->secrets( app->defaults->{secrets} );
 app->start;
