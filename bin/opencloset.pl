@@ -38,6 +38,8 @@ use Mojo::Util qw( encode );
 use String::Random;
 use Text::CSV;
 use Try::Tiny;
+use Unicode::GCString;
+use Unicode::Normalize;
 
 use OpenCloset::Schema;
 
@@ -1245,6 +1247,7 @@ group {
     put  '/gui/booking/:id'       => \&api_gui_update_booking;
     get  '/gui/booking-list'      => \&api_gui_booking_list;
     put  '/gui/user-booking/:id'  => \&api_gui_update_user_booking;
+    post '/gui/utf8/gcs-columns'  => \&api_gui_utf8_gcs_columns;
 
     sub api_create_user {
         my $self = shift;
@@ -3347,6 +3350,44 @@ group {
         $self->respond_to( json => { status => 200, json => $data } );
     }
 
+    sub api_gui_utf8_gcs_columns {
+        my $self = shift;
+
+        #
+        # fetch params
+        #
+        my %params = $self->get_params(qw/ str /);
+
+        #
+        # validate params
+        #
+        my $v = $self->create_validator;
+        $v->field('str')->required(1);
+        unless ( $self->validate( $v, \%params ) ) {
+            my @error_str;
+            while ( my ( $k, $v ) = each %{ $v->errors } ) {
+                push @error_str, "$k:$v";
+            }
+            return $self->error( 400, {
+                str  => join(',', @error_str),
+                data => $v->errors,
+            });
+        }
+
+        my $val = $params{str};
+
+        my $nfc  = NFC($val);
+        my $gcs  = Unicode::GCString->new($nfc);
+        my $cols = $gcs->columns;
+
+        #
+        # response
+        #
+        my $data = { ret => $cols };
+
+        $self->respond_to( json => { status => 200, json => $data } );
+    }
+
 }; # end of API section
 
 under '/' => sub {
@@ -4106,6 +4147,10 @@ get '/timetable/:ymd' => sub {
         dt_start   => $dt_start,
         dt_end     => $dt_end,
     );
+};
+
+get '/sms' => sub {
+    my $self = shift;
 };
 
 app->secrets( app->defaults->{secrets} );
