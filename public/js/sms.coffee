@@ -41,5 +41,4 @@ $ ->
         #
         # 전송
         #
-        console.log( to )
-        console.log( msg )
+        OpenCloset.sendSMS to, msg

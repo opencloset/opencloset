@@ -39,8 +39,7 @@
             $('#form-field-2').focus();
             return;
           }
-          console.log(to);
-          return console.log(msg);
+          return OpenCloset.sendSMS(to, msg);
         }
       });
     });
