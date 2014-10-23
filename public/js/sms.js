@@ -39,7 +39,10 @@
             $('#form-field-2').focus();
             return;
           }
-          return OpenCloset.sendSMS(to, msg);
+          OpenCloset.sendSMS(to, msg);
+          $('#form-field-1').prop('value', '');
+          $('#form-field-2').prop('value', '');
+          return OpenCloset.alert('success', '문자 메시지를 전송했습니다.');
         }
       });
     });
