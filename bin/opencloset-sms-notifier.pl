@@ -29,6 +29,7 @@ $SIG{HUP}  = sub {
         send_delay => 1,
     );
 };
+
 while ($continue) {
     do_work();
     sleep $CONF->{delay};
@@ -36,6 +37,8 @@ while ($continue) {
 
 sub do_work {
     for my $sms ( get_pending_sms_list() ) {
+        print STDERR "$CONF->{fake_sms},$sms->{id},$sms->{from},$sms->{to},$sms->{text}\n";
+
         #
         # updating status to sending
         #
