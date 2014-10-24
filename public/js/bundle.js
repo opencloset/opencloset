@@ -147,7 +147,7 @@
         gray: '회색',
         brown: '갈색'
       },
-      payWith: ['현금', '카드', '계좌이체'],
+      payWith: ['현금', '카드', '계좌이체', '현금영수증', '세금계산서'],
       trimClothesCode: function(code) {
         code = code.replace(/^\s+/, '');
         code = code.replace(/\s+$/, '');
