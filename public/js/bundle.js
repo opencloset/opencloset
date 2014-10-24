@@ -68,6 +68,14 @@
         '반납배송중': {
           id: 11,
           css: 'label-warning'
+        },
+        '미방문': {
+          id: 12,
+          css: 'label-warning'
+        },
+        '방문': {
+          id: 13,
+          css: 'label-warning'
         }
       },
       category: {
