@@ -105,12 +105,12 @@ $db_opts->{AutoCommit} //= 1;
     },
 
     'opencloset-sms-notifier.pl' => {
-        fake_sms   => 1,
-        delay      => 60,
+        fake_sms   => 0,
+        delay      => 10,
         send_delay => 1,
-        base_url   => 'http://localhost:5000/api',
-        user       => 'opencloset',
-        pass       => q{},
+        base_url   => 'https://localhost:5000/api',
+        api_key    => $ENV{OPENCLOSET_COOLSMS_API_KEY}    || q{},
+        api_secret => $ENV{OPENCLOSET_COOLSMS_API_SECRET} || q{},
     },
 
     'opencloset-cron.pl' => {

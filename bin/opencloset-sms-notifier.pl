@@ -103,11 +103,9 @@ sub send_sms {
 
     my $sender = SMS::Send->new(
         'KR::CoolSMS',
-        _ssl      => 1,
-        _user     => $CONF->{user},
-        _password => $CONF->{pass},
-        _type     => 'sms',
-        _from     => $sms->{from},
+        _api_key    => $CONF->{api_key},
+        _api_secret => $CONF->{api_secret},
+        _from       => $sms->{from},
     );
 
     my $sent = $sender->send_sms(
