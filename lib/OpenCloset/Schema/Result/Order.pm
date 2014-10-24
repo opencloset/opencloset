@@ -344,6 +344,21 @@ __PACKAGE__->set_primary_key("id");
 
 =head1 RELATIONS
 
+=head2 order_bookings
+
+Type: has_many
+
+Related object: L<OpenCloset::Schema::Result::OrderBooking>
+
+=cut
+
+__PACKAGE__->has_many(
+  "order_bookings",
+  "OpenCloset::Schema::Result::OrderBooking",
+  { "foreign.order_id" => "self.id" },
+  { cascade_copy => 0, cascade_delete => 0 },
+);
+
 =head2 order_details
 
 Type: has_many
@@ -450,8 +465,8 @@ __PACKAGE__->belongs_to(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07040 @ 2014-08-21 15:11:51
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:yBg8BohpUVnrZIKqnhF40g
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2014-10-24 17:11:00
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:EltciT95kElZ3V9Jon+1Zw
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

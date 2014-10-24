@@ -108,37 +108,37 @@ __PACKAGE__->add_unique_constraint("date", ["date", "gender"]);
 
 =head1 RELATIONS
 
-=head2 user_bookings
+=head2 order_bookings
 
 Type: has_many
 
-Related object: L<OpenCloset::Schema::Result::UserBooking>
+Related object: L<OpenCloset::Schema::Result::OrderBooking>
 
 =cut
 
 __PACKAGE__->has_many(
-  "user_bookings",
-  "OpenCloset::Schema::Result::UserBooking",
+  "order_bookings",
+  "OpenCloset::Schema::Result::OrderBooking",
   { "foreign.booking_id" => "self.id" },
   { cascade_copy => 0, cascade_delete => 0 },
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07040 @ 2014-08-28 16:11:58
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:cYuyr5WrQ1PNGZol1mJB3Q
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2014-10-24 17:10:59
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:fxhwxEcSgO8c9TEANsGMgQ
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration
 
-=head2 users
+=head2 orders
 
 Type: many_to_many
 
-Related object: L<OpenCloset::Schema::Result::User>
+Related object: L<OpenCloset::Schema::Result::Order>
 
 =cut
 
-__PACKAGE__->many_to_many( "users", "user_bookings", "user" );
+__PACKAGE__->many_to_many( "orders", "order_bookings", "order" );
 
 =head1 Additional ACCESSORS
 

@@ -213,21 +213,6 @@ __PACKAGE__->has_many(
   { cascade_copy => 0, cascade_delete => 0 },
 );
 
-=head2 user_bookings
-
-Type: has_many
-
-Related object: L<OpenCloset::Schema::Result::UserBooking>
-
-=cut
-
-__PACKAGE__->has_many(
-  "user_bookings",
-  "OpenCloset::Schema::Result::UserBooking",
-  { "foreign.user_id" => "self.id" },
-  { cascade_copy => 0, cascade_delete => 0 },
-);
-
 =head2 user_info
 
 Type: might_have
@@ -244,8 +229,8 @@ __PACKAGE__->might_have(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07040 @ 2014-08-28 16:11:59
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:KmEbL8mfXXueQ1XRmL4heQ
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2014-10-24 17:11:00
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:4jz3uBzYdFjgmGtXpDruSA
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

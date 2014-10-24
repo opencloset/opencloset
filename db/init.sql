@@ -120,7 +120,9 @@ INSERT INTO `status` (`id`, `name`)
     (8,  '폐기'),
     (9,  '반납'),
     (10, '부분반납'),
-    (11, '반납배송중')
+    (11, '반납배송중'),
+    (12, '미방문'),
+    (13, '방문')
     ;
 
 --
@@ -338,21 +340,20 @@ CREATE TABLE `booking` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
--- user_booking
+-- order_booking
 --
 
-CREATE TABLE `user_booking` (
+CREATE TABLE `order_booking` (
   `id`           INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `user_id`      INT UNSIGNED NOT NULL,
+  `order_id`     INT UNSIGNED NOT NULL,
   `booking_id`   INT UNSIGNED NOT NULL,
-  `status`       VARCHAR(16)  DEFAULT NULL COMMENT 'NULL/visiting',
   `create_date`  DATETIME     DEFAULT NULL,
   `update_date`  DATETIME     DEFAULT NULL,
 
   PRIMARY KEY (`id`),
-  UNIQUE  KEY ( `user_id`, `booking_id` ),
-  CONSTRAINT `fk_user_booking1` FOREIGN KEY (`user_id`)    REFERENCES `user`    (`id`) ON DELETE CASCADE,
-  CONSTRAINT `fk_user_booking2` FOREIGN KEY (`booking_id`) REFERENCES `booking` (`id`) ON DELETE CASCADE
+  UNIQUE  KEY ( `order_id`, `booking_id` ),
+  CONSTRAINT `fk_order_booking1` FOREIGN KEY (`order_id`)   REFERENCES `order`   (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_order_booking2` FOREIGN KEY (`booking_id`) REFERENCES `booking` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
