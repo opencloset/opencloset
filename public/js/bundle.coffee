@@ -75,8 +75,7 @@ $ ->
     payWith: [
       '현금',
       '카드',
-      '현금+카드',
-      '계좌 이체',
+      '계좌이체',
     ]
     trimClothesCode: (code) ->
       code = code.replace /^\s+/, ''
