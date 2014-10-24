@@ -81,7 +81,7 @@ sub update_sms {
     return unless $sms;
     return unless %params;
 
-    my $id = $sms->id;
+    my $id = $sms->{id};
     my $res = HTTP::Tiny->new->put(
         "$CONF->{base_url}/sms/$id.json",
         {
