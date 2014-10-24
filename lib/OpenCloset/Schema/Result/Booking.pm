@@ -108,37 +108,37 @@ __PACKAGE__->add_unique_constraint("date", ["date", "gender"]);
 
 =head1 RELATIONS
 
-=head2 order_bookings
-
-Type: has_many
-
-Related object: L<OpenCloset::Schema::Result::OrderBooking>
-
-=cut
-
-__PACKAGE__->has_many(
-  "order_bookings",
-  "OpenCloset::Schema::Result::OrderBooking",
-  { "foreign.booking_id" => "self.id" },
-  { cascade_copy => 0, cascade_delete => 0 },
-);
-
-
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2014-10-24 17:10:59
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:fxhwxEcSgO8c9TEANsGMgQ
-
-
-# You can replace this text with custom code or comments, and it will be preserved on regeneration
-
 =head2 orders
 
-Type: many_to_many
+Type: has_many
 
 Related object: L<OpenCloset::Schema::Result::Order>
 
 =cut
 
-__PACKAGE__->many_to_many( "orders", "order_bookings", "order" );
+__PACKAGE__->has_many(
+  "orders",
+  "OpenCloset::Schema::Result::Order",
+  { "foreign.booking_id" => "self.id" },
+  { cascade_copy => 0, cascade_delete => 0 },
+);
+
+
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2014-10-24 23:00:47
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:7wVNRArL3G4qX4qQ13Za7A
+
+
+# You can replace this text with custom code or comments, and it will be preserved on regeneration
+
+=head2 users
+
+Type: many_to_many
+
+Related object: L<OpenCloset::Schema::Result::User>
+
+=cut
+
+__PACKAGE__->many_to_many( "users", "orders", "user" );
 
 =head1 Additional ACCESSORS
 

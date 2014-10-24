@@ -3222,30 +3222,30 @@ group {
             return;
         }
 
-        my $dtf = $DB->storage->datetime_parser;
-
         #
         # SELECT
         #     `me`.`id`,
         #     `me`.`date`,
         #     `me`.`gender`,
         #     `me`.`slot`,
-        #     COUNT( `user_bookings`.`user_id` ) AS `user_count`
+        #     COUNT( `user`.`id` ) AS `user_count`
         # FROM `booking` `me`
-        # LEFT JOIN `user_booking` `user_bookings`
-        # ON `user_bookings`.`booking_id` = `me`.`id`
-        # WHERE
-        #     (
-        #         ( `me`.`date` BETWEEN ? AND ? )
-        #         AND `me`.`gender` = ?
-        #         AND `me`.`id` IS NOT NULL
-        #     )
-        # GROUP BY `me`.`id`
-        # HAVING COUNT(user_bookings.user_id) < me.slot
+        # LEFT JOIN `order` `orders`
+        #     ON `orders`.`booking_id` = `me`.`id`
+        # LEFT JOIN `user` `user`
+        #     ON `user`.`id` = `orders`.`user_id`
+        # WHERE (
+        #     ( `me`.`date` BETWEEN ? AND ? )
+        #     AND `me`.`gender` = ?
+        #     AND `me`.`id` IS NOT NULL
+        # )
+        # GROUP BY `me`.`id` HAVING COUNT(user.id) < me.slot
         # ORDER BY `me`.`date` ASC
         #
         # http://stackoverflow.com/questions/5285448/mysql-select-only-not-null-values
+        # https://metacpan.org/pod/DBIx::Class::Manual::Joining#Across-multiple-relations
         #
+        my $dtf        = $DB->storage->datetime_parser;
         my $booking_rs = $DB->resultset('Booking')->search(
             {
                 'me.id'     => { '!=' => undef },
@@ -3259,11 +3259,11 @@ group {
             },
             {
                 '+columns' => [
-                    { user_count => { count => 'user_bookings.user_id', -as => 'user_count' } },
+                    { user_count => { count => 'user.id', -as => 'user_count' } },
                 ],
-                join       => 'user_bookings',
+                join       => { 'orders' => 'user' },
                 group_by   => [ qw/ me.id / ],
-                having     => \[ 'COUNT(user_bookings.user_id) < me.slot' ],
+                having     => \[ 'COUNT(user.id) < me.slot' ],
                 order_by   => { -asc => 'me.date' },
             },
         );
@@ -3456,8 +3456,8 @@ any '/visit' => sub {
             #
             # 예약 취소
             #
-            my $user_booking = $user->find_related( 'user_bookings', { booking_id => $booking_saved } );
-            $user_booking->delete if $user_booking;
+            my $order = $user->find_related( 'orders', { booking_id => $booking_saved } );
+            $order->delete if $order;
         }
         else {
             $user = $self->update_user( \%user_params, \%user_info_params );
@@ -3465,19 +3465,19 @@ any '/visit' => sub {
                 #
                 # 이미 예약 정보가 저장되어 있는 경우 - 예약 변경 상황
                 #
-                my $user_booking = $user->find_related( 'user_bookings', { booking_id => $booking_saved } );
+                my $order = $user->find_related( 'orders', { booking_id => $booking_saved } );
                 if ( $booking != $booking_saved ) {
                     #
                     # 변경한 예약 정보가 기존 정보와 다를 경우 갱신함
                     #
-                    $user_booking->update({ booking_id => $booking }) if $user_booking;
+                    $order->update({ booking_id => $booking }) if $order;
                 }
             }
             else {
                 #
                 # 예약 정보가 없는 경우 - 신규 예약 신청 상황
                 #
-                $user->create_related( 'user_bookings', { booking_id => $booking } );
+                my $order = $user->create_related('orders', { booking_id => $booking } );
             }
         }
     }
@@ -3485,7 +3485,7 @@ any '/visit' => sub {
     my $booking_obj = do {
         my $dt_now = DateTime->now( time_zone => app->config->{timezone} );
         my $dtf    = $DB->storage->datetime_parser;
-        my $rs     = $user->search_related('user_bookings')->search_related('booking', {
+        my $rs     = $user->search_related('orders')->search_related('booking', {
             date => { '>' => $dtf->format_datetime($dt_now) },
         });
 

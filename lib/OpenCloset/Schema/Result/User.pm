@@ -183,7 +183,7 @@ __PACKAGE__->has_many(
   { cascade_copy => 0, cascade_delete => 0 },
 );
 
-=head2 order_users
+=head2 orders
 
 Type: has_many
 
@@ -192,7 +192,7 @@ Related object: L<OpenCloset::Schema::Result::Order>
 =cut
 
 __PACKAGE__->has_many(
-  "order_users",
+  "orders",
   "OpenCloset::Schema::Result::Order",
   { "foreign.user_id" => "self.id" },
   { cascade_copy => 0, cascade_delete => 0 },
@@ -229,8 +229,8 @@ __PACKAGE__->might_have(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2014-10-24 17:11:00
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:4jz3uBzYdFjgmGtXpDruSA
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2014-10-24 21:13:46
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:BcPbOLJ4wDt702tyUaq8Og
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

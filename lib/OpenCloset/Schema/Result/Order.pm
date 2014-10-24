@@ -62,6 +62,13 @@ __PACKAGE__->table("order");
   is_foreign_key: 1
   is_nullable: 1
 
+=head2 booking_id
+
+  data_type: 'integer'
+  extra: {unsigned => 1}
+  is_foreign_key: 1
+  is_nullable: 1
+
 =head2 additional_day
 
   data_type: 'integer'
@@ -242,6 +249,13 @@ __PACKAGE__->add_columns(
     is_foreign_key => 1,
     is_nullable => 1,
   },
+  "booking_id",
+  {
+    data_type => "integer",
+    extra => { unsigned => 1 },
+    is_foreign_key => 1,
+    is_nullable => 1,
+  },
   "additional_day",
   {
     data_type => "integer",
@@ -344,19 +358,24 @@ __PACKAGE__->set_primary_key("id");
 
 =head1 RELATIONS
 
-=head2 order_bookings
+=head2 booking
 
-Type: has_many
+Type: belongs_to
 
-Related object: L<OpenCloset::Schema::Result::OrderBooking>
+Related object: L<OpenCloset::Schema::Result::Booking>
 
 =cut
 
-__PACKAGE__->has_many(
-  "order_bookings",
-  "OpenCloset::Schema::Result::OrderBooking",
-  { "foreign.order_id" => "self.id" },
-  { cascade_copy => 0, cascade_delete => 0 },
+__PACKAGE__->belongs_to(
+  "booking",
+  "OpenCloset::Schema::Result::Booking",
+  { id => "booking_id" },
+  {
+    is_deferrable => 1,
+    join_type     => "LEFT",
+    on_delete     => "CASCADE",
+    on_update     => "RESTRICT",
+  },
 );
 
 =head2 order_details
@@ -465,8 +484,8 @@ __PACKAGE__->belongs_to(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2014-10-24 17:11:00
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:EltciT95kElZ3V9Jon+1Zw
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2014-10-24 23:00:47
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:ZeDrFNnKjYtekK8XzsT3FQ
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

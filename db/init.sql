@@ -266,6 +266,7 @@ CREATE TABLE `order` (
   `status_id`         INT UNSIGNED DEFAULT NULL,
   `staff_id`          INT UNSIGNED DEFAULT NULL,
   `parent_id`         INT UNSIGNED DEFAULT NULL,
+  `booking_id`        INT UNSIGNED DEFAULT NULL,
 
   `additional_day`    INT UNSIGNED DEFAULT 0,
   `rental_date`       DATETIME DEFAULT NULL,
@@ -296,10 +297,11 @@ CREATE TABLE `order` (
   `update_date`      DATETIME DEFAULT NULL,
 
   PRIMARY KEY (`id`),
-  CONSTRAINT `fk_order1` FOREIGN KEY (`user_id`)   REFERENCES `user`   (`id`) ON DELETE CASCADE,
-  CONSTRAINT `fk_order2` FOREIGN KEY (`status_id`) REFERENCES `status` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `fk_order3` FOREIGN KEY (`staff_id`)  REFERENCES `user`   (`id`) ON DELETE CASCADE,
-  CONSTRAINT `fk_order4` FOREIGN KEY (`parent_id`) REFERENCES `order`  (`id`) ON DELETE CASCADE
+  CONSTRAINT `fk_order1` FOREIGN KEY (`user_id`)    REFERENCES `user`    (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_order2` FOREIGN KEY (`status_id`)  REFERENCES `status`  (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_order3` FOREIGN KEY (`staff_id`)   REFERENCES `user`    (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_order4` FOREIGN KEY (`parent_id`)  REFERENCES `order`   (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_order5` FOREIGN KEY (`booking_id`) REFERENCES `booking` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
@@ -337,23 +339,6 @@ CREATE TABLE `booking` (
 
   PRIMARY KEY (`id`),
   UNIQUE  KEY ( `date`, `gender` )
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
---
--- order_booking
---
-
-CREATE TABLE `order_booking` (
-  `id`           INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `order_id`     INT UNSIGNED NOT NULL,
-  `booking_id`   INT UNSIGNED NOT NULL,
-  `create_date`  DATETIME     DEFAULT NULL,
-  `update_date`  DATETIME     DEFAULT NULL,
-
-  PRIMARY KEY (`id`),
-  UNIQUE  KEY ( `order_id`, `booking_id` ),
-  CONSTRAINT `fk_order_booking1` FOREIGN KEY (`order_id`)   REFERENCES `order`   (`id`) ON DELETE CASCADE,
-  CONSTRAINT `fk_order_booking2` FOREIGN KEY (`booking_id`) REFERENCES `booking` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
