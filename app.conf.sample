@@ -8,6 +8,8 @@ use warnings;
 
 use Mojo::JSON;
 
+my $SMS_FROM = '07075837521',
+
 my $json    = Mojo::JSON->new;
 my $db_opts = $ENV{OPENCLOSET_DATABASE_OPTS} ? $json->decode( $ENV{OPENCLOSET_DATABASE_OPTS} ) : +{
     quote_char        => q{`},
@@ -120,8 +122,8 @@ $db_opts->{AutoCommit} //= 1;
         workers   => {
             send_sms_to_late_users => {
                 cron     => '0 9 * * *',
-                base_url => 'http://localhost:7723/api',
-                from     => '07075837521',
+                base_url => 'https://localhost:5000/api',
+                from     => $SMS_FROM,
                 text_fmt => "%s님 대여하신 의류가 연체되었습니다. -열린옷장",
                 timeout  => 3,
             },
@@ -132,10 +134,7 @@ $db_opts->{AutoCommit} //= 1;
     # SMS
     #
     sms => {
-        sender   => '07075837521',
-        text     => '[열린옷장]에서 보내는 본인확인용 문자입니다. :)',
-        username => $ENV{OPENCLOSET_COOLSMS_USER} || 'opencloset',
-        password => $ENV{OPENCLOSET_COOLSMS_PASS} || '',
+        from => $SMS_FROM,
     },
 
     #

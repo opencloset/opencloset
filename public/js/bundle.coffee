@@ -93,7 +93,6 @@ $ ->
       $.ajax "/api/sms.json",
         type: 'POST'
         data:
-          from: '07075837521'
           to:   to
           text: text
         success: (data, textStatus, jqXHR) ->
@@ -102,7 +101,6 @@ $ ->
       $.ajax "/api/sms/validation.json",
         type: 'POST'
         data:
-          from: '07075837521'
           to:   to
         success: (data, textStatus, jqXHR) ->
         error: (jqXHR, textStatus, errorThrown) ->

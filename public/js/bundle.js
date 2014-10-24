@@ -167,7 +167,6 @@
         return $.ajax("/api/sms.json", {
           type: 'POST',
           data: {
-            from: '07075837521',
             to: to,
             text: text
           },
@@ -179,7 +178,6 @@
         return $.ajax("/api/sms/validation.json", {
           type: 'POST',
           data: {
-            from: '07075837521',
             to: to
           },
           success: function(data, textStatus, jqXHR) {},

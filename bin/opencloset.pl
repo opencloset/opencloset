@@ -2681,14 +2681,13 @@ group {
         #
         # fetch params
         #
-        my %params = $self->get_params(qw/ from to text status /);
+        my %params = $self->get_params(qw/ to text status /);
 
         #
         # validate params
         #
         my $v = $self->create_validator;
-        $v->field(qw/ from to /)
-            ->each( sub { shift->required(1)->regexp(qr/^\d+$/) } );
+        $v->field('to')->required(1)->regexp(qr/^\d+$/);
         $v->field('text')->required(1)->regexp(qr/^.+$/);
         $v->field('status')->in(qw/ pending sending sent /);
 
@@ -2703,7 +2702,10 @@ group {
             }), return;
         }
 
-        my $sms = $DB->resultset('SMS')->create( \%params );
+        my $sms = $DB->resultset('SMS')->create({
+            %params,
+            from => app->config->{sms}{from},
+        });
         return $self->error( 404, {
             str  => 'failed to create a new sms',
             data => {},
@@ -2808,15 +2810,13 @@ group {
         #
         # fetch params
         #
-        my %params = $self->get_params(qw/ from to status /);
+        my %params = $self->get_params(qw/ to /);
 
         #
         # validate params
         #
         my $v = $self->create_validator;
-        $v->field(qw/ from to /)
-            ->each( sub { shift->required(1)->regexp(qr/^\d+$/) } );
-        $v->field('status')->in(qw/ pending sending sent /);
+        $v->field('to')->required(1)->regexp(qr/^\d+$/);
 
         unless ( $self->validate( $v, \%params ) ) {
             my @error_str;
@@ -2860,6 +2860,7 @@ group {
 
         my $sms = $DB->resultset('SMS')->create({
             %params,
+            from => app->config->{sms}{from},
             text => "열린옷장 인증번호: $password",
         });
         return $self->error( 404, {
