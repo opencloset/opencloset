@@ -3743,33 +3743,57 @@ get '/order' => sub {
     });
 
     #
-    # undef  - 상태없음
-    # rental - 대여중 (2)
-    # return - 반납 (9)
-    # late   - 연체중
+    # undef       => '상태없음'
+    # late        => '연체중'
+    # rental-late => '대여중(연체아님)'
     #
+    # 1     =>  '대여가능'
+    # 2     =>  '대여중'
+    # 3     =>  '대여불가'
+    # 4     =>  '예약'
+    # 5     =>  '세탁'
+    # 6     =>  '수선'
+    # 7     =>  '분실'
+    # 8     =>  '폐기'
+    # 9     =>  '반납'
+    # 10    =>  '부분반납'
+    # 11    =>  '반납배송중'
+    # 12    =>  '미방문'
+    # 13    =>  '방문'
+    # 14    =>  '방문예약'
+    # 15    =>  '배송예약'
+    #
+
     {
         no warnings 'experimental';
-        given ( $search_params{status} ) {
-            $rs = $rs->search({ status_id => { '=' => undef } }) when 'undef';
-            $rs = $rs->search({ status_id => 9 })                when 'return';
-            when ('rental') {
-                $rs = $rs->search({
-                    -and => [
-                        status_id   => 2,
-                        target_date => { '>=' => DateTime->now },
-                    ],
-                });
+        my $status_id = $search_params{status};
+        my %cond;
+        given ($status_id) {
+            when ('undef') {
+                %cond = ( status_id => { '=' => undef },);
             }
             when ('late') {
-                $rs = $rs->search({
+                %cond = (
                     -and => [
                         status_id   => 2,
                         target_date => { '<' => DateTime->now },
                     ],
-                });
+                );
+            }
+            when ('rental-late') {
+                %cond = (
+                    -and => [
+                        status_id   => $status_id,
+                        target_date => { '>=' => DateTime->now },
+                    ],
+                );
+            }
+            default {
+                my @valid = 1 .. 15;
+                %cond = ( status_id => $status_id ) if $status_id ~~ @valid;
             }
         }
+        $rs = $rs->search(\%cond);
     }
 
     #
