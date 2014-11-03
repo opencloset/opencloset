@@ -76,6 +76,14 @@
         '방문': {
           id: 13,
           css: 'label-warning'
+        },
+        '방문예약': {
+          id: 14,
+          css: 'label-info'
+        },
+        '배송예약': {
+          id: 15,
+          css: 'label-info'
         }
       },
       category: {

@@ -3477,7 +3477,10 @@ any '/visit' => sub {
                 #
                 # 예약 정보가 없는 경우 - 신규 예약 신청 상황
                 #
-                my $order = $user->create_related('orders', { booking_id => $booking } );
+                my $order = $user->create_related('orders', {
+                    status_id  => 14,      # 방문예약: status 테이블 참조
+                    booking_id => $booking,
+                });
             }
         }
     }
