@@ -21,7 +21,7 @@
         return;
       }
       if (query.length === 4) {
-        $.ajax("/api/clothes/" + query + ".json", {
+        return $.ajax("/api/clothes/" + query + ".json", {
           type: 'GET',
           dataType: 'json',
           success: function(data, textStatus, jqXHR) {
@@ -60,33 +60,6 @@
           complete: function(jqXHR, textStatus) {}
         });
       }
-      return $.ajax('/api/search/user.json', {
-        type: 'GET',
-        data: {
-          q: query
-        },
-        dataType: 'json',
-        success: function(data, textStatus, jqXHR) {
-          var $html, compiled, user, _i, _len, _results;
-          _results = [];
-          for (_i = 0, _len = data.length; _i < _len; _i++) {
-            user = data[_i];
-            if ($("#user-table table tbody tr[data-user-id='" + user.id + "']").length) {
-              continue;
-            }
-            compiled = _.template($('#tpl-row-radio').html());
-            $html = $(compiled(user));
-            _results.push($("#user-table table tbody").append($html));
-          }
-          return _results;
-        },
-        error: function(jqXHR, textStatus, errorThrown) {
-          if (jqXHR.status === 404) {
-            return OpenCloset.alert('warning', "" + query + " 검색어와 관련있는 사용자는 찾을 수 없습니다.");
-          }
-        },
-        complete: function(jqXHR, textStatus) {}
-      });
     });
     $('#input-check-all').click(function(e) {
       var is_checked;

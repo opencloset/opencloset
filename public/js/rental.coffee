@@ -18,7 +18,7 @@ $ ->
     #
     # 검색어 길이가 4이면
     #
-    if ( query.length is 4 )
+    if query.length is 4
       #
       # 의류 검색 및 결과 테이블 갱신
       #
@@ -51,23 +51,6 @@ $ ->
           if jqXHR.status is 404
             OpenCloset.alert 'warning', "#{query} 의류는 찾을 수 없습니다."
         complete: (jqXHR, textStatus) ->
-    #
-    # 사용자 검색 및 결과 테이블 갱신
-    #
-    $.ajax '/api/search/user.json',
-      type: 'GET'
-      data: { q: query }
-      dataType: 'json'
-      success: (data, textStatus, jqXHR) ->
-        for user in data
-          continue if $("#user-table table tbody tr[data-user-id='#{user.id}']").length
-          compiled = _.template($('#tpl-row-radio').html())
-          $html = $(compiled(user))
-          $("#user-table table tbody").append($html)
-      error: (jqXHR, textStatus, errorThrown) ->
-        if jqXHR.status is 404
-          OpenCloset.alert 'warning', "#{query} 검색어와 관련있는 사용자는 찾을 수 없습니다."
-      complete: (jqXHR, textStatus) ->
 
   #
   # 의류 검색 결과 테이블에서 모든 항목 선택 및 취소
