@@ -5,7 +5,7 @@
     $('#btn-clear').click(function(e) {
       e.preventDefault();
       $('#clothes-table table tbody tr').remove();
-      $('#user-table table tbody tr').remove();
+      $('#order-table table tbody tr').remove();
       $('#action-buttons').hide();
       return $('#query').focus();
     });
@@ -67,8 +67,8 @@
       return $(this).closest('thead').next().find('.ace:checkbox:not(:disabled)').prop('checked', is_checked);
     });
     return $('#action-buttons').click(function(e) {
-      var clothes, user;
-      user = $('input[name=user_id]:checked').val();
+      var clothes, order;
+      order = $('input[name=id]:checked').val();
       clothes = [];
       $('input[name=clothes_code]:checked').each(function(i, el) {
         if ($(el).attr('id') === 'input-check-all') {
@@ -77,8 +77,8 @@
         return clothes.push($(el).data('clothes-code'));
       });
       clothes = _.uniq(clothes);
-      if (!user) {
-        return OpenCloset.alert('danger', '대여할 사용자를 선택해 주세요');
+      if (!order) {
+        return OpenCloset.alert('danger', '대여할 주문서를 선택해 주세요');
       }
       if (!clothes) {
         return OpenCloset.alert('danger', '대여할 옷을 선택해 주세요.');

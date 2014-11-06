@@ -3702,38 +3702,72 @@ get '/clothes/:code' => sub {
 get '/rental' => sub {
     my $self = shift;
 
-    my $q = $self->param('q');
+    my $dt_today = DateTime->now( time_zone => app->config->{timezone} );
+    $self->redirect_to( $self->url_for( '/rental/' . $dt_today->ymd ) );
+};
 
-    ### DBIx::Class::Storage::DBI::_gen_sql_bind(): DateTime objects passed to search() are not
-    ### supported properly (InflateColumn::DateTime formats and settings are not respected.)
-    ### See "Formatting DateTime objects in queries" in DBIx::Class::Manual::Cookbook.
-    ### To disable this warning for good set $ENV{DBIC_DT_SEARCH_OK} to true
-    ###
-    ### DateTime object 를 search 에 바로 사용하지 말고 parser 를 이용하라능 - @aanoaa
-    my $today     = DateTime->today( time_zone => app->config->{timezone} );
-    my $dt_parser = $DB->storage->datetime_parser;
+get '/rental/:ymd' => sub {
+    my $self = shift;
 
-    my @users = $DB->resultset('User')->search(
+    #
+    # fetch params
+    #
+    my %params = $self->get_params(qw/ ymd /);
+
+    unless ( $params{ymd} ) {
+        app->log->warn( "ymd is required" );
+        $self->redirect_to( $self->url_for('/rental') );
+        return;
+    }
+
+    unless ( $params{ymd} =~ m/^(\d{4})-(\d{2})-(\d{2})$/ ) {
+        app->log->warn( "invalid ymd format: $params{ymd}" );
+        $self->redirect_to( $self->url_for('/rental') );
+        return;
+    }
+
+    my $dt_start = try {
+        DateTime->new(
+            time_zone => app->config->{timezone},
+            year      => $1,
+            month     => $2,
+            day       => $3,
+        );
+    };
+    unless ($dt_start) {
+        app->log->warn( "cannot create start datetime object" );
+        $self->redirect_to( $self->url_for('/rental') );
+        return;
+    }
+
+    my $dt_end = $dt_start->clone->add( hours => 24, seconds => -1 );
+    unless ($dt_end) {
+        app->log->warn( "cannot create end datetime object" );
+        $self->redirect_to( $self->url_for('/rental') );
+        return;
+    }
+
+    my $dtf      = $DB->storage->datetime_parser;
+    my $order_rs = $DB->resultset('Order')->search(
         {
-            -or => [
-                {
-                    -or => [
-                        'me.id'           => $q,
-                        'me.name'         => $q,
-                        'me.email'        => $q,
-                        'user_info.phone' => $q,
-                    ],
-                },
-                { update_date => { '>=' => $dt_parser->format_datetime($today) } },
-            ],
+            'booking.date' => {
+                -between => [
+                    $dtf->format_datetime($dt_start),
+                    $dtf->format_datetime($dt_end),
+                ],
+            },
         },
         {
-            order_by => { -desc => 'update_date' },
-            join     => 'user_info',
+            join     => 'booking',
+            order_by => { -asc => 'booking.date' },
         },
     );
 
-    $self->stash( users => \@users );
+    $self->stash(
+        order_rs => $order_rs,
+        dt_start => $dt_start,
+        dt_end   => $dt_end,
+    );
 } => 'rental';
 
 get '/order' => sub {

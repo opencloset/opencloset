@@ -3,7 +3,7 @@ $ ->
   $('#btn-clear').click (e) ->
     e.preventDefault()
     $('#clothes-table table tbody tr').remove()
-    $('#user-table table tbody tr').remove()
+    $('#order-table table tbody tr').remove()
     $('#action-buttons').hide()
     $('#query').focus()
   $('#btn-search').click (e) ->
@@ -63,7 +63,7 @@ $ ->
   # 대여 버튼 클릭
   #
   $('#action-buttons').click (e) ->
-    user = $('input[name=user_id]:checked').val()
+    order = $('input[name=id]:checked').val()
 
     clothes = []
     $('input[name=clothes_code]:checked').each (i, el) ->
@@ -71,7 +71,7 @@ $ ->
       clothes.push($(el).data('clothes-code'))
     clothes = _.uniq(clothes)
 
-    return OpenCloset.alert('danger', '대여할 사용자를 선택해 주세요') unless user
+    return OpenCloset.alert('danger', '대여할 주문서를 선택해 주세요') unless order
     return OpenCloset.alert('danger', '대여할 옷을 선택해 주세요.')    unless clothes
 
     $('#order-form').submit()
