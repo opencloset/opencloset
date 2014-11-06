@@ -759,32 +759,50 @@ helper update_order => sub {
     #
     # validate params
     #
-    my $v = $self->create_validator;
-    $v->field('id')->required(1)->regexp(qr/^\d+$/);
-    $v->field('user_id')->regexp(qr/^\d+$/)->callback(sub {
-        my $val = shift;
+    {
+        my $v = $self->create_validator;
+        $v->field('id')->required(1)->regexp(qr/^\d+$/);
+        $v->field('user_id')->regexp(qr/^\d+$/)->callback(sub {
+            my $val = shift;
 
-        return 1 if $DB->resultset('User')->find({ id => $val });
-        return ( 0, 'user not found using user_id' );
-    });
-    #
-    # FIXME
-    #   need more validation but not now
-    #   since columns are not perfect yet.
-    #
-    $v->field('additional_day')->regexp(qr/^\d+$/);
-    $v->field(qw/ height weight bust waist hip belly thigh arm leg knee foot /)->each(sub {
-        shift->regexp(qr/^\d{1,3}$/);
-    });
-    unless ( $self->validate( $v, $order_params ) ) {
-        my @error_str;
-        while ( my ( $k, $v ) = each %{ $v->errors } ) {
-            push @error_str, "$k:$v";
-        }
-        return $self->error( 400, {
-            str  => join(',', @error_str),
-            data => $v->errors,
+            return 1 if $DB->resultset('User')->find({ id => $val });
+            return ( 0, 'user not found using user_id' );
         });
+        $v->field('additional_day')->regexp(qr/^\d+$/);
+        $v->field(qw/ height weight bust waist hip belly thigh arm leg knee foot /)->each(sub {
+            shift->regexp(qr/^\d{1,3}$/);
+        });
+        unless ( $self->validate( $v, $order_params ) ) {
+            my @error_str;
+            while ( my ( $k, $v ) = each %{ $v->errors } ) {
+                push @error_str, "$k:$v";
+            }
+            $self->error( 400, {
+                str  => join(',', @error_str),
+                data => $v->errors,
+            }), return;
+        }
+    }
+    {
+        my $v = $self->create_validator;
+        $v->field('clothes_code')->regexp(qr/^[A-Z0-9]{4,5}$/)->callback(sub {
+            my $val = shift;
+
+            $val = sprintf( '%05s', $val ) if length $val == 4;
+
+            return 1 if $DB->resultset('Clothes')->find({ code => $val });
+            return ( 0, 'clothes not found using clothes_code' );
+        });
+        unless ( $self->validate( $v, $order_detail_params ) ) {
+            my @error_str;
+            while ( my ( $k, $v ) = each %{ $v->errors } ) {
+                push @error_str, "$k:$v";
+            }
+            $self->error( 400, {
+                str  => join(',', @error_str),
+                data => $v->errors,
+            }), return;
+        }
     }
 
     #
