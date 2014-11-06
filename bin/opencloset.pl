@@ -3869,10 +3869,68 @@ post '/order' => sub {
     #
     # fetch params
     #
-    my %order_params        = $self->get_params(qw/ user_id /);
+    my %order_params        = $self->get_params(qw/ id /);
     my %order_detail_params = $self->get_params(qw/ clothes_code /);
 
-    my $order = $self->create_order( \%order_params, \%order_detail_params );
+    #
+    # adjust params
+    #
+    if ( $order_detail_params{clothes_code} ) {
+        $order_detail_params{clothes_code} = [ $order_detail_params{clothes_code} ]
+            unless ref $order_detail_params{clothes_code};
+
+        for ( @{ $order_detail_params{clothes_code} } ) {
+            next unless length == 4;
+            $_ = sprintf( '%05s', $_ );
+        }
+    }
+
+    my ( $order, $error ) = do {
+        my $guard = $DB->txn_scope_guard;
+        try {
+            #
+            # find order
+            #
+            my $order = $DB->resultset('Order')->find( $order_params{id} );
+            die "order not found: $order_params{id}\n" unless $order;
+
+            for ( my $i = 0; $i < @{ $order_detail_params{clothes_code} }; ++$i ) {
+                my $clothes_code = $order_detail_params{clothes_code}[$i];
+                my $clothes      = $DB->resultset('Clothes')->find({ code => $clothes_code });
+
+                die "clothes not found: $clothes_code\n" unless $clothes;
+
+                my $name = join(
+                    q{ - },
+                    $self->trim_clothes_code($clothes),
+                    app->config->{category}{ $clothes->category }{str},
+                );
+
+                $order->add_to_order_details({
+                    clothes_code => $clothes->code,
+                    name         => $name,
+                    price        => $clothes->price,
+                    final_price  => $clothes->price,
+                }) or die "failed to create a new order_detail\n";
+            }
+
+            $order->add_to_order_details({
+                name        => '에누리',
+                price       => 0,
+                final_price => 0,
+            }) or die "failed to create a new order_detail for discount\n";
+
+            $guard->commit;
+
+            return $order;
+        }
+        catch {
+            chomp;
+            app->log->error("failed to update the order & create a new order_detail");
+            app->log->error($_);
+            return ( undef, $_ );
+        }
+    };
     return unless $order;
 
     #
