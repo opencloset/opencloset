@@ -338,25 +338,33 @@ helper get_params => sub {
     my @dest_keys;
     my @values;
     for my $k (@keys) {
-        my @v;
+        my $v;
         if ( ref($k) eq 'ARRAY' ) {
             push @src_keys,  $k->[0];
             push @dest_keys, $k->[1];
 
-            @v = $self->param( $k->[0] );
+            $v = $self->every_param( $k->[0] );
         }
         else {
             push @src_keys,  $k;
             push @dest_keys, $k;
 
-            @v = $self->param($k);
+            $v = $self->every_param($k);
         }
 
-        if ( @v > 1 ) {
-            push @values, \@v;
+        if ($v) {
+            if ( @$v == 1 ) {
+                push @values, $v->[0];
+            }
+            elsif ( @$v < 1 ) {
+                push @values, undef;
+            }
+            else {
+                push @values, $v;
+            }
         }
         else {
-            push @values, $v[0];
+            push @values, undef;
         }
     }
 
