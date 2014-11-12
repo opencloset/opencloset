@@ -52,6 +52,21 @@ MySQL 데이터베이스에 접속하며 `opencloset` 데이터베이스에
 
     $ PERL5LIB=lib:$PERL5LIB MOJO_HOME=. MOJO_CONFIG=app.conf morbo -w app.conf -w lib app.psgi
 
+### bundler
+
+**TODO** 좀 더 친절한 문서화
+
+    $ gem install bundler
+    $ bundle install
+
+### Grunt
+
+**TODO** 좀 더 친절한 문서화
+
+    $ npm install -g grunt-cli
+    $ npm install
+    $ grunt          # compile javascripts and scss
+    $ grunt watch    # for development
 
 ### 자바스크립트 수정
 
