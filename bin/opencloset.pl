@@ -328,16 +328,6 @@ helper flatten_booking => sub {
     return \%data;
 };
 
-helper flatten_user_booking => sub {
-    my ( $self, $user_booking ) = @_;
-
-    return unless $user_booking;
-
-    my %data = $user_booking->get_columns;
-
-    return \%data;
-};
-
 helper get_params => sub {
     my ( $self, @keys ) = @_;
 
@@ -348,25 +338,33 @@ helper get_params => sub {
     my @dest_keys;
     my @values;
     for my $k (@keys) {
-        my @v;
+        my $v;
         if ( ref($k) eq 'ARRAY' ) {
             push @src_keys,  $k->[0];
             push @dest_keys, $k->[1];
 
-            @v = $self->param( $k->[0] );
+            $v = $self->every_param( $k->[0] );
         }
         else {
             push @src_keys,  $k;
             push @dest_keys, $k;
 
-            @v = $self->param($k);
+            $v = $self->every_param($k);
         }
 
-        if ( @v > 1 ) {
-            push @values, \@v;
+        if ($v) {
+            if ( @$v == 1 ) {
+                push @values, $v->[0];
+            }
+            elsif ( @$v < 1 ) {
+                push @values, undef;
+            }
+            else {
+                push @values, $v;
+            }
         }
         else {
-            push @values, $v[0];
+            push @values, undef;
         }
     }
 
@@ -761,32 +759,50 @@ helper update_order => sub {
     #
     # validate params
     #
-    my $v = $self->create_validator;
-    $v->field('id')->required(1)->regexp(qr/^\d+$/);
-    $v->field('user_id')->regexp(qr/^\d+$/)->callback(sub {
-        my $val = shift;
+    {
+        my $v = $self->create_validator;
+        $v->field('id')->required(1)->regexp(qr/^\d+$/);
+        $v->field('user_id')->regexp(qr/^\d+$/)->callback(sub {
+            my $val = shift;
 
-        return 1 if $DB->resultset('User')->find({ id => $val });
-        return ( 0, 'user not found using user_id' );
-    });
-    #
-    # FIXME
-    #   need more validation but not now
-    #   since columns are not perfect yet.
-    #
-    $v->field('additional_day')->regexp(qr/^\d+$/);
-    $v->field(qw/ height weight bust waist hip belly thigh arm leg knee foot /)->each(sub {
-        shift->regexp(qr/^\d{1,3}$/);
-    });
-    unless ( $self->validate( $v, $order_params ) ) {
-        my @error_str;
-        while ( my ( $k, $v ) = each %{ $v->errors } ) {
-            push @error_str, "$k:$v";
-        }
-        return $self->error( 400, {
-            str  => join(',', @error_str),
-            data => $v->errors,
+            return 1 if $DB->resultset('User')->find({ id => $val });
+            return ( 0, 'user not found using user_id' );
         });
+        $v->field('additional_day')->regexp(qr/^\d+$/);
+        $v->field(qw/ height weight bust waist hip belly thigh arm leg knee foot /)->each(sub {
+            shift->regexp(qr/^\d{1,3}$/);
+        });
+        unless ( $self->validate( $v, $order_params ) ) {
+            my @error_str;
+            while ( my ( $k, $v ) = each %{ $v->errors } ) {
+                push @error_str, "$k:$v";
+            }
+            $self->error( 400, {
+                str  => join(',', @error_str),
+                data => $v->errors,
+            }), return;
+        }
+    }
+    {
+        my $v = $self->create_validator;
+        $v->field('clothes_code')->regexp(qr/^[A-Z0-9]{4,5}$/)->callback(sub {
+            my $val = shift;
+
+            $val = sprintf( '%05s', $val ) if length $val == 4;
+
+            return 1 if $DB->resultset('Clothes')->find({ code => $val });
+            return ( 0, 'clothes not found using clothes_code' );
+        });
+        unless ( $self->validate( $v, $order_detail_params ) ) {
+            my @error_str;
+            while ( my ( $k, $v ) = each %{ $v->errors } ) {
+                push @error_str, "$k:$v";
+            }
+            $self->error( 400, {
+                str  => join(',', @error_str),
+                data => $v->errors,
+            }), return;
+        }
     }
 
     #
@@ -1246,7 +1262,6 @@ group {
     get  '/gui/staff-list'        => \&api_gui_staff_list;
     put  '/gui/booking/:id'       => \&api_gui_update_booking;
     get  '/gui/booking-list'      => \&api_gui_booking_list;
-    put  '/gui/user-booking/:id'  => \&api_gui_update_user_booking;
     post '/gui/utf8/gcs-columns'  => \&api_gui_utf8_gcs_columns;
 
     sub api_create_user {
@@ -3233,30 +3248,30 @@ group {
             return;
         }
 
-        my $dtf = $DB->storage->datetime_parser;
-
         #
         # SELECT
         #     `me`.`id`,
         #     `me`.`date`,
         #     `me`.`gender`,
         #     `me`.`slot`,
-        #     COUNT( `user_bookings`.`user_id` ) AS `user_count`
+        #     COUNT( `user`.`id` ) AS `user_count`
         # FROM `booking` `me`
-        # LEFT JOIN `user_booking` `user_bookings`
-        # ON `user_bookings`.`booking_id` = `me`.`id`
-        # WHERE
-        #     (
-        #         ( `me`.`date` BETWEEN ? AND ? )
-        #         AND `me`.`gender` = ?
-        #         AND `me`.`id` IS NOT NULL
-        #     )
-        # GROUP BY `me`.`id`
-        # HAVING COUNT(user_bookings.user_id) < me.slot
+        # LEFT JOIN `order` `orders`
+        #     ON `orders`.`booking_id` = `me`.`id`
+        # LEFT JOIN `user` `user`
+        #     ON `user`.`id` = `orders`.`user_id`
+        # WHERE (
+        #     ( `me`.`date` BETWEEN ? AND ? )
+        #     AND `me`.`gender` = ?
+        #     AND `me`.`id` IS NOT NULL
+        # )
+        # GROUP BY `me`.`id` HAVING COUNT(user.id) < me.slot
         # ORDER BY `me`.`date` ASC
         #
         # http://stackoverflow.com/questions/5285448/mysql-select-only-not-null-values
+        # https://metacpan.org/pod/DBIx::Class::Manual::Joining#Across-multiple-relations
         #
+        my $dtf        = $DB->storage->datetime_parser;
         my $booking_rs = $DB->resultset('Booking')->search(
             {
                 'me.id'     => { '!=' => undef },
@@ -3270,11 +3285,11 @@ group {
             },
             {
                 '+columns' => [
-                    { user_count => { count => 'user_bookings.user_id', -as => 'user_count' } },
+                    { user_count => { count => 'user.id', -as => 'user_count' } },
                 ],
-                join       => 'user_bookings',
+                join       => { 'orders' => 'user' },
                 group_by   => [ qw/ me.id / ],
-                having     => \[ 'COUNT(user_bookings.user_id) < me.slot' ],
+                having     => \[ 'COUNT(user.id) < me.slot' ],
                 order_by   => { -asc => 'me.date' },
             },
         );
@@ -3295,60 +3310,6 @@ group {
         # response
         #
         $self->respond_to( json => { status => 200, json => \@data } );
-    }
-
-    sub api_gui_update_user_booking {
-        my $self = shift;
-
-        #
-        # fetch params
-        #
-        my %params = $self->get_params(qw/ id status /);
-
-        #
-        # validate params
-        #
-        my $v = $self->create_validator;
-        $v->field('id')->required(1)->regexp(qr/^\d+$/);
-        $v->field('status')->in([ qw/ visiting / ]);
-        unless ( $self->validate( $v, \%params ) ) {
-            my @error_str;
-            while ( my ( $k, $v ) = each %{ $v->errors } ) {
-                push @error_str, "$k:$v";
-            }
-            return $self->error( 400, {
-                str  => join(',', @error_str),
-                data => $v->errors,
-            });
-        }
-
-        #
-        # find user_booking
-        #
-        my $user_booking = $DB->resultset('UserBooking')->find({ id => $params{id} });
-        return $self->error( 404, {
-            str  => 'user_booking not found',
-            data => {},
-        }) unless $user_booking;
-
-        #
-        # update user_booking
-        #
-        my %_params = %params;
-        delete $_params{id};
-
-        $user_booking->update( \%_params )
-            or return $self->error( 500, {
-                str  => 'failed to update a user_booking',
-                data => {},
-            });
-
-        #
-        # response
-        #
-        my $data = $self->flatten_user_booking($user_booking);
-
-        $self->respond_to( json => { status => 200, json => $data } );
     }
 
     sub api_gui_utf8_gcs_columns {
@@ -3521,8 +3482,8 @@ any '/visit' => sub {
             #
             # 예약 취소
             #
-            my $user_booking = $user->find_related( 'user_bookings', { booking_id => $booking_saved } );
-            $user_booking->delete if $user_booking;
+            my $order = $user->find_related( 'orders', { booking_id => $booking_saved } );
+            $order->delete if $order;
         }
         else {
             $user = $self->update_user( \%user_params, \%user_info_params );
@@ -3530,19 +3491,22 @@ any '/visit' => sub {
                 #
                 # 이미 예약 정보가 저장되어 있는 경우 - 예약 변경 상황
                 #
-                my $user_booking = $user->find_related( 'user_bookings', { booking_id => $booking_saved } );
+                my $order = $user->find_related( 'orders', { booking_id => $booking_saved } );
                 if ( $booking != $booking_saved ) {
                     #
                     # 변경한 예약 정보가 기존 정보와 다를 경우 갱신함
                     #
-                    $user_booking->update({ booking_id => $booking }) if $user_booking;
+                    $order->update({ booking_id => $booking }) if $order;
                 }
             }
             else {
                 #
                 # 예약 정보가 없는 경우 - 신규 예약 신청 상황
                 #
-                $user->create_related( 'user_bookings', { booking_id => $booking } );
+                my $order = $user->create_related('orders', {
+                    status_id  => 14,      # 방문예약: status 테이블 참조
+                    booking_id => $booking,
+                });
             }
         }
     }
@@ -3550,7 +3514,7 @@ any '/visit' => sub {
     my $booking_obj = do {
         my $dt_now = DateTime->now( time_zone => app->config->{timezone} );
         my $dtf    = $DB->storage->datetime_parser;
-        my $rs     = $user->search_related('user_bookings')->search_related('booking', {
+        my $rs     = $user->search_related('orders')->search_related('booking', {
             date => { '>' => $dtf->format_datetime($dt_now) },
         });
 
@@ -3756,38 +3720,72 @@ get '/clothes/:code' => sub {
 get '/rental' => sub {
     my $self = shift;
 
-    my $q = $self->param('q');
+    my $dt_today = DateTime->now( time_zone => app->config->{timezone} );
+    $self->redirect_to( $self->url_for( '/rental/' . $dt_today->ymd ) );
+};
 
-    ### DBIx::Class::Storage::DBI::_gen_sql_bind(): DateTime objects passed to search() are not
-    ### supported properly (InflateColumn::DateTime formats and settings are not respected.)
-    ### See "Formatting DateTime objects in queries" in DBIx::Class::Manual::Cookbook.
-    ### To disable this warning for good set $ENV{DBIC_DT_SEARCH_OK} to true
-    ###
-    ### DateTime object 를 search 에 바로 사용하지 말고 parser 를 이용하라능 - @aanoaa
-    my $today     = DateTime->today( time_zone => app->config->{timezone} );
-    my $dt_parser = $DB->storage->datetime_parser;
+get '/rental/:ymd' => sub {
+    my $self = shift;
 
-    my @users = $DB->resultset('User')->search(
+    #
+    # fetch params
+    #
+    my %params = $self->get_params(qw/ ymd /);
+
+    unless ( $params{ymd} ) {
+        app->log->warn( "ymd is required" );
+        $self->redirect_to( $self->url_for('/rental') );
+        return;
+    }
+
+    unless ( $params{ymd} =~ m/^(\d{4})-(\d{2})-(\d{2})$/ ) {
+        app->log->warn( "invalid ymd format: $params{ymd}" );
+        $self->redirect_to( $self->url_for('/rental') );
+        return;
+    }
+
+    my $dt_start = try {
+        DateTime->new(
+            time_zone => app->config->{timezone},
+            year      => $1,
+            month     => $2,
+            day       => $3,
+        );
+    };
+    unless ($dt_start) {
+        app->log->warn( "cannot create start datetime object" );
+        $self->redirect_to( $self->url_for('/rental') );
+        return;
+    }
+
+    my $dt_end = $dt_start->clone->add( hours => 24, seconds => -1 );
+    unless ($dt_end) {
+        app->log->warn( "cannot create end datetime object" );
+        $self->redirect_to( $self->url_for('/rental') );
+        return;
+    }
+
+    my $dtf      = $DB->storage->datetime_parser;
+    my $order_rs = $DB->resultset('Order')->search(
         {
-            -or => [
-                {
-                    -or => [
-                        'me.id'           => $q,
-                        'me.name'         => $q,
-                        'me.email'        => $q,
-                        'user_info.phone' => $q,
-                    ],
-                },
-                { update_date => { '>=' => $dt_parser->format_datetime($today) } },
-            ],
+            'booking.date' => {
+                -between => [
+                    $dtf->format_datetime($dt_start),
+                    $dtf->format_datetime($dt_end),
+                ],
+            },
         },
         {
-            order_by => { -desc => 'update_date' },
-            join     => 'user_info',
+            join     => 'booking',
+            order_by => { -asc => 'booking.date' },
         },
     );
 
-    $self->stash( users => \@users );
+    $self->stash(
+        order_rs => $order_rs,
+        dt_start => $dt_start,
+        dt_end   => $dt_end,
+    );
 } => 'rental';
 
 get '/order' => sub {
@@ -3805,33 +3803,57 @@ get '/order' => sub {
     });
 
     #
-    # undef  - 상태없음
-    # rental - 대여중 (2)
-    # return - 반납 (9)
-    # late   - 연체중
+    # undef       => '상태없음'
+    # late        => '연체중'
+    # rental-late => '대여중(연체아님)'
     #
+    # 1     =>  '대여가능'
+    # 2     =>  '대여중'
+    # 3     =>  '대여불가'
+    # 4     =>  '예약'
+    # 5     =>  '세탁'
+    # 6     =>  '수선'
+    # 7     =>  '분실'
+    # 8     =>  '폐기'
+    # 9     =>  '반납'
+    # 10    =>  '부분반납'
+    # 11    =>  '반납배송중'
+    # 12    =>  '미방문'
+    # 13    =>  '방문'
+    # 14    =>  '방문예약'
+    # 15    =>  '배송예약'
+    #
+
     {
         no warnings 'experimental';
-        given ( $search_params{status} ) {
-            $rs = $rs->search({ status_id => { '=' => undef } }) when 'undef';
-            $rs = $rs->search({ status_id => 9 })                when 'return';
-            when ('rental') {
-                $rs = $rs->search({
-                    -and => [
-                        status_id   => 2,
-                        target_date => { '>=' => DateTime->now },
-                    ],
-                });
+        my $status_id = $search_params{status};
+        my %cond;
+        given ($status_id) {
+            when ('undef') {
+                %cond = ( status_id => { '=' => undef },);
             }
             when ('late') {
-                $rs = $rs->search({
+                %cond = (
                     -and => [
                         status_id   => 2,
                         target_date => { '<' => DateTime->now },
                     ],
-                });
+                );
+            }
+            when ('rental-late') {
+                %cond = (
+                    -and => [
+                        status_id   => $status_id,
+                        target_date => { '>=' => DateTime->now },
+                    ],
+                );
+            }
+            default {
+                my @valid = 1 .. 15;
+                %cond = ( status_id => $status_id ) if $status_id ~~ @valid;
             }
         }
+        $rs = $rs->search(\%cond);
     }
 
     #
@@ -3847,10 +3869,68 @@ post '/order' => sub {
     #
     # fetch params
     #
-    my %order_params        = $self->get_params(qw/ user_id /);
+    my %order_params        = $self->get_params(qw/ id /);
     my %order_detail_params = $self->get_params(qw/ clothes_code /);
 
-    my $order = $self->create_order( \%order_params, \%order_detail_params );
+    #
+    # adjust params
+    #
+    if ( $order_detail_params{clothes_code} ) {
+        $order_detail_params{clothes_code} = [ $order_detail_params{clothes_code} ]
+            unless ref $order_detail_params{clothes_code};
+
+        for ( @{ $order_detail_params{clothes_code} } ) {
+            next unless length == 4;
+            $_ = sprintf( '%05s', $_ );
+        }
+    }
+
+    my ( $order, $error ) = do {
+        my $guard = $DB->txn_scope_guard;
+        try {
+            #
+            # find order
+            #
+            my $order = $DB->resultset('Order')->find( $order_params{id} );
+            die "order not found: $order_params{id}\n" unless $order;
+
+            for ( my $i = 0; $i < @{ $order_detail_params{clothes_code} }; ++$i ) {
+                my $clothes_code = $order_detail_params{clothes_code}[$i];
+                my $clothes      = $DB->resultset('Clothes')->find({ code => $clothes_code });
+
+                die "clothes not found: $clothes_code\n" unless $clothes;
+
+                my $name = join(
+                    q{ - },
+                    $self->trim_clothes_code($clothes),
+                    app->config->{category}{ $clothes->category }{str},
+                );
+
+                $order->add_to_order_details({
+                    clothes_code => $clothes->code,
+                    name         => $name,
+                    price        => $clothes->price,
+                    final_price  => $clothes->price,
+                }) or die "failed to create a new order_detail\n";
+            }
+
+            $order->add_to_order_details({
+                name        => '에누리',
+                price       => 0,
+                final_price => 0,
+            }) or die "failed to create a new order_detail for discount\n";
+
+            $guard->commit;
+
+            return $order;
+        }
+        catch {
+            chomp;
+            app->log->error("failed to update the order & create a new order_detail");
+            app->log->error($_);
+            return ( undef, $_ );
+        }
+    };
     return unless $order;
 
     #

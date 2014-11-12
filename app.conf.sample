@@ -10,8 +10,7 @@ use Mojo::JSON;
 
 my $SMS_FROM = '07075837521',
 
-my $json    = Mojo::JSON->new;
-my $db_opts = $ENV{OPENCLOSET_DATABASE_OPTS} ? $json->decode( $ENV{OPENCLOSET_DATABASE_OPTS} ) : +{
+my $db_opts = $ENV{OPENCLOSET_DATABASE_OPTS} ? Mojo::JSON::decode_json( $ENV{OPENCLOSET_DATABASE_OPTS} ) : +{
     quote_char        => q{`},
     mysql_enable_utf8 => 1,
     on_connect_do     => 'SET NAMES utf8',

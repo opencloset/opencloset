@@ -34,6 +34,10 @@ $ ->
       '반납':       { id: 9,  css: 'label-inverse'   }
       '부분반납':   { id: 10, css: 'label-warning'   }
       '반납배송중': { id: 11, css: 'label-warning'   }
+      '미방문':     { id: 12, css: 'label-warning'   }
+      '방문':       { id: 13, css: 'label-warning'   }
+      '방문예약':   { id: 14, css: 'label-info'      }
+      '배송예약':   { id: 15, css: 'label-info'      }
     category:
       belt:      { str: '벨트',     price: 2000  }
       blouse:    { str: '블라우스', price: 5000  }

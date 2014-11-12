@@ -14,10 +14,19 @@
     %a{ :href => "#{ url_for('/order?status=late') }" } 연체중
   %span= '|'
   %span
-    %a{ :href => "#{ url_for('/order?status=rental') }" } 대여중
+    %a{ :href => "#{ url_for('/order?status=rental-late') }" } 대여중(연체아님)
   %span= '|'
   %span
-    %a{ :href => "#{ url_for('/order?status=return') }" } 반납
+    %a{ :href => "#{ url_for('/order?status=2') }" } 대여중(연체포함)
+  %span= '|'
+  %span
+    %a{ :href => "#{ url_for('/order?status=9') }" } 반납
+  %span= '|'
+  %span
+    %a{ :href => "#{ url_for('/order?status=14') }" } 방문예약
+  %span= '|'
+  %span
+    %a{ :href => "#{ url_for('/order?status=15') }" } 배송예약
   %span= '|'
   %span
     %a{ :href => "#{ url_for('/order?status=undef') }" } 상태없음

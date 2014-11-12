@@ -42,9 +42,9 @@
                                         <a
                                           id               = "order-staff-name"
                                           class            = "editable editable-click"
-                                          href             = "#{ $order->status ? url_for('/user/' . $order->staff_id) : '#' }"
+                                          href             = "#{ $order->status->id != 14 ? url_for('/user/' . $order->staff_id) : '#' }"
 
-                                          data-disabled    = "#{ $order->status ? 'true' : 'false' }"
+                                          data-disabled    = "#{ $order->status->id != 14 ? 'true' : 'false' }"
                                           data-mode        = "inline"
                                           data-showbuttons = "true"
                                           data-type        = "select"
@@ -68,7 +68,7 @@
                                           class            = "editable editable-click"
                                           href             = "#"
 
-                                          data-disabled    = "#{ $order->status ? 'true' : 'false' }"
+                                          data-disabled    = "#{ $order->status->id != 14 ? 'true' : 'false' }"
                                           data-mode        = "inline"
                                           data-showbuttons = "true"
                                           data-type        = "select"
@@ -91,7 +91,7 @@
                                           class            = "editable editable-click"
                                           href             = "#"
 
-                                          data-disabled    = "#{ $order->status ? 'true' : 'false' }"
+                                          data-disabled    = "#{ $order->status->id != 14 ? 'true' : 'false' }"
                                           data-value       = "#{ $order->rental_date ? $order->rental_date->ymd : q{} }"
                                           data-name        = "rental_date"
                                         ></a>
@@ -106,7 +106,7 @@
                                           class            = "editable editable-click"
                                           href             = "#"
 
-                                          data-disabled    = "#{ !$order->status || $order->status->name eq '대여중' ? 'false' : 'true' }"
+                                          data-disabled    = "#{ ($order->status->id != 14) || $order->status->name eq '대여중' ? 'false' : 'true' }"
 
                                           data-value       = "#{ $order->target_date ? $order->target_date->ymd : q{} }"
                                           data-name        = "target_date"
@@ -128,7 +128,7 @@
                                           class            = "editable editable-click"
                                           href             = "#"
 
-                                          data-disabled    = "#{ $order->status ? 'true' : 'false' }"
+                                          data-disabled    = "#{ $order->status->id != 14 ? 'true' : 'false' }"
                                           data-mode        = "inline"
                                           data-showbuttons = "true"
                                           data-type        = "select"
@@ -204,7 +204,7 @@
                                             class            = "editable editable-click"
                                             href             = "#"
 
-                                            data-disabled    = "#{ !$order->status || $order->status->name eq '대여중' ? 'false' : 'true' }"
+                                            data-disabled    = "#{ ($order->status->id != 14) || $order->status->name eq '대여중' ? 'false' : 'true' }"
 
                                             data-value       = "#{ $order->user_target_date ? $order->user_target_date->ymd : q{} }"
                                             data-name        = "user_target_date"
@@ -315,7 +315,7 @@
                                       %td
                                         %a{ :href => "/clothes/#{ trim_clothes_code($detail->clothes) }" }= $detail->name
                                       %td
-                                        - if ( $order->status && $detail->status ) {
+                                        - if ( $order->status && $order->status->id != 14 && $detail->status ) {
                                           %span.order-status.label{ 'data-order-detail-status' => "#{ $detail->status->name }" }
                                             = $detail->status->name
                                         - }
@@ -335,7 +335,7 @@
                                           class            = "order-detail-price editable editable-click"
                                           href             = "#"
 
-                                          data-disabled    = "#{ $order->status ? 'true' : 'false' }"
+                                          data-disabled    = "#{ $order->status->id != 14 ? 'true' : 'false' }"
                                           data-mode        = "inline"
                                           data-showbuttons = "true"
                                           data-type        = "text"
@@ -364,7 +364,7 @@
                                           class            = "order-detail-final-price editable editable-click"
                                           href             = "#"
 
-                                          data-disabled    = "#{ $order->status ? 'true' : 'false' }"
+                                          data-disabled    = "#{ $order->status->id != 14 ? 'true' : 'false' }"
                                           data-mode        = "inline"
                                           data-showbuttons = "true"
                                           data-type        = "text"
@@ -453,14 +453,14 @@
                           %i.icon-remove.bigger-110
                           반납 취소
                       -   }
-                      - }
-                      - else {
-                        %a#btn-order-confirm.btn.btn-info.pull-right{ :type => 'button', :href => "#", 'data-url' => "#{ url_for('/order/' . $order->id . '/update') }", 'data-redirect-url' => "#{ url_for('/order/' . $order->id) }" }
-                          %i.icon-ok.bigger-110
-                          주문 확정
-                        %a.btn.btn-danger.pull-right{ :type => 'button', :href => "#{ url_for('/order/' . $order->id . '/delete') }" }
-                          %i.icon-remove.bigger-110
-                          주문 지우기
+                      -   elsif ( $order->status->id == 14 ) {
+                          %a#btn-order-confirm.btn.btn-info.pull-right{ :type => 'button', :href => "#", 'data-url' => "#{ url_for('/order/' . $order->id . '/update') }", 'data-redirect-url' => "#{ url_for('/order/' . $order->id) }" }
+                            %i.icon-ok.bigger-110
+                            주문 확정
+                          %a.btn.btn-danger.pull-right{ :type => 'button', :href => "#{ url_for('/order/' . $order->id . '/delete') }" }
+                            %i.icon-remove.bigger-110
+                            주문 지우기
+                      -   }
                       - }
                 :plain
                   <script id="tpl-late-fee" type="text/html">

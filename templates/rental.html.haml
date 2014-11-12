@@ -9,7 +9,7 @@
 .search
   %form#search-form
     .input-group
-      %input#query.form-control{ :type => 'text', :placeholder => '의류코드/이메일/이름/휴대전화' }
+      %input#query.form-control{ :type => 'text', :placeholder => '의류코드' }
       %span.input-group-btn
         %button#btn-search.btn.btn-sm.btn-default{ :type => 'button' }
           %i.icon-search.bigger-110 검색
@@ -40,8 +40,8 @@
 
   .space-8
 
-  #user-table
-    %h2 대여할 사용자를 선택해 주세요.
+  #order-table
+    %h2 대여할 주문서를 선택해 주세요.
     .space-4
     %table.table.table-striped.table-bordered.table-hover
       %thead
@@ -57,11 +57,12 @@
           %th
             %span.label.label-warning 허벅지 / 팔 / 다리 / 무릎 / 발
       %tbody
-        - for my $user (@$users) {
-          %tr{ 'data-user-id' => "#{ $user->id }" }
+        - for my $order ( $order_rs->all ) {
+        -   my $user = $order->user;
+          %tr{ 'data-order-id' => "#{ $order->id }" }
             %td.center
               %label
-                %input.ace{ :type => 'radio', name => 'user_id', value => "#{ $user->id}" }
+                %input.ace{ :type => 'radio', name => 'id', value => "#{ $order->id}" }
                 %span.lbl
             %td
               %a{ :href => "/user/#{ $user->id }" }= $user->name
@@ -75,22 +76,21 @@
               %strong= $user->update_date ? $user->update_date->ymd : q{}
             %td
               %div
-                %span.label.label-success= $user->user_info->height || '-'
-                %span.label.label-success= $user->user_info->weight || '-'
+                %span.label.label-success= $order->height || '-'
+                %span.label.label-success= $order->weight || '-'
             %td
               %div
-                %span.label.label-info=    $user->user_info->bust   || '-'
-                %span.label.label-info=    $user->user_info->waist  || '-'
-                %span.label.label-info=    $user->user_info->hip    || '-'
-                %span.label.label-info=    $user->user_info->belly  || '-'
+                %span.label.label-info=    $order->bust   || '-'
+                %span.label.label-info=    $order->waist  || '-'
+                %span.label.label-info=    $order->hip    || '-'
+                %span.label.label-info=    $order->belly  || '-'
             %td
               %div
-
-                %span.label.label-warning= $user->user_info->thigh  || '-'
-                %span.label.label-warning= $user->user_info->arm    || '-'
-                %span.label.label-warning= $user->user_info->leg    || '-'
-                %span.label.label-warning= $user->user_info->knee   || '-'
-                %span.label.label-warning= $user->user_info->foot   || '-'
+                %span.label.label-warning= $order->thigh  || '-'
+                %span.label.label-warning= $order->arm    || '-'
+                %span.label.label-warning= $order->leg    || '-'
+                %span.label.label-warning= $order->knee   || '-'
+                %span.label.label-warning= $order->foot   || '-'
         - }
 
 :plain
@@ -175,51 +175,4 @@
     <span>
       연체료 <%= OpenCloset.commify(order.late_fee) %>원 = <%= OpenCloset.commify(order.clothes_price) %>원 x <%= order.overdue %>일 x 20%
     </span>
-  </script>
-
-:plain
-  <script id="tpl-row-radio" type="text/html">
-    <tr data-user-id="<%= id %>">
-      <td class="center">
-        <label>
-          <input class="ace" type="radio" name="user_id" value="<%= id %>">
-          <span class="lbl"></span>
-        </label>
-      </td>
-      <td>
-        <a href="/user/<%= id %>"> <%= name %> </a>
-      </td>
-      <td>
-        <i class="icon-envelope"></i>
-        <a href="mailto:<%= email %>"><%= email %></a>
-        <br />
-        <i class="icon-phone"></i>
-        <%= phone %>
-      </td>
-      <td>
-        <strong> <%= update_date ? update_date.substr(0, 10) : '' %> </strong>
-      </td>
-      <td>
-        <div>
-          <span class="label label-success"> <%= height || 0 %> </span>
-          <span class="label label-success"> <%= weight || 0 %> </span>
-        </div>
-      </td>
-      <td>
-        <div>
-          <span class="label label-info">    <%= bust   || 0 %> </span>
-          <span class="label label-info">    <%= waist  || 0 %> </span>
-          <span class="label label-info">    <%= hip    || 0 %> </span>
-        </div>
-      </td>
-      <td>
-        <div>
-          <span class="label label-warning"> <%= thigh  || 0 %> </span>
-          <span class="label label-warning"> <%= arm    || 0 %> </span>
-          <span class="label label-warning"> <%= leg    || 0 %> </span>
-          <span class="label label-warning"> <%= knee   || 0 %> </span>
-          <span class="label label-warning"> <%= foot   || 0 %> </span>
-        </div>
-      </td>
-    </tr>
   </script>

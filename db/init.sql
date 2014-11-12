@@ -120,7 +120,11 @@ INSERT INTO `status` (`id`, `name`)
     (8,  '폐기'),
     (9,  '반납'),
     (10, '부분반납'),
-    (11, '반납배송중')
+    (11, '반납배송중'),
+    (12, '미방문'),
+    (13, '방문'),
+    (14, '방문예약'),
+    (15, '배송예약')
     ;
 
 --
@@ -264,6 +268,7 @@ CREATE TABLE `order` (
   `status_id`         INT UNSIGNED DEFAULT NULL,
   `staff_id`          INT UNSIGNED DEFAULT NULL,
   `parent_id`         INT UNSIGNED DEFAULT NULL,
+  `booking_id`        INT UNSIGNED DEFAULT NULL,
 
   `additional_day`    INT UNSIGNED DEFAULT 0,
   `rental_date`       DATETIME DEFAULT NULL,
@@ -294,10 +299,11 @@ CREATE TABLE `order` (
   `update_date`      DATETIME DEFAULT NULL,
 
   PRIMARY KEY (`id`),
-  CONSTRAINT `fk_order1` FOREIGN KEY (`user_id`)   REFERENCES `user`   (`id`) ON DELETE CASCADE,
-  CONSTRAINT `fk_order2` FOREIGN KEY (`status_id`) REFERENCES `status` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `fk_order3` FOREIGN KEY (`staff_id`)  REFERENCES `user`   (`id`) ON DELETE CASCADE,
-  CONSTRAINT `fk_order4` FOREIGN KEY (`parent_id`) REFERENCES `order`  (`id`) ON DELETE CASCADE
+  CONSTRAINT `fk_order1` FOREIGN KEY (`user_id`)    REFERENCES `user`    (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_order2` FOREIGN KEY (`status_id`)  REFERENCES `status`  (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_order3` FOREIGN KEY (`staff_id`)   REFERENCES `user`    (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_order4` FOREIGN KEY (`parent_id`)  REFERENCES `order`   (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_order5` FOREIGN KEY (`booking_id`) REFERENCES `booking` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
@@ -335,24 +341,6 @@ CREATE TABLE `booking` (
 
   PRIMARY KEY (`id`),
   UNIQUE  KEY ( `date`, `gender` )
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
---
--- user_booking
---
-
-CREATE TABLE `user_booking` (
-  `id`           INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `user_id`      INT UNSIGNED NOT NULL,
-  `booking_id`   INT UNSIGNED NOT NULL,
-  `status`       VARCHAR(16)  DEFAULT NULL COMMENT 'NULL/visiting',
-  `create_date`  DATETIME     DEFAULT NULL,
-  `update_date`  DATETIME     DEFAULT NULL,
-
-  PRIMARY KEY (`id`),
-  UNIQUE  KEY ( `user_id`, `booking_id` ),
-  CONSTRAINT `fk_user_booking1` FOREIGN KEY (`user_id`)    REFERENCES `user`    (`id`) ON DELETE CASCADE,
-  CONSTRAINT `fk_user_booking2` FOREIGN KEY (`booking_id`) REFERENCES `booking` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
