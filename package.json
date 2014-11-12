@@ -1,0 +1,15 @@
+{
+  "name": "opencloset",
+  "version": "0.0.1",
+  "repository" : {
+    "type": "git",
+    "url": "git@github.com:opencloset/opencloset.git"
+  },
+  "devDependencies": {
+    "grunt": "~0.4.2",
+    "grunt-contrib-uglify": "~0.2.7",
+    "grunt-contrib-compass": "~0.7.0",
+    "grunt-contrib-watch": "~0.5.3",
+    "grunt-contrib-coffee": "~0.8.0"
+  }
+}
