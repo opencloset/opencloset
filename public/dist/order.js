@@ -1,0 +1,1 @@
+/*! opencloset - v0.0.1 - 2014-11-13 */$(function(){return $("span.order-status.label").each(function(a,b){var c;return c=$(b).data("order-status"),c?$(b).addClass(OpenCloset.status[c].css):void 0})});

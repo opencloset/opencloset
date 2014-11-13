@@ -6,11 +6,11 @@ use utf8;
 use strict;
 use warnings;
 
-use Mojo::JSON;
+use Mojo::JSON 'decode_json';
 
 my $SMS_FROM = '07075837521',
 
-my $db_opts = $ENV{OPENCLOSET_DATABASE_OPTS} ? Mojo::JSON::decode_json( $ENV{OPENCLOSET_DATABASE_OPTS} ) : +{
+my $db_opts = $ENV{OPENCLOSET_DATABASE_OPTS} ? decode_json( $ENV{OPENCLOSET_DATABASE_OPTS} ) : +{
     quote_char        => q{`},
     mysql_enable_utf8 => 1,
     on_connect_do     => 'SET NAMES utf8',

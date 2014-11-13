@@ -1,0 +1,1 @@
+/*! opencloset - v0.0.1 - 2014-11-13 */$(function(){return Window.prototype.show_box=function(a){return $(".widget-box.visible").removeClass("visible"),$("#"+a).addClass("visible")}});
