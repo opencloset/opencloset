@@ -1,6 +1,25 @@
 opencloset
 ==========
 
+## Requirements ##
+
+node.js 를 사용할 수 있는 환경이라고 가정합니다.
+[https://github.com/creationix/nvm](nvm) 의 사용을 추천합니다.
+
+ruby를 사용할 수 있는 환경이라고 가정합니다.
+rbenv 또는 rvm 의 사용을 추천합니다.
+
+`scss` 파일의 컴파일을 위한 도구를 설치해야 합니다.
+
+    $ gem install bundler
+    $ bundle install
+
+coffeescript 파일을 컴파일하고, 컴파일된 javascript 파일을 minify
+하기위한 도구를 설치합니다.
+
+    $ npm install -g grunt-cli
+    $ npm install
+
 ### 데이터베이스 초기화
 
 MySQL을 사용해서 데이터베이스를 `opencloset`, 사용자 이름 `opencloset`,
@@ -52,71 +71,36 @@ MySQL 데이터베이스에 접속하며 `opencloset` 데이터베이스에
 
     $ PERL5LIB=lib:$PERL5LIB MOJO_HOME=. MOJO_CONFIG=app.conf morbo -w app.conf -w lib app.psgi
 
-### bundler
+## front-end 파일의 수정 ##
 
-**TODO** 좀 더 친절한 문서화
+scss 파일이나 coffeescript 파일이 추가 되었거나 변경되었다면, `grunt`
+명령어를 이용해서 각각의 파일을 js, css 파일로 컴파일합니다.
 
-    $ gem install bundler
-    $ bundle install
+    $ grunt
 
-### Grunt
+개발중에 있다면 `watch` 명령어를 통해 변경된 파일이 감지되면 자동으로
+컴파일 되도록 할 수 있습니다.
 
-**TODO** 좀 더 친절한 문서화
-
-    $ npm install -g grunt-cli
-    $ npm install
-    $ grunt          # compile javascripts and scss
-    $ grunt watch    # for development
+    $ grunt watch
 
 ### 자바스크립트 수정
 
 열린옷장 프로젝트의 자바스크립트는 커피스크립트를 이용해서 작성합니다.
 자바스크립트를 수정해야 하면 커피스크립트 파일을 수정해주세요.
-커피스크립트를 사용하기 위해서는 `npm` 유틸리티가 필요합니다.
-데비안 리눅스의 경우 다음 명령을 실행해 `npm` 유틸리티를 설치합니다.
 
-    $ sudo apt-get install npm
+`grunt` 명령어를 이용해서 coffeescript 파일을 javascript 파일로
+컴파일합니다.
 
-`npm`을 설치한 후에는 커피스크립트 모듈을 설치해야 합니다.
-전역으로 설치한다면 다음 명령을 실행합니다.
-
-    $ sudo npm install -g coffee-script    # 또는 -g(global) 옵션을 줘서 전역으로 설치
-
-별도의 터미널에서 다음 명령을 실행시켜 수정하는 커피스크립트가
-자바스크립트로 바로바로 변환되도록 한 후 개발을 진행합니다.
-
-    $ coffee --compile --watch public/js/
-
-루트 권한이 없거나 사용자 디렉터리에서 커피스크립트를 관리하고 싶다면
-프로젝트 루트 디렉터리에서 다음 명령을 실행합니다.
-
-    $ npm install coffee-script
-
-아무런 설정없이 앞의 명령을 실행하면 `node_modules` 디렉터리가 생기고
-그 하부에 커피스크립트 관련 파일이 설치되므로 실행 방법은 다음과 같습니다.
-
-    $ node_modules/.bin/coffee --compile --watch public/js/
-
+    $ grunt coffee uglify
 
 ### 스타일시트 수정
 
 열린옷장 프로젝트의 스타일시트는 SASS를 이용해서 작성합니다.
 스타일시트를 수정해야 하면 `public/sass/*.sass` 파일을 수정해주세요.
-SASS 파일을 수정한 후 CSS로 빌드하기 위해서는 `sass`나 `compass`
-유틸리티가 필요합니다. 다음 명령을 실행해서 `sass`나 `compass`를 설치합니다.
 
-    $ gem install sass
-    $ gem install compass
+`grunt` 명령어를 이용해서 scss 파일을 css 파일로 컴파일합니다.
 
-`sass`를 이용하는 경우 프로젝트 루트 디렉터리에서 다음 명령을 실행합니다.
-
-    $ sass --style=compact --watch public/sass:public/css
-
-`compass`를 이용하는 경우 `public` 디렉터리 하부로 들어간 후 다음 명령을 실행합니다.
-
-    $ cd public
-    $ compass watch
-
+    $ grunt compass
 
 ### 이슈, 제안이나 의견
 
