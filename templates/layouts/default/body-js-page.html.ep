@@ -2,13 +2,13 @@
 <!-- body-js-page -->
     <!-- page specific -->
     % my @include_jses = @$jses;
-    % my $asset = app->static->file("js/$page_id.js");
+    % my $asset = app->static->file("dist/$page_id.js");
     % push @include_jses, "$page_id.js" if $page_id && $asset && $asset->is_file;
     % for my $js (@include_jses) {
     %   if ( $js =~ m{^(https?://|/)} ) {
           <script type="text/javascript" src="<%= $js %>"></script>
     %   }
     %   else {
-          <script type="text/javascript" src="/js/<%= $js %>"></script>
+          <script type="text/javascript" src="/dist/<%= $js %>"></script>
     %   }
     % }

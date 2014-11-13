@@ -49,4 +49,4 @@
     <script src="/lib/bootstrap/js/bootbox.min.js"></script>
 
     <!-- bundle -->
-    <script src="/js/bundle.js"></script>
+    <script src="/dist/bundle.js"></script>
