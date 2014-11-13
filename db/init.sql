@@ -259,6 +259,21 @@ CREATE TABLE `satisfaction` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
+-- booking
+--
+
+CREATE TABLE `booking` (
+  `id`          INT UNSIGNED NOT NULL AUTO_INCREMENT,
+
+  `date`        DATETIME     NOT NULL,
+  `gender`      VARCHAR(6)   NOT NULL COMMENT 'male/female',
+  `slot`        INT UNSIGNED NOT NULL,
+
+  PRIMARY KEY (`id`),
+  UNIQUE  KEY ( `date`, `gender` )
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
 -- order
 --
 
@@ -326,21 +341,6 @@ CREATE TABLE `order_detail` (
   CONSTRAINT `fk_order_detail1` FOREIGN KEY (`order_id`)     REFERENCES `order`   (`id`)   ON DELETE CASCADE,
   CONSTRAINT `fk_order_detail2` FOREIGN KEY (`clothes_code`) REFERENCES `clothes` (`code`) ON DELETE CASCADE,
   CONSTRAINT `fk_order_detail3` FOREIGN KEY (`status_id`)    REFERENCES `status`  (`id`)   ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
---
--- booking
---
-
-CREATE TABLE `booking` (
-  `id`          INT UNSIGNED NOT NULL AUTO_INCREMENT,
-
-  `date`        DATETIME     NOT NULL,
-  `gender`      VARCHAR(6)   NOT NULL COMMENT 'male/female',
-  `slot`        INT UNSIGNED NOT NULL,
-
-  PRIMARY KEY (`id`),
-  UNIQUE  KEY ( `date`, `gender` )
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
