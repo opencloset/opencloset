@@ -8,37 +8,37 @@ module.exports = function(grunt) {
           join: true
         },
         expand: true,
-        cwd: 'public/js',
+        cwd: 'coffee',
         src: ['*.coffee'],
-        dest: 'public/js/',
+        dest: 'coffee/js',
         ext: '.js'
       }
     },
     uglify: {
       options: {
         banner: '/*! <%= pkg.name %> - v<%= pkg.version %> - ' + 
-          '<%= grunt.template.today("yyyy-mm-dd") %> */'
+          '<%= grunt.template.today("yyyy-mm-dd HH:MM:ss") %> */'
       },
       dist: {
         files: [{
           expand: true,
-          cwd: 'public/js',
-          src: '**/*.js',
-          dest: 'public/dist'
+          cwd: 'coffee/js',
+          src: '*.js',
+          dest: 'public/js'
         }]
       }
     },
     watch: {
       js: {
-        files: ['public/js/*.js'],
+        files: ['coffee/js/*.js'],
         tasks: 'uglify'
       },
       sass: {
-        files: ['public/assets/sass/screen.scss'],
+        files: ['sass/screen.scss'],
         tasks: 'compass'
       },
       coffee: {
-        files: ['public/js/*.coffee'],
+        files: ['coffee/*.coffee'],
         tasks: 'coffee'
       }
     },
