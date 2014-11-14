@@ -4,7 +4,7 @@ module.exports = function(grunt) {
     coffee: {
       compileBare: {
         options: {
-          bare: true,
+          bare: false,
           join: true
         },
         expand: true,
