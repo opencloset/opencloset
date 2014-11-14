@@ -17,6 +17,11 @@ log/
 # local npm install modules
 node_modules/
 
-# grunt built result
+# grunt: coffee
 coffee/js
+
+# grunt: uglify
 public/js
+
+# grunt: compass
+public/css
