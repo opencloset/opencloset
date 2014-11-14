@@ -16,3 +16,7 @@ log/
 
 # local npm install modules
 node_modules/
+
+# grunt built result
+coffee/js
+public/js
