@@ -3652,7 +3652,7 @@ get '/user/:id' => sub {
     $donated_clothes_count += $_->clothes->count for $user->donations;
 
     my $rented_clothes_count = 0;
-    $rented_clothes_count += $_->clothes->count for $user->order_users;
+    $rented_clothes_count += $_->clothes->count for $user->orders;
 
     #
     # response
