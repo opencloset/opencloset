@@ -54,8 +54,8 @@ MySQL 데이터베이스에 접속하며 `opencloset` 데이터베이스에
     $ export OPENCLOSET_DATABASE_USER=opencloset
     $ export OPENCLOSET_DATABASE_PASS=opencloset
     $ export OPENCLOSET_DATABASE_OPTS='{ "mysql_enable_utf8": 1, "on_connect_do": "SET NAMES utf8", "quote_char": "`" }'
-    $ export OPENCLOSET_COOLSMS_USER=coolsms_username
-    $ export OPENCLOSET_COOLSMS_PASS=coolsms_s3cr3t
+    $ export OPENCLOSET_COOLSMS_API_KEY=123456789ABCDEFG
+    $ export OPENCLOSET_COOLSMS_API_SECRET=123456789ABCDEFG123456789ABCDEFG
 
     # 설정파일 위치와 Project Root에 대한 환경변수를 설정합니다
     $ export MOJO_CONFIG=app.conf
