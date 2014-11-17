@@ -379,6 +379,21 @@ $opencloset-darken-yellow: desaturate(darken($opencloset-yellow, 4%), 10%);
             }
         }
     }
+    #clothes {
+        #clothes-list-table table {
+            th {
+                &:first-child {
+                    width: 80px;
+                }
+                &:nth-child(2) {
+                    width: 160px;
+                }
+                &:nth-child(3) {
+                    width: 80px;
+                }
+            }
+        }
+    }
     #clothes-code {
         .user-profile.row .grid2 {
             a:hover {

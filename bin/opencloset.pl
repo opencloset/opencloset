@@ -3630,6 +3630,96 @@ get '/user/:id' => sub {
     );
 } => 'user-id';
 
+get '/clothes' => sub {
+    my $self = shift;
+
+    #
+    # fetch params
+    #
+    my %params = $self->get_params(qw/ status /);
+
+    #
+    # validate params
+    #
+    my $v = $self->create_validator;
+    $v->field('status')->regexp(qr/^\d+$/);
+    unless ( $self->validate( $v, \%params ) ) {
+        my @error_str;
+        while ( my ( $k, $v ) = each %{ $v->errors } ) {
+            push @error_str, "$k:$v";
+        }
+        return $self->error( 400, {
+            str  => join(',', @error_str),
+            data => $v->errors,
+        });
+    }
+
+    #
+    # count for each status
+    #
+    my $count_rs = $DB->resultset('Clothes')->search(
+        undef,
+        {
+            select   => [ 'status_id', { count => 'me.status_id' } ],
+            as       => [ qw/ id count / ],
+            group_by => [ qw/ status_id / ],
+            order_by => [ qw/ status_id / ],
+        },
+    );
+
+    my %status = (
+        all => $DB->resultset('Clothes')->count,
+        1   => 0,
+        2   => 0,
+        3   => 0,
+        4   => 0,
+        5   => 0,
+        6   => 0,
+        7   => 0,
+        8   => 0,
+        9   => 0,
+        11  => 0,
+    );
+    while ( my $s = $count_rs->next ) {
+        my $id    = $s->get_column('id');
+        my $count = $s->get_column('count');
+        $status{$id} = $count;
+    }
+
+    #
+    # search clothes
+    #
+    my $p      = $self->param('p') || 1;
+    my $s      = $self->param('s') || app->config->{entries_per_page};
+    my $status = $self->param('status');
+
+    my $cond = $status ? { 'status_id' => $status } : {};
+    my $rs = $DB->resultset('Clothes')->search(
+        $cond,
+        {
+            order_by => { -asc => 'id' },
+            page     => $p,
+            rows     => $s,
+        },
+    );
+
+    my $pageset = Data::Pageset->new({
+        total_entries    => $rs->pager->total_entries,
+        entries_per_page => $rs->pager->entries_per_page,
+        pages_per_set    => 5,
+        current_page     => $p,
+    });
+
+    #
+    # response
+    #
+    $self->stash(
+        status       => \%status,
+        clothes_list => $rs,
+        pageset      => $pageset,
+    );
+} => 'clothes';
+
 get '/clothes/:code' => sub {
     my $self = shift;
 

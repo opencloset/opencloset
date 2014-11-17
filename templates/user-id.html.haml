@@ -2,8 +2,9 @@
 - my $_id   = 'user-id';
 - layout 'default',
 -   page_id     => $_id,
+-   active_id   => 'user',
 -   breadcrumbs => [
--     { text => meta_text('user') },
+-     { text => meta_text('user'), link => url_for( meta_link('user') ) },
 -     { text => meta_text($_id)   },
 -   ],
 -   jses  => [ '/lib/bootstrap3-editable/js/bootstrap-editable.min.js' ],
