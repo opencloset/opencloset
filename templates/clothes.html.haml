@@ -1,0 +1,127 @@
+- use utf8;
+- my $_id = 'clothes';
+- layout 'default',
+-   page_id     => $_id,
+-   breadcrumbs => [ { text => meta_text($_id) } ]
+-   ;
+- title meta_text($_id);
+
+#clothes-list-table.dataTables_wrapper
+  %table.table.table-striped.table-bordered.table-hover
+    %thead
+      %tr
+        %th 옷
+        %th 상태
+        %th 종류
+        %th 기타
+    %tbody
+      - while ( my $clothes = $clothes_list->next ) {
+      - my $clothes_code = trim_clothes_code($clothes);
+      - my $order = $clothes->orders->find({ status_id => 2 });
+      - my $late_fee = $order ? calc_late_fee($order) : 0;
+        %tr
+          %td
+            %a{ :href => "#{url_for('/clothes/' . $clothes_code)}" }= $clothes_code
+          %td
+            %span.order-status.label{ 'data-status' => "#{ $clothes->status->name }" }
+              = $clothes->status->name
+              - if ($order) {
+                %span.late-fee= $late_fee ? commify($late_fee) . '원' : q{}
+              - }
+          %td
+            %span.category{ 'data-category' => "#{ $clothes->category }" }= $clothes->category
+          %td
+            - if ($order) {
+            -   my $rental_date = $order->rental_date;
+            -   my $target_date = $order->target_date;
+              :plain
+                <a href="#{ url_for( '/orders/' . $order->id ) }"><span class="label label-info arrowed-right arrowed-in">
+                  <strong>주문서</strong>
+                  <time class="js-relative-date" datetime="#{ $rental_date->datetime }" title="#{ $rental_date->ymd }">#{ join('/', $rental_date->month, $rental_date->day) }</time>
+                  ~
+                  <time class="js-relative-date" datetime="#{ $target_date->datetime }" title="#{ $target_date->ymd }">#{ join('/', $target_date->month, $target_date->day) }</time>
+                </span></a>
+              - if ($late_fee) {
+                :plain
+                  <span>
+                    연체료 #{ commify($late_fee) }원 = #{ commify($clothes->price) }원 x #{ calc_overdue($order) }일 x 20%
+                  </span>
+              - }
+            - }
+      - }
+
+  .row
+    .col-xs-6
+      .dataTables_info= sprintf('Showing %d to %d of %d entries', $pageset->first, $pageset->last, $pageset->total_entries)
+    .col-xs-6
+      .dataTables_paginate.paging_simple_numbers
+        %ul.pagination
+          /
+          / first page
+          /
+          - if ( $pageset->current_page != $pageset->first_page ) {
+            %li.paginate_button.previous
+              %a{ :href => '#{url_with->query([p => $pageset->first_page])}' }
+                %i.icon-fast-backward
+          - }
+          - else {
+            %li.paginate_button.previous.disabled
+              %a
+                %i.icon-fast-backward
+          - }
+
+          /
+          / previous page
+          /
+          - if ($pageset->previous_page) {
+            %li.paginate_button.previous
+              %a{ :href => '#{url_with->query([p => $pageset->previous_page])}' }
+                %i.icon-backward
+          - }
+          - else {
+            %li.paginate_button.previous.disabled
+              %a
+                %i.icon-backward
+          - }
+
+          /
+          / pages
+          /
+          - for my $p (@{ $pageset->pages_in_set }) {
+          -   if ($p == $pageset->current_page) {
+            %li.paginate_button.active
+              %a{ :href => '#' }= $p
+          -   }
+          -   else {
+            %li.paginate_button
+              %a{ :href => '#{url_with->query([p => $p])}' }= $p
+          -   }
+          - }
+
+          /
+          / next page
+          /
+          - if ($pageset->next_page) {
+            %li.paginate_button.next
+              %a{ :href => '#{url_with->query([p => $pageset->next_page])} '}
+                %i.icon-forward
+          - }
+          - else {
+            %li.paginate_button.next.disabled
+              %a
+                %i.icon-forward
+          - }
+
+          /
+          / last page
+          /
+          - if ( $pageset->current_page != $pageset->last_page ) {
+            %li.paginate_button.next
+              %a{ :href => '#{url_with->query([p => $pageset->last_page])}' }
+                %i.icon-fast-forward
+          - }
+          - else {
+            %li.paginate_button.next.disabled
+              %a
+                %i.icon-fast-forward
+          - }
