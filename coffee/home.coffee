@@ -13,7 +13,7 @@ $ ->
   #
   $('#clothes-search-form').submit (e) ->
     e.preventDefault()
-    clothes_id = $('#clothes-id').val()
+    clothes_id = $('#clothes-id').val().toUpperCase()
     $('#clothes-id').val('').focus()
     return unless clothes_id
     $.ajax "/api/clothes/#{clothes_id}.json",
@@ -39,7 +39,15 @@ $ ->
         $html.find('.order-status').addClass OpenCloset.status[ data.status ].css
         $("#clothes-table table tbody").append($html)
       error: (jqXHR, textStatus, errorThrown) ->
-        OpenCloset.alert('danger', jqXHR.responseJSON.error)
+        msg = "#{clothes_id}: "
+        switch jqXHR.status
+          when 400
+            msg += '의류 코드가 정확하지 않습니다.'
+          when 404
+            msg += '의류 코드가 없습니다.'
+          else
+            msg += '알 수 없는 오류입니다.'
+        OpenCloset.alert 'warning', msg
       complete: (jqXHR, textStatus) ->
 
   #
