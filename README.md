@@ -4,7 +4,7 @@ opencloset
 ## Requirements ##
 
 node.js 를 사용할 수 있는 환경이라고 가정합니다.
-[https://github.com/creationix/nvm](nvm) 의 사용을 추천합니다.
+[nvm](https://github.com/creationix/nvm) 의 사용을 추천합니다.
 
 ruby를 사용할 수 있는 환경이라고 가정합니다.
 rbenv 또는 rvm 의 사용을 추천합니다.
