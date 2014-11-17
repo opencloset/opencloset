@@ -1,56 +1,59 @@
 $ ->
-  $('#query').focus()
+  $('#clothes-id').focus()
   $('#btn-clear').click (e) ->
     e.preventDefault()
     $('#clothes-table table tbody tr').remove()
     $('#order-table table tbody tr').remove()
     $('#action-buttons').hide()
-    $('#query').focus()
+    $('#clothes-id').focus()
   $('#btn-search').click (e) ->
     $('#search-form').trigger('submit')
 
   $('#search-form').submit (e) ->
     e.preventDefault()
-    query = $('#query').val()
-    $('#query').val('').focus()
-    return unless query
+    clothes_id = $('#clothes-id').val().toUpperCase()
+    $('#clothes-id').val('').focus()
+    return unless clothes_id
 
     #
-    # 검색어 길이가 4이면
+    # 의류 검색 및 결과 테이블 갱신
     #
-    if query.length is 4
-      #
-      # 의류 검색 및 결과 테이블 갱신
-      #
-      $.ajax "/api/clothes/#{query}.json",
-        type: 'GET'
-        dataType: 'json'
-        success: (data, textStatus, jqXHR) ->
-          data.code        = data.code.replace /^0/, ''
-          data.categoryStr = OpenCloset.category[ data.category ].str
+    $.ajax "/api/clothes/#{clothes_id}.json",
+      type: 'GET'
+      dataType: 'json'
+      success: (data, textStatus, jqXHR) ->
+        data.code        = data.code.replace /^0/, ''
+        data.categoryStr = OpenCloset.category[ data.category ].str
 
-          return if $("#clothes-table table tbody tr[data-clothes-code='#{data.code}']").length
-          if data.status is '대여중'
-            compiled = _.template($('#tpl-row-checkbox-disabled-with-order').html())
-            $html = $(compiled(data))
-            if data.order.overdue
-              compiled = _.template($('#tpl-overdue-paragraph').html())
-              html     = compiled(data)
-              $html.find("td:last-child").append(html)
-          else if data.status is '대여가능'
-            compiled = _.template($('#tpl-row-checkbox-enabled').html())
-            $html = $(compiled(data))
-            $('#action-buttons').show() if data.status is '대여가능'
+        return if $("#clothes-table table tbody tr[data-clothes-code='#{data.code}']").length
+        if data.status is '대여중'
+          compiled = _.template($('#tpl-row-checkbox-disabled-with-order').html())
+          $html = $(compiled(data))
+          if data.order.overdue
+            compiled = _.template($('#tpl-overdue-paragraph').html())
+            html     = compiled(data)
+            $html.find("td:last-child").append(html)
+        else if data.status is '대여가능'
+          compiled = _.template($('#tpl-row-checkbox-enabled').html())
+          $html = $(compiled(data))
+          $('#action-buttons').show() if data.status is '대여가능'
+        else
+          compiled = _.template($('#tpl-row-checkbox-disabled-without-order').html())
+          $html = $(compiled(data))
+
+        $html.find('.order-status').addClass OpenCloset.status[ data.status ].css
+        $("#clothes-table table tbody").append($html)
+      error: (jqXHR, textStatus, errorThrown) ->
+        msg = "#{clothes_id}: "
+        switch jqXHR.status
+          when 400
+            msg += '의류 코드가 정확하지 않습니다.'
+          when 404
+            msg += '의류 코드가 없습니다.'
           else
-            compiled = _.template($('#tpl-row-checkbox-disabled-without-order').html())
-            $html = $(compiled(data))
-
-          $html.find('.order-status').addClass OpenCloset.status[ data.status ].css
-          $("#clothes-table table tbody").append($html)
-        error: (jqXHR, textStatus, errorThrown) ->
-          if jqXHR.status is 404
-            OpenCloset.alert 'warning', "#{query} 의류는 찾을 수 없습니다."
-        complete: (jqXHR, textStatus) ->
+            msg += '알 수 없는 오류입니다.'
+        OpenCloset.alert 'warning', msg
+      complete: (jqXHR, textStatus) ->
 
   #
   # 의류 검색 결과 테이블에서 모든 항목 선택 및 취소
