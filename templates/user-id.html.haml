@@ -29,7 +29,7 @@
 
                       .profile-contact-info
                         .profile-contact-links.align-left
-                          %a.btn.btn-link{ :href => '#' }
+                          %a.btn.btn-link{ :href => "#{ url_for('/sms')->query( to => $user->user_info->phone ) }" }
                             %i.icon-phone.bigger-120.green
                             SMS 보내기
                           %a.btn.btn-link{ :href => 'mailto:#{ $user->email }' }
