@@ -2,8 +2,9 @@
 - my $_id = 'clothes-code';
 - layout 'default',
 -   page_id     => $_id,
+-   active_id   => 'clothes',
 -   breadcrumbs => [
--     { text => meta_text('clothes') },
+-     { text => meta_text('clothes'), link => url_for( meta_link('clothes') ) },
 -     { text => meta_text($_id)      },
 -   ],
 -   jses  => [
