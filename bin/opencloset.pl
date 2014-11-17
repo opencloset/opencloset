@@ -4232,6 +4232,13 @@ get '/timetable/:ymd' => sub {
 
 get '/sms' => sub {
     my $self = shift;
+
+    my %params = $self->get_params(qw/ to msg /);
+
+    $self->stash(
+        to  => $params{to},
+        msg => $params{msg},
+    );
 };
 
 app->secrets( app->defaults->{secrets} );
