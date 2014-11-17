@@ -218,3 +218,8 @@
                     <td> <%%= hm %> </td>
                   </tr>
                 </script>
+                <script id="tpl-booking-error-404" type="text/html">
+                  <tr>
+                    <td colspan="3">예약가능한 날짜가 없습니다.</td>
+                  </tr>
+                </script>
