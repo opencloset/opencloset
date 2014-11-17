@@ -35,7 +35,7 @@
             -   my $rental_date = $order->rental_date;
             -   my $target_date = $order->target_date;
               :plain
-                <a href="#{ url_for( '/orders/' . $order->id ) }"><span class="label label-info arrowed-right arrowed-in">
+                <a href="#{ url_for( '/order/' . $order->id ) }"><span class="label label-info arrowed-right arrowed-in">
                   <strong>주문서</strong>
                   <time class="js-relative-date" datetime="#{ $rental_date->datetime }" title="#{ $rental_date->ymd }">#{ join('/', $rental_date->month, $rental_date->day) }</time>
                   ~
