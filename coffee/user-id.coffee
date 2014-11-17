@@ -52,6 +52,8 @@ $ ->
             when '1' then value_str = '직원'
             else          value_str = ''
           $(this).html value_str
+      when 'user-comment'
+        params.type = 'textarea'
       else
         params.type = 'text'
 
