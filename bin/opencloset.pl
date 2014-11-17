@@ -3630,6 +3630,60 @@ get '/user/:id' => sub {
     );
 } => 'user-id';
 
+get '/clothes' => sub {
+    my $self = shift;
+
+    #
+    # fetch params
+    #
+    my %params = $self->get_params(qw/ status /);
+
+    #
+    # validate params
+    #
+    my $v = $self->create_validator;
+    $v->field('status')->regexp(qr/^\d+$/);
+    unless ( $self->validate( $v, \%params ) ) {
+        my @error_str;
+        while ( my ( $k, $v ) = each %{ $v->errors } ) {
+            push @error_str, "$k:$v";
+        }
+        return $self->error( 400, {
+            str  => join(',', @error_str),
+            data => $v->errors,
+        });
+    }
+
+    my $p      = $self->param('p') || 1;
+    my $s      = $self->param('s') || app->config->{entries_per_page};
+    my $status = $self->param('status');
+
+    my $cond = $status ? { 'status_id' => $status } : {};
+    my $rs = $DB->resultset('Clothes')->search(
+        $cond,
+        {
+            order_by => { -asc => 'id' },
+            page     => $p,
+            rows     => $s,
+        },
+    );
+
+    my $pageset = Data::Pageset->new({
+        total_entries    => $rs->pager->total_entries,
+        entries_per_page => $rs->pager->entries_per_page,
+        pages_per_set    => 5,
+        current_page     => $p,
+    });
+
+    #
+    # response
+    #
+    $self->stash(
+        clothes_list => $rs,
+        pageset      => $pageset,
+    );
+} => 'clothes';
+
 get '/clothes/:code' => sub {
     my $self = shift;
 
