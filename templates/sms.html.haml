@@ -4,6 +4,21 @@
 - title meta_text($_id);
 
 .row
+  .hr.hr12.dotted
+  .clearfix
+    .grid2
+      %span.bigger-175.blue= commify( $balance->{cash} )
+      %br
+      캐쉬
+    .grid2
+      %span.bigger-175.blue= commify( $balance->{point} )
+      %br
+      포인트
+  .hr.hr16.dotted
+
+.space-6
+
+.row
   .col-xs-12
     %form.form-horizontal{ :role => 'form' }
       .form-group
