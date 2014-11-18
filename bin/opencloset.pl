@@ -35,6 +35,8 @@ use Gravatar::URL;
 use List::MoreUtils qw( zip );
 use List::Util qw( sum );
 use Mojo::Util qw( encode );
+use SMS::Send::KR::CoolSMS;
+use SMS::Send;
 use String::Random;
 use Text::CSV;
 use Try::Tiny;
@@ -4291,9 +4293,18 @@ get '/sms' => sub {
 
     my %params = $self->get_params(qw/ to msg /);
 
+    my $sender = SMS::Send->new(
+        'KR::CoolSMS',
+        _api_key    => app->config->{sms}{api_key},
+        _api_secret => app->config->{sms}{api_secret},
+        _from       => app->config->{sms}{from},
+    );
+    my $balance = $sender->balance;
+
     $self->stash(
-        to  => $params{to},
-        msg => $params{msg},
+        to      => $params{to},
+        msg     => $params{msg},
+        balance => $balance->{success} ? $balance->{detail} : { cash => 0, point => 0 },
     );
 };
 

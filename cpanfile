@@ -25,7 +25,7 @@ requires 'Moo';
 requires 'MooX::Types::MooseLike';
 requires 'Object::Event';
 requires 'Path::Tiny';
-requires 'SMS::Send::KR::CoolSMS', '1.000';
+requires 'SMS::Send::KR::CoolSMS', '1.002';
 requires 'Scalar::Util';
 requires 'Text::CSV';
 requires 'Text::Haml', '0.990114';

@@ -135,7 +135,9 @@ $db_opts->{AutoCommit} //= 1;
     # SMS
     #
     sms => {
-        from => $SMS_FROM,
+        api_key    => $ENV{OPENCLOSET_COOLSMS_API_KEY}    || q{},
+        api_secret => $ENV{OPENCLOSET_COOLSMS_API_SECRET} || q{},
+        from       => $SMS_FROM,
     },
 
     #
