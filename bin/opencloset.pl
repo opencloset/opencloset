@@ -3467,6 +3467,10 @@ any '/visit' => sub {
     }
 
     if ( $type eq 'visit' ) {
+        #
+        # 예약 신청/변경/취소
+        #
+
         my %user_params;
         my %user_info_params;
 
@@ -3485,6 +3489,18 @@ any '/visit' => sub {
             # 예약 취소
             #
             my $order = $user->find_related( 'orders', { booking_id => $booking_saved } );
+
+            my $msg = sprintf(
+                "%s님 %s 방문 예약이 취소되었습니다.",
+                $user->name,
+                $order->booking->date->strftime('%m월 %d일 %H시 %M분'),
+            );
+            $DB->resultset('SMS')->create({
+                to   => $user->user_info->phone,
+                from => app->config->{sms}{from},
+                text => $msg,
+            }) or app->log->warn("failed to create a new sms: $msg");
+
             $order->delete if $order;
         }
         else {
@@ -3500,6 +3516,17 @@ any '/visit' => sub {
                     #
                     $order->update({ booking_id => $booking }) if $order;
                 }
+
+                my $msg = sprintf(
+                    "%s님 %s으로 방문 예약이 변경되었습니다.",
+                    $user->name,
+                    $order->booking->date->strftime('%m월 %d일 %H시 %M분'),
+                );
+                $DB->resultset('SMS')->create({
+                    to   => $user->user_info->phone,
+                    from => app->config->{sms}{from},
+                    text => $msg,
+                }) or app->log->warn("failed to create a new sms: $msg");
             }
             else {
                 #
@@ -3509,6 +3536,17 @@ any '/visit' => sub {
                     status_id  => 14,      # 방문예약: status 테이블 참조
                     booking_id => $booking,
                 });
+
+                my $msg = sprintf(
+                    "%s님 %s으로 방문 예약이 완료되었습니다.",
+                    $user->name,
+                    $order->booking->date->strftime('%m월 %d일 %H시 %M분'),
+                );
+                $DB->resultset('SMS')->create({
+                    to   => $user->user_info->phone,
+                    from => app->config->{sms}{from},
+                    text => $msg,
+                }) or app->log->warn("failed to create a new sms: $msg");
             }
         }
     }
