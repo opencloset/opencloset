@@ -1269,6 +1269,8 @@ group {
     post '/gui/utf8/gcs-columns'  => \&api_gui_utf8_gcs_columns;
     get  '/gui/timetable/:ymd'    => \&api_gui_timetable;
 
+    any '/postcode/search'       => \&api_postcode_search;
+
     sub api_create_user {
         my $self = shift;
 
