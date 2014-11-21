@@ -42,6 +42,9 @@ use Text::CSV;
 use Try::Tiny;
 use Unicode::GCString;
 use Unicode::Normalize;
+use Encode 'decode_utf8';
+
+use Postcodify;
 
 use OpenCloset::Schema;
 
@@ -3466,6 +3469,15 @@ group {
         $count{visited} = $count{all} - $count{notvisited};
 
         $self->respond_to( json => { status => 200, json => \%count } );
+
+    }
+
+    sub api_postcode_search {
+        my $self   = shift;
+        my $q      = $self->param('q');
+        my $p      = Postcodify->new;
+        my $result = $p->search( $q );
+        $self->render(text => decode_utf8($result->json), format => 'json');
     }
 
 }; # end of API section
