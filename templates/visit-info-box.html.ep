@@ -73,9 +73,10 @@
                             </span>
                           </label>
 
+                          <label id="postcodify" class="block clearfix"></label>
                           <label class="block clearfix">
                             <span class="block input-icon input-icon-right">
-                              <input name="address" type="text" class="form-control" placeholder="주소" value="<%= $user->user_info->address %>" />
+                              <input name="address" type="text" class="form-control postcodify_address" placeholder="주소" value="<%= $user->user_info->address %>" />
                               <i class="icon-home"></i>
                             </span>
                           </label>
