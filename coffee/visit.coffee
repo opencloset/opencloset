@@ -502,3 +502,21 @@ $ ->
   # 전화번호에 `-` 기호를 무시하도록 함
   #
   $('input[type="tel"]').mask('99999999999')
+
+  #
+  # postcodify
+  #
+  $("#postcodify").postcodify
+    api: "/api/postcode/search"
+    timeout: 30000
+    insertAddress : ".postcodify_address"
+    onReady: ->
+      $("#postcodify").find('.postcodify_search_controls.postcode_search_controls')
+        .addClass('input-group').find('input[type=text]')
+        .addClass('form-control').val($('.postcodify_address').val()).end().find('button')
+        .addClass('btn btn-default btn-sm')
+        .wrap('<span class="input-group-btn"></span>')
+    afterSelect: ->
+      $('.postcodify_search_result.postcode_search_result').hide()
+    afterSearch: (keywords, results, lang, sort) ->
+      $('summary.postcodify_search_status.postcode_search_status').hide()
