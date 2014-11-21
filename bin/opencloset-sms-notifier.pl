@@ -12,6 +12,9 @@ use SMS::Send;
 
 use OpenCloset::Util;
 
+binmode STDOUT, ':utf8';
+binmode STDERR, ':utf8';
+
 my $CONF = OpenCloset::Util::load_config(
     "$Bin/../app.conf",
     $Script,
