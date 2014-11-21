@@ -140,7 +140,8 @@
 
                           <label class="block clearfix">
                             <span class="block input-icon input-icon-right">
-                              <input name="company" type="text" class="form-control" placeholder="응시 기업 및 분야" value="<%= $company %>" />
+                              <input name="company" type="text" class="form-control" placeholder="대여 목적에 대한 자세한 설명" value="<%= $company %>" />
+                              <p> 입사 면접인 경우 응시 기업 및 분야를, 결혼식인 경우 누구의 결혼식인지를 자세하게 입력해주세요.  저희가 적합한 옷을 준비하는데 큰 도움이 됩니다. :) </p>
                             </span>
                           </label>
 
