@@ -568,6 +568,7 @@ helper create_order => sub {
         $v->field(qw/ height weight bust waist hip belly thigh arm leg knee foot /)->each(sub {
             shift->regexp(qr/^\d{1,3}$/);
         });
+        $v->field('bestfit')->in( 0, 1 );
         unless ( $self->validate( $v, $order_params ) ) {
             my @error_str;
             while ( my ( $k, $v ) = each %{ $v->errors } ) {
@@ -774,6 +775,7 @@ helper update_order => sub {
         $v->field(qw/ height weight bust waist hip belly thigh arm leg knee foot /)->each(sub {
             shift->regexp(qr/^\d{1,3}$/);
         });
+        $v->field('bestfit')->in( 0, 1 );
         unless ( $self->validate( $v, $order_params ) ) {
             my @error_str;
             while ( my ( $k, $v ) = each %{ $v->errors } ) {
@@ -1499,6 +1501,7 @@ group {
             additional_day
             arm
             belly
+            bestfit
             bust
             desc
             foot
@@ -1573,6 +1576,7 @@ group {
             additional_day
             arm
             belly
+            bestfit
             bust
             desc
             foot
@@ -1645,6 +1649,7 @@ group {
             additional_day
             arm
             belly
+            bestfit
             bust
             desc
             foot
