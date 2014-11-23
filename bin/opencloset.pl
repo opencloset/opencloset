@@ -4331,8 +4331,8 @@ get '/sms' => sub {
     my $balance = $sender->balance;
 
     $self->stash(
-        to      => $params{to},
-        msg     => $params{msg},
+        to      => $params{to}  || q{},
+        msg     => $params{msg} || q{},
         balance => $balance->{success} ? $balance->{detail} : { cash => 0, point => 0 },
     );
 };
