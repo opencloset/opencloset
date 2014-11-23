@@ -220,12 +220,7 @@ $ ->
             else
               visitError '서버 오류가 발생했습니다.'
 
-  #
-  # 개인정보 갱신 버튼 클릭
-  #
-  $('#btn-booking-cancel').click (e) ->
-    e.preventDefault()
-
+  cancelBooking = () ->
     name    = $("input[name=name]").val()
     phone   = $("input[name=phone]").val()
     sms     = $("input[name=sms]").val()
@@ -261,12 +256,7 @@ $ ->
         visitError '인증번호를 입력해주세요.'
         return
 
-  #
-  # 개인정보 갱신 버튼 클릭
-  #
-  $('#btn-info').click (e) ->
-    e.preventDefault()
-
+  createOrUpdateBooking = () ->
     name    = $("input[name=name]").val()
     phone   = $("input[name=phone]").val()
     sms     = $("input[name=sms]").val()
@@ -375,6 +365,44 @@ $ ->
       unless purpose
         visitError '대여 목적을 입력해주세요.'
         return
+
+  $("#btn-confirm-modal-cancel").click (e) ->
+    type = $("#modal-confirm").data('type')
+    $("#modal-confirm").modal('hide')
+  $("#btn-confirm-modal-ok").click (e) ->
+    $("#modal-confirm").modal('hide')
+    type = $("#modal-confirm").data('type')
+    if type is 'remove'
+      cancelBooking()
+    else if type is 'createorupdate'
+      createOrUpdateBooking()
+
+  confirmDialog = (type, msg) ->
+    if type is 'remove'
+      header = '예약을 취소하시겠습니까?'
+    else if type is 'createorupdate'
+      header = '예약을 확정하시겠습니까?'
+    else
+      return
+
+    $('#confirmModalLabel').html(header)
+    $('#modal-confirm .modal-body').append("#{msg}")
+    $("#modal-confirm").data('type', type)
+    $("#modal-confirm").modal('show')
+
+  #
+  # 개인정보 갱신 버튼 클릭
+  #
+  $('#btn-booking-cancel').click (e) ->
+    e.preventDefault()
+    confirmDialog('remove', '')
+
+  #
+  # 개인정보 갱신 버튼 클릭
+  #
+  $('#btn-info').click (e) ->
+    e.preventDefault()
+    confirmDialog('createorupdate', '')
 
   #
   # 방문 일자 선택 버튼 클릭
