@@ -1,7 +1,7 @@
 $ ->
   $('#btn-sms-send').click (e) ->
     to  = $('input[name=to]').prop('value')
-    msg = $('input[name=msg]').prop('value')
+    msg = $('textarea[name=msg]').prop('value')
 
     #
     # 휴대전화 점검
