@@ -3482,7 +3482,7 @@ any '/visit' => sub {
         $user_info_params{height}   = $height   if $height   && $height   ne $user->user_info->height;
         $user_info_params{weight}   = $weight   if $weight   && $weight   ne $user->user_info->weight;
         $user_info_params{purpose}  = $purpose  if $purpose  && $purpose  ne $user->user_info->purpose;
-        $user_info_params{purpose2} = $purpose2 if $purpose2 && $purpose2 ne $user->user_info->purpose2;
+        $user_info_params{purpose2} = $purpose2 || q{};
 
         if ( $booking == -1 ) {
             #
