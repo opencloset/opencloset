@@ -271,17 +271,17 @@ $ ->
     phone   = $("input[name=phone]").val()
     sms     = $("input[name=sms]").val()
 
-    gender  = $("input[name=gender]:checked").val()
-    email   = $("input[name=email]").val()
-    address = $("input[name=address]").val()
-    birth   = $("input[name=birth]").val()
-    height  = $("input[name=height]").val()
-    weight  = $("input[name=weight]").val()
-    booking = $("input[name=booking]").val()
-    purpose = $("input[name=purpose]").val()
-    company = $("input[name=company]").val()
+    gender   = $("input[name=gender]:checked").val()
+    email    = $("input[name=email]").val()
+    address  = $("input[name=address]").val()
+    birth    = $("input[name=birth]").val()
+    height   = $("input[name=height]").val()
+    weight   = $("input[name=weight]").val()
+    booking  = $("input[name=booking]").val()
+    purpose  = $("input[name=purpose]").val()
+    purpose2 = $("input[name=purpose2]").val()
 
-    if name && phone && sms && gender && email && address && birth && height && weight && booking && purpose && company
+    if name && phone && sms && gender && email && address && birth && height && weight && booking && purpose
       $('#visit-info-form').submit()
     else
       #
@@ -374,13 +374,6 @@ $ ->
       #
       unless purpose
         visitError '대여 목적을 입력해주세요.'
-        return
-
-      #
-      # 응시 기업 및 분야 점검
-      #
-      unless company
-        visitError '응시 기업 및 분야를 입력해주세요.'
         return
 
   #

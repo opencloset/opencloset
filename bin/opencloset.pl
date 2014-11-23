@@ -1286,7 +1286,6 @@ group {
             birth
             bust
             comment
-            company
             foot
             gender
             height
@@ -1295,6 +1294,7 @@ group {
             leg
             phone
             purpose
+            purpose2
             thigh
             waist
             weight
@@ -1416,7 +1416,6 @@ group {
             birth
             bust
             comment
-            company
             foot
             gender
             height
@@ -1425,6 +1424,7 @@ group {
             leg
             phone
             purpose
+            purpose2
             staff
             thigh
             waist
@@ -3411,7 +3411,7 @@ any '/visit' => sub {
     my $booking       = $self->param('booking');
     my $booking_saved = $self->param('booking-saved');
     my $purpose       = $self->param('purpose');
-    my $company       = $self->param('company');
+    my $purpose2      = $self->param('purpose2');
 
     app->log->debug("type: $type");
     app->log->debug("name: $name");
@@ -3429,7 +3429,7 @@ any '/visit' => sub {
     app->log->debug("booking: $booking");
     app->log->debug("booking-saved: $booking_saved");
     app->log->debug("purpose: $purpose");
-    app->log->debug("company: $company");
+    app->log->debug("purpose2: $purpose2");
 
     #
     # find user
@@ -3474,15 +3474,15 @@ any '/visit' => sub {
         my %user_params;
         my %user_info_params;
 
-        $user_params{id}           = $user->id;
-        $user_params{email}        = $email   if $email   && $email   ne $user->email;
-        $user_info_params{gender}  = $gender  if $gender  && $gender  ne $user->user_info->gender;
-        $user_info_params{address} = $address if $address && $address ne $user->user_info->address;
-        $user_info_params{birth}   = $birth   if $birth   && $birth   ne $user->user_info->birth;
-        $user_info_params{height}  = $height  if $height  && $height  ne $user->user_info->height;
-        $user_info_params{weight}  = $weight  if $weight  && $weight  ne $user->user_info->weight;
-        $user_info_params{purpose} = $purpose if $purpose && $purpose ne $user->user_info->purpose;
-        $user_info_params{company} = $company if $company && $company ne $user->user_info->company;
+        $user_params{id}            = $user->id;
+        $user_params{email}         = $email    if $email    && $email    ne $user->email;
+        $user_info_params{gender}   = $gender   if $gender   && $gender   ne $user->user_info->gender;
+        $user_info_params{address}  = $address  if $address  && $address  ne $user->user_info->address;
+        $user_info_params{birth}    = $birth    if $birth    && $birth    ne $user->user_info->birth;
+        $user_info_params{height}   = $height   if $height   && $height   ne $user->user_info->height;
+        $user_info_params{weight}   = $weight   if $weight   && $weight   ne $user->user_info->weight;
+        $user_info_params{purpose}  = $purpose  if $purpose  && $purpose  ne $user->user_info->purpose;
+        $user_info_params{purpose2} = $purpose2 if $purpose2 && $purpose2 ne $user->user_info->purpose2;
 
         if ( $booking == -1 ) {
             #
@@ -3562,19 +3562,10 @@ any '/visit' => sub {
     };
 
     $self->stash(
-        type    => $type,
-        name    => $user->name,
-        email   => $user->email,
-        gender  => $user->user_info->gender,
-        phone   => $user->user_info->phone,
-        address => $user->user_info->address,
-        birth   => $user->user_info->birth,
-        sms     => $sms,
-        height  => $user->user_info->height,
-        weight  => $user->user_info->weight,
-        purpose => $user->user_info->purpose,
-        company => $user->user_info->company,
-        booking => $booking_obj,
+        type     => $type,
+        user     => $user,
+        sms      => $sms,
+        booking  => $booking_obj,
     );
 };
 
