@@ -73,7 +73,7 @@ CREATE TABLE `user_info` (
   --
   `staff`       BOOLEAN DEFAULT 0,
   `purpose`     VARCHAR(128) DEFAULT NULL,
-  `company`     VARCHAR(128) DEFAULT NULL,
+  `purpose2`    TEXT DEFAULT NULL,
 
   PRIMARY KEY (`id`),
   UNIQUE KEY (`user_id`),
@@ -297,7 +297,7 @@ CREATE TABLE `order` (
 
   -- guest info
   `purpose`          VARCHAR(128) DEFAULT NULL,
-  `company`          VARCHAR(128) DEFAULT NULL,
+  `purpose2`         TEXT DEFAULT NULL,
   `height`           INT DEFAULT NULL, -- 키(cm)
   `weight`           INT DEFAULT NULL, -- 몸무게(kg)
   `bust`             INT DEFAULT NULL, -- 가슴   둘레(cm)
