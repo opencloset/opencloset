@@ -227,6 +227,29 @@
                                     %li.row
                                       .col-sm-1
                                         %i.icon-caret-right.green
+                                      .col-sm-3.no-padding-left 어울림:
+                                      .col-sm-8
+                                        :plain
+                                          <a
+                                            id               = "order-bestfit"
+                                            class            = "editable editable-click"
+                                            href             = "#"
+
+                                            data-disabled    = "#{ $order->status->id != 14 ? 'true' : 'false' }"
+                                            data-mode        = "inline"
+                                            data-showbuttons = "true"
+                                            data-type        = "select"
+                                            data-emptytext   = "보통"
+
+                                            data-value       = "#{ $order->bestfit }"
+
+                                            data-url         = "/order/#{ $order->id }/update"
+                                            data-pk          = "#{ $order->id }"
+                                            data-name        = "bestfit"
+                                          ></a>
+                                    %li.row
+                                      .col-sm-1
+                                        %i.icon-caret-right.green
                                       .col-sm-3.no-padding-left 신체 치수:
                                       .col-sm-8
                                         %span.label.label-success= $order->user->user_info->height || '-'

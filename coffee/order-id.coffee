@@ -126,6 +126,8 @@ $ ->
     source: -> { value: m, text: m } for m in OpenCloset.payWith
     success: (response, newValue) ->
       $('#order').data('order-late-fee-pay-with', newValue)
+  $('#order-bestfit').editable
+    source: -> { value: k, text: v } for k, v of { 0: '보통', 1: 'Best-Fit' }
   $('.order-detail').editable()
 
   setOrderDetailFinalPrice = (order_detail_id) ->

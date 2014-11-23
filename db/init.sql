@@ -309,6 +309,7 @@ CREATE TABLE `order` (
   `leg`              INT DEFAULT NULL, -- 다리   길이(cm)
   `knee`             INT DEFAULT NULL, -- 무릎   길이(cm)
   `foot`             INT DEFAULT NULL, -- 발 크기(mm)
+  `bestfit`          BOOLEAN DEFAULT 0,
 
   `create_date`      DATETIME DEFAULT NULL,
   `update_date`      DATETIME DEFAULT NULL,
