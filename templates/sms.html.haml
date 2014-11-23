@@ -26,6 +26,10 @@
         .col-sm-9
           %input.col-xs-10.col-sm-5{ :name => "to", :type => "tel", :placeholder => "휴대 전화 번호", :value => "#{$to}" }
       .form-group
+        %label.col-sm-3.control-label.no-padding-right{ :for => 'macro' } 매크로
+        .col-sm-9
+          %select.col-xs-10.col-sm-5{ :name => "macro", :type => 'hidden', 'data-placeholder' => '전송할 메시지의 종류를 선택하세요.' }
+      .form-group
         %label.col-sm-3.control-label.no-padding-right{ :for => 'msg' } 메시지
         .col-sm-9
           %textarea.col-xs-10.col-sm-8{ :name => "msg", :placeholder => "한글 기준 44자 이내로 작성하세요.", :rows => "5" }= $msg
