@@ -195,10 +195,9 @@ __PACKAGE__->table("order");
 
 =head2 bestfit
 
-  data_type: 'bit'
-  default_value: 'b'0''
-  is_nullable: 0
-  size: 1
+  data_type: 'tinyint'
+  default_value: 0
+  is_nullable: 1
 
 =head2 create_date
 
@@ -332,7 +331,7 @@ __PACKAGE__->add_columns(
   "foot",
   { data_type => "integer", is_nullable => 1 },
   "bestfit",
-  { data_type => "bit", default_value => "b'0'", is_nullable => 0, size => 1 },
+  { data_type => "tinyint", default_value => 0, is_nullable => 1 },
   "create_date",
   {
     data_type => "datetime",
@@ -492,8 +491,8 @@ __PACKAGE__->belongs_to(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2014-11-23 23:55:13
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:8/haY1OU+TbTL1HnshgcLA
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2014-11-24 02:13:03
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:UZ4wtEtTpxN1kACu+N4tOA
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration
