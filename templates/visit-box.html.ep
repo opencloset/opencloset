@@ -83,9 +83,10 @@
                             </span>
                           </label>
 
+                          <label id="postcodify" class="block clearfix signup"></label>
                           <label class="block clearfix signup">
                             <span class="block input-icon input-icon-right">
-                              <input name="address" type="text" class="form-control" placeholder="주소" />
+                              <input name="address" type="text" class="form-control postcodify_address" placeholder="주소" />
                               <i class="icon-home"></i>
                             </span>
                           </label>

@@ -508,15 +508,16 @@ $ ->
   #
   $("#postcodify").postcodify
     api: "/api/postcode/search"
-    timeout: 30000
+    timeout: 10000    # 10 seconds
     insertAddress : ".postcodify_address"
+    searchButtonContent: '주소검색'
     onReady: ->
       $("#postcodify").find('.postcodify_search_controls.postcode_search_controls')
         .addClass('input-group').find('input[type=text]')
         .addClass('form-control').val($('.postcodify_address').val()).end().find('button')
         .addClass('btn btn-default btn-sm')
         .wrap('<span class="input-group-btn"></span>')
-    afterSelect: ->
-      $('.postcodify_search_result.postcode_search_result').hide()
+    afterSelect: (selectedEntry) ->
+      $("#postcodify").remove()
     afterSearch: (keywords, results, lang, sort) ->
       $('summary.postcodify_search_status.postcode_search_status').hide()
