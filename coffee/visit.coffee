@@ -427,7 +427,6 @@ $ ->
           $("#booking-list").append( $(compiled(booking)) )
           $("input[type='radio'][name='booking_id'][value='#{ old_booking_id }']").prop( "checked", true )
       error: (jqXHR, textStatus, errorThrown) ->
-        console.log jqXHR.status
         if jqXHR.status is 404
           template = _.template( $('#tpl-booking-error-404').html() )
           $("#booking-list").append( $(template()) )
