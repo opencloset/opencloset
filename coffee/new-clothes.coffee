@@ -319,7 +319,7 @@ $ ->
         else return
 
     .on 'finished', (e) ->
-      location.href = "/"
+      location.href = "/new-clothes"
       false
     .on 'stepclick', (e) ->
       # false
