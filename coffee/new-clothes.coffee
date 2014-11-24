@@ -223,6 +223,11 @@ $ ->
       ajax = {}
       switch info.step
         when 2
+          unless /^\d{4}-\d{2}-\d{2}$/.test( $('#create-date').val() )
+            OpenCloset.alert('warning', '기증 날짜가 올바르지 않습니다.')
+            $(this).wizard('previous')
+            return
+
           if userID
             ajax.type = 'PUT'
             ajax.path = "/api/user/#{userID}.json"
