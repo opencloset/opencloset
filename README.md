@@ -69,6 +69,9 @@ MySQL 데이터베이스에 접속하며 `opencloset` 데이터베이스에
 
     $ curl https://raw.githubusercontent.com/aanoaa/p5-postcodify/develop/installer.sh | sh
 
+설정파일에서 `postcodify_db` 의 경로를 수정합니다.
+기본값은 `db/postcodify.20141112.v2.sqlite` 입니다.
+
 ### RUN
 
     $ plackup                         # or
