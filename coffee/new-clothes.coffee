@@ -222,10 +222,15 @@ $ ->
 
       ajax = {}
       switch info.step
+        when 1
+          unless userID or donationID
+            OpenCloset.alert('warning', '기증자나 기증 행위를 선택하지 않았습니다.')
+            e.preventDefault()
+            return
         when 2
           unless /^\d{4}-\d{2}-\d{2}$/.test( $('#create-date').val() )
             OpenCloset.alert('warning', '기증 날짜가 올바르지 않습니다.')
-            $(this).wizard('previous')
+            e.preventDefault()
             return
 
           if userID
@@ -242,11 +247,15 @@ $ ->
               userID = data.id
               return true
             error: (jqXHR, textStatus, errorThrown) ->
-              OpenCloset.alert('danger', jqXHR.responseJSON.error)
-              return false
+              OpenCloset.alert('warning', jqXHR.responseJSON.str)
+              e.preventDefault()
+              return
             complete: (jqXHR, textStatus) ->
         when 3
-          return unless $("input[name=clothes-list]:checked").length
+          unless $("input[name=clothes-list]:checked").length
+            OpenCloset.alert('warning', '추가할 의류를 선택하지 않았습니다.')
+            e.preventDefault()
+            return
 
           #
           # FIXME do we need a single API for transaction?
