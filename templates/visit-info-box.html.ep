@@ -119,7 +119,7 @@
                             </button>
                           </label>
                           <input name="booking" type="hidden" class="form-control" value="<%= $booking ? $booking->id : '' %>" />
-                          <input name="booking-saved" type="hidden" class="form-control" value="<%= $booking ? $booking->id : '' %>" />
+                          <input name="booking-saved" type="hidden" class="form-control" value="<%= $booking ? $booking->id : '' %>" data-ymd="<%= $booking ? $booking->date->strftime('%Y-%m-%d') : '' %>" data-hm="<%= $booking ? $booking->date->strftime('%H:%M') : '' %>" />
 
                           <label class="block clearfix">
                             <span class="block input-icon input-icon-right">

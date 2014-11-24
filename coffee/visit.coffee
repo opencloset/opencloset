@@ -222,9 +222,10 @@ $ ->
               visitError '서버 오류가 발생했습니다.'
 
   checkCancelBooking = () ->
-    name    = $("input[name=name]").val()
-    phone   = $("input[name=phone]").val()
-    sms     = $("input[name=sms]").val()
+    name          = $("input[name=name]").val()
+    phone         = $("input[name=phone]").val()
+    sms           = $("input[name=sms]").val()
+    booking_saved = $("input[name=booking-saved]").val()
 
     #
     # 이름 점검
@@ -251,6 +252,13 @@ $ ->
     #
     unless sms
       visitError '인증번호를 입력해주세요.'
+      return
+
+    #
+    # 저장된 예약 아이디 점검
+    #
+    unless booking_saved
+      visitError '아직 예약한적이 없습니다.'
       return
 
     return true
@@ -367,12 +375,10 @@ $ ->
   cancelBooking = () ->
     return unless checkCancelBooking()
     $("input[name=booking]").prop( "value", '-1' )
-    console.log 'cancel booking'
     $('#visit-info-form').submit()
 
   createOrUpdateBooking = () ->
     return unless checkCreateOrUpdateBooking()
-    console.log 'create or update booking'
     $('#visit-info-form').submit()
 
   $("#btn-confirm-modal-cancel").click (e) ->
@@ -406,13 +412,14 @@ $ ->
     e.preventDefault()
     return unless checkCancelBooking()
 
-    booking = $("#lbl-booking").text()
-    booking = booking.replace /^\s+|\s+$/g, ""
-    booking = booking.replace /^-\s+/, ""
-    return unless booking
+    booking_saved = $("input[name=booking-saved]").val()
+    booking_ymd   = $("input[name=booking-saved]").data('ymd')
+    booking_hm    = $("input[name=booking-saved]").data('hm')
+
+    return unless booking_saved
 
     name = $("input[name=name]").val()
-    msg  = "<p>#{name}님, <strong>#{booking}</strong>의 열린옷장 방문 예약을 취소하시겠습니까?</p>"
+    msg  = "<p>#{name}님, <strong>#{booking_ymd} #{booking_hm}</strong>의 열린옷장 방문 예약을 취소하시겠습니까?</p>"
 
     confirmDialog 'remove', msg
 
