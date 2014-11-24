@@ -3,7 +3,10 @@
 - layout 'default',
 -   page_id     => $_id,
 -   breadcrumbs => [ { text => meta_text($_id) } ],
--   jses        => [ '/lib/bootstrap/js/fuelux/fuelux.wizard.min.js' ]
+-   jses  => [
+-     '/lib/bootstrap/js/date-time/moment.min.js',
+-     '/lib/bootstrap/js/fuelux/fuelux.wizard.min.js',
+-   ],
 -   ;
 - title meta_text($_id);
 
@@ -89,6 +92,15 @@
               #step2.step-pane
                 %h3.lighter.block.green 기증자의 정보를 입력하세요.
                 %form#user-info.form-horizontal{ :method => 'get', :novalidate="novalidate" }
+                  /
+                  / 기증 날짜
+                  /
+                  .form-group.has-info
+                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'create-date' } 기증 날짜:
+                    .col-xs-12.col-sm-9
+                      .clearfix
+                        %input#create-date.valid.col-xs-12.col-sm-6{ :name => 'create-date', :type => 'text', 'placeholder' => 'YYYY-mm-dd' }
+
                   /
                   / 전자우편
                   /

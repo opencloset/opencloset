@@ -287,14 +287,17 @@ $ ->
           if donationID
             createGroupClothes donationID
           else
+            create_date = $('#create-date').val()
+
             #
             # create donation
             #
             $.ajax "/api/donation.json",
               type: 'POST'
               data:
-                user_id: userID
-                message: $('#donation-message').val()
+                user_id:     userID
+                message:     $('#donation-message').val()
+                create_date: moment(create_date).unix()
               success: (donation, textStatus, jqXHR)  -> createGroupClothes donation.id
               error: (jqXHR, textStatus, errorThrown) ->
                 OpenCloset.alert('warning', jqXHR.responseJSON.error.str)
