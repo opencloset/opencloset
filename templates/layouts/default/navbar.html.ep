@@ -1,4 +1,5 @@
 % use utf8;
+% my $user = current_user;
 <!-- navbar -->
     <div class="navbar navbar-default" id="navbar">
       <div class="navbar-container" id="navbar-container">
@@ -239,8 +240,8 @@
 
                 <li class="opencloset-darken-yellow">
                   <a data-toggle="dropdown" href="#" class="dropdown-toggle">
-                    <img class="nav-user-photo" src="https://pbs.twimg.com/profile_images/1814758551/keedi_bigger.jpg" alt="Keedi's Photo" />
-                    <span class="user-info"> <small>Welcome,</small> Keedi </span>
+                    <img class="nav-user-photo" src="<%= get_gravatar( $user, 36, https => 1 ) %>" alt="<%= $user->name %>'s Photo" />
+                    <span class="user-info"> <small>안녕하세요!</small> <%= $user->name %>님 </span>
                     <i class="icon-caret-down"></i>
                   </a>
 
