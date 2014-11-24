@@ -1,5 +1,6 @@
 $ ->
   signup = false
+  $("input[name=booking]").val(undefined)
 
   #
   # 대여 목적
@@ -220,43 +221,41 @@ $ ->
             else
               visitError '서버 오류가 발생했습니다.'
 
-  cancelBooking = () ->
+  checkCancelBooking = () ->
     name    = $("input[name=name]").val()
     phone   = $("input[name=phone]").val()
     sms     = $("input[name=sms]").val()
 
-    if name && phone && sms
-      $("input[name=booking]").prop( "value", '-1' )
-      $('#visit-info-form').submit()
-    else
-      #
-      # 이름 점검
-      #
-      unless name
-        visitError '이름을 입력해주세요.'
-        return
+    #
+    # 이름 점검
+    #
+    unless name
+      visitError '이름을 입력해주세요.'
+      return
 
-      #
-      # 휴대전화 점검
-      #
-      unless phone
-        visitError '휴대전화를 입력해주세요.'
-        return
-      unless /^\d+$/.test( phone )
-        visitError '유효하지 않은 휴대전화입니다.'
-        return
-      if /^999/.test( phone )
-        visitError '전송 불가능한 휴대전화입니다.'
-        return
+    #
+    # 휴대전화 점검
+    #
+    unless phone
+      visitError '휴대전화를 입력해주세요.'
+      return
+    unless /^\d+$/.test( phone )
+      visitError '유효하지 않은 휴대전화입니다.'
+      return
+    if /^999/.test( phone )
+      visitError '전송 불가능한 휴대전화입니다.'
+      return
 
-      #
-      # 인증번호 점검
-      #
-      unless sms
-        visitError '인증번호를 입력해주세요.'
-        return
+    #
+    # 인증번호 점검
+    #
+    unless sms
+      visitError '인증번호를 입력해주세요.'
+      return
 
-  createOrUpdateBooking = () ->
+    return true
+
+  checkCreateOrUpdateBooking = () ->
     name    = $("input[name=name]").val()
     phone   = $("input[name=phone]").val()
     sms     = $("input[name=sms]").val()
@@ -271,100 +270,110 @@ $ ->
     purpose  = $("input[name=purpose]").val()
     purpose2 = $("input[name=purpose2]").val()
 
-    if name && phone && sms && gender && email && address && birth && height && weight && booking && purpose
-      $('#visit-info-form').submit()
-    else
-      #
-      # 이름 점검
-      #
-      unless name
-        visitError '이름을 입력해주세요.'
-        return
+    #
+    # 이름 점검
+    #
+    unless name
+      visitError '이름을 입력해주세요.'
+      return
 
-      #
-      # 휴대전화 점검
-      #
-      unless phone
-        visitError '휴대전화를 입력해주세요.'
-        return
-      unless /^\d+$/.test( phone )
-        visitError '유효하지 않은 휴대전화입니다.'
-        return
-      if /^999/.test( phone )
-        visitError '전송 불가능한 휴대전화입니다.'
-        return
+    #
+    # 휴대전화 점검
+    #
+    unless phone
+      visitError '휴대전화를 입력해주세요.'
+      return
+    unless /^\d+$/.test( phone )
+      visitError '유효하지 않은 휴대전화입니다.'
+      return
+    if /^999/.test( phone )
+      visitError '전송 불가능한 휴대전화입니다.'
+      return
 
-      #
-      # 인증번호 점검
-      #
-      unless sms
-        visitError '인증번호를 입력해주세요.'
-        return
+    #
+    # 인증번호 점검
+    #
+    unless sms
+      visitError '인증번호를 입력해주세요.'
+      return
 
-      #
-      # 성별 점검
-      #
-      unless gender
-        visitError '성별을 입력해주세요.'
-        return
+    #
+    # 성별 점검
+    #
+    unless gender
+      visitError '성별을 입력해주세요.'
+      return
 
-      #
-      # 전자우편 점검
-      #
-      unless email
-        visitError '전자우편을 입력해주세요.'
-        return
+    #
+    # 전자우편 점검
+    #
+    unless email
+      visitError '전자우편을 입력해주세요.'
+      return
 
-      #
-      # 주소 점검
-      #
-      unless address
-        visitError '주소를 입력해주세요.'
-        return
+    #
+    # 주소 점검
+    #
+    unless address
+      visitError '주소를 입력해주세요.'
+      return
 
-      #
-      # 생년 점검
-      #
-      unless birth
-        visitError '생년을 입력해주세요.'
-        return
-      unless /^(19|20)|\d\d$/.test( birth )
-        visitError '유효하지 않은 생년입니다.'
-        return
+    #
+    # 생년 점검
+    #
+    unless birth
+      visitError '생년을 입력해주세요.'
+      return
+    unless /^(19|20)|\d\d$/.test( birth )
+      visitError '유효하지 않은 생년입니다.'
+      return
 
-      #
-      # 키 점검
-      #
-      unless height
-        visitError '키를 입력해주세요.'
-        return
-      unless /^\d+$/.test( height )
-        visitError '유효하지 않은 키입니다.'
-        return
+    #
+    # 키 점검
+    #
+    unless height
+      visitError '키를 입력해주세요.'
+      return
+    unless /^\d+$/.test( height )
+      visitError '유효하지 않은 키입니다.'
+      return
 
-      #
-      # 몸무게 점검
-      #
-      unless weight
-        visitError '몸무게를 입력해주세요.'
-        return
-      unless /^\d+$/.test( weight )
-        visitError '유효하지 않은 몸무게입니다.'
-        return
+    #
+    # 몸무게 점검
+    #
+    unless weight
+      visitError '몸무게를 입력해주세요.'
+      return
+    unless /^\d+$/.test( weight )
+      visitError '유효하지 않은 몸무게입니다.'
+      return
 
-      #
-      # 방문 일자 점검
-      #
-      unless booking
-        visitError '방문 일자를 선택해주세요.'
-        return
+    #
+    # 방문 일자 점검
+    #
+    unless booking
+      visitError '방문 일자를 선택해주세요.'
+      return
 
-      #
-      # 대여 목적 점검
-      #
-      unless purpose
-        visitError '대여 목적을 입력해주세요.'
-        return
+    #
+    # 대여 목적 점검
+    #
+    unless purpose
+      visitError '대여 목적을 입력해주세요.'
+      return
+
+    return true
+
+  cancelBooking = () ->
+    return unless checkCancelBooking()
+    $("input[name=booking]").prop( "value", '-1' )
+    console.log 'cancel booking'
+    $('#visit-info-form').submit()
+
+  createOrUpdateBooking = () ->
+    return unless checkCreateOrUpdateBooking()
+    console.log 'create or update booking'
+    $('#visit-info-form').submit()
 
   $("#btn-confirm-modal-cancel").click (e) ->
     type = $("#modal-confirm").data('type')
@@ -386,23 +395,44 @@ $ ->
       return
 
     $('#confirmModalLabel').html(header)
-    $('#modal-confirm .modal-body').append("#{msg}")
+    $('#modal-confirm .modal-body').html(msg)
     $("#modal-confirm").data('type', type)
     $("#modal-confirm").modal('show')
 
   #
-  # 개인정보 갱신 버튼 클릭
+  # 예약 취소 버튼 클릭
   #
   $('#btn-booking-cancel').click (e) ->
     e.preventDefault()
-    confirmDialog('remove', '')
+    return unless checkCancelBooking()
+
+    booking = $("#lbl-booking").text()
+    booking = booking.replace /^\s+|\s+$/g, ""
+    booking = booking.replace /^-\s+/, ""
+    return unless booking
+
+    name = $("input[name=name]").val()
+    msg  = "<p>#{name}님, <strong>#{booking}</strong>의 열린옷장 방문 예약을 취소하시겠습니까?</p>"
+
+    confirmDialog 'remove', msg
 
   #
-  # 개인정보 갱신 버튼 클릭
+  # 예약 신청 버튼 클릭
   #
   $('#btn-info').click (e) ->
     e.preventDefault()
-    confirmDialog('createorupdate', '')
+    return unless checkCreateOrUpdateBooking()
+
+    booking = $("#lbl-booking").text()
+    booking = booking.replace /^\s+|\s+$/g, ""
+    booking = booking.replace /^-\s+/, ""
+    return unless booking
+
+    name = $("input[name=name]").val()
+    msg  = "<p>#{name}님, <strong>#{booking}</strong>에 열린옷장으로 방문하시겠습니까?</p>"
+    msg  += '<p>열린옷장 방문시 <strong>정시</strong>에 대여자 <strong>본인만</strong> 방문 부탁드립니다. :)</p>'
+
+    confirmDialog 'createorupdate', msg
 
   #
   # 방문 일자 선택 버튼 클릭
