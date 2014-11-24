@@ -4240,8 +4240,9 @@ get '/booking/:ymd/open' => sub {
             $dt->set_hour($h);
             $dt->set_minute($m);
 
+            my $dtf = $DB->storage->datetime_parser;
             $DB->resultset('Booking')->find_or_create({
-                date   => $dt,
+                date   => $dtf->format_datetime($dt),
                 gender => $gender,
                 slot   => $value,
             });
