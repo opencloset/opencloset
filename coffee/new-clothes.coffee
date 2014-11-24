@@ -247,8 +247,8 @@ $ ->
               userID = data.id
               return true
             error: (jqXHR, textStatus, errorThrown) ->
-              OpenCloset.alert('warning', jqXHR.responseJSON.str)
-              e.preventDefault()
+              OpenCloset.alert('warning', jqXHR.responseJSON.error.str)
+              $('#fuelux-wizard').wizard('previous')
               return
             complete: (jqXHR, textStatus) ->
         when 3

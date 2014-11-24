@@ -430,7 +430,7 @@ helper update_user => sub {
     $v->field('expires')->regexp(qr/^\d+$/);
     $v->field('phone')->regexp(qr/^\d+$/);
     $v->field('gender')->in(qw/ male female /);
-    $v->field('birth')->regexp(qr/^(19|20)\d{2}$/);
+    $v->field('birth')->regexp(qr/^(0|((19|20)\d{2}))$/);
     $v->field(qw/ height weight bust waist hip belly thigh arm leg knee foot /)->each(sub {
         shift->regexp(qr/^\d{1,3}$/);
     });
