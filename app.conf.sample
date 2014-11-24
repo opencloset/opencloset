@@ -183,4 +183,8 @@ $db_opts->{AutoCommit} //= 1;
             '17:30' => 2,
         },
     },
+    #
+    # postcodify
+    #
+    postcodify_db => './db/postcodify.20141112.v2.sqlite',
 };

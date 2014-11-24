@@ -3475,7 +3475,7 @@ group {
     sub api_postcode_search {
         my $self   = shift;
         my $q      = $self->param('q');
-        my $p      = Postcodify->new;
+        my $p      = Postcodify->new( config => $ENV{MOJO_CONFIG} || './app.psgi.conf' );
         my $result = $p->search( $q );
         $self->render(text => decode_utf8($result->json), format => 'json');
     }
