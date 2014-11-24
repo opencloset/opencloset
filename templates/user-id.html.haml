@@ -20,7 +20,7 @@
                     .col-xs-12.col-sm-3.center
                       %div
                         %span.profile-picture
-                          %img.avatar.img-responsive{ :src => '#{ get_gravatar( $user, 180 ) }' }
+                          %img.avatar.img-responsive{ :src => '#{ get_gravatar( $user, 180, https => 1 ) }' }
                         .space-4
                         .width-80.label.label-info.label-xlg.arrowed-in.arrowed-in-right
                           .inline.position-relative
@@ -191,7 +191,7 @@
                               -   my $late_fee = calc_late_fee($order);
                                 .profile-activity.clearfix
                                   %div
-                                    %img.pull-left{ :alt => "#{ $user->name }'s avatar", :src => '#{ get_gravatar( $user, 36 ) }' }
+                                    %img.pull-left{ :alt => "#{ $user->name }'s avatar", :src => '#{ get_gravatar( $user, 36, https => 1 ) }' }
                                     = $user->name
                                     %a.order-badge{ :href => "/order/#{ $order->id }" }
                                       - if ( $order->rental_date && $order->target_date ) {
