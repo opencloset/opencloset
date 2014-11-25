@@ -1251,6 +1251,7 @@ group {
     del  '/tag/:id'               => \&api_delete_tag;
 
     post '/donation'              => \&api_create_donation;
+    put  '/donation/:id'          => \&api_update_donation;
 
     post '/group'                 => \&api_create_group;
 
@@ -2666,6 +2667,40 @@ group {
             'Location' => $self->url_for( '/api/donation/' . $donation->id ),
         );
         $self->respond_to( json => { status => 201, json => \%data } );
+    }
+
+    sub api_update_donation {
+        my $self = shift;
+
+        #
+        # fetch params
+        #
+        my %params = $self->get_params(qw/id message/);
+
+        #
+        # validate params
+        #
+        my $v = $self->create_validator;
+
+        unless ( $self->validate( $v, \%params ) ) {
+            my @error_str;
+            while ( my ( $k, $v ) = each %{ $v->errors } ) {
+                push @error_str, "$k:$v";
+            }
+            return $self->error( 400, {
+                str  => join(',', @error_str),
+                data => $v->errors,
+            });
+        }
+
+        my $donation = $DB->resultset('Donation')->find({ id => $params{id} });
+        die "donation not found\n" unless $donation;
+
+        $donation->message($params{message});
+        $donation->update;
+
+        my %data = ( $donation->get_columns );
+        $self->respond_to( json => { status => 200, json => \%data } );
     }
 
     sub api_create_group {
@@ -4359,8 +4394,6 @@ get '/sms' => sub {
     );
 };
 
-app->secrets( app->defaults->{secrets} );
-app->start;
 get '/donation' => sub {
     my $self = shift;
 
@@ -4399,3 +4432,5 @@ get '/donation/:id' => sub {
     $self->stash( donation => $donation, clothes_list => [$donation->clothes] );
 } => 'donation-id';
 
+app->secrets( app->defaults->{secrets} );
+app->start;
