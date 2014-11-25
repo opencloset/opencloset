@@ -1433,8 +1433,23 @@ group {
             weight
         /);
 
-        my $user = $self->update_user( \%user_params, \%user_info_params );
-        return unless $user;
+        my ( $user, $msg )
+            = try {
+                $self->update_user( \%user_params, \%user_info_params );
+            }
+            catch {
+                chomp;
+                my $err = $_;
+
+                $err = $1 if $err =~ m/(Duplicate entry .*? for key '.*?')/;
+
+                ( undef, $err );
+            };
+        unless ($user) {
+            app->log->error("failed to update the user: $msg");
+            $self->respond_to( json => { status => 400, json => { error => $msg } } );
+            return;
+        }
 
         #
         # response
