@@ -4361,3 +4361,41 @@ get '/sms' => sub {
 
 app->secrets( app->defaults->{secrets} );
 app->start;
+get '/donation' => sub {
+    my $self = shift;
+
+    my $p  = $self->param('p') || 1;
+    my $s  = $self->param('s') || app->config->{entries_per_page};
+    my $rs = $DB->resultset('Donation')->search(undef, {
+        order_by => { -asc => 'id' },
+        page => $p,
+        rows => $s
+    });
+
+    my $pageset = Data::Pageset->new({
+        total_entries    => $rs->pager->total_entries,
+        entries_per_page => $rs->pager->entries_per_page,
+        pages_per_set    => 5,
+        current_page     => $p,
+    });
+
+    $self->stash(
+        donation_list => $rs,
+        pageset       => $pageset,
+    );
+};
+
+get '/donation/:id' => sub {
+    my $self = shift;
+
+    my $id = $self->param('id');
+    my $donation = $DB->resultset('Donation')->find({ id => $id });
+
+    return $self->error(404, {
+        str => 'donation not found',
+        data => {}
+    }) unless $donation;
+
+    $self->stash( donation => $donation, clothes_list => [$donation->clothes] );
+} => 'donation-id';
+
