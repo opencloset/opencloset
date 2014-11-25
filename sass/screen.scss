@@ -487,7 +487,21 @@ $opencloset-darken-yellow: desaturate(darken($opencloset-yellow, 4%), 10%);
     }
     #timetable {
         .timetable-people {
-            height: 36px;
+            min-height: 137px;
+            .dropdown-people {
+                margin:0 5px;
+                display:inline-block;
+            }
+            .dropdown-people {
+                .dropdown-menu {
+                    min-width: 120px;
+                }
+                > .dropdown-menu {
+                    display: block;
+                    position: static;
+                    margin-bottom: 5px;
+                }
+            }
         }
     }
     .step-content {
