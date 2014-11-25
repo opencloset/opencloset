@@ -6,6 +6,17 @@
 -   ;
 - title meta_text($_id);
 
+.user-add
+  %form#add-form
+    .input-group
+      %input#query.form-control{ :type => 'text', :placeholder => '등록할 사용자 이름을 입력하세요.' }
+      %span.input-group-btn
+        %button#btn-user-add.btn.btn-sm.btn-default{ :type => 'button' }
+          %i.icon-plus.bigger-110
+          추가
+
+.space-8
+
 #user-list-table.dataTables_wrapper
   %table.table.table-striped.table-bordered.table-hover
     %thead
