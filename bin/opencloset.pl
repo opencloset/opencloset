@@ -3650,6 +3650,7 @@ get '/user' => sub {
     $self->stash(
         user_list => $rs,
         pageset   => $pageset,
+        q         => $q || q{},
     );
     $self->respond_to( html => { status => 200 } );
 };
