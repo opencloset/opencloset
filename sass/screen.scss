@@ -339,6 +339,11 @@ $opencloset-darken-yellow: desaturate(darken($opencloset-yellow, 4%), 10%);
             width: inherit !important;
         }
     }
+    #user {
+        .user-add {
+            width: 300px;
+        }
+    }
     #user-id {
         .profile-info-row {
             .profile-info-name,
