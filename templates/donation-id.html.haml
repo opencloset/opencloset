@@ -7,13 +7,26 @@
 -     { text => meta_text('donation'), link => url_for( meta_link('donation') ) },
 -     { text => meta_text($_id)   },
 -   ],
+-   jses  => [ '/lib/facebox/facebox.js' ],
+-   csses => [ '/lib/facebox/facebox.css' ],
 -   ;
 - title meta_text($_id);
+
+#users{ :style => 'display: none' }
+  %form.form-inline{ :role => 'form', :action => '/api/search/user.json' }
+    .form-group.col-xs-9
+      %label.sr-only{ :for => 'username' }사용자 이름
+      %input#username.form-control{ :name => 'q', :type => 'text', :placeholder => '사용자 이름, 이메일 또는 전화번호' }
+    %button.btn.btn-default.btn-sm{ :type => 'submit' } 검색
+  %hr
+  .list-group
 
 .row#donation
   %h2
     %a{ :href => "#{url_for('/user/' . $donation->user->id)}" }= $donation->user->name
-    %small 님이 기증해주신 내역입니다.
+    %small
+      %a.btn.btn-info.btn-xs{ :href => '#users', :rel => 'facebox' } edit
+      님이 기증해주신 내역입니다.
   .space-4
 
   #clothes-list-table.dataTables_wrapper
@@ -36,3 +49,23 @@
     .form-group
       %textarea.col-xs-10.col-sm-8{ :name => "message", :placeholder => "비어있음", :rows => "5" }= $donation->message
     %button.btn.btn-primary{ :type => 'submit' } 메세지 수정
+
+:plain
+  <script id="tpl-user-list-item" type="text/html">
+    <a href="#" class="list-group-item user-list-item" data-id="<%= id %>" data-username="<%= name %>">
+      <h4>
+        <%= name %>
+        <small><%= gender %></small>
+      </h4>
+      <p>
+        <span class="label label-info">
+          <span class="glyphicon glyphicon-envelope"></span>
+          <%= email %>
+        </span>
+        <span class="label label-default">
+          <span class="glyphicon glyphicon-earphone"></span>
+          <%= phone %>
+        </span>
+      </p>
+    </a>
+  </script>
