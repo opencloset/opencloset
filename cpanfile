@@ -31,4 +31,5 @@ requires 'Text::CSV';
 requires 'Text::Haml', '0.990114';
 requires 'Try::Tiny';
 requires 'Unicode::GCString';
+requires 'experimental';
 requires 'namespace::clean';

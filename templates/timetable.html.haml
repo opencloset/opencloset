@@ -7,10 +7,18 @@
 -   ;
 - title meta_text($_id);
 
+- my %count;
 - my %orders;
 - while ( my $booking = $booking_rs->next ) {
 -   my $hm = sprintf '%02d:%02d', $booking->date->hour, $booking->date->minute;
 -   for my $order ( $booking->orders ) {
+-     ++$count{all};
+-     use feature qw( switch );
+-     use experimental qw( smartmatch );
+-     given ( $order->status_id ) {
+-       ++$count{notvisited} when 12;
+-       ++$count{notvisited} when 14;
+-     }
 -     my $gender = $order->user->user_info->gender;
 -     $orders{$hm}{$gender} = [] unless $orders{$hm}{$gender};
 -     push @{ $orders{$hm}{$gender} }, $order;
@@ -31,23 +39,23 @@
 
   .row
     .col-sm-12
-      .infobox.infobox-green
-        .infobox-icon
-          %i.icon-user
-        .infobox-data
-          %span.infobox-data-number 7
-          .infobox-content 총 예약자 수
       .infobox.infobox-blue
         .infobox-icon
           %i.icon-user
         .infobox-data
-          %span.infobox-data-number 7
+          %span.infobox-data-number= $count{all}
+          .infobox-content 총 예약자 수
+      .infobox.infobox-green
+        .infobox-icon
+          %i.icon-user
+        .infobox-data
+          %span.infobox-data-number= $count{all} - $count{notvisited}
           .infobox-content 방문자 수
       .infobox.infobox-red
         .infobox-icon
           %i.icon-user
         .infobox-data
-          %span.infobox-data-number 7
+          %span.infobox-data-number= $count{notvisited}
           .infobox-content 미방문자 수
 
   .space-4
