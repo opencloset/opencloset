@@ -60,10 +60,11 @@
               .widget-toolbar.no-border
             .widget-body
               .widget-main
-                %div.timetable-people
+                - ( my $alert_target = $time ) =~ s/^(\d\d):(\d\d)$/timetable-$1$2/;
+                %div.timetable-people{ :id => "#{$alert_target}" }
                   - for my $order ( @{ $orders{$time}{male} } ) {
                     :plain
-                      <div class="dropdown dropdown-people">
+                      <div class="dropdown dropdown-people" data-target="#{$alert_target}" data-order-id="#{$order->id}">
                         <ul class="dropdown-menu">
                           <li> <a tabindex="-1" href="#{ url_for( '/user/' . $order->user->id ) }">#{ $order->user->name }</a> </li>
                           <li class="divider"></li>
@@ -75,15 +76,15 @@
                               <i class="ace-icon icon-caret-right pull-right"></i>
                             </a>
                             <ul class="dropdown-menu">
-                              <li> <a tabindex="-1" href="#">방문    </a> </li>
-                              <li> <a tabindex="-1" href="#">대기    </a> </li>
-                              <li> <a tabindex="-1" href="#">치수측정</a> </li>
-                              <li> <a tabindex="-1" href="#">의류준비</a> </li>
-                              <li> <a tabindex="-1" href="#">탈의대기</a> </li>
-                              <li> <a tabindex="-1" href="#">탈의    </a> </li>
-                              <li> <a tabindex="-1" href="#">수선    </a> </li>
-                              <li> <a tabindex="-1" href="#">포장    </a> </li>
-                              <li> <a tabindex="-1" href="#">결제대기</a> </li>
+                              <li> <a class="order-status" tabindex="-1" data-status-id="13">방문    </a> </li>
+                              <li> <a class="order-status" tabindex="-1" data-status-id="16">대기    </a> </li>
+                              <li> <a class="order-status" tabindex="-1" data-status-id="17">치수측정</a> </li>
+                              <li> <a class="order-status" tabindex="-1" data-status-id="18">의류준비</a> </li>
+                              <li> <a class="order-status" tabindex="-1" data-status-id="19">탈의대기</a> </li>
+                              <li> <a class="order-status" tabindex="-1" data-status-id="20">탈의    </a> </li>
+                              <li> <a class="order-status" tabindex="-1" data-status-id="6" >수선    </a> </li>
+                              <li> <a class="order-status" tabindex="-1" data-status-id="21">포장    </a> </li>
+                              <li> <a class="order-status" tabindex="-1" data-status-id="22">결제대기</a> </li>
                             </ul>
                           </li>
                         </ul>
@@ -93,7 +94,7 @@
                 %div.timetable-people
                   - for my $order ( @{ $orders{$time}{female} } ) {
                     :plain
-                      <div class="dropdown dropdown-people">
+                      <div class="dropdown dropdown-people" data-target="#{$alert_target}" data-order-id="#{$order->id}">
                         <ul class="dropdown-menu">
                           <li> <a tabindex="-1" href="#{ url_for( '/user/' . $order->user->id ) }">#{ $order->user->name }</a> </li>
                           <li class="divider"></li>
@@ -105,15 +106,15 @@
                               <i class="ace-icon icon-caret-right pull-right"></i>
                             </a>
                             <ul class="dropdown-menu">
-                              <li> <a tabindex="-1" href="#">방문    </a> </li>
-                              <li> <a tabindex="-1" href="#">대기    </a> </li>
-                              <li> <a tabindex="-1" href="#">치수측정</a> </li>
-                              <li> <a tabindex="-1" href="#">의류준비</a> </li>
-                              <li> <a tabindex="-1" href="#">탈의대기</a> </li>
-                              <li> <a tabindex="-1" href="#">탈의    </a> </li>
-                              <li> <a tabindex="-1" href="#">수선    </a> </li>
-                              <li> <a tabindex="-1" href="#">포장    </a> </li>
-                              <li> <a tabindex="-1" href="#">결제대기</a> </li>
+                              <li> <a class="order-status" tabindex="-1" data-status-id="13">방문    </a> </li>
+                              <li> <a class="order-status" tabindex="-1" data-status-id="16">대기    </a> </li>
+                              <li> <a class="order-status" tabindex="-1" data-status-id="17">치수측정</a> </li>
+                              <li> <a class="order-status" tabindex="-1" data-status-id="18">의류준비</a> </li>
+                              <li> <a class="order-status" tabindex="-1" data-status-id="19">탈의대기</a> </li>
+                              <li> <a class="order-status" tabindex="-1" data-status-id="20">탈의    </a> </li>
+                              <li> <a class="order-status" tabindex="-1" data-status-id="6" >수선    </a> </li>
+                              <li> <a class="order-status" tabindex="-1" data-status-id="21">포장    </a> </li>
+                              <li> <a class="order-status" tabindex="-1" data-status-id="22">결제대기</a> </li>
                             </ul>
                           </li>
                         </ul>
