@@ -26,7 +26,32 @@
 
 #timetable-table
   %h2= $dt_start->ymd . ' 방문 현황'
+
   .space-4
+
+  .row
+    .col-sm-12
+      .infobox.infobox-green
+        .infobox-icon
+          %i.icon-user
+        .infobox-data
+          %span.infobox-data-number 7
+          .infobox-content 총 예약자 수
+      .infobox.infobox-blue
+        .infobox-icon
+          %i.icon-user
+        .infobox-data
+          %span.infobox-data-number 7
+          .infobox-content 방문자 수
+      .infobox.infobox-red
+        .infobox-icon
+          %i.icon-user
+        .infobox-data
+          %span.infobox-data-number 7
+          .infobox-content 미방문자 수
+
+  .space-4
+
   #timetable-data{ 'data-url' => "#{ url_for('/api/order') }" }
   - use List::MoreUtils;
   - my @times = qw(
