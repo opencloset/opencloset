@@ -61,6 +61,7 @@ $ ->
     storage      = $(this).closest('.dropdown-people')
     order_id     = storage.data('order-id')
     alert_target = storage.data('target')
+    ymd          = storage.data('ymd')
     status_id    = $(this).data('status-id')
 
     #
@@ -73,7 +74,21 @@ $ ->
         status_id: status_id
       success: (data, textStatus, jqXHR) ->
         #
-        # 상태 변경에 성공했으므로 드롭다운의 주문서 상태 레이블을 갱신
+        # 상태 변경에 성공
+        #
+
+        #
+        # 최상단의 요약 정보 갱신
+        #
+        $.ajax "/api/gui/timetable/#{ymd}.json",
+          type: 'GET'
+          success: (data, textStatus, jqXHR) ->
+            $('#count-all').html(data.all)
+            $('#count-visited').html(data.visited)
+            $('#count-notvisited').html(data.notvisited)
+
+        #
+        # 드롭다운의 주문서 상태 레이블을 갱신
         #
         status_label = ''
         for k, v of OpenCloset.status

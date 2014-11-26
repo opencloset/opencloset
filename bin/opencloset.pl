@@ -1267,6 +1267,7 @@ group {
     put  '/gui/booking/:id'       => \&api_gui_update_booking;
     get  '/gui/booking-list'      => \&api_gui_booking_list;
     post '/gui/utf8/gcs-columns'  => \&api_gui_utf8_gcs_columns;
+    get  '/gui/timetable/:ymd'    => \&api_gui_timetable;
 
     sub api_create_user {
         my $self = shift;
@@ -3370,6 +3371,99 @@ group {
         my $data = { ret => $cols };
 
         $self->respond_to( json => { status => 200, json => $data } );
+    }
+
+    sub api_gui_timetable {
+        my $self = shift;
+
+        #
+        # fetch params
+        #
+        my %params = $self->get_params(qw/ ymd /);
+
+        #
+        # validate params
+        #
+        my $v = $self->create_validator;
+        $v->field('ymd')->required(1)->callback(sub {
+            my $val = shift;
+
+            unless ( $val =~ m/^(\d{4})-(\d{2})-(\d{2})$/ ) {
+                my $msg = "invalid ymd format: $params{ymd}";
+                app->log->warn($msg);
+                return ( 0, $msg );
+            }
+
+            my $dt = try {
+                DateTime->new(
+                    time_zone => app->config->{timezone},
+                    year      => $1,
+                    month     => $2,
+                    day       => $3,
+                );
+            };
+            unless ($dt) {
+                my $msg = "cannot create start datetime object: $params{ymd}";
+                app->log->warn($msg);
+                return ( 0, $msg );
+            }
+
+            return 1;
+        });
+        unless ( $self->validate( $v, \%params ) ) {
+            my @error_str;
+            while ( my ( $k, $v ) = each %{ $v->errors } ) {
+                push @error_str, "$k:$v";
+            }
+            return $self->error( 400, {
+                str  => join(',', @error_str),
+                data => $v->errors,
+            });
+        }
+
+        $params{ymd} =~ m/^(\d{4})-(\d{2})-(\d{2})$/;
+        my $dt_start = DateTime->new(
+            time_zone => app->config->{timezone},
+            year      => $1,
+            month     => $2,
+            day       => $3,
+        );
+        my $dt_end = $dt_start->clone->add( hours => 24, seconds => -1 );
+
+        my $dtf        = $DB->storage->datetime_parser;
+        my $booking_rs = $DB->resultset('Booking')->search(
+            {
+                date => {
+                    -between => [
+                        $dtf->format_datetime($dt_start),
+                        $dtf->format_datetime($dt_end),
+                    ],
+                },
+            },
+            {
+                order_by => { -asc => 'date' },
+            },
+        );
+
+        my %count = (
+            all        => 0,
+            visited    => 0,
+            notvisited => 0,
+        );
+        while ( my $booking = $booking_rs->next ) {
+            for my $order ( $booking->orders ) {
+                ++$count{all};
+                use feature qw( switch );
+                use experimental qw( smartmatch );
+                given ( $order->status_id ) {
+                    ++$count{notvisited} when 12;
+                    ++$count{notvisited} when 14;
+                }
+            }
+        }
+        $count{visited} = $count{all} - $count{notvisited};
+
+        $self->respond_to( json => { status => 200, json => \%count } );
     }
 
 }; # end of API section
