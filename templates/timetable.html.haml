@@ -7,7 +7,11 @@
 -   ;
 - title meta_text($_id);
 
-- my %count;
+- my %count = (
+-     all        => 0,
+-     visited    => 0,
+-     notvisited => 0,
+- );
 - my %orders;
 - while ( my $booking = $booking_rs->next ) {
 -   my $hm = sprintf '%02d:%02d', $booking->date->hour, $booking->date->minute;
@@ -24,6 +28,7 @@
 -     push @{ $orders{$hm}{$gender} }, $order;
 -   }
 - }
+- $count{visited} = $count{all} - $count{notvisited};
 
 .search
   %form#search-form
@@ -43,19 +48,19 @@
         .infobox-icon
           %i.icon-user
         .infobox-data
-          %span.infobox-data-number= $count{all}
+          %span.infobox-data-number#count-all= $count{all}
           .infobox-content 총 예약자 수
       .infobox.infobox-green
         .infobox-icon
           %i.icon-user
         .infobox-data
-          %span.infobox-data-number= $count{all} - $count{notvisited}
+          %span.infobox-data-number#count-visited= $count{visited}
           .infobox-content 방문자 수
       .infobox.infobox-red
         .infobox-icon
           %i.icon-user
         .infobox-data
-          %span.infobox-data-number= $count{notvisited}
+          %span.infobox-data-number#count-notvisited= $count{notvisited}
           .infobox-content 미방문자 수
 
   .space-4
@@ -97,7 +102,7 @@
                 %div.timetable-people{ :id => "#{$alert_target}" }
                   - for my $order ( @{ $orders{$time}{male} } ) {
                     :plain
-                      <div class="dropdown dropdown-people" data-target="#{$alert_target}" data-order-id="#{$order->id}">
+                      <div class="dropdown dropdown-people" data-target="#{$alert_target}" data-order-id="#{$order->id}" data-ymd="#{$dt_start->ymd}">
                         <ul class="dropdown-menu">
                           <li> <a tabindex="-1" href="#{ url_for( '/user/' . $order->user->id ) }">#{ $order->user->name }</a> </li>
                           <li class="divider"></li>
