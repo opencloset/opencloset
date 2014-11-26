@@ -2675,7 +2675,7 @@ group {
         #
         # fetch params
         #
-        my %params = $self->get_params(qw/id message/);
+        my %params = $self->get_params(qw/id message user_id/);
 
         #
         # validate params
@@ -2696,7 +2696,8 @@ group {
         my $donation = $DB->resultset('Donation')->find({ id => $params{id} });
         die "donation not found\n" unless $donation;
 
-        $donation->message($params{message});
+        $donation->message($params{message}) if $params{message};
+        $donation->user_id($params{user_id}) if $params{user_id};
         $donation->update;
 
         my %data = ( $donation->get_columns );
