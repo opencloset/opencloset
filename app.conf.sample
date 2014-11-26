@@ -45,7 +45,7 @@ $db_opts->{AutoCommit} //= 1;
         '2013-11-01 15:53:55 Asia/Seoul',
     ],
     theme        => 'ace',
-    site         => { name => '열린옷장 재고 관리', icon => 'archive' },
+    site         => { name => '열린옷장', icon => 'archive' },
     company_name => '열린옷장',
     sidebar      => {
         meta => {
