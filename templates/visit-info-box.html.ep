@@ -124,7 +124,7 @@
                           <label class="block clearfix">
                             <span class="block input-icon input-icon-right">
                               <input name="purpose" type="text" class="form-control" placeholder="대여 목적" value="<%= $user->user_info->purpose %>" />
-                              <p> 아래 목록에 없으면 직접 입력해주세요. </p>
+                              <p> 아래 목록을 클릭해주시거나, 목록에 없으면 직접 입력해주세요. </p>
                               <p class="purpose">
                                 <span class="label label-info clickable"> 입사면접 </span>
                                 <span class="label label-info clickable"> 사진촬영 </span>
