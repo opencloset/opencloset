@@ -13,12 +13,14 @@ $ ->
   # common fuction for OpenCloset
   #
   Window::OpenCloset =
-    alert: (cls, msg) ->
+    alert: (cls, msg, target) ->
       unless msg
         msg = cls
         cls = 'info'
+      unless target
+        target = '.main-content'
       # error, success, info
-      $('.main-content').prepend("<div class=\"alert alert-#{cls}\">#{msg}</div>")
+      $(target).prepend("<div class=\"alert alert-#{cls}\">#{msg}</div>")
       setTimeout ->
         $('.alert').remove()
       , 3000
