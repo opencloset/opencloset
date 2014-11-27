@@ -492,3 +492,8 @@ $ ->
   $("input[name=gender]").click (e) ->
     $("input[name=booking]").prop( "value", '' )
     $("#lbl-booking").html('')
+
+  #
+  # 생년에 생년월일을 입력하지 못하게 함
+  #
+  $('input[name="birth"]').mask('9999')
