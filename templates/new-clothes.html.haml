@@ -71,7 +71,7 @@
                             <label class="blue highlight">
                               <input type="radio" class="ace valid" name="user-donation-id" value="<%= id %>" data-type="user" data-user-id="<%= id %>">
                               <span class="lbl"> 기증자: <%= name %> (<%= email %>)</span>
-                              <span><%= address %></span>
+                              <span><%= address2 %></span>
                             </label>
                           </div>
                         </script>
@@ -156,10 +156,10 @@
                   / 주소
                   /
                   .form-group.has-info
-                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'address' } 주소:
+                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'address2' } 주소:
                     .col-xs-12.col-sm-9
                       .clearfix
-                        %input#address.valid.col-xs-12.col-sm-9{ :name => 'address', :type => 'text' }
+                        %input#address.valid.col-xs-12.col-sm-9{ :name => 'address2', :type => 'text' }
 
                   /
                   / 기증 메시지
