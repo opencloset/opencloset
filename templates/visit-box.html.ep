@@ -92,7 +92,7 @@
 
                           <label class="block clearfix signup">
                             <span class="block input-icon input-icon-right">
-                              <input name="birth" type="text" class="form-control" placeholder="생년" />
+                              <input name="birth" type="text" class="form-control" placeholder="출생년도 (예. 1988)" />
                               <i class="icon-calendar"></i>
                             </span>
                           </label>
