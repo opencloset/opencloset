@@ -4377,9 +4377,19 @@ get '/booking/:ymd/open' => sub {
         return;
     }
 
+    #
+    # GH #164
+    #
+    #   열린옷장 휴무일(일, 월요일)일 경우 슬롯을 0으로 강제합니다.
+    #
+    #   DateTime->day_of_week은 요일을 반환하며
+    #   1은 월요일 7은 일요일 입니다.
+    #
+    my $holiday = ( $dt_start->day_of_week == 7 || $dt_start->day_of_week == 1 ) ? 1 : 0;
+
     for my $gender ( qw/ male female / ) {
         for my $key ( sort keys %{ app->config->{booking}{$gender} } ) {
-            my $value = app->config->{booking}{$gender}{$key};
+            my $value = $holiday ? 0 : app->config->{booking}{$gender}{$key};
 
             my ( $h, $m ) = split /:/, $key, 2;
             my $dt = $dt_start->clone;
