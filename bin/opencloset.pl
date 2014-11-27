@@ -42,6 +42,9 @@ use Text::CSV;
 use Try::Tiny;
 use Unicode::GCString;
 use Unicode::Normalize;
+use Encode 'decode_utf8';
+
+use Postcodify;
 
 use OpenCloset::Schema;
 
@@ -1109,7 +1112,10 @@ group {
                 $user->email,
                 $user->create_date,
                 $user->user_info->phone,
-                $user->user_info->address,
+                $user->user_info->address1,
+                $user->user_info->address2,
+                $user->user_info->address3,
+                $user->user_info->address4,
                 $user->user_info->gender,
                 $user->user_info->birth,
             );
@@ -1122,7 +1128,10 @@ group {
             email
             createdate
             phone
-            address
+            address1
+            address2
+            address3
+            address4
             gender
             birth
         /);
@@ -1270,6 +1279,8 @@ group {
     post '/gui/utf8/gcs-columns'  => \&api_gui_utf8_gcs_columns;
     get  '/gui/timetable/:ymd'    => \&api_gui_timetable;
 
+    any '/postcode/search'       => \&api_postcode_search;
+
     sub api_create_user {
         my $self = shift;
 
@@ -1284,7 +1295,10 @@ group {
             update_date
         /);
         my %user_info_params = $self->get_params(qw/
-            address
+            address1
+            address2
+            address3
+            address4
             arm
             belly
             birth
@@ -1414,7 +1428,10 @@ group {
             update_date
         /);
         my %user_info_params = $self->get_params(qw/
-            address
+            address1
+            address2
+            address3
+            address4
             arm
             belly
             birth
@@ -3500,6 +3517,15 @@ group {
         $count{visited} = $count{all} - $count{notvisited};
 
         $self->respond_to( json => { status => 200, json => \%count } );
+
+    }
+
+    sub api_postcode_search {
+        my $self   = shift;
+        my $q      = $self->param('q');
+        my $p      = Postcodify->new( config => $ENV{MOJO_CONFIG} || './app.psgi.conf' );
+        my $result = $p->search( $q );
+        $self->render(text => decode_utf8($result->json), format => 'json');
     }
 
 }; # end of API section
@@ -3554,7 +3580,10 @@ any '/visit' => sub {
 
     my $email         = $self->param('email');
     my $gender        = $self->param('gender');
-    my $address       = $self->param('address');
+    my $address1      = $self->param('address1');
+    my $address2      = $self->param('address2');
+    my $address3      = $self->param('address3');
+    my $address4      = $self->param('address4');
     my $birth         = $self->param('birth');
     my $height        = $self->param('height');
     my $weight        = $self->param('weight');
@@ -3572,7 +3601,10 @@ any '/visit' => sub {
 
     app->log->debug("email: $email");
     app->log->debug("gender: $gender");
-    app->log->debug("address: $address");
+    app->log->debug("address1: $address1");
+    app->log->debug("address2: $address2");
+    app->log->debug("address3: $address3");
+    app->log->debug("address4: $address4");
     app->log->debug("birth: $birth");
     app->log->debug("height: $height");
     app->log->debug("weight: $weight");
@@ -3627,7 +3659,10 @@ any '/visit' => sub {
         $user_params{id}            = $user->id;
         $user_params{email}         = $email    if $email    && $email    ne $user->email;
         $user_info_params{gender}   = $gender   if $gender   && $gender   ne $user->user_info->gender;
-        $user_info_params{address}  = $address  if $address  && $address  ne $user->user_info->address;
+        $user_info_params{address1} = $address1 if $address1 && $address1 ne $user->user_info->address1;
+        $user_info_params{address2} = $address2 if $address2 && $address2 ne $user->user_info->address2;
+        $user_info_params{address3} = $address3 if $address3 && $address3 ne $user->user_info->address3;
+        $user_info_params{address4} = $address4 if $address4 && $address4 ne $user->user_info->address4;
         $user_info_params{birth}    = $birth    if $birth    && $birth    ne $user->user_info->birth;
         $user_info_params{height}   = $height   if $height   && $height   ne $user->user_info->height;
         $user_info_params{weight}   = $weight   if $weight   && $weight   ne $user->user_info->weight;
@@ -3744,12 +3779,12 @@ get '/user' => sub {
     my $q = $self->param('q');
     my $cond = $q
         ? [
-        { 'name'             => { like => "%$q%" } },
-        { 'email'            => { like => "%$q%" } },
-        { 'user_info.phone'  => { like => "%$q%" } },
-        { 'user_info.address'=> { like => "%$q%" } },
-        { 'user_info.birth'  => { like => "%$q%" } },
-        { 'user_info.gender' => $q },
+        { 'name'               => { like => "%$q%" } },
+        { 'email'              => { like => "%$q%" } },
+        { 'user_info.phone'    => { like => "%$q%" } },
+        { 'user_info.address4' => { like => "%$q%" } },    # 상세주소만 검색
+        { 'user_info.birth'    => { like => "%$q%" } },
+        { 'user_info.gender'   => $q },
         ]
         : {};
 

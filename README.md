@@ -61,6 +61,16 @@ MySQL 데이터베이스에 접속하며 `opencloset` 데이터베이스에
     $ export MOJO_CONFIG=app.conf
     $ export MOJO_HOME=.
 
+### 우편번호검색 DB 파일 설치 ###
+
+    $ wget -qO- https://raw.githubusercontent.com/aanoaa/p5-postcodify/develop/installer.sh | sh
+
+`wget` 이 없으면, `curl` 로..
+
+    $ curl https://raw.githubusercontent.com/aanoaa/p5-postcodify/develop/installer.sh | sh
+
+설정파일에서 `postcodify_db` 의 경로를 수정합니다.
+기본값은 `db/postcodify.20141112.v2.sqlite` 입니다.
 
 ### RUN
 

@@ -577,3 +577,6 @@ $opencloset-darken-yellow: desaturate(darken($opencloset-yellow, 4%), 10%);
         margin-bottom: 0;
     }
 }
+#postcodify .summary {
+    display: none;
+}

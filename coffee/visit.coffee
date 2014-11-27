@@ -101,10 +101,13 @@ $ ->
     privacy = $("input[name=privacy]").prop( "checked" )
     sms     = $("input[name=sms]").val()
 
-    gender  = $("input[name=gender]:checked").val()
-    email   = $("input[name=email]").val()
-    address = $("input[name=address]").val()
-    birth   = $("input[name=birth]").val()
+    gender   = $("input[name=gender]:checked").val()
+    email    = $("input[name=email]").val()
+    address1 = $("input[name=address1]").val()
+    address2 = $("input[name=address2]").val()
+    address3 = $("input[name=address3]").val()
+    address4 = $("input[name=address4]").val()
+    birth    = $("input[name=birth]").val()
 
     if name && phone && service && privacy && sms
       $('#visit-form').submit()
@@ -161,7 +164,7 @@ $ ->
         #
         # 주소 점검
         #
-        unless address
+        unless address2
           visitError '주소를 입력해주세요.'
           return
 
@@ -184,7 +187,10 @@ $ ->
           data:
             name:    name
             email:   email
-            address: address
+            address1: address1
+            address2: address2
+            address3: address3
+            address4: address4
             gender:  gender
             phone:   phone
             birth:   birth
@@ -270,7 +276,7 @@ $ ->
 
     gender   = $("input[name=gender]:checked").val()
     email    = $("input[name=email]").val()
-    address  = $("input[name=address]").val()
+    address2 = $("input[name=address2]").val()
     birth    = $("input[name=birth]").val()
     height   = $("input[name=height]").val()
     weight   = $("input[name=weight]").val()
@@ -322,7 +328,7 @@ $ ->
     #
     # 주소 점검
     #
-    unless address
+    unless address2
       visitError '주소를 입력해주세요.'
       return
 
@@ -502,3 +508,26 @@ $ ->
   # 전화번호에 `-` 기호를 무시하도록 함
   #
   $('input[type="tel"]').mask('99999999999')
+
+  #
+  # 주소검색
+  #
+
+  $("#postcodify").postcodify
+    api: "/api/postcode/search"
+    timeout: 10000    # 10 seconds
+    insertDbid : ".postcodify_dbid"
+    insertAddress : ".postcodify_address"
+    insertJibeonAddress: ".postcodify_jibeonaddress"
+    searchButtonContent: '주소검색'
+    onReady: ->
+      $("#postcodify").find('.postcodify_search_controls.postcode_search_controls')
+        .addClass('input-group').find('input[type=text]')
+        .addClass('form-control').val($('.postcodify_address').val()).end().find('button')
+        .addClass('btn btn-default btn-sm')
+        .wrap('<span class="input-group-btn"></span>')
+    afterSelect: (selectedEntry) ->
+      $("#postcodify").find('.postcodify_search_result.postcode_search_result')
+        .remove()
+    afterSearch: (keywords, results, lang, sort) ->
+      $('summary.postcodify_search_status.postcode_search_status').hide()
