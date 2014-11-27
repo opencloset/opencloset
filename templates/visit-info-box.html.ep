@@ -78,7 +78,7 @@
                           <input name="address3" type="hidden" class="postcodify_jibeonaddress" value="<%= $user->user_info->address3 %>" />
                           <label class="block clearfix">
                             <span class="block input-icon input-icon-right">
-                              <input name="address2" type="text" class="form-control postcodify_address" placeholder="주소" value="<%= $user->user_info->address2 %>" />
+                              <input name="address2" type="text" class="form-control postcodify_address" readonly="readonly" placeholder="주소" value="<%= $user->user_info->address2 %>" />
                               <i class="icon-home"></i>
                             </span>
                           </label>
