@@ -73,18 +73,18 @@ $ ->
       knee:   '무릎 길이'
       foot:   '발 크기'
     color:
+      black:  '검정'
+      navy:   '남색'
+      gray:   '회색'
+      white:  '흰색'
+      brown:  '갈색'
+      blue:   '파랑'
       red:    '빨강'
       orange: '주황'
       yellow: '노랑'
       green:  '초록'
-      blue:   '파랑'
-      navy:   '남색'
       purple: '보라'
-      white:  '흰색'
-      black:  '검정'
       pink:   '분홍'
-      gray:   '회색'
-      brown:  '갈색'
     payWith: [
       '현금',
       '카드',
