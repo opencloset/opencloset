@@ -1,0 +1,33 @@
+- use utf8;
+- my $clothes_code = trim_clothes_code($clothes);
+- my $order = $clothes->orders->find({ status_id => 2 });
+- my $late_fee = $order ? calc_late_fee($order) : 0;
+%tr
+  %td
+    %a{ :href => "#{url_for('/clothes/' . $clothes_code)}" }= $clothes_code
+  %td
+    %span.order-status.label{ 'data-status' => "#{ $clothes->status->name }" }
+      = $clothes->status->name
+      - if ($order) {
+        %span.late-fee= $late_fee ? commify($late_fee) . '원' : q{}
+      - }
+  %td
+    %span.category{ 'data-category' => "#{ $clothes->category }" }= $clothes->category
+  %td
+    - if ($order) {
+    -   my $rental_date = $order->rental_date;
+    -   my $target_date = $order->target_date;
+      :plain
+        <a href="#{ url_for( '/order/' . $order->id ) }"><span class="label label-info arrowed-right arrowed-in">
+          <strong>주문서</strong>
+          <time class="js-relative-date" datetime="#{ $rental_date->datetime }" title="#{ $rental_date->ymd }">#{ join('/', $rental_date->month, $rental_date->day) }</time>
+          ~
+          <time class="js-relative-date" datetime="#{ $target_date->datetime }" title="#{ $target_date->ymd }">#{ join('/', $target_date->month, $target_date->day) }</time>
+        </span></a>
+      - if ($late_fee) {
+        :plain
+          <span>
+            연체료 #{ commify($late_fee) }원 = #{ commify($clothes->price) }원 x #{ calc_overdue($order) }일 x 20%
+          </span>
+      - }
+    - }

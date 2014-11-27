@@ -1251,6 +1251,7 @@ group {
     del  '/tag/:id'               => \&api_delete_tag;
 
     post '/donation'              => \&api_create_donation;
+    put  '/donation/:id'          => \&api_update_donation;
 
     post '/group'                 => \&api_create_group;
 
@@ -2667,6 +2668,41 @@ group {
             'Location' => $self->url_for( '/api/donation/' . $donation->id ),
         );
         $self->respond_to( json => { status => 201, json => \%data } );
+    }
+
+    sub api_update_donation {
+        my $self = shift;
+
+        #
+        # fetch params
+        #
+        my %params = $self->get_params(qw/id message user_id/);
+
+        #
+        # validate params
+        #
+        my $v = $self->create_validator;
+
+        unless ( $self->validate( $v, \%params ) ) {
+            my @error_str;
+            while ( my ( $k, $v ) = each %{ $v->errors } ) {
+                push @error_str, "$k:$v";
+            }
+            return $self->error( 400, {
+                str  => join(',', @error_str),
+                data => $v->errors,
+            });
+        }
+
+        my $donation = $DB->resultset('Donation')->find({ id => $params{id} });
+        die "donation not found\n" unless $donation;
+
+        $donation->message($params{message}) if $params{message};
+        $donation->user_id($params{user_id}) if $params{user_id};
+        $donation->update;
+
+        my %data = ( $donation->get_columns );
+        $self->respond_to( json => { status => 200, json => \%data } );
     }
 
     sub api_create_group {
@@ -4452,6 +4488,44 @@ get '/sms' => sub {
         balance => $balance->{success} ? $balance->{detail} : { cash => 0, point => 0 },
     );
 };
+
+get '/donation' => sub {
+    my $self = shift;
+
+    my $p  = $self->param('p') || 1;
+    my $s  = $self->param('s') || app->config->{entries_per_page};
+    my $rs = $DB->resultset('Donation')->search(undef, {
+        order_by => { -asc => 'id' },
+        page => $p,
+        rows => $s
+    });
+
+    my $pageset = Data::Pageset->new({
+        total_entries    => $rs->pager->total_entries,
+        entries_per_page => $rs->pager->entries_per_page,
+        pages_per_set    => 5,
+        current_page     => $p,
+    });
+
+    $self->stash(
+        donation_list => $rs,
+        pageset       => $pageset,
+    );
+};
+
+get '/donation/:id' => sub {
+    my $self = shift;
+
+    my $id = $self->param('id');
+    my $donation = $DB->resultset('Donation')->find({ id => $id });
+
+    return $self->error(404, {
+        str => 'donation not found',
+        data => {}
+    }) unless $donation;
+
+    $self->stash( donation => $donation, clothes_list => [$donation->clothes] );
+} => 'donation-id';
 
 app->secrets( app->defaults->{secrets} );
 app->start;

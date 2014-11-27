@@ -1,0 +1,23 @@
+- use utf8;
+- my $_id = 'donation';
+- layout 'default', page_id => $_id;
+- title meta_text($_id);
+
+#donation-table
+  %table.table.table-striped.table-bordered.table-hover
+    %thead
+      %tr
+        %th 사용자
+        %th 메세지
+        %th 기증일
+    %tbody
+      - while (my $d = $donation_list->next) {
+        %tr
+          %td
+            %a{ :href => "#{url_for('/user/' . $d->user->id)}" }= $d->user->name
+          %td
+            %a.editable-click{ :href => "#{url_for('/donation/' . $d->id)}" }= substr($d->message, 0, 100) || '비어있음'
+          %td= $d->create_date->ymd
+      - }
+
+= include 'partials/pagination'
