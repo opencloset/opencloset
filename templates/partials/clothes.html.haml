@@ -1,3 +1,4 @@
+- use utf8;
 - my $clothes_code = trim_clothes_code($clothes);
 - my $order = $clothes->orders->find({ status_id => 2 });
 - my $late_fee = $order ? calc_late_fee($order) : 0;
