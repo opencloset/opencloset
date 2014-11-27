@@ -84,11 +84,17 @@
                           </label>
 
                           <label id="postcodify" class="block clearfix signup"></label>
+                          <input name="address1" type="hidden" class="postcodify_dbid" />
+                          <input name="address3" type="hidden" class="postcodify_jibeonaddress" />
                           <label class="block clearfix signup">
                             <span class="block input-icon input-icon-right">
-                              <input name="address" type="text" class="form-control postcodify_address" placeholder="주소" />
+                              <input name="address2" type="text" class="form-control postcodify_address" placeholder="주소" />
                               <i class="icon-home"></i>
                             </span>
+                          </label>
+
+                          <label class="block clearfix signup">
+                            <input name="address4" type="text" class="form-control" placeholder="상세주소" />
                           </label>
 
                           <label class="block clearfix signup">
