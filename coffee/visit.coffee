@@ -42,15 +42,6 @@ $ ->
       $(this).prop( "checked", false )
       $("#modal-privacy").modal('show')
 
-  setTimeout ->
-    $('.alert').remove()
-  , 5000
-  visitError = (msg) ->
-    $('#visit-alert').prepend("<div class=\"alert alert-danger\"><button class=\"close\" type=\"button\" data-dismiss=\"alert\">&times;</button>#{msg}</div>")
-    setTimeout ->
-      $('.alert').remove()
-    , 5000
-
   beforeSendSMS = () ->
     $(".sms").removeClass('block').hide()
     $("#btn-sms-confirm-label").html('SMS 인증번호 전송')
@@ -116,34 +107,34 @@ $ ->
       # 이름 점검
       #
       unless name
-        visitError '이름을 입력해주세요.'
+        OpenCloset.alert 'danger', '이름을 입력해주세요.', '#visit-alert'
         return
 
       #
       # 휴대전화 점검
       #
       unless phone
-        visitError '휴대전화를 입력해주세요.'
+        OpenCloset.alert 'danger', '휴대전화를 입력해주세요.', '#visit-alert'
         return
       unless /^\d+$/.test( phone )
-        visitError '유효하지 않은 휴대전화입니다.'
+        OpenCloset.alert 'danger', '유효하지 않은 휴대전화입니다.', '#visit-alert'
         return
       if /^999/.test( phone )
-        visitError '전송 불가능한 휴대전화입니다.'
+        OpenCloset.alert 'danger', '전송 불가능한 휴대전화입니다.', '#visit-alert'
         return
 
       #
       # 서비스 이용약관 점검
       #
       unless service
-        visitError '서비스 이용약관을 확인해주세요.'
+        OpenCloset.alert 'danger', '서비스 이용약관을 확인해주세요.', '#visit-alert'
         return
 
       #
       # 개인정보 이용안내 점검
       #
       unless privacy
-        visitError '개인정보 이용안내를 확인해주세요.'
+        OpenCloset.alert 'danger', '개인정보 이용안내를 확인해주세요.', '#visit-alert'
         return
 
       if signup
@@ -151,31 +142,31 @@ $ ->
         # 성별 점검
         #
         unless gender
-          visitError '성별을 입력해주세요.'
+          OpenCloset.alert 'danger', '성별을 입력해주세요.', '#visit-alert'
           return
 
         #
         # 전자우편 점검
         #
         unless email
-          visitError '전자우편을 입력해주세요.'
+          OpenCloset.alert 'danger', '전자우편을 입력해주세요.', '#visit-alert'
           return
 
         #
         # 주소 점검
         #
         unless address2
-          visitError '주소를 입력해주세요.'
+          OpenCloset.alert 'danger', '주소를 입력해주세요.', '#visit-alert'
           return
 
         #
         # 생년 점검
         #
         unless birth
-          visitError '생년을 입력해주세요.'
+          OpenCloset.alert 'danger', '생년을 입력해주세요.', '#visit-alert'
           return
         unless /^(19|20)|\d\d$/.test( birth )
-          visitError '유효하지 않은 생년입니다.'
+          OpenCloset.alert 'danger', '유효하지 않은 생년입니다.', '#visit-alert'
           return
 
         #
@@ -198,7 +189,7 @@ $ ->
             signup = false
             validateSMS(phone)
           error: (jqXHR, textStatus, errorThrown) ->
-            visitError '서버 오류가 발생했습니다.'
+            OpenCloset.alert 'danger', '서버 오류가 발생했습니다.', '#visit-alert'
       else
         #
         # - 사용자 존재 확인
@@ -209,23 +200,23 @@ $ ->
           data: { q: phone }
           success: (data, textStatus, jqXHR) ->
             unless data.length == 1
-              visitError '휴대전화가 중복되었습니다.'
+              OpenCloset.alert 'danger', '휴대전화가 중복되었습니다.', '#visit-alert'
               return
 
             user = data[0]
             unless user.name == name
-              visitError '이름과 휴대전화가 일치하지 않습니다.'
+              OpenCloset.alert 'danger', '이름과 휴대전화가 일치하지 않습니다.', '#visit-alert'
               return
 
             validateSMS(phone)
           error: (jqXHR, textStatus, errorThrown) ->
             type = jqXHR.status is 404 ? 'warning' : 'danger'
             if jqXHR.status is 404
-              visitError '사용자 등록이 필요합니다. 추가 정보를 입력해주세요.'
+              OpenCloset.alert 'danger', '사용자 등록이 필요합니다. 추가 정보를 입력해주세요.', '#visit-alert'
               $(".signup").addClass('block').show()
               signup = true
             else
-              visitError '서버 오류가 발생했습니다.'
+              OpenCloset.alert 'danger', '서버 오류가 발생했습니다.', '#visit-alert'
 
   checkCancelBooking = () ->
     name          = $("input[name=name]").val()
@@ -237,34 +228,34 @@ $ ->
     # 이름 점검
     #
     unless name
-      visitError '이름을 입력해주세요.'
+      OpenCloset.alert 'danger', '이름을 입력해주세요.', '#visit-alert'
       return
 
     #
     # 휴대전화 점검
     #
     unless phone
-      visitError '휴대전화를 입력해주세요.'
+      OpenCloset.alert 'danger', '휴대전화를 입력해주세요.', '#visit-alert'
       return
     unless /^\d+$/.test( phone )
-      visitError '유효하지 않은 휴대전화입니다.'
+      OpenCloset.alert 'danger', '유효하지 않은 휴대전화입니다.', '#visit-alert'
       return
     if /^999/.test( phone )
-      visitError '전송 불가능한 휴대전화입니다.'
+      OpenCloset.alert 'danger', '전송 불가능한 휴대전화입니다.', '#visit-alert'
       return
 
     #
     # 인증번호 점검
     #
     unless sms
-      visitError '인증번호를 입력해주세요.'
+      OpenCloset.alert 'danger', '인증번호를 입력해주세요.', '#visit-alert'
       return
 
     #
     # 저장된 예약 아이디 점검
     #
     unless booking_saved
-      visitError '아직 예약한적이 없습니다.'
+      OpenCloset.alert 'danger', '아직 예약한적이 없습니다.', '#visit-alert'
       return
 
     return true
@@ -288,92 +279,92 @@ $ ->
     # 이름 점검
     #
     unless name
-      visitError '이름을 입력해주세요.'
+      OpenCloset.alert 'danger', '이름을 입력해주세요.', '#visit-alert'
       return
 
     #
     # 휴대전화 점검
     #
     unless phone
-      visitError '휴대전화를 입력해주세요.'
+      OpenCloset.alert 'danger', '휴대전화를 입력해주세요.', '#visit-alert'
       return
     unless /^\d+$/.test( phone )
-      visitError '유효하지 않은 휴대전화입니다.'
+      OpenCloset.alert 'danger', '유효하지 않은 휴대전화입니다.', '#visit-alert'
       return
     if /^999/.test( phone )
-      visitError '전송 불가능한 휴대전화입니다.'
+      OpenCloset.alert 'danger', '전송 불가능한 휴대전화입니다.', '#visit-alert'
       return
 
     #
     # 인증번호 점검
     #
     unless sms
-      visitError '인증번호를 입력해주세요.'
+      OpenCloset.alert 'danger', '인증번호를 입력해주세요.', '#visit-alert'
       return
 
     #
     # 성별 점검
     #
     unless gender
-      visitError '성별을 입력해주세요.'
+      OpenCloset.alert 'danger', '성별을 입력해주세요.', '#visit-alert'
       return
 
     #
     # 전자우편 점검
     #
     unless email
-      visitError '전자우편을 입력해주세요.'
+      OpenCloset.alert 'danger', '전자우편을 입력해주세요.', '#visit-alert'
       return
 
     #
     # 주소 점검
     #
     unless address2
-      visitError '주소를 입력해주세요.'
+      OpenCloset.alert 'danger', '주소를 입력해주세요.', '#visit-alert'
       return
 
     #
     # 생년 점검
     #
     unless birth
-      visitError '생년을 입력해주세요.'
+      OpenCloset.alert 'danger', '생년을 입력해주세요.', '#visit-alert'
       return
     unless /^(19|20)|\d\d$/.test( birth )
-      visitError '유효하지 않은 생년입니다.'
+      OpenCloset.alert 'danger', '유효하지 않은 생년입니다.', '#visit-alert'
       return
 
     #
     # 키 점검
     #
     unless height
-      visitError '키를 입력해주세요.'
+      OpenCloset.alert 'danger', '키를 입력해주세요.', '#visit-alert'
       return
     unless /^\d+$/.test( height )
-      visitError '유효하지 않은 키입니다.'
+      OpenCloset.alert 'danger', '유효하지 않은 키입니다.', '#visit-alert'
       return
 
     #
     # 몸무게 점검
     #
     unless weight
-      visitError '몸무게를 입력해주세요.'
+      OpenCloset.alert 'danger', '몸무게를 입력해주세요.', '#visit-alert'
       return
     unless /^\d+$/.test( weight )
-      visitError '유효하지 않은 몸무게입니다.'
+      OpenCloset.alert 'danger', '유효하지 않은 몸무게입니다.', '#visit-alert'
       return
 
     #
     # 방문 일자 점검
     #
     unless booking
-      visitError '방문 일자를 선택해주세요.'
+      OpenCloset.alert 'danger', '방문 일자를 선택해주세요.', '#visit-alert'
       return
 
     #
     # 대여 목적 점검
     #
     unless purpose
-      visitError '대여 목적을 입력해주세요.'
+      OpenCloset.alert 'danger', '대여 목적을 입력해주세요.', '#visit-alert'
       return
 
     return true
