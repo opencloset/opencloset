@@ -52,3 +52,6 @@ $ ->
         console.log textStatus
       complete: (jqXHR, textStatus) ->
         $.facebox.close()
+
+  $('span.order-status.label').each (i, el) ->
+    $(el).addClass OpenCloset.status[ $(el).data('status') ].css
