@@ -48,7 +48,10 @@ CREATE TABLE `user_info` (
   -- general
   --
   `phone`       VARCHAR(16)  DEFAULT NULL COMMENT 'regex: 01\d{8,9}',
-  `address`     VARCHAR(255) DEFAULT NULL,
+  `address1`    VARCHAR(32)  DEFAULT NULL COMMENT 'dbid',
+  `address2`    VARCHAR(256) DEFAULT NULL COMMENT '도로명주소',
+  `address3`    VARCHAR(256) DEFAULT NULL COMMENT '구(old)주소',
+  `address4`    VARCHAR(256) DEFAULT NULL COMMENT '상세주소',
   `gender`      VARCHAR(6)   DEFAULT NULL COMMENT 'male/female',
   `birth`       INT          DEFAULT NULL,
   `comment`     TEXT         DEFAULT NULL,

@@ -49,11 +49,37 @@ __PACKAGE__->table("user_info");
 
 regex: 01d{8,9}
 
-=head2 address
+=head2 address1
 
   data_type: 'varchar'
   is_nullable: 1
-  size: 255
+  size: 32
+
+dbid
+
+=head2 address2
+
+  data_type: 'varchar'
+  is_nullable: 1
+  size: 256
+
+?????
+
+=head2 address3
+
+  data_type: 'varchar'
+  is_nullable: 1
+  size: 256
+
+?(old)??
+
+=head2 address4
+
+  data_type: 'varchar'
+  is_nullable: 1
+  size: 256
+
+????
 
 =head2 gender
 
@@ -164,8 +190,14 @@ __PACKAGE__->add_columns(
   },
   "phone",
   { data_type => "varchar", is_nullable => 1, size => 16 },
-  "address",
-  { data_type => "varchar", is_nullable => 1, size => 255 },
+  "address1",
+  { data_type => "varchar", is_nullable => 1, size => 32 },
+  "address2",
+  { data_type => "varchar", is_nullable => 1, size => 256 },
+  "address3",
+  { data_type => "varchar", is_nullable => 1, size => 256 },
+  "address4",
+  { data_type => "varchar", is_nullable => 1, size => 256 },
   "gender",
   { data_type => "varchar", is_nullable => 1, size => 6 },
   "birth",
@@ -258,8 +290,8 @@ __PACKAGE__->belongs_to(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2014-11-23 13:53:01
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:X/nojvci3Vd0GJ+Ony64Pw
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2014-11-27 18:23:44
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:zaHO6HW5yyWiTfRraSwV1w
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration
