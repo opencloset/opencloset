@@ -35,6 +35,7 @@ $ ->
       success: (data, textStatus, jqXHR) ->
         compiled = _.template($('#tpl-donation-id').html())
         _.each data, (donation) ->
+          return if donation.user.id is "1"
           unless $("#user-search-list input[data-donation-id='#{donation.id}']").length
             $html = $(compiled(donation))
             $html.find('input').attr('data-json', JSON.stringify(donation))
