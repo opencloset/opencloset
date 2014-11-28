@@ -1988,6 +1988,7 @@ group {
             category
             code
             color
+            comment
             compatible_code
             donation_id
             gender
