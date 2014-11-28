@@ -81,6 +81,12 @@ dbid
 
 ????
 
+=head2 old_address
+
+  data_type: 'varchar'
+  is_nullable: 1
+  size: 256
+
 =head2 gender
 
   data_type: 'varchar'
@@ -198,6 +204,8 @@ __PACKAGE__->add_columns(
   { data_type => "varchar", is_nullable => 1, size => 256 },
   "address4",
   { data_type => "varchar", is_nullable => 1, size => 256 },
+  "old_address",
+  { data_type => "varchar", is_nullable => 1, size => 256 },
   "gender",
   { data_type => "varchar", is_nullable => 1, size => 6 },
   "birth",
@@ -290,8 +298,8 @@ __PACKAGE__->belongs_to(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2014-11-27 18:23:44
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:zaHO6HW5yyWiTfRraSwV1w
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2014-11-28 11:32:22
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:M/+ljlOHfh76wDt6woBhNw
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration
