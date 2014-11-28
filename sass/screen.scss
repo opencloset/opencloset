@@ -577,6 +577,12 @@ $opencloset-darken-yellow: desaturate(darken($opencloset-yellow, 4%), 10%);
         margin-bottom: 0;
     }
 }
+
+.form-group.has-info textarea[disabled], .form-group.has-info textarea[readonly] {
+    background-color: #eee !important;
+    color: #848484 !important;
+}
+
 #postcodify .summary {
     display: none;
 }

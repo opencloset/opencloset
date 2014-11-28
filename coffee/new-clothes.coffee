@@ -53,11 +53,12 @@ $ ->
     if donationID
       donation = $(@).data('json')
       user     = donation.user
-      $("#donation-message").val(donation.message)
-      $("#donation-message").prop('disabled', true)
+      $("#create-date").val(donation.create_date.ymd).prop('readonly', 'readonly')
+      $("#donation-message").val(donation.message).prop('readonly', 'readonly')
     else
       user = $(@).data('json')
-      $("#donation-message").prop('disabled', false)
+      $("#create-date").val('').removeProp('readonly')
+      $("#donation-message").val('').removeProp('readonly')
 
     _.each [
       'name',
@@ -73,6 +74,11 @@ $ ->
           $(el).attr('checked', true) if $(el).val() is user[name]
       else
         $input.val(user[name])
+
+      #
+      # http://stackoverflow.com/questions/1953017/why-cant-radio-buttons-be-readonly
+      #
+      $("input[name=#{name}], input[name=gender]:not(:checked)").attr('disabled', true)
 
   $('#user-search').keypress (e) -> addRegisteredUserAndDonation() if e.keyCode is 13
   $('#btn-user-search').click -> addRegisteredUserAndDonation()
@@ -232,25 +238,6 @@ $ ->
             OpenCloset.alert('warning', '기증 날짜가 올바르지 않습니다.')
             e.preventDefault()
             return
-
-          if userID
-            ajax.type = 'PUT'
-            ajax.path = "/api/user/#{userID}.json"
-          else
-            ajax.type = 'POST'
-            ajax.path = '/api/user.json'
-
-          $.ajax ajax.path,
-            type: ajax.type
-            data: $('form').serialize()
-            success: (data, textStatus, jqXHR) ->
-              userID = data.id
-              return true
-            error: (jqXHR, textStatus, errorThrown) ->
-              OpenCloset.alert('warning', jqXHR.responseJSON.error.str)
-              $('#fuelux-wizard').wizard('previous')
-              return
-            complete: (jqXHR, textStatus) ->
         when 3
           unless $("input[name=clothes-list]:checked").length
             OpenCloset.alert('warning', '추가할 의류를 선택하지 않았습니다.')

@@ -29,7 +29,7 @@
                   %span.title 기증자 검색
                 %li{ "data-target" => "#step2" }
                   %span.step  2
-                  %span.title 기증자 정보
+                  %span.title 기증 정보
                 %li{ "data-target" => "#step3" }
                   %span.step  3
                   %span.title 새 옷 등록
@@ -81,8 +81,7 @@
                             <label class="blue highlight">
                               <input type="radio" class="ace valid" name="user-donation-id" value="<%= id %>" data-type="donation" data-user-id="<%= user.id %>" data-donation-id="<%= id %>">
                               <span class="lbl"> 기증: <%= user.name %> (<%= user.email %>)</span>
-                              <span><%= message %></span>
-                              <span><%= create_date.ymd %></span>
+                              <span class="lbl"><%= create_date.ymd %></span>
                             </label>
                           </div>
                         </script>
@@ -90,7 +89,7 @@
               / step2
               /
               #step2.step-pane
-                %h3.lighter.block.green 기증자의 정보를 입력하세요.
+                %h3.lighter.block.green 기증 정보를 입력하세요.
                 %form#user-info.form-horizontal{ :method => 'get', :novalidate="novalidate" }
                   /
                   / 기증 날짜
@@ -102,13 +101,22 @@
                         %input#create-date.valid.col-xs-12.col-sm-6{ :name => 'create-date', :type => 'text', 'placeholder' => 'YYYY-mm-dd' }
 
                   /
+                  / 기증 메시지
+                  /
+                  .form-group.has-info
+                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'donation-message' } 전하실 말:
+                    .col-xs-12.col-sm-9
+                      .clearfix
+                        %textarea#donation-message.valid.col-xs-12.col-sm-6{ :name => 'donation-message', :type => 'text' }
+
+                  /
                   / 전자우편
                   /
                   .form-group.has-info
                     %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'email' } 전자우편:
                     .col-xs-12.col-sm-9
                       .clearfix
-                        %input#email.valid.col-xs-12.col-sm-6{ :name => 'email', :type => 'text' }
+                        %input#email.valid.col-xs-12.col-sm-6{ :name => 'email', :type => 'text', :readonly => 'readonly' }
 
                   /
                   / 이름
@@ -117,7 +125,7 @@
                     %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'name' } 이름:
                     .col-xs-12.col-sm-9
                       .clearfix
-                        %input#name.valid.col-xs-12.col-sm-6{ :name => 'name', :type => 'text' }
+                        %input#name.valid.col-xs-12.col-sm-6{ :name => 'name', :type => 'text', :readonly => 'readonly' }
 
                   /
                   / 태어난 해
@@ -126,7 +134,7 @@
                     %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'birth' } 태어난 해:
                     .col-xs-12.col-sm-9
                       .clearfix
-                        %input#birth.valid.col-xs-12.col-sm-6{ :name => 'birth', :type => 'text' }
+                        %input#birth.valid.col-xs-12.col-sm-6{ :name => 'birth', :type => 'text', :readonly => 'readonly' }
 
                   /
                   / 성별
@@ -136,11 +144,11 @@
                     .col-xs-12.col-sm-9
                       %div
                         %label.blue
-                          %input.ace.valid{ :type => 'radio', :name => 'gender', :value => 'male' }
+                          %input.ace.valid{ :type => 'radio', :name => 'gender', :value => 'male', :readonly => 'readonly' }
                           %span.lbl= " 남자"
                       %div
                         %label.blue
-                          %input.ace.valid{ :type => 'radio', :name => 'gender', :value => 'female' }
+                          %input.ace.valid{ :type => 'radio', :name => 'gender', :value => 'female', :readonly => 'readonly' }
                           %span.lbl= " 여자"
 
                   /
@@ -150,25 +158,16 @@
                     %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'phone' } 휴대전화:
                     .col-xs-12.col-sm-9
                       .clearfix
-                        %input#phone.valid.col-xs-12.col-sm-6{ :name => 'phone', :type => 'tel' }
+                        %input#phone.valid.col-xs-12.col-sm-6{ :name => 'phone', :type => 'tel', :readonly => 'readonly' }
 
                   /
                   / 주소
                   /
                   .form-group.has-info
-                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'address2' } 주소:
+                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'address' } 주소:
                     .col-xs-12.col-sm-9
                       .clearfix
-                        %input#address.valid.col-xs-12.col-sm-9{ :name => 'address2', :type => 'text' }
-
-                  /
-                  / 기증 메시지
-                  /
-                  .form-group.has-info
-                    %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'donation-message' } 전하실 말:
-                    .col-xs-12.col-sm-9
-                      .clearfix
-                        %textarea#donation-message.valid.col-xs-12.col-sm-6{ :name => 'donation-message', :type => 'text' }
+                        %input#address.valid.col-xs-12.col-sm-9{ :name => 'address', :type => 'text', :readonly => 'readonly' }
 
               /
               / step3
