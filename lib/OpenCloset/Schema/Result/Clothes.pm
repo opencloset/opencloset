@@ -132,6 +132,11 @@ male/female/unisex
   default_value: 0
   is_nullable: 1
 
+=head2 comment
+
+  data_type: 'text'
+  is_nullable: 1
+
 =head2 compatible_code
 
   data_type: 'varchar'
@@ -196,6 +201,8 @@ __PACKAGE__->add_columns(
   { data_type => "varchar", is_nullable => 0, size => 32 },
   "price",
   { data_type => "integer", default_value => 0, is_nullable => 1 },
+  "comment",
+  { data_type => "text", is_nullable => 1 },
   "compatible_code",
   { data_type => "varchar", is_nullable => 1, size => 32 },
 );
@@ -344,8 +351,8 @@ Composing rels: L</clothes_tags> -> tag
 __PACKAGE__->many_to_many("tags", "clothes_tags", "tag");
 
 
-# Created by DBIx::Class::Schema::Loader v0.07038 @ 2014-01-24 15:02:59
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:TSUtWPCg9hZG4kNDlSFuEQ
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2014-11-28 15:23:18
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:ybn3XBsVVgrXw+hSVDV0pA
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration
