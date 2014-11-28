@@ -54,18 +54,18 @@ $ ->
       '포장':       { id: 19, css: 'label-inverse'   }
       '결제대기':   { id: 20, css: 'label-inverse'   }
     category:
-      belt:      { str: '벨트',     price: 2000  }
-      blouse:    { str: '블라우스', price: 5000  }
-      coat:      { str: '코트',     price: 10000 }
-      hat:       { str: '모자',     price: 2000  }
       jacket:    { str: '재킷',     price: 10000 }
-      onepiece:  { str: '원피스',   price: 10000 }
       pants:     { str: '바지',     price: 10000 }
-      shirt:     { str: '셔츠',     price: 5000  }
-      shoes:     { str: '신발',     price: 5000  }
       skirt:     { str: '치마',     price: 10000 }
+      shirt:     { str: '셔츠',     price: 5000  }
+      blouse:    { str: '블라우스', price: 5000  }
+      shoes:     { str: '신발',     price: 5000  }
       tie:       { str: '넥타이',   price: 2000  }
+      onepiece:  { str: '원피스',   price: 10000 }
+      coat:      { str: '코트',     price: 10000 }
       waistcoat: { str: '조끼',     price: 5000  }
+      belt:      { str: '벨트',     price: 2000  }
+      hat:       { str: '모자',     price: 2000  }
     measurement:
       height: '키'
       weight: '몸무게'
