@@ -48,13 +48,11 @@ $ ->
       '방문':       { id: 13, css: 'label-warning'   }
       '방문예약':   { id: 14, css: 'label-info'      }
       '배송예약':   { id: 15, css: 'label-info'      }
-      '대기':       { id: 16, css: 'label-inverse'   }
-      '치수측정':   { id: 17, css: 'label-inverse'   }
-      '의류준비':   { id: 18, css: 'label-inverse'   }
-      '탈의대기':   { id: 19, css: 'label-inverse'   }
-      '탈의':       { id: 20, css: 'label-inverse'   }
-      '포장':       { id: 21, css: 'label-inverse'   }
-      '결제대기':   { id: 22, css: 'label-inverse'   }
+      '치수측정':   { id: 16, css: 'label-inverse'   }
+      '의류준비':   { id: 17, css: 'label-inverse'   }
+      '탈의':       { id: 18, css: 'label-inverse'   }
+      '포장':       { id: 19, css: 'label-inverse'   }
+      '결제대기':   { id: 20, css: 'label-inverse'   }
     category:
       belt:      { str: '벨트',     price: 2000  }
       blouse:    { str: '블라우스', price: 5000  }
