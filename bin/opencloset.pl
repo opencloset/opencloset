@@ -3931,7 +3931,7 @@ get '/clothes' => sub {
     # response
     #
     $self->stash(
-        status       => \%status,
+        condition    => \%status,
         clothes_list => $rs,
         pageset      => $pageset,
     );
