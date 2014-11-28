@@ -186,6 +186,7 @@ CREATE TABLE `clothes` (
   `gender`      VARCHAR(6)  DEFAULT NULL COMMENT 'male/female/unisex',
   `category`    VARCHAR(32) NOT NULL,  -- 종류
   `price`       INT DEFAULT 0,         -- 대여 가격
+  `comment`     TEXT        DEFAULT NULL,
 
   `compatible_code` VARCHAR(32) DEFAULT NULL,
 
