@@ -56,6 +56,8 @@ $ ->
         params.type   = 'select'
         params.source = []
         params.source.push { value: color, text: color_str } for color, color_str of OpenCloset.color
+      when 'clothes-comment'
+        params.type = 'textarea'
       else
         params.type = 'text'
 
