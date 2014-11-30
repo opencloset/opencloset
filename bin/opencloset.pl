@@ -43,6 +43,7 @@ use Try::Tiny;
 use Unicode::GCString;
 use Unicode::Normalize;
 use Encode 'decode_utf8';
+use HTTP::Tiny;
 
 use Postcodify;
 
@@ -1647,6 +1648,17 @@ group {
 
         my $order = $self->update_order( \%order_params, \%order_detail_params );
         return unless $order;
+
+        #
+        # event posting to opencloset/monitor
+        #
+        my $res = HTTP::Tiny->new(timeout => 1)->post_form('http://localhost:5000/events', {
+            order_id => $order->id,
+            from => $order_params{status_id},
+            to => $order->status_id
+        });
+
+        $self->app->log->error("Failed to posting event: $res->{reason}") unless $res->{success};
 
         #
         # response
