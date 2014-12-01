@@ -493,17 +493,16 @@ $ ->
   #
   # 생년에 생년월일을 입력하지 못하게 함
   #
-  $('input[name="birth"]').mask('9999')
+  $('input[name="birth"]').mask('0000')
 
   #
   # 전화번호에 `-` 기호를 무시하도록 함
   #
-  $('input[type="tel"]').mask('99999999999')
+  $('input[type="tel"]').mask('00000000000')
 
   #
   # 주소검색
   #
-
   $("#postcodify").postcodify
     api: "/api/postcode/search"
     timeout: 10000    # 10 seconds
