@@ -7,6 +7,7 @@ public/theme/ace
 
 # application config file
 app.conf
+app.psgi.conf
 
 # editor swap files
 *.swp
