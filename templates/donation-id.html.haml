@@ -21,13 +21,23 @@
   %hr
   .list-group
 
-.row#donation
+.row#donation{:data-donation-id => '#{$donation->id}'}
   %h2
     %a{ :href => "#{url_for('/user/' . $donation->user->id)}" }= $donation->user->name
     %small
       %a.btn.btn-info.btn-xs{ :href => '#users', :rel => 'facebox' } edit
       님이 기증해주신 내역입니다.
   .space-4
+
+  #clothes-bucket
+    %ul
+      - my @clothes_id;
+      - while (my $clothes = $bucket->next) {
+        - my $clothes_code = trim_clothes_code($clothes);
+        - push @clothes_id, $clothes->id;
+        %li 
+          %span.label.label-default{:data-clothes-code => "#{$clothes->code}"}= $clothes_code
+      - }
 
   #clothes-list-table.dataTables_wrapper
     %table.table.table-striped.table-bordered.table-hover

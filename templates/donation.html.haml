@@ -17,6 +17,16 @@
 
 .space-8
 
+#clothes-bucket
+  %ul
+    - my @clothes_id;
+    - while (my $clothes = $bucket->next) {
+      - my $clothes_code = trim_clothes_code($clothes);
+      - push @clothes_id, $clothes->id;
+      %li 
+        %span.label.label-default{:data-clothes-code => "#{$clothes->code}"}= $clothes_code
+    - }
+
 #donation-table
   %table.table.table-striped.table-bordered.table-hover
     %thead
