@@ -55,3 +55,16 @@ $ ->
 
   $('span.order-status.label').each (i, el) ->
     $(el).addClass OpenCloset.status[ $(el).data('status') ].css
+
+  $('#clothes-bucket span').dblclick (e) ->
+    e.preventDefault()
+    $this = $(@)
+    code = $this.data('clothes-code')
+    $.ajax "/api/clothes/#{code}.json",
+      type: 'PUT'
+      data: { donation_id: $('#donation').data('donation-id') }
+      success: (data, textStatus, jqXHR) ->
+        location.reload()
+      error: (jqXHR, textStatus, errorThrown) ->
+        console.log textStatus
+      complete: (jqXHR, textStatus) ->

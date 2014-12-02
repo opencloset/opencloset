@@ -4566,6 +4566,10 @@ get '/donation' => sub {
         },
     );
 
+    my $bucket = $DB->resultset('Clothes')->search({
+        donation_id => undef
+    });
+
     my $pageset = Data::Pageset->new({
         total_entries    => $rs->pager->total_entries,
         entries_per_page => $rs->pager->entries_per_page,
@@ -4575,6 +4579,7 @@ get '/donation' => sub {
 
     $self->stash(
         donation_list => $rs,
+        bucket        => $bucket,
         pageset       => $pageset,
         q             => $q || q{},
     );
@@ -4586,12 +4591,20 @@ get '/donation/:id' => sub {
     my $id = $self->param('id');
     my $donation = $DB->resultset('Donation')->find({ id => $id });
 
+    my $bucket = $DB->resultset('Clothes')->search({
+        donation_id => undef
+    });
+
     return $self->error(404, {
         str => 'donation not found',
         data => {}
     }) unless $donation;
 
-    $self->stash( donation => $donation, clothes_list => [$donation->clothes] );
+    $self->stash(
+        donation     => $donation,
+        bucket       => $bucket,
+        clothes_list => [$donation->clothes]
+    );
 } => 'donation-id';
 
 app->secrets( app->defaults->{secrets} );
