@@ -4538,13 +4538,32 @@ get '/sms' => sub {
 get '/donation' => sub {
     my $self = shift;
 
-    my $p  = $self->param('p') || 1;
-    my $s  = $self->param('s') || app->config->{entries_per_page};
-    my $rs = $DB->resultset('Donation')->search(undef, {
-        order_by => { -asc => 'id' },
-        page => $p,
-        rows => $s
-    });
+    #
+    # fetch params
+    #
+    my $p = $self->param('p') || 1;
+    my $s = $self->param('s') || app->config->{entries_per_page};
+    my $q = $self->param('q');
+    my $cond = $q
+        ? [
+        { 'name'               => { like => "%$q%" } },
+        { 'email'              => { like => "%$q%" } },
+        { 'user_info.phone'    => { like => "%$q%" } },
+        { 'user_info.address4' => { like => "%$q%" } },    # 상세주소만 검색
+        { 'user_info.birth'    => { like => "%$q%" } },
+        { 'user_info.gender'   => $q },
+        ]
+        : {};
+
+    my $rs = $DB->resultset('Donation')->search(
+        $cond,
+        {
+            join     => { 'user' => 'user_info' },
+            order_by => { -asc => 'id' },
+            page     => $p,
+            rows     => $s
+        },
+    );
 
     my $pageset = Data::Pageset->new({
         total_entries    => $rs->pager->total_entries,
@@ -4556,6 +4575,7 @@ get '/donation' => sub {
     $self->stash(
         donation_list => $rs,
         pageset       => $pageset,
+        q             => $q || q{},
     );
 };
 

@@ -504,6 +504,23 @@ $opencloset-darken-yellow: desaturate(darken($opencloset-yellow, 4%), 10%);
             }
         }
     }
+    #donation {
+        .donation-search {
+            width: 440px;
+        }
+
+        #donation-table table th {
+            &:first-child {
+                width: 40px;
+            }
+            &:nth-child(2) {
+                width: 100px;
+            }
+            &:nth-child(3) {
+                width: 100px;
+            }
+        }
+    }
     .step-content {
         .step-pane {
             h3 {
