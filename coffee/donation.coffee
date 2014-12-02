@@ -24,3 +24,16 @@ $ ->
   $('#btn-clear').click (e) ->
     $('#query').val('')
     $('#query').focus()
+
+  $('.donation-clothes span').dblclick (e) ->
+    e.preventDefault()
+    $this = $(@)
+    code = $this.data('clothes-code')
+    $.ajax "/api/clothes/#{code}.json",
+      type: 'PUT'
+      data: { donation_id: null }
+      success: (data, textStatus, jqXHR) ->
+        $this.appendTo('#clothes-bucket ul')
+      error: (jqXHR, textStatus, errorThrown) ->
+        console.log textStatus
+      complete: (jqXHR, textStatus) ->
