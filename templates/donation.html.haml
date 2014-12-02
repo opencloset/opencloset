@@ -17,12 +17,24 @@
 
 .space-8
 
+#clothes-bucket
+  %ul
+    - my @clothes_id;
+    - while (my $clothes = $bucket->next) {
+      - my $clothes_code = trim_clothes_code($clothes);
+      - push @clothes_id, $clothes->id;
+      %li 
+        %span.label.label-default{:data-clothes-code => "#{$clothes->code}"}= $clothes_code
+    - }
+
 #donation-table
   %table.table.table-striped.table-bordered.table-hover
     %thead
       %tr
         %th.center #
         %th 사용자
+        %th 의류
+        %th 메세지
         %th 기증일
         %th 메세지
     %tbody
@@ -34,7 +46,16 @@
             %a{ :href => "#{ url_for('/user/' . $d->user->id) }" }= $d->user->name
           %td= $d->create_date->ymd
           %td
-            %a.editable-click{ :href => "#{url_for('/donation/' . $d->id)}" }= substr($d->message, 0, 100) || '비어있음'
+            %ul
+              - my @clothes = $d->clothes;
+              - for my $clothes (@clothes) {
+                - my $clothes_code = trim_clothes_code($clothes);
+                %li.donation-clothes
+                  %span.label.label-default{:data-clothes-code => "#{$clothes->code}"}= $clothes_code
+              - }
+          %td
+            %a{ :href => "#{url_for('/donation/' . $d->id)}" }= substr($d->message, 0, 100) || '비어있음'
+          %td= $d->create_date->ymd
       - }
 
 = include 'partials/pagination'

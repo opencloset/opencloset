@@ -603,3 +603,26 @@ $opencloset-darken-yellow: desaturate(darken($opencloset-yellow, 4%), 10%);
 #postcodify .summary {
     display: none;
 }
+#clothes-bucket ul {
+    height: 10em;
+    background-color: #eee;
+    margin-left: 0;
+    list-style-type: none;
+    li {
+        display: inline;
+        span {
+            cursor: pointer;
+        }
+    }
+}
+#donation-table ul {
+    margin: 0;
+    padding: 0;
+    list-style-type: none;
+    li {
+        display: inline;
+        span {
+            cursor: pointer;
+        }
+    }
+}
