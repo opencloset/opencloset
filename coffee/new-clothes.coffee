@@ -145,7 +145,7 @@ $ ->
   $('#btn-clothes-add').click ->
     data =
       user_id:              userID
-      clothes_code:         $('#clothes-code').val()
+      clothes_code:         $('#clothes-code').val().toUpperCase()
       clothes_category:     $('#clothes-category').val()
       clothes_category_str: $('#clothes-category option:selected').text()
       clothes_gender:       $('input[name=clothes-gender]:checked').val()
