@@ -196,4 +196,9 @@ $db_opts->{AutoCommit} //= 1;
     # postcodify
     #
     postcodify_db => './db/postcodify.20141112.v2.sqlite',
+
+    #
+    # monitor
+    #
+    monitor_uri => 'http://localhost:5000/events',
 };
