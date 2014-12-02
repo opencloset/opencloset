@@ -1652,7 +1652,7 @@ group {
         #
         # event posting to opencloset/monitor
         #
-        my $res = HTTP::Tiny->new(timeout => 1)->post_form('http://localhost:5000/events', {
+        my $res = HTTP::Tiny->new(timeout => 1)->post_form(app->config->{monitor_uri}, {
             order_id => $order->id,
             from => $order_params{status_id},
             to => $order->status_id
