@@ -85,11 +85,11 @@
   -   17:00
   -   17:30
   - );
-  - my $it = List::MoreUtils::natatime( 2, @times );
+  - my $it = List::MoreUtils::natatime( 1, @times );
   - while ( my @vals = $it->() ) {
     .row
       - for my $time (@vals) {
-        .col-sm-6
+        .col-sm-12
           .widget-box
             .widget-header.widget-header-flat.widget-header-small
               %h5.widget-title
