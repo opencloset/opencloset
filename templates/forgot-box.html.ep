@@ -9,25 +9,36 @@
                       </h4>
 
                       <div class="space-6"></div>
+
                       <p>
-                        비밀번호를 새로 설정하는 방법을 전자우편으로 보내드립니다.
-                        전자우편 주소를 입력하세요.
+                        임시 비밀번호를 휴대전화로 보내드립니다.
+                        휴대전화 번호를 입력하세요.
                       </p>
-                      <p>
-                        전자우편 주소를 모른다면 직원을 불러주세요. :)
-                      </p>
+
+                      <div class="space-6"></div>
+
+                      <div id="forgot-alert">
+                        % if ($alert) {
+                          <div class="alert alert-danger">
+                            <button class="close" type="button" data-dismiss="alert">&times;</button>
+                            <%= $alert %>
+                          </div>
+                        % }
+                      </div>
+
+                      <div class="space-6"></div>
 
                       <form>
                         <fieldset>
                           <label class="block clearfix">
                             <span class="block input-icon input-icon-right">
-                              <input type="email" class="form-control" placeholder="전자우편" />
-                              <i class="icon-envelope"></i>
+                              <input name="forgot-phone" type="tel" class="form-control" placeholder="휴대전화" />
+                              <i class="icon-phone"></i>
                             </span>
                           </label>
 
                           <div class="clearfix">
-                            <button type="button" class="width-35 pull-right btn btn-sm btn-danger">
+                            <button id="btn-forgot-sms-send" type="button" class="width-35 pull-right btn btn-sm btn-danger">
                               <i class="icon-lightbulb"></i>
                               보내주세요!
                             </button>

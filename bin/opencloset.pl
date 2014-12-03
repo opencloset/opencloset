@@ -89,6 +89,17 @@ plugin 'authentication' => {
             return;
         }
 
+        #
+        # GitHub #199
+        #
+        # check expires when login
+        #
+        my $now = DateTime->now( time_zone => app->config->{timezone} )->epoch;
+        unless ( $user_obj->expires && $user_obj->expires > $now ) {
+            app->log->warn( "$user\'s password is expired" );
+            return;
+        }
+
         unless ( $user_obj->check_password($pass) ) {
             app->log->warn("$user\'s password is wrong");
             return;
@@ -1452,6 +1463,16 @@ group {
             waist
             weight
         /);
+
+        #
+        # GitHub #199
+        #
+        # 패스워드 수정 요청이지만 만료 시간을 지정하지 않았을 경우
+        # 기본 값으로 1개월 뒤를 만료 시간으로 설정합니다.
+        #
+        if ( $user_params{password} && !$user_params{expires} ) {
+            $user_params{expires} = DateTime->now( time_zone => app->config->{timezone} )->add( months => 1 )->epoch;
+        }
 
         my ( $user, $msg )
             = try {
@@ -3566,8 +3587,23 @@ post '/login' => sub {
     my $remember = $self->param('remember');
 
     if ( $self->authenticate($username, $password) ) {
-        $self->session->{expiration} = $remember ? $self->app->config->{expire}{remember} : $self->app->config->{expire}{default},
-        $self->redirect_to( $self->url_for('/') );
+        $self->session->{expiration} = $remember ? $self->app->config->{expire}{remember} : $self->app->config->{expire}{default};
+
+        my $remain   = $self->current_user->expires - DateTime->now( time_zone => app->config->{timezone} )->epoch;
+        my $deadline = 60 * 60 * 24 * 7;
+        my $uri      = q{/};
+
+        if ( $remain < $deadline ) {
+            $uri = '/user/' . $self->current_user->id;
+            $self->flash(
+                alert => {
+                    type => 'warning',
+                    msg  => '비밀번호 만료 시간이 얼마남지 않았습니다. 비밀번호를 변경해주세요.',
+                },
+            );
+        }
+
+        $self->redirect_to( $self->url_for($uri) );
     }
     else {
         $self->flash(error => 'Failed to Authentication');

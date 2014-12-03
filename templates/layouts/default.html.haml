@@ -19,6 +19,11 @@
           %span.menu-text
         = include 'layouts/default/sidebar'
         .main-content
+          - if ( my $alert = flash 'alert' ) {
+            .alert{ :class => "alert-#{ $alert->{type} }" }
+              %button.close{ :type => "button", 'data-dismiss' => 'alert' }!= '&times;'
+              = $alert->{msg}
+          - }
           = include 'layouts/default/breadcrumbs'
           .page-content
             .page-header

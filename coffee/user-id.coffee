@@ -52,6 +52,11 @@ $ ->
             when '1' then value_str = '직원'
             else          value_str = ''
           $(this).html value_str
+      when 'user-password'
+        params.type      = 'password'
+        params.emptytext = '비밀번호를 입력해주세요.'
+        params.success   = (response, newValue) ->
+          OpenCloset.alert 'info', '비밀번호 변경을 완료했습니다.'
       when 'user-comment'
         params.type = 'textarea'
       else
