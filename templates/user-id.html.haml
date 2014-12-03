@@ -89,6 +89,13 @@
                                 .profile-info-value
                                   %span.editable#user-phone{ 'data-name' => 'phone' }= $user->user_info->phone
 
+                              - if ( $user->id == current_user->id ) {
+                                .profile-info-row
+                                  .profile-info-name 비밀번호
+                                  .profile-info-value
+                                    %span.editable#user-password{ 'data-name' => 'password' }
+                              - }
+
                               .profile-info-row
                                 .profile-info-name 주소
                                 .profile-info-value

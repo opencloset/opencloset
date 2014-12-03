@@ -89,6 +89,11 @@ plugin 'authentication' => {
             return;
         }
 
+        #
+        # GitHub #199
+        #
+        # check expires when login
+        #
         my $now = DateTime->now( time_zone => app->config->{timezone} )->epoch;
         unless ( $user_obj->expires && $user_obj->expires > $now ) {
             app->log->warn( "$user\'s password is expired" );
@@ -1458,6 +1463,16 @@ group {
             waist
             weight
         /);
+
+        #
+        # GitHub #199
+        #
+        # 패스워드 수정 요청이지만 만료 시간을 지정하지 않았을 경우
+        # 기본 값으로 1개월 뒤를 만료 시간으로 설정합니다.
+        #
+        if ( $user_params{password} && !$user_params{expires} ) {
+            $user_params{expires} = DateTime->now( time_zone => app->config->{timezone} )->add( months => 1 )->epoch;
+        }
 
         my ( $user, $msg )
             = try {
