@@ -90,8 +90,8 @@ plugin 'authentication' => {
         }
 
         my $now = DateTime->now( time_zone => app->config->{timezone} )->epoch;
-        unless ( $user->expires && $user->expires > $now ) {
-            app->log->warn( $user->email . "\'s password is expired" );
+        unless ( $user_obj->expires && $user_obj->expires > $now ) {
+            app->log->warn( "$user\'s password is expired" );
             return;
         }
 
