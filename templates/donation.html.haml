@@ -33,9 +33,8 @@
       %tr
         %th.center #
         %th 사용자
-        %th 의류
-        %th 메세지
         %th 기증일
+        %th 의류
         %th 메세지
     %tbody
       - while (my $d = $donation_list->next) {
@@ -55,7 +54,6 @@
               - }
           %td
             %a{ :href => "#{url_for('/donation/' . $d->id)}" }= substr($d->message, 0, 100) || '비어있음'
-          %td= $d->create_date->ymd
       - }
 
 = include 'partials/pagination'
