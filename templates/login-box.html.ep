@@ -8,6 +8,15 @@
                         정보를 입력해주세요.
                       </h4>
 
+                      <div id="login-alert">
+                        % if ($alert) {
+                          <div class="alert alert-danger">
+                            <button class="close" type="button" data-dismiss="alert">&times;</button>
+                            <%= $alert %>
+                          </div>
+                        % }
+                      </div>
+
                       <div class="space-6"></div>
 
                       <form method="post" action="<%= url_for('/login') %>">
