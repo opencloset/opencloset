@@ -3572,8 +3572,23 @@ post '/login' => sub {
     my $remember = $self->param('remember');
 
     if ( $self->authenticate($username, $password) ) {
-        $self->session->{expiration} = $remember ? $self->app->config->{expire}{remember} : $self->app->config->{expire}{default},
-        $self->redirect_to( $self->url_for('/') );
+        $self->session->{expiration} = $remember ? $self->app->config->{expire}{remember} : $self->app->config->{expire}{default};
+
+        my $remain   = $self->current_user->expires - DateTime->now( time_zone => app->config->{timezone} )->epoch;
+        my $deadline = 60 * 60 * 24 * 7;
+        my $uri      = q{/};
+
+        if ( $remain < $deadline ) {
+            $uri = '/user/' . $self->current_user->id;
+            $self->flash(
+                alert => {
+                    type => 'warning',
+                    msg  => '비밀번호 만료 시간이 얼마남지 않았습니다. 비밀번호를 변경해주세요.',
+                },
+            );
+        }
+
+        $self->redirect_to( $self->url_for($uri) );
     }
     else {
         $self->flash(error => 'Failed to Authentication');
