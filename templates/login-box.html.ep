@@ -53,7 +53,7 @@
                         </a>
                       </div>
 
-                      <div>
+                      <div style="display: none;">
                         <a href="#" onclick="show_box('signup-box'); return false;" class="user-signup-link">
                           가입할래요
                           <i class="icon-arrow-right"></i>
