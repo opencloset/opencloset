@@ -25,15 +25,38 @@ $ ->
     $('#query').val('')
     $('#query').focus()
 
-  $('.donation-clothes span').dblclick (e) ->
+  $('#donation-table tbody').on 'dblclick', 'span', (e) ->
     e.preventDefault()
     $this = $(@)
     code = $this.data('clothes-code')
+    donation_id = $this.data('donation-id')
+    unless donation_id
+      OpenCloset.alert 'danger', '기증 ID 를 찾을 수 없습니다'
+      return
     $.ajax "/api/clothes/#{code}.json",
       type: 'PUT'
       data: { donation_id: null }
       success: (data, textStatus, jqXHR) ->
-        $this.appendTo('#clothes-bucket ul')
+        localStorage.setItem(code, donation_id)
+        $this.parent().appendTo('#clothes-bucket ul')
+      error: (jqXHR, textStatus, errorThrown) ->
+        console.log textStatus
+      complete: (jqXHR, textStatus) ->
+
+  $('#clothes-bucket').on 'dblclick', 'span', (e) ->
+    e.preventDefault()
+    $this = $(@)
+    code = $this.data('clothes-code')
+    donation_id = $this.data('donation-id') or localStorage.getItem(code)
+    unless donation_id
+      OpenCloset.alert 'danger', '기증 ID 를 찾을 수 없습니다(새로고침을 해보세요)'
+      return
+    $this.attr('data-donation-id', donation_id)
+    $.ajax "/api/clothes/#{code}.json",
+      type: 'PUT'
+      data: { donation_id: donation_id }
+      success: (data, textStatus, jqXHR) ->
+        $this.parent().appendTo("#donation-#{donation_id} td:nth-child(4) ul")
       error: (jqXHR, textStatus, errorThrown) ->
         console.log textStatus
       complete: (jqXHR, textStatus) ->

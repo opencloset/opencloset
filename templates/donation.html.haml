@@ -38,7 +38,7 @@
         %th 메세지
     %tbody
       - while (my $d = $donation_list->next) {
-        %tr
+        %tr{:id => "donation-#{$d->id}"}
           %td.center
             %a{ :href => "#{ url_for('/donation/' . $d->id) }" }= $d->id
           %td
@@ -49,8 +49,8 @@
               - my @clothes = $d->clothes;
               - for my $clothes (@clothes) {
                 - my $clothes_code = trim_clothes_code($clothes);
-                %li.donation-clothes
-                  %span.label.label-default{:data-clothes-code => "#{$clothes->code}"}= $clothes_code
+                %li
+                  %span.label.label-default{:data-clothes-code => "#{$clothes->code}", :data-donation-id => "#{$d->id}"}= $clothes_code
               - }
           %td
             %a{ :href => "#{url_for('/donation/' . $d->id)}" }= substr($d->message, 0, 100) || '비어있음'

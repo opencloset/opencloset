@@ -64,6 +64,7 @@ $ ->
       type: 'PUT'
       data: { donation_id: $('#donation').data('donation-id') }
       success: (data, textStatus, jqXHR) ->
+        localStorage.removeItem(code)
         location.reload()
       error: (jqXHR, textStatus, errorThrown) ->
         console.log textStatus
