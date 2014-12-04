@@ -110,10 +110,20 @@ $ ->
   # 13 => 방문
   # 16 => 치수측정
   # 17 => 의류준비
-  # 18 => 탈의
+  #
+  # 20 => 탈의01
+  # 21 => 탈의02
+  # 22 => 탈의03
+  # 23 => 탈의04
+  # 24 => 탈의05
+  # 25 => 탈의06
+  # 26 => 탈의07
+  # 27 => 탈의08
+  # 28 => 탈의09
+  #
   #  6 => 수선
-  # 19 => 포장
-  # 20 => 결제대기
+  # 18 => 포장
+  # 19 => 결제대기
   #
   $('.dropdown-people a.order-next-status').click (e) ->
     storage      = $(this).closest('.dropdown-people')
@@ -131,10 +141,17 @@ $ ->
           when 14 then status_id = 13 # 방문예약 -> 방문
           when 13 then status_id = 16 # 방문     -> 치수측정
           when 16 then status_id = 17 # 치수측정 -> 의류준비
-          when 17 then status_id = 18 # 의류준비 -> 탈의
-          when 18 then status_id = 19 # 탈의     -> 포장
-          when 19 then status_id = 20 # 포장     -> 결제대기
-          when  6 then status_id = 20 # 수선     -> 결제대기
+          when 20 then status_id = 18 # 탈의01   -> 포장
+          when 21 then status_id = 18 # 탈의02   -> 포장
+          when 22 then status_id = 18 # 탈의03   -> 포장
+          when 23 then status_id = 18 # 탈의04   -> 포장
+          when 24 then status_id = 18 # 탈의05   -> 포장
+          when 25 then status_id = 18 # 탈의06   -> 포장
+          when 26 then status_id = 18 # 탈의07   -> 포장
+          when 27 then status_id = 18 # 탈의08   -> 포장
+          when 28 then status_id = 18 # 탈의09   -> 포장
+          when 18 then status_id = 19 # 포장     -> 결제대기
+          when  6 then status_id = 19 # 수선     -> 결제대기
           else return
         updateOrder order_id, ymd, status_id, alert_target
       error: (jqXHR, textStatus, errorThrown) ->
