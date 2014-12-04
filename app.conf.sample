@@ -96,10 +96,10 @@ $db_opts->{AutoCommit} //= 1;
     # category
     #
     category => {
+        bag       => { str => '가방',     price => 5000  },
         belt      => { str => '벨트',     price => 2000  },
         blouse    => { str => '블라우스', price => 5000  },
         coat      => { str => '코트',     price => 10000 },
-        hat       => { str => '모자',     price => 2000  },
         jacket    => { str => '재킷',     price => 10000 },
         onepiece  => { str => '원피스',   price => 10000 },
         pants     => { str => '바지',     price => 10000 },
