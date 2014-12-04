@@ -195,6 +195,11 @@
                                   %li.row
                                     .col-sm-1
                                       %i.icon-caret-right.green
+                                    .col-sm-3.no-padding-left 방문 예약일:
+                                    .col-sm-8=                $order->booking->date->strftime('%Y-%m-%d %H:%M');
+                                  %li.row
+                                    .col-sm-1
+                                      %i.icon-caret-right.green
                                     .col-sm-3.no-padding-left 반납 희망일:
                                     .col-sm-8
                                       :plain
