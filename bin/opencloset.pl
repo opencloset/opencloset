@@ -2079,8 +2079,10 @@ group {
         #
         # adjust params
         #
-        $params{code}        = sprintf( '%05s', $params{code} ) if length( $params{code} ) == 4;
-        $params{donation_id} = undef unless length($params{donation_id});
+        $params{code} = sprintf( '%05s', $params{code} ) if length( $params{code} ) == 4;
+        if (exists $params{donation_id} && !$params{donation_id}) {
+            $params{donation_id} = undef;
+        }
 
         #
         # find clothes
