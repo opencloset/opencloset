@@ -85,7 +85,7 @@ CREATE TABLE `user_info` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 INSERT
-  INTO `user_info` ( `id`, `user_id`, `phone`, `address`, `gender`, `birth`, `comment`, `staff` )
+  INTO `user_info` ( `id`, `user_id`, `phone`, `address4`, `gender`, `birth`, `comment`, `staff` )
   VALUES
     (  1,  1, '07075837521', '서울특별시 광진구 화양동 48-3 웅진빌딩 403호', NULL, 2012, '열린옷장', 1 ),
     (  2,  2, '99999889991', '서울특별시 광진구 화양동 48-3 웅진빌딩 403호', NULL, NULL, '열린옷장 스태프 01', 1 ),
