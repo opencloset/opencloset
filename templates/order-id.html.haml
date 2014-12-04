@@ -186,130 +186,84 @@
                                   %strong 대여자 정보
                               .row
                                 %ul.list-unstyled.spaced
-                                  - if ( $order->user ) {
-                                    %li.row
-                                      .col-sm-1
-                                        %i.icon-caret-right.green
-                                      .col-sm-3.no-padding-left 이름:
-                                      .col-sm-8
-                                        %a{ :href => "#{ url_for('/user/' . $order->user->id) }" }= $order->user->name
-                                    %li.row
-                                      .col-sm-1
-                                        %i.icon-caret-right.green
-                                      .col-sm-3.no-padding-left 반납 희망일:
-                                      .col-sm-8
-                                        :plain
-                                          <a
-                                            id               = "order-user-target-date"
-                                            class            = "editable editable-click"
-                                            href             = "#"
+                                  %li.row
+                                    .col-sm-1
+                                      %i.icon-caret-right.green
+                                    .col-sm-3.no-padding-left 이름:
+                                    .col-sm-8
+                                      %a{ :href => "#{ url_for('/user/' . $order->user->id) }" }= $order->user->name
+                                  %li.row
+                                    .col-sm-1
+                                      %i.icon-caret-right.green
+                                    .col-sm-3.no-padding-left 반납 희망일:
+                                    .col-sm-8
+                                      :plain
+                                        <a
+                                          id               = "order-user-target-date"
+                                          class            = "editable editable-click"
+                                          href             = "#"
 
-                                            data-disabled    = "#{ ($order->status->id != 14) || $order->status->name eq '대여중' ? 'false' : 'true' }"
+                                          data-disabled    = "#{ ($order->status->id != 14) || $order->status->name eq '대여중' ? 'false' : 'true' }"
 
-                                            data-value       = "#{ $order->user_target_date ? $order->user_target_date->ymd : q{} }"
-                                            data-name        = "user_target_date"
-                                          ></a>
-                                    %li.row
-                                      .col-sm-1
-                                        %i.icon-caret-right.green
-                                      .col-sm-3.no-padding-left 전자우편:
-                                      .col-sm-8=                $order->user->email
-                                    %li.row
-                                      .col-sm-1
-                                        %i.icon-caret-right.green
-                                      .col-sm-3.no-padding-left 전화번호:
-                                      .col-sm-8=                $order->user->user_info->phone
-                                    %li.row
-                                      .col-sm-1
-                                        %i.icon-caret-right.green
-                                      .col-sm-3.no-padding-left 주소:
-                                      .col-sm-8=                $order->user->user_info->address2
-                                    %li.row
-                                      .col-sm-1
-                                        %i.icon-caret-right.green
-                                      .col-sm-3.no-padding-left 어울림:
-                                      .col-sm-8
-                                        :plain
-                                          <a
-                                            id               = "order-bestfit"
-                                            class            = "editable editable-click"
-                                            href             = "#"
+                                          data-value       = "#{ $order->user_target_date ? $order->user_target_date->ymd : q{} }"
+                                          data-name        = "user_target_date"
+                                        ></a>
+                                  %li.row
+                                    .col-sm-1
+                                      %i.icon-caret-right.green
+                                    .col-sm-3.no-padding-left 전자우편:
+                                    .col-sm-8=                $order->user->email
+                                  %li.row
+                                    .col-sm-1
+                                      %i.icon-caret-right.green
+                                    .col-sm-3.no-padding-left 전화번호:
+                                    .col-sm-8=                $order->user->user_info->phone
+                                  %li.row
+                                    .col-sm-1
+                                      %i.icon-caret-right.green
+                                    .col-sm-3.no-padding-left 주소:
+                                    .col-sm-8=                $order->user->user_info->address2
+                                  %li.row
+                                    .col-sm-1
+                                      %i.icon-caret-right.green
+                                    .col-sm-3.no-padding-left 어울림:
+                                    .col-sm-8
+                                      :plain
+                                        <a
+                                          id               = "order-bestfit"
+                                          class            = "editable editable-click"
+                                          href             = "#"
 
-                                            data-disabled    = "#{ $order->status->id != 14 ? 'true' : 'false' }"
-                                            data-mode        = "inline"
-                                            data-showbuttons = "true"
-                                            data-type        = "select"
-                                            data-emptytext   = "보통"
+                                          data-disabled    = "#{ $order->status->id != 14 ? 'true' : 'false' }"
+                                          data-mode        = "inline"
+                                          data-showbuttons = "true"
+                                          data-type        = "select"
+                                          data-emptytext   = "보통"
 
-                                            data-value       = "#{ $order->bestfit }"
+                                          data-value       = "#{ $order->bestfit }"
 
-                                            data-url         = "/order/#{ $order->id }/update"
-                                            data-pk          = "#{ $order->id }"
-                                            data-name        = "bestfit"
-                                          ></a>
-                                    %li.row
-                                      .col-sm-1
-                                        %i.icon-caret-right.green
-                                      .col-sm-3.no-padding-left 신체 치수:
-                                      .col-sm-8
-                                        %span.label.label-success= $order->user->user_info->height || '-'
-                                        %span.label.label-success= $order->user->user_info->weight || '-'
-                                        %br
-                                        %span.label.label-info=    $order->user->user_info->bust   || '-'
-                                        %span.label.label-info=    $order->user->user_info->waist  || '-'
-                                        %span.label.label-info=    $order->user->user_info->hip    || '-'
-                                        %span.label.label-info=    $order->user->user_info->belly  || '-'
-                                        %br
-                                        %span.label.label-warning= $order->user->user_info->thigh  || '-'
-                                        %span.label.label-warning= $order->user->user_info->arm    || '-'
-                                        %span.label.label-warning= $order->user->user_info->leg    || '-'
-                                        %span.label.label-warning= $order->user->user_info->knee   || '-'
-                                        %span.label.label-warning= $order->user->user_info->foot   || '-'
-                                  - }
-                                  - else {
-                                    %li.row
-                                      .col-sm-1
-                                        %i.icon-caret-right.green
-                                      .col-sm-3.no-padding-left 이름:
-                                      .col-sm-8
-                                    %li.row
-                                      .col-sm-1
-                                        %i.icon-caret-right.green
-                                      .col-sm-3.no-padding-left 반납 희망일:
-                                      .col-sm-8
-                                    %li.row
-                                      .col-sm-1
-                                        %i.icon-caret-right.green
-                                      .col-sm-3.no-padding-left 전자우편:
-                                      .col-sm-8
-                                    %li.row
-                                      .col-sm-1
-                                        %i.icon-caret-right.green
-                                      .col-sm-3.no-padding-left 전화번호:
-                                      .col-sm-8
-                                    %li.row
-                                      .col-sm-1
-                                        %i.icon-caret-right.green
-                                      .col-sm-3.no-padding-left 주소:
-                                      .col-sm-8
-                                    %li.row
-                                      .col-sm-1
-                                        %i.icon-caret-right.green
-                                      .col-sm-3.no-padding-left 신체 치수:
-                                      .col-sm-8
-                                        %span.label.label-success= '-'
-                                        %span.label.label-success= '-'
-                                        %br
-                                        %span.label.label-info=    '-'
-                                        %span.label.label-info=    '-'
-                                        %span.label.label-info=    '-'
-                                        %br
-                                        %span.label.label-warning= '-'
-                                        %span.label.label-warning= '-'
-                                        %span.label.label-warning= '-'
-                                        %span.label.label-warning= '-'
-                                        %span.label.label-warning= '-'
-                                  - }
+                                          data-url         = "/order/#{ $order->id }/update"
+                                          data-pk          = "#{ $order->id }"
+                                          data-name        = "bestfit"
+                                        ></a>
+                                  %li.row
+                                    .col-sm-1
+                                      %i.icon-caret-right.green
+                                    .col-sm-3.no-padding-left 신체 치수:
+                                    .col-sm-8
+                                      %span.label.label-success= $order->user->user_info->height || '-'
+                                      %span.label.label-success= $order->user->user_info->weight || '-'
+                                      %br
+                                      %span.label.label-info=    $order->user->user_info->bust   || '-'
+                                      %span.label.label-info=    $order->user->user_info->waist  || '-'
+                                      %span.label.label-info=    $order->user->user_info->hip    || '-'
+                                      %span.label.label-info=    $order->user->user_info->belly  || '-'
+                                      %br
+                                      %span.label.label-warning= $order->user->user_info->thigh  || '-'
+                                      %span.label.label-warning= $order->user->user_info->arm    || '-'
+                                      %span.label.label-warning= $order->user->user_info->leg    || '-'
+                                      %span.label.label-warning= $order->user->user_info->knee   || '-'
+                                      %span.label.label-warning= $order->user->user_info->foot   || '-'
                           .space
                           %div
                             %table.table.table-striped.table-bordered.table-hover
