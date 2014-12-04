@@ -50,9 +50,17 @@ $ ->
       '배송예약':   { id: 15, css: 'label-info'      }
       '치수측정':   { id: 16, css: 'label-inverse'   }
       '의류준비':   { id: 17, css: 'label-inverse'   }
-      '탈의':       { id: 18, css: 'label-inverse'   }
-      '포장':       { id: 19, css: 'label-inverse'   }
-      '결제대기':   { id: 20, css: 'label-inverse'   }
+      '포장':       { id: 18, css: 'label-inverse'   }
+      '결제대기':   { id: 19, css: 'label-inverse'   }
+      '탈의01':     { id: 20, css: 'label-inverse'   }
+      '탈의02':     { id: 21, css: 'label-inverse'   }
+      '탈의03':     { id: 22, css: 'label-inverse'   }
+      '탈의04':     { id: 23, css: 'label-inverse'   }
+      '탈의05':     { id: 24, css: 'label-inverse'   }
+      '탈의06':     { id: 25, css: 'label-inverse'   }
+      '탈의07':     { id: 26, css: 'label-inverse'   }
+      '탈의08':     { id: 27, css: 'label-inverse'   }
+      '탈의09':     { id: 28, css: 'label-inverse'   }
     category:
       jacket:    { str: '재킷',     price: 10000 }
       pants:     { str: '바지',     price: 10000 }
