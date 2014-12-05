@@ -23,6 +23,15 @@ $db_opts->{AutoCommit} //= 1;
 
 {
     #
+    # for Mojolicious hypnotoad server
+    #
+    hypnotoad => {
+        listen   => [ 'http://*:8001' ],
+        workers  => 6,
+        pid_file => 'hypnotoad.pid',
+    },
+
+    #
     # 기본 데이터베이스 설정은 mysql 기준입니다.
     #
     database => {
