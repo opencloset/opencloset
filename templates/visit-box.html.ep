@@ -88,7 +88,7 @@
                           <input name="address3" type="hidden" class="postcodify_jibeonaddress" />
                           <label class="block clearfix signup">
                             <span class="block input-icon input-icon-right">
-                              <input name="address2" type="text" class="form-control postcodify_address" placeholder="주소" />
+                              <input name="address2" type="text" class="form-control postcodify_address" placeholder="주소" readonly="readonly" />
                               <i class="icon-home"></i>
                             </span>
                           </label>
