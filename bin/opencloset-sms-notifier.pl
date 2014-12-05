@@ -15,6 +15,9 @@ use OpenCloset::Util;
 binmode STDOUT, ':utf8';
 binmode STDERR, ':utf8';
 
+my $config_file = shift || "$Bin/../app.conf";
+die "cannot find $config_file\n" unless -f $config_file;
+
 my $CONF = OpenCloset::Util::load_config(
     "$Bin/../app.conf",
     $Script,

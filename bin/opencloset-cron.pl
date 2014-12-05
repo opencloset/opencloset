@@ -23,6 +23,9 @@ use OpenCloset::Cron;
 use OpenCloset::Cron::Worker;
 use OpenCloset::Util;
 
+my $config_file = shift || "$Bin/../app.conf";
+die "cannot find $config_file\n" unless -f $config_file;
+
 my $CONF = OpenCloset::Util::load_config(
     "$Bin/../app.conf",
     $Script,
