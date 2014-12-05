@@ -29,7 +29,7 @@ my $continue = 1;
 $SIG{TERM} = sub { $continue = 0;        };
 $SIG{HUP}  = sub {
     $CONF = OpenCloset::Util::load_config(
-        "$Bin/../app.conf",
+        $config_file,
         $Script,
         delay      => 60,
         send_delay => 1,
