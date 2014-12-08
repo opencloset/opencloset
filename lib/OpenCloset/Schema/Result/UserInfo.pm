@@ -177,6 +177,18 @@ male/female
   data_type: 'text'
   is_nullable: 1
 
+=head2 pre_category
+
+  data_type: 'varchar'
+  is_nullable: 1
+  size: 128
+
+=head2 pre_color
+
+  data_type: 'varchar'
+  is_nullable: 1
+  size: 32
+
 =cut
 
 __PACKAGE__->add_columns(
@@ -240,6 +252,10 @@ __PACKAGE__->add_columns(
   { data_type => "varchar", is_nullable => 1, size => 128 },
   "purpose2",
   { data_type => "text", is_nullable => 1 },
+  "pre_category",
+  { data_type => "varchar", is_nullable => 1, size => 128 },
+  "pre_color",
+  { data_type => "varchar", is_nullable => 1, size => 32 },
 );
 
 =head1 PRIMARY KEY
@@ -298,8 +314,8 @@ __PACKAGE__->belongs_to(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2014-11-28 11:32:22
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:M/+ljlOHfh76wDt6woBhNw
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2014-12-09 04:39:58
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:r2742isHAm6WIdh7JDonjw
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

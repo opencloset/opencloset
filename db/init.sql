@@ -74,9 +74,11 @@ CREATE TABLE `user_info` (
   --
   -- etc
   --
-  `staff`       BOOLEAN DEFAULT 0,
-  `purpose`     VARCHAR(128) DEFAULT NULL,
-  `purpose2`    TEXT DEFAULT NULL,
+  `staff`        BOOLEAN DEFAULT 0,
+  `purpose`      VARCHAR(128) DEFAULT NULL,
+  `purpose2`     TEXT DEFAULT NULL,
+  `pre_category` VARCHAR(128) DEFAULT NULL,
+  `pre_color`    VARCHAR(32)  DEFAULT NULL,
 
   PRIMARY KEY (`id`),
   UNIQUE KEY (`user_id`),
@@ -312,24 +314,24 @@ CREATE TABLE `order` (
   `late_fee_pay_with` VARCHAR(32) DEFAULT NULL,
   `desc`              TEXT DEFAULT NULL,
 
-  `pre_category`      VARCHAR(128) DEFAULT NULL,
-  `pre_color`         VARCHAR(32)  DEFAULT NULL,
 
   -- guest info
-  `purpose`          VARCHAR(128) DEFAULT NULL,
-  `purpose2`         TEXT DEFAULT NULL,
-  `height`           INT DEFAULT NULL, -- 키(cm)
-  `weight`           INT DEFAULT NULL, -- 몸무게(kg)
-  `bust`             INT DEFAULT NULL, -- 가슴   둘레(cm)
-  `waist`            INT DEFAULT NULL, -- 허리   둘레(cm)
-  `hip`              INT DEFAULT NULL, -- 엉덩이 둘레(cm)
-  `belly`            INT DEFAULT NULL, -- 배     둘레(cm)
-  `thigh`            INT DEFAULT NULL, -- 허벅지 둘레(cm)
-  `arm`              INT DEFAULT NULL, -- 팔     길이(cm)
-  `leg`              INT DEFAULT NULL, -- 다리   길이(cm)
-  `knee`             INT DEFAULT NULL, -- 무릎   길이(cm)
-  `foot`             INT DEFAULT NULL, -- 발 크기(mm)
-  `bestfit`          BOOLEAN DEFAULT 0,
+  `purpose`           VARCHAR(128) DEFAULT NULL,
+  `purpose2`          TEXT DEFAULT NULL,
+  `pre_category`      VARCHAR(128) DEFAULT NULL,
+  `pre_color`         VARCHAR(32)  DEFAULT NULL,
+  `height`            INT DEFAULT NULL, -- 키(cm)
+  `weight`            INT DEFAULT NULL, -- 몸무게(kg)
+  `bust`              INT DEFAULT NULL, -- 가슴   둘레(cm)
+  `waist`             INT DEFAULT NULL, -- 허리   둘레(cm)
+  `hip`               INT DEFAULT NULL, -- 엉덩이 둘레(cm)
+  `belly`             INT DEFAULT NULL, -- 배     둘레(cm)
+  `thigh`             INT DEFAULT NULL, -- 허벅지 둘레(cm)
+  `arm`               INT DEFAULT NULL, -- 팔     길이(cm)
+  `leg`               INT DEFAULT NULL, -- 다리   길이(cm)
+  `knee`              INT DEFAULT NULL, -- 무릎   길이(cm)
+  `foot`              INT DEFAULT NULL, -- 발 크기(mm)
+  `bestfit`           BOOLEAN DEFAULT 0,
 
   `create_date`      DATETIME DEFAULT NULL,
   `update_date`      DATETIME DEFAULT NULL,

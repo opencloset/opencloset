@@ -127,6 +127,17 @@ __PACKAGE__->table("order");
   data_type: 'text'
   is_nullable: 1
 
+=head2 purpose
+
+  data_type: 'varchar'
+  is_nullable: 1
+  size: 128
+
+=head2 purpose2
+
+  data_type: 'text'
+  is_nullable: 1
+
 =head2 pre_category
 
   data_type: 'varchar'
@@ -138,17 +149,6 @@ __PACKAGE__->table("order");
   data_type: 'varchar'
   is_nullable: 1
   size: 32
-
-=head2 purpose
-
-  data_type: 'varchar'
-  is_nullable: 1
-  size: 128
-
-=head2 purpose2
-
-  data_type: 'text'
-  is_nullable: 1
 
 =head2 height
 
@@ -316,14 +316,14 @@ __PACKAGE__->add_columns(
   { data_type => "varchar", is_nullable => 1, size => 32 },
   "desc",
   { data_type => "text", is_nullable => 1 },
-  "pre_category",
-  { data_type => "varchar", is_nullable => 1, size => 128 },
-  "pre_color",
-  { data_type => "varchar", is_nullable => 1, size => 32 },
   "purpose",
   { data_type => "varchar", is_nullable => 1, size => 128 },
   "purpose2",
   { data_type => "text", is_nullable => 1 },
+  "pre_category",
+  { data_type => "varchar", is_nullable => 1, size => 128 },
+  "pre_color",
+  { data_type => "varchar", is_nullable => 1, size => 32 },
   "height",
   { data_type => "integer", is_nullable => 1 },
   "weight",
@@ -507,8 +507,8 @@ __PACKAGE__->belongs_to(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2014-12-08 23:39:51
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:GgF/9kIrj6qbQM7+jZImdQ
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2014-12-09 04:39:58
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:hSNicdrSyKTNv9djlu0n/g
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration
