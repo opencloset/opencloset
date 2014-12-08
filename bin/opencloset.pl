@@ -3810,6 +3810,8 @@ any '/visit' => sub {
     my $booking_saved = $self->param('booking-saved');
     my $purpose       = $self->param('purpose');
     my $purpose2      = $self->param('purpose2');
+    my $pre_category  = $self->param('pre_category');
+    my $pre_color     = $self->param('pre_color');
 
     app->log->debug("type: $type");
     app->log->debug("name: $name");
@@ -3831,6 +3833,8 @@ any '/visit' => sub {
     app->log->debug("booking-saved: $booking_saved");
     app->log->debug("purpose: $purpose");
     app->log->debug("purpose2: $purpose2");
+    app->log->debug("pre_category: $pre_category");
+    app->log->debug("pre_color: $pre_color");
 
     #
     # find user

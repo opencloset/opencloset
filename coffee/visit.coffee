@@ -1,6 +1,9 @@
 $ ->
   $("input[name=booking]").val(undefined)
-  $(".chosen-select").chosen()
+  $("select[name=pre_category_temp]").chosen().change ->
+    $("input[name=pre_category]").val $(this).val().join(',')
+  $("select[name=pre_color1],select[name=pre_color2],select[name=pre_color3]").chosen().change ->
+    $("input[name=pre_color]").val [ $("select[name=pre_color1]").val(), $("select[name=pre_color2]").val(), $("select[name=pre_color3]").val() ].join(',')
 
   #
   # 대여 목적
@@ -197,6 +200,11 @@ $ ->
     purpose  = $("input[name=purpose]").val()
     purpose2 = $("input[name=purpose2]").val()
 
+    pre_category_temp = $("select[name=pre_category_temp]").val()
+    pre_color1        = $("select[name=pre_color1]").val()
+    pre_color2        = $("select[name=pre_color2]").val()
+    pre_color3        = $("select[name=pre_color3]").val()
+
     #
     # 이름 점검
     #
@@ -287,6 +295,34 @@ $ ->
     #
     unless purpose
       OpenCloset.alert 'danger', '대여 목적을 입력해주세요.', '#visit-alert'
+      return
+
+    #
+    # 대여할 옷의 종류 점검
+    #
+    unless pre_category_temp
+      OpenCloset.alert 'danger', '대여할 옷의 종류를 입력해주세요.', '#visit-alert'
+      return
+
+    #
+    # 첫 번째 선호하는 색상 점검
+    #
+    unless pre_color1
+      OpenCloset.alert 'danger', '첫 번째 선호하는 색상을 입력해주세요.', '#visit-alert'
+      return
+
+    #
+    # 두 번째 선호하는 색상 점검
+    #
+    unless pre_color2
+      OpenCloset.alert 'danger', '두 번째 선호하는 색상을 입력해주세요.', '#visit-alert'
+      return
+
+    #
+    # 세 번째 선호하는 색상 점검
+    #
+    unless pre_color3
+      OpenCloset.alert 'danger', '세 번째 선호하는 색상을 입력해주세요.', '#visit-alert'
       return
 
     return true
