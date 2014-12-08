@@ -9,6 +9,7 @@ $ ->
   $('#btn-forgot-sms-send').click (e) ->
     e.preventDefault()
 
+    name  = $("input[name=forgot-name]").val()
     phone = $("input[name=forgot-phone]").val()
 
     #
@@ -27,11 +28,12 @@ $ ->
     #
     # 문자 전송
     #
-    OpenCloset.sendSMSValidation(phone)
+    OpenCloset.sendSMSValidation(name, phone)
 
     #
     # 입력 양식 초기화
     #
+    $("input[name=forgot-name]").val('')
     $("input[name=forgot-phone]").val('')
 
     #

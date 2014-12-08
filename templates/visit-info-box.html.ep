@@ -153,6 +153,42 @@
                           </label>
 
                           <label class="block clearfix">
+                            <input type="hidden" name="pre_category" value="<%= $user->user_info->pre_category %>">
+                            <select class="width-80 chosen-select" name="pre_category_temp" multiple data-placeholder="대여할 옷의 종류를 선택하세요.">
+                              <option value=""     >           </option>
+                              <option value="jacket"> 자켓     </option>
+                              <option value="pants" > 팬츠     </option>
+                              <option value="shirt" > 셔츠     </option>
+                              <option value="tie"   > 타이     </option>
+                              <option value="shoes" > 구두     </option>
+                              <option value="belt"  > 벨트     </option>
+                              <option value="skirt" > 스커트   </option>
+                              <option value="blouse"> 블라우스 </option>
+                            </select>
+                            <p> 대여를 원하는 옷의 종류를 모두 선택해주세요. </p>
+                          </label>
+
+                          <input type="hidden" name="pre_color" value="<%= $user->user_info->pre_color %>">
+                          % my @colors = (
+                          %   [ 1 => '첫' ],
+                          %   [ 2 => '두' ],
+                          %   [ 3 => '세' ],
+                          % );
+                          % for my $color (@colors) {
+                            <label class="block clearfix">
+                              <select class="width-80 chosen-select" name="pre_color<%= $color->[0] %>" data-placeholder="<%= $color->[1] %> 번째 선호 색상">
+                                <option value=""     > <%= $color->[1] %> 번째 선호 색상 </option>
+                                <option value="black"> 블랙              </option>
+                                <option value="navy" > 네이비            </option>
+                                <option value="gray" > 그레이            </option>
+                                <option value="brown"> 브라운            </option>
+                                <option value="etc"  > 기타              </option>
+                                <option value="staff"> 직원 추천         </option>
+                              </select>
+                            </label>
+                          % }
+
+                          <label class="block clearfix">
                             <span class="block input-icon input-icon-right">
                               <input name="sms" type="text" class="form-control" placeholder="인증번호" value="<%= $sms %>" />
                               <i class="icon-key"></i>

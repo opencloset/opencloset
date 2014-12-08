@@ -1239,12 +1239,9 @@ group {
 
         my $req_path = $self->req->url->path;
         return 1 if $req_path =~ m{^/api/sms/validation(\.json)?$};
+        return 1 if $req_path =~ m{^/api/postcode/search(\.json)?$};
 
-        if (
-            $req_path =~ m{^/api/gui/booking-list(\.json)?$}
-            || $req_path =~ m{^/api/postcode/search(\.json)?$}
-        )
-        {
+        if ( $req_path =~ m{^/api/gui/booking-list(\.json)?$} ) {
             my $phone = $self->param('phone');
             my $sms   = $self->param('sms');
 
@@ -3813,6 +3810,8 @@ any '/visit' => sub {
     my $booking_saved = $self->param('booking-saved');
     my $purpose       = $self->param('purpose');
     my $purpose2      = $self->param('purpose2');
+    my $pre_category  = $self->param('pre_category');
+    my $pre_color     = $self->param('pre_color');
 
     app->log->debug("type: $type");
     app->log->debug("name: $name");
@@ -3834,6 +3833,8 @@ any '/visit' => sub {
     app->log->debug("booking-saved: $booking_saved");
     app->log->debug("purpose: $purpose");
     app->log->debug("purpose2: $purpose2");
+    app->log->debug("pre_category: $pre_category");
+    app->log->debug("pre_color: $pre_color");
 
     #
     # find user
@@ -3878,18 +3879,20 @@ any '/visit' => sub {
         my %user_params;
         my %user_info_params;
 
-        $user_params{id}            = $user->id;
-        $user_params{email}         = $email    if $email    && $email    ne $user->email;
-        $user_info_params{gender}   = $gender   if $gender   && $gender   ne $user->user_info->gender;
-        $user_info_params{address1} = $address1 if $address1 && $address1 ne $user->user_info->address1;
-        $user_info_params{address2} = $address2 if $address2 && $address2 ne $user->user_info->address2;
-        $user_info_params{address3} = $address3 if $address3 && $address3 ne $user->user_info->address3;
-        $user_info_params{address4} = $address4 if $address4 && $address4 ne $user->user_info->address4;
-        $user_info_params{birth}    = $birth    if $birth    && $birth    ne $user->user_info->birth;
-        $user_info_params{height}   = $height   if $height   && $height   ne $user->user_info->height;
-        $user_info_params{weight}   = $weight   if $weight   && $weight   ne $user->user_info->weight;
-        $user_info_params{purpose}  = $purpose  if $purpose  && $purpose  ne $user->user_info->purpose;
-        $user_info_params{purpose2} = $purpose2 || q{};
+        $user_params{id}                = $user->id;
+        $user_params{email}             = $email        if $email         && $email        ne $user->email;
+        $user_info_params{gender}       = $gender       if $gender        && $gender       ne $user->user_info->gender;
+        $user_info_params{address1}     = $address1     if $address1      && $address1     ne $user->user_info->address1;
+        $user_info_params{address2}     = $address2     if $address2      && $address2     ne $user->user_info->address2;
+        $user_info_params{address3}     = $address3     if $address3      && $address3     ne $user->user_info->address3;
+        $user_info_params{address4}     = $address4     if $address4      && $address4     ne $user->user_info->address4;
+        $user_info_params{birth}        = $birth        if $birth         && $birth        ne $user->user_info->birth;
+        $user_info_params{height}       = $height       if $height        && $height       ne $user->user_info->height;
+        $user_info_params{weight}       = $weight       if $weight        && $weight       ne $user->user_info->weight;
+        $user_info_params{purpose}      = $purpose      if $purpose       && $purpose      ne $user->user_info->purpose;
+        $user_info_params{purpose2}     = $purpose2 || q{};
+        $user_info_params{pre_category} = $pre_category if $pre_category  && $pre_category ne $user->user_info->pre_category;
+        $user_info_params{pre_color}    = $pre_color    if $pre_color     && $pre_color    ne $user->user_info->pre_color;
 
         if ( $booking == -1 ) {
             #
@@ -3969,10 +3972,10 @@ any '/visit' => sub {
     };
 
     $self->stash(
-        type     => $type,
-        user     => $user,
-        sms      => $sms,
-        booking  => $booking_obj,
+        type    => $type,
+        user    => $user,
+        sms     => $sms,
+        booking => $booking_obj,
     );
 };
 
