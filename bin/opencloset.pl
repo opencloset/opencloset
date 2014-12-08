@@ -1090,7 +1090,15 @@ helper get_clothes => sub {
 # csv section
 #
 group {
-    under '/csv';
+    under '/csv' => sub {
+        my $self = shift;
+
+        return 1 if $self->is_user_authenticated;
+
+        $self->render( json => { error => 'invalid_access' }, status => 400 );
+
+        return;
+    };
 
     get '/user'    => \&csv_get_user;
     get '/clothes' => \&csv_get_clothes;
@@ -1227,14 +1235,44 @@ group {
     under '/api' => sub {
         my $self = shift;
 
-        #
-        # FIXME - need authorization
-        #
-        if (1) {
+        return 1 if $self->is_user_authenticated;
+
+        my $req_path = $self->req->url->path;
+        return 1 if $req_path =~ m{^/api/sms/validation(\.json)?$};
+
+        if (
+            $req_path =~ m{^/api/gui/booking-list(\.json)?$}
+            || $req_path =~ m{^/api/postcode/search(\.json)?$}
+        )
+        {
+            my $phone = $self->param('phone');
+            my $sms   = $self->param('sms');
+
+            $self->error( 400, { data => { error => 'missing phone' } } ), return unless defined $phone;
+            $self->error( 400, { data => { error => 'missing sms'   } } ), return unless defined $sms;
+
+            #
+            # find user
+            #
+            my @users = $DB->resultset('User')->search(
+                { 'user_info.phone' => $phone },
+                { join => 'user_info' },
+            );
+            my $user = shift @users;
+            $self->error( 400, { data => { error => 'user not found' } } ), return unless $user;
+
+            #
+            # GitHub #199 - check expires
+            #
+            my $now = DateTime->now( time_zone => app->config->{timezone} )->epoch;
+            $self->error( 400, { data => { error => 'expiration is not set' } } ), return unless $user->expires;
+            $self->error( 400, { data => { error => 'sms is expired'        } } ), return unless $user->expires > $now;
+            $self->error( 400, { data => { error => 'sms is wrong'          } } ), return unless $user->check_password($sms);
+
             return 1;
         }
 
-        $self->render( json => { error => 'invalid_access' }, status => 400 );
+        $self->error( 400, { data => { error => 'invalid_access' } } );
         return;
     };
 

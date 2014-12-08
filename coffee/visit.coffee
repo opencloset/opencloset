@@ -365,12 +365,16 @@ $ ->
   $('#btn-booking').click (e) ->
     e.preventDefault()
 
+    phone          = $("input[name=phone]").val()
+    sms            = $("input[name=sms]").val()
     gender         = $("input[name=gender]:checked").val()
     old_booking_id = $("input[name=booking]").prop("value")
 
     $.ajax "/api/gui/booking-list.json",
       type: 'GET'
       data:
+        phone:  phone
+        sms:    sms
         gender: gender
       success: (data, textStatus, jqXHR) ->
         #
