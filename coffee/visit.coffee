@@ -1,5 +1,4 @@
 $ ->
-  signup = false
   $("input[name=booking]").val(undefined)
 
   #
@@ -48,8 +47,6 @@ $ ->
     $("#btn-sms-confirm").prop( "disabled", false )
   beforeSendSMS()
 
-  $(".signup").removeClass('block').hide()
-
   #
   # 새로 쓰기 버튼 클릭
   #
@@ -62,23 +59,34 @@ $ ->
   # - submit 버튼 레이블 변경
   # - 남은 시간 표시
   #
-  validateSMS = (phone) ->
-    OpenCloset.sendSMSValidation(phone)
+  validateSMS = (name, phone) ->
+    success_cb = ( data, textStatus, jqXHR ) ->
+      $(".sms").addClass('block').show()
+      $("#btn-sms-confirm-label").html('SMS 인증하기')
 
-    $(".sms").addClass('block').show()
-    $("#btn-sms-confirm-label").html('SMS 인증하기')
+      validate_end = moment().add('m', 5)
+      $("#sms-remain-seconds").html( validate_end.diff( moment(), 'seconds' ) )
+      timer = setInterval () ->
+        validate_remain = validate_end.diff( moment(), 'seconds' )
+        if validate_remain > 0
+          $("#sms-remain-seconds").html(validate_remain)
+        else
+          $("#sms-remain-seconds").html(0)
+          $("#btn-sms-confirm").prop( "disabled", true )
+          clearInterval(timer)
+      , 500
 
-    validate_end = moment().add('m', 5)
-    $("#sms-remain-seconds").html( validate_end.diff( moment(), 'seconds' ) )
-    timer = setInterval () ->
-      validate_remain = validate_end.diff( moment(), 'seconds' )
-      if validate_remain > 0
-        $("#sms-remain-seconds").html(validate_remain)
+    error_cb = ( jqXHR, textStatus, errorThrown ) ->
+      if jqXHR.status is 400
+        switch jqXHR.responseJSON.error.str
+          when 'name and phone does not match'
+            OpenCloset.alert 'danger', '이름과 휴대전화 번호가 일치하지 않습니다.', '#visit-alert'
+          else
+            OpenCloset.alert 'danger', '인증 번호 전송에 실패했습니다.', '#visit-alert'
       else
-        $("#sms-remain-seconds").html(0)
-        $("#btn-sms-confirm").prop( "disabled", true )
-        clearInterval(timer)
-    , 500
+        OpenCloset.alert 'danger', '인증 번호 전송에 실패했습니다.', '#visit-alert'
+
+    OpenCloset.sendSMSValidation(name, phone, success_cb, error_cb)
 
   #
   # SMS 인증하기 버튼 클릭
@@ -91,14 +99,6 @@ $ ->
     service = $("input[name=service]").prop( "checked" )
     privacy = $("input[name=privacy]").prop( "checked" )
     sms     = $("input[name=sms]").val()
-
-    gender   = $("input[name=gender]:checked").val()
-    email    = $("input[name=email]").val()
-    address1 = $("input[name=address1]").val()
-    address2 = $("input[name=address2]").val()
-    address3 = $("input[name=address3]").val()
-    address4 = $("input[name=address4]").val()
-    birth    = $("input[name=birth]").val()
 
     if name && phone && service && privacy && sms
       $('#visit-form').submit()
@@ -137,86 +137,7 @@ $ ->
         OpenCloset.alert 'danger', '개인정보 이용안내를 확인해주세요.', '#visit-alert'
         return
 
-      if signup
-        #
-        # 성별 점검
-        #
-        unless gender
-          OpenCloset.alert 'danger', '성별을 입력해주세요.', '#visit-alert'
-          return
-
-        #
-        # 전자우편 점검
-        #
-        unless email
-          OpenCloset.alert 'danger', '전자우편을 입력해주세요.', '#visit-alert'
-          return
-
-        #
-        # 주소 점검
-        #
-        unless address2
-          OpenCloset.alert 'danger', '주소를 입력해주세요.', '#visit-alert'
-          return
-
-        #
-        # 생년 점검
-        #
-        unless birth
-          OpenCloset.alert 'danger', '생년을 입력해주세요.', '#visit-alert'
-          return
-        unless /^(19|20)|\d\d$/.test( birth )
-          OpenCloset.alert 'danger', '유효하지 않은 생년입니다.', '#visit-alert'
-          return
-
-        #
-        # - 사용자 추가
-        # - 인증번호 발송
-        #
-        $.ajax "/api/user.json",
-          type: 'POST'
-          data:
-            name:    name
-            email:   email
-            address1: address1
-            address2: address2
-            address3: address3
-            address4: address4
-            gender:  gender
-            phone:   phone
-            birth:   birth
-          success: (data, textStatus, jqXHR) ->
-            signup = false
-            validateSMS(phone)
-          error: (jqXHR, textStatus, errorThrown) ->
-            OpenCloset.alert 'danger', '서버 오류가 발생했습니다.', '#visit-alert'
-      else
-        #
-        # - 사용자 존재 확인
-        # - 인증번호 발송
-        #
-        $.ajax "/api/search/user.json",
-          type: 'GET'
-          data: { q: phone }
-          success: (data, textStatus, jqXHR) ->
-            unless data.length == 1
-              OpenCloset.alert 'danger', '휴대전화가 중복되었습니다.', '#visit-alert'
-              return
-
-            user = data[0]
-            unless user.name == name
-              OpenCloset.alert 'danger', '이름과 휴대전화가 일치하지 않습니다.', '#visit-alert'
-              return
-
-            validateSMS(phone)
-          error: (jqXHR, textStatus, errorThrown) ->
-            type = jqXHR.status is 404 ? 'warning' : 'danger'
-            if jqXHR.status is 404
-              OpenCloset.alert 'danger', '사용자 등록이 필요합니다. 추가 정보를 입력해주세요.', '#visit-alert'
-              $(".signup").addClass('block').show()
-              signup = true
-            else
-              OpenCloset.alert 'danger', '서버 오류가 발생했습니다.', '#visit-alert'
+      validateSMS(name, phone)
 
   checkCancelBooking = () ->
     name          = $("input[name=name]").val()

@@ -2938,12 +2938,13 @@ group {
         #
         # fetch params
         #
-        my %params = $self->get_params(qw/ to /);
+        my %params = $self->get_params(qw/ name to /);
 
         #
         # validate params
         #
         my $v = $self->create_validator;
+        $v->field('name')->required(1);
         $v->field('to')->required(1)->regexp(qr/^\d+$/);
 
         unless ( $self->validate( $v, \%params ) ) {
@@ -2966,14 +2967,63 @@ group {
         );
         my $user = shift @users;
 
-        return $self->error( 404, {
-            str  => 'user not found',
-            data => {},
-        }) unless $user;
-        return $self->error( 404, {
-            str  => 'user info not found',
-            data => {},
-        }) unless $user->user_info;
+        if ($user) {
+            #
+            # fail if name and phone does not match
+            #
+            unless ( $user->name eq $params{name} ) {
+                my $msg = sprintf(
+                    'name and phone does not match: input(%s,%s), db(%s,%s)',
+                    $params{name},
+                    $params{to},
+                    $user->name,
+                    $user->user_info->phone,
+                );
+                app->log->warn($msg);
+
+                $self->error( 400, {
+                    str  => 'name and phone does not match',
+                }), return;
+            }
+        }
+        else {
+            #
+            # add user using one's name and phone if who does not exist
+            #
+            {
+                my $guard = $DB->txn_scope_guard;
+
+                my $_user = $DB->resultset('User')->create({ name => $params{name} });
+                unless ($_user) {
+                    app->log->warn('failed to create a user');
+                    last;
+                }
+
+                my $_user_info = $DB->resultset('UserInfo')->create({
+                    user_id => $_user->id,
+                    phone   => $params{to},
+                });
+                unless ($_user_info) {
+                    app->log->warn('failed to create a user_info');
+                    last;
+                }
+
+                $guard->commit;
+
+                $user = $_user;
+            }
+
+            app->log->info("create a user: name($params{name}), phone($params{to})");
+        }
+
+        #
+        # fail if creating user is failed
+        #
+        unless ($user) {
+            $self->error( 400, {
+                str  => 'failed to create a user',
+            }), return;
+        }
 
         my $password = String::Random->new->randregex('\d\d\d\d\d\d');
         my $expires  = DateTime->now( time_zone => app->config->{timezone} )->add( minutes => 5 );
@@ -2987,7 +3037,7 @@ group {
         app->log->debug( "sent temporary password: to($params{to}) password($password)" );
 
         my $sms = $DB->resultset('SMS')->create({
-            %params,
+            to   => $params{to},
             from => app->config->{sms}{from},
             text => "열린옷장 인증번호: $password",
         });
