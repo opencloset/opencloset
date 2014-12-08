@@ -1090,7 +1090,15 @@ helper get_clothes => sub {
 # csv section
 #
 group {
-    under '/csv';
+    under '/csv' => sub {
+        my $self = shift;
+
+        return 1 if $self->is_user_authenticated;
+
+        $self->render( json => { error => 'invalid_access' }, status => 400 );
+
+        return;
+    };
 
     get '/user'    => \&csv_get_user;
     get '/clothes' => \&csv_get_clothes;
@@ -1227,14 +1235,44 @@ group {
     under '/api' => sub {
         my $self = shift;
 
-        #
-        # FIXME - need authorization
-        #
-        if (1) {
+        return 1 if $self->is_user_authenticated;
+
+        my $req_path = $self->req->url->path;
+        return 1 if $req_path =~ m{^/api/sms/validation(\.json)?$};
+
+        if (
+            $req_path =~ m{^/api/gui/booking-list(\.json)?$}
+            || $req_path =~ m{^/api/postcode/search(\.json)?$}
+        )
+        {
+            my $phone = $self->param('phone');
+            my $sms   = $self->param('sms');
+
+            $self->error( 400, { data => { error => 'missing phone' } } ), return unless defined $phone;
+            $self->error( 400, { data => { error => 'missing sms'   } } ), return unless defined $sms;
+
+            #
+            # find user
+            #
+            my @users = $DB->resultset('User')->search(
+                { 'user_info.phone' => $phone },
+                { join => 'user_info' },
+            );
+            my $user = shift @users;
+            $self->error( 400, { data => { error => 'user not found' } } ), return unless $user;
+
+            #
+            # GitHub #199 - check expires
+            #
+            my $now = DateTime->now( time_zone => app->config->{timezone} )->epoch;
+            $self->error( 400, { data => { error => 'expiration is not set' } } ), return unless $user->expires;
+            $self->error( 400, { data => { error => 'sms is expired'        } } ), return unless $user->expires > $now;
+            $self->error( 400, { data => { error => 'sms is wrong'          } } ), return unless $user->check_password($sms);
+
             return 1;
         }
 
-        $self->render( json => { error => 'invalid_access' }, status => 400 );
+        $self->error( 400, { data => { error => 'invalid_access' } } );
         return;
     };
 
@@ -2938,12 +2976,13 @@ group {
         #
         # fetch params
         #
-        my %params = $self->get_params(qw/ to /);
+        my %params = $self->get_params(qw/ name to /);
 
         #
         # validate params
         #
         my $v = $self->create_validator;
+        $v->field('name')->required(1);
         $v->field('to')->required(1)->regexp(qr/^\d+$/);
 
         unless ( $self->validate( $v, \%params ) ) {
@@ -2966,14 +3005,63 @@ group {
         );
         my $user = shift @users;
 
-        return $self->error( 404, {
-            str  => 'user not found',
-            data => {},
-        }) unless $user;
-        return $self->error( 404, {
-            str  => 'user info not found',
-            data => {},
-        }) unless $user->user_info;
+        if ($user) {
+            #
+            # fail if name and phone does not match
+            #
+            unless ( $user->name eq $params{name} ) {
+                my $msg = sprintf(
+                    'name and phone does not match: input(%s,%s), db(%s,%s)',
+                    $params{name},
+                    $params{to},
+                    $user->name,
+                    $user->user_info->phone,
+                );
+                app->log->warn($msg);
+
+                $self->error( 400, {
+                    str  => 'name and phone does not match',
+                }), return;
+            }
+        }
+        else {
+            #
+            # add user using one's name and phone if who does not exist
+            #
+            {
+                my $guard = $DB->txn_scope_guard;
+
+                my $_user = $DB->resultset('User')->create({ name => $params{name} });
+                unless ($_user) {
+                    app->log->warn('failed to create a user');
+                    last;
+                }
+
+                my $_user_info = $DB->resultset('UserInfo')->create({
+                    user_id => $_user->id,
+                    phone   => $params{to},
+                });
+                unless ($_user_info) {
+                    app->log->warn('failed to create a user_info');
+                    last;
+                }
+
+                $guard->commit;
+
+                $user = $_user;
+            }
+
+            app->log->info("create a user: name($params{name}), phone($params{to})");
+        }
+
+        #
+        # fail if creating user is failed
+        #
+        unless ($user) {
+            $self->error( 400, {
+                str  => 'failed to create a user',
+            }), return;
+        }
 
         my $password = String::Random->new->randregex('\d\d\d\d\d\d');
         my $expires  = DateTime->now( time_zone => app->config->{timezone} )->add( minutes => 5 );
@@ -2987,7 +3075,7 @@ group {
         app->log->debug( "sent temporary password: to($params{to}) password($password)" );
 
         my $sms = $DB->resultset('SMS')->create({
-            %params,
+            to   => $params{to},
             from => app->config->{sms}{from},
             text => "열린옷장 인증번호: $password",
         });
@@ -3570,12 +3658,94 @@ group {
 under '/' => sub {
     my $self = shift;
 
-    my $req_path = $self->req->url->path;
-    return 1 if $self->is_user_authenticated;
-    return 1 if $req_path eq '/login';
-    return 1 if $req_path eq '/visit';
+    {
+        use experimental qw( smartmatch );
 
-    $self->redirect_to( $self->url_for('/visit') );
+        my $req_path  = $self->req->url->path;
+        my $site_type = app->config->{site_type};
+        given ($site_type) {
+            when ('all') {
+                if ( $self->is_user_authenticated ) {
+                    given ($req_path) {
+                        when ('/visit') {
+                            return 1;
+                        }
+                        when ('/login') {
+                            $self->redirect_to( $self->url_for('/') );
+                            return 1;
+                        }
+                        default {
+                            return 1;
+                        }
+                    }
+                }
+                else {
+                    given ($req_path) {
+                        when ('/visit') {
+                            return 1;
+                        }
+                        when ('/login') {
+                            return 1;
+                        }
+                        default {
+                            $self->redirect_to( $self->url_for('/visit') );
+                            return;
+                        }
+                    }
+                }
+            }
+            when ('staff') {
+                if ( $self->is_user_authenticated ) {
+                    given ($req_path) {
+                        when ('/visit') {
+                            app->log->warn( "/visit is not allowed by site_type config: $site_type" );
+                            $self->redirect_to( $self->url_for('/') );
+                            return;
+                        }
+                        when ('/login') {
+                            $self->redirect_to( $self->url_for('/') );
+                            return 1;
+                        }
+                        default {
+                            return 1;
+                        }
+                    }
+                }
+                else {
+                    given ($req_path) {
+                        when ('/visit') {
+                            app->log->warn( "/visit is not allowed by site_type config: $site_type" );
+                            $self->redirect_to( $self->url_for('/login') );
+                            return;
+                        }
+                        when ('/login') {
+                            return 1;
+                        }
+                        default {
+                            $self->redirect_to( $self->url_for('/login') );
+                            return;
+                        }
+                    }
+                }
+            }
+            when ('visit') {
+                given ($req_path) {
+                    when ('/visit') {
+                        return 1;
+                    }
+                    default {
+                        app->log->warn( "$req_path is not allowed by site_type config: $site_type" );
+                        $self->redirect_to( $self->url_for('/visit') );
+                        return;
+                    }
+                }
+            }
+            default {
+                app->log->warn( "$req_path is not allowed by site_type config: $site_type" );
+                return;
+            }
+        }
+    }
 
     return;
 };

@@ -125,13 +125,16 @@ $ ->
           text: text
         success: (data, textStatus, jqXHR) ->
         error: (jqXHR, textStatus, errorThrown) ->
-    sendSMSValidation: (to) ->
+    sendSMSValidation: (name, to, success_cb, error_cb) ->
       $.ajax "/api/sms/validation.json",
         type: 'POST'
         data:
+          name: name
           to:   to
         success: (data, textStatus, jqXHR) ->
+          success_cb( data, textStatus, jqXHR )
         error: (jqXHR, textStatus, errorThrown) ->
+          error_cb( jqXHR, textStatus, errorThrown )
 
   #
   # return nothing

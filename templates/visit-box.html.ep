@@ -56,54 +56,6 @@
                             </span>
                           </label>
 
-                          <label class="block clearfix signup">
-                            <div class="control-group">
-                              <label class="control-label bolder">성별</label>
-
-                              <div class="radio">
-                                <label>
-                                  <input type="radio" class="ace" name="gender" value="male">
-                                  <span class="lbl"> 남자</span>
-                                </label>
-                              </div>
-
-                              <div class="radio">
-                                <label>
-                                  <input type="radio" class="ace" name="gender" value="female">
-                                  <span class="lbl"> 여자</span>
-                                </label>
-                              </div>
-                            </div>
-                          </label>
-
-                          <label class="block clearfix signup">
-                            <span class="block input-icon input-icon-right">
-                              <input name="email" type="email" class="form-control" placeholder="전자우편" />
-                              <i class="icon-envelope"></i>
-                            </span>
-                          </label>
-
-                          <label id="postcodify" class="block clearfix signup"></label>
-                          <input name="address1" type="hidden" class="postcodify_dbid" />
-                          <input name="address3" type="hidden" class="postcodify_jibeonaddress" />
-                          <label class="block clearfix signup">
-                            <span class="block input-icon input-icon-right">
-                              <input name="address2" type="text" class="form-control postcodify_address" placeholder="주소" readonly="readonly" />
-                              <i class="icon-home"></i>
-                            </span>
-                          </label>
-
-                          <label class="block clearfix signup">
-                            <input name="address4" type="text" class="form-control" placeholder="상세주소" />
-                          </label>
-
-                          <label class="block clearfix signup">
-                            <span class="block input-icon input-icon-right">
-                              <input name="birth" type="text" class="form-control" placeholder="출생년도 (예. 1988)" />
-                              <i class="icon-calendar"></i>
-                            </span>
-                          </label>
-
                           <label class="block">
                             <input name="service" type="checkbox" class="<%= $theme %>" />
                             <span class="lbl">

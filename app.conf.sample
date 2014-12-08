@@ -48,6 +48,12 @@ $db_opts->{AutoCommit} //= 1;
     timezone => 'Asia/Seoul',
 
     #
+    # 사이트 유형 설정
+    #   all/staff/visit
+    #
+    site_type => 'all',
+
+    #
     # site UI
     #
     secrets      => [
