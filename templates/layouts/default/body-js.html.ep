@@ -45,6 +45,9 @@
     <script src="/lib/select2/select2.min.js"></script>
     <script src="/lib/select2/select2_locale_ko.js"></script>
 
+    <!-- chosen -->
+    <script src="/lib/chosen/js/chosen.jquery.min.js"></script>
+
     <!-- bootbox -->
     <script src="/lib/bootstrap/js/bootbox.min.js"></script>
 

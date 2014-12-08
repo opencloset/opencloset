@@ -152,6 +152,25 @@
                             </span>
                           </label>
 
+                          % my @colors = (
+                          %   [ 1 => '첫' ],
+                          %   [ 2 => '두' ],
+                          %   [ 3 => '세' ],
+                          % );
+                          % for my $color (@colors) {
+                            <label class="block clearfix">
+                              <select class="width-80 chosen-select" name="pre_color<%= $color->[0] %>" data-placeholder="<%= $color->[1] %> 번째 선호 색상">
+                                <option value=""     > <%= $color->[1] %> 번째 선호 색상 </option>
+                                <option value="black"> 블랙              </option>
+                                <option value="navy" > 네이비            </option>
+                                <option value="gray" > 그레이            </option>
+                                <option value="brown"> 브라운            </option>
+                                <option value="etc"  > 기타              </option>
+                                <option value="staff"> 직원 추천         </option>
+                              </select>
+                            </label>
+                          % }
+
                           <label class="block clearfix">
                             <span class="block input-icon input-icon-right">
                               <input name="sms" type="text" class="form-control" placeholder="인증번호" value="<%= $sms %>" />

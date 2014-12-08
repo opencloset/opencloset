@@ -1,5 +1,6 @@
 $ ->
   $("input[name=booking]").val(undefined)
+  $(".chosen-select").chosen()
 
   #
   # 대여 목적
