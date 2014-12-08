@@ -312,6 +312,9 @@ CREATE TABLE `order` (
   `late_fee_pay_with` VARCHAR(32) DEFAULT NULL,
   `desc`              TEXT DEFAULT NULL,
 
+  `pre_category`      VARCHAR(128) DEFAULT NULL,
+  `pre_color`         VARCHAR(32)  DEFAULT NULL,
+
   -- guest info
   `purpose`          VARCHAR(128) DEFAULT NULL,
   `purpose2`         TEXT DEFAULT NULL,
