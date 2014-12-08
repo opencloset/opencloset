@@ -1,7 +1,32 @@
 $ ->
   $("input[name=booking]").val(undefined)
+
+  #
+  # 페이지 로드시 첫/두/세 번째 선호 색상 설정
+  #
+  if $("input[name=pre_color]").val()
+    pre_color = $("input[name=pre_color]").val().split(',')
+    $("select[name=pre_color1]").val(pre_color[0]).trigger("chosen:updated")
+    $("select[name=pre_color2]").val(pre_color[1]).trigger("chosen:updated")
+    $("select[name=pre_color3]").val(pre_color[2]).trigger("chosen:updated")
+
+  #
+  # 페이지 로드시 대여할 옷의 종류 설정
+  #
+  if $("input[name=pre_category]").val()
+    pre_category = $("input[name=pre_category]").val().split(',')
+    $("select[name=pre_category_temp]").val(pre_category).trigger("chosen:updated")
+
+  #
+  # 대여할 옷의 종류 변경시 pre_category 양식 자동 설정
+  #
   $("select[name=pre_category_temp]").chosen().change ->
-    $("input[name=pre_category]").val $(this).val().join(',')
+    category = $(this).val() || []
+    $("input[name=pre_category]").val category.join(',')
+
+  #
+  # 첫/두/세 번째 선호 색상 변경시 pre_color 양식 자동 설정
+  #
   $("select[name=pre_color1],select[name=pre_color2],select[name=pre_color3]").chosen().change ->
     $("input[name=pre_color]").val [ $("select[name=pre_color1]").val(), $("select[name=pre_color2]").val(), $("select[name=pre_color3]").val() ].join(',')
 
