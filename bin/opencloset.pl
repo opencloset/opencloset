@@ -1268,6 +1268,20 @@ group {
 
             return 1;
         }
+        elsif (
+            $req_path =~ m{^/api/search/sms(\.json)?$}
+            || $req_path =~ m{^/api/sms/\d+(\.json)?$}
+        )
+        {
+            my $email    = $self->param('email');
+            my $password = $self->param('password');
+
+            $self->error( 400, { data => { error => 'missing email'     } } ), return unless defined $email;
+            $self->error( 400, { data => { error => 'missing password'  } } ), return unless defined $password;
+            $self->error( 400, { data => { error => 'password is wrong' } } ), return unless $self->authenticate($email, $password);
+
+            return 1;
+        }
 
         $self->error( 400, { data => { error => 'invalid_access' } } );
         return;

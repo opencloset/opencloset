@@ -75,7 +75,11 @@ sub do_work {
 sub get_pending_sms_list {
     my $res = HTTP::Tiny->new->get(
         "$CONF->{base_url}/search/sms.json?"
-        . HTTP::Tiny->www_form_urlencode({ status => 'pending' })
+        . HTTP::Tiny->www_form_urlencode({
+            status   => 'pending',
+            email    => $CONF->{email},
+            password => $CONF->{password},
+        })
     );
     return unless $res->{success};
 
@@ -89,6 +93,12 @@ sub update_sms {
 
     return unless $sms;
     return unless %params;
+
+    %params = (
+        email    => $CONF->{email},
+        password => $CONF->{password},
+        %params,
+    );
 
     my $id = $sms->{id};
     my $res = HTTP::Tiny->new->put(
