@@ -35,4 +35,4 @@ requires 'experimental';
 requires 'namespace::clean';
 
 # from git repository
-requires 'git://github.com/aanoaa/p5-postcodify.git@v0.2.4';
+requires 'git://github.com/aanoaa/p5-postcodify.git@v0.2.5';

@@ -63,14 +63,24 @@ MySQL 데이터베이스에 접속하며 `opencloset` 데이터베이스에
 
 ### 우편번호검색 DB 파일 설치 ###
 
+상황에 맞게 설정파일에서 `postcodify` 의 값을 수정합니다.
+기본값은 SQLite 를 사용합니다.
+
+#### MySQL ####
+
+    $ wget http://storage.poesis.kr/downloads/post/postcodify.20141201.v2.mysqldump.xz
+    $ xz -d postcodify.20141201.v2.mysqldump.xz
+    $ mysql -u root -p -e 'GRANT ALL PRIVILEGES ON `postcodify`.* TO postcodify@localhost IDENTIFIED by "s3cr3t";'    # WARN: type your own secret password
+    $ mysql -u postcodify -p -e 'CREATE DATABASE `postcodify` DEFAULT CHARACTER SET utf8;'
+    $ mysql -u postcodify -p postcodify < postcodify.20141201.v2.mysqldump
+
+#### SQLite ####
+
     $ wget -qO- https://raw.githubusercontent.com/aanoaa/p5-postcodify/develop/installer.sh | sh
 
 `wget` 이 없으면, `curl` 로..
 
     $ curl https://raw.githubusercontent.com/aanoaa/p5-postcodify/develop/installer.sh | sh
-
-설정파일에서 `postcodify_db` 의 경로를 수정합니다.
-기본값은 `db/postcodify.20141112.v2.sqlite` 입니다.
 
 ### RUN
 

@@ -30,3 +30,6 @@ public/css
 # database file
 *.sqlite
 *.db
+
+# cache dir
+cache/
