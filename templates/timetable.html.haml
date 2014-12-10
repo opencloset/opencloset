@@ -106,6 +106,9 @@
                         <ul class="dropdown-menu">
                           <li> <a tabindex="-1" href="#{ url_for( '/user/' . $order->user->id ) }">#{ $order->user->name }</a> </li>
                           <li class="divider"></li>
+                          <li> <a class="pre_category" data-category="#{ $order->user->user_info->pre_category }"></a> </li>
+                          <li> <a class="pre_color" data-color="#{ $order->user->user_info->pre_color }"></a> </li>
+                          <li class="divider"></li>
                           <li> <a tabindex="-1" href="#{ url_for( '/order/' . $order->id ) }"> 주문서 </a> </li>
                           <li> <a class="order-next-status" tabindex="-1"> 다음 상태로 </a> </li>
                           <li class="divider"></li>
