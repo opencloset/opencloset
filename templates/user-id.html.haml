@@ -118,6 +118,11 @@
                                   %span.editable#user-comment{ 'data-name' => 'comment' }= $user->user_info->comment
 
                               .profile-info-row
+                                .profile-info-name 대여 희망 품목
+                                .profile-info-value
+                                  %span.editable#user-pre_category{ 'data-name' => 'pre_category', 'data-value' => "#{ $user->user_info->pre_category}" }
+
+                              .profile-info-row
                                 .profile-info-name 키
                                 .profile-info-value
                                   %span.editable#user-height{ 'data-name' => 'height' }= $user->user_info->height

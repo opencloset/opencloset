@@ -59,6 +59,27 @@ $ ->
           OpenCloset.alert 'info', '비밀번호 변경을 완료했습니다.'
       when 'user-comment'
         params.type = 'textarea'
+      when 'user-pre_category'
+        params.type    = 'select2'
+        params.source  = ( { id: i, text: OpenCloset.category[i].str } for i in [ 'jacket', 'pants', 'shirt', 'tie', 'shoes', 'belt', 'skirt', 'blouse' ] )
+        params.select2 =
+          width:       250
+          placeholder: '희망 항목을 모두 선택해주세요.'
+          allowClear:  true
+          multiple:    true
+        params.display = (value, sourceData) ->
+          unless value
+            $(this).empty()
+            return
+          mapped_values = ( OpenCloset.category[i].str for i in value )
+          $(this).html mapped_values.join(',')
+        params.url = (params) ->
+          url = $('#profile-user-info-data').data('url')
+          data = {}
+          data[params.name] = params.value.join(',')
+          $.ajax url,
+            type: 'PUT'
+            data: data
       else
         params.type = 'text'
 
