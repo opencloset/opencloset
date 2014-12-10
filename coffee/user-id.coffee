@@ -80,6 +80,28 @@ $ ->
           $.ajax url,
             type: 'PUT'
             data: data
+      when 'user-pre_color'
+        params.type    = 'select2'
+        params.source  = ( { id: i, text: OpenCloset.color[i] } for i in [ 'black', 'navy', 'gray', 'brown', 'etc', 'staff' ] )
+        params.select2 =
+          width:                250
+          placeholder:          '희망 색상을 선택해주세요.'
+          allowClear:           true
+          multiple:             true
+          maximumSelectionSize: 3
+        params.display = (value, sourceData) ->
+          unless value
+            $(this).empty()
+            return
+          mapped_values = ( OpenCloset.color[i] for i in value )
+          $(this).html mapped_values.join(',')
+        params.url = (params) ->
+          url = $('#profile-user-info-data').data('url')
+          data = {}
+          data[params.name] = params.value.join(',')
+          $.ajax url,
+            type: 'PUT'
+            data: data
       else
         params.type = 'text'
 

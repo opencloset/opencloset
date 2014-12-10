@@ -123,6 +123,11 @@
                                   %span.editable#user-pre_category{ 'data-name' => 'pre_category', 'data-value' => "#{ $user->user_info->pre_category}" }
 
                               .profile-info-row
+                                .profile-info-name 대여 희망 색상
+                                .profile-info-value
+                                  %span.editable#user-pre_color{ 'data-name' => 'pre_color', 'data-value' => "#{ $user->user_info->pre_color }" }
+
+                              .profile-info-row
                                 .profile-info-name 키
                                 .profile-info-value
                                   %span.editable#user-height{ 'data-name' => 'height' }= $user->user_info->height
