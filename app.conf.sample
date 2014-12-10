@@ -212,8 +212,22 @@ $db_opts->{AutoCommit} //= 1;
     #
     # postcodify
     #
-    postcodify_db => './db/postcodify.20141112.v2.sqlite',
-
+    ## SQLite
+    # postcodify => {
+    #     dsn            => 'dbi:SQLite:dbname=db/postcodify.20141112.v2.sqlite',
+    #     quote_char     => q{`},
+    #     sqlite_unicode => 1
+    # },
+    ## MySQL
+    postcodify => {
+        dsn               => $ENV{POSTCODIFY_DATABASE_DSN}  || 'dbi:mysql:postcodify:127.0.0.1',
+        name              => $ENV{POSTCODIFY_DATABASE_NAME} || 'postcodify',
+        user              => $ENV{POSTCODIFY_DATABASE_USER} || 'postcodify',
+        password          => $ENV{POSTCODIFY_DATABASE_PASS} // 'postcodify',
+        quote_char        => q{`},
+        mysql_enable_utf8 => 1,
+        on_connect_do     => 'SET NAMES utf8'
+    },
     #
     # monitor
     #
