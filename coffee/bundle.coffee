@@ -99,6 +99,8 @@ $ ->
       green:  '초록'
       purple: '보라'
       pink:   '분홍'
+      etc:    '기타'
+      staff:  '직원추천'
     payWith: [
       '현금',
       '카드',
