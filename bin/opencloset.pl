@@ -1505,6 +1505,8 @@ group {
             knee
             leg
             phone
+            pre_category
+            pre_color
             purpose
             purpose2
             staff
