@@ -7,8 +7,16 @@
 -     { text => meta_text('user'), link => url_for( meta_link('user') ) },
 -     { text => meta_text($_id)   },
 -   ],
--   jses  => [ '/lib/bootstrap3-editable/js/bootstrap-editable.min.js' ],
--   csses => [ '/lib/bootstrap3-editable/css/bootstrap-editable.css'   ],
+-   jses  => [ 
+-     '/lib/bootstrap3-editable/js/bootstrap-editable.min.js',
+-     '//cdn.poesis.kr/post/search.min.js',
+-     '/lib/facebox/facebox.js',
+-   ],
+-   csses => [ 
+-     '/lib/bootstrap3-editable/css/bootstrap-editable.css',
+-     '//cdn.poesis.kr/post/search.css',
+-     '/lib/facebox/facebox.css',
+-   ],
 -   ;
 - title meta_text($_id) . q{: } . $user->name . q{님};
 
@@ -101,6 +109,15 @@
                                 .profile-info-value
                                   %i.icon-map-marker.light-orange.bigger-110
                                   %span.editable#user-address{ 'data-name' => 'address' }= $user->user_info->address2
+                                %input.postcodify_dbid{:name => 'address1' :type => 'hidden', :value => "#{$user->user_info->address1}"}
+                                %input.postcodify_address{:name => 'address2' :type => 'hidden', :value => "#{$user->user_info->address2}"}
+                                %input.postcodify_jibeonaddress{:name => 'address3' :type => 'hidden', :value => "#{$user->user_info->address3}"}
+
+                              .profile-info-row
+                                .profile-info-name 상세주소
+                                .profile-info-value
+                                  %i.icon-map-marker.light-orange.bigger-110
+                                  %span.editable#user-detail-address{ 'data-name' => 'address4' }= $user->user_info->address4
 
                               .profile-info-row
                                 .profile-info-name 성별
