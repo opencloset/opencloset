@@ -8,7 +8,8 @@ use warnings;
 
 use Mojo::JSON;
 
-my $SMS_FROM = '07075837521',
+my $SMS_FROM = '07075837521';
+my $PORT     = 8001;
 
 my $db_opts = $ENV{OPENCLOSET_DATABASE_OPTS} ? Mojo::JSON::decode_json( $ENV{OPENCLOSET_DATABASE_OPTS} ) : +{
     quote_char        => q{`},
@@ -26,7 +27,7 @@ $db_opts->{AutoCommit} //= 1;
     # for Mojolicious hypnotoad server
     #
     hypnotoad => {
-        listen   => [ 'http://*:8001' ],
+        listen   => [ "http://*:$PORT" ],
         workers  => 6,
         pid_file => 'hypnotoad.pid',
     },
@@ -129,7 +130,7 @@ $db_opts->{AutoCommit} //= 1;
         fake_sms   => 0,
         delay      => 10,
         send_delay => 1,
-        base_url   => 'https://localhost:5000/api',
+        base_url   => "https://localhost:$PORT/api",
         email      => q{},
         password   => q{},
         api_key    => $ENV{OPENCLOSET_COOLSMS_API_KEY}    || q{},
@@ -143,7 +144,7 @@ $db_opts->{AutoCommit} //= 1;
         workers   => {
             send_sms_to_late_users => {
                 cron     => '0 9 * * *',
-                base_url => 'https://localhost:5000/api',
+                base_url => "https://localhost:$PORT/api",
                 from     => $SMS_FROM,
                 text_fmt => "%s님 대여하신 의류가 연체되었습니다. -열린옷장",
                 timeout  => 3,
