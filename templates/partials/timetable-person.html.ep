@@ -1,0 +1,40 @@
+% use utf8;
+<div class="dropdown dropdown-people" data-target="<%= $alert_target %>" data-order-id="<%= $order->id %>" data-ymd="<%= $dt_start->ymd %>">
+  <ul class="dropdown-menu">
+    <li> <a tabindex="-1" href="<%= url_for( '/user/' . $order->user->id ) %>"><%= $order->user->name %></a> </li>
+    <li class="divider"></li>
+    <li> <a class="pre_category" data-category="<%= $order->user->user_info->pre_category %>"></a> </li>
+    <li> <a class="pre_color" data-color="<%= $order->user->user_info->pre_color %>"></a> </li>
+    <li class="divider"></li>
+    <li> <a tabindex="-1" href="<%= url_for( '/order/' . $order->id ) %>"> 주문서 </a> </li>
+    <li> <a class="order-next-status" tabindex="-1"> 다음 상태로 </a> </li>
+    <li class="divider"></li>
+    <li class="dropdown-hover dropup">
+      <a class="clearfix" tabindex="-1">
+        <span id="label-order-status-<%= $order->id %>" class="pull-left"><%= $order->status->name %></span>
+        <i class="ace-icon icon-caret-right pull-right"></i>
+      </a>
+      <ul class="dropdown-menu">
+        <li> <a class="order-status" tabindex="-1" data-status-id="14">방문예약</a> </li>
+        <li> <a class="order-status" tabindex="-1" data-status-id="12">미방문  </a> </li>
+        <li> <a class="order-status" tabindex="-1" data-status-id="13">방문    </a> </li>
+        <li> <a class="order-status" tabindex="-1" data-status-id="16">치수측정</a> </li>
+        <li> <a class="order-status" tabindex="-1" data-status-id="17">의류준비</a> </li>
+        <li class="divider"></li>
+        <li> <a class="order-status" tabindex="-1" data-status-id="20">탈의01  </a> </li>
+        <li> <a class="order-status" tabindex="-1" data-status-id="21">탈의02  </a> </li>
+        <li> <a class="order-status" tabindex="-1" data-status-id="22">탈의03  </a> </li>
+        <li> <a class="order-status" tabindex="-1" data-status-id="23">탈의04  </a> </li>
+        <li> <a class="order-status" tabindex="-1" data-status-id="24">탈의05  </a> </li>
+        <li> <a class="order-status" tabindex="-1" data-status-id="25">탈의06  </a> </li>
+        <li> <a class="order-status" tabindex="-1" data-status-id="26">탈의07  </a> </li>
+        <li> <a class="order-status" tabindex="-1" data-status-id="27">탈의08  </a> </li>
+        <li> <a class="order-status" tabindex="-1" data-status-id="28">탈의09  </a> </li>
+        <li class="divider"></li>
+        <li> <a class="order-status" tabindex="-1" data-status-id="6" >수선    </a> </li>
+        <li> <a class="order-status" tabindex="-1" data-status-id="18">포장    </a> </li>
+        <li> <a class="order-status" tabindex="-1" data-status-id="19">결제대기</a> </li>
+      </ul>
+    </li>
+  </ul>
+</div>
