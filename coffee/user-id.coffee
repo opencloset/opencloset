@@ -106,3 +106,38 @@ $ ->
         params.type = 'text'
 
     $(el).editable params
+
+  $.facebox.settings.loadingImage = '/lib/facebox/loading.gif'
+  $.facebox.settings.closeImage = '/lib/facebox/closelabel.png'
+
+  $('#user-address').click (e) ->
+    e.preventDefault()
+    $.facebox
+      ajax: '/html/postcodify.html'
+
+  $(document).bind 'reveal.facebox', ->
+    $('#facebox #postcodify').postcodify
+      api: '/api/postcode/search'
+      timeout: 10000    # 10 seconds
+      insertDbid: '.postcodify_dbid'
+      insertAddress: '.postcodify_address'
+      insertJibeonAddress: '.postcodify_jibeonaddress'
+      searchButtonContent: '주소검색'
+      onReady: ->
+        $('#postcodify').find('.postcodify_search_controls.postcode_search_controls')
+          .addClass('input-group').find('input[type=text]')
+          .addClass('form-control').val($('.postcodify_address').val())
+          .focus().end().find('button').addClass('btn btn-default btn-sm')
+          .wrap('<span class="input-group-btn"></span>')
+      afterSelect: (selectedEntry) ->
+        $.ajax $('#profile-user-info-data').data('url'),
+          type: 'PUT'
+          data:
+            address1: $('.postcodify_dbid').val()
+            address2: $('.postcodify_address').val()
+            address3: $('.postcodify_jibeonaddress').val()
+          success:
+            $('#user-address').text($('.postcodify_address').val())
+        $(document).trigger('close.facebox')
+      afterSearch: (keywords, results, lang, sort) ->
+        $('summary.postcodify_search_status.postcode_search_status').hide()
