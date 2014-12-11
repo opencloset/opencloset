@@ -1,7 +1,16 @@
 % use utf8;
+% my $rs = $order->user->orders->search({
+%   status_id => [
+%     2,  # 대여중
+%     9,  # 반납
+%     10, # 부분반납
+%     11, # 반납배송중
+%   ],
+% });
+% my $revisited = $rs->count;
 <div class="dropdown dropdown-people" data-target="<%= $alert_target %>" data-order-id="<%= $order->id %>" data-ymd="<%= $dt_start->ymd %>">
   <ul class="dropdown-menu">
-    <li> <a tabindex="-1" href="<%= url_for( '/user/' . $order->user->id ) %>"><%= $order->user->name %></a> </li>
+    <li> <a tabindex="-1" href="<%= url_for( '/user/' . $order->user->id ) %>"><%= $order->user->name %> <%= $revisited ? '(재방문)' : q{} %> </a> </li>
     <li class="divider"></li>
     <li> <a class="pre_category" data-category="<%= $order->user->user_info->pre_category %>"></a> </li>
     <li> <a class="pre_color" data-color="<%= $order->user->user_info->pre_color %>"></a> </li>
