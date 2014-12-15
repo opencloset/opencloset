@@ -1,0 +1,290 @@
+% use utf8;
+<!-- VISIT-INFO-BOX -->
+                <div id="visit-info-box" class="visit-info-box visible widget-box no-border">
+                  <div class="widget-body">
+                    <div class="widget-main">
+                      <h4 class="header blue lighter bigger">
+                        <i class="icon-group green"></i>
+                        대여자 정보 변경 (직원 전용)
+                      </h4>
+
+                      <div class="space-6"></div>
+
+                      <div>
+                        <p>
+                          이전 입력 정보와 달라진 부분이 있다면 최신 내용으로 변경해주세요.
+                        </p>
+                      </div>
+
+                      <div class="space-6"></div>
+
+                      <div id="visit-alert">
+                        % if ($alert) {
+                          <div class="alert alert-danger">
+                            <button class="close" type="button" data-dismiss="alert">&times;</button>
+                            <%= $alert %>
+                          </div>
+                        % }
+                      </div>
+
+                      <div class="space-6"></div>
+
+                      <form id="visit-info-form" method="post" action="<%= url_for('/visit2') %>">
+                        <input type="hidden" name="type" value="visit">
+                        <fieldset>
+                          <label class="block clearfix">
+                            <span class="block input-icon input-icon-right">
+                              <input name="name" type="text" class="form-control" placeholder="이름" value="<%= $user->name %>" readonly />
+                              <i class="icon-user"></i>
+                            </span>
+                          </label>
+
+                          <label class="block clearfix">
+                            <span class="block input-icon input-icon-right">
+                              <input name="phone" type="tel" class="form-control" placeholder="휴대전화" value="<%= $user->user_info->phone %>" readonly />
+                              <i class="icon-phone"></i>
+                            </span>
+                          </label>
+
+                          <label class="block clearfix">
+                            <div class="control-group">
+                              <label class="control-label bolder">성별</label>
+
+                              <div class="radio">
+                                <label>
+                                  <input type="radio" class="ace" name="gender" value="male" <%= $user->user_info->gender eq 'male' ? 'checked' : q{} %>>
+                                  <span class="lbl"> 남자</span>
+                                </label>
+                              </div>
+
+                              <div class="radio">
+                                <label>
+                                  <input type="radio" class="ace" name="gender" value="female" <%= $user->user_info->gender eq 'female' ? 'checked' : q{} %>>
+                                  <span class="lbl"> 여자</span>
+                                </label>
+                              </div>
+                            </div>
+                          </label>
+
+                          <label class="block clearfix">
+                            <span class="block input-icon input-icon-right">
+                              <input name="email" type="email" class="form-control" placeholder="전자우편" value="<%= $user->email %>" />
+                              <i class="icon-envelope"></i>
+                            </span>
+                          </label>
+
+                          <label id="postcodify" class="block clearfix"></label>
+                          <input name="address1" type="hidden" class="postcodify_dbid" value="<%= $user->user_info->address1 %>" />
+                          <input name="address3" type="hidden" class="postcodify_jibeonaddress" value="<%= $user->user_info->address3 %>" />
+                          <label class="block clearfix">
+                            <span class="block input-icon input-icon-right">
+                              <input name="address2" type="text" class="form-control postcodify_address" readonly="readonly" placeholder="주소" value="<%= $user->user_info->address2 %>" />
+                              <i class="icon-home"></i>
+                            </span>
+                          </label>
+
+                          <label class="block clearfix">
+                            <input name="address4" type="text" class="form-control" placeholder="상세주소" value="<%= $user->user_info->address4 %>" />
+                          </label>
+
+                          <label class="block clearfix">
+                            <span class="block input-icon input-icon-right">
+                              <input name="birth" type="text" class="form-control" placeholder="출생년도 (예. 1988)" value="<%= $user->user_info->birth %>" />
+                              <i class="icon-calendar"></i>
+                            </span>
+                          </label>
+
+                          <label class="block clearfix">
+                            <div class="input-group">
+                              <input name="height" type="text" class="form-control" placeholder="키" value="<%= $user->user_info->height %>" />
+                              <span class="input-group-addon">
+                                <i>cm</i>
+                              </span>
+                            </div>
+                          </label>
+
+                          <label class="block clearfix">
+                            <div class="input-group">
+                              <input name="weight" type="text" class="form-control" placeholder="몸무게" value="<%= $user->user_info->weight %>" />
+                              <span class="input-group-addon">
+                                <i>kg</i>
+                              </span>
+                            </div>
+                          </label>
+
+                          <label class="block clearfix">
+                            <button id="btn-booking" class="width-100 pull-right btn btn-sm btn-success" data-toggle="modal" data-target="#modal-booking">
+                              <span>
+                                방문 일자 선택
+                              </span>
+                              <span id="lbl-booking">
+                                % if ($booking) {
+                                %   my $ymdhm = sprintf( '%s %02d:%02d', $booking->date->ymd, $booking->date->hour, $booking->date->minute );
+                                - <%= $ymdhm %>
+                                % }
+                              </span>
+                            </button>
+                          </label>
+                          <input name="booking" type="hidden" class="form-control" value="<%= $booking ? $booking->id : '' %>" />
+                          <input name="booking-saved" type="hidden" class="form-control" value="<%= $booking ? $booking->id : '' %>" data-ymd="<%= $booking ? $booking->date->strftime('%Y-%m-%d') : '' %>" data-hm="<%= $booking ? $booking->date->strftime('%H:%M') : '' %>" />
+
+                          <label class="block clearfix">
+                            <span class="block input-icon input-icon-right">
+                              <input name="purpose" type="text" class="form-control" placeholder="대여 목적" value="<%= $user->user_info->purpose %>" />
+                              <p> 아래 목록을 클릭해주시거나, 목록에 없으면 직접 입력해주세요. </p>
+                              <p class="purpose">
+                                <span class="label label-info clickable"> 입사면접 </span>
+                                <span class="label label-info clickable"> 사진촬영 </span>
+                                <span class="label label-info clickable"> 결혼식 </span>
+                                <span class="label label-info clickable"> 장례식 </span>
+                                <span class="label label-info clickable"> 입학식 </span>
+                                <span class="label label-info clickable"> 졸업식 </span>
+                                <span class="label label-info clickable"> 세미나 </span>
+                                <span class="label label-info clickable"> 발표 </span>
+                              </p>
+                            </span>
+                          </label>
+
+                          <label class="block clearfix">
+                            <span class="block input-icon input-icon-right">
+                              <input name="purpose2" type="text" class="form-control" placeholder="대여 목적에 대한 자세한 설명" value="<%= $user->user_info->purpose2 %>" />
+                              <p> 입사 면접인 경우 응시 기업 및 분야를, 결혼식인 경우 누구의 결혼식인지를 자세하게 입력해주세요.  저희가 적합한 옷을 준비하는데 큰 도움이 됩니다. :) </p>
+                            </span>
+                          </label>
+
+                          <label class="block clearfix">
+                            <input type="hidden" name="pre_category" value="<%= $user->user_info->pre_category %>">
+                            <select class="width-80 chosen-select" name="pre_category_temp" multiple data-placeholder="대여할 옷의 종류를 선택하세요.">
+                              <option value=""     >           </option>
+                              <option value="jacket"> 자켓     </option>
+                              <option value="pants" > 팬츠     </option>
+                              <option value="shirt" > 셔츠     </option>
+                              <option value="tie"   > 타이     </option>
+                              <option value="shoes" > 구두     </option>
+                              <option value="belt"  > 벨트     </option>
+                              <option value="skirt" > 스커트   </option>
+                              <option value="blouse"> 블라우스 </option>
+                            </select>
+                            <p> 대여를 원하는 옷의 종류를 모두 선택해주세요. </p>
+                          </label>
+
+                          <input type="hidden" name="pre_color" value="<%= $user->user_info->pre_color %>">
+                          % my @colors = (
+                          %   [ 1 => '첫' ],
+                          %   [ 2 => '두' ],
+                          %   [ 3 => '세' ],
+                          % );
+                          % for my $color (@colors) {
+                            <label class="block clearfix">
+                              <select class="width-80 chosen-select" name="pre_color<%= $color->[0] %>" data-placeholder="<%= $color->[1] %> 번째 선호 색상">
+                                <option value=""     > <%= $color->[1] %> 번째 선호 색상 </option>
+                                <option value="black"> 블랙              </option>
+                                <option value="navy" > 네이비            </option>
+                                <option value="gray" > 그레이            </option>
+                                <option value="brown"> 브라운            </option>
+                                <option value="etc"  > 기타              </option>
+                                <option value="staff"> 직원 추천         </option>
+                              </select>
+                            </label>
+                          % }
+
+                          <div class="space-12"></div>
+
+                          <div class="clearfix">
+                            <button id="btn-booking-cancel" class="width-40 pull-left btn btn-sm btn-danger">
+                              <span>
+                                <i class="icon-remove"></i>
+                                예약 취소
+                              </span>
+                            </button>
+
+                            <button id="btn-info" type="submit" class="width-55 pull-right btn btn-sm btn-primary">
+                              <span>
+                                <i class="icon-ok"></i>
+                                예약 신청
+                              </span>
+                            </button>
+                          </div>
+
+                        </fieldset>
+                      </form>
+
+                      <div class="space-6"></div>
+
+                      <div class="clearfix">
+                        <a class="width-100 pull-right btn btn-sm btn-yellow" href="<%= url_for('/') %>">
+                          <i class="icon-home"></i>
+                          <span> 관리 시스템으로 돌아가기 </span>
+                        </a>
+                      </div>
+
+                    </div>
+                  </div><!-- /widget-body -->
+                </div><!-- /visit-info-box -->
+
+                <div id="modal-booking" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="bookingModalLabel" aria-hidden="true">
+                  <div class="modal-dialog">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title" id="bookingModalLabel">
+                          열린옷장 방문 일자 선택
+                        </h4>
+                      </div>
+                      <div class="modal-body" style="height: 250px; overflow-y: auto;">
+                        <table id="booking-table" class="table table-striped table-bordered table-hover">
+                          <thead>
+                            <tr>
+                              <th class="center"> 선택 </th>
+                              <th> 날짜 </th>
+                              <th> 시간 </th>
+                            </tr>
+                          </thead>
+                          <tbody id="booking-list">
+                          </tbody>
+                        </table>
+                      </div>
+                      <div class="modal-footer">
+                        <button id="btn-booking-modal-cancel"  type="button" class="btn btn-danger" >취소</button>
+                        <button id="btn-booking-modal-confirm" type="button" class="btn btn-primary">확인</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div id="modal-confirm" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="confirmModalLabel" aria-hidden="true">
+                  <div class="modal-dialog">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title" id="confirmModalLabel">
+                        </h4>
+                      </div>
+                      <div class="modal-body" style="height: 250px; overflow-y: auto;">
+                      </div>
+                      <div class="modal-footer">
+                        <button id="btn-confirm-modal-cancel"  type="button" class="btn btn-danger" >취소</button>
+                        <button id="btn-confirm-modal-ok"     type="button" class="btn btn-primary">확인</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <script id="tpl-booking" type="text/html">
+                  <tr>
+                    <%% var dt = moment(date); %>
+                    <%% var ymd = dt.format('YYYY-MM-DD'); %>
+                    <%% var hm  = dt.format('HH:mm'); %>
+                    <td class="center">
+                      <input class="ace" type="radio" name="booking_id" value="<%%= id %>" data-id="<%%= id %>" data-ymd="<%%= ymd %>" data-hm="<%%= hm %>">
+                      <span class="lbl"></span>
+                    </td>
+                    <td> <%%= ymd %> </td>
+                    <td> <%%= hm %> </td>
+                  </tr>
+                </script>
+                <script id="tpl-booking-error-404" type="text/html">
+                  <tr>
+                    <td colspan="3">예약가능한 날짜가 없습니다.</td>
+                  </tr>
+                </script>

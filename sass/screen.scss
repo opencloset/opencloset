@@ -593,6 +593,9 @@ $opencloset-darken-yellow: desaturate(darken($opencloset-yellow, 4%), 10%);
     label.control-label {
         margin-bottom: 0;
     }
+    strong {
+        color: blue;
+    }
 }
 
 .form-group.has-info textarea[disabled], .form-group.has-info textarea[readonly] {

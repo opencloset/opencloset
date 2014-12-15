@@ -1,0 +1,21 @@
+- use utf8;
+- my $_id = 'visit2';
+- layout 'notlogin',
+-   page_id => $_id,
+-   jses  => [
+-     '/lib/bootstrap/js/date-time/moment.min.js',
+-     '/lib/jquery/js/jquery.mask.min.js',
+-     '//cdn.poesis.kr/post/search.min.js',
+-   ],
+-   csses => [
+-     '//cdn.poesis.kr/post/search.css',
+-   ],
+-   ;
+- title meta_text($_id);
+
+- if ( $type eq 'visit-info' ) {
+  = include 'visit2-info-box'
+- }
+- else {
+  = include 'visit2-box'
+- }

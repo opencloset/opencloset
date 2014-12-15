@@ -53,3 +53,8 @@
 
     <!-- bundle -->
     <script src="/js/bundle.js"></script>
+
+    <!-- remove alert box after 5 sec -->
+    <script type="text/javascript">
+      setTimeout( function() { $(".alert").remove() }, 5000 );
+    </script>
