@@ -44,6 +44,11 @@ $db_opts->{AutoCommit} //= 1;
     },
 
     #
+    # for Google Analytics
+    #
+    google_analytics => q{},
+
+    #
     # 시간대 설정
     #
     timezone => 'Asia/Seoul',
