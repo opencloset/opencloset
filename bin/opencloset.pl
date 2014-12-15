@@ -4432,9 +4432,10 @@ get '/rental/:ymd' => sub {
                     $dtf->format_datetime($dt_end),
                 ],
             },
+            'status.name' => '포장',
         },
         {
-            join     => 'booking',
+            join     => [ qw/ booking status / ],
             order_by => { -asc => 'booking.date' },
         },
     );
