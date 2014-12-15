@@ -161,7 +161,7 @@ $ ->
           when 27 then status_id = 18 # 탈의08   -> 포장
           when 28 then status_id = 18 # 탈의09   -> 포장
           when 18 then status_id = 19 # 포장     -> 결제대기
-          when  6 then status_id = 19 # 수선     -> 결제대기
+          when  6 then status_id = 18 # 수선     -> 포장
           else return
         updateOrder order_id, ymd, status_id, alert_target
       error: (jqXHR, textStatus, errorThrown) ->
