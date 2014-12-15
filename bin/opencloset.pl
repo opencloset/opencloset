@@ -4595,7 +4595,7 @@ post '/order' => sub {
     #
     # response
     #
-    $self->redirect_to( '/order/' . $order->id );
+    $self->redirect_to('/rental');
 };
 
 get '/order/:id' => sub {
