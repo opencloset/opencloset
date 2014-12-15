@@ -49,7 +49,6 @@
           %th
           %th 이름
           %th 연락처
-          %th 방문일
           %th
             %span.label.label-success 키 / 몸무게
           %th
@@ -72,8 +71,6 @@
               %br
               %i.icon-phone
               = $user->user_info->phone
-            %td
-              %strong= $user->update_date ? $user->update_date->ymd : q{}
             %td
               %div
                 %span.label.label-success= $order->height || '-'

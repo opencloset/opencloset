@@ -218,19 +218,32 @@ $opencloset-darken-yellow: desaturate(darken($opencloset-yellow, 4%), 10%);
                 }
             }
         }
+        #order-table table th {
+            &:first-child {
+                width: 40px;
+            }
+            &:nth-child(2) {
+                width: 100px;
+            }
+            &:nth-child(3) {
+                width: 200px;
+            }
+        }
     }
-    #order-table table th {
-        &:first-child {
-            width: 40px;
-        }
-        &:nth-child(2) {
-            width: 155px;
-        }
-        &:nth-child(3), &:nth-child(4) {
-            width: 80px;
-        }
-        &:nth-child(5), &:nth-child(6) {
-            width: 80px;
+    #order {
+        #order-table table th {
+            &:first-child {
+                width: 40px;
+            }
+            &:nth-child(2) {
+                width: 155px;
+            }
+            &:nth-child(3), &:nth-child(4) {
+                width: 80px;
+            }
+            &:nth-child(5), &:nth-child(6) {
+                width: 80px;
+            }
         }
     }
     #order-id {
