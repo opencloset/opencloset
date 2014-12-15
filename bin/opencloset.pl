@@ -4553,6 +4553,11 @@ post '/order' => sub {
             my $order = $DB->resultset('Order')->find( $order_params{id} );
             die "order not found: $order_params{id}\n" unless $order;
 
+            #
+            # 주문서를 결제대기(19) 상태로 변경
+            #
+            $order->update({ status_id => 19 });
+
             for ( my $i = 0; $i < @{ $order_detail_params{clothes_code} }; ++$i ) {
                 my $clothes_code = $order_detail_params{clothes_code}[$i];
                 my $clothes      = $DB->resultset('Clothes')->find({ code => $clothes_code });
@@ -4595,7 +4600,7 @@ post '/order' => sub {
     #
     # response
     #
-    $self->redirect_to( '/order/' . $order->id );
+    $self->redirect_to('/rental');
 };
 
 get '/order/:id' => sub {
