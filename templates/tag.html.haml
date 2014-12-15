@@ -3,7 +3,10 @@
 - layout 'default',
 -   page_id     => $_id,
 -   breadcrumbs => [ { text => meta_text($_id) } ],
--   jses  => [ '/assets/components/x-editable/dist/bootstrap3-editable/js/bootstrap-editable.min.js' ],
+-   jses  => [ 
+-     '/theme/ace/js/x-editable/bootstrap-editable.min.js',
+-     '/theme/ace/js/x-editable/ace-editable.min.js',
+-    ],
 -   csses => [ '/assets/components/x-editable/dist/bootstrap3-editable/css/bootstrap-editable.css' ],
 -   ;
 - title meta_text($_id);

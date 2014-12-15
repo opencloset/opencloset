@@ -7,32 +7,25 @@
     <!--[if !IE]> -->
       <script type="text/javascript">
         window.jQuery
-          || document.write("<script src='/assets/components/jquery/dist/jquery.min.js'>"+"<"+"/script>");
+          || document.write("<script src='/theme/ace/js/jquery.min.js'>"+"<"+"/script>");
       </script>
     <!-- <![endif]-->
 
-    <!--[if IE]>
-      <script type="text/javascript">
-        window.jQuery
-          || document.write("<script src='/lib/jquery/js/jquery-1.10.2.min.js'>"+"<"+"/script>");
-      </script>
-    <![endif]-->
-
     <script type="text/javascript">
       if ("ontouchend" in document)
-        document.write("<script src='/lib/jquery/js/jquery.mobile.custom.min.js'>"+"<"+"/script>");
+        document.write("<script src='/theme/ace/js/jquery.mobile.custom.min.js'>"+"<"+"/script>");
     </script>
 
     <!-- bootstrap -->
-    <script src="/assets/components/bootstrap/dist/js/bootstrap.min.js"></script>
-    <script src="/assets/components/bootstrap-tag/js/bootstrap-tag.js"></script> <!-- tag -->
+    <script src="/theme/ace/js/bootstrap.min.js"></script>
+    <script src="/theme/ace/js/bootstrap-tag.min.js"></script> <!-- tag -->
 
     <!--[if lte IE 8]>
-      <script src="/assets/components/excanvas/excanvas.js"></script>
+      <script src="/theme/ace/js/excanvas.min.js"></script>
     <![endif]-->
 
     <!-- prettify -->
-    <script src="/assets/components/google-code-prettify/src/prettify.js"></script>
+    <script src="/theme/ace/js/prettify.min.js"></script>
 
     <!-- underscore -->
     <script src="/assets/components/underscore/underscore-min.js"></script>
@@ -42,14 +35,14 @@
     <script src="/assets/components/bootstrap-datepicker/js/locales/bootstrap-datepicker.kr.js"></script>
 
     <!-- select2 -->
-    <script src="/assets/components/select2/select2.min.js"></script>
+    <script src="/theme/ace/js/select2.min.js"></script>
     <script src="/assets/components/select2/select2_locale_ko.js"></script>
 
     <!-- chosen -->
-    <script src="/assets/components/chosen_v1.1.0/chosen.jquery.min.js"></script>
+    <script src="/theme/ace/js/chosen.jquery.min.js"></script>
 
     <!-- bootbox -->
-    <script src="/assets/components/bootbox/bootbox.js"></script>
+    <script src="/theme/ace/js/bootbox.min.js"></script>
 
     <!-- bundle -->
     <script src="/js/bundle.js"></script>
