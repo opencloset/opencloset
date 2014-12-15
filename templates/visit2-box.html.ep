@@ -1,0 +1,90 @@
+% use utf8;
+<!-- VISIT-BOX -->
+                <div id="visit-box" class="visit-box visible widget-box no-border">
+                  <div class="widget-body">
+                    <div class="widget-main">
+                      <h4 class="header blue lighter bigger">
+                        <i class="icon-group green"></i>
+                        열린옷장 방문 예약 (직원 전용)
+                      </h4>
+
+                      <div class="space-6"></div>
+
+                      <div>
+                        <p>
+                          안녕하세요! <strong>직원 전용</strong> 방문 예약 페이지입니다.
+                        </p>
+                        <p>
+                          열린옷장 <strong>방문 예약</strong>을 하거나,
+                          이미 신청하신 경우 <strong>예약 내역을 확인</strong>하거나,
+                          또는 <strong>예약 일시를 변경</strong>하거나,
+                          <strong>예약을 취소</strong>하려 한다면
+                          다음 내용을 입력해주세요.
+                        </p>
+                        <p>
+                          <strong>직원 전용</strong> 기능이기 때문에 SMS 인증 문자를 보내지 않습니다.
+                          따라서 <strong>사용자가 없을 경우</strong> 관리 시스템에서
+                          <strong>사용자를 등록한 후 예약을 진행</strong>해주세요.
+                        </p>
+                      </div>
+
+                      <div class="space-6"></div>
+
+                      <div id="visit-alert">
+                        % if ($alert) {
+                          <div class="alert alert-danger">
+                            <button class="close" type="button" data-dismiss="alert">&times;</button>
+                            <%= $alert %>
+                          </div>
+                        % }
+                      </div>
+
+                      <div class="space-6"></div>
+
+                      <form id="visit-form" method="post" action="<%= url_for('/visit2') %>">
+                        <input type="hidden" name="type" value="visit-info">
+                        <fieldset>
+                          <label class="block clearfix">
+                            <span class="block input-icon input-icon-right">
+                              <input name="name" type="text" class="form-control" placeholder="이름" />
+                              <i class="icon-user"></i>
+                            </span>
+                          </label>
+
+                          <label class="block clearfix">
+                            <span class="block input-icon input-icon-right">
+                              <input name="phone" type="tel" class="form-control" placeholder="휴대전화" />
+                              <i class="icon-phone"></i>
+                            </span>
+                          </label>
+
+                          <div class="space-12"></div>
+
+                          <div class="clearfix">
+                            <button id="btn-sms-reset" type="reset" class="width-40 pull-left btn btn-sm">
+                              <i class="icon-refresh"></i>
+                              새로 쓰기
+                            </button>
+
+                            <button id="btn-sms-confirm" class="width-55 pull-right btn btn-sm btn-primary">
+                              <span id="btn-sms-confirm-label">
+                                예약 진행
+                              </span>
+                              <i class="icon-arrow-right icon-on-right"></i>
+                            </button>
+                          </div>
+                        </fieldset>
+                      </form>
+
+                      <div class="space-6"></div>
+
+                      <div class="clearfix">
+                        <a class="width-100 pull-right btn btn-sm btn-yellow" href="<%= url_for('/') %>">
+                          <i class="icon-home"></i>
+                          <span> 관리 시스템으로 돌아가기 </span>
+                        </a>
+                      </div>
+
+                    </div>
+                  </div><!-- /widget-body -->
+                </div><!-- /visit-box -->

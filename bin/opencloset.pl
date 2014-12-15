@@ -3683,6 +3683,9 @@ under '/' => sub {
                         when ('/visit') {
                             return 1;
                         }
+                        when ('/visit2') {
+                            return 1;
+                        }
                         when ('/login') {
                             $self->redirect_to( $self->url_for('/') );
                             return 1;
@@ -3714,6 +3717,9 @@ under '/' => sub {
                             app->log->warn( "/visit is not allowed by site_type config: $site_type" );
                             $self->redirect_to( $self->url_for('/') );
                             return;
+                        }
+                        when ('/visit2') {
+                            return 1;
                         }
                         when ('/login') {
                             $self->redirect_to( $self->url_for('/') );
@@ -3991,6 +3997,144 @@ any '/visit' => sub {
         type    => $type,
         user    => $user,
         sms     => $sms,
+        booking => $booking_obj,
+    );
+};
+
+any '/visit2' => sub {
+    my $self = shift;
+
+    my $type    = $self->param('type') || q{};
+    my $name    = $self->param('name');
+    my $phone   = $self->param('phone');
+
+    my $email         = $self->param('email');
+    my $gender        = $self->param('gender');
+    my $address1      = $self->param('address1');
+    my $address2      = $self->param('address2');
+    my $address3      = $self->param('address3');
+    my $address4      = $self->param('address4');
+    my $birth         = $self->param('birth');
+    my $height        = $self->param('height');
+    my $weight        = $self->param('weight');
+    my $booking       = $self->param('booking');
+    my $booking_saved = $self->param('booking-saved');
+    my $purpose       = $self->param('purpose');
+    my $purpose2      = $self->param('purpose2');
+    my $pre_category  = $self->param('pre_category');
+    my $pre_color     = $self->param('pre_color');
+
+    app->log->debug("type: $type");
+    app->log->debug("name: $name");
+    app->log->debug("phone: $phone");
+
+    app->log->debug("email: $email");
+    app->log->debug("gender: $gender");
+    app->log->debug("address1: $address1");
+    app->log->debug("address2: $address2");
+    app->log->debug("address3: $address3");
+    app->log->debug("address4: $address4");
+    app->log->debug("birth: $birth");
+    app->log->debug("height: $height");
+    app->log->debug("weight: $weight");
+    app->log->debug("booking: $booking");
+    app->log->debug("booking-saved: $booking_saved");
+    app->log->debug("purpose: $purpose");
+    app->log->debug("purpose2: $purpose2");
+    app->log->debug("pre_category: $pre_category");
+    app->log->debug("pre_color: $pre_color");
+
+    #
+    # find user
+    #
+    my @users = $DB->resultset('User')->search(
+        {
+            'me.name'         => $name,
+            'user_info.phone' => $phone,
+        },
+        { join => 'user_info' },
+    );
+    my $user = shift @users;
+    unless ($user) {
+        app->log->warn( 'user not found' );
+        $self->stash( alert => '이름과 휴대전화가 일치하는 사용자를 찾을 수 없습니다.' ) if $name || $phone;
+        return;
+    }
+    unless ($user->user_info) {
+        app->log->warn( 'user_info not found' );
+        $self->stash( alert => '사용자 정보에 문제가 있습니다. 관리자에게 문의해주세요.' ) if $name || $phone;
+        return;
+    }
+
+    if ( $type eq 'visit' ) {
+        #
+        # 예약 신청/변경/취소
+        #
+
+        my %user_params;
+        my %user_info_params;
+
+        $user_params{id}                = $user->id;
+        $user_params{email}             = $email        if $email         && $email        ne $user->email;
+        $user_info_params{gender}       = $gender       if $gender        && $gender       ne $user->user_info->gender;
+        $user_info_params{address1}     = $address1     if $address1      && $address1     ne $user->user_info->address1;
+        $user_info_params{address2}     = $address2     if $address2      && $address2     ne $user->user_info->address2;
+        $user_info_params{address3}     = $address3     if $address3      && $address3     ne $user->user_info->address3;
+        $user_info_params{address4}     = $address4     if $address4      && $address4     ne $user->user_info->address4;
+        $user_info_params{birth}        = $birth        if $birth         && $birth        ne $user->user_info->birth;
+        $user_info_params{height}       = $height       if $height        && $height       ne $user->user_info->height;
+        $user_info_params{weight}       = $weight       if $weight        && $weight       ne $user->user_info->weight;
+        $user_info_params{purpose}      = $purpose      if $purpose       && $purpose      ne $user->user_info->purpose;
+        $user_info_params{purpose2}     = $purpose2 || q{};
+        $user_info_params{pre_category} = $pre_category if $pre_category  && $pre_category ne $user->user_info->pre_category;
+        $user_info_params{pre_color}    = $pre_color    if $pre_color     && $pre_color    ne $user->user_info->pre_color;
+
+        if ( $booking == -1 ) {
+            #
+            # 예약 취소
+            #
+            my $order = $user->find_related( 'orders', { booking_id => $booking_saved } );
+            $order->delete if $order;
+        }
+        else {
+            $user = $self->update_user( \%user_params, \%user_info_params );
+            if ($booking_saved) {
+                #
+                # 이미 예약 정보가 저장되어 있는 경우 - 예약 변경 상황
+                #
+                my $order = $user->find_related( 'orders', { booking_id => $booking_saved } );
+                if ( $booking != $booking_saved ) {
+                    #
+                    # 변경한 예약 정보가 기존 정보와 다를 경우 갱신함
+                    #
+                    $order->update({ booking_id => $booking }) if $order;
+                }
+            }
+            else {
+                #
+                # 예약 정보가 없는 경우 - 신규 예약 신청 상황
+                #
+                my $order = $user->create_related('orders', {
+                    status_id  => 14,      # 방문예약: status 테이블 참조
+                    booking_id => $booking,
+                });
+            }
+        }
+    }
+
+    my $booking_obj = do {
+        my $dt_now = DateTime->now( time_zone => app->config->{timezone} );
+        my $dtf    = $DB->storage->datetime_parser;
+        my $rs     = $user->search_related('orders')->search_related('booking', {
+            date => { '>' => $dtf->format_datetime($dt_now) },
+        });
+
+        $rs->next;
+    };
+
+    $self->stash(
+        type    => $type,
+        user    => $user,
         booking => $booking_obj,
     );
 };
