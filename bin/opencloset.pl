@@ -4647,21 +4647,6 @@ get '/order/:id' => sub {
     $self->render( 'order-id', order => $order );
 };
 
-get '/order/:id/delete' => sub {
-    my $self = shift;
-
-    #
-    # fetch params
-    #
-    my %params = $self->get_params(qw/ id /);
-    $self->delete_order( \%params );
-
-    #
-    # response
-    #
-    $self->redirect_to('/order');
-};
-
 post '/order/:id/update' => sub {
     my $self = shift;
 
