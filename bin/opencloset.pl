@@ -4642,6 +4642,33 @@ get '/order/:id' => sub {
     return unless $order;
 
     #
+    # 결제 대기 상태이면 사용자의 정보를 주문서에 동기화 시킴
+    #
+    if ( $order->status_id == 19 ) {
+        my $user    = $order->user;
+        my $comment = $user->user_info->comment ? $user->user_info->comment . "\n" : q{};
+        my $desc    = $order->desc              ? $order->desc              . "\n" : q{};
+        $order->update({
+            purpose      => $user->user_info->purpose,
+            purpose2     => $user->user_info->purpose2,
+            pre_category => $user->user_info->pre_category,
+            pre_color    => $user->user_info->pre_color,
+            height       => $user->user_info->height,
+            weight       => $user->user_info->weight,
+            bust         => $user->user_info->bust,
+            waist        => $user->user_info->waist,
+            hip          => $user->user_info->hip,
+            belly        => $user->user_info->belly,
+            thigh        => $user->user_info->thigh,
+            arm          => $user->user_info->arm,
+            leg          => $user->user_info->leg,
+            knee         => $user->user_info->knee,
+            foot         => $user->user_info->foot,
+            desc         => $comment . $desc,
+        });
+    }
+
+    #
     # response
     #
     $self->render( 'order-id', order => $order );
