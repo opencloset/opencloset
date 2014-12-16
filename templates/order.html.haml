@@ -29,6 +29,9 @@
     %a{ :href => "#{ url_for('/order?status=15') }" } 배송예약
   %span= '|'
   %span
+    %a{ :href => "#{ url_for('/order?status=19') }" } 결제대기
+  %span= '|'
+  %span
     %a{ :href => "#{ url_for('/order?status=undef') }" } 상태없음
 
 .space-4
