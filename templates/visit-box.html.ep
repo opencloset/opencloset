@@ -60,7 +60,7 @@
                             <input name="service" type="checkbox" class="<%= $theme %>" />
                             <span class="lbl">
                               <a href="#modal-service" data-toggle="modal">
-                                <strong>서비스 이용약관</strong>에 동의합니다.
+                                <strong>정장 대여규정</strong>에 동의합니다.
                               </a>
                             </span>
                           </label>
@@ -126,7 +126,7 @@
                       <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
                         <h4 class="modal-title" id="serviceModalLabel">
-                          열린옷장 서비스 이용약관
+                          열린옷장 정장 대여규정
                         </h4>
                       </div>
                       <div class="modal-body" style="height: 250px; overflow-y: auto;">
