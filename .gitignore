@@ -27,6 +27,9 @@ public/js
 # grunt: compass
 public/css
 
+# bower
+public/assets
+
 # database file
 *.sqlite
 *.db

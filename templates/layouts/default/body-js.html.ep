@@ -7,49 +7,42 @@
     <!--[if !IE]> -->
       <script type="text/javascript">
         window.jQuery
-          || document.write("<script src='/lib/jquery/js/jquery-2.0.3.min.js'>"+"<"+"/script>");
+          || document.write("<script src='/theme/ace/js/jquery.min.js'>"+"<"+"/script>");
       </script>
     <!-- <![endif]-->
 
-    <!--[if IE]>
-      <script type="text/javascript">
-        window.jQuery
-          || document.write("<script src='/lib/jquery/js/jquery-1.10.2.min.js'>"+"<"+"/script>");
-      </script>
-    <![endif]-->
-
     <script type="text/javascript">
       if ("ontouchend" in document)
-        document.write("<script src='/lib/jquery/js/jquery.mobile.custom.min.js'>"+"<"+"/script>");
+        document.write("<script src='/theme/ace/js/jquery.mobile.custom.min.js'>"+"<"+"/script>");
     </script>
 
     <!-- bootstrap -->
-    <script src="/lib/bootstrap/js/bootstrap.min.js"></script>
-    <script src="/lib/bootstrap/js/bootstrap-tag.min.js"></script> <!-- tag -->
+    <script src="/theme/ace/js/bootstrap.min.js"></script>
+    <script src="/theme/ace/js/bootstrap-tag.min.js"></script> <!-- tag -->
 
     <!--[if lte IE 8]>
-      <script src="/lib/excanvas/excanvas.min.js"></script>
+      <script src="/theme/ace/js/excanvas.min.js"></script>
     <![endif]-->
 
     <!-- prettify -->
-    <script src="/lib/prettify/js/prettify.js"></script>
+    <script src="/theme/ace/js/prettify.min.js"></script>
 
     <!-- underscore -->
-    <script src="/lib/underscore/underscore-min.js"></script>
+    <script src="/assets/components/underscore/underscore-min.js"></script>
 
     <!-- datepicker -->
-    <script src="/lib/datepicker/js/bootstrap-datepicker.js"></script>
-    <script src="/lib/datepicker/js/locales/bootstrap-datepicker.kr.js"></script>
+    <script src="/assets/components/bootstrap-datepicker/js/bootstrap-datepicker.js"></script>
+    <script src="/assets/components/bootstrap-datepicker/js/locales/bootstrap-datepicker.kr.js"></script>
 
     <!-- select2 -->
-    <script src="/lib/select2/select2.min.js"></script>
-    <script src="/lib/select2/select2_locale_ko.js"></script>
+    <script src="/theme/ace/js/select2.min.js"></script>
+    <script src="/assets/components/select2/select2_locale_ko.js"></script>
 
     <!-- chosen -->
-    <script src="/lib/chosen/js/chosen.jquery.min.js"></script>
+    <script src="/theme/ace/js/chosen.jquery.min.js"></script>
 
     <!-- bootbox -->
-    <script src="/lib/bootstrap/js/bootbox.min.js"></script>
+    <script src="/theme/ace/js/bootbox.min.js"></script>
 
     <!-- bundle -->
     <script src="/js/bundle.js"></script>

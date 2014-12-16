@@ -20,6 +20,11 @@ coffeescript 파일을 컴파일하고, 컴파일된 javascript 파일을 minify
     $ npm install -g grunt-cli
     $ npm install
 
+front-end package 매니저인 `bower` 를 설치하고 필요한 패키지를 설치합니다.
+
+    $ npm install -g bower
+    $ bower install
+
 ### 데이터베이스 초기화
 
 MySQL을 사용해서 데이터베이스를 `opencloset`, 사용자 이름 `opencloset`,

@@ -1,6 +1,6 @@
 % use utf8;
 <!-- theme -->
-    <link rel="stylesheet" href="/theme/<%= $theme %>/css/<%= $theme %>-fonts.css" />
+    <link rel="stylesheet" href="/theme/<%= $theme %>/css/<%= $theme %>-fonts.min.css" />
     <link rel="stylesheet" href="/theme/<%= $theme %>/css/<%= $theme %>.min.css" />
     <link rel="stylesheet" href="/theme/<%= $theme %>/css/<%= $theme %>-rtl.min.css" />
     <link rel="stylesheet" href="/theme/<%= $theme %>/css/<%= $theme %>-skins.min.css" />
