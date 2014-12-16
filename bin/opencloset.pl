@@ -3994,6 +3994,7 @@ any '/visit' => sub {
     };
 
     $self->stash(
+        load    => app->config->{visit_load},
         type    => $type,
         user    => $user,
         sms     => $sms,
@@ -4133,6 +4134,7 @@ any '/visit2' => sub {
     };
 
     $self->stash(
+        load    => app->config->{visit_load},
         type    => $type,
         user    => $user,
         booking => $booking_obj,

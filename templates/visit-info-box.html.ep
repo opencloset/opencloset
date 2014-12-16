@@ -130,7 +130,7 @@
 
                           <label class="block clearfix">
                             <span class="block input-icon input-icon-right">
-                              <input name="purpose" type="text" class="form-control" placeholder="대여 목적" value="<%= $user->user_info->purpose %>" />
+                              <input name="purpose" type="text" class="form-control" placeholder="대여 목적" value="<%= $load ? $user->user_info->purpose : q{} %>" />
                               <p> 아래 목록을 클릭해주시거나, 목록에 없으면 직접 입력해주세요. </p>
                               <p class="purpose">
                                 <span class="label label-info clickable"> 입사면접 </span>
@@ -147,7 +147,7 @@
 
                           <label class="block clearfix">
                             <span class="block input-icon input-icon-right">
-                              <input name="purpose2" type="text" class="form-control" placeholder="대여 목적에 대한 자세한 설명" value="<%= $user->user_info->purpose2 %>" />
+                              <input name="purpose2" type="text" class="form-control" placeholder="대여 목적에 대한 자세한 설명" value="<%= $load ? $user->user_info->purpose2 : q{} %>" />
                               <p> 입사 면접인 경우 응시 기업 및 분야를, 결혼식인 경우 누구의 결혼식인지를 자세하게 입력해주세요.  저희가 적합한 옷을 준비하는데 큰 도움이 됩니다. :) </p>
                             </span>
                           </label>
@@ -168,7 +168,7 @@
                             <p> 대여를 원하는 옷의 종류를 모두 선택해주세요. </p>
                           </label>
 
-                          <input type="hidden" name="pre_color" value="<%= $user->user_info->pre_color %>">
+                          <input type="hidden" name="pre_color" value="<%= $load ? $user->user_info->pre_color : q{} %>">
                           % my @colors = (
                           %   [ 1 => '첫' ],
                           %   [ 2 => '두' ],
