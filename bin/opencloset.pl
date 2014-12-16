@@ -4161,10 +4161,12 @@ get '/user' => sub {
     #
     my %params = $self->get_params(qw/ id /);
 
-    my $p = $self->param('p') || 1;
-    my $s = $self->param('s') || app->config->{entries_per_page};
-    my $q = $self->param('q');
-    my $cond = $q
+    my $p     = $self->param('p') || 1;
+    my $s     = $self->param('s') || app->config->{entries_per_page};
+    my $q     = $self->param('q');
+    my $staff = $self->param('staff');
+
+    my $cond1 = $q
         ? [
         { 'name'               => { like => "%$q%" } },
         { 'email'              => { like => "%$q%" } },
@@ -4174,13 +4176,23 @@ get '/user' => sub {
         { 'user_info.gender'   => $q },
         ]
         : {};
+    my $cond2
+        = !defined($staff)           ? {}
+        : !$staff                    ? { 'user_info.staff' => 0 }
+        : { 'user_info.staff' => 1 }
+        ;
 
     my $rs = $self->get_user_list({
         %params,
         allow_empty => 1,
     });
     $rs = $rs->search(
-        $cond,
+        {
+            -and => [
+                $cond1,
+                $cond2,
+            ],
+        },
         {
             join     => 'user_info',
             order_by => { -asc => 'id' },

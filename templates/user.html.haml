@@ -24,6 +24,15 @@
 
 .space-8
 
+%div
+  %span
+    %a{ :href => "#{ url_for('/user') }" } 전체보기
+  %span= '|'
+  %span
+    %a{ :href => "#{ url_for('/user?staff=1') }" } 직원보기
+
+.space-4
+
 #user-list-table.dataTables_wrapper
   %table.table.table-striped.table-bordered.table-hover
     %thead
