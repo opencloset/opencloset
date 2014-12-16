@@ -60,6 +60,11 @@ $db_opts->{AutoCommit} //= 1;
     site_type => 'all',
 
     #
+    # 방문 예약 페이지에서 기존 정보로 채워줌 여무
+    #
+    visit_load => 0,
+
+    #
     # site UI
     #
     secrets      => [
