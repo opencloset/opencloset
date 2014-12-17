@@ -31,7 +31,7 @@
 
                       <form id="visit-info-form" method="post" action="<%= url_for('/visit') %>">
                         <input type="hidden" name="type" value="visit">
-                        <input name="sms" type="hidden" class="form-control" value="<%= $sms %>" />
+                        <input name="sms" type="hidden" class="form-control" value="<%= $password %>" />
                         <fieldset>
                           <label class="block clearfix">
                             <span class="block input-icon input-icon-right">
@@ -155,7 +155,7 @@
 
                           <label class="block clearfix">
                             <input type="hidden" name="pre_category" value="<%= $user->user_info->pre_category %>">
-                            <select class="width-80 chosen-select" name="pre_category_temp" multiple data-placeholder="대여할 옷의 종류를 선택하세요.">
+                            <select class="width-100 chosen-select" name="pre_category_temp" multiple data-placeholder="대여할 옷의 종류를 선택하세요.">
                               <option value=""     >           </option>
                               <option value="jacket"> 자켓     </option>
                               <option value="pants" > 팬츠     </option>
@@ -177,7 +177,7 @@
                           % );
                           % for my $color (@colors) {
                             <label class="block clearfix">
-                              <select class="width-80 chosen-select" name="pre_color<%= $color->[0] %>" data-placeholder="<%= $color->[1] %> 번째 선호 색상">
+                              <select class="width-100 chosen-select" name="pre_color<%= $color->[0] %>" data-placeholder="<%= $color->[1] %> 번째 선호 색상">
                                 <option value=""     > <%= $color->[1] %> 번째 선호 색상 </option>
                                 <option value="staff"> 직원 추천         </option>
                                 <option value="black"> 블랙              </option>

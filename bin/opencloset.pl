@@ -3812,12 +3812,12 @@ get '/logout' => sub {
 any '/visit' => sub {
     my $self = shift;
 
-    my $type    = $self->param('type') || q{};
-    my $name    = $self->param('name');
-    my $phone   = $self->param('phone');
-    my $service = $self->param('service');
-    my $privacy = $self->param('privacy');
-    my $sms     = $self->param('sms');
+    my $type     = $self->param('type') || q{};
+    my $name     = $self->param('name');
+    my $phone    = $self->param('phone');
+    my $service  = $self->param('service');
+    my $privacy  = $self->param('privacy');
+    my $password = $self->param('sms');
 
     my $email         = $self->param('email');
     my $gender        = $self->param('gender');
@@ -3840,7 +3840,7 @@ any '/visit' => sub {
     app->log->debug("phone: $phone");
     app->log->debug("service: $service");
     app->log->debug("privacy: $privacy");
-    app->log->debug("sms: $sms");
+    app->log->debug("sms: $password");
 
     app->log->debug("email: $email");
     app->log->debug("gender: $gender");
@@ -3887,7 +3887,7 @@ any '/visit' => sub {
         $self->stash( alert => '인증코드가 만료되었습니다.' );
         return;
     }
-    unless ( $user->check_password($sms) ) {
+    unless ( $user->check_password($password) ) {
         app->log->warn( $user->email . "\'s password is wrong" );
         $self->stash( alert => '인증코드가 유효하지 않습니다.' );
         return;
@@ -3994,11 +3994,11 @@ any '/visit' => sub {
     };
 
     $self->stash(
-        load    => app->config->{visit_load},
-        type    => $type,
-        user    => $user,
-        sms     => $sms,
-        booking => $booking_obj,
+        load     => app->config->{visit_load},
+        type     => $type,
+        user     => $user,
+        password => $password,
+        booking  => $booking_obj,
     );
 };
 

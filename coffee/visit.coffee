@@ -20,14 +20,14 @@ $ ->
   #
   # 대여할 옷의 종류 변경시 pre_category 양식 자동 설정
   #
-  $("select[name=pre_category_temp]").chosen().change ->
+  $("select[name=pre_category_temp]").chosen({ width: "100%" }).change ->
     category = $(this).val() || []
     $("input[name=pre_category]").val category.join(',')
 
   #
   # 첫/두/세 번째 선호 색상 변경시 pre_color 양식 자동 설정
   #
-  $("select[name=pre_color1],select[name=pre_color2],select[name=pre_color3]").chosen().change ->
+  $("select[name=pre_color1],select[name=pre_color2],select[name=pre_color3]").chosen({ width: "100%" }).change ->
     $("input[name=pre_color]").val [ $("select[name=pre_color1]").val(), $("select[name=pre_color2]").val(), $("select[name=pre_color3]").val() ].join(',')
 
   #
