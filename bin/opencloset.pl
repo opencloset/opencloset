@@ -3077,7 +3077,7 @@ group {
         }
 
         my $password = String::Random->new->randregex('\d\d\d\d\d\d');
-        my $expires  = DateTime->now( time_zone => app->config->{timezone} )->add( minutes => 5 );
+        my $expires  = DateTime->now( time_zone => app->config->{timezone} )->add( minutes => 10 );
         $user->update({
             password => $password,
             expires  => $expires->epoch,

@@ -93,7 +93,7 @@ $ ->
       $(".sms").addClass('block').show()
       $("#btn-sms-confirm-label").html('SMS 인증하기')
 
-      validate_end = moment().add('m', 5)
+      validate_end = moment().add('m', 10)
       $("#sms-remain-seconds").html( validate_end.diff( moment(), 'seconds' ) )
       timer = setInterval () ->
         validate_remain = validate_end.diff( moment(), 'seconds' )
