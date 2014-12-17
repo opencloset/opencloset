@@ -31,6 +31,7 @@
 
                       <form id="visit-info-form" method="post" action="<%= url_for('/visit') %>">
                         <input type="hidden" name="type" value="visit">
+                        <input name="sms" type="hidden" class="form-control" value="<%= $sms %>" />
                         <fieldset>
                           <label class="block clearfix">
                             <span class="block input-icon input-icon-right">
@@ -187,13 +188,6 @@
                               </select>
                             </label>
                           % }
-
-                          <label class="block clearfix">
-                            <span class="block input-icon input-icon-right">
-                              <input name="sms" type="text" class="form-control" placeholder="인증번호" value="<%= $sms %>" />
-                              <i class="icon-key"></i>
-                            </span>
-                          </label>
 
                           <div class="space-12"></div>
 
