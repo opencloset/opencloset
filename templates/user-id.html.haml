@@ -130,6 +130,16 @@
                                   %span.editable#user-birth{ 'data-name' => 'birth' }= $user->user_info->birth
 
                               .profile-info-row
+                                .profile-info-name 대여 목적
+                                .profile-info-value
+                                  %span.editable#user-purpose{ 'data-name' => 'purpose', 'data-value' => "#{ $user->user_info->purpose}" }
+
+                              .profile-info-row
+                                .profile-info-name 상세 대여 목적
+                                .profile-info-value
+                                  %span.editable#user-purpose2{ 'data-name' => 'purpose2', 'data-value' => "#{ $user->user_info->purpose2}" }
+
+                              .profile-info-row
                                 .profile-info-name 설명
                                 .profile-info-value
                                   %span.editable#user-comment{ 'data-name' => 'comment' }= $user->user_info->comment

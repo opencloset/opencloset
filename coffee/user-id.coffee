@@ -59,6 +59,8 @@ $ ->
           OpenCloset.alert 'info', '비밀번호 변경을 완료했습니다.'
       when 'user-comment'
         params.type = 'textarea'
+      when 'user-purpose2'
+        params.type = 'textarea'
       when 'user-pre_category'
         params.type    = 'select2'
         params.source  = ( { id: i, text: OpenCloset.category[i].str } for i in [ 'jacket', 'pants', 'shirt', 'tie', 'shoes', 'belt', 'skirt', 'blouse' ] )
