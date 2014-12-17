@@ -56,7 +56,7 @@
 
     <!-- remove alert box after 5 sec -->
     <script type="text/javascript">
-      setTimeout( function() { $(".alert").remove() }, 5000 );
+      setTimeout( function() { $(".alert").remove() }, 8000 );
     </script>
 
     % if ($google_analytics) {
