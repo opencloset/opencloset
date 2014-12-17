@@ -1726,8 +1726,8 @@ group {
         #
         my $res = HTTP::Tiny->new(timeout => 1)->post_form(app->config->{monitor_uri}, {
             order_id => $order->id,
-            from => $order_params{status_id},
-            to => $order->status_id
+            from     => $order_params{status_id},
+            to       => $order->status_id
         });
 
         $self->app->log->error("Failed to posting event: $res->{reason}") unless $res->{success};
