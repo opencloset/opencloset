@@ -33,3 +33,6 @@ public/css
 
 # cache dir
 cache/
+
+# hypnotoad pid file
+hypnotoad.pid
