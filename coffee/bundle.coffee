@@ -28,6 +28,10 @@ $ ->
       # http://stackoverflow.com/questions/6677035/jquery-scroll-to-element#answer-6677069
       #
       $('html, body').animate({ scrollTop: $(target).offset().top }, 0)
+
+      setTimeout ->
+        $('.alert').remove()
+      , 8000
     status:
       '대여가능':   { id: 1,  css: 'label-success'   }
       '대여중':     { id: 2,  css: 'label-important' }
