@@ -4,6 +4,7 @@
     <link rel="stylesheet" href="/theme/<%= $theme %>/css/<%= $theme %>.min.css" />
     <link rel="stylesheet" href="/theme/<%= $theme %>/css/<%= $theme %>-rtl.min.css" />
     <link rel="stylesheet" href="/theme/<%= $theme %>/css/<%= $theme %>-skins.min.css" />
+    <link rel="stylesheet" href="/theme/<%= $theme %>/css/<%= $theme %>-chosen.css" />
     <!--[if lte IE 8]>
       <link rel="stylesheet" href="/theme/<%= $theme %>/css/<%= $theme %>-ie.min.css" />
     <![endif]-->
