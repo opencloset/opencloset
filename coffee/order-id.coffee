@@ -189,16 +189,25 @@ $ ->
 
         $.ajax url,
           type: 'POST'
-          data: {
+          data:
             id:    order_id
             name:  'status_id'
             value: 2
             pk:    order_id
-          }
           success: (data, textStatus, jqXHR) ->
-            window.location.href = redirect_url
+            $.ajax $(e.target).data('monitor-url'),
+              type: 'POST'
+              data:
+                order_id: order_id
+                from:     19    # 결제대기
+                to:       2     # 대여중
+              success: ->
+              error: (jqXHR, textStatus, errorThrown) ->
+                OpenCloset.alert 'danger', '모니터 이벤트 전송에 실패했습니다.'
+              complete: (jqXHR, textStatus) ->
+                window.location.href = redirect_url
           error: (jqXHR, textStatus, errorThrown) ->
-            OpenCloset.alert 'danger', jqXHR.responseJSON.error
+            OpenCloset.alert 'danger', '주문서 상태 변경에 실패했습니다.'
           complete: (jqXHR, textStatus) ->
       error: (jqXHR, textStatus, errorThrown) ->
       complete: (jqXHR, textStatus) ->

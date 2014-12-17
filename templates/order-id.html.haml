@@ -435,7 +435,7 @@
                           반납 취소
                       -   }
                       -   elsif ( $order->status->name eq '결제대기' ) {
-                          %a#btn-order-confirm.btn.btn-info.pull-right{ :type => 'button', :href => "#", 'data-url' => "#{ url_for('/order/' . $order->id . '/update') }", 'data-redirect-url' => "#{ url_for('/order/' . $order->id) }" }
+                          %a#btn-order-confirm.btn.btn-info.pull-right{ :type => 'button', :href => "#", 'data-url' => "#{ url_for('/order/' . $order->id . '/update') }", 'data-redirect-url' => "#{ url_for('/order/' . $order->id) }", 'data-monitor-url' => "#{$monitor_uri}" }
                             %i.icon-ok.bigger-110
                             주문 확정
                       -   }
