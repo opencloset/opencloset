@@ -710,6 +710,12 @@ helper create_order => sub {
                         or die "failed to create a new order_detail\n";
                 }
             }
+
+            $order->add_to_order_details({
+                name        => '배송비',
+                price       => 0,
+                final_price => 0,
+            }) or die "failed to create a new order_detail for delivery_fee\n";
             $order->add_to_order_details({
                 name        => '에누리',
                 price       => 0,
@@ -4612,6 +4618,11 @@ post '/order' => sub {
                 }) or die "failed to create a new order_detail\n";
             }
 
+            $order->add_to_order_details({
+                name        => '배송비',
+                price       => 0,
+                final_price => 0,
+            }) or die "failed to create a new order_detail for delivery_fee\n";
             $order->add_to_order_details({
                 name        => '에누리',
                 price       => 0,
