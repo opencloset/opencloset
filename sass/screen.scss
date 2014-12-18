@@ -511,6 +511,9 @@ $opencloset-darken-yellow: desaturate(darken($opencloset-yellow, 4%), 10%);
                 p {
                     font-size: 1.1em;
                 }
+                .widget-body.prohibit-change-status {
+                    background-color: #ffc80f;
+                }
             }
         }
     }
