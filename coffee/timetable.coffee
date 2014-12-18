@@ -86,6 +86,31 @@ $ ->
       error: (jqXHR, textStatus, errorThrown) ->
         OpenCloset.alert('danger', "주문서 상태 변경에 실패했습니다: #{jqXHR.responseJSON.error.str}", "##{alert_target}")
 
+  enableStatus = (el) ->
+    status_id = $(el).editable( 'getValue', true )
+    switch status_id
+      when 14 then enable = true # 방문예약
+      when 12 then enable = true # 미방문
+      when 13 then enable = true # 방문
+      when 16 then enable = true # 치수측정
+      when 17 then enable = true # 의류준비
+      when 20 then enable = true # 탈의01
+      when 21 then enable = true # 탈의02
+      when 22 then enable = true # 탈의03
+      when 23 then enable = true # 탈의04
+      when 24 then enable = true # 탈의05
+      when 25 then enable = true # 탈의06
+      when 26 then enable = true # 탈의07
+      when 27 then enable = true # 탈의08
+      when 28 then enable = true # 탈의09
+      when  6 then enable = true # 수선
+      when 18 then enable = true # 포장
+      else         enable = false
+    if enable
+      $(el).editable 'enable'
+    else
+      $(el).editable 'disable'
+
   #
   # 시간표내 각각의 주문서 상태 변경
   #
@@ -128,6 +153,9 @@ $ ->
         ( mapped[v.id] = k ) for k, v of OpenCloset.status
         $(this).html mapped[value]
     )
+
+  $('.editable').each (i, el) -> enableStatus(el)
+  $('.editable').on 'save', (e, params) -> enableStatus(this)
 
   #
   # 각각의 주문서에서 다음 상태로 상태 변경
@@ -179,7 +207,9 @@ $ ->
           when 28 then status_id = 18 # 탈의09   -> 포장
           when  6 then status_id = 18 # 수선     -> 포장
           else return
-        success_cb = () -> $(storage).find('.editable').editable( 'setValue', status_id, true )
+        success_cb = () ->
+          $(storage).find('.editable').editable( 'setValue', status_id, true )
+          $(storage).find('.editable').each (i, el) -> enableStatus(el)
         updateOrder order_id, ymd, status_id, alert_target, success_cb
       error: (jqXHR, textStatus, errorThrown) ->
         OpenCloset.alert('danger', "현재 주문서 상태를 확인할 수 없습니다: #{jqXHR.responseJSON.error.str}", "##{alert_target}")
