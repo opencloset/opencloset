@@ -4584,6 +4584,13 @@ post '/order' => sub {
             # 주문서를 결제대기(19) 상태로 변경
             #
             $order->update({ status_id => 19 });
+            my $res = HTTP::Tiny->new(timeout => 1)->post_form(app->config->{monitor_uri}, {
+                order_id => $order_params{id},
+                from     => 18,
+                to       => 19
+            });
+
+            $self->app->log->error("Failed to posting event: $res->{reason}") unless $res->{success};
 
             for ( my $i = 0; $i < @{ $order_detail_params{clothes_code} }; ++$i ) {
                 my $clothes_code = $order_detail_params{clothes_code}[$i];
