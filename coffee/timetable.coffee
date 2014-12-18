@@ -59,7 +59,7 @@ $ ->
         success: (data, textStatus, jqXHR) ->
           updateTimeTablePerson(btn)
 
-  updateOrder = ( order_id, ymd, status_id, alert_target ) ->
+  updateOrder = ( order_id, ymd, status_id, alert_target, success_cb ) ->
     #
     # 주문서의 상태 갱신
     #
@@ -82,35 +82,52 @@ $ ->
             $('#count-all').html(data.all)
             $('#count-visited').html(data.visited)
             $('#count-notvisited').html(data.notvisited)
-
-        #
-        # 드롭다운의 주문서 상태 레이블을 갱신
-        #
-        status_label = ''
-        for k, v of OpenCloset.status
-          continue unless v.id == status_id
-          status_label = k
-          break
-        $("#label-order-status-#{ order_id }").html(status_label)
+            success_cb() if success_cb
       error: (jqXHR, textStatus, errorThrown) ->
         OpenCloset.alert('danger', "주문서 상태 변경에 실패했습니다: #{jqXHR.responseJSON.error.str}", "##{alert_target}")
 
   #
-  # 시간표내 각각의 주문서 드롭다운 상태 변경
+  # 시간표내 각각의 주문서 상태 변경
   #
-  # 클릭 후 .open 클래스를 제거해  드롭다운을 안보이게 하면 좋겠지만
-  # 실제로 동작하지 않기 때문에 일단은 그대로 둡니다.
-  #
-  # http://stackoverflow.com/questions/10941540/how-to-hide-twitter-bootstrap-dropdown
-  #
-  $('.dropdown-people a.order-status').click (e) ->
-    storage      = $(this).closest('.dropdown-people')
-    order_id     = storage.data('order-id')
-    alert_target = storage.data('target')
-    ymd          = storage.data('ymd')
-    status_id    = $(this).data('status-id')
-
-    updateOrder order_id, ymd, status_id, alert_target
+  $('.editable').each (i, el) ->
+    available_status = [
+      '방문예약',
+      '미방문',
+      '방문',
+      '치수측정',
+      '의류준비',
+      '탈의01',
+      '탈의02',
+      '탈의03',
+      '탈의04',
+      '탈의05',
+      '탈의06',
+      '탈의07',
+      '탈의08',
+      '탈의09',
+      '포장',
+    ]
+    $(el).editable(
+      mode:        'inline'
+      showbuttons: 'true'
+      emptytext:   '상태없음'
+      type:        'select'
+      source:      ( { value: OpenCloset.status[i]['id'], text: i } for i in available_status )
+      url: (params) ->
+        storage      = $(el).closest('.people-box')
+        order_id     = storage.data('order-id')
+        alert_target = storage.data('target')
+        ymd          = storage.data('ymd')
+        status_id    = params.value
+        updateOrder order_id, ymd, status_id, alert_target
+      display: (value, sourceData) ->
+        unless value
+          $(this).empty()
+          return
+        mapped = {}
+        ( mapped[v.id] = k ) for k, v of OpenCloset.status
+        $(this).html mapped[value]
+    )
 
   #
   # 각각의 주문서에서 다음 상태로 상태 변경
@@ -135,8 +152,8 @@ $ ->
   # 18 => 포장
   # 19 => 결제대기
   #
-  $('.dropdown-people a.order-next-status').click (e) ->
-    storage      = $(this).closest('.dropdown-people')
+  $('.people-box a.order-next-status').click (e) ->
+    storage      = $(this).closest('.people-box')
     order_id     = storage.data('order-id')
     alert_target = storage.data('target')
     ymd          = storage.data('ymd')
@@ -162,6 +179,7 @@ $ ->
           when 28 then status_id = 18 # 탈의09   -> 포장
           when  6 then status_id = 18 # 수선     -> 포장
           else return
-        updateOrder order_id, ymd, status_id, alert_target
+        success_cb = () -> $(storage).find('.editable').editable( 'setValue', status_id, true )
+        updateOrder order_id, ymd, status_id, alert_target, success_cb
       error: (jqXHR, textStatus, errorThrown) ->
         OpenCloset.alert('danger', "현재 주문서 상태를 확인할 수 없습니다: #{jqXHR.responseJSON.error.str}", "##{alert_target}")
