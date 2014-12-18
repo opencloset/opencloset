@@ -86,7 +86,7 @@ $ ->
       error: (jqXHR, textStatus, errorThrown) ->
         OpenCloset.alert('danger', "주문서 상태 변경에 실패했습니다: #{jqXHR.responseJSON.error.str}", "##{alert_target}")
 
-  enableStatus = (el) ->
+  updateStatus = (el) ->
     status_id = $(el).editable( 'getValue', true )
     switch status_id
       when 14 then enable = true # 방문예약
@@ -108,8 +108,10 @@ $ ->
       else         enable = false
     if enable
       $(el).editable 'enable'
+      $(el).closest('.widget-body').removeClass('prohibit-change-status')
     else
       $(el).editable 'disable'
+      $(el).closest('.widget-body').addClass('prohibit-change-status')
 
   #
   # 시간표내 각각의 주문서 상태 변경
@@ -155,8 +157,8 @@ $ ->
         $(this).html mapped[value]
     )
 
-  $('.editable').each (i, el) -> enableStatus(el)
-  $('.editable').on 'save', (e, params) -> enableStatus(this)
+  $('.editable').each (i, el) -> updateStatus(el)
+  $('.editable').on 'save', (e, params) -> updateStatus(this)
 
   #
   # 각각의 주문서에서 다음 상태로 상태 변경
@@ -210,7 +212,7 @@ $ ->
           else return
         success_cb = () ->
           $(storage).find('.editable').editable( 'setValue', status_id, true )
-          $(storage).find('.editable').each (i, el) -> enableStatus(el)
+          $(storage).find('.editable').each (i, el) -> updateStatus(el)
         updateOrder order_id, ymd, status_id, alert_target, success_cb
       error: (jqXHR, textStatus, errorThrown) ->
         OpenCloset.alert('danger', "현재 주문서 상태를 확인할 수 없습니다: #{jqXHR.responseJSON.error.str}", "##{alert_target}")
