@@ -239,5 +239,5 @@ $db_opts->{AutoCommit} //= 1;
     #
     # monitor
     #
-    monitor_uri => 'http://localhost:5000/events',
+    monitor_uri => 'http://localhost:5000',
 };

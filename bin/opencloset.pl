@@ -890,7 +890,7 @@ helper update_order => sub {
             my $to = $order_params->{status_id};
             return $order if $to == $from;
 
-            my $res = HTTP::Tiny->new(timeout => 1)->post_form(app->config->{monitor_uri}, {
+            my $res = HTTP::Tiny->new(timeout => 1)->post_form(app->config->{monitor_uri} . '/events', {
                 order_id => $order->id,
                 from     => $from,
                 to       => $to
@@ -4594,7 +4594,7 @@ post '/order' => sub {
             # 주문서를 결제대기(19) 상태로 변경
             #
             $order->update({ status_id => 19 });
-            my $res = HTTP::Tiny->new(timeout => 1)->post_form(app->config->{monitor_uri}, {
+            my $res = HTTP::Tiny->new(timeout => 1)->post_form(app->config->{monitor_uri} . '/events', {
                 order_id => $order_params{id},
                 from     => 18,
                 to       => 19
