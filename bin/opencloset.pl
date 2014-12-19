@@ -846,6 +846,7 @@ helper update_order => sub {
             #
             my $order = $DB->resultset('Order')->find({ id => $order_params->{id} });
             die "order not found\n" unless $order;
+            my $from = $order->status_id;
 
             #
             # update order
@@ -882,6 +883,20 @@ helper update_order => sub {
             }
 
             $guard->commit;
+
+            #
+            # event posting to opencloset/monitor
+            #
+            my $to = $order_params->{status_id};
+            return $order if $to == $from;
+
+            my $res = HTTP::Tiny->new(timeout => 1)->post_form(app->config->{monitor_uri}, {
+                order_id => $order->id,
+                from     => $from,
+                to       => $to
+            });
+
+            $self->app->log->error("Failed to posting event: $res->{reason}") unless $res->{success};
 
             return $order;
         }
@@ -1726,17 +1741,6 @@ group {
 
         my $order = $self->update_order( \%order_params, \%order_detail_params );
         return unless $order;
-
-        #
-        # event posting to opencloset/monitor
-        #
-        my $res = HTTP::Tiny->new(timeout => 1)->post_form(app->config->{monitor_uri}, {
-            order_id => $order->id,
-            from     => $order_params{status_id},
-            to       => $order->status_id
-        });
-
-        $self->app->log->error("Failed to posting event: $res->{reason}") unless $res->{success};
 
         #
         # response
