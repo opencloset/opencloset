@@ -4518,6 +4518,7 @@ get '/order' => sub {
     # 26    =>  '탈의07'
     # 27    =>  '탈의08'
     # 28    =>  '탈의09'
+    # 29    =>  '미대여'
     #
 
     {
@@ -4545,7 +4546,7 @@ get '/order' => sub {
                 );
             }
             default {
-                my @valid = 1 .. 28;
+                my @valid = 1 .. 29;
                 %cond = ( status_id => $status_id ) if $status_id ~~ @valid;
             }
         }

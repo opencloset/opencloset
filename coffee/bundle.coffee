@@ -61,6 +61,7 @@ $ ->
       '탈의07':     { id: 26, css: 'label-inverse'   }
       '탈의08':     { id: 27, css: 'label-inverse'   }
       '탈의09':     { id: 28, css: 'label-inverse'   }
+      '미대여':     { id: 29, css: 'label-inverse'   }
     category:
       jacket:    { str: '재킷',     price: 10000 }
       pants:     { str: '바지',     price: 10000 }

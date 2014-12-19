@@ -44,25 +44,29 @@ $ ->
       error: (jqXHR, textStatus, errorThrown) ->
         OpenCloset.alert('danger', "주문서 상태 변경에 실패했습니다: #{jqXHR.responseJSON.error.str}", "##{alert_target}")
 
-  updateStatus = (el) ->
-    status_id = $(el).editable( 'getValue', true )
+  updateStatus = (el, status_id) ->
+    status_id = $(el).editable( 'getValue', true ) unless status_id
     ###
-    14: 방문예약
-    12: 미방문
-    13: 방문
-    16: 치수측정
-    17: 의류준비
-    20: 탈의01
-    21: 탈의02
-    22: 탈의03
-    23: 탈의04
-    24: 탈의05
-    25: 탈의06
-    26: 탈의07
-    27: 탈의08
-    28: 탈의09
-     6: 수선
-    18: 포장
+
+      다음의 경우에 한해 상태 변경이 가능하도록 허용합니다.
+
+      14: 방문예약
+      12: 미방문
+      13: 방문
+      16: 치수측정
+      17: 의류준비
+      20: 탈의01
+      21: 탈의02
+      22: 탈의03
+      23: 탈의04
+      24: 탈의05
+      25: 탈의06
+      26: 탈의07
+      27: 탈의08
+      28: 탈의09
+       6: 수선
+      18: 포장
+
     ###
     if parseInt(status_id) in [ 14, 12, 13, 16, 17, 20, 21, 22, 23, 24, 25, 26, 27, 28, 6, 18 ]
       $(el).editable 'enable'
@@ -78,6 +82,7 @@ $ ->
     available_status = [
       '방문예약',
       '미방문',
+      '미대여',
       '방문',
       '치수측정',
       '의류준비',
@@ -116,7 +121,7 @@ $ ->
     )
 
   $('.editable').each (i, el) -> updateStatus(el)
-  $('.editable').on 'save', (e, params) -> updateStatus(this)
+  $('.editable').on 'save', (e, params) -> updateStatus(this, params.newValue)
 
   #
   # 각각의 주문서에서 다음 상태로 상태 변경
