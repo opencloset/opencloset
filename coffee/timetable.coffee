@@ -174,3 +174,20 @@ $ ->
         updateOrder order_id, ymd, status_id, alert_target, success_cb
       error: (jqXHR, textStatus, errorThrown) ->
         OpenCloset.alert('danger', "현재 주문서 상태를 확인할 수 없습니다: #{jqXHR.responseJSON.error.str}", "##{alert_target}")
+
+  statusMap = {}
+  ( statusMap[v.id] = k ) for k, v of OpenCloset.status
+  url  = "#{CONFIG.monitor_uri}/socket".replace 'http', 'ws'
+  sock = new ReconnectingWebSocket url, null, { debug: false }
+  sock.onmessage = (e) ->
+    data     = JSON.parse(e.data)
+    order_id = data.order.id
+    $box     = $(".people-box[data-order-id='#{order_id}']")
+    if $box.find('.order-status').data('value') isnt data.to
+      $editable = $box.find('.editable.order-status')
+      $editable.editable('setValue', data.to, true)
+      updateStatus($editable)
+  sock.onerror = (e) ->
+    location.reload()
+  sock.onclose = (e) ->
+    location.reload()
