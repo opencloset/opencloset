@@ -44,8 +44,8 @@ $ ->
       error: (jqXHR, textStatus, errorThrown) ->
         OpenCloset.alert('danger', "주문서 상태 변경에 실패했습니다: #{jqXHR.responseJSON.error.str}", "##{alert_target}")
 
-  updateStatus = (el) ->
-    status_id = $(el).editable( 'getValue', true )
+  updateStatus = (el, status_id) ->
+    status_id = $(el).editable( 'getValue', true ) unless status_id
     ###
 
       다음의 경우에 한해 상태 변경이 가능하도록 허용합니다.
@@ -82,6 +82,7 @@ $ ->
     available_status = [
       '방문예약',
       '미방문',
+      '미대여',
       '방문',
       '치수측정',
       '의류준비',
@@ -120,7 +121,7 @@ $ ->
     )
 
   $('.editable').each (i, el) -> updateStatus(el)
-  $('.editable').on 'save', (e, params) -> updateStatus(this)
+  $('.editable').on 'save', (e, params) -> updateStatus(this, params.newValue)
 
   #
   # 각각의 주문서에서 다음 상태로 상태 변경
