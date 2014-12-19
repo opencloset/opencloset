@@ -46,25 +46,25 @@ $ ->
 
   updateStatus = (el) ->
     status_id = $(el).editable( 'getValue', true )
-    switch status_id
-      when 14 then enable = true # 방문예약
-      when 12 then enable = true # 미방문
-      when 13 then enable = true # 방문
-      when 16 then enable = true # 치수측정
-      when 17 then enable = true # 의류준비
-      when 20 then enable = true # 탈의01
-      when 21 then enable = true # 탈의02
-      when 22 then enable = true # 탈의03
-      when 23 then enable = true # 탈의04
-      when 24 then enable = true # 탈의05
-      when 25 then enable = true # 탈의06
-      when 26 then enable = true # 탈의07
-      when 27 then enable = true # 탈의08
-      when 28 then enable = true # 탈의09
-      when  6 then enable = true # 수선
-      when 18 then enable = true # 포장
-      else         enable = false
-    if enable
+    ###
+    14: 방문예약
+    12: 미방문
+    13: 방문
+    16: 치수측정
+    17: 의류준비
+    20: 탈의01
+    21: 탈의02
+    22: 탈의03
+    23: 탈의04
+    24: 탈의05
+    25: 탈의06
+    26: 탈의07
+    27: 탈의08
+    28: 탈의09
+     6: 수선
+    18: 포장
+    ###
+    if parseInt(status_id) in [ 14, 12, 13, 16, 17, 20, 21, 22, 23, 24, 25, 26, 27, 28, 6, 18 ]
       $(el).editable 'enable'
       $(el).closest('.widget-body').removeClass('prohibit-change-status')
     else
