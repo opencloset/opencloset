@@ -3473,6 +3473,27 @@ group {
         }
 
         #
+        # [GH 279] 직원 전용 방문 예약은 인원 제한과 상관없이 예약 가능하게 함
+        #
+        my %search_attrs = (
+            '+columns' => [
+                { user_count => { count => 'user.id', -as => 'user_count' } },
+            ],
+            join       => { 'orders' => 'user' },
+            group_by   => [ qw/ me.id / ],
+            order_by   => { -asc => 'me.date' },
+        );
+        unless (
+            $self->is_user_authenticated
+            && $self->current_user
+            && $self->current_user->user_info
+            && $self->current_user->user_info->staff
+        )
+        {
+            $search_attrs{having} = \[ 'COUNT(user.id) < me.slot' ];
+        }
+
+        #
         # SELECT
         #     `me`.`id`,
         #     `me`.`date`,
@@ -3507,15 +3528,7 @@ group {
                     ],
                 },
             },
-            {
-                '+columns' => [
-                    { user_count => { count => 'user.id', -as => 'user_count' } },
-                ],
-                join       => { 'orders' => 'user' },
-                group_by   => [ qw/ me.id / ],
-                having     => \[ 'COUNT(user.id) < me.slot' ],
-                order_by   => { -asc => 'me.date' },
-            },
+            \%search_attrs,
         );
 
         my @booking_list = $booking_rs->all;
