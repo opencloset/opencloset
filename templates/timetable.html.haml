@@ -2,8 +2,11 @@
 - my $_id = 'timetable';
 - layout 'default',
 -   page_id     => $_id,
--   jses  => [ '/lib/bootstrap3-editable/js/bootstrap-editable.min.js' ],
--   csses => [ '/lib/bootstrap3-editable/css/bootstrap-editable.css'   ],
+-   jses  => [ 
+-     '/lib/bootstrap3-editable/js/bootstrap-editable.min.js',
+-     '/lib/reconnectingWebsocket/reconnecting-websocket.js',
+-   ],
+-   csses => [ '/lib/bootstrap3-editable/css/bootstrap-editable.css' ],
 -   ;
 - title meta_text($_id);
 
