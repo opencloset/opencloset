@@ -44,7 +44,7 @@ $ ->
       '반납':       { id: 9,  css: 'label-inverse'   }
       '부분반납':   { id: 10, css: 'label-warning'   }
       '반납배송중': { id: 11, css: 'label-warning'   }
-      '미방문':     { id: 12, css: 'label-warning'   }
+      '방문안함':   { id: 12, css: 'label-warning'   }
       '방문':       { id: 13, css: 'label-warning'   }
       '방문예약':   { id: 14, css: 'label-info'      }
       '배송예약':   { id: 15, css: 'label-info'      }
@@ -61,7 +61,7 @@ $ ->
       '탈의07':     { id: 26, css: 'label-inverse'   }
       '탈의08':     { id: 27, css: 'label-inverse'   }
       '탈의09':     { id: 28, css: 'label-inverse'   }
-      '미대여':     { id: 29, css: 'label-inverse'   }
+      '대여안함':   { id: 29, css: 'label-inverse'   }
     category:
       jacket:    { str: '재킷',     price: 10000 }
       pants:     { str: '바지',     price: 10000 }
