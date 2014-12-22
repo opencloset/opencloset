@@ -73,7 +73,13 @@ $ ->
           unless value
             $(this).empty()
             return
-          mapped_values = ( OpenCloset.category[i].str for i in value )
+          mapped_values = []
+          for i in value
+            item = OpenCloset.category[i]
+            continue unless item
+            str = item.str.replace /^\s+|\s+$/, ""
+            continue if str is ''
+            mapped_values.push str
           $(this).html mapped_values.join(',')
         params.url = (params) ->
           url = $('#profile-user-info-data').data('url')
@@ -95,7 +101,13 @@ $ ->
           unless value
             $(this).empty()
             return
-          mapped_values = ( OpenCloset.color[i] for i in value )
+          mapped_values = []
+          for i in value
+            item = OpenCloset.color[i]
+            continue unless item
+            str = item.replace /^\s+|\s+$/, ""
+            continue if str is ''
+            mapped_values.push str
           $(this).html mapped_values.join(',')
         params.url = (params) ->
           url = $('#profile-user-info-data').data('url')
