@@ -194,5 +194,3 @@ $ ->
       updateStatus($editable)
   sock.onerror = (e) ->
     location.reload()
-  sock.onclose = (e) ->
-    location.reload()
