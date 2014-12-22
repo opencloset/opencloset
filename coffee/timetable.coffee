@@ -8,13 +8,31 @@ $ ->
   )
 
   $('.pre_category').each (i, el) ->
-    keys_str   = $(el).data('category') || ''
-    values_str = ( OpenCloset.category[i].str for i in keys_str.split(',') ).join(',')
+    keys_str = $(el).data('category') || ''
+
+    values = []
+    for i in keys_str.split(',')
+      item = OpenCloset.category[i]
+      continue unless item
+      str = item.str.replace /^\s+|\s+$/, ""
+      continue if str is ''
+      values.push str
+    values_str = values.join(',')
+
     $(el).html( values_str )
 
   $('.pre_color').each (i, el) ->
-    keys_str   = $(el).data('color') || ''
-    values_str = ( OpenCloset.color[i] for i in keys_str.split(',') ).join(',')
+    keys_str = $(el).data('color') || ''
+
+    values = []
+    for i in keys_str.split(',')
+      item = OpenCloset.color[i]
+      continue unless item
+      str = item.replace /^\s+|\s+$/, ""
+      continue if str is ''
+      values.push str
+    values_str = values.join(',')
+
     $(el).html( values_str )
 
   updateOrder = ( order_id, ymd, status_id, alert_target, success_cb ) ->
