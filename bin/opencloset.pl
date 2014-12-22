@@ -3939,6 +3939,24 @@ any '/visit' => sub {
         $user_info_params{pre_category} = $pre_category if $pre_category  && $pre_category ne $user->user_info->pre_category;
         $user_info_params{pre_color}    = $pre_color    if $pre_color     && $pre_color    ne $user->user_info->pre_color;
 
+        #
+        # tune pre_category
+        #
+        if ( $user_info_params{pre_category} ) {
+            my $items_str = $user_info_params{pre_category};
+            my @items     = grep { $_ } map { s/^\s+|\s+$//g; $_ } split /,/, $items_str;
+            $user_info_params{pre_category} = join q{,}, @items;
+        }
+
+        #
+        # tune pre_color
+        #
+        if ( $user_info_params{pre_color} ) {
+            my $items_str = $user_info_params{pre_color};
+            my @items     = grep { $_ } map { s/^\s+|\s+$//g; $_ } split /,/, $items_str;
+            $user_info_params{pre_color} = join q{,}, @items;
+        }
+
         if ( $booking == -1 ) {
             #
             # 예약 취소
@@ -4112,6 +4130,24 @@ any '/visit2' => sub {
         $user_info_params{purpose2}     = $purpose2 || q{};
         $user_info_params{pre_category} = $pre_category if $pre_category  && $pre_category ne $user->user_info->pre_category;
         $user_info_params{pre_color}    = $pre_color    if $pre_color     && $pre_color    ne $user->user_info->pre_color;
+
+        #
+        # tune pre_category
+        #
+        if ( $user_info_params{pre_category} ) {
+            my $items_str = $user_info_params{pre_category};
+            my @items     = grep { $_ } map { s/^\s+|\s+$//g; $_ } split /,/, $items_str;
+            $user_info_params{pre_category} = join q{,}, @items;
+        }
+
+        #
+        # tune pre_color
+        #
+        if ( $user_info_params{pre_color} ) {
+            my $items_str = $user_info_params{pre_color};
+            my @items     = grep { $_ } map { s/^\s+|\s+$//g; $_ } split /,/, $items_str;
+            $user_info_params{pre_color} = join q{,}, @items;
+        }
 
         if ( $booking == -1 ) {
             #
