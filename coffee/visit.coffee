@@ -432,7 +432,6 @@ $ ->
     gender         = $("input[name=gender]:checked").val()
     old_booking_id = $("input[name=booking]").prop("value")
 
-    console.log gender
     unless /^(male|female)$/.test( gender )
       OpenCloset.alert 'danger', '방문 일자를 선택하기 전 성별을 먼저 선택해주세요.', '#visit-alert'
       return
