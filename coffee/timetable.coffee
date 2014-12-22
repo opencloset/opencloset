@@ -64,11 +64,13 @@ $ ->
       26: 탈의07
       27: 탈의08
       28: 탈의09
+      29: 탈의10
+      30: 탈의11
        6: 수선
       18: 포장
 
     ###
-    if parseInt(status_id) in [ 14, 12, 13, 16, 17, 20, 21, 22, 23, 24, 25, 26, 27, 28, 6, 18 ]
+    if parseInt(status_id) in [ 14, 12, 13, 16, 17, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 6, 18 ]
       $(el).editable 'enable'
       $(el).closest('.widget-body').removeClass('prohibit-change-status')
     else
@@ -95,6 +97,8 @@ $ ->
       '탈의07',
       '탈의08',
       '탈의09',
+      '탈의10',
+      '탈의11',
       '수선',
       '포장',
     ]
@@ -141,6 +145,8 @@ $ ->
   # 26 => 탈의07
   # 27 => 탈의08
   # 28 => 탈의09
+  # 29 => 탈의10
+  # 30 => 탈의11
   #
   #  6 => 수선
   # 18 => 포장
@@ -171,6 +177,8 @@ $ ->
           when 26 then status_id = 18 # 탈의07   -> 포장
           when 27 then status_id = 18 # 탈의08   -> 포장
           when 28 then status_id = 18 # 탈의09   -> 포장
+          when 29 then status_id = 18 # 탈의10   -> 포장
+          when 30 then status_id = 18 # 탈의11   -> 포장
           when  6 then status_id = 18 # 수선     -> 포장
           else return
         success_cb = () ->
