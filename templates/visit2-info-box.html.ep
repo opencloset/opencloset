@@ -74,8 +74,8 @@
                           </label>
 
                           <label id="postcodify" class="block clearfix"></label>
-                          <input name="address1" type="hidden" class="postcodify_dbid" value="<%= $user->user_info->address1 %>" />
-                          <input name="address3" type="hidden" class="postcodify_jibeonaddress" value="<%= $user->user_info->address3 %>" />
+                          <input type="hidden" class="postcodify_dbid"          name="address1" value="<%= $user->user_info->address1 %>" />
+                          <input type="hidden" class="postcodify_jibeonaddress" name="address3" value="<%= $user->user_info->address3 %>" />
                           <label class="block clearfix">
                             <span class="block input-icon input-icon-right">
                               <input name="address2" type="text" class="form-control postcodify_address" readonly="readonly" placeholder="주소 검색을 이용해주세요." value="<%= $user->user_info->address2 %>" />
@@ -125,8 +125,8 @@
                               </span>
                             </button>
                           </label>
-                          <input name="booking" type="hidden" class="form-control" value="<%= $booking ? $booking->id : '' %>" />
-                          <input name="booking-saved" type="hidden" class="form-control" value="<%= $booking ? $booking->id : '' %>" data-ymd="<%= $booking ? $booking->date->strftime('%Y-%m-%d') : '' %>" data-hm="<%= $booking ? $booking->date->strftime('%H:%M') : '' %>" />
+                          <input type="hidden" name="booking"       value="<%= $booking ? $booking->id : '' %>" />
+                          <input type="hidden" name="booking-saved" value="<%= $booking ? $booking->id : '' %>" data-ymd="<%= $booking ? $booking->date->strftime('%Y-%m-%d') : '' %>" data-hm="<%= $booking ? $booking->date->strftime('%H:%M') : '' %>" />
 
                           <label class="block clearfix">
                             <span class="block input-icon input-icon-right">
