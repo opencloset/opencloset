@@ -1107,6 +1107,32 @@ helper get_clothes => sub {
     return $clothes;
 };
 
+helper get_nearest_booked_order => sub {
+    my ( $self, $user ) = @_;
+
+    my $dt_now = DateTime->now( time_zone => app->config->{timezone} );
+    my $dtf    = $DB->storage->datetime_parser;
+
+    my $rs = $user ->search_related(
+        'orders',
+        {
+            'me.status_id' => 14, # 방문예약
+            'booking.date' => { '>' => $dtf->format_datetime($dt_now) },
+        },
+        {
+            join     => 'booking',
+            order_by => [
+                { -asc => 'booking.date' },
+                { -asc => 'me.id'        },
+            ],
+        },
+    );
+
+    my $order = $rs->next;
+
+    return $order;
+};
+
 #
 # csv section
 #
@@ -4033,22 +4059,12 @@ any '/visit' => sub {
         }
     }
 
-    my $booking_obj = do {
-        my $dt_now = DateTime->now( time_zone => app->config->{timezone} );
-        my $dtf    = $DB->storage->datetime_parser;
-        my $rs     = $user->search_related('orders')->search_related('booking', {
-            date => { '>' => $dtf->format_datetime($dt_now) },
-        });
-
-        $rs->next;
-    };
-
     $self->stash(
         load     => app->config->{visit_load},
         type     => $type,
         user     => $user,
         password => $password,
-        booking  => $booking_obj,
+        order    => $self->get_nearest_booked_order($user),
     );
 };
 
@@ -4191,21 +4207,11 @@ any '/visit2' => sub {
         }
     }
 
-    my $booking_obj = do {
-        my $dt_now = DateTime->now( time_zone => app->config->{timezone} );
-        my $dtf    = $DB->storage->datetime_parser;
-        my $rs     = $user->search_related('orders')->search_related('booking', {
-            date => { '>' => $dtf->format_datetime($dt_now) },
-        });
-
-        $rs->next;
-    };
-
     $self->stash(
-        load    => app->config->{visit_load},
-        type    => $type,
-        user    => $user,
-        booking => $booking_obj,
+        load  => app->config->{visit_load},
+        type  => $type,
+        user  => $user,
+        order => $self->get_nearest_booked_order($user),
     );
 };
 
