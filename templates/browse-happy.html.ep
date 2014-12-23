@@ -11,10 +11,10 @@
   <title>행복한 브라우징 - 열린옷장</title>
   <meta name="description" content="온라인. 편안함. 지금 바로 여러분의 브라우저를 업그레이드하세요!" />
   <meta name="author" content="TheOpenCloset" />
-  <link rel="icon" type="image/png" href="/icon.png">
+  <link rel="icon" type="image/png" href="<%= url_for('/icon.png') %>" />
 
   <!--[if (gt IE 6)|!(IE)]><!-->
-    <link rel="stylesheet" href="/css/browse-happy.css" />
+    <link rel="stylesheet" href="<%= url_for('/css/browse-happy.css') %>" />
   <!--<![endif]-->
 </head>
 
