@@ -2,6 +2,9 @@
 !!! 5
 %html
   %head
+    /[if IE]
+      :plain
+        <meta http-equiv="refresh" content="0;URL='#{url_for("/browse-happy")}'" />
     %title= title . ' - ' . $site->{name}
     = include 'layouts/default/meta'
     = include 'layouts/default/before-css'
