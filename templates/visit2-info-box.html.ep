@@ -180,13 +180,15 @@
                           % for my $color (@colors) {
                             <label class="block clearfix">
                               <select class="width-100 chosen-select" name="pre_color<%= $color->[0] %>" data-placeholder="<%= $color->[1] %> 번째 선호 색상">
-                                <option value=""     > <%= $color->[1] %> 번째 선호 색상 </option>
-                                <option value="staff"> 직원 추천         </option>
-                                <option value="black"> 블랙              </option>
-                                <option value="navy" > 네이비            </option>
-                                <option value="gray" > 그레이            </option>
-                                <option value="brown"> 브라운            </option>
-                                <option value="etc"  > 기타              </option>
+                                <option value=""            > <%= $color->[1] %> 번째 선호 색상 </option>
+                                <option value="staff"       > 직원 추천   </option>
+                                <option value="dark"        > 어두운 계열 </option>
+                                <option value="black"       > 블랙        </option>
+                                <option value="navy"        > 네이비      </option>
+                                <option value="charcoalgray"> 차콜그레이  </option>
+                                <option value="gray"        > 그레이      </option>
+                                <option value="brown"       > 브라운      </option>
+                                <option value="etc"         > 기타        </option>
                               </select>
                             </label>
                           % }
