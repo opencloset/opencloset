@@ -65,7 +65,7 @@
       </section><!-- #about -->
       <section id="share">
         <a href="https://www.theopencloset.net/"> <h2>열린옷장으로 돌아가기</h2> </a>
-        <a href="https://visit.theopencloset.net/"> <h2>방문 예약하기</h2> </a>
+        <a href="<%= url_for('/') %>"> <h2>방문 예약하기</h2> </a>
       </section><!-- #share -->
       <div id="byline">
         <a href="http://browsehappy.com/" title="Browse Happy">Design is copied from <span>Browse Happy</span> :)</a>
