@@ -74,8 +74,8 @@
                           </label>
 
                           <label id="postcodify" class="block clearfix"></label>
-                          <input name="address1" type="hidden" class="postcodify_dbid" value="<%= $user->user_info->address1 %>" />
-                          <input name="address3" type="hidden" class="postcodify_jibeonaddress" value="<%= $user->user_info->address3 %>" />
+                          <input type="hidden" class="postcodify_dbid"          name="address1" value="<%= $user->user_info->address1 %>" />
+                          <input type="hidden" class="postcodify_jibeonaddress" name="address3" value="<%= $user->user_info->address3 %>" />
                           <label class="block clearfix">
                             <span class="block input-icon input-icon-right">
                               <input name="address2" type="text" class="form-control postcodify_address" readonly="readonly" placeholder="주소 검색을 이용해주세요." value="<%= $user->user_info->address2 %>" />
@@ -125,12 +125,13 @@
                               </span>
                             </button>
                           </label>
-                          <input name="booking" type="hidden" class="form-control" value="<%= $booking ? $booking->id : '' %>" />
-                          <input name="booking-saved" type="hidden" class="form-control" value="<%= $booking ? $booking->id : '' %>" data-ymd="<%= $booking ? $booking->date->strftime('%Y-%m-%d') : '' %>" data-hm="<%= $booking ? $booking->date->strftime('%H:%M') : '' %>" />
+                          <input type="hidden" name="order"         value="<%= $order   ? $order->id   : '' %>" />
+                          <input type="hidden" name="booking"       value="<%= $booking ? $booking->id : '' %>" />
+                          <input type="hidden" name="booking-saved" value="<%= $booking ? $booking->id : '' %>" data-ymd="<%= $booking ? $booking->date->strftime('%Y-%m-%d') : '' %>" data-hm="<%= $booking ? $booking->date->strftime('%H:%M') : '' %>" />
 
                           <label class="block clearfix">
                             <span class="block input-icon input-icon-right">
-                              <input name="purpose" type="text" class="form-control" placeholder="대여 목적" value="<%= $load ? $user->user_info->purpose : q{} %>" />
+                              <input name="purpose" type="text" class="form-control" placeholder="대여 목적" value="<%= ( $order || $load ) ? $user->user_info->purpose : q{} %>" />
                               <p> 아래 목록을 클릭해주시거나, 목록에 없으면 직접 입력해주세요. </p>
                               <p class="purpose">
                                 <span class="label label-info clickable"> 입사면접 </span>
@@ -147,14 +148,14 @@
 
                           <label class="block clearfix">
                             <span class="block input-icon input-icon-right">
-                              <input name="purpose2" type="text" class="form-control" placeholder="대여 목적에 대한 자세한 설명" value="<%= $load ? $user->user_info->purpose2 : q{} %>" />
+                              <input name="purpose2" type="text" class="form-control" placeholder="대여 목적에 대한 자세한 설명" value="<%= ( $order || $load ) ? $user->user_info->purpose2 : q{} %>" />
                               <p> 입사 면접인 경우 응시 기업 및 분야를, 결혼식인 경우 누구의 결혼식인지를 자세하게 입력해주세요.  저희가 적합한 옷을 준비하는데 큰 도움이 됩니다. :) </p>
                             </span>
                           </label>
 
                           <label class="block clearfix">
-                            <input type="hidden" name="pre_category" value="<%= $load ? $user->user_info->pre_category : q{} %>">
-                            <select class="width-80 chosen-select" name="pre_category_temp" multiple data-placeholder="대여할 옷의 종류를 선택하세요.">
+                            <input type="hidden" name="pre_category" value="<%= ( $order || $load ) ? $user->user_info->pre_category : q{} %>">
+                            <select class="width-100 chosen-select" name="pre_category_temp" multiple data-placeholder="대여할 옷의 종류를 선택하세요.">
                               <option value=""     >           </option>
                               <option value="jacket"> 자켓     </option>
                               <option value="pants" > 팬츠     </option>
@@ -168,7 +169,7 @@
                             <p> 대여를 원하는 옷의 종류를 모두 선택해주세요. </p>
                           </label>
 
-                          <input type="hidden" name="pre_color" value="<%= $load ? $user->user_info->pre_color : q{} %>">
+                          <input type="hidden" name="pre_color" value="<%= ( $order || $load ) ? $user->user_info->pre_color : q{} %>">
                           % my @colors = (
                           %   [ 1 => '첫' ],
                           %   [ 2 => '두' ],
@@ -176,7 +177,7 @@
                           % );
                           % for my $color (@colors) {
                             <label class="block clearfix">
-                              <select class="width-80 chosen-select" name="pre_color<%= $color->[0] %>" data-placeholder="<%= $color->[1] %> 번째 선호 색상">
+                              <select class="width-100 chosen-select" name="pre_color<%= $color->[0] %>" data-placeholder="<%= $color->[1] %> 번째 선호 색상">
                                 <option value=""     > <%= $color->[1] %> 번째 선호 색상 </option>
                                 <option value="staff"> 직원 추천         </option>
                                 <option value="black"> 블랙              </option>

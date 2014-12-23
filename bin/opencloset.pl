@@ -1107,6 +1107,32 @@ helper get_clothes => sub {
     return $clothes;
 };
 
+helper get_nearest_booked_order => sub {
+    my ( $self, $user ) = @_;
+
+    my $dt_now = DateTime->now( time_zone => app->config->{timezone} );
+    my $dtf    = $DB->storage->datetime_parser;
+
+    my $rs = $user ->search_related(
+        'orders',
+        {
+            'me.status_id' => 14, # 방문예약
+            'booking.date' => { '>' => $dtf->format_datetime($dt_now) },
+        },
+        {
+            join     => 'booking',
+            order_by => [
+                { -asc => 'booking.date' },
+                { -asc => 'me.id'        },
+            ],
+        },
+    );
+
+    my $order = $rs->next;
+
+    return $order;
+};
+
 #
 # csv section
 #
@@ -3851,6 +3877,7 @@ any '/visit' => sub {
     my $birth         = $self->param('birth');
     my $height        = $self->param('height');
     my $weight        = $self->param('weight');
+    my $order         = $self->param('order');
     my $booking       = $self->param('booking');
     my $booking_saved = $self->param('booking-saved');
     my $purpose       = $self->param('purpose');
@@ -3874,6 +3901,7 @@ any '/visit' => sub {
     app->log->debug("birth: $birth");
     app->log->debug("height: $height");
     app->log->debug("weight: $weight");
+    app->log->debug("order: $order");
     app->log->debug("booking: $booking");
     app->log->debug("booking-saved: $booking_saved");
     app->log->debug("purpose: $purpose");
@@ -3918,6 +3946,15 @@ any '/visit' => sub {
 
     if ( $type eq 'visit' ) {
         #
+        # GH #253
+        #
+        #   사용자가 동일 시간대 중복 방문 예약할 수 있는 경우를 방지하기 위해
+        #   예약 관련 신청/변경/취소 요청이 들어오면 인증 번호를 검증한 후
+        #   강제로 만료시킵니다.
+        #
+        $user->update({ expires  => $now });
+
+        #
         # 예약 신청/변경/취소
         #
 
@@ -3961,20 +3998,21 @@ any '/visit' => sub {
             #
             # 예약 취소
             #
-            my $order = $user->find_related( 'orders', { booking_id => $booking_saved } );
+            my $order_obj = $DB->resultset('Order')->find($order);
+            if ($order_obj) {
+                my $msg = sprintf(
+                    "%s님 %s 방문 예약이 취소되었습니다.",
+                    $user->name,
+                    $order_obj->booking->date->strftime('%m월 %d일 %H시 %M분'),
+                );
+                $DB->resultset('SMS')->create({
+                    to   => $user->user_info->phone,
+                    from => app->config->{sms}{from},
+                    text => $msg,
+                }) or app->log->warn("failed to create a new sms: $msg");
 
-            my $msg = sprintf(
-                "%s님 %s 방문 예약이 취소되었습니다.",
-                $user->name,
-                $order->booking->date->strftime('%m월 %d일 %H시 %M분'),
-            );
-            $DB->resultset('SMS')->create({
-                to   => $user->user_info->phone,
-                from => app->config->{sms}{from},
-                text => $msg,
-            }) or app->log->warn("failed to create a new sms: $msg");
-
-            $order->delete if $order;
+                $order_obj->delete;
+            }
         }
         else {
             $user = $self->update_user( \%user_params, \%user_info_params );
@@ -3982,64 +4020,57 @@ any '/visit' => sub {
                 #
                 # 이미 예약 정보가 저장되어 있는 경우 - 예약 변경 상황
                 #
-                my $order = $user->find_related( 'orders', { booking_id => $booking_saved } );
-                if ( $booking != $booking_saved ) {
-                    #
-                    # 변경한 예약 정보가 기존 정보와 다를 경우 갱신함
-                    #
-                    $order->update({ booking_id => $booking }) if $order;
-                }
+                my $order_obj = $DB->resultset('Order')->find($order);
+                if ($order_obj) {
+                    if ( $booking != $booking_saved ) {
+                        #
+                        # 변경한 예약 정보가 기존 정보와 다를 경우 갱신함
+                        #
+                        $order_obj->update({ booking_id => $booking });
+                    }
 
-                my $msg = sprintf(
-                    "%s님 %s으로 방문 예약이 변경되었습니다.",
-                    $user->name,
-                    $order->booking->date->strftime('%m월 %d일 %H시 %M분'),
-                );
-                $DB->resultset('SMS')->create({
-                    to   => $user->user_info->phone,
-                    from => app->config->{sms}{from},
-                    text => $msg,
-                }) or app->log->warn("failed to create a new sms: $msg");
+                    my $msg = sprintf(
+                        "%s님 %s으로 방문 예약이 변경되었습니다.",
+                        $user->name,
+                        $order_obj->booking->date->strftime('%m월 %d일 %H시 %M분'),
+                    );
+                    $DB->resultset('SMS')->create({
+                        to   => $user->user_info->phone,
+                        from => app->config->{sms}{from},
+                        text => $msg,
+                    }) or app->log->warn("failed to create a new sms: $msg");
+                }
             }
             else {
                 #
                 # 예약 정보가 없는 경우 - 신규 예약 신청 상황
                 #
-                my $order = $user->create_related('orders', {
+                my $order_obj = $user->create_related('orders', {
                     status_id  => 14,      # 방문예약: status 테이블 참조
                     booking_id => $booking,
                 });
-
-                my $msg = sprintf(
-                    "%s님 %s으로 방문 예약이 완료되었습니다.",
-                    $user->name,
-                    $order->booking->date->strftime('%m월 %d일 %H시 %M분'),
-                );
-                $DB->resultset('SMS')->create({
-                    to   => $user->user_info->phone,
-                    from => app->config->{sms}{from},
-                    text => $msg,
-                }) or app->log->warn("failed to create a new sms: $msg");
+                if ($order_obj) {
+                    my $msg = sprintf(
+                        "%s님 %s으로 방문 예약이 완료되었습니다.",
+                        $user->name,
+                        $order_obj->booking->date->strftime('%m월 %d일 %H시 %M분'),
+                    );
+                    $DB->resultset('SMS')->create({
+                        to   => $user->user_info->phone,
+                        from => app->config->{sms}{from},
+                        text => $msg,
+                    }) or app->log->warn("failed to create a new sms: $msg");
+                }
             }
         }
     }
-
-    my $booking_obj = do {
-        my $dt_now = DateTime->now( time_zone => app->config->{timezone} );
-        my $dtf    = $DB->storage->datetime_parser;
-        my $rs     = $user->search_related('orders')->search_related('booking', {
-            date => { '>' => $dtf->format_datetime($dt_now) },
-        });
-
-        $rs->next;
-    };
 
     $self->stash(
         load     => app->config->{visit_load},
         type     => $type,
         user     => $user,
         password => $password,
-        booking  => $booking_obj,
+        order    => $self->get_nearest_booked_order($user),
     );
 };
 
@@ -4059,6 +4090,7 @@ any '/visit2' => sub {
     my $birth         = $self->param('birth');
     my $height        = $self->param('height');
     my $weight        = $self->param('weight');
+    my $order         = $self->param('order');
     my $booking       = $self->param('booking');
     my $booking_saved = $self->param('booking-saved');
     my $purpose       = $self->param('purpose');
@@ -4079,6 +4111,7 @@ any '/visit2' => sub {
     app->log->debug("birth: $birth");
     app->log->debug("height: $height");
     app->log->debug("weight: $weight");
+    app->log->debug("order: $order");
     app->log->debug("booking: $booking");
     app->log->debug("booking-saved: $booking_saved");
     app->log->debug("purpose: $purpose");
@@ -4153,8 +4186,8 @@ any '/visit2' => sub {
             #
             # 예약 취소
             #
-            my $order = $user->find_related( 'orders', { booking_id => $booking_saved } );
-            $order->delete if $order;
+            my $order_obj = $DB->resultset('Order')->find($order);
+            $order_obj->delete if $order_obj;
         }
         else {
             $user = $self->update_user( \%user_params, \%user_info_params );
@@ -4162,19 +4195,21 @@ any '/visit2' => sub {
                 #
                 # 이미 예약 정보가 저장되어 있는 경우 - 예약 변경 상황
                 #
-                my $order = $user->find_related( 'orders', { booking_id => $booking_saved } );
-                if ( $booking != $booking_saved ) {
-                    #
-                    # 변경한 예약 정보가 기존 정보와 다를 경우 갱신함
-                    #
-                    $order->update({ booking_id => $booking }) if $order;
+                my $order_obj = $DB->resultset('Order')->find($order);
+                if ($order_obj) {
+                    if ( $booking != $booking_saved ) {
+                        #
+                        # 변경한 예약 정보가 기존 정보와 다를 경우 갱신함
+                        #
+                        $order_obj->update({ booking_id => $booking });
+                    }
                 }
             }
             else {
                 #
                 # 예약 정보가 없는 경우 - 신규 예약 신청 상황
                 #
-                my $order = $user->create_related('orders', {
+                my $order_obj = $user->create_related('orders', {
                     status_id  => 14,      # 방문예약: status 테이블 참조
                     booking_id => $booking,
                 });
@@ -4182,21 +4217,11 @@ any '/visit2' => sub {
         }
     }
 
-    my $booking_obj = do {
-        my $dt_now = DateTime->now( time_zone => app->config->{timezone} );
-        my $dtf    = $DB->storage->datetime_parser;
-        my $rs     = $user->search_related('orders')->search_related('booking', {
-            date => { '>' => $dtf->format_datetime($dt_now) },
-        });
-
-        $rs->next;
-    };
-
     $self->stash(
-        load    => app->config->{visit_load},
-        type    => $type,
-        user    => $user,
-        booking => $booking_obj,
+        load  => app->config->{visit_load},
+        type  => $type,
+        user  => $user,
+        order => $self->get_nearest_booked_order($user),
     );
 };
 
