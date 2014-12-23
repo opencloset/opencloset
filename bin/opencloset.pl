@@ -4225,8 +4225,10 @@ any '/visit2' => sub {
     );
 };
 
-get '/'            => 'home';
-get '/new-clothes' => 'new-clothes';
+
+get '/'             => 'home';
+get '/browse-happy' => 'browse-happy';
+get '/new-clothes'  => 'new-clothes';
 
 get '/tag' => sub {
     my $self = shift;
