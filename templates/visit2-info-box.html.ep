@@ -1,4 +1,6 @@
 % use utf8;
+% my $booking;
+% $booking = $order->booking if $order;
 <!-- VISIT-INFO-BOX -->
                 <div id="visit-info-box" class="visit-info-box visible widget-box no-border">
                   <div class="widget-body">
