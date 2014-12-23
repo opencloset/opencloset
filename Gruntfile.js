@@ -34,7 +34,7 @@ module.exports = function(grunt) {
         tasks: 'uglify'
       },
       sass: {
-        files: ['sass/screen.scss'],
+        files: ['sass/*.scss'],
         tasks: 'compass'
       },
       coffee: {

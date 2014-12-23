@@ -1,0 +1,78 @@
+<!DOCTYPE html>  
+
+<!--[if lt IE 7 ]> <html lang="ko-KR" class="no-js ie6"> <![endif]-->
+<!--[if IE 7 ]>    <html lang="ko-KR" class="no-js ie7"> <![endif]-->
+<!--[if IE 8 ]>    <html lang="ko-KR" class="no-js ie8"> <![endif]-->
+<!--[if IE 9 ]>    <html lang="ko-KR" class="no-js ie9"> <![endif]-->
+<!--[if (gt IE 9)|!(IE)]><!--> <html lang="ko-KR" class="no-js"> <!--<![endif]-->
+
+<head>
+  <meta charset="utf-8">
+  <title>행복한 브라우징 - 열린옷장</title>
+  <meta name="description" content="온라인. 편안함. 지금 바로 여러분의 브라우저를 업그레이드하세요!" />
+  <meta name="author" content="TheOpenCloset" />
+  <link rel="icon" type="image/png" href="/icon.png">
+
+  <!--[if (gt IE 6)|!(IE)]><!-->
+    <link rel="stylesheet" href="/css/browse-happy.css" />
+  <!--<![endif]-->
+</head>
+
+<body>
+<div id="body-wrap">
+
+  <header>
+    <hgroup class="wrap">
+      <h1><em>행복한</em> 브라우징</h1>
+      <h2>온라인. 편안함. <em>지금 바로 여러분의 브라우저를 업그레이드하세요</em>!</h2>
+    </hgroup>
+  </header>
+    <div id="main">
+    <ul id="browserlist" class="wrap">
+      <li id="firefox">
+        <a href="https://www.mozilla.org/ko/firefox/new/" title="모질라 파이어폭스">
+          <div class="icon"></div>
+          <h2>모질라 파이어폭스</h2>
+          <p class="info">&#8220;Firefox는 항상 사용자의 개인 정보를 지키고 존중하는 방향으로 만들어 졌습니다. 그래서 우리는 개인정보 보호에서 가장 신뢰 받는 인터넷 기업으로 선정된 것을 매우 자랑스럽게 생각합니다.&#8221;</p>
+          <p class="version">최신 버전: <strong>34</strong></p>
+          <p class="website">더 자세한 내용을 확인하기 위해 방문하기</p>
+        </a>
+        <p class="likebutton"><iframe src="http://www.facebook.com/plugins/like.php?href=http%3A%2F%2Fwww.facebook.com%2FFirefox&amp;layout=button_count&amp;show_faces=false&amp;width=172&amp;action=like&amp;font=lucida+grande&amp;colorscheme=light&amp;height=20" scrolling="no" frameborder="0" style="border:none; overflow:hidden; width:172px; height:20px;"></iframe></p>
+      </li><!-- #firefox -->
+      <li id="chrome">
+        <a href="https://www.google.co.kr/intl/ko/chrome/browser/desktop/index.html" title="구글 크롬">
+          <div class="icon"></div>
+          <h2>구글 크롬</h2>
+          <p class="info">&#8220;차원이 다른 웹 서핑을 즐겨보세요. 컴퓨터, 휴대전화, 태블릿을 위한 하나의 브라우저.&#8221;</p>
+          <p class="version">최신 버전: <strong>39</strong></p>
+          <p class="website">더 자세한 내용을 확인하기 위해 방문하기</p>
+        </a>
+        <p class="likebutton"><iframe src="http://www.facebook.com/plugins/like.php?href=http%3A%2F%2Fwww.facebook.com%2Fgooglechrome&amp;layout=button_count&amp;show_faces=false&amp;width=172&amp;action=like&amp;font=lucida+grande&amp;colorscheme=light&amp;height=20" scrolling="no" frameborder="0" style="border:none; overflow:hidden; width:172px; height:20px;"></iframe></p>
+      </li><!-- #chrome -->
+    </ul><!-- #browserlist -->
+  </div><!-- #main -->
+
+  <footer>
+    <div class="wrap">
+      <section id="about">
+        <h2>왜 새로운 브라우저를 설치해야 하나요?</h2>
+        <p>
+          열린옷장 홈페이지 및 열린옷장 방문 예약 시스템은 표준 웹 기술을
+          준수하는 브라우저에서 정상적으로 이용할 수 있습니다.
+          오래된 브라우저를 사용하면 여러분의 컴퓨터가 위험에 노출됩니다.
+          웹 표준을 준수하는 빠르고 안전한 브라우저를 사용해보세요!
+        </p>
+      </section><!-- #about -->
+      <section id="share">
+        <a href="https://www.theopencloset.net/"> <h2>열린옷장으로 돌아가기</h2> </a>
+        <a href="<%= url_for('/') %>"> <h2>방문 예약하기</h2> </a>
+      </section><!-- #share -->
+      <div id="byline">
+        <a href="http://browsehappy.com/" title="Browse Happy">Design is copied from <span>Browse Happy</span> :)</a>
+      </div><!-- #byline -->
+    </div>
+  </footer>
+
+</div><!-- #body-wrap -->
+</body>
+</html>
