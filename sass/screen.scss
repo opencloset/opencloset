@@ -611,6 +611,15 @@ $opencloset-darken-yellow: desaturate(darken($opencloset-yellow, 4%), 10%);
     }
 }
 
+#modal-booking {
+    .modal-body {
+        padding-top: 0;
+        strong {
+            color: blue;
+        }
+    }
+}
+
 .form-group.has-info textarea[disabled], .form-group.has-info textarea[readonly] {
     background-color: #eee !important;
     color: #848484 !important;
