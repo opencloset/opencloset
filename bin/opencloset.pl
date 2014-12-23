@@ -3735,6 +3735,9 @@ under '/' => sub {
                         when ('/visit2') {
                             return 1;
                         }
+                        when ('/browse-happy') {
+                            return 1;
+                        }
                         when ('/login') {
                             $self->redirect_to( $self->url_for('/') );
                             return 1;
@@ -3747,6 +3750,9 @@ under '/' => sub {
                 else {
                     given ($req_path) {
                         when ('/visit') {
+                            return 1;
+                        }
+                        when ('/browse-happy') {
                             return 1;
                         }
                         when ('/login') {
@@ -3770,6 +3776,9 @@ under '/' => sub {
                         when ('/visit2') {
                             return 1;
                         }
+                        when ('/browse-happy') {
+                            return 1;
+                        }
                         when ('/login') {
                             $self->redirect_to( $self->url_for('/') );
                             return 1;
@@ -3786,6 +3795,9 @@ under '/' => sub {
                             $self->redirect_to( $self->url_for('/login') );
                             return;
                         }
+                        when ('/browse-happy') {
+                            return 1;
+                        }
                         when ('/login') {
                             return 1;
                         }
@@ -3799,6 +3811,9 @@ under '/' => sub {
             when ('visit') {
                 given ($req_path) {
                     when ('/visit') {
+                        return 1;
+                    }
+                    when ('/browse-happy') {
                         return 1;
                     }
                     default {
