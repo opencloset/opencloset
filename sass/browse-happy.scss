@@ -156,8 +156,8 @@ header h1 {
 }
 
 header h1 {
-    font-size: 1491%;
     font-size: 900%;
+    font-weight: bold;
     font-family: "Nanum Myeongjo";
 }
 
@@ -173,6 +173,7 @@ header h2 {
     color: #fff;
     text-shadow: 0 1px 0 #4C7C7B;
     font-family: "Nanum Myeongjo" !important;
+    margin-top: 40px;
 }
 
 header h2 em {
