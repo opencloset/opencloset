@@ -238,6 +238,27 @@
                         </h4>
                       </div>
                       <div class="modal-body" style="height: 250px; overflow-y: auto;">
+                        <div class="notice">
+                          <h3>"미리 오지 마세요."</h3>
+
+                          <p>
+                            가장 경제적으로 정장 대여하는 방법, 알려드릴께요.
+                          </p>
+
+                          <p>
+                            열린옷장의 <strong>정장 대여 기간은 3박 4일</strong>입니다.
+                            옷이 <strong>필요한 날로부터 1~2일 전 방문시간</strong>을 예약하신 후
+                            대여하고 반납하셔야 기본금액으로 대여하실 수 있습니다.
+                            너무 <strong>미리 예약하고 대여하시면 추가비용</strong>이 있습니다.
+                            참고하셔서 경제적으로 알뜰하게 대여하시기 바랍니다.
+                          </p>
+
+                          <p>
+                            예)<br />
+                            옷이 필요한 날 - 12월 5일<br />
+                            적절한 예약일  - 12월 3일 또는 12월 4일
+                          </p>
+                        </div>
                         <table id="booking-table" class="table table-striped table-bordered table-hover">
                           <thead>
                             <tr>
