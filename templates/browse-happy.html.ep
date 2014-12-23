@@ -1,0 +1,130 @@
+<!DOCTYPE html>  
+
+<!--[if lt IE 7 ]> <html lang="en-US" class="no-js ie6"> <![endif]-->
+<!--[if IE 7 ]>    <html lang="en-US" class="no-js ie7"> <![endif]-->
+<!--[if IE 8 ]>    <html lang="en-US" class="no-js ie8"> <![endif]-->
+<!--[if IE 9 ]>    <html lang="en-US" class="no-js ie9"> <![endif]-->
+<!--[if (gt IE 9)|!(IE)]><!--> <html lang="en-US" class="no-js"> <!--<![endif]-->
+
+<head>
+	<meta charset="utf-8">
+	<title>Browse Happy</title>
+	<meta name="description" content="Online. Worry-free. Upgrade your browser today!" />
+	<meta name="author" content="WordPress" />
+
+	<link rel="shortcut icon" href="http://browsehappy.com/favicon.ico" />
+	<link rel="apple-touch-icon" href="http://browsehappy.com/content/themes/browsehappy/imgs/apple-touch-icon-57x57.png" />
+	<link rel="apple-touch-icon" sizes="72x72" href="http://browsehappy.com/content/themes/browsehappy/imgs/apple-touch-icon-72x72.png" />
+	<link rel="apple-touch-icon" sizes="114x114" href="http://browsehappy.com/content/themes/browsehappy/imgs/apple-touch-icon-114x114.png" />
+
+	<!--[if (gt IE 6)|!(IE)]><!-->
+		<link rel="stylesheet" href="http://browsehappy.com/content/themes/browsehappy/style.css?3" />
+		<script src="http://browsehappy.com/content/themes/browsehappy/js/modernizr-1.6.min.js"></script>
+		<script src="http://use.typekit.com/lsw6yis.js"></script>
+		<script type="text/javascript">try{Typekit.load();}catch(e){}</script>
+	<!--<![endif]-->
+
+<link rel="EditURI" type="application/rsd+xml" title="RSD" href="http://browsehappy.com/wp/xmlrpc.php?rsd" />
+<link rel="wlwmanifest" type="application/wlwmanifest+xml" href="http://browsehappy.com/wp/wp-includes/wlwmanifest.xml" /> 
+<meta name="generator" content="WordPress 4.2-alpha" />
+</head>
+
+<body>
+<div id="body-wrap">
+
+	<header>
+		<hgroup class="wrap">
+			<h1>Browse <em>Happy</em></h1>
+			<h2>Online. Worry-free. <em>Upgrade your browser today</em>!</h2>
+		</hgroup>
+	</header>
+		<div id="main">
+		<ul id="browserlist" class="wrap">
+			<li id="chrome">
+				<a href="http://www.google.com/chrome" title="Google Chrome">
+					<div class="icon"></div>
+					<h2>Google Chrome</h2>
+					<p class="info">&#8220;A fast new browser from Google. Try&nbsp;it&nbsp;now!&#8221;</p>
+					<p class="version">Latest Version: <strong>39</strong></p>
+					<p class="website">Visit website for more info</p>
+				</a>
+				<p class="likebutton"><iframe src="http://www.facebook.com/plugins/like.php?href=http%3A%2F%2Fwww.facebook.com%2Fgooglechrome&amp;layout=button_count&amp;show_faces=false&amp;width=172&amp;action=like&amp;font=lucida+grande&amp;colorscheme=light&amp;height=20" scrolling="no" frameborder="0" style="border:none; overflow:hidden; width:172px; height:20px;"></iframe></p>
+			</li><!-- #chrome -->
+			<li id="firefox">
+				<a href="http://www.firefox.com/" title="Mozilla Firefox">
+					<div class="icon"></div>
+					<h2>Mozilla Firefox</h2>
+					<p class="info">&#8220;Your online security is Firefox's top priority. Firefox is free, and made to help you get the most out of the&nbsp;web.&#8221;</p>
+					<p class="version">Latest Version: <strong>34</strong></p>
+					<p class="website">Visit website for more info</p>
+				</a>
+				<p class="likebutton"><iframe src="http://www.facebook.com/plugins/like.php?href=http%3A%2F%2Fwww.facebook.com%2FFirefox&amp;layout=button_count&amp;show_faces=false&amp;width=172&amp;action=like&amp;font=lucida+grande&amp;colorscheme=light&amp;height=20" scrolling="no" frameborder="0" style="border:none; overflow:hidden; width:172px; height:20px;"></iframe></p>
+			</li><!-- #firefox -->
+			<li id="safari">
+				<a href="http://www.apple.com/safari/" title="Apple Safari">
+					<div class="icon"></div>
+					<h2>Safari</h2>
+					<p class="info">&#8220;Safari for Mac from Apple, the world’s most innovative&nbsp;browser.&#8221;</p>
+					<p class="version">Latest Version: <strong>8</strong></p>
+					<p class="website">Visit website for more info</p>
+				</a>
+							</li><!-- #safari -->
+			<li id="opera">
+				<a href="http://www.opera.com/" title="Opera">
+					<div class="icon"></div>
+					<h2>Opera</h2>
+					<p class="info">&#8220;The fastest browser on Earth—secure, powerful and easy to use, with excellent privacy protection. And&nbsp;it&nbsp;is&nbsp;free.&#8221;</p>
+					<p class="version">Latest Version: <strong>26</strong></p>
+					<p class="website">Visit website for more info</p>
+				</a>
+				<p class="likebutton"><iframe src="http://www.facebook.com/plugins/like.php?href=http%3A%2F%2Fwww.facebook.com%2FOpera&amp;layout=button_count&amp;show_faces=false&amp;width=172&amp;action=like&amp;font=lucida+grande&amp;colorscheme=light&amp;height=20" scrolling="no" frameborder="0" style="border:none; overflow:hidden; width:172px; height:20px;"></iframe></p>
+			</li><!-- #opera -->
+			<li id="ie">
+				<a href="http://windows.microsoft.com/ie" title="Microsoft Internet Explorer">
+					<div class="icon"></div>
+					<h2>Internet Explorer</h2>
+					<p class="info">&#8220;Designed to help you take control of your privacy and browse with confidence. Free from&nbsp;Microsoft.&#8221;</p>
+					<p class="version">Latest Version: <strong>11</strong></p>
+					<p class="website">Visit website for more info</p>
+				</a>
+				<p class="likebutton"><iframe src="http://www.facebook.com/plugins/like.php?href=http%3A%2F%2Fwww.facebook.com%2Finternetexplorer&amp;layout=button_count&amp;show_faces=false&amp;width=172&amp;action=like&amp;font=lucida+grande&amp;colorscheme=light&amp;height=20" scrolling="no" frameborder="0" style="border:none; overflow:hidden; width:172px; height:20px;"></iframe></p>
+			</li><!-- #ie -->
+		</ul><!-- #browserlist -->
+	</div><!-- #main -->
+
+	<footer>
+		<div class="wrap">
+			<section id="about">
+				<h2>What is Browse Happy</h2>
+				<p>Using an outdated browser makes your computer unsafe. Browse Happy is a way for you to find out what are the latest versions of the major browsers around. You can also learn about alternative browsers that may fit you even better than the one you are currently using.</p>
+			</section><!-- #about -->
+			<section id="share">
+				<h2>Share the Happiness</h2>
+				<nav>
+					<ul>
+						<li class="twitter"><a onclick="window.open(this.href, 'twittershare', 'status=0,toolbar=0,location=0,menubar=0,directories=0,resizable=0,scrollbars=0,height=250,width=500'); return false;" href="http://twitter.com/share?url=http%3A%2F%2Fbrowsehappy.com%2F&amp;text=Browse+Happy%3A+Online.+Worry-free.+Upgrade+your+browser+today%21" title="Share on Twitter">Twitter</a></li>
+						<li class="facebook"><a onclick="window.open(this.href, 'fbshare', 'status=0,toolbar=0,location=0,menubar=0,directories=0,resizable=0,scrollbars=0,height=325,width=540'); return false;" href="http://www.facebook.com/dialog/feed?app_id=180651631983617&link=http://browsehappy.com/&picture=http://browsehappy.com/content/themes/browsehappy/imgs/apple-touch-icon-114x114.png&name=Browse+Happy&description=Using+an+outdated+browser+makes+your+computer+unsafe.+Browse+Happy+is+a+way+for+you+to+find+out+what+are+the+latest+versions+of+the+major+browsers+around.+You+can+also+learn+about+alternative+browsers+that+may+fit+you+even+better+than+the+one+you+are+currently+using.&message=Online.+Worry-free.+Upgrade+your+browser+today%21&display=popup&redirect_uri=http://browsehappy.com/" title="Share on Facebook">Facebook</a></li>
+					</ul>
+				</nav>
+			</section><!-- #share -->
+			<div id="byline">
+				<a href="http://wordpress.org/" title="WordPress">Brought to you by WordPress</a>
+			</div><!-- #byline -->
+		</div>
+	</footer>
+
+</div><!-- #body-wrap -->
+<script src="http://www.google-analytics.com/urchin.js" type="text/javascript"></script> 
+<script type="text/javascript"> 
+_uacct = "UA-52447-6";
+urchinTracker();
+</script>
+
+	<script src="http://stats.wordpress.com/e-201452.js" type="text/javascript"></script>
+	<script type="text/javascript">
+	st_go({v:'ext',j:'1',blog:'22956346',post:'0'});
+	var load_cmc = function(){linktracker_init(22956346,0,2);};
+	if ( typeof addLoadEvent != 'undefined' ) addLoadEvent(load_cmc);
+	else load_cmc();
+	</script></body>
+</html>
