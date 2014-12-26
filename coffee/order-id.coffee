@@ -323,7 +323,7 @@ $ ->
     late_fee_pay_with = $('#order').data('order-late-fee-pay-with')
     overdue           = $('#order').data('order-overdue')
 
-    if late_fee_final > 0 and not late_fee_pay_with
+    if late_fee_final != 0 and not late_fee_pay_with
       OpenCloset.alert 'danger', '연체료를 납부받지 않았습니다.'
       return
 
@@ -341,7 +341,7 @@ $ ->
         desc:        "#{OpenCloset.commify clothes_price}원 x 20% x #{overdue}일"
       }
       success: (data, textStatus, jqXHR) ->
-        if late_fee_final > 0 and late_fee_pay_with
+        if late_fee_discount != 0
           $.ajax "/api/order_detail.json",
             type: 'POST'
             data: {
