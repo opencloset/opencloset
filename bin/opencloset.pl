@@ -903,7 +903,7 @@ helper update_order => sub {
         }
         catch {
             chomp;
-            app->log->error("failed to create a new order & a new order_clothes");
+            app->log->error("failed to update a new order & a new order_clothes");
             app->log->error($_);
 
             no warnings 'experimental';
