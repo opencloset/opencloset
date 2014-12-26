@@ -256,6 +256,7 @@ helper flatten_order => sub {
 
     my %data = (
         $order->get_columns,
+        status_name      => $order->status->name,
         rental_date      => undef,
         target_date      => undef,
         user_target_date => undef,
@@ -831,6 +832,36 @@ helper update_order => sub {
     }
 
     #
+    # adjust params
+    #
+    if ($order_detail_params) {
+        for my $key (qw/
+            id
+            order_id
+            clothes_code
+            status_id
+            name
+            price
+            final_price
+            stage
+            desc
+        /)
+        {
+            if ( $order_detail_params->{$key} ) {
+                $order_detail_params->{$key} = [ $order_detail_params->{$key} ]
+                    unless ref $order_detail_params->{$key};
+
+                if ( $key eq 'clothes_code' ) {
+                    for ( @{ $order_detail_params->{$key} } ) {
+                        next unless length == 4;
+                        $_ = sprintf( '%05s', $_ );
+                    }
+                }
+            }
+        }
+    }
+
+    #
     # TRANSACTION:
     #
     #   - find   order
@@ -902,7 +933,7 @@ helper update_order => sub {
         }
         catch {
             chomp;
-            app->log->error("failed to create a new order & a new order_clothes");
+            app->log->error("failed to update a new order & a new order_clothes");
             app->log->error($_);
 
             no warnings 'experimental';
