@@ -42,7 +42,7 @@ $ ->
         #
         # update late_fee final
         #
-        if data.price is data.stage0_price
+        if data.status_name is '대여중'
           $('.late-fee-final').html OpenCloset.commify(data.late_fee) + '원'
         else
           $('.late-fee-final').html OpenCloset.commify(data.price - data.stage0_price) + '원'
