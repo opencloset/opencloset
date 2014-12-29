@@ -512,6 +512,14 @@ helper update_user => sub {
         });
 
         $guard->commit;
+
+        #
+        # event posting to opencloset/monitor
+        #
+        my $res = HTTP::Tiny->new(timeout => 1)->post_form(app->config->{monitor_uri} . '/events', {
+            sender  => 'user',
+            user_id => $user->id
+        });
     }
 
     return $user;
@@ -922,6 +930,7 @@ helper update_order => sub {
             return $order if $to == $from;
 
             my $res = HTTP::Tiny->new(timeout => 1)->post_form(app->config->{monitor_uri} . '/events', {
+                sender   => 'order',
                 order_id => $order->id,
                 from     => $from,
                 to       => $to
@@ -4780,6 +4789,7 @@ post '/order' => sub {
             #
             $order->update({ status_id => 19 });
             my $res = HTTP::Tiny->new(timeout => 1)->post_form(app->config->{monitor_uri} . '/events', {
+                sender   => 'order',
                 order_id => $order_params{id},
                 from     => 18,
                 to       => 19
