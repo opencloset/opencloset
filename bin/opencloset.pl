@@ -512,6 +512,14 @@ helper update_user => sub {
         });
 
         $guard->commit;
+
+        #
+        # event posting to opencloset/monitor
+        #
+        my $res = HTTP::Tiny->new(timeout => 1)->post_form(app->config->{monitor_uri} . '/events', {
+            sender  => 'user',
+            user_id => $user->id
+        });
     }
 
     return $user;
