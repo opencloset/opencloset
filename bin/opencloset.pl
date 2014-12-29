@@ -256,7 +256,7 @@ helper flatten_order => sub {
 
     my %data = (
         $order->get_columns,
-        status_name      => $order->status->name,
+        status_name      => $order->status ? $order->status->name : q{},
         rental_date      => undef,
         target_date      => undef,
         user_target_date => undef,
