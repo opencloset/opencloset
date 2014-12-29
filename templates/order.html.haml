@@ -6,33 +6,40 @@
 -   ;
 - title meta_text($_id);
 
+.search
+  %form#search-form
+    .input-group
+      %input#booking-ymd.form-control{ :placeholder => '방문 예약 날짜를 고르세요', 'data-date-format' => 'yyyy-mm-dd' }
+
+.space-8
+
 %div
   %span
-    %a{ :href => "#{ url_for('/order') }" } 전체보기
+    %a{ :href => "#{ url_with->query([ status => 'all' ]) }" } 전체보기
   %span= '|'
   %span
-    %a{ :href => "#{ url_for('/order?status=late') }" } 연체중
+    %a{ :href => "#{ url_with->query([ status => 'late' ]) }" } 연체중
   %span= '|'
   %span
-    %a{ :href => "#{ url_for('/order?status=rental-late') }" } 대여중(연체아님)
+    %a{ :href => "#{ url_with->query([ status => 'rental-late' ]) }" } 대여중(연체아님)
   %span= '|'
   %span
-    %a{ :href => "#{ url_for('/order?status=2') }" } 대여중(연체포함)
+    %a{ :href => "#{ url_with->query([ status => '2' ]) }" } 대여중(연체포함)
   %span= '|'
   %span
-    %a{ :href => "#{ url_for('/order?status=9') }" } 반납
+    %a{ :href => "#{ url_with->query([ status => '9' ]) }" } 반납
   %span= '|'
   %span
-    %a{ :href => "#{ url_for('/order?status=14') }" } 방문예약
+    %a{ :href => "#{ url_with->query([ status => '14' ]) }" } 방문예약
   %span= '|'
   %span
-    %a{ :href => "#{ url_for('/order?status=15') }" } 배송예약
+    %a{ :href => "#{ url_with->query([ status => '15' ]) }" } 배송예약
   %span= '|'
   %span
-    %a{ :href => "#{ url_for('/order?status=19') }" } 결제대기
+    %a{ :href => "#{ url_with->query([ status => '19' ]) }" } 결제대기
   %span= '|'
   %span
-    %a{ :href => "#{ url_for('/order?status=undef') }" } 상태없음
+    %a{ :href => "#{ url_with->query([ status => 'undef' ]) }" } 상태없음
 
 .space-4
 
