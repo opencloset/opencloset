@@ -4603,6 +4603,9 @@ get '/order' => sub {
     my %params        = $self->get_params(qw/ id /);
     my %search_params = $self->get_params(qw/ status /);
 
+    my $p     = $self->param('p') || 1;
+    my $s     = $self->param('s') || app->config->{entries_per_page};
+
     my $rs = $self->get_order_list({
         %params,
         allow_empty => 1,
@@ -4676,10 +4679,22 @@ get '/order' => sub {
         $rs = $rs->search(\%cond);
     }
 
+    $rs = $rs->search( undef, { page => $p, rows => $s } );
+    my $pageset = Data::Pageset->new({
+        total_entries    => $rs->pager->total_entries,
+        entries_per_page => $rs->pager->entries_per_page,
+        pages_per_set    => 5,
+        current_page     => $p,
+    });
+
     #
     # response
     #
-    $self->stash( order_list => $rs );
+    $self->stash(
+        order_list => $rs,
+        pageset    => $pageset,
+    );
+
     $self->respond_to( html => { status => 200 } );
 } => 'order';
 
