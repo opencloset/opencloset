@@ -414,7 +414,7 @@ $ ->
   # 검색한 의류 품번에 일치하는 주문서 목록의 체크박스에 체크
   #
   selectSearchedClothes = ->
-    clothes_code = OpenCloset.trimClothesCode $('#clothes-search').val()
+    clothes_code = OpenCloset.trimClothesCode $('#clothes-search').val().toUpperCase()
     $('#clothes-search').val('').focus()
     $(".return-process input[data-clothes-code=#{ clothes_code }]").click()
     refreshReturnButton()
