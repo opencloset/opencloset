@@ -89,7 +89,7 @@
             -   ++$count;
               = $count > 1 ? q{, } : q{}
               %span
-                %a{ :href => '/clothes/#{ trim_clothes_code($detail->clothes) }' }= $detail->clothes->category
+                %a.clothes-category{ :href => '/clothes/#{ trim_clothes_code($detail->clothes) }' }= $detail->clothes->category
             - }
       - }
 
