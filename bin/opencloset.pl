@@ -256,7 +256,7 @@ helper flatten_order => sub {
 
     my %data = (
         $order->get_columns,
-        status_name      => $order->status->name,
+        status_name      => $order->status ? $order->status->name : q{},
         rental_date      => undef,
         target_date      => undef,
         user_target_date => undef,
@@ -1896,13 +1896,14 @@ group {
         $order_params{target_date}      = $order->target_date;
         $order_params{user_id}          = $order->user_id;
         $order_params{user_target_date} = $order->user_target_date;
+        $order_params{booking_id}       = $order->booking_id;
+        $order_params{status_id}        = 19; # 결제대기
 
         delete $order_params{id};
         delete $order_params{late_fee_pay_with};
         delete $order_params{price_pay_with};
         delete $order_params{return_date};
         delete $order_params{return_method};
-        delete $order_params{status_id};
 
         my $new_order;
         {
