@@ -36,6 +36,31 @@
                                   %li.row
                                     .col-sm-1
                                       %i.icon-caret-right.blue
+                                    .col-sm-3.no-padding-left 상위 주문서:
+                                    .col-sm-8
+                                      - if ( $order->parent_id ) {
+                                        %a{ :href => "#{ url_for('/order/' . $order->parent_id) }" }= $order->parent_id
+                                      - }
+                                      - else {
+                                        없음
+                                      - }
+                                  %li.row
+                                    .col-sm-1
+                                      %i.icon-caret-right.blue
+                                    .col-sm-3.no-padding-left 하위 주문서:
+                                    .col-sm-8
+                                      - my @children = $order->orders->all;
+                                      - if (@children) {
+                                      -   for my $child (@children) {
+                                        %a{ :href => "#{ url_for('/order/' . $child->id) }" }= $child->id
+                                      -   }
+                                      - }
+                                      - else {
+                                        없음
+                                      - }
+                                  %li.row
+                                    .col-sm-1
+                                      %i.icon-caret-right.blue
                                     .col-sm-3.no-padding-left 담당자:
                                     .col-sm-8
                                       :plain
