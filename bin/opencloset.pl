@@ -1896,6 +1896,7 @@ group {
         $order_params{target_date}      = $order->target_date;
         $order_params{user_id}          = $order->user_id;
         $order_params{user_target_date} = $order->user_target_date;
+        $order_params{booking_id}       = $order->booking_id;
         $order_params{status_id}        = 19; # 결제대기
 
         delete $order_params{id};
