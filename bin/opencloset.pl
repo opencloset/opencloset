@@ -4601,10 +4601,10 @@ get '/order' => sub {
     # fetch params
     #
     my %params        = $self->get_params(qw/ id /);
-    my %search_params = $self->get_params(qw/ status /);
+    my %search_params = $self->get_params(qw/ booking_ymd status /);
 
-    my $p     = $self->param('p') || 1;
-    my $s     = $self->param('s') || app->config->{entries_per_page};
+    my $p = $self->param('p') || 1;
+    my $s = $self->param('s') || app->config->{entries_per_page};
 
     my $rs = $self->get_order_list({
         %params,
@@ -4677,6 +4677,52 @@ get '/order' => sub {
             }
         }
         $rs = $rs->search(\%cond);
+    }
+
+    {
+        my $dt_today    = DateTime->now( time_zone => app->config->{timezone} );
+        my $booking_ymd = $search_params{booking_ymd} || $dt_today->ymd;
+        last unless $booking_ymd;
+
+        unless ( $booking_ymd =~ m/^(\d{4})-(\d{2})-(\d{2})$/ ) {
+            app->log->warn( "invalid booking_ymd format: $booking_ymd" );
+            last;
+        }
+
+        my $dt_start = try {
+            DateTime->new(
+                time_zone => app->config->{timezone},
+                year      => $1,
+                month     => $2,
+                day       => $3,
+            );
+        };
+        unless ($dt_start) {
+            app->log->warn( "cannot create start datetime object using booking_ymd" );
+            last;
+        }
+
+        my $dt_end = $dt_start->clone->add( hours => 24, seconds => -1 );
+        unless ($dt_end) {
+            app->log->warn( "cannot create end datetime object using booking_ymd" );
+            last;
+        }
+
+        my $dtf = $DB->storage->datetime_parser;
+        $rs = $rs->search(
+            {
+                'booking.date' => {
+                    -between => [
+                        $dtf->format_datetime($dt_start),
+                        $dtf->format_datetime($dt_end),
+                    ],
+                },
+            },
+            {
+                join     => [ qw/ booking / ],
+                order_by => { -asc => 'booking.date' },
+            },
+        );
     }
 
     $rs = $rs->search( undef, { page => $p, rows => $s } );
