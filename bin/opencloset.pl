@@ -4704,6 +4704,8 @@ get '/order' => sub {
     {
         no warnings 'experimental';
         my $status_id = $search_params{status};
+        my $dt_now    = DateTime->now( time_zone => app->config->{timezone} );
+        my $dtf       = $DB->storage->datetime_parser;
         my %cond;
         given ($status_id) {
             when ('undef') {
@@ -4713,7 +4715,7 @@ get '/order' => sub {
                 %cond = (
                     -and => [
                         status_id   => 2,
-                        target_date => { '<' => DateTime->now },
+                        target_date => { '<' => $dtf->format_datetime($dt_now) },
                     ],
                 );
             }
@@ -4721,7 +4723,7 @@ get '/order' => sub {
                 %cond = (
                     -and => [
                         status_id   => $status_id,
-                        target_date => { '>=' => DateTime->now },
+                        target_date => { '>=' => $dtf->format_datetime($dt_now) },
                     ],
                 );
             }
