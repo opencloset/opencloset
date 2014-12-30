@@ -929,6 +929,7 @@ helper update_order => sub {
             # event posting to opencloset/monitor
             #
             my $to = $order_params->{status_id};
+            return $order unless $to;
             return $order if $to == $from;
 
             my $res = HTTP::Tiny->new(timeout => 1)->post_form(app->config->{monitor_uri} . '/events', {
