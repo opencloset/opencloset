@@ -15,31 +15,31 @@
 
 %div
   %span
-    %a{ :href => "#{ url_with->query([ status => 'all' ]) }" } 전체보기
+    %a{ :href => "#{ url_with->query([ p => 1, status => 'all' ]) }" } 전체보기
   %span= '|'
   %span
-    %a{ :href => "#{ url_with->query([ status => 'late' ]) }" } 연체중
+    %a{ :href => "#{ url_with->query([ p => 1, status => 'late' ]) }" } 연체중
   %span= '|'
   %span
-    %a{ :href => "#{ url_with->query([ status => 'rental-late' ]) }" } 대여중(연체아님)
+    %a{ :href => "#{ url_with->query([ p => 1, status => 'rental-late' ]) }" } 대여중(연체아님)
   %span= '|'
   %span
-    %a{ :href => "#{ url_with->query([ status => '2' ]) }" } 대여중(연체포함)
+    %a{ :href => "#{ url_with->query([ p => 1, status => '2' ]) }" } 대여중(연체포함)
   %span= '|'
   %span
-    %a{ :href => "#{ url_with->query([ status => '9' ]) }" } 반납
+    %a{ :href => "#{ url_with->query([ p => 1, status => '9' ]) }" } 반납
   %span= '|'
   %span
-    %a{ :href => "#{ url_with->query([ status => '14' ]) }" } 방문예약
+    %a{ :href => "#{ url_with->query([ p => 1, status => '14' ]) }" } 방문예약
   %span= '|'
   %span
-    %a{ :href => "#{ url_with->query([ status => '15' ]) }" } 배송예약
+    %a{ :href => "#{ url_with->query([ p => 1, status => '15' ]) }" } 배송예약
   %span= '|'
   %span
-    %a{ :href => "#{ url_with->query([ status => '19' ]) }" } 결제대기
+    %a{ :href => "#{ url_with->query([ p => 1, status => '19' ]) }" } 결제대기
   %span= '|'
   %span
-    %a{ :href => "#{ url_with->query([ status => 'undef' ]) }" } 상태없음
+    %a{ :href => "#{ url_with->query([ p => 1, status => 'undef' ]) }" } 상태없음
 
 .space-4
 
