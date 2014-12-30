@@ -210,6 +210,8 @@ $ ->
   ( statusMap[v.id] = k ) for k, v of OpenCloset.status
   url  = "#{CONFIG.monitor_uri}/socket".replace 'http', 'ws'
   sock = new ReconnectingWebSocket url, null, { debug: false }
+  sock.onopen = (e) ->
+    sock.send '/subscribe order'
   sock.onmessage = (e) ->
     data     = JSON.parse(e.data)
     order_id = data.order.id
