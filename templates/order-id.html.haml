@@ -15,6 +15,8 @@
 -   ;
 - title meta_text($_id);
 
+- my $order_status = $order->status ? $order->status->name : '상태없음';
+
                 .row#order{ 'data-order-id' => "#{ $order->id }", 'data-order-parent-id' => "#{ $order->parent_id // q{} } ", 'data-url' => "#{ url_for( '/api/order/' . $order->id ) }" }
                   .col-sm-10.col-sm-offset-1
                     .widget-box.transparent.invoice-box
@@ -67,9 +69,9 @@
                                         <a
                                           id               = "order-staff-name"
                                           class            = "editable editable-click"
-                                          href             = "#{ $order->status->name ne '결제대기' ? url_for('/user/' . $order->staff_id) : '#' }"
+                                          href             = "#{ $order_status ne '결제대기' ? url_for('/user/' . $order->staff_id) : '#' }"
 
-                                          data-disabled    = "#{ $order->status->name ne '결제대기' ? 'true' : 'false' }"
+                                          data-disabled    = "#{ $order_status ne '결제대기' ? 'true' : 'false' }"
                                           data-mode        = "inline"
                                           data-showbuttons = "true"
                                           data-type        = "select"
@@ -93,7 +95,7 @@
                                           class            = "editable editable-click"
                                           href             = "#"
 
-                                          data-disabled    = "#{ $order->status->name ne '결제대기' ? 'true' : 'false' }"
+                                          data-disabled    = "#{ $order_status ne '결제대기' ? 'true' : 'false' }"
                                           data-mode        = "inline"
                                           data-showbuttons = "true"
                                           data-type        = "select"
@@ -116,7 +118,7 @@
                                           class            = "editable editable-click"
                                           href             = "#"
 
-                                          data-disabled    = "#{ $order->status->name ne '결제대기' ? 'true' : 'false' }"
+                                          data-disabled    = "#{ $order_status ne '결제대기' ? 'true' : 'false' }"
                                           data-value       = "#{ $order->rental_date ? $order->rental_date->ymd : q{} }"
                                           data-name        = "rental_date"
                                         ></a>
@@ -131,7 +133,7 @@
                                           class            = "editable editable-click"
                                           href             = "#"
 
-                                          data-disabled    = "#{ $order->status->name ne '결제대기' ? 'true' : 'false' }"
+                                          data-disabled    = "#{ $order_status ne '결제대기' ? 'true' : 'false' }"
 
                                           data-value       = "#{ $order->target_date ? $order->target_date->ymd : q{} }"
                                           data-name        = "target_date"
@@ -153,7 +155,7 @@
                                           class            = "editable editable-click"
                                           href             = "#"
 
-                                          data-disabled    = "#{ $order->status->name ne '결제대기' ? 'true' : 'false' }"
+                                          data-disabled    = "#{ $order_status ne '결제대기' ? 'true' : 'false' }"
                                           data-mode        = "inline"
                                           data-showbuttons = "true"
                                           data-type        = "select"
@@ -167,7 +169,7 @@
                                         ></a>
                                       \/
                                       %strong.order-stage0-price 0원
-                                  - if ( $order->status && $order->status->name eq '대여중' ) {
+                                  - if ( $order_status eq '대여중' ) {
                                     %li.row
                                       .col-sm-1
                                         %i.icon-caret-right.blue
@@ -321,7 +323,7 @@
                                       %td
                                         %a{ :href => "/clothes/#{ trim_clothes_code($detail->clothes) }" }= $detail->name
                                       %td
-                                        - if ( $order->status && $order->status->name ne '결제대기' && $detail->status ) {
+                                        - if ( $order_status ne '결제대기' && $detail->status ) {
                                           %span.order-status.label{ 'data-order-detail-status' => "#{ $detail->status->name }" }
                                             = $detail->status->name
                                         - }
@@ -341,7 +343,7 @@
                                           class            = "order-detail-price editable editable-click"
                                           href             = "#"
 
-                                          data-disabled    = "#{ $order->status->name ne '결제대기' ? 'true' : 'false' }"
+                                          data-disabled    = "#{ $order_status ne '결제대기' ? 'true' : 'false' }"
                                           data-mode        = "inline"
                                           data-showbuttons = "true"
                                           data-type        = "text"
@@ -370,7 +372,7 @@
                                           class            = "order-detail-final-price editable editable-click"
                                           href             = "#"
 
-                                          data-disabled    = "#{ $order->status->name ne '결제대기' ? 'true' : 'false' }"
+                                          data-disabled    = "#{ $order_status ne '결제대기' ? 'true' : 'false' }"
                                           data-mode        = "inline"
                                           data-showbuttons = "true"
                                           data-type        = "text"
@@ -439,7 +441,7 @@
                   .col-sm-10.col-sm-offset-1
                     .clearfix.form-actions
                       - if ( $order->status ) {
-                      -   if ( $order->status->name eq '대여중' ) {
+                      -   if ( $order_status eq '대여중' ) {
                         .search.pull-left.return-process
                           .input-group
                             %input#clothes-search.form-control{ :name => 'clothes-search' :type => 'text', :placeholder => '의류 품번' }
@@ -459,7 +461,7 @@
                           %i.icon-remove.bigger-110
                           반납 취소
                       -   }
-                      -   elsif ( $order->status->name eq '결제대기' ) {
+                      -   elsif ( $order_status eq '결제대기' ) {
                           %a#btn-order-confirm.btn.btn-info.pull-right{ :type => 'button', :href => "#", 'data-url' => "#{ url_for('/order/' . $order->id . '/update') }", 'data-redirect-url' => "#{ url_for('/order/' . $order->id) }", 'data-monitor-url' => "#{$monitor_uri}/events" }
                             %i.icon-ok.bigger-110
                             주문 확정
