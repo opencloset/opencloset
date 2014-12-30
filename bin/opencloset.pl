@@ -520,6 +520,8 @@ helper update_user => sub {
             sender  => 'user',
             user_id => $user->id
         });
+
+        $self->app->log->error("Failed to posting event: $res->{reason}") unless $res->{success};
     }
 
     return $user;
