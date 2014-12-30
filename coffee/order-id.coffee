@@ -198,6 +198,7 @@ $ ->
             $.ajax $(e.target).data('monitor-url'),
               type: 'POST'
               data:
+                sender:   'order'
                 order_id: order_id
                 from:     19    # 결제대기
                 to:       2     # 대여중
