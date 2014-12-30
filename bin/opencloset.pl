@@ -930,7 +930,7 @@ helper update_order => sub {
             #
             my $to = $order_params->{status_id};
             return $order unless $to;
-            return $order if $to == $from;
+            return $order if     $to == $from;
 
             my $res = HTTP::Tiny->new(timeout => 1)->post_form(app->config->{monitor_uri} . '/events', {
                 sender   => 'order',
@@ -1389,7 +1389,8 @@ group {
     put  '/order/:id'             => \&api_update_order;
     del  '/order/:id'             => \&api_delete_order;
 
-    put  '/order/:id/return-part' => \&api_return_part_order;
+    put  '/order/:id/return-part' => \&api_order_return_part;
+    get  '/order/:id/set-package' => \&api_order_set_package;
 
     get  '/order-list'            => \&api_get_order_list;
 
@@ -1836,7 +1837,7 @@ group {
         $self->respond_to( json => { status => 200, json => $data } );
     }
 
-    sub api_return_part_order {
+    sub api_order_return_part {
         my $self = shift;
 
         #
@@ -1973,6 +1974,47 @@ group {
             'Location' => $self->url_for( '/api/order/' . $order->id ),
         );
         $self->respond_to( json => { status => 201, json => $data } );
+    }
+
+    sub api_order_set_package {
+        my $self = shift;
+
+        #
+        # fetch params
+        #
+        my %order_params = $self->get_params(qw/ id /);
+
+        #
+        # update the order
+        #
+        my $order = $self->get_order( { id => $order_params{id} } );
+        unless ($order) {
+            app->log->warn( "cannot find such order: " . $order->id );
+        }
+        return unless $order;
+
+        $order->order_details->delete_all;
+        $order = $self->update_order(
+            {
+                id                => $order->id,
+                status_id         => 18,         # 포장
+                staff_id          => undef,
+                rental_date       => undef,
+                target_date       => undef,
+                user_target_date  => undef,
+                return_date       => undef,
+                return_method     => undef,
+                price_pay_with    => undef,
+                late_fee_pay_with => undef,
+                bestfit           => 0,
+            },
+        );
+
+        #
+        # response
+        #
+        my $data = $self->flatten_order($order);
+        $self->respond_to( json => { status => 200, json => $data } );
     }
 
     sub api_get_order_list {

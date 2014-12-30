@@ -160,6 +160,15 @@ $ ->
     display: (value, sourceData, response) -> $(this).html( OpenCloset.commify value )
     success: (response, newValue) -> updateOrder()
 
+  $('#btn-order-clear').click (e) ->
+    order_id = $('#order').data('order-id')
+    $.ajax "/api/order/#{ order_id }/set-package.json",
+      type: 'GET'
+      success: (data, textStatus, jqXHR) ->
+      error: (jqXHR, textStatus, errorThrown) ->
+      complete: (jqXHR, textStatus) ->
+        window.location.assign "/order?status=19"
+
   $('#btn-order-confirm').click (e) ->
     order_id     = $('#order').data('order-id')
     url          = $(e.target).data('url')
