@@ -4733,7 +4733,7 @@ get '/order' => sub {
             when ('rental-late') {
                 %cond = (
                     -and => [
-                        status_id   => $status_id,
+                        status_id   => 2,
                         target_date => { '>=' => $dtf->format_datetime($dt_day_end) },
                     ],
                 );
