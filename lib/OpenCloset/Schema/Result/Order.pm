@@ -122,6 +122,12 @@ __PACKAGE__->table("order");
   is_nullable: 1
   size: 32
 
+=head2 compensation_pay_with
+
+  data_type: 'varchar'
+  is_nullable: 1
+  size: 32
+
 =head2 desc
 
   data_type: 'text'
@@ -313,6 +319,8 @@ __PACKAGE__->add_columns(
   "price_pay_with",
   { data_type => "varchar", is_nullable => 1, size => 32 },
   "late_fee_pay_with",
+  { data_type => "varchar", is_nullable => 1, size => 32 },
+  "compensation_pay_with",
   { data_type => "varchar", is_nullable => 1, size => 32 },
   "desc",
   { data_type => "text", is_nullable => 1 },
@@ -522,8 +530,8 @@ __PACKAGE__->belongs_to(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-01-05 14:39:12
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:gXjgU8IR5eI0B0MfYUVfyw
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-01-06 20:46:07
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:dzmxr2CsGq+f9MqpSd5LUg
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration
