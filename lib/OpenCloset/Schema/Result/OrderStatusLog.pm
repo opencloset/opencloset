@@ -45,6 +45,7 @@ __PACKAGE__->table("order_status_log");
 
   data_type: 'datetime'
   datetime_undef_if_invalid: 1
+  inflate_datetime: 1
   is_nullable: 0
 
 =cut
@@ -68,6 +69,7 @@ __PACKAGE__->add_columns(
   {
     data_type => "datetime",
     datetime_undef_if_invalid => 1,
+    inflate_datetime => 1,
     is_nullable => 0,
   },
 );
@@ -119,8 +121,8 @@ __PACKAGE__->belongs_to(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-01-05 14:39:12
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:KiDFxd0uFRd+ToRtI0Kcdg
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-01-05 17:12:39
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:Yyz59C3TJnn30W91s5QoOQ
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

@@ -73,6 +73,12 @@ my $CONF = OpenCloset::Util::load_config('app.conf');
                         encode_check_method => 'check_password',
                     };
                 }
+                when ('timestamp') {
+                    return +{
+                        %$col_info,
+                        inflate_datetime => 1,
+                    };
+                }
             }
 
             return;
