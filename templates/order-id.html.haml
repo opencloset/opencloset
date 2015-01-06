@@ -204,6 +204,65 @@
                                         >#{ $order->late_fee_pay_with || q{미납} }</a>
                                       \/
                                       %strong.late-fee-final 0원
+                                  %li.row.return-process
+                                    .col-sm-1
+                                      %i.icon-caret-right.blue
+                                    .col-sm-3.no-padding-left 배상비:
+                                    .col-sm-8
+                                      :plain
+                                        <a
+                                          id               = "order-compensation"
+                                          class            = "editable editable-click"
+                                          href             = "#"
+
+                                          data-disabled    = "true"
+                                          data-mode        = "inline"
+                                          data-showbuttons = "true"
+                                          data-type        = "text"
+                                          data-emptytext   = "0"
+
+                                          data-value       = "0"
+                                        ></a>원
+                                  %li.row.return-process
+                                    .col-sm-1
+                                      %i.icon-caret-right.blue
+                                    .col-sm-3.no-padding-left 배상비 에누리:
+                                    .col-sm-8
+                                      :plain
+                                        <a
+                                          id               = "order-compensation-discount"
+                                          class            = "editable editable-click"
+                                          href             = "#"
+
+                                          data-disabled    = "true"
+                                          data-mode        = "inline"
+                                          data-showbuttons = "true"
+                                          data-type        = "text"
+                                          data-emptytext   = "0"
+
+                                          data-value       = "0"
+                                        ></a>원
+                                  %li.row
+                                    .col-sm-1
+                                      %i.icon-caret-right.blue
+                                    .col-sm-3.no-padding-left 최종 배상비:
+                                    .col-sm-8
+                                      :plain
+                                        <a
+                                          id               = "order-compensation-pay-with"
+                                          class            = "editable editable-click"
+                                          href             = "#"
+
+                                          data-disabled    = "true"
+                                          data-mode        = "inline"
+                                          data-showbuttons = "true"
+                                          data-type        = "select"
+                                          data-emptytext   = "미납"
+
+                                          data-value       = "#{ $order->compensation_pay_with || q{} }"
+                                        >#{ $order->compensation_pay_with || q{미납} }</a>
+                                      \/
+                                      %strong.compensation-final 0원
                             /
                             / 대여자 정보
                             /
