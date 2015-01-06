@@ -309,44 +309,45 @@ CREATE TABLE `booking` (
 --
 
 CREATE TABLE `order` (
-  `id`                INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `user_id`           INT UNSIGNED NOT NULL,
-  `status_id`         INT UNSIGNED DEFAULT NULL,
-  `staff_id`          INT UNSIGNED DEFAULT NULL,
-  `parent_id`         INT UNSIGNED DEFAULT NULL,
-  `booking_id`        INT UNSIGNED DEFAULT NULL,
+  `id`                    INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `user_id`               INT UNSIGNED NOT NULL,
+  `status_id`             INT UNSIGNED DEFAULT NULL,
+  `staff_id`              INT UNSIGNED DEFAULT NULL,
+  `parent_id`             INT UNSIGNED DEFAULT NULL,
+  `booking_id`            INT UNSIGNED DEFAULT NULL,
 
-  `additional_day`    INT UNSIGNED DEFAULT 0,
-  `rental_date`       DATETIME DEFAULT NULL,
-  `target_date`       DATETIME DEFAULT NULL,
-  `user_target_date`  DATETIME DEFAULT NULL,
-  `return_date`       DATETIME DEFAULT NULL,
-  `return_method`     VARCHAR(32) DEFAULT NULL,
-  `price_pay_with`    VARCHAR(32) DEFAULT NULL,
-  `late_fee_pay_with` VARCHAR(32) DEFAULT NULL,
-  `desc`              TEXT DEFAULT NULL,
+  `additional_day`        INT UNSIGNED DEFAULT 0,
+  `rental_date`           DATETIME DEFAULT NULL,
+  `target_date`           DATETIME DEFAULT NULL,
+  `user_target_date`      DATETIME DEFAULT NULL,
+  `return_date`           DATETIME DEFAULT NULL,
+  `return_method`         VARCHAR(32) DEFAULT NULL,
+  `price_pay_with`        VARCHAR(32) DEFAULT NULL,
+  `late_fee_pay_with`     VARCHAR(32) DEFAULT NULL,
+  `compensation_pay_with` VARCHAR(32) DEFAULT NULL,
+  `desc`                  TEXT DEFAULT NULL,
 
 
   -- guest info
-  `purpose`           VARCHAR(128) DEFAULT NULL,
-  `purpose2`          TEXT DEFAULT NULL,
-  `pre_category`      VARCHAR(128) DEFAULT NULL,
-  `pre_color`         VARCHAR(32)  DEFAULT NULL,
-  `height`            INT DEFAULT NULL, -- 키(cm)
-  `weight`            INT DEFAULT NULL, -- 몸무게(kg)
-  `bust`              INT DEFAULT NULL, -- 가슴   둘레(cm)
-  `waist`             INT DEFAULT NULL, -- 허리   둘레(cm)
-  `hip`               INT DEFAULT NULL, -- 엉덩이 둘레(cm)
-  `belly`             INT DEFAULT NULL, -- 배     둘레(cm)
-  `thigh`             INT DEFAULT NULL, -- 허벅지 둘레(cm)
-  `arm`               INT DEFAULT NULL, -- 팔     길이(cm)
-  `leg`               INT DEFAULT NULL, -- 다리   길이(cm)
-  `knee`              INT DEFAULT NULL, -- 무릎   길이(cm)
-  `foot`              INT DEFAULT NULL, -- 발 크기(mm)
-  `bestfit`           BOOLEAN DEFAULT 0,
+  `purpose`               VARCHAR(128) DEFAULT NULL,
+  `purpose2`              TEXT DEFAULT NULL,
+  `pre_category`          VARCHAR(128) DEFAULT NULL,
+  `pre_color`             VARCHAR(32)  DEFAULT NULL,
+  `height`                INT DEFAULT NULL, -- 키(cm)
+  `weight`                INT DEFAULT NULL, -- 몸무게(kg)
+  `bust`                  INT DEFAULT NULL, -- 가슴   둘레(cm)
+  `waist`                 INT DEFAULT NULL, -- 허리   둘레(cm)
+  `hip`                   INT DEFAULT NULL, -- 엉덩이 둘레(cm)
+  `belly`                 INT DEFAULT NULL, -- 배     둘레(cm)
+  `thigh`                 INT DEFAULT NULL, -- 허벅지 둘레(cm)
+  `arm`                   INT DEFAULT NULL, -- 팔     길이(cm)
+  `leg`                   INT DEFAULT NULL, -- 다리   길이(cm)
+  `knee`                  INT DEFAULT NULL, -- 무릎   길이(cm)
+  `foot`                  INT DEFAULT NULL, -- 발 크기(mm)
+  `bestfit`               BOOLEAN DEFAULT 0,
 
-  `create_date`      DATETIME DEFAULT NULL,
-  `update_date`      DATETIME DEFAULT NULL,
+  `create_date`           DATETIME DEFAULT NULL,
+  `update_date`           DATETIME DEFAULT NULL,
 
   PRIMARY KEY (`id`),
   CONSTRAINT `fk_order1` FOREIGN KEY (`user_id`)    REFERENCES `user`    (`id`) ON DELETE CASCADE,

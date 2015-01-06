@@ -15,7 +15,7 @@ $ ->
         #
         # update price
         #
-        $(".order-stage0-price").html( OpenCloset.commify(data.stage0_price) + '원' )
+        $(".order-stage0-price").html( OpenCloset.commify(data.stage_price['0']) + '원' )
         $(".order-price").html( OpenCloset.commify(data.price) + '원' )
 
         #
@@ -45,7 +45,36 @@ $ ->
         if data.status_name is '대여중'
           $('.late-fee-final').html OpenCloset.commify(data.late_fee) + '원'
         else
-          $('.late-fee-final').html OpenCloset.commify(data.price - data.stage0_price) + '원'
+          $('.late-fee-final').html OpenCloset.commify(data.stage_price['1']) + '원'
+          $('.compensation-final').html OpenCloset.commify(data.stage_price['2']) + '원'
+
+        #
+        # update compensation final
+        #
+        $('#order-compensation').editable
+          display: (value, sourceData, response) ->
+            $(this).html( OpenCloset.commify value )
+          success: (response, newValue) ->
+            compensation          = parseInt newValue
+            compensation_discount = parseInt $('#order-compensation-discount').editable( 'getValue', true )
+            compensation_final    = compensation + compensation_discount
+
+            $('#order').data('order-compensation', compensation)
+            $('#order').data('order-compensation-discount', compensation_discount)
+            $('#order').data('order-compensation-final', compensation_final)
+            $('.compensation-final').html OpenCloset.commify(compensation_final) + '원'
+        $('#order-compensation-discount').editable
+          display: (value, sourceData, response) ->
+            $(this).html( OpenCloset.commify value )
+          success: (response, newValue) ->
+            compensation          = parseInt $('#order-compensation').editable( 'getValue', true )
+            compensation_discount = parseInt newValue
+            compensation_final    = compensation + compensation_discount
+
+            $('#order').data('order-compensation', compensation)
+            $('#order').data('order-compensation-discount', compensation_discount)
+            $('#order').data('order-compensation-final', compensation_final)
+            $('.compensation-final').html OpenCloset.commify(compensation_final) + '원'
       error: (jqXHR, textStatus, errorThrown) ->
       complete: (jqXHR, textStatus) ->
   updateOrder()
@@ -126,6 +155,10 @@ $ ->
     source: -> { value: m, text: m } for m in OpenCloset.payWith
     success: (response, newValue) ->
       $('#order').data('order-late-fee-pay-with', newValue)
+  $('#order-compensation-pay-with').editable
+    source: -> { value: m, text: m } for m in OpenCloset.payWith
+    success: (response, newValue) ->
+      $('#order').data('order-compensation-pay-with', newValue)
   $('#order-bestfit').editable
     source: -> { value: k, text: v } for k, v of { 0: '보통', 1: 'Best-Fit' }
   $('.order-detail').editable()
@@ -282,7 +315,7 @@ $ ->
     $('#order-late-fee-pay-with').editable 'setValue', ''
     $('#order-late-fee-pay-with').html '미납'
 
-  returnClothesReal = (is_part, redirect_url, order_id, late_fee_pay_with) ->
+  returnClothesReal = (is_part, redirect_url, order_id, late_fee_pay_with, compensation_pay_with) ->
     if is_part
       #
       # 부분 반납
@@ -313,6 +346,7 @@ $ ->
         return_date:            moment().format('YYYY-MM-DD HH:mm:ss')
         return_method:          '직접방문'
         late_fee_pay_with:      late_fee_pay_with
+        compensation_pay_with:  compensation_pay_with
         order_detail_id:        order_detail_id
         order_detail_status_id: order_detail_status_id
     $.ajax url,
@@ -325,20 +359,32 @@ $ ->
         window.location.href = redirect_url
 
   returnOrder = (is_part, redirect_url) ->
-    order_id          = $('#order').data('order-id')
-    clothes_price     = $('#order').data('order-clothes-price')
-    late_fee          = $('#order').data('order-late-fee')
-    late_fee_discount = $('#order').data('order-late-fee-discount')
-    late_fee_final    = $('#order').data('order-late-fee-final')
-    late_fee_pay_with = $('#order').data('order-late-fee-pay-with')
-    overdue           = $('#order').data('order-overdue')
+    order_id              = $('#order').data('order-id')
+    clothes_price         = $('#order').data('order-clothes-price')
+    late_fee              = $('#order').data('order-late-fee')
+    late_fee_discount     = $('#order').data('order-late-fee-discount')
+    late_fee_final        = $('#order').data('order-late-fee-final')
+    late_fee_pay_with     = $('#order').data('order-late-fee-pay-with')
+    compensation          = $('#order').data('order-compensation')          || 0
+    compensation_discount = $('#order').data('order-compensation-discount') || 0
+    compensation_final    = $('#order').data('order-compensation-final')    || 0
+    compensation_pay_with = $('#order').data('order-compensation-pay-with')
+    overdue               = $('#order').data('order-overdue')
 
     if late_fee_final != 0 and not late_fee_pay_with
       OpenCloset.alert 'danger', '연체료를 납부받지 않았습니다.'
       return
 
+    if compensation == 0 and compensation_discount != 0
+      OpenCloset.alert 'danger', '배상비 없이 배상비 에누리가 있을 수 없습니다.'
+      return
+
+    if compensation_final != 0 and not compensation_pay_with
+      OpenCloset.alert 'danger', '배상비를 납부받지 않았습니다.'
+      return
+
     #
-    # 연체료, 연체료 에누리 항목 추가
+    # 연체료 항목 추가
     #
     $.ajax "/api/order_detail.json",
       type: 'POST'
@@ -350,7 +396,10 @@ $ ->
         stage:       1
         desc:        "#{OpenCloset.commify clothes_price}원 x 20% x #{overdue}일"
       }
-      success: (data, textStatus, jqXHR) ->
+      complete: (jqXHR, textStatus) ->
+        #
+        # 연체료 에누리 항목 추가
+        #
         if late_fee_discount != 0
           $.ajax "/api/order_detail.json",
             type: 'POST'
@@ -361,10 +410,36 @@ $ ->
               final_price: late_fee_discount
               stage:       1
             }
-            success: (data, textStatus, jqXHR) ->
-              returnClothesReal is_part, redirect_url, order_id, late_fee_pay_with
-        else
-          returnClothesReal is_part, redirect_url, order_id, late_fee_pay_with
+
+    #
+    # 배상비 항목 추가
+    #
+    if compensation != 0
+      $.ajax "/api/order_detail.json",
+        type: 'POST'
+        data: {
+          order_id:    order_id
+          name:        '배상비'
+          price:       compensation
+          final_price: compensation
+          stage:       2
+        }
+        complete: (jqXHR, textStatus) ->
+          #
+          # 배상비 에누리 항목 추가
+          #
+          if compensation_discount != 0
+            $.ajax "/api/order_detail.json",
+              type: 'POST'
+              data: {
+                order_id:    order_id
+                name:        '배상비 에누리'
+                price:       compensation_discount
+                final_price: compensation_discount
+                stage:       2
+              }
+
+    returnClothesReal is_part, redirect_url, order_id, late_fee_pay_with, compensation_pay_with
 
   #
   # 전체 반납 버튼 클릭
@@ -400,20 +475,37 @@ $ ->
     { selected: selected, total: total }
 
   #
-  # 부분 반납 및 전체 반납 버튼 활성 또는 비활성화
+  # 부분 반납 및 전체 반납 여부에 따라
+  #   - 부분 반납 및 전체 반납 버튼 활성 또는 비활성화
+  #   - 배상비 항목 활성 또는 비활성화
   #
   refreshReturnButton = ->
     count = countSelectedOrderDetail()
+    enable_compensation = 0
     if count.selected > 0
       if count.selected is count.total
         $('#btn-return-all').removeClass('disabled')
         $('#btn-return-part').addClass('disabled')
+        ++enable_compensation
       else
         $('#btn-return-all').addClass('disabled')
         $('#btn-return-part').removeClass('disabled')
     else
       $('#btn-return-all').addClass('disabled')
       $('#btn-return-part').addClass('disabled')
+
+    if enable_compensation
+      $('#order-compensation').editable 'enable'
+      $('#order-compensation-discount').editable 'enable'
+      $('#order-compensation-pay-with').editable 'enable'
+    else
+      $('#order-compensation').editable 'disable'
+      $('#order-compensation').editable 'setValue', '0'
+      $('#order-compensation-discount').editable 'disable'
+      $('#order-compensation-discount').editable 'setValue', '0'
+      $('#order-compensation-pay-with').editable 'disable'
+      $('#order-compensation-pay-with').editable 'setValue', ''
+      $('#order-compensation-pay-with').html '미납'
 
   #
   # 주문서 목록의 체크박스 클릭시 반납 버튼 활성화 여부 갱신

@@ -248,10 +248,14 @@ helper flatten_order => sub {
     return unless $order;
 
     my $order_price        = 0;
-    my $order_stage0_price = 0;
+    my %order_stage_price = (
+        0 => 0,
+        1 => 0,
+        2 => 0,
+    );
     for my $order_detail ( $order->order_details ) {
-        $order_price        += $order_detail->final_price;
-        $order_stage0_price += $order_detail->final_price if $order_detail->stage == 0;
+        $order_price                               += $order_detail->final_price;
+        $order_stage_price{ $order_detail->stage } += $order_detail->final_price;
     }
 
     my %data = (
@@ -262,7 +266,7 @@ helper flatten_order => sub {
         user_target_date => undef,
         return_date      => undef,
         price            => $order_price,
-        stage0_price     => $order_stage0_price,
+        stage_price      => \%order_stage_price,
         clothes_price    => $self->order_clothes_price($order),
         clothes          => [ $order->order_details({ clothes_code => { '!=' => undef } })->get_column('clothes_code')->all ],
         late_fee         => $self->calc_late_fee($order),
@@ -1701,6 +1705,7 @@ group {
             belly
             bestfit
             bust
+            compensation_pay_with
             desc
             foot
             height
@@ -1776,6 +1781,7 @@ group {
             belly
             bestfit
             bust
+            compensation_pay_with
             desc
             foot
             height
