@@ -397,3 +397,44 @@ CREATE TABLE `sms` (
   PRIMARY KEY (`id`),
   INDEX (`status`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- order_status_log
+--
+
+CREATE TABLE `order_status_log` (
+  `order_id`  INT(10) UNSIGNED NOT NULL,
+  `status_id` INT(10) UNSIGNED NOT NULL,
+  `timestamp` DATETIME         NOT NULL,
+  PRIMARY KEY (`order_id`,`status_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+DROP TRIGGER IF EXISTS `tracking_order_insert`;
+DROP TRIGGER IF EXISTS `tracking_order_update`;
+
+DELIMITER $$
+
+CREATE TRIGGER `tracking_order_update` AFTER UPDATE on `order`
+FOR EACH ROW
+BEGIN
+    IF (NEW.id = OLD.id AND NEW.status_id != OLD.status_id ) THEN
+        INSERT INTO `order_status_log`
+            (`order_id` , `status_id` , `timestamp`)
+        VALUES
+            (NEW.id, NEW.status_id, NOW());
+    END IF;
+END$$
+
+CREATE TRIGGER `tracking_order_insert` AFTER INSERT on `order`
+FOR EACH ROW
+BEGIN
+    INSERT INTO `order_status_log`
+        (`order_id` , `status_id` , `timestamp`)
+    VALUES
+        (NEW.id, NEW.status_id, NOW());
+END$$
+
+DELIMITER ;
+
+ALTER TABLE `order_status_log` ADD FOREIGN KEY (`order_id`) REFERENCES `order` (`id`);
+ALTER TABLE `order_status_log` ADD FOREIGN KEY (`status_id`) REFERENCES `status` (`id`);
