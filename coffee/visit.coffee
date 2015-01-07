@@ -270,6 +270,9 @@ $ ->
     unless email
       OpenCloset.alert 'danger', '전자우편을 입력해주세요.', '#visit-alert'
       return
+    unless /^([a-zA-Z0-9_.+-])+\@(([a-zA-Z0-9-])+\.)+([a-zA-Z0-9]{2,4})+$/.test( email )
+      OpenCloset.alert 'danger', '유효하지 않은 전자우편입니다.', '#visit-alert'
+      return
 
     #
     # 주소 점검
