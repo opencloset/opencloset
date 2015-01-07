@@ -3803,15 +3803,8 @@ group {
         my $self   = shift;
         my $q      = $self->param('q');
         my $p      = Postcodify->new( config => $ENV{MOJO_CONFIG} || './app.psgi.conf' );
-        my $result = try { $p->search( $q ) } catch {
-            $self->app->log->error("api_postcode_search failed: $q");
-        };
-
-        unless ($result) {
-            $self->error(500, {str => "api_postcode_search failed: $q"});
-            return;
-        }
-
+        my $result = $p->search( $q );
+        $self->app->log->info("postcode search query: $q");
         $self->render(text => decode_utf8($result->json), format => 'json');
     }
 
