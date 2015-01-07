@@ -406,8 +406,7 @@ CREATE TABLE `sms` (
 CREATE TABLE `order_status_log` (
   `order_id`  INT(10) UNSIGNED NOT NULL,
   `status_id` INT(10) UNSIGNED NOT NULL,
-  `timestamp` DATETIME         NOT NULL,
-  PRIMARY KEY (`order_id`,`status_id`)
+  `timestamp` DATETIME         NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 DROP TRIGGER IF EXISTS `tracking_order_insert`;
