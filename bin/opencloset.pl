@@ -1160,7 +1160,7 @@ helper get_nearest_booked_order => sub {
     my $dt_now = DateTime->now( time_zone => app->config->{timezone} );
     my $dtf    = $DB->storage->datetime_parser;
 
-    my $rs = $user ->search_related(
+    my $rs = $user->search_related(
         'orders',
         {
             'me.status_id' => 14, # 방문예약
@@ -4052,6 +4052,7 @@ any '/visit' => sub {
         return;
     }
 
+    $self->stash( order => $self->get_nearest_booked_order($user) );
     if ( $type eq 'visit' ) {
         #
         # GH #253
@@ -4124,51 +4125,58 @@ any '/visit' => sub {
         }
         else {
             $user = $self->update_user( \%user_params, \%user_info_params );
-            if ($booking_saved) {
-                #
-                # 이미 예약 정보가 저장되어 있는 경우 - 예약 변경 상황
-                #
-                my $order_obj = $DB->resultset('Order')->find($order);
-                if ($order_obj) {
-                    if ( $booking != $booking_saved ) {
-                        #
-                        # 변경한 예약 정보가 기존 정보와 다를 경우 갱신함
-                        #
-                        $order_obj->update({ booking_id => $booking });
-                    }
+            if ($user) {
+                if ($booking_saved) {
+                    #
+                    # 이미 예약 정보가 저장되어 있는 경우 - 예약 변경 상황
+                    #
+                    my $order_obj = $DB->resultset('Order')->find($order);
+                    if ($order_obj) {
+                        if ( $booking != $booking_saved ) {
+                            #
+                            # 변경한 예약 정보가 기존 정보와 다를 경우 갱신함
+                            #
+                            $order_obj->update({ booking_id => $booking });
+                        }
 
-                    my $msg = sprintf(
-                        "%s님 %s으로 방문 예약이 변경되었습니다.",
-                        $user->name,
-                        $order_obj->booking->date->strftime('%m월 %d일 %H시 %M분'),
-                    );
-                    $DB->resultset('SMS')->create({
-                        to   => $user->user_info->phone,
-                        from => app->config->{sms}{from},
-                        text => $msg,
-                    }) or app->log->warn("failed to create a new sms: $msg");
+                        my $msg = sprintf(
+                            "%s님 %s으로 방문 예약이 변경되었습니다.",
+                            $user->name,
+                            $order_obj->booking->date->strftime('%m월 %d일 %H시 %M분'),
+                        );
+                        $DB->resultset('SMS')->create({
+                            to   => $user->user_info->phone,
+                            from => app->config->{sms}{from},
+                            text => $msg,
+                        }) or app->log->warn("failed to create a new sms: $msg");
+                    }
+                }
+                else {
+                    #
+                    # 예약 정보가 없는 경우 - 신규 예약 신청 상황
+                    #
+                    my $order_obj = $user->create_related('orders', {
+                        status_id  => 14,      # 방문예약: status 테이블 참조
+                        booking_id => $booking,
+                    });
+                    if ($order_obj) {
+                        my $msg = sprintf(
+                            "%s님 %s으로 방문 예약이 완료되었습니다.",
+                            $user->name,
+                            $order_obj->booking->date->strftime('%m월 %d일 %H시 %M분'),
+                        );
+                        $DB->resultset('SMS')->create({
+                            to   => $user->user_info->phone,
+                            from => app->config->{sms}{from},
+                            text => $msg,
+                        }) or app->log->warn("failed to create a new sms: $msg");
+                    }
                 }
             }
             else {
-                #
-                # 예약 정보가 없는 경우 - 신규 예약 신청 상황
-                #
-                my $order_obj = $user->create_related('orders', {
-                    status_id  => 14,      # 방문예약: status 테이블 참조
-                    booking_id => $booking,
-                });
-                if ($order_obj) {
-                    my $msg = sprintf(
-                        "%s님 %s으로 방문 예약이 완료되었습니다.",
-                        $user->name,
-                        $order_obj->booking->date->strftime('%m월 %d일 %H시 %M분'),
-                    );
-                    $DB->resultset('SMS')->create({
-                        to   => $user->user_info->phone,
-                        from => app->config->{sms}{from},
-                        text => $msg,
-                    }) or app->log->warn("failed to create a new sms: $msg");
-                }
+                my $error_msg = "유효하지 않은 정보입니다: " . $self->stash('error');
+                app->log->warn($error_msg);
+                $self->stash( alert => $error_msg );
             }
         }
     }
@@ -4178,7 +4186,6 @@ any '/visit' => sub {
         type     => $type,
         user     => $user,
         password => $password,
-        order    => $self->get_nearest_booked_order($user),
     );
 };
 
