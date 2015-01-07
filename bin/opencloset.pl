@@ -4256,6 +4256,7 @@ any '/visit2' => sub {
         return;
     }
 
+    $self->stash( order => $self->get_nearest_booked_order($user) );
     if ( $type eq 'visit' ) {
         #
         # 예약 신청/변경/취소
@@ -4306,40 +4307,45 @@ any '/visit2' => sub {
         }
         else {
             $user = $self->update_user( \%user_params, \%user_info_params );
-            if ($booking_saved) {
-                #
-                # 이미 예약 정보가 저장되어 있는 경우 - 예약 변경 상황
-                #
-                my $order_obj = $DB->resultset('Order')->find($order);
-                if ($order_obj) {
-                    if ( $booking != $booking_saved ) {
-                        #
-                        # 변경한 예약 정보가 기존 정보와 다를 경우 갱신함
-                        #
-                        $order_obj->update({ booking_id => $booking });
+            if ($user) {
+                if ($booking_saved) {
+                    #
+                    # 이미 예약 정보가 저장되어 있는 경우 - 예약 변경 상황
+                    #
+                    my $order_obj = $DB->resultset('Order')->find($order);
+                    if ($order_obj) {
+                        if ( $booking != $booking_saved ) {
+                            #
+                            # 변경한 예약 정보가 기존 정보와 다를 경우 갱신함
+                            #
+                            $order_obj->update({ booking_id => $booking });
+                        }
                     }
+                }
+                else {
+                    #
+                    # 예약 정보가 없는 경우 - 신규 예약 신청 상황
+                    #
+                    my $order_obj = $user->create_related('orders', {
+                        status_id  => 14,      # 방문예약: status 테이블 참조
+                        booking_id => $booking,
+                    });
                 }
             }
             else {
-                #
-                # 예약 정보가 없는 경우 - 신규 예약 신청 상황
-                #
-                my $order_obj = $user->create_related('orders', {
-                    status_id  => 14,      # 방문예약: status 테이블 참조
-                    booking_id => $booking,
-                });
+                my $error_msg = "유효하지 않은 정보입니다: " . $self->stash('error');
+                app->log->warn($error_msg);
+                $self->stash( alert => $error_msg );
             }
         }
     }
 
     $self->stash(
-        load  => app->config->{visit_load},
-        type  => $type,
-        user  => $user,
-        order => $self->get_nearest_booked_order($user),
+        load => app->config->{visit_load},
+        type => $type,
+        user => $user,
     );
 };
-
 
 get '/'             => 'home';
 get '/browse-happy' => 'browse-happy';
