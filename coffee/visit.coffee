@@ -497,7 +497,7 @@ $ ->
   # 주소검색
   #
   $("#postcodify").postcodify
-    api: "/api/postcode/search"
+    api: "/api/postcode/search.json"
     timeout: 10000    # 10 seconds
     insertDbid : ".postcodify_dbid"
     insertAddress : ".postcodify_address"
