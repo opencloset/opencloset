@@ -17,6 +17,7 @@ $ ->
         #
         $(".order-stage0-price").html( OpenCloset.commify(data.stage_price['0']) + '원' )
         $(".order-price").html( OpenCloset.commify(data.price) + '원' )
+        $(".order-price-input").prop( 'value', data.price )
 
         #
         # update late_fee
@@ -293,6 +294,40 @@ $ ->
       setOrderDetailFinalPrice $(el).data('pk')
 
   autoSetByAdditionalDay()
+
+  #
+  # 환불 진행 버튼 클릭
+  #
+  $('#btn-refund-process').click (e) ->
+    $('#order-refund-error').html('')
+    $('#order-refund-charge').prop 'value', 0
+    $('#order-refund-real').prop 'value', 0
+    $("#modal-refund").modal('show')
+  $("#btn-refund-modal-cancel").click (e) ->
+    $("#modal-refund").modal('hide')
+  $("#btn-refund-modal-ok").click (e) ->
+    total  = parseInt( $('#order-refund-total').prop 'value' )
+    charge = parseInt( $('#order-refund-charge').prop 'value' )
+    real   = parseInt( $('#order-refund-real').prop 'value' )
+    unless total is charge + real
+      $('#order-refund-error').html('환불 수수료와 환불 금액의 합이 주문서 총액과 일치하지 않습니다.')
+      return
+    $("#modal-refund").modal('hide')
+    #
+    # 환불 금액 항목 추가
+    #
+    order_id = $('#order').data('order-id')
+    $.ajax "/api/order_detail.json",
+      type: 'POST'
+      data: {
+        order_id:    order_id
+        name:        '환불'
+        price:       -real
+        final_price: -real
+        desc:        "환불 수수료: #{charge}원"
+        stage:       3
+      }
+    returnClothesReal false, "/order/#{order_id}", order_id, '미납', '미납'
 
   #
   # 반납 진행 버튼 클릭

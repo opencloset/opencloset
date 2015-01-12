@@ -295,6 +295,10 @@ $opencloset-darken-yellow: desaturate(darken($opencloset-yellow, 4%), 10%);
         .input-large {
             width: 400px !important;
         }
+        #order-refund-error {
+            color: red;
+            font-weight: bold;
+        }
     }
     #user-list-table table th {
         &:first-child {
