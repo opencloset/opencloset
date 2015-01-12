@@ -1999,6 +1999,10 @@ group {
         }
         return unless $order;
 
+        for my $clothes ( $order->clothes ) {
+            $clothes->update({ status_id => 41 }); # 포장취소
+        }
+
         $order->order_details->delete_all;
         $order = $self->update_order(
             {
