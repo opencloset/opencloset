@@ -39,6 +39,12 @@
   %span= '|'
   %span
     %a{ :href => "#{ url_for( '/clothes' )->query( status => 11 ) }" }= sprintf " 반납배송중 (%d)", $condition->{11};
+  %span= '|'
+  %span
+    %a{ :href => "#{ url_for( '/clothes' )->query( status => 41 ) }" }= sprintf " 포장취소 (%d)", $condition->{41};
+  %span= '|'
+  %span
+    %a{ :href => "#{ url_for( '/clothes' )->query( status => 42 ) }" }= sprintf " 환불 (%d)", $condition->{42};
 
 #clothes-list-table.dataTables_wrapper
   %table.table.table-striped.table-bordered.table-hover

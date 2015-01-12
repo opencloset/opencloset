@@ -327,7 +327,7 @@ $ ->
         desc:        "환불 수수료: #{charge}원"
         stage:       3
       }
-    returnClothesReal false, "/order/#{order_id}", order_id, '미납', '미납'
+    returnClothesReal 'refund', "/order/#{order_id}", order_id, '미납', '미납'
 
   #
   # 반납 진행 버튼 클릭
@@ -350,8 +350,8 @@ $ ->
     $('#order-late-fee-pay-with').editable 'setValue', ''
     $('#order-late-fee-pay-with').html '미납'
 
-  returnClothesReal = (is_part, redirect_url, order_id, late_fee_pay_with, compensation_pay_with) ->
-    if is_part
+  returnClothesReal = (type, redirect_url, order_id, late_fee_pay_with, compensation_pay_with) ->
+    if type is 'part'
       #
       # 부분 반납
       #
@@ -367,6 +367,23 @@ $ ->
         return_method:          '직접방문'
         late_fee_pay_with:      late_fee_pay_with
         order_detail_id:        order_detail_id
+    else if type is 'refund'
+      #
+      # 환불
+      #
+      order_detail_id = []
+      $("input[data-clothes-code]").each (i, el) -> order_detail_id.push $(el).data('id')
+      order_detail_status_id = ( 42 for code in order_detail_id )
+
+      url  = "/api/order/#{ order_id }.json"
+      data =
+        status_id:              42
+        return_date:            moment().format('YYYY-MM-DD HH:mm:ss')
+        return_method:          '직접방문'
+        late_fee_pay_with:      late_fee_pay_with
+        compensation_pay_with:  compensation_pay_with
+        order_detail_id:        order_detail_id
+        order_detail_status_id: order_detail_status_id
     else
       #
       # 최종 반납
@@ -393,7 +410,7 @@ $ ->
         #
         window.location.href = redirect_url
 
-  returnOrder = (is_part, redirect_url) ->
+  returnOrder = (type, redirect_url) ->
     order_id              = $('#order').data('order-id')
     clothes_price         = $('#order').data('order-clothes-price')
     late_fee              = $('#order').data('order-late-fee')
@@ -474,7 +491,7 @@ $ ->
                 stage:       2
               }
 
-    returnClothesReal is_part, redirect_url, order_id, late_fee_pay_with, compensation_pay_with
+    returnClothesReal type, redirect_url, order_id, late_fee_pay_with, compensation_pay_with
 
   #
   # 전체 반납 버튼 클릭
@@ -485,7 +502,7 @@ $ ->
     unless count.selected > 0 && count.selected is count.total
       OpenCloset.alert 'error', "반납할 항목을 선택하지 않았습니다."
       return
-    returnOrder 0, redirect_url
+    returnOrder 'all', redirect_url
 
   #
   # 부분 반납 버튼 클릭
@@ -496,7 +513,7 @@ $ ->
     unless count.selected > 0
       OpenCloset.alert 'error', "반납할 항목을 선택하지 않았습니다."
       return
-    returnOrder 1, redirect_url
+    returnOrder 'part', redirect_url
 
   #
   # 주문서 목록에서 선택된 항목과 선택할 수 있는 항목 총 개수를 반환

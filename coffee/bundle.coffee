@@ -65,6 +65,7 @@ $ ->
       '탈의11':     { id: 30, css: 'label-inverse'   }
       '대여안함':   { id: 40, css: 'label-inverse'   }
       '포장취소':   { id: 41, css: 'label-inverse'   }
+      '환불':       { id: 42, css: 'label-inverse'   }
     category:
       jacket:    { str: '재킷',     price: 10000 }
       pants:     { str: '바지',     price: 10000 }

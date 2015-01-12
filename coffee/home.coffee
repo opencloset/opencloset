@@ -71,6 +71,8 @@ $ ->
   $('#clothes-status-8').click (e)   -> showStatusOnly 8
   $('#clothes-status-9').click (e)   -> showStatusOnly 9
   $('#clothes-status-11').click (e)  -> showStatusOnly 11
+  $('#clothes-status-41').click (e)  -> showStatusOnly 41
+  $('#clothes-status-42').click (e)  -> showStatusOnly 42
 
   #
   # 의류 목록에서 선택한 항목의 상태 변경

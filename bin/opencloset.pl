@@ -4734,6 +4734,8 @@ get '/order' => sub {
     # 38    =>  '탈의19'
     # 39    =>  '탈의20'
     # 40    =>  '대여안함'
+    # 41    =>  '포장취소'
+    # 42    =>  '환불'
     #
 
     {
@@ -4763,7 +4765,7 @@ get '/order' => sub {
                 );
             }
             default {
-                my @valid = 1 .. 40;
+                my @valid = 1 .. 42;
                 %cond = ( status_id => $status_id ) if $status_id ~~ @valid;
             }
         }
