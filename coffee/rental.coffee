@@ -9,6 +9,22 @@ $ ->
   $('#btn-search').click (e) ->
     $('#search-form').trigger('submit')
 
+  #
+  # 대여 희망 품목을 코드가 아닌 레이블로 표시
+  #
+  $('.pre_category').each (i, el) ->
+    value = $(el).html()
+    return unless value
+
+    mapped_values = []
+    for i in value.split(',')
+      item = OpenCloset.category[i]
+      continue unless item
+      str = item.str.replace /^\s+|\s+$/, ""
+      continue if str is ''
+      mapped_values.push str
+      $(el).html( mapped_values.join(',') )
+
   $('#search-form').submit (e) ->
     e.preventDefault()
     clothes_id = $('#clothes-id').val().toUpperCase()
