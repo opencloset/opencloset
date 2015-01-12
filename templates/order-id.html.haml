@@ -527,9 +527,11 @@
                           %a#btn-order-confirm.btn.btn-info.pull-right{ :type => 'button', :href => "#", 'data-url' => "#{ url_for('/order/' . $order->id . '/update') }", 'data-redirect-url' => "#{ url_for('/order/' . $order->id) }", 'data-monitor-url' => "#{$monitor_uri}/events" }
                             %i.icon-ok.bigger-110
                             주문 확정
-                          %a#btn-order-clear.btn.btn-danger.pull-right{ :type => 'button', :href => "#" }
-                            %i.icon-remove.bigger-110
-                            새로 주문
+                          - unless ( $order->parent_id ) {
+                            %a#btn-order-clear.btn.btn-danger.pull-right{ :type => 'button', :href => "#" }
+                              %i.icon-remove.bigger-110
+                              새로 주문
+                          - }
                       -   }
                       - }
                 :plain
