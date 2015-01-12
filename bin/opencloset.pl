@@ -1999,6 +1999,10 @@ group {
         }
         return unless $order;
 
+        for my $clothes ( $order->clothes ) {
+            $clothes->update({ status_id => 41 }); # 포장취소
+        }
+
         $order->order_details->delete_all;
         $order = $self->update_order(
             {
@@ -4887,8 +4891,14 @@ post '/order' => sub {
                     app->config->{category}{ $clothes->category }{str},
                 );
 
+                #
+                # 주문서 하부의 모든 의류 항목을 결제대기(19) 상태로 변경
+                #
+                $clothes->update({ status_id => 19 });
+
                 $order->add_to_order_details({
                     clothes_code => $clothes->code,
+                    status_id    => 19, # 주문서 하부의 모든 의류 항목을 결제대기(19) 상태로 변경
                     name         => $name,
                     price        => $clothes->price,
                     final_price  => $clothes->price,
