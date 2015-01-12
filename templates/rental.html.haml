@@ -55,6 +55,7 @@
             %span.label.label-info    가슴 / 허리 / 엉덩이 / 배
           %th
             %span.label.label-warning 허벅지 / 팔 / 다리 / 무릎 / 발
+          %th 대여 희망 품목
       %tbody
         - for my $order ( $order_rs->all ) {
         -   my $user = $order->user;
@@ -88,6 +89,8 @@
                 %span.label.label-warning= $order->leg    || '-'
                 %span.label.label-warning= $order->knee   || '-'
                 %span.label.label-warning= $order->foot   || '-'
+            %td
+              %span.pre_category= $user->user_info->pre_category  || ''
         - }
 
 :plain
