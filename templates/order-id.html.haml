@@ -514,6 +514,9 @@
                         %a#btn-return-process.btn.btn-info.pull-right.return-process-reverse{ :type => 'button' }
                           %i.icon-reply.bigger-110
                           반납 진행
+                        %a#btn-refund-process.btn.btn-danger.pull-right.return-process-reverse{ :type => 'button' }
+                          %i.icon-remove.bigger-110
+                          환불 진행
                         %a#btn-return-all.btn.btn-success.disabled.pull-right.return-process{ :type => 'button', 'data-redirect-url' => "#{ url_for('/order/' . $order->id) }" }
                           %i.icon-ok.bigger-110
                           전체 반납
@@ -565,3 +568,63 @@
                       <strong> 해당사항 없음 </strong>
                     <% } %>
                   </script>
+                :plain
+                  <div id="modal-refund" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="refundModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                          <h4 class="modal-title" id="refundModalLabel">
+                            환불을 진행하시겠습니까?
+                          </h4>
+                        </div>
+                        <div class="modal-body" style="height: 300px; overflow-y: auto;">
+                          <div>
+                            환불 금액과 환불 수수료 금액의 합이 주문서 총액과 일치해야 합니다.
+                            보통 환불 금액은 주문서 총액과 동일하며 환불 수수료 금액은 0원입니다.
+                            환불 수수료가 있을 경우 총액에서 수수료 금액을 제외한 금액을 고객에게 환불합니다.
+                          </div>
+                          <div class="space-4"></div>
+                          <div>
+                            <strong>환불을 진행한 이후에는 되돌릴 수 없습니다. 주의해서 확인한 후 진행해주세요.</strong>
+                          </div>
+                          <div class="space-12"></div>
+                          <form role="form" class="form-horizontal">
+                            <div class="form-group">
+                              <label for="order-refund-total" class="col-sm-3 control-label no-padding-right"> 주문서 총액 </label>
+
+                              <div class="col-sm-9">
+                                <input type="text" class="col-xs-10 col-sm-5 order-price-input" placeholder="주문서 총액" id="order-refund-total" readonly>
+                              </div>
+                            </div>
+
+                            <div class="space-4"></div>
+
+                            <div class="form-group">
+                              <label for="order-refund-charge" class="col-sm-3 control-label no-padding-right"> 환불 수수료 </label>
+
+                              <div class="col-sm-9">
+                                <input type="text" class="col-xs-10 col-sm-5" placeholder="환불 수수료" id="order-refund-charge" value="0">
+                              </div>
+                            </div>
+
+                            <div class="space-4"></div>
+
+                            <div class="form-group">
+                              <label for="order-refund-real" class="col-sm-3 control-label no-padding-right"> 환불 금액 </label>
+
+                              <div class="col-sm-9">
+                                <input type="text" class="col-xs-10 col-sm-5" placeholder="환불 금액" id="order-refund-real" value="0">
+                              </div>
+                            </div>
+                          </form>
+
+                          <div id="order-refund-error"></div>
+                        </div>
+                        <div class="modal-footer">
+                          <button id="btn-refund-modal-cancel" type="button" class="btn btn-danger" >취소</button>
+                          <button id="btn-refund-modal-ok"     type="button" class="btn btn-primary">확인</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
