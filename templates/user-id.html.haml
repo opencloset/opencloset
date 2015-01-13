@@ -230,8 +230,8 @@
                               -   my $late_fee = calc_late_fee($order);
                                 .profile-activity.clearfix
                                   %div
-                                    %img.pull-left{ :alt => "#{ $user->name }'s avatar", :src => '#{ get_gravatar( $user, 36, https => 1 ) }' }
-                                    = $user->name
+                                    %img.pull-left{ :alt => "#{ $order->user->name }'s avatar", :src => '#{ get_gravatar( $order->user, 36, https => 1 ) }' }
+                                    %a{ :href => "#{ url_for( '/user/' . $order->user->id ) }" }= $order->user->name
                                     %a.order-badge{ :href => "/order/#{ $order->id }" }
                                       - if ( $order->rental_date && $order->target_date ) {
                                         %span.label.label-info.arrowed-right.arrowed-in
