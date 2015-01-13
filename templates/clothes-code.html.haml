@@ -92,6 +92,11 @@
                                   %span.clothes-code#clothes-code= $clothes_code
 
                               .profile-info-row
+                                .profile-info-name 상태
+                                .profile-info-value
+                                  %span#clothes-status_id= $clothes->status->name
+
+                              .profile-info-row
                                 .profile-info-name 종류
                                 .profile-info-value
                                   %span.editable#clothes-category{ 'data-name' => 'category', 'data-value' => "#{ $clothes->category }" }
