@@ -1,13 +1,42 @@
 % use utf8;
 % my $rs = $order->user->orders->search({
+%   id        => { '!=', $order->id },
 %   status_id => [
 %     2,  # 대여중
 %     9,  # 반납
 %     10, # 부분반납
 %     11, # 반납배송중
+%     13, # 방문
+%     16, # 치수측정
+%     17, # 의류준비
+%     18, # 포장
+%     19, # 결제대기
+%     20, # 탈의01
+%     21, # 탈의02
+%     22, # 탈의03
+%     23, # 탈의04
+%     24, # 탈의05
+%     25, # 탈의06
+%     26, # 탈의07
+%     27, # 탈의08
+%     28, # 탈의09
+%     29, # 탈의10
+%     30, # 탈의11
+%     31, # 탈의12
+%     32, # 탈의13
+%     33, # 탈의14
+%     34, # 탈의15
+%     35, # 탈의16
+%     36, # 탈의17
+%     37, # 탈의18
+%     38, # 탈의19
+%     39, # 탈의20
+%     40, # 대여안함
+%     41, # 포장취소
+%     42, # 환불
 %   ],
 % });
-% my $revisited = $rs->count > 1;
+% my $revisited = $rs->count;
 <div class="people-box" data-target="<%= $alert_target %>" data-order-id="<%= $order->id %>" data-ymd="<%= $dt_start->ymd %>">
   <div class="widget-box">
     <div class="widget-header">
