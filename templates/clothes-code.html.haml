@@ -50,6 +50,7 @@
                       .hr.hr16.dotted
 
                       %div
+                        - map { $average_size->{$_} = sprintf "%.1f", $average_size->{$_} } keys %$average_size;
                         %span.label.label-success= $average_size->{height} || '-'
                         %span.label.label-success= $average_size->{weight} || '-'
                         %br
