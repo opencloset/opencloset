@@ -303,7 +303,7 @@
                     <%% var ymd = dt.format('YYYY-MM-DD'); %>
                     <%% var hm  = dt.format('HH:mm'); %>
                     <td class="center">
-                      <input class="ace" type="radio" name="booking_id" value="<%%= id %>" data-id="<%%= id %>" data-ymd="<%%= ymd %>" data-hm="<%%= hm %>">
+                      <input type="radio" name="booking_id" value="<%%= id %>" data-id="<%%= id %>" data-ymd="<%%= ymd %>" data-hm="<%%= hm %>">
                       <span class="lbl"></span>
                     </td>
                     <td> <%%= ymd %> </td>
