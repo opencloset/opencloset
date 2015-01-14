@@ -1,7 +1,7 @@
 $ ->
   $('.order-status').each (i, el) ->
     $(el).addClass OpenCloset.status[ $(el).data('status') ].css
-    $(el).find('.order-status-str').html('연체중') if $(el).data('late-fee') > 0
+    $(el).find('.order-status-str').html('연체중') if $(el).data('status') is '대여중' and $(el).data('late-fee') > 0
 
   #
   # inline editable field
