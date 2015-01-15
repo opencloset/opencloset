@@ -151,7 +151,7 @@ $ ->
       clothes_gender:       $('input[name=clothes-gender]:checked').val()
       clothes_gender_str:   $('input[name=clothes-gender]:checked').next().text()
       clothes_color:        $('#clothes-color').val()
-      clothes_color_str:    $('#clothes-color option:selected').text()
+      clothes_color_str:    OpenCloset.color[ $('#clothes-color').val() ]
       clothes_bust:         $('#clothes-bust').val()
       clothes_waist:        $('#clothes-waist').val()
       clothes_hip:          $('#clothes-hip').val()
