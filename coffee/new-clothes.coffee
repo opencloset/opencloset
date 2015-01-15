@@ -126,7 +126,7 @@ $ ->
         $("#clothes-#{type}").prop('disabled', false)
   $('#clothes-color').select2({
     dropdownCssClass: 'bigdrop'
-    data:             ( { id: color, text: color_str } for color, color_str of OpenCloset.color )
+    data:             ( { id: i, text: OpenCloset.color[i] } for i in [ 'black', 'navy', 'gray', 'white', 'brown', 'blue', 'red', 'orange', 'yellow', 'green', 'purple', 'pink', 'charcoalgray' ] )
   })
 
   $('#clothes-category').select2('val', '')
