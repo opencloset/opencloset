@@ -325,7 +325,7 @@
                             <div>
                               <label>
                                 <input type="checkbox" class="ace valid" name="clothes-list"
-                                  value="<%= [ user_id, clothes_code, clothes_category, clothes_color, clothes_bust, clothes_waist, clothes_hip, clothes_arm, clothes_length, clothes_foot, clothes_gender ].join('-') %>"
+                                  value="<%= [ user_id, clothes_code, clothes_category, clothes_color, clothes_bust, clothes_waist, clothes_hip, clothes_belly, clothes_thigh, clothes_arm, clothes_length, clothes_foot, clothes_gender ].join('-') %>"
                                   data-user-id          = "<%= user_id %>"
                                   data-clothes-code     = "<%= clothes_code %>"
                                   data-clothes-category = "<%= clothes_category %>"
@@ -334,6 +334,8 @@
                                   data-clothes-arm      = "<%= clothes_arm %>"
                                   data-clothes-waist    = "<%= clothes_waist %>"
                                   data-clothes-hip      = "<%= clothes_hip %>"
+                                  data-clothes-belly    = "<%= clothes_belly %>"
+                                  data-clothes-thigh    = "<%= clothes_thigh %>"
                                   data-clothes-length   = "<%= clothes_length %>"
                                   data-clothes-foot     = "<%= clothes_foot %>"
                                   data-clothes-gender   = "<%= clothes_gender %>"
@@ -347,6 +349,8 @@
                                   if ( clothes_arm    >  0 ) { clothes_detail.push( "팔 길이(" + clothes_arm       + "cm)" ) }
                                   if ( clothes_waist  >  0 ) { clothes_detail.push( "허리("    + clothes_waist     + "cm)" ) }
                                   if ( clothes_hip    >  0 ) { clothes_detail.push( "엉덩이("  + clothes_hip       + "cm)" ) }
+                                  if ( clothes_belly  >  0 ) { clothes_detail.push( "배("      + clothes_belly     + "cm)" ) }
+                                  if ( clothes_thigh  >  0 ) { clothes_detail.push( "허벅지("  + clothes_thigh     + "cm)" ) }
                                   if ( clothes_length >  0 ) { clothes_detail.push( "기장("    + clothes_length    + "cm)" ) }
                                   if ( clothes_foot   >  0 ) { clothes_detail.push( "발 크기(" + clothes_foot      + "mm)" ) }
                                 %>
