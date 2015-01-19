@@ -110,13 +110,6 @@ __PACKAGE__->table("order");
   is_nullable: 1
   size: 32
 
-=head2 waybill_id
-
-  data_type: 'integer'
-  extra: {unsigned => 1}
-  is_foreign_key: 1
-  is_nullable: 1
-
 =head2 price_pay_with
 
   data_type: 'varchar'
@@ -323,13 +316,6 @@ __PACKAGE__->add_columns(
   },
   "return_method",
   { data_type => "varchar", is_nullable => 1, size => 32 },
-  "waybill_id",
-  {
-    data_type => "integer",
-    extra => { unsigned => 1 },
-    is_foreign_key => 1,
-    is_nullable => 1,
-  },
   "price_pay_with",
   { data_type => "varchar", is_nullable => 1, size => 32 },
   "late_fee_pay_with",
@@ -438,6 +424,21 @@ __PACKAGE__->has_many(
   { cascade_copy => 0, cascade_delete => 0 },
 );
 
+=head2 order_status_logs
+
+Type: has_many
+
+Related object: L<OpenCloset::Schema::Result::OrderStatusLog>
+
+=cut
+
+__PACKAGE__->has_many(
+  "order_status_logs",
+  "OpenCloset::Schema::Result::OrderStatusLog",
+  { "foreign.order_id" => "self.id" },
+  { cascade_copy => 0, cascade_delete => 0 },
+);
+
 =head2 orders
 
 Type: has_many
@@ -528,29 +529,9 @@ __PACKAGE__->belongs_to(
   { is_deferrable => 1, on_delete => "CASCADE", on_update => "RESTRICT" },
 );
 
-=head2 waybill
 
-Type: belongs_to
-
-Related object: L<OpenCloset::Schema::Result::Waybill>
-
-=cut
-
-__PACKAGE__->belongs_to(
-  "waybill",
-  "OpenCloset::Schema::Result::Waybill",
-  { id => "waybill_id" },
-  {
-    is_deferrable => 1,
-    join_type     => "LEFT",
-    on_delete     => "CASCADE",
-    on_update     => "RESTRICT",
-  },
-);
-
-
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-01-12 14:11:54
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:mQNiBx8xNXUO2MMd9/xyRw
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-01-06 20:46:07
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:dzmxr2CsGq+f9MqpSd5LUg
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

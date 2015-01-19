@@ -307,37 +307,6 @@ CREATE TABLE `booking` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
--- parcel_service 택배서비스
---
-
-CREATE TABLE `parcel_service` (
-  `id`           INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `name`         VARCHAR(32)  NOT NULL,
-  `tracking_url` VARCHAR(512) DEFAULT NULL,
-
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-INSERT INTO `parcel_service` (`id`,`name`)
-  VALUES
-    (1, 'CJ'), (2, 'DHL'), (3, 'Fedex'), (4, 'KGB'), (5, 'UPS'),
-    (6, '경동'), (7, '동부'), (8, '로젠'), (9, '옐로우캡'),
-    (11,'우체국'), (12,'한진'), (13,'현대');
-
---
--- waybill 운송장번호
---
-
-CREATE TABLE `waybill` (
-  `id`                INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `parcel_service_id` INT UNSIGNED NOT NULL,
-  `number`            VARCHAR(128) DEFAULT NULL,
-
-  PRIMARY KEY (`id`),
-  CONSTRAINT `fk_waybill1` FOREIGN KEY (`parcel_service_id`) REFERENCES `parcel_service` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
---
 -- order
 --
 
@@ -355,7 +324,6 @@ CREATE TABLE `order` (
   `user_target_date`      DATETIME DEFAULT NULL,
   `return_date`           DATETIME DEFAULT NULL,
   `return_method`         VARCHAR(32) DEFAULT NULL,
-  `waybill_id`            INT UNSIGNED DEFAULT NULL,
   `price_pay_with`        VARCHAR(32) DEFAULT NULL,
   `late_fee_pay_with`     VARCHAR(32) DEFAULT NULL,
   `compensation_pay_with` VARCHAR(32) DEFAULT NULL,
@@ -388,8 +356,7 @@ CREATE TABLE `order` (
   CONSTRAINT `fk_order2` FOREIGN KEY (`status_id`)  REFERENCES `status`  (`id`) ON DELETE CASCADE,
   CONSTRAINT `fk_order3` FOREIGN KEY (`staff_id`)   REFERENCES `user`    (`id`) ON DELETE CASCADE,
   CONSTRAINT `fk_order4` FOREIGN KEY (`parent_id`)  REFERENCES `order`   (`id`) ON DELETE CASCADE,
-  CONSTRAINT `fk_order5` FOREIGN KEY (`booking_id`) REFERENCES `booking` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `fk_order6` FOREIGN KEY (`waybill_id`) REFERENCES `waybill` (`id`) ON DELETE CASCADE
+  CONSTRAINT `fk_order5` FOREIGN KEY (`booking_id`) REFERENCES `booking` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
