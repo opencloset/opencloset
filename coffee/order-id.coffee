@@ -76,6 +76,10 @@ $ ->
             $('#order').data('order-compensation-discount', compensation_discount)
             $('#order').data('order-compensation-final', compensation_final)
             $('.compensation-final').html OpenCloset.commify(compensation_final) + '원'
+        #
+        # update parcel tracking url
+        #
+        $('#parcel-tracking-url').attr('href', data.parcel)
       error: (jqXHR, textStatus, errorThrown) ->
       complete: (jqXHR, textStatus) ->
   updateOrder()
@@ -578,3 +582,21 @@ $ ->
   #
   $('#clothes-search').keypress (e) -> $('#btn-clothes-search').click() if e.keyCode is 13
   $('#btn-clothes-search').click -> selectSearchedClothes()
+
+  $('#order-return-method').editable
+    mode:      'inline'
+    emptytext: '비어있음'
+    source:    ['대한통운', 'Yellowcap']
+    url: (params) ->
+      url = $('#order').data('url')
+      data = {}
+      value = params.value
+      data[params.name] = "#{value.parcel},#{value.number}"
+      $.ajax url,
+        type: 'PUT'
+        data: data
+        success: ->
+          $.ajax "#{$('#order').data('url')}.json",
+            type: 'GET'
+            success: (data, textStatus, jqXHR) ->
+              $('#parcel-tracking-url').attr('href', data.parcel)

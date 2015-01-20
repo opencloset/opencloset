@@ -47,6 +47,7 @@ use HTTP::Tiny;
 
 use Postcodify;
 
+use OpenCloset::Parcel;
 use OpenCloset::Schema;
 
 app->defaults( %{ plugin 'Config' => { default => {
@@ -258,6 +259,13 @@ helper flatten_order => sub {
         $order_stage_price{ $order_detail->stage } += $order_detail->final_price;
     }
 
+    my ($return_method, $tracking_url) = ($order->return_method, '');
+    if ($return_method && $return_method =~ /,\d+$/) {
+        my ($parcel, $number) = split /,/, $return_method;
+        my $p = try { OpenCloset::Parcel->new($parcel) } || '';
+        $tracking_url = $p->url($number) if $p;
+    }
+
     my %data = (
         $order->get_columns,
         status_name      => $order->status ? $order->status->name : q{},
@@ -271,6 +279,7 @@ helper flatten_order => sub {
         clothes          => [ $order->order_details({ clothes_code => { '!=' => undef } })->get_column('clothes_code')->all ],
         late_fee         => $self->calc_late_fee($order),
         overdue          => $self->calc_overdue($order),
+        parcel           => $tracking_url,
     );
 
     if ( $order->rental_date ) {
