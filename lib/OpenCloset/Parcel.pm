@@ -5,6 +5,11 @@ use utf8;
 my %MMAP = (
     옐로우캡  => 'KR::Yellowcap',
     yellowcap => 'KR::Yellowcap',
+
+    cj         => 'KR::CJ',
+    cj대한통운 => 'KR::CJ',
+    대한       => 'KR::CJ',
+    대한통운   => 'KR::CJ',
 );
 
 sub new {
