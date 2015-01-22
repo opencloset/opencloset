@@ -4463,13 +4463,14 @@ get '/clothes' => sub {
     #
     # fetch params
     #
-    my %params = $self->get_params(qw/ status /);
+    my %params = $self->get_params(qw/ status tag /);
 
     #
     # validate params
     #
     my $v = $self->create_validator;
     $v->field('status')->regexp(qr/^\d+$/);
+    $v->field('tag')->regexp(qr/^\d+$/);
     unless ( $self->validate( $v, \%params ) ) {
         my @error_str;
         while ( my ( $k, $v ) = each %{ $v->errors } ) {
@@ -4519,17 +4520,20 @@ get '/clothes' => sub {
     my $p      = $self->param('p') || 1;
     my $s      = $self->param('s') || app->config->{entries_per_page};
     my $status = $self->param('status');
+    my $tag    = $self->param('tag');
 
-    my $cond = $status ? { 'status_id' => $status } : {};
-    my $rs = $DB->resultset('Clothes')->search(
-        $cond,
-        {
-            order_by => { -asc => 'id' },
-            page     => $p,
-            rows     => $s,
-        },
-    );
+    my $cond = {};
+    $cond->{status_id}             = $status if $status;
+    $cond->{'clothes_tags.tag_id'} = $tag    if $tag;
 
+    my $attrs = {
+        order_by => { -asc => 'id' },
+        page     => $p,
+        rows     => $s,
+    };
+    $attrs->{join} = 'clothes_tags';
+
+    my $rs = $DB->resultset('Clothes')->search( $cond, $attrs );
     my $pageset = Data::Pageset->new({
         total_entries    => $rs->pager->total_entries,
         entries_per_page => $rs->pager->entries_per_page,
@@ -4537,12 +4541,18 @@ get '/clothes' => sub {
         current_page     => $p,
     });
 
+    my $tag_rs = $DB->resultset('Tag')->search(
+        undef,
+        { order_by => { -asc => 'me.id' } },
+    );
+
     #
     # response
     #
     $self->stash(
         condition    => \%status,
         clothes_list => $rs,
+        tag_list     => $tag_rs,
         pageset      => $pageset,
     );
 } => 'clothes';
