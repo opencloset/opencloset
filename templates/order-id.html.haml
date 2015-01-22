@@ -281,6 +281,16 @@
                                   %li.row
                                     .col-sm-1
                                       %i.icon-caret-right.green
+                                    .col-sm-3.no-padding-left 대여 목적:
+                                    .col-sm-8=                $order->purpose
+                                  %li.row
+                                    .col-sm-1
+                                      %i.icon-caret-right.green
+                                    .col-sm-3.no-padding-left 상세 대여 목적:
+                                    .col-sm-8=                $order->purpose2
+                                  %li.row
+                                    .col-sm-1
+                                      %i.icon-caret-right.green
                                     .col-sm-3.no-padding-left 방문 예약일:
                                     .col-sm-8
                                       - if ( $order->booking ) {
