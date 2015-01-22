@@ -46,6 +46,13 @@
   %span
     %a{ :href => "#{ url_for( '/clothes' )->query( status => 42 ) }" }= sprintf " 환불 (%d)", $condition->{42};
 
+%div
+  - my $tag_count = 0;
+  - while ( my $tag = $tag_list->next ) {
+    %span= $tag_count++ ? q{|} : q{};
+    %a{ :href => "#{ url_for( '/clothes' )->query( tag => $tag->id ) }" }= sprintf " %s (%d)", $tag->name, $tag->clothes->count;
+  - }
+
 #clothes-list-table.dataTables_wrapper
   %table.table.table-striped.table-bordered.table-hover
     %thead
