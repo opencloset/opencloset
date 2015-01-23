@@ -10,6 +10,7 @@
 -   jses  => [
 -     '/lib/bootstrap/js/date-time/moment.min.js',
 -     '/lib/bootstrap3-editable/js/bootstrap-editable.min.js',
+-     '/lib/x-editable/inputs/waybill.js',
 -   ],
 -   csses => [ '/lib/bootstrap3-editable/css/bootstrap-editable.css' ],
 -   ;
@@ -144,6 +145,15 @@
                                     .col-sm-3.no-padding-left 반납일:
                                     .col-sm-8
                                       = $order->return_date ? $order->return_date->ymd : q{}
+                                  %li.row
+                                    .col-sm-1
+                                      %i.icon-caret-right.blue
+                                    .col-sm-3.no-padding-left
+                                      반납방법:
+                                      %a#parcel-tracking-url{:href => '#', :target => '_blank'}
+                                        %span.glyphicon.glyphicon-link
+                                    .col-sm-8
+                                      %a#order-return-method{:data-type => 'waybill', :data-name => 'return_method'}= $order->return_method
                                   %li.row
                                     .col-sm-1
                                       %i.icon-caret-right.blue
