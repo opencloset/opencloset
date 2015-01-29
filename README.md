@@ -3,6 +3,9 @@ opencloset
 
 ## Requirements ##
 
+    $ cpanm --installdeps .
+    $ cpanm --mirror https://cpan.theopencloset.net OpenCloset::Schema
+
 node.js 를 사용할 수 있는 환경이라고 가정합니다.
 [nvm](https://github.com/creationix/nvm) 의 사용을 추천합니다.
 
