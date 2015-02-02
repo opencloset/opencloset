@@ -76,6 +76,10 @@ $ ->
             $('#order').data('order-compensation-discount', compensation_discount)
             $('#order').data('order-compensation-final', compensation_final)
             $('.compensation-final').html OpenCloset.commify(compensation_final) + '원'
+        #
+        # update parcel tracking url
+        #
+        $('#order-tracking-url').attr('href', data.tracking_url)
       error: (jqXHR, textStatus, errorThrown) ->
       complete: (jqXHR, textStatus) ->
   updateOrder()
@@ -338,6 +342,7 @@ $ ->
     $('.return-process-reverse').hide()
     $('#clothes-search').val('').focus()
     $('#order-late-fee-pay-with').editable 'enable'
+    $('#order-return-method').editable 'enable'
 
   #
   # 반납 취소 버튼 클릭
@@ -349,6 +354,7 @@ $ ->
     $('#order-late-fee-pay-with').editable 'disable'
     $('#order-late-fee-pay-with').editable 'setValue', ''
     $('#order-late-fee-pay-with').html '미납'
+    $('#order-return-method').editable 'disable'
 
   returnClothesReal = (type, redirect_url, order_id, late_fee_pay_with, compensation_pay_with) ->
     if type is 'part'
@@ -578,3 +584,27 @@ $ ->
   #
   $('#clothes-search').keypress (e) -> $('#btn-clothes-search').click() if e.keyCode is 13
   $('#btn-clothes-search').click -> selectSearchedClothes()
+
+  $('#order-return-method').editable
+    source: [
+      '직접반납'
+      '우체국'
+      'CJ대한통운'
+      'KGB'
+      '한진'
+      '옐로우캡'
+      '동부'
+    ]
+    url: (params) ->
+      url = $('#order').data('url')
+      data = {}
+      value = params.value
+      data[params.name] = "#{value.company},#{value.trackingNumber}"
+      $.ajax url,
+        type: 'PUT'
+        data: data
+        success: ->
+          $.ajax "#{$('#order').data('url')}.json",
+            type:    'GET'
+            success: (data, textStatus, jqXHR) ->
+              $('#order-tracking-url').attr('href', data.tracking_url)

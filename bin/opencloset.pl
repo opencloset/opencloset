@@ -31,10 +31,13 @@ app->controller_class("OpenCloset::Web::Controller");
 
 use Data::Pageset;
 use DateTime;
+use Encode 'decode_utf8';
 use Gravatar::URL;
+use HTTP::Tiny;
 use List::MoreUtils qw( zip );
 use List::Util qw( sum );
 use Mojo::Util qw( encode );
+use Parcel::Track;
 use SMS::Send::KR::CoolSMS;
 use SMS::Send;
 use String::Random;
@@ -42,8 +45,6 @@ use Text::CSV;
 use Try::Tiny;
 use Unicode::GCString;
 use Unicode::Normalize;
-use Encode 'decode_utf8';
-use HTTP::Tiny;
 
 use Postcodify;
 
@@ -242,6 +243,34 @@ helper flatten_user => sub {
     return \%data;
 };
 
+helper tracking_url => sub {
+    my ( $self, $order ) = @_;
+
+    return unless $order;
+    return unless $order->return_method;
+
+    my ( $company, $id ) = split /,/, $order->return_method;
+
+    my $driver;
+    {
+        no warnings 'experimental';
+
+        given ($company) {
+            $driver = 'KR::PostOffice' when /^우체국/;
+            $driver = 'KR::CJKorea'    when m/^(대한통운|CJ|CJ\s*GLS|편의점)/i;
+            $driver = 'KR::KGB'        when m/^KGB/i;
+            $driver = 'KR::Hanjin'     when m/^한진/;
+            $driver = 'KR::Yellowcap'  when m/^(KG\s*)?옐로우캡/i;
+            $driver = 'KR::Dongbu'     when m/^(KG\s*)?동부/i;
+        }
+    }
+    return unless $driver;
+
+    my $tracking_url = Parcel::Track->new( $driver, $id )->uri;
+
+    return $tracking_url;
+};
+
 helper flatten_order => sub {
     my ( $self, $order ) = @_;
 
@@ -271,6 +300,8 @@ helper flatten_order => sub {
         clothes          => [ $order->order_details({ clothes_code => { '!=' => undef } })->get_column('clothes_code')->all ],
         late_fee         => $self->calc_late_fee($order),
         overdue          => $self->calc_overdue($order),
+        return_method    => $order->return_method || q{},
+        tracking_url     => $self->tracking_url($order),
     );
 
     if ( $order->rental_date ) {

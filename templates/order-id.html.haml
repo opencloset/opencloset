@@ -10,6 +10,7 @@
 -   jses  => [
 -     '/lib/bootstrap/js/date-time/moment.min.js',
 -     '/lib/bootstrap3-editable/js/bootstrap-editable.min.js',
+-     '/js/returnmethod.js',
 -   ],
 -   csses => [ '/lib/bootstrap3-editable/css/bootstrap-editable.css' ],
 -   ;
@@ -144,6 +145,29 @@
                                     .col-sm-3.no-padding-left 반납일:
                                     .col-sm-8
                                       = $order->return_date ? $order->return_date->ymd : q{}
+                                  %li.row
+                                    .col-sm-1
+                                      %i.icon-caret-right.blue
+                                    .col-sm-3.no-padding-left
+                                      반납방법:
+                                      %a#order-tracking-url{ :href => "#{ tracking_url($order) || '#' }", :target => '_blank' }
+                                        %span.glyphicon.glyphicon-link
+                                    .col-sm-8
+                                      :plain
+                                        <a
+                                          id               = "order-return-method"
+                                          class            = "editable editable-click"
+                                          href             = "#"
+
+                                          data-disabled    = "true"
+                                          data-mode        = "inline"
+                                          data-showbuttons = "true"
+                                          data-type        = "returnmethod"
+                                          data-emptytext   = "직접 또는 택배 반납인지를 선택하세요."
+
+                                          data-name        = "return_method"
+                                          data-value       = "#{ $order->return_method || q{} }"
+                                        >#{ $order->return_method || q{} }</a>
                                   %li.row
                                     .col-sm-1
                                       %i.icon-caret-right.blue
