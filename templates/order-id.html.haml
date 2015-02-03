@@ -152,14 +152,13 @@
                                       반납방법:
                                       %a#order-tracking-url{ :href => "#{ tracking_url($order) || '#' }", :target => '_blank' }
                                         %span.glyphicon.glyphicon-link
-                                    .col-sm-8
+                                    .col-sm-8.return-method
                                       :plain
                                         <a
                                           id               = "order-return-method"
                                           class            = "editable editable-click"
                                           href             = "#"
 
-                                          data-disabled    = "true"
                                           data-mode        = "inline"
                                           data-showbuttons = "true"
                                           data-type        = "returnmethod"

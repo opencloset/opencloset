@@ -342,7 +342,6 @@ $ ->
     $('.return-process-reverse').hide()
     $('#clothes-search').val('').focus()
     $('#order-late-fee-pay-with').editable 'enable'
-    $('#order-return-method').editable 'enable'
 
   #
   # 반납 취소 버튼 클릭
@@ -354,7 +353,6 @@ $ ->
     $('#order-late-fee-pay-with').editable 'disable'
     $('#order-late-fee-pay-with').editable 'setValue', ''
     $('#order-late-fee-pay-with').html '미납'
-    $('#order-return-method').editable 'disable'
 
   returnClothesReal = (type, redirect_url, order_id, late_fee_pay_with, compensation_pay_with) ->
     if type is 'part'
@@ -587,7 +585,7 @@ $ ->
 
   $('#order-return-method').editable
     source: [
-      '직접반납'
+      '방문반납'
       '우체국'
       'CJ대한통운'
       'KGB'
