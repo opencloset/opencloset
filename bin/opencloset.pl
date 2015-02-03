@@ -5424,26 +5424,18 @@ get '/status-tracking/:ymd' => sub {
         return;
     }
 
-    my $dt_end = $dt_start->clone->add( hours => 24, seconds => -1 );
-    unless ($dt_end) {
-        app->log->warn( "cannot create end datetime object" );
-        $self->redirect_to( $self->url_for('/status-tracking') );
-        return;
-    }
-
-    my $dtf        = $DB->storage->datetime_parser;
-    my $status_tracking_rs = $DB->resultset('Order')->search(
+    my $status_tracking_rs_day = $DB->resultset('Order')->search(
+        \[ 'DATE_FORMAT(`booking`.`date`,"%Y-%m-%d") = ?', $dt_start->ymd],
         {
-        },
-        {
+            join       => [ qw/ booking / ],
+            order_by   => { -asc => 'me.id' },
         },
     );
 
     $self->render(
         'status-tracking',
-        booking_rs => $status_tracking_rs,
+        status_tracking_day => $status_tracking_rs_day,
         dt_start   => $dt_start,
-        dt_end     => $dt_end,
     );
 };
 

@@ -7,28 +7,14 @@
 -   ;
 - title meta_text($_id);
 
-- my @times = qw(
--   10:00
--   10:30
--   11:00
--   11:30
--   12:00
--   12:30
--   13:00
--   13:30
--   14:00
--   14:30
--   15:00
--   15:30
--   16:00
--   16:30
--   17:00
--   17:30
--   18:00
--   18:30
--   19:00
-- );
-- my %booking_times;
+- use DateTime::Format::Duration;
+- use List::Util qw/reduce/;
+- my @process = (qw/대기 치수측정 의류준비 탈의 수선 포장 결제/);
+- my $df  = DateTime::Format::Duration->new( pattern => "%H:%M:%S", normalize => 1 );
+- my @day;
+- while ( my $order = $status_tracking_day->next ) {
+-   push @day, $order;
+- }
 
 .search
   %form#search-form
@@ -37,41 +23,39 @@
 
 .space-8
 
-#booking-table
-  %h2= $dt_start->ymd . ' 예약 현황'
+#status-tracking-day
+  %h2= $dt_start->ymd . ' 일간 주문서 처리 통계'
   .space-4
   %table.table.table-striped.table-bordered.table-hover
     %thead
       %tr
-        %th{ :rowspan => "2" } 시간
-        %th{ :colspan => "2" } 남자
-        %th{ :colspan => "2" } 여자
+        %th{ :rowspan => "2" } #
+        %th{ :rowspan => "2" } 주문번호
+        %th{ :rowspan => "2" } 방문자
+        %th.center{ :colspan => "7" } 처리시간
+        %th{ :rowspan => "2" } Total
       %tr
-        %th.slot 제한
-        %th.name 이름
-        %th.slot 제한
-        %th.name 이름
+        %th 대기
+        %th 치수측정
+        %th 의류준비
+        %th 탈의
+        %th 수선
+        %th 포장
+        %th 결제
     %tbody
-      - for my $time (@times) {
+      - my $count = 0;
+      - for my $order (@day) {
+        - my %tracking = $order->tracking_normalize();
+        - next unless %tracking;
+        - my $total = reduce { $a + $b } grep { defined $_ } ( @tracking{ @process });
         %tr
-          %td= $time
-          - my $male   = $booking_times{$time}{male};
-          - my $female = $booking_times{$time}{female};
-          - for my $data ( $booking_times{$time}{male}, $booking_times{$time}{female} ) {
-            - my $booking = $data->{booking};
-            - my $users   = $data->{users};
-            %td
-              - if ($booking) {
-                %span.editable{ 'data-pk' => "#{ $booking->id }", 'data-name' => 'slot', 'data-value' => "#{ $booking->slot }" }
-              - }
-              - else {
-                %span.label.label-warning CLOSED
-              - }
-            %td
-              - if ($users) {
-              -   for my $u (@$users) {
-                %a{ :href => "#{ url_for( '/user/' . $u->id ) }" }= $u->name
-              -   }
-              - }
+          %td= ++$count
+          %td
+            %a{ :href => "#{ url_for( '/order/' . $order->id ) }" }= $order->id
+          %td
+            %a{ :href => "#{ url_for( '/user/' . $order->user->id ) }" }= $order->user->name
+          - for my $process (@process) {
+            %td= $df->format_duration($tracking{$process}) if $tracking{$process}
           - }
+          %td= $df->format_duration($total) if $total;
       - }
