@@ -585,7 +585,7 @@ $ ->
 
   $('#order-return-method').editable
     source: [
-      '직접반납'
+      '방문반납'
       '우체국'
       'CJ대한통운'
       'KGB'
