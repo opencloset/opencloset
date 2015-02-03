@@ -1,0 +1,77 @@
+- use utf8;
+- my $_id = 'status-tracking';
+- layout 'default',
+-   page_id     => $_id,
+-   jses  => [ '/lib/bootstrap3-editable/js/bootstrap-editable.min.js' ],
+-   csses => [ '/lib/bootstrap3-editable/css/bootstrap-editable.css'   ],
+-   ;
+- title meta_text($_id);
+
+- my @times = qw(
+-   10:00
+-   10:30
+-   11:00
+-   11:30
+-   12:00
+-   12:30
+-   13:00
+-   13:30
+-   14:00
+-   14:30
+-   15:00
+-   15:30
+-   16:00
+-   16:30
+-   17:00
+-   17:30
+-   18:00
+-   18:30
+-   19:00
+- );
+- my %booking_times;
+
+.search
+  %form#search-form
+    .input-group
+      %input#query.form-control{ :placeholder => '날짜를 고르세요', 'data-date-format' => 'yyyy-mm-dd' }
+
+.space-8
+
+#booking-table
+  %h2= $dt_start->ymd . ' 예약 현황'
+  .space-4
+  %table.table.table-striped.table-bordered.table-hover
+    %thead
+      %tr
+        %th{ :rowspan => "2" } 시간
+        %th{ :colspan => "2" } 남자
+        %th{ :colspan => "2" } 여자
+      %tr
+        %th.slot 제한
+        %th.name 이름
+        %th.slot 제한
+        %th.name 이름
+    %tbody
+      - for my $time (@times) {
+        %tr
+          %td= $time
+          - my $male   = $booking_times{$time}{male};
+          - my $female = $booking_times{$time}{female};
+          - for my $data ( $booking_times{$time}{male}, $booking_times{$time}{female} ) {
+            - my $booking = $data->{booking};
+            - my $users   = $data->{users};
+            %td
+              - if ($booking) {
+                %span.editable{ 'data-pk' => "#{ $booking->id }", 'data-name' => 'slot', 'data-value' => "#{ $booking->slot }" }
+              - }
+              - else {
+                %span.label.label-warning CLOSED
+              - }
+            %td
+              - if ($users) {
+              -   for my $u (@$users) {
+                %a{ :href => "#{ url_for( '/user/' . $u->id ) }" }= $u->name
+              -   }
+              - }
+          - }
+      - }

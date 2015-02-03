@@ -5383,5 +5383,69 @@ get '/donation/:id' => sub {
     );
 } => 'donation-id';
 
+get '/status-tracking' => sub {
+    my $self = shift;
+
+    my $dt_today = DateTime->now( time_zone => app->config->{timezone} );
+    $self->redirect_to( $self->url_for( '/status-tracking/' . $dt_today->ymd ) );
+};
+
+get '/status-tracking/:ymd' => sub {
+    my $self = shift;
+
+    #
+    # fetch params
+    #
+    my %params = $self->get_params(qw/ ymd /);
+
+    unless ( $params{ymd} ) {
+        app->log->warn( "ymd is required" );
+        $self->redirect_to( $self->url_for('/status-tracking') );
+        return;
+    }
+
+    unless ( $params{ymd} =~ m/^(\d{4})-(\d{2})-(\d{2})$/ ) {
+        app->log->warn( "invalid ymd format: $params{ymd}" );
+        $self->redirect_to( $self->url_for('/status-tracking') );
+        return;
+    }
+
+    my $dt_start = try {
+        DateTime->new(
+            time_zone => app->config->{timezone},
+            year      => $1,
+            month     => $2,
+            day       => $3,
+        );
+    };
+    unless ($dt_start) {
+        app->log->warn( "cannot create start datetime object" );
+        $self->redirect_to( $self->url_for('/status-tracking') );
+        return;
+    }
+
+    my $dt_end = $dt_start->clone->add( hours => 24, seconds => -1 );
+    unless ($dt_end) {
+        app->log->warn( "cannot create end datetime object" );
+        $self->redirect_to( $self->url_for('/status-tracking') );
+        return;
+    }
+
+    my $dtf        = $DB->storage->datetime_parser;
+    my $status_tracking_rs = $DB->resultset('Order')->search(
+        {
+        },
+        {
+        },
+    );
+
+    $self->render(
+        'status-tracking',
+        booking_rs => $status_tracking_rs,
+        dt_start   => $dt_start,
+        dt_end     => $dt_end,
+    );
+};
+
 app->secrets( app->defaults->{secrets} );
 app->start;
