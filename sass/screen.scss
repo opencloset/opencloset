@@ -523,6 +523,12 @@ $opencloset-darken-yellow: desaturate(darken($opencloset-yellow, 4%), 10%);
                 .widget-body.prohibit-change-status {
                     background-color: #ffc80f;
                 }
+                .widget-body.processing-status {
+                    background-color: lighten(#aec95b, 15%);
+                }
+                .widget-body.notvisit-status {
+                    background-color: lighten(#dd6566, 15%);
+                }
             }
         }
     }
