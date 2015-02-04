@@ -74,26 +74,50 @@ $ ->
       16: 치수측정
       17: 의류준비
       20: 탈의01
-      21: 탈의02
-      22: 탈의03
-      23: 탈의04
-      24: 탈의05
-      25: 탈의06
-      26: 탈의07
-      27: 탈의08
-      28: 탈의09
-      29: 탈의10
-      30: 탈의11
+      ...
+      39: 탈의20
        6: 수선
       18: 포장
 
     ###
-    if parseInt(status_id) in [ 14, 12, 13, 16, 17, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 6, 18 ]
+    if parseInt(status_id) in [ 14, 12, 13, 16, 17, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 6, 18 ]
       $(el).editable 'enable'
       $(el).closest('.widget-body').removeClass('prohibit-change-status')
     else
       $(el).editable 'disable'
       $(el).closest('.widget-body').addClass('prohibit-change-status')
+
+    ###
+
+      처리중인 사람들을 구분하기 위해 색상을 다르게 표시합니다.
+
+      13: 방문
+      16: 치수측정
+      17: 의류준비
+      20: 탈의01
+      ...
+      39: 탈의20
+       6: 수선
+      18: 포장
+      19: 결제대기
+
+    ###
+    if parseInt(status_id) in [ 13, 16, 17, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 6, 18, 19 ]
+      $(el).closest('.widget-body').addClass('processing-status')
+    else
+      $(el).closest('.widget-body').removeClass('processing-status')
+
+    ###
+
+      방문하지 않은 사람은 조금 더 명확하게 표시합니다.
+
+      12: 방문안함
+
+    ###
+    if parseInt(status_id) in [ 12 ]
+      $(el).closest('.widget-body').addClass('notvisit-status')
+    else
+      $(el).closest('.widget-body').removeClass('notvisit-status')
 
   #
   # 시간표내 각각의 주문서 상태 변경
