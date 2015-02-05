@@ -15,6 +15,8 @@
 -   csses => [ '/lib/bootstrap3-editable/css/bootstrap-editable.css' ],
 -   ;
 - title meta_text($_id);
+- use  DateTime::Format::Human::Duration;
+- my $df =  DateTime::Format::Human::Duration->new();
 
 - my $order_status = $order->status ? $order->status->name : '상태없음';
 
@@ -286,6 +288,29 @@
                                         >#{ $order->compensation_pay_with || q{미납} }</a>
                                       \/
                                       %strong.compensation-final 0원
+                              .row
+                                .col-xs-11.label.label-lg.label-info.arrowed-in.arrowed-right
+                                  %strong 처리기록 정보
+                              .row
+                                .col-sm-11
+                                  %div
+                                    %table.table.table-striped.table-bordered
+                                      %thead.thin-border-bottom
+                                        %tr
+                                          %th.center #
+                                          %th.center 상태
+                                          %th.center 시점
+                                          %th.center 처리시간
+                                      %tbody
+                                        - my $count = 0;
+                                        - my $priv;
+                                        - for my $log ( $order->tracking_logs ) {
+                                          %tr
+                                            %td.center= ++$count
+                                            %td.center= $log->{status}
+                                            %td.center= $log->{timestamp}->strftime('%m월 %d일 %H시 %M분');
+                                            %td.center= $df->format_duration($log->{delta}, 'locale' => 'kr') if $log->{delta}
+                                        - }
                             /
                             / 대여자 정보
                             /
@@ -390,6 +415,21 @@
                                       %span.label.label-warning= $order->user->user_info->leg    || '-'
                                       %span.label.label-warning= $order->user->user_info->knee   || '-'
                                       %span.label.label-warning= $order->user->user_info->foot   || '-'
+                            .col-sm-6
+                              .row
+                                .col-xs-11.label.label-lg.label-success.arrowed-in.arrowed-right
+                                  %strong 처리기록 통계
+                              .row
+                                - my %delta = $order->tracking_normalize();
+                                %ul.list-unstyled.spaced
+                                  - foreach my $step (qw/ 대기 치수측정 의류준비 탈의 포장 수선 결제/) {
+                                  - next unless $delta{$step};
+                                  %li.row
+                                    .col-sm-1
+                                      %i.icon-caret-right.green
+                                    .col-sm-3.no-padding-left= "$step 시간:"
+                                    .col-sm-8= $df->format_duration($delta{$step}, locale=> 'kr');
+                                  - }
                           .space
                           %div
                             %table.table.table-striped.table-bordered.table-hover
