@@ -368,7 +368,6 @@ $ ->
       data =
         status_id:              9
         return_date:            moment().format('YYYY-MM-DD HH:mm:ss')
-        return_method:          '직접방문'
         late_fee_pay_with:      late_fee_pay_with
         order_detail_id:        order_detail_id
     else if type is 'refund'
@@ -383,7 +382,6 @@ $ ->
       data =
         status_id:              42
         return_date:            moment().format('YYYY-MM-DD HH:mm:ss')
-        return_method:          '직접방문'
         late_fee_pay_with:      late_fee_pay_with
         compensation_pay_with:  compensation_pay_with
         order_detail_id:        order_detail_id
@@ -400,7 +398,6 @@ $ ->
       data =
         status_id:              9
         return_date:            moment().format('YYYY-MM-DD HH:mm:ss')
-        return_method:          '직접방문'
         late_fee_pay_with:      late_fee_pay_with
         compensation_pay_with:  compensation_pay_with
         order_detail_id:        order_detail_id
