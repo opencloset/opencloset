@@ -93,6 +93,7 @@ $db_opts->{AutoCommit} //= 1;
             'login'        => { text => '로그인',                icon => 'lock',     },
             'visit'        => { text => '방문 예약',             icon => 'group',    desc => '열린옷장 방문 예약', link => '/visit'  },
             'visit2'       => { text => '방문 예약 (직원 전용)', icon => 'group',    desc => '열린옷장 방문 예약', link => '/visit2' },
+            'status-tracking'       => { text => '주문서 처리 통계', icon => 'signal',    desc => '상태별 주문서 처리 기록 통계', LINK => '/status-tracking' },
         },
         items => [
             { id => 'home'        },
@@ -107,6 +108,7 @@ $db_opts->{AutoCommit} //= 1;
             { id => 'timetable'   },
             { id => 'order'       },
             { id => 'rental'      },
+            { id => 'status-tracking' },
         ],
     },
 

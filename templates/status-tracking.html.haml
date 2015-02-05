@@ -1,0 +1,61 @@
+- use utf8;
+- my $_id = 'status-tracking';
+- layout 'default',
+-   page_id     => $_id,
+-   jses  => [ '/lib/bootstrap3-editable/js/bootstrap-editable.min.js' ],
+-   csses => [ '/lib/bootstrap3-editable/css/bootstrap-editable.css'   ],
+-   ;
+- title meta_text($_id);
+
+- use DateTime::Format::Duration;
+- use List::Util qw/reduce/;
+- my @process = (qw/대기 치수측정 의류준비 탈의 수선 포장 결제/);
+- my $df  = DateTime::Format::Duration->new( pattern => "%H:%M:%S", normalize => 1 );
+- my @day;
+- while ( my $order = $status_tracking_day->next ) {
+-   push @day, $order;
+- }
+
+.search
+  %form#search-form
+    .input-group
+      %input#query.form-control{ :placeholder => '날짜를 고르세요', 'data-date-format' => 'yyyy-mm-dd' }
+
+.space-8
+
+#status-tracking-day
+  %h2= $dt_start->ymd . ' 일간 주문서 처리 통계'
+  .space-4
+  %table.table.table-striped.table-bordered.table-hover
+    %thead
+      %tr
+        %th{ :rowspan => "2" } #
+        %th{ :rowspan => "2" } 주문번호
+        %th{ :rowspan => "2" } 방문자
+        %th.center{ :colspan => "7" } 처리시간
+        %th{ :rowspan => "2" } Total
+      %tr
+        %th 대기
+        %th 치수측정
+        %th 의류준비
+        %th 탈의
+        %th 수선
+        %th 포장
+        %th 결제
+    %tbody
+      - my $count = 0;
+      - for my $order (@day) {
+        - my %tracking = $order->tracking_normalize();
+        - next unless %tracking;
+        - my $total = reduce { $a + $b } grep { defined $_ } ( @tracking{ @process });
+        %tr
+          %td= ++$count
+          %td
+            %a{ :href => "#{ url_for( '/order/' . $order->id ) }" }= $order->id
+          %td
+            %a{ :href => "#{ url_for( '/user/' . $order->user->id ) }" }= $order->user->name
+          - for my $process (@process) {
+            %td= $df->format_duration($tracking{$process}) if $tracking{$process}
+          - }
+          %td= $df->format_duration($total) if $total;
+      - }
