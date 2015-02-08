@@ -18,7 +18,6 @@ requires 'Mojolicious::Plugin::Validator';
 requires 'Moo';
 requires 'MooX::Types::MooseLike';
 requires 'Object::Event';
-requires 'OpenCloset::Schema', '0.001';
 requires 'Parcel::Track', '0.005';
 requires 'Parcel::Track::KR::CJKorea';
 requires 'Parcel::Track::KR::Dongbu';
@@ -38,3 +37,7 @@ requires 'namespace::clean';
 
 # from git repository
 requires 'git://github.com/aanoaa/p5-postcodify.git@v0.2.6';
+
+# from opencloset cpan
+requires 'OpenCloset::Config', '0.001';
+requires 'OpenCloset::Schema', '0.004';
