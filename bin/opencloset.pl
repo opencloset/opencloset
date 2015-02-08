@@ -1744,6 +1744,7 @@ group {
             knee
             late_fee_pay_with
             leg
+            message
             parent_id
             price_pay_with
             purpose
@@ -1821,6 +1822,7 @@ group {
             knee
             late_fee_pay_with
             leg
+            message
             parent_id
             price_pay_with
             purpose
@@ -1894,6 +1896,7 @@ group {
             knee
             late_fee_pay_with
             leg
+            message
             parent_id
             price_pay_with
             purpose
