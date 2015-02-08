@@ -193,6 +193,7 @@ $ ->
         setOrderDetailFinalPrice $(el).data('pk')
 
   $('#order-desc').editable()
+  $('#order-message').editable()
 
   $('.order-detail-final-price').editable
     display: (value, sourceData, response) -> $(this).html( OpenCloset.commify value )
