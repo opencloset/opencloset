@@ -122,7 +122,7 @@ $ ->
   #
   # 시간표내 각각의 주문서 상태 변경
   #
-  $('.editable').each (i, el) ->
+  $('.editable.order-status').each (i, el) ->
     available_status = [
       '방문예약',
       '방문안함',
@@ -166,8 +166,8 @@ $ ->
         $(this).html mapped[value]
     )
 
-  $('.editable').each (i, el) -> updateStatus(el)
-  $('.editable').on 'save', (e, params) -> updateStatus(this, params.newValue)
+  $('.editable.order-status').each (i, el) -> updateStatus(el)
+  $('.editable.order-status').on 'save', (e, params) -> updateStatus(this, params.newValue)
 
   #
   # 각각의 주문서에서 다음 상태로 상태 변경
@@ -224,11 +224,17 @@ $ ->
           when  6 then status_id = 18 # 수선     -> 포장
           else return
         success_cb = () ->
-          $(storage).find('.editable').editable( 'setValue', status_id, true )
-          $(storage).find('.editable').each (i, el) -> updateStatus(el)
+          $(storage).find('.editable.order-status').editable( 'setValue', status_id, true )
+          $(storage).find('.editable.order-status').each (i, el) -> updateStatus(el)
         updateOrder order_id, ymd, status_id, alert_target, success_cb
       error: (jqXHR, textStatus, errorThrown) ->
         OpenCloset.alert('danger', "현재 주문서 상태를 확인할 수 없습니다: #{jqXHR.responseJSON.error.str}", "##{alert_target}")
+
+  #
+  # 어울림
+  #
+  $('.editable.order-bestfit').editable
+    source: -> { value: k, text: v } for k, v of { 0: '보통', 1: 'Best-Fit' }
 
   statusMap = {}
   ( statusMap[v.id] = k ) for k, v of OpenCloset.status
