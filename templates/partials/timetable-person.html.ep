@@ -53,6 +53,24 @@
           <span class="editable order-status" data-value="<%= $order->status_id %>"> </span>
         </p>
         <p> <a class="order-next-status"> 다음 상태로 </a> </p>
+        <p>
+          어울림 -
+          <span
+            class="editable order-bestfit"
+
+            data-mode        = "inline"
+            data-showbuttons = "true"
+            data-type        = "select"
+            data-emptytext   = "보통"
+
+            data-value       = "<%= $order->bestfit %>"
+
+            data-url         = "<%= url_for( '/order/' . $order->id . '/update' ) %>"
+            data-pk          = "<%= $order->id %>"
+            data-name        = "bestfit"
+          >
+          </span>
+        </p>
       </div>
     </div>
   </div>
