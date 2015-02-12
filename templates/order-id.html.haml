@@ -377,19 +377,20 @@
                                       %i.icon-caret-right.green
                                     .col-sm-3.no-padding-left 신체 치수:
                                     .col-sm-8
-                                      %span.label.label-success= $order->user->user_info->height || '-'
-                                      %span.label.label-success= $order->user->user_info->weight || '-'
+                                      %span.label.label-success= $order->user->user_info->height   || '-'
+                                      %span.label.label-success= $order->user->user_info->weight   || '-'
                                       %br
-                                      %span.label.label-info=    $order->user->user_info->bust   || '-'
-                                      %span.label.label-info=    $order->user->user_info->waist  || '-'
-                                      %span.label.label-info=    $order->user->user_info->hip    || '-'
-                                      %span.label.label-info=    $order->user->user_info->belly  || '-'
+                                      %span.label.label-info=    $order->user->user_info->bust     || '-'
+                                      %span.label.label-info=    $order->user->user_info->waist    || '-'
+                                      %span.label.label-info=    $order->user->user_info->hip      || '-'
+                                      %span.label.label-info=    $order->user->user_info->topbelly || '-'
+                                      %span.label.label-info=    $order->user->user_info->belly    || '-'
                                       %br
-                                      %span.label.label-warning= $order->user->user_info->thigh  || '-'
-                                      %span.label.label-warning= $order->user->user_info->arm    || '-'
-                                      %span.label.label-warning= $order->user->user_info->leg    || '-'
-                                      %span.label.label-warning= $order->user->user_info->knee   || '-'
-                                      %span.label.label-warning= $order->user->user_info->foot   || '-'
+                                      %span.label.label-warning= $order->user->user_info->thigh    || '-'
+                                      %span.label.label-warning= $order->user->user_info->arm      || '-'
+                                      %span.label.label-warning= $order->user->user_info->leg      || '-'
+                                      %span.label.label-warning= $order->user->user_info->knee     || '-'
+                                      %span.label.label-warning= $order->user->user_info->foot     || '-'
                           .space
                           %div
                             %table.table.table-striped.table-bordered.table-hover

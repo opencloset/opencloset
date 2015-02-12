@@ -482,7 +482,7 @@ helper update_user => sub {
     $v->field('phone')->regexp(qr/^\d+$/);
     $v->field('gender')->in(qw/ male female /);
     $v->field('birth')->regexp(qr/^(0|((19|20)\d{2}))$/);
-    $v->field(qw/ height weight bust waist hip belly thigh arm leg knee foot /)->each(sub {
+    $v->field(qw/ height weight bust waist hip topbelly belly thigh arm leg knee foot /)->each(sub {
         shift->regexp(qr/^\d{1,3}$/);
     });
     $v->field('staff')->in( 0, 1 );
@@ -626,7 +626,7 @@ helper create_order => sub {
             return ( 0, 'user not found using user_id' );
         });
         $v->field('additional_day')->regexp(qr/^\d+$/);
-        $v->field(qw/ height weight bust waist hip belly thigh arm leg knee foot /)->each(sub {
+        $v->field(qw/ height weight bust waist hip topbelly belly thigh arm leg knee foot /)->each(sub {
             shift->regexp(qr/^\d{1,3}$/);
         });
         $v->field('bestfit')->in( 0, 1 );
@@ -683,7 +683,7 @@ helper create_order => sub {
         #
         # we believe user is exist since parameter validator
         #
-        for (qw/ height weight bust waist hip belly thigh arm leg knee foot /) {
+        for (qw/ height weight bust waist hip topbelly belly thigh arm leg knee foot /) {
             next if     defined $order_params->{$_};
             next unless defined $user->user_info->$_;
 
@@ -839,7 +839,7 @@ helper update_order => sub {
             return ( 0, 'user not found using user_id' );
         });
         $v->field('additional_day')->regexp(qr/^\d+$/);
-        $v->field(qw/ height weight bust waist hip belly thigh arm leg knee foot /)->each(sub {
+        $v->field(qw/ height weight bust waist hip topbelly belly thigh arm leg knee foot /)->each(sub {
             shift->regexp(qr/^\d{1,3}$/);
         });
         $v->field('bestfit')->in( 0, 1 );
@@ -1320,6 +1320,7 @@ group {
                 $clothes->bust,
                 $clothes->waist,
                 $clothes->hip,
+                $clothes->topbelly,
                 $clothes->belly,
                 $clothes->arm,
                 $clothes->thigh,
@@ -1338,6 +1339,7 @@ group {
             bust
             waist
             hip
+            topbelly
             belly
             arm
             thigh
@@ -1500,6 +1502,7 @@ group {
             purpose
             purpose2
             thigh
+            topbelly
             waist
             weight
         /);
@@ -1513,7 +1516,7 @@ group {
         $v->field('phone')->regexp(qr/^\d+$/);
         $v->field('gender')->in(qw/ male female /);
         $v->field('birth')->regexp(qr/^(19|20)\d{2}$/);
-        $v->field(qw/ height weight bust waist hip belly thigh arm leg knee foot /)->each(sub {
+        $v->field(qw/ height weight bust waist hip topbelly belly thigh arm leg knee foot /)->each(sub {
             shift->regexp(qr/^\d{1,3}$/);
         });
         unless ( $self->validate( $v, { %user_params, %user_info_params } ) ) {
@@ -1636,6 +1639,7 @@ group {
             purpose2
             staff
             thigh
+            topbelly
             waist
             weight
         /);
@@ -1754,6 +1758,7 @@ group {
             status_id
             target_date
             thigh
+            topbelly
             user_id
             user_target_date
             waist
@@ -1832,6 +1837,7 @@ group {
             status_id
             target_date
             thigh
+            topbelly
             user_id
             user_target_date
             waist
@@ -1906,6 +1912,7 @@ group {
             status_id
             target_date
             thigh
+            topbelly
             user_id
             user_target_date
             waist
@@ -2135,6 +2142,7 @@ group {
             price
             status_id
             thigh
+            topbelly
             waist
         /);
 
@@ -2146,7 +2154,7 @@ group {
         $v->field('category')->required(1)->in( keys %{ app->config->{category} } );
         $v->field('gender')->in(qw/ male female unisex /);
         $v->field('price')->regexp(qr/^\d*$/);
-        $v->field(qw/ belly bust waist hip thigh arm length /)->each(sub {
+        $v->field(qw/ topbelly belly bust waist hip thigh arm length /)->each(sub {
             shift->regexp(qr/^\d{1,3}$/);
         });
         $v->field('donation_id')->regexp(qr/^\d*$/)->callback(sub {
@@ -2247,6 +2255,7 @@ group {
             price
             status_id
             thigh
+            topbelly
             waist
         /);
 
@@ -2258,7 +2267,7 @@ group {
         $v->field('category')->in( keys %{ app->config->{category} } );
         $v->field('gender')->in(qw/ male female unisex /);
         $v->field('price')->regexp(qr/^\d*$/);
-        $v->field(qw/ belly bust waist hip thigh arm length /)->each(sub {
+        $v->field(qw/ topbelly belly bust waist hip thigh arm length /)->each(sub {
             shift->regexp(qr/^\d{1,3}$/);
         });
         $v->field('donation_id')->regexp(qr/^\d*$/)->callback(sub {
@@ -4583,6 +4592,7 @@ get '/clothes/:code' => sub {
         bust
         waist
         hip
+        topbelly
         belly
         thigh
         arm
@@ -4983,6 +4993,7 @@ get '/order/:id' => sub {
             bust         => $user->user_info->bust,
             waist        => $user->user_info->waist,
             hip          => $user->user_info->hip,
+            topbelly     => $user->user_info->topbelly,
             belly        => $user->user_info->belly,
             thigh        => $user->user_info->thigh,
             arm          => $user->user_info->arm,

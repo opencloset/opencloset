@@ -90,16 +90,16 @@ $ ->
   #
   clear_clothes_form = (show) ->
     if show
-      _.each [ 'bust', 'waist', 'hip', 'belly', 'thigh', 'arm', 'length', 'foot' ], (name) ->
+      _.each [ 'bust', 'waist', 'hip', 'topbelly', 'belly', 'thigh', 'arm', 'length', 'foot' ], (name) ->
         $("#display-clothes-#{name}").show()
     else
-      _.each [ 'bust', 'waist', 'hip', 'belly', 'thigh', 'arm', 'length', 'foot' ], (name) ->
+      _.each [ 'bust', 'waist', 'hip', 'topbelly', 'belly', 'thigh', 'arm', 'length', 'foot' ], (name) ->
         $("#display-clothes-#{name}").hide()
 
     $('#clothes-code').val('')
     $('input[name=clothes-gender]').prop('checked', false)
     $('#clothes-color').select2('val', '')
-    _.each [ 'bust', 'waist', 'hip', 'belly', 'thigh', 'arm', 'length', 'foot' ], (name) ->
+    _.each [ 'bust', 'waist', 'hip', 'topbelly', 'belly', 'thigh', 'arm', 'length', 'foot' ], (name) ->
       $("#clothes-#{name}").prop('disabled', true).val('')
 
   $('#clothes-category').select2({
@@ -110,10 +110,10 @@ $ ->
       clear_clothes_form false
       types = []
       switch e.val
-        when 'jacket'    then types = [ 'bust', 'arm', 'belly'                  ]
+        when 'jacket'    then types = [ 'bust', 'arm', 'topbelly', 'belly'      ]
         when 'pants'     then types = [ 'waist', 'hip', 'thigh', 'length'       ]
-        when 'shirt'     then types = [ 'bust', 'arm', 'belly'                  ]
-        when 'waistcoat' then types = [ 'waist', 'belly'                        ]
+        when 'shirt'     then types = [ 'bust', 'arm', 'topbelly', 'belly'      ]
+        when 'waistcoat' then types = [ 'waist', 'topbelly', 'belly'            ]
         when 'coat'      then types = [ 'bust', 'arm', 'length'                 ]
         when 'onepiece'  then types = [ 'bust', 'waist', 'hip', 'arm', 'length' ]
         when 'skirt'     then types = [ 'waist', 'hip', 'length'                ]
@@ -155,6 +155,7 @@ $ ->
       clothes_bust:         $('#clothes-bust').val()
       clothes_waist:        $('#clothes-waist').val()
       clothes_hip:          $('#clothes-hip').val()
+      clothes_topbelly:     $('#clothes-topbelly').val()
       clothes_belly:        $('#clothes-belly').val()
       clothes_thigh:        $('#clothes-thigh').val()
       clothes_arm:          $('#clothes-arm').val()
@@ -280,6 +281,7 @@ $ ->
                       bust:        $(el).data('clothes-bust')
                       waist:       $(el).data('clothes-waist')
                       hip:         $(el).data('clothes-hip')
+                      topbelly:    $(el).data('clothes-topbelly')
                       belly:       $(el).data('clothes-belly')
                       thigh:       $(el).data('clothes-thigh')
                       arm:         $(el).data('clothes-arm')

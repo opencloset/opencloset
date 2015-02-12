@@ -248,11 +248,22 @@
                           %span.input-group-addon
                             %i cm
 
+                  #display-clothes-topbelly
+                    .space-2
+
+                    .form-group.has-info
+                      %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'clothes-topbelly' } 윗배 둘레:
+                      .col-xs-12.col-sm-5
+                        .input-group
+                          %input#clothes-topbelly.valid.form-control{ :name => 'topbelly', :type => 'text' }
+                          %span.input-group-addon
+                            %i cm
+
                   #display-clothes-belly
                     .space-2
 
                     .form-group.has-info
-                      %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'clothes-belly' } 배 둘레:
+                      %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'clothes-belly' } 배꼽 둘레:
                       .col-xs-12.col-sm-5
                         .input-group
                           %input#clothes-belly.valid.form-control{ :name => 'belly', :type => 'text' }
@@ -325,7 +336,7 @@
                             <div>
                               <label>
                                 <input type="checkbox" class="ace valid" name="clothes-list"
-                                  value="<%= [ user_id, clothes_code, clothes_category, clothes_color, clothes_bust, clothes_waist, clothes_hip, clothes_belly, clothes_thigh, clothes_arm, clothes_length, clothes_foot, clothes_gender ].join('-') %>"
+                                  value="<%= [ user_id, clothes_code, clothes_category, clothes_color, clothes_bust, clothes_waist, clothes_hip, clothes_topbelly, clothes_belly, clothes_thigh, clothes_arm, clothes_length, clothes_foot, clothes_gender ].join('-') %>"
                                   data-user-id          = "<%= user_id %>"
                                   data-clothes-code     = "<%= clothes_code %>"
                                   data-clothes-category = "<%= clothes_category %>"
@@ -334,6 +345,7 @@
                                   data-clothes-arm      = "<%= clothes_arm %>"
                                   data-clothes-waist    = "<%= clothes_waist %>"
                                   data-clothes-hip      = "<%= clothes_hip %>"
+                                  data-clothes-topbelly = "<%= clothes_topbelly %>"
                                   data-clothes-belly    = "<%= clothes_belly %>"
                                   data-clothes-thigh    = "<%= clothes_thigh %>"
                                   data-clothes-length   = "<%= clothes_length %>"
@@ -345,14 +357,15 @@
                                   typeof yourvar != 'undefined'
                                   if ( typeof clothes_gender != 'undefined' ) { clothes_detail.push( clothes_gender_str ) }
                                   if ( typeof clothes_color  != 'undefined' ) { clothes_detail.push( clothes_color_str  ) }
-                                  if ( clothes_bust   >  0 ) { clothes_detail.push( "가슴("    + clothes_bust      + "cm)" ) }
-                                  if ( clothes_arm    >  0 ) { clothes_detail.push( "팔 길이(" + clothes_arm       + "cm)" ) }
-                                  if ( clothes_waist  >  0 ) { clothes_detail.push( "허리("    + clothes_waist     + "cm)" ) }
-                                  if ( clothes_hip    >  0 ) { clothes_detail.push( "엉덩이("  + clothes_hip       + "cm)" ) }
-                                  if ( clothes_belly  >  0 ) { clothes_detail.push( "배("      + clothes_belly     + "cm)" ) }
-                                  if ( clothes_thigh  >  0 ) { clothes_detail.push( "허벅지("  + clothes_thigh     + "cm)" ) }
-                                  if ( clothes_length >  0 ) { clothes_detail.push( "기장("    + clothes_length    + "cm)" ) }
-                                  if ( clothes_foot   >  0 ) { clothes_detail.push( "발 크기(" + clothes_foot      + "mm)" ) }
+                                  if ( clothes_bust     > 0 ) { clothes_detail.push( "가슴("    + clothes_bust       + "cm)" ) }
+                                  if ( clothes_arm      > 0 ) { clothes_detail.push( "팔 길이(" + clothes_arm        + "cm)" ) }
+                                  if ( clothes_waist    > 0 ) { clothes_detail.push( "허리("    + clothes_waist      + "cm)" ) }
+                                  if ( clothes_hip      > 0 ) { clothes_detail.push( "엉덩이("  + clothes_hip        + "cm)" ) }
+                                  if ( clothes_topbelly > 0 ) { clothes_detail.push( "윗배("      + clothes_topbelly + "cm)" ) }
+                                  if ( clothes_belly    > 0 ) { clothes_detail.push( "배꼽("      + clothes_belly    + "cm)" ) }
+                                  if ( clothes_thigh    > 0 ) { clothes_detail.push( "허벅지("  + clothes_thigh      + "cm)" ) }
+                                  if ( clothes_length   > 0 ) { clothes_detail.push( "기장("    + clothes_length     + "cm)" ) }
+                                  if ( clothes_foot     > 0 ) { clothes_detail.push( "발 크기(" + clothes_foot       + "mm)" ) }
                                 %>
                                 <span class="lbl"> &nbsp; <%= clothes_category_str %>(<%= clothes_code %>): <%= clothes_detail.join(', ') %> </span>
                               </label>
