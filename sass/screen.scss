@@ -547,6 +547,9 @@ $opencloset-darken-yellow: desaturate(darken($opencloset-yellow, 4%), 10%);
             &:nth-child(3) {
                 width: 100px;
             }
+            &:nth-child(4) {
+                width: 230px;
+            }
         }
     }
     .step-content {
