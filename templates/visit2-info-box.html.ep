@@ -76,7 +76,7 @@
                           </label>
 
                           <label id="postcodify" class="block clearfix"></label>
-                          <p class="help-block help-block-postcodify">e.g 서울시 광진구 화양동 48-3</p>
+                          <p class="help-block help-block-postcodify">예시) 서울시 광진구 화양동 48-3</p>
                           <input type="hidden" class="postcodify_dbid"          name="address1" value="<%= $user->user_info->address1 %>" />
                           <input type="hidden" class="postcodify_jibeonaddress" name="address3" value="<%= $user->user_info->address3 %>" />
                           <label class="block clearfix">
