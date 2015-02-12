@@ -93,8 +93,8 @@ $db_opts->{AutoCommit} //= 1;
             'login'        => { text => '로그인',                icon => 'lock',      },
             'visit'        => { text => '방문 예약',             icon => 'group',     desc => '열린옷장 방문 예약', link => '/visit'  },
             'visit2'       => { text => '방문 예약 (직원 전용)', icon => 'group',     desc => '열린옷장 방문 예약', link => '/visit2' },
-            'stat'         => { text => '통계',                  icon => 'bar-chart', desc => '통계',        link => '#'             },
-            'stat-bestfit' => { text => '어울림',                icon => {},          desc => '어울림 정보', link => '/stat/bestfit' },
+            'stat'         => { text => '통계',                  icon => 'bar-chart', desc => '통계',               link => '#' },
+            'stat-bestfit' => { text => '어울림',                icon => {},          desc => '베스트핏에 해당하는 의류와 대여자 신체 치수 정보를 보여줍니다.', link => '/stat/bestfit' },
         },
         items => [
             { id => 'home'        },
