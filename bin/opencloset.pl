@@ -5287,21 +5287,32 @@ get '/donation' => sub {
     my $p = $self->param('p') || 1;
     my $s = $self->param('s') || app->config->{entries_per_page};
     my $q = $self->param('q');
-    my $cond = $q
-        ? [
-        { 'name'               => { like => "%$q%" } },
-        { 'email'              => { like => "%$q%" } },
-        { 'user_info.phone'    => { like => "%$q%" } },
-        { 'user_info.address4' => { like => "%$q%" } },    # 상세주소만 검색
-        { 'user_info.birth'    => { like => "%$q%" } },
-        { 'user_info.gender'   => $q },
-        ]
-        : {};
+
+    my $cond;
+    my $join = [ { 'user' => 'user_info' } ];
+    if ($q) {
+        $cond = [
+            { 'name'               => { like => "%$q%" } },
+            { 'email'              => { like => "%$q%" } },
+            { 'user_info.phone'    => { like => "%$q%" } },
+            { 'user_info.address4' => { like => "%$q%" } }, # 상세주소만 검색
+            { 'user_info.birth'    => { like => "%$q%" } },
+            { 'user_info.gender'   => $q },
+        ];
+
+        if ( $q =~ m/^\w{4,5}$/ ) {
+            push @$cond, { 'clothes.code' => sprintf( '%05s', uc($q) ) };
+            $join = [ 'clothes', { 'user' => 'user_info' } ];
+        }
+    }
+    else {
+        $cond = {};
+    }
 
     my $rs = $DB->resultset('Donation')->search(
         $cond,
         {
-            join     => { 'user' => 'user_info' },
+            join     => $join,
             order_by => { -asc => 'id' },
             page     => $p,
             rows     => $s

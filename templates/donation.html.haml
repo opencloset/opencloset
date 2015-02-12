@@ -24,7 +24,7 @@
       - my $clothes_code = trim_clothes_code($clothes);
       - push @clothes_id, $clothes->id;
       %li 
-        %span.label.label-default{:data-clothes-code => "#{$clothes->code}"}= $clothes_code
+        %span.label.label-default.clothes-code{:data-clothes-code => "#{$clothes->code}"}= $clothes_code
     - }
 
 #donation-table
@@ -50,7 +50,7 @@
               - for my $clothes (@clothes) {
                 - my $clothes_code = trim_clothes_code($clothes);
                 %li
-                  %span.label.label-default{:data-clothes-code => "#{$clothes->code}", :data-donation-id => "#{$d->id}"}= $clothes_code
+                  %span.label.label-default.clothes-code{:data-clothes-code => "#{$clothes->code}", :data-donation-id => "#{$d->id}"}= $clothes_code
               - }
           %td
             %a{ :href => "#{url_for('/donation/' . $d->id)}" }= substr($d->message, 0, 100) || '비어있음'
