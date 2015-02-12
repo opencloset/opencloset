@@ -533,6 +533,10 @@ $opencloset-darken-yellow: desaturate(darken($opencloset-yellow, 4%), 10%);
         }
     }
     #donation {
+        .clothes-code {
+            font-family: Monospace;
+        }
+
         .donation-search {
             width: 440px;
         }
