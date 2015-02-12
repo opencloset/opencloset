@@ -3777,24 +3777,35 @@ group {
         );
 
         my %count = (
-            all        => 0,
-            visited    => 0,
-            notvisited => 0,
-            bestfit    => 0,
+            all        => { total => 0, male => 0, female => 0 },
+            visited    => { total => 0, male => 0, female => 0 },
+            notvisited => { total => 0, male => 0, female => 0 },
+            bestfit    => { total => 0, male => 0, female => 0 },
         );
         while ( my $booking = $booking_rs->next ) {
             for my $order ( $booking->orders ) {
-                ++$count{all};
-                ++$count{bestfit} if $order->bestfit;
+                my $gender = $order->user->user_info->gender;
+
+                ++$count{all}{total};
+                ++$count{all}{$gender};
+                if ( $order->bestfit ) {
+                    ++$count{bestfit}{total};
+                    ++$count{bestfit}{$gender};
+                }
+
                 use feature qw( switch );
                 use experimental qw( smartmatch );
                 given ( $order->status_id ) {
-                    ++$count{notvisited} when 12;
-                    ++$count{notvisited} when 14;
+                    when (/^12|14$/) {
+                        ++$count{notvisited}{total};
+                        ++$count{notvisited}{$gender};
+                    }
                 }
             }
         }
-        $count{visited} = $count{all} - $count{notvisited};
+        $count{visited}{total}  = $count{all}{total}  - $count{notvisited}{total};
+        $count{visited}{male}   = $count{all}{male}   - $count{notvisited}{male};
+        $count{visited}{female} = $count{all}{female} - $count{notvisited}{female};
 
         $self->respond_to( json => { status => 200, json => \%count } );
 
