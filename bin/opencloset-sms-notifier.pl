@@ -9,6 +9,8 @@ use HTTP::Tiny;
 use JSON;
 use SMS::Send::KR::CoolSMS;
 use SMS::Send;
+use Unicode::GCString;
+use Unicode::Normalize;
 
 use OpenCloset::Util;
 
@@ -120,11 +122,23 @@ sub send_sms {
     return unless $sms->{to};
     return unless $sms->{text};
 
+    my $type = 'SMS';
+    {
+        my $val = $sms->{text};
+
+        my $nfc  = Unicode::Normalize::NFC($val);
+        my $gcs  = Unicode::GCString->new($nfc);
+        my $cols = $gcs->columns;
+
+        $type = 'LMS' if $cols > 88;
+    }
+
     my $sender = SMS::Send->new(
         'KR::CoolSMS',
         _api_key    => $CONF->{api_key},
         _api_secret => $CONF->{api_secret},
         _from       => $sms->{from},
+        _type       => $type,
     );
 
     my $sent = $sender->send_sms(

@@ -26,7 +26,7 @@ requires 'Parcel::Track::KR::KGB';
 requires 'Parcel::Track::KR::PostOffice';
 requires 'Parcel::Track::KR::Yellowcap';
 requires 'Path::Tiny';
-requires 'SMS::Send::KR::CoolSMS', '1.002';
+requires 'SMS::Send::KR::CoolSMS', '1.003';
 requires 'Scalar::Util';
 requires 'Text::CSV';
 requires 'Text::Haml', '0.990114';
@@ -40,4 +40,4 @@ requires 'git://github.com/aanoaa/p5-postcodify.git@v0.2.6';
 
 # from opencloset cpan
 requires 'OpenCloset::Config', '0.001';
-requires 'OpenCloset::Schema', '0.005';
+requires 'OpenCloset::Schema', '0.006';

@@ -47,21 +47,10 @@ $ ->
       $('input[name=msg]').focus()
       return
 
-    $.ajax '/api/gui/utf8/gcs-columns.json',
-      type: 'POST'
-      data: { str: msg }
-      success: (data, textStatus, jqXHR) ->
-        gcs_columns = data.ret
-        console.log gcs_columns
-        if gcs_columns > 88
-          console.log OpenCloset.alert 'danger', "메시지가 너무 깁니다. (#{gcs_columns} 바이트)"
-          $('input[name=msg]').focus()
-          return
-
-        #
-        # 전송
-        #
-        OpenCloset.sendSMS to, msg
-        $('input[name=to]').prop('value', '')
-        $('input[name=msg]').prop('value', '')
-        OpenCloset.alert 'success', '문자 메시지를 전송했습니다.'
+    #
+    # 전송
+    #
+    OpenCloset.sendSMS to, msg
+    $('input[name=to]').prop('value', '')
+    $('input[name=msg]').prop('value', '')
+    OpenCloset.alert 'success', '문자 메시지를 전송했습니다.'

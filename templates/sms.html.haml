@@ -32,7 +32,7 @@
       .form-group
         %label.col-sm-3.control-label.no-padding-right{ :for => 'msg' } 메시지
         .col-sm-9
-          %textarea.col-xs-10.col-sm-8{ :name => "msg", :placeholder => "한글 기준 44자 이내로 작성하세요.", :rows => "5" }= $msg
+          %textarea.col-xs-10.col-sm-8{ :name => "msg", :placeholder => "한글 기준 44자가 넘지 않을 경우 SMS로, 넘을 경우 LMS로 전송합니다.", :rows => "5" }= $msg
       .form-actions.clearfix
         .col-md-offset-3.col-md-9
           %button.btn.btn-info#btn-sms-send{ :type => 'button' }
