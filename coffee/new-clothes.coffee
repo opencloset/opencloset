@@ -240,10 +240,18 @@ $ ->
             e.preventDefault()
             return
         when 3
+          ###
+          #
+          # #211 - 개별 옷을 등록하지 않고 기증행위가 등록이 가능해야 함
+          #
+          # 개별 옷 등록 없이 기증행위를 등록할 수 있기를 바라므로 추가할
+          # 의류를 선택했는지 여부를 확인하는 코드를 주석 처리합니다.
+          #
           unless $("input[name=clothes-list]:checked").length
             OpenCloset.alert('warning', '추가할 의류를 선택하지 않았습니다.')
             e.preventDefault()
             return
+          ###
 
           #
           # FIXME do we need a single API for transaction?
