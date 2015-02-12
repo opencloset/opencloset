@@ -42,10 +42,21 @@ $ ->
     $.ajax "/api/gui/timetable/#{ymd}.json",
       type: 'GET'
       success: (data, textStatus, jqXHR) ->
-        $('.count-all').html(data.all)
-        $('.count-visited').html(data.visited)
-        $('.count-notvisited').html(data.notvisited)
-        $('.count-bestfit').html(data.bestfit)
+        $('.count-all-total').html(data.all.total)
+        $('.count-visited-total').html(data.visited.total)
+        $('.count-notvisited-total').html(data.notvisited.total)
+        $('.count-bestfit-total').html(data.bestfit.total)
+
+        $('.count-all-male').html(data.all.male)
+        $('.count-visited-male').html(data.visited.male)
+        $('.count-notvisited-male').html(data.notvisited.male)
+        $('.count-bestfit-male').html(data.bestfit.male)
+
+        $('.count-all-female').html(data.all.female)
+        $('.count-visited-female').html(data.visited.female)
+        $('.count-notvisited-female').html(data.notvisited.female)
+        $('.count-bestfit-female').html(data.bestfit.female)
+
         success_cb() if success_cb
 
   updateOrder = ( order_id, ymd, status_id, alert_target, success_cb ) ->
