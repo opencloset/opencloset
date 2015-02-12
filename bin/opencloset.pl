@@ -3032,7 +3032,7 @@ group {
         #
         my $v = $self->create_validator;
         $v->field('to')->required(1)->regexp(qr/^\d+$/);
-        $v->field('text')->required(1)->regexp(qr/^.+$/);
+        $v->field('text')->required(1)->regexp(qr/^(\s|\S)+$/);
         $v->field('status')->in(qw/ pending sending sent /);
 
         unless ( $self->validate( $v, \%params ) ) {
