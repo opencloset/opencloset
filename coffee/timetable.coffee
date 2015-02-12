@@ -35,6 +35,19 @@ $ ->
 
     $(el).html( values_str )
 
+  updateSummary = (ymd, success_cb) ->
+    #
+    # 최상단의 요약 정보 갱신
+    #
+    $.ajax "/api/gui/timetable/#{ymd}.json",
+      type: 'GET'
+      success: (data, textStatus, jqXHR) ->
+        $('.count-all').html(data.all)
+        $('.count-visited').html(data.visited)
+        $('.count-notvisited').html(data.notvisited)
+        $('.count-bestfit').html(data.bestfit)
+        success_cb() if success_cb
+
   updateOrder = ( order_id, ymd, status_id, alert_target, success_cb ) ->
     #
     # 주문서의 상태 갱신
@@ -48,17 +61,8 @@ $ ->
         #
         # 상태 변경에 성공
         #
+        updateSummary(ymd, success_cb)
 
-        #
-        # 최상단의 요약 정보 갱신
-        #
-        $.ajax "/api/gui/timetable/#{ymd}.json",
-          type: 'GET'
-          success: (data, textStatus, jqXHR) ->
-            $('#count-all').html(data.all)
-            $('#count-visited').html(data.visited)
-            $('#count-notvisited').html(data.notvisited)
-            success_cb() if success_cb
       error: (jqXHR, textStatus, errorThrown) ->
         OpenCloset.alert('danger', "주문서 상태 변경에 실패했습니다: #{jqXHR.responseJSON.error.str}", "##{alert_target}")
 
@@ -235,6 +239,10 @@ $ ->
   #
   $('.editable.order-bestfit').editable
     source: -> { value: k, text: v } for k, v of { 0: '보통', 1: 'Best-Fit' }
+    success: (response, newValue) ->
+      storage = $('.editable.order-bestfit').closest('.people-box')
+      ymd     = storage.data('ymd')
+      updateSummary storage.data('ymd')
 
   statusMap = {}
   ( statusMap[v.id] = k ) for k, v of OpenCloset.status
