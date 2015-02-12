@@ -640,6 +640,16 @@ $opencloset-darken-yellow: desaturate(darken($opencloset-yellow, 4%), 10%);
     color: #848484 !important;
 }
 
+#postcodify {
+    height: 38px;
+    margin-bottom: 0;
+}
+
+.help-block-postcodify {
+    margin-top: 0;
+    font-size: 0.9em;
+}
+
 #postcodify .summary {
     display: none;
 }
