@@ -5382,5 +5382,7 @@ get '/donation/:id' => sub {
     );
 } => 'donation-id';
 
+get '/stat/bestfit' => 'stat-bestfit';
+
 app->secrets( app->defaults->{secrets} );
 app->start;
