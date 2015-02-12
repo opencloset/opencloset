@@ -14,12 +14,14 @@
 -     all        => 0,
 -     visited    => 0,
 -     notvisited => 0,
+-     bestfit    => 0,
 - );
 - my %orders;
 - while ( my $booking = $booking_rs->next ) {
 -   my $hm = sprintf '%02d:%02d', $booking->date->hour, $booking->date->minute;
 -   for my $order ( $booking->orders ) {
 -     ++$count{all};
+-     ++$count{bestfit} if $order->bestfit;
 -     use feature qw( switch );
 -     use experimental qw( smartmatch );
 -     given ( $order->status_id ) {
@@ -51,20 +53,29 @@
         .infobox-icon
           %i.icon-user
         .infobox-data
-          %span.infobox-data-number#count-all= $count{all}
+          %span.infobox-data-number.count-all= $count{all}
           .infobox-content 총 예약자 수
       .infobox.infobox-green
         .infobox-icon
           %i.icon-user
         .infobox-data
-          %span.infobox-data-number#count-visited= $count{visited}
+          %span.infobox-data-number.count-visited= $count{visited}
           .infobox-content 방문자 수
       .infobox.infobox-red
         .infobox-icon
           %i.icon-user
         .infobox-data
-          %span.infobox-data-number#count-notvisited= $count{notvisited}
+          %span.infobox-data-number.count-notvisited= $count{notvisited}
           .infobox-content 미방문자 수
+      .infobox.infobox-pink
+        .infobox-icon
+          %i.icon-user
+        .infobox-data
+          %span.infobox-data-number
+            %span.count-bestfit= $count{bestfit}
+            %span= '/'
+            %span.count-visited= $count{visited}
+          .infobox-content Best-fit 수 / 방문자 수
 
   .space-4
 
