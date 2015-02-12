@@ -51,19 +51,20 @@
 
                       %div
                         - map { $average_size->{$_} = sprintf "%.1f", $average_size->{$_} } keys %$average_size;
-                        %span.label.label-success= $average_size->{height} || '-'
-                        %span.label.label-success= $average_size->{weight} || '-'
+                        %span.label.label-success= $average_size->{height}   || '-'
+                        %span.label.label-success= $average_size->{weight}   || '-'
                         %br
-                        %span.label.label-info=    $average_size->{bust}   || '-'
-                        %span.label.label-info=    $average_size->{waist}  || '-'
-                        %span.label.label-info=    $average_size->{hip}    || '-'
-                        %span.label.label-info=    $average_size->{belly}  || '-'
+                        %span.label.label-info=    $average_size->{bust}     || '-'
+                        %span.label.label-info=    $average_size->{waist}    || '-'
+                        %span.label.label-info=    $average_size->{hip}      || '-'
+                        %span.label.label-info=    $average_size->{topbelly} || '-'
+                        %span.label.label-info=    $average_size->{belly}    || '-'
                         %br
-                        %span.label.label-warning= $average_size->{thigh}  || '-'
-                        %span.label.label-warning= $average_size->{arm}    || '-'
-                        %span.label.label-warning= $average_size->{leg}    || '-'
-                        %span.label.label-warning= $average_size->{knee}   || '-'
-                        %span.label.label-warning= $average_size->{foot}   || '-'
+                        %span.label.label-warning= $average_size->{thigh}    || '-'
+                        %span.label.label-warning= $average_size->{arm}      || '-'
+                        %span.label.label-warning= $average_size->{leg}      || '-'
+                        %span.label.label-warning= $average_size->{knee}     || '-'
+                        %span.label.label-warning= $average_size->{foot}     || '-'
 
                       .hr.hr16.dotted
 
@@ -132,7 +133,12 @@
                                   %span.editable#clothes-hip{ 'data-name' => 'hip', 'data-value' => "#{ $clothes->hip }" }
 
                               .profile-info-row
-                                .profile-info-name 배 둘레
+                                .profile-info-name 윗배 둘레
+                                .profile-info-value
+                                  %span.editable#clothes-topbelly{ 'data-name' => 'topbelly', 'data-value' => "#{ $clothes->topbelly }" }
+
+                              .profile-info-row
+                                .profile-info-name 배꼽 둘레
                                 .profile-info-value
                                   %span.editable#clothes-belly{ 'data-name' => 'belly', 'data-value' => "#{ $clothes->belly }" }
 
