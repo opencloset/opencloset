@@ -3819,10 +3819,12 @@ group {
             all        => 0,
             visited    => 0,
             notvisited => 0,
+            bestfit    => 0,
         );
         while ( my $booking = $booking_rs->next ) {
             for my $order ( $booking->orders ) {
                 ++$count{all};
+                ++$count{bestfit} if $order->bestfit;
                 use feature qw( switch );
                 use experimental qw( smartmatch );
                 given ( $order->status_id ) {
