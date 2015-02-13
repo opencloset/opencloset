@@ -133,20 +133,23 @@
                           <input type="hidden" name="booking-saved" value="<%= $booking ? $booking->id : '' %>" data-ymd="<%= $booking ? $booking->date->strftime('%Y-%m-%d') : '' %>" data-hm="<%= $booking ? $booking->date->strftime('%H:%M') : '' %>" />
 
                           <label class="block clearfix">
-                            <span class="block input-icon input-icon-right">
-                              <input name="purpose" type="text" class="form-control" placeholder="대여 목적" value="<%= ( $order || $load ) ? $user->user_info->purpose : q{} %>" />
-                              <p> 아래 목록을 클릭해주시거나, 목록에 없으면 직접 입력해주세요. </p>
-                              <p class="purpose">
-                                <span class="label label-info clickable"> 입사면접 </span>
-                                <span class="label label-info clickable"> 사진촬영 </span>
-                                <span class="label label-info clickable"> 결혼식 </span>
-                                <span class="label label-info clickable"> 장례식 </span>
-                                <span class="label label-info clickable"> 입학식 </span>
-                                <span class="label label-info clickable"> 졸업식 </span>
-                                <span class="label label-info clickable"> 세미나 </span>
-                                <span class="label label-info clickable"> 발표 </span>
-                              </p>
-                            </span>
+                            <select class="width-100 chosen-select" name="purpose" data-placeholder="대여 목적을 선택해주세요." data-purpose="<%= ( $order || $load ) ? $user->user_info->purpose : q{} %>">
+                              <option value=""                  > 대여 목적을 선택해주세요. </option>
+                              <option value="입사면접"          > 입사면접                  </option>
+                              <option value="결혼식"            > 결혼식                    </option>
+                              <option value="대학(원)면접"      > 대학(원)면접              </option>
+                              <option value="장례식"            > 장례식                    </option>
+                              <option value="사진촬영(웨딩촬영)"> 사진촬영(웨딩촬영)        </option>
+                              <option value="세미나"            > 세미나                    </option>
+                              <option value="발표"              > 발표                      </option>
+                              <option value="공연(연주회)"      > 공연(연주회)              </option>
+                              <option value="축제(행사)"        > 축제(행사)                </option>
+                              <option value="OT"                > OT                        </option>
+                              <option value="아르바이트"        > 아르바이트                </option>
+                              <option value="졸업식"            > 졸업식                    </option>
+                              <option value="입학식"            > 입학식                    </option>
+                              <option value="기타"              > 기타                      </option>
+                            </select>
                           </label>
 
                           <label class="block clearfix">
@@ -303,7 +306,7 @@
                     <%% var ymd = dt.format('YYYY-MM-DD'); %>
                     <%% var hm  = dt.format('HH:mm'); %>
                     <td class="center">
-                      <input class="ace" type="radio" name="booking_id" value="<%%= id %>" data-id="<%%= id %>" data-ymd="<%%= ymd %>" data-hm="<%%= hm %>">
+                      <input type="radio" name="booking_id" value="<%%= id %>" data-id="<%%= id %>" data-ymd="<%%= ymd %>" data-hm="<%%= hm %>">
                       <span class="lbl"></span>
                     </td>
                     <td> <%%= ymd %> </td>

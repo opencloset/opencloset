@@ -33,10 +33,8 @@ $ ->
   #
   # 대여 목적
   #
-  $(".purpose .clickable.label").click ->
-    old_purpose = $("input[name=purpose]").val()
-    new_purpose = $(@).text()
-    $("input[name=purpose]").prop( "value", $.trim( "#{old_purpose} #{new_purpose}" ) )
+  purpose = $("select[name=purpose]").data('purpose')
+  $("select[name=purpose]").chosen({ width: "100%" }).val(purpose).trigger("chosen:updated")
 
   #
   # SMS 인증하기 버튼 클릭
@@ -115,7 +113,7 @@ $ ->
     height   = $("input[name=height]").val()
     weight   = $("input[name=weight]").val()
     booking  = $("input[name=booking]").val()
-    purpose  = $("input[name=purpose]").val()
+    purpose  = $("select[name=purpose]").val()
     purpose2 = $("input[name=purpose2]").val()
 
     pre_category_temp = $("select[name=pre_category_temp]").val()
@@ -209,6 +207,13 @@ $ ->
     #
     unless purpose
       OpenCloset.alert 'danger', '대여 목적을 입력해주세요.', '#visit-alert'
+      return
+
+    #
+    # 상세 대여 목적 점검
+    #
+    unless purpose2
+      OpenCloset.alert 'danger', '상세 대여 목적을 입력해주세요.', '#visit-alert'
       return
 
     #
