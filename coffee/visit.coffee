@@ -324,6 +324,13 @@ $ ->
       return
 
     #
+    # 상세 대여 목적 점검
+    #
+    unless purpose2
+      OpenCloset.alert 'danger', '상세 대여 목적을 입력해주세요.', '#visit-alert'
+      return
+
+    #
     # 대여할 옷의 종류 점검
     #
     unless pre_category_temp
