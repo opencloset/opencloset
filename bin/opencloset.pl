@@ -5382,5 +5382,27 @@ get '/donation/:id' => sub {
     );
 } => 'donation-id';
 
+get '/stat/bestfit' => sub {
+    my $self = shift;
+
+    my $rs = $DB->resultset('Order')->search(
+        { bestfit => 1 },
+        {
+            order_by => [
+                { -asc => 'order_details.clothes_code' },
+            ],
+            prefetch => {
+                'order_details' => {
+                    'clothes' => {
+                        'donation' => 'user',
+                    },
+                },
+            },
+        },
+    );
+
+    $self->stash( order_rs => $rs,);
+} => 'stat-bestfit';
+
 app->secrets( app->defaults->{secrets} );
 app->start;

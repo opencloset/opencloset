@@ -28,6 +28,7 @@ requires 'Parcel::Track::KR::Yellowcap';
 requires 'Path::Tiny';
 requires 'SMS::Send::KR::CoolSMS', '1.003';
 requires 'Scalar::Util';
+requires 'Statistics::Basic';
 requires 'Text::CSV';
 requires 'Text::Haml', '0.990114';
 requires 'Try::Tiny';
