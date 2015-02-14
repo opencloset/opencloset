@@ -1,4 +1,5 @@
 - use utf8;
+- use List::Util qw/sum/;
 - my $_id = 'order-id';
 - layout 'default',
 -   page_id     => $_id,
@@ -17,6 +18,8 @@
 - title meta_text($_id);
 
 - my $order_status = $order->status ? $order->status->name : '상태없음';
+- my %analyze = $order->analyze_order_status_logs;
+- my @process = (qw/대기 치수측정 의류준비 탈의 포장 수선 결제/);
 
                 .row#order{ 'data-order-id' => "#{ $order->id }", 'data-order-parent-id' => "#{ $order->parent_id // q{} } ", 'data-url' => "#{ url_for( '/api/order/' . $order->id ) }" }
                   .col-sm-10.col-sm-offset-1
@@ -396,7 +399,71 @@
                                       %span.label.label-warning= $order->user->user_info->leg      || '-'
                                       %span.label.label-warning= $order->user->user_info->knee     || '-'
                                       %span.label.label-warning= $order->user->user_info->foot     || '-'
-                          .space
+
+                    .space
+
+                    .widget-box
+                      .widget-header.widget-header-flat.widget-header-small
+                        %h5.widget-title
+                          %i.ace-icon.icon-time
+                          %span 주문서 상태 및 통계
+                        .widget-toolbar.no-border
+                      .widget-body
+                        .widget-main
+                          .row
+                            .col-xs-10
+                              .desc 주문서 상태 :
+                              .status-tracking
+                                %table.table.table-striped.table-bordered.table-hover
+                                  %thead
+                                    %tr
+                                      %th.center #
+                                      %th.center 상태
+                                      %th.center 시점
+                                      %th.center 처리시간
+                                  %tbody
+                                    - my $count = 0;
+                                    - for my $log ( @{ $analyze{logs} } ) {
+                                      %tr
+                                        %td.center= ++$count
+                                        %td.center= $log->{status}
+                                        %td.center= $log->{timestamp}->strftime('%m월 %d일 %H시 %M분');
+                                        %td.center= convert_sec_to_locale($log->{delta}) if $log->{delta}
+                                    - }
+                          .row
+                            .col-xs-8
+                              .desc 통계 ;
+                              .tracking-stat
+                                %table.table.table-striped.table-bordered.table-hover
+                                  %thead
+                                    %tr
+                                      %th.center 상태
+                                      %th.center 처리시간
+                                      %th %
+                                  %tbody
+                                    - my $total = sum @{$analyze{elapsed_time}}{@process};
+                                    - foreach my $step (@process) {
+                                      - my $elapsed_time = $analyze{elapsed_time}{$step};
+                                      - next unless $elapsed_time;
+                                      %tr
+                                        %td.center= $step
+                                        %td.center= convert_sec_to_locale($elapsed_time);
+                                        %td= sprintf('%.2f%', $elapsed_time / $total * 100);
+                                    - }
+                                  %thead
+                                    %tr
+                                      %td.center 총 처리시간
+                                      %td.center= convert_sec_to_locale($total)
+                                      %td 100%
+
+                    .space
+
+                    .widget-box.transparent.invoice-box
+                      /
+                      / body
+                      /
+                      .widget-body
+                        .widget-main
                           %div
                             %table.table.table-striped.table-bordered.table-hover
                               %thead
