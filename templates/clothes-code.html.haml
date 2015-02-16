@@ -66,6 +66,29 @@
                         %span.label.label-warning= $average_size->{knee}     || '-'
                         %span.label.label-warning= $average_size->{foot}     || '-'
 
+                      .space-6
+
+                      .hr.hr12.dotted
+
+                      - for my $size (@$recent_sizes) {
+                        %div
+                          %span.label.label-success= $size->{height}   || '-'
+                          %span.label.label-success= $size->{weight}   || '-'
+                          %br
+                          %span.label.label-info=    $size->{bust}     || '-'
+                          %span.label.label-info=    $size->{waist}    || '-'
+                          %span.label.label-info=    $size->{hip}      || '-'
+                          %span.label.label-info=    $size->{topbelly} || '-'
+                          %span.label.label-info=    $size->{belly}    || '-'
+                          %br
+                          %span.label.label-warning= $size->{thigh}    || '-'
+                          %span.label.label-warning= $size->{arm}      || '-'
+                          %span.label.label-warning= $size->{leg}      || '-'
+                          %span.label.label-warning= $size->{knee}     || '-'
+                          %span.label.label-warning= $size->{foot}     || '-'
+                        .space-6
+                      - }
+
                       .hr.hr16.dotted
 
                     /
