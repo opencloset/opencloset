@@ -137,7 +137,10 @@
                               <option value=""                  > 대여 목적을 선택해주세요. </option>
                               <option value="입사면접"          > 입사면접                  </option>
                               <option value="결혼식"            > 결혼식                    </option>
+                              <option value="상견례"            > 상견례                    </option>
                               <option value="대학(원)면접"      > 대학(원)면접              </option>
+                              <option value="모의면접"          > 모의면접                  </option>
+                              <option value="인턴면접"          > 인턴면접                  </option>
                               <option value="장례식"            > 장례식                    </option>
                               <option value="사진촬영(웨딩촬영)"> 사진촬영(웨딩촬영)        </option>
                               <option value="세미나"            > 세미나                    </option>
