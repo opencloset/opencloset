@@ -31,6 +31,14 @@ $ ->
     $("input[name=pre_color]").val [ $("select[name=pre_color1]").val(), $("select[name=pre_color2]").val(), $("select[name=pre_color3]").val() ].join(',')
 
   #
+  # 착용 날짜
+  #
+  $("input[name=wearon_date]").datepicker(
+    todayHighlight: true
+    autoclose:      true
+  )
+
+  #
   # 대여 목적
   #
   purpose = $("select[name=purpose]").data('purpose')
@@ -213,15 +221,16 @@ $ ->
     phone   = $("input[name=phone]").val()
     sms     = $("input[name=sms]").val()
 
-    gender   = $("input[name=gender]:checked").val()
-    email    = $("input[name=email]").val()
-    address2 = $("input[name=address2]").val()
-    birth    = $("input[name=birth]").val()
-    height   = $("input[name=height]").val()
-    weight   = $("input[name=weight]").val()
-    booking  = $("input[name=booking]").val()
-    purpose  = $("select[name=purpose]").val()
-    purpose2 = $("input[name=purpose2]").val()
+    gender      = $("input[name=gender]:checked").val()
+    email       = $("input[name=email]").val()
+    address2    = $("input[name=address2]").val()
+    birth       = $("input[name=birth]").val()
+    height      = $("input[name=height]").val()
+    weight      = $("input[name=weight]").val()
+    booking     = $("input[name=booking]").val()
+    wearon_date = $("input[name=wearon_date]").val()
+    purpose     = $("select[name=purpose]").val()
+    purpose2    = $("input[name=purpose2]").val()
 
     pre_category_temp = $("select[name=pre_category_temp]").val()
     pre_color1        = $("select[name=pre_color1]").val()
@@ -314,6 +323,13 @@ $ ->
     #
     unless booking
       OpenCloset.alert 'danger', '방문 일자를 선택해주세요.', '#visit-alert'
+      return
+
+    #
+    # 착용 날짜 점검
+    #
+    unless wearon_date
+      OpenCloset.alert 'danger', '착용 날짜를 입력해주세요.', '#visit-alert'
       return
 
     #
