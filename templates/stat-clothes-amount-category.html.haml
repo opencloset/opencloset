@@ -1,0 +1,39 @@
+- use utf8;
+- my $_id   = 'stat-clothes-amount';
+- layout 'default',
+-   page_id     => $_id,
+-   active_id   => $_id,
+-   breadcrumbs => [
+-     { text => meta_text('stat') },
+-     { text => meta_text($_id)   },
+-   ],
+-   ;
+- title "$category · " . meta_text($_id);
+
+%h2
+  = $config->{category}{$category}{str} || $category
+  %small= $quantity
+
+%p
+
+.row
+  .col-md-6
+    %table.table.table-striped.table-bordered.table-hover
+      %thead
+        %tr
+          %th
+            사이즈
+            %small= $criterion
+          %th 수량
+          %th 대여중
+          %th 수선중
+          %th 세탁중
+      %tbody
+        - for my $item (@$items) {
+          %tr
+            %td= $item->{size}
+            %td= $item->{qty}
+            %td= $item->{rental}
+            %td= $item->{repair}
+            %td= $item->{cleaning}
+        - }
