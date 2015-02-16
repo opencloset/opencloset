@@ -30,6 +30,9 @@ use Mojolicious::Lite;
 app->controller_class("OpenCloset::Web::Controller");
 
 use Data::Pageset;
+use DateTime::Duration;
+use DateTime::Format::Duration;
+use DateTime::Format::Human::Duration;
 use DateTime;
 use Encode 'decode_utf8';
 use Gravatar::URL;
@@ -1209,6 +1212,36 @@ helper get_nearest_booked_order => sub {
     my $order = $rs->next;
 
     return $order;
+};
+
+helper convert_sec_to_locale => sub {
+    my ( $self, $seconds ) = @_;
+
+    my $dfd  = DateTime::Format::Duration->new( normalize => 'ISO', pattern => '%M:%S' );
+    my $dur1 = DateTime::Duration->new( seconds => $seconds );
+    my $dur2 = DateTime::Duration->new( $dfd->normalize($dur1) );
+    my $dfhd = DateTime::Format::Human::Duration->new;
+
+    my $locale = $dfhd->format_duration( $dur2, locale => "ko" );
+    $locale =~ s/\s*(년|개월|주|일|시간|분|초|나노초)/$1/gms;
+    $locale =~ s/\s+/ /gms;
+    $locale =~ s/,//gms;
+
+    return $locale;
+};
+
+helper convert_sec_to_hms => sub {
+    my ( $self, $seconds ) = @_;
+
+    my $dfd  = DateTime::Format::Duration->new( normalize => 'ISO', pattern => "%M:%S" );
+    my $dur1 = DateTime::Duration->new( seconds => $seconds );
+    my $hms  = sprintf(
+        '%02d:%s',
+        $seconds / 3600,
+        $dfd->format_duration( DateTime::Duration->new( $dfd->normalize($dur1) ) ),
+    );
+
+    return $hms;
 };
 
 #

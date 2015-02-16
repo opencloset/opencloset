@@ -1,4 +1,5 @@
 - use utf8;
+- use List::Util qw/sum/;
 - my $_id = 'order-id';
 - layout 'default',
 -   page_id     => $_id,
@@ -17,6 +18,8 @@
 - title meta_text($_id);
 
 - my $order_status = $order->status ? $order->status->name : '상태없음';
+- my %analyze = $order->analyze_order_status_logs;
+- my @process = (qw/대기 치수측정 의류준비 탈의 포장 수선 결제/);
 
                 .row#order{ 'data-order-id' => "#{ $order->id }", 'data-order-parent-id' => "#{ $order->parent_id // q{} } ", 'data-url' => "#{ url_for( '/api/order/' . $order->id ) }" }
                   .col-sm-10.col-sm-offset-1
@@ -396,9 +399,81 @@
                                       %span.label.label-warning= $order->user->user_info->leg      || '-'
                                       %span.label.label-warning= $order->user->user_info->knee     || '-'
                                       %span.label.label-warning= $order->user->user_info->foot     || '-'
-                          .space
+
+                    .space
+
+                    .widget-box.collapsed.stat
+                      .widget-header.widget-header-flat.widget-header-small
+                        %h5.widget-title
+                          %i.ace-icon.icon-time
+                          %span 상태 별 시각
+                        .widget-toolbar.no-border
+                          %a{ :href => '#', 'data-action' => 'collapse' }
+                            %i.icon-chevron-down
+                      .widget-body
+                        .widget-main
+                          .row
+                            %table.table.table-striped.table-bordered.table-hover.status-time
+                              %thead
+                                %tr
+                                  %th.center #
+                                  %th 상태
+                                  %th 시점
+                                  %th 처리 시간
+                              %tbody
+                                - my $count = 0;
+                                - for my $log ( @{ $analyze{logs} } ) {
+                                  %tr
+                                    %td.center= ++$count
+                                    %td= $log->{status}
+                                    %td= $log->{timestamp}->strftime('%m월 %d일 %H시 %M분');
+                                    %td= convert_sec_to_locale($log->{delta}) if $log->{delta}
+                                - }
+
+                    .space-6
+
+                    .widget-box.collapsed.stat
+                      .widget-header.widget-header-flat.widget-header-small
+                        %h5.widget-title
+                          %i.ace-icon.icon-time
+                          %span 상태 별 소요 시간
+                        .widget-toolbar.no-border
+                          %a{ :href => '#', 'data-action' => 'collapse' }
+                            %i.icon-chevron-down
+                      .widget-body
+                        .widget-main
+                          .row
+                            %table.table.table-striped.table-bordered.table-hover.status-duration
+                              %thead
+                                %tr
+                                  %th 상태
+                                  %th 처리 시간
+                                  %th %
+                              %tbody
+                                - my $total = sum @{$analyze{elapsed_time}}{@process};
+                                - foreach my $step (@process) {
+                                  - my $elapsed_time = $analyze{elapsed_time}{$step};
+                                  - next unless $elapsed_time;
+                                  %tr
+                                    %td= $step
+                                    %td= convert_sec_to_locale($elapsed_time);
+                                    %td= sprintf( '%.1f', $elapsed_time / $total * 100 );
+                                - }
+                                %tr
+                                  %td.center 총 처리시간
+                                  %td= convert_sec_to_locale($total)
+                                  %td= sprintf( '%.1f', 100 );
+
+                    .space
+
+                    .widget-box.invoice-box
+                      /
+                      / body
+                      /
+                      .widget-body
+                        .widget-main
                           %div
-                            %table.table.table-striped.table-bordered.table-hover
+                            %table.table.table-striped.table-bordered.table-hover.order-detail
                               %thead
                                 %tr
                                   %th.center.return-process

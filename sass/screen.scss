@@ -253,7 +253,7 @@ $opencloset-darken-yellow: desaturate(darken($opencloset-yellow, 4%), 10%);
         .return-process {
             display: none;
         }
-        table {
+        table.order-detail {
             th {
                 &:first-child {
                     width: 50px;
@@ -302,6 +302,68 @@ $opencloset-darken-yellow: desaturate(darken($opencloset-yellow, 4%), 10%);
         .return-method {
             .editable-buttons {
                 display: block;
+            }
+        }
+        .widget-box.stat {
+            .widget-body {
+                padding-left: 20px;
+                padding-right: 20px;
+
+                table.status-time {
+                    th:nth-child(2),
+                    td:nth-child(2) {
+                        padding-left: 20px;
+                    }
+
+                    th:nth-child(3),
+                    th:nth-child(4),
+                    td:nth-child(3),
+                    td:nth-child(4) {
+                        text-align: right;
+                        padding-right: 20px;
+                    }
+
+                    td:nth-child(3),
+                    td:nth-child(4) {
+                        font-family: Monospace;
+                    }
+
+                    td:first-child {
+                        width: 50px;
+                    }
+                    td:nth-child(3) {
+                        width: 250px;
+                    }
+                    td:nth-child(4) {
+                        width: 180px;
+                    }
+                }
+
+                table.status-duration {
+                    th:first-child,
+                    td:first-child {
+                        padding-left: 20px;
+                    }
+
+                    th:nth-child(2),
+                    th:nth-child(3),
+                    td:nth-child(2),
+                    td:nth-child(3) {
+                        width: 25%;
+                        text-align: right;
+                        padding-right: 20px;
+                    }
+                    td:nth-child(2),
+                    td:nth-child(3) {
+                        font-family: Monospace;
+                    }
+                }
+            }
+        }
+        .widget-box.invoice-box {
+            border: none;
+            .widget-body {
+                border: none;
             }
         }
     }
