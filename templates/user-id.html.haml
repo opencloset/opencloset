@@ -133,7 +133,7 @@
                               .profile-info-row
                                 .profile-info-name 착용 날짜
                                 .profile-info-value
-                                  %span.editable#user-wearon_date{ 'data-name' => 'wearon_date', 'data-value' => "#{ $user->user_info->wearon_date->ymd }" }
+                                  %span.editable#user-wearon_date{ 'data-name' => 'wearon_date', 'data-value' => "#{ $user->user_info->wearon_date ? $user->user_info->wearon_date->ymd : q{} }" }
 
                               .profile-info-row
                                 .profile-info-name 대여 목적
