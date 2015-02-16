@@ -1,4 +1,5 @@
 - use utf8;
+- use List::Util qw/sum/;
 - my $_id = 'order-id';
 - layout 'default',
 -   page_id     => $_id,
@@ -17,6 +18,8 @@
 - title meta_text($_id);
 
 - my $order_status = $order->status ? $order->status->name : '상태없음';
+- my %analyze = $order->analyze_order_status_logs;
+- my @process = (qw/대기 치수측정 의류준비 탈의 포장 수선 결제/);
 
                 .row#order{ 'data-order-id' => "#{ $order->id }", 'data-order-parent-id' => "#{ $order->parent_id // q{} } ", 'data-url' => "#{ url_for( '/api/order/' . $order->id ) }" }
                   .col-sm-10.col-sm-offset-1
@@ -396,301 +399,364 @@
                                       %span.label.label-warning= $order->user->user_info->leg      || '-'
                                       %span.label.label-warning= $order->user->user_info->knee     || '-'
                                       %span.label.label-warning= $order->user->user_info->foot     || '-'
-                          .space
-                          %div
-                            %table.table.table-striped.table-bordered.table-hover
-                              %thead
-                                %tr
-                                  %th.center.return-process
-                                  %th.center #
-                                  %th 항목
-                                  %th 상태
-                                  %th.return-process-reverse 대여 가격
-                                  %th.return-process-reverse 기간
-                                  %th 소계
-                                  %th 기타
-                              %tbody
-                                - my $count = 0;
-                                - for my $detail ( $order->order_details ) {
-                                  %tr
-                                    %td.center.return-process
-                                      - if ( $detail->clothes ) {
-                                        %label
-                                          %input.ace{ :type => 'checkbox', 'data-clothes-code' => "#{ trim_clothes_code($detail->clothes) }", 'data-id' => "#{ $detail->id }" }
-                                          %span.lbl
-                                      - }
-                                    %td.center= ++$count
-                                    - if ( $detail->clothes ) {
-                                      %td
-                                        %a{ :href => "/clothes/#{ trim_clothes_code($detail->clothes) }" }= $detail->name
-                                      %td
-                                        - if ( $order_status ne '결제대기' && $detail->status ) {
-                                          %span.order-status.label{ 'data-order-detail-status' => "#{ $detail->status->name }" }
-                                            = $detail->status->name
+                    .widget-box
+                      .widget-header.widget-header-flat.widget-header-small
+                        %h5.widget-title
+                          %i.ace-icon.icon-time
+                          %span 주문서 상태 및 통계
+                        .widget-toolbar.no-border
+                      .widget-body
+                        .widget-main
+                          .row
+                            .col-xs-10
+                              .desc 주문서 상태 :
+                              .status-tracking
+                                %table.table.table-striped.table-bordered.table-hover
+                                  %thead
+                                    %tr
+                                      %th.center #
+                                      %th.center 상태
+                                      %th.center 시점
+                                      %th.center 처리시간
+                                  %tbody
+                                    - my $count = 0;
+                                    - for my $log ( @{ $analyze{logs} } ) {
+                                      %tr
+                                        %td.center= ++$count
+                                        %td.center= $log->{status}
+                                        %td.center= $log->{timestamp}->strftime('%m월 %d일 %H시 %M분');
+                                        %td.center= convert_sec_to_locale($log->{delta}) if $log->{delta}
+                                    - }
+                          .row
+                            .col-xs-8
+                              .desc 통계 ;
+                              .tracking-stat
+                                %table.table.table-striped.table-bordered.table-hover
+                                  %thead
+                                    %tr
+                                      %th.center 상태
+                                      %th.center 처리시간
+                                      %th %
+                                  %tbody
+                                    - my $total = sum @{$analyze{elapsed_time}}{@process};
+                                    - foreach my $step (@process) {
+                                      - my $elapsed_time = $analyze{elapsed_time}{$step};
+                                      - next unless $elapsed_time;
+                                      %tr
+                                        %td.center= $step
+                                        %td.center= convert_sec_to_locale($elapsed_time);
+                                        %td= sprintf('%.2f%', $elapsed_time / $total * 100);
+                                    - }
+                                  %thead
+                                    %tr
+                                      %td.center 총 처리시간
+                                      %td.center= convert_sec_to_locale($total)
+                                      %td 100%
+                    .space-6
+                    .widget-box
+                      .widget-header.widget-header-flat.widget-header-small
+                        %h5.widget-title
+                          %i.ace-icon.icon-pushpin
+                          %span 대여정산 및 비고
+                        .widget-toolbar.no-border
+                      .widget-body
+                        .widget-main
+                          .row
+                            .col-xs-12
+                              .order-calcurate
+                                %table.table.table-striped.table-bordered.table-hover
+                                  %thead
+                                    %tr
+                                      %th.center.return-process
+                                      %th.center #
+                                      %th 항목
+                                      %th 상태
+                                      %th.return-process-reverse 대여 가격
+                                      %th.return-process-reverse 기간
+                                      %th 소계
+                                      %th 기타
+                                  %tbody
+                                    - my $count = 0;
+                                    - for my $detail ( $order->order_details ) {
+                                      %tr
+                                        %td.center.return-process
+                                          - if ( $detail->clothes ) {
+                                            %label
+                                              %input.ace{ :type => 'checkbox', 'data-clothes-code' => "#{ trim_clothes_code($detail->clothes) }", 'data-id' => "#{ $detail->id }" }
+                                              %span.lbl
+                                          - }
+                                        %td.center= ++$count
+                                        - if ( $detail->clothes ) {
+                                          %td
+                                            %a{ :href => "/clothes/#{ trim_clothes_code($detail->clothes) }" }= $detail->name
+                                          %td
+                                            - if ( $order_status ne '결제대기' && $detail->status ) {
+                                              %span.order-status.label{ 'data-order-detail-status' => "#{ $detail->status->name }" }
+                                                = $detail->status->name
+                                            - }
+                                            - else {
+                                              %span.order-status.label{ 'data-order-detail-status' => "#{ $detail->clothes->status->name }" }
+                                                = $detail->clothes->status->name
+                                            - }
                                         - }
                                         - else {
-                                          %span.order-status.label{ 'data-order-detail-status' => "#{ $detail->clothes->status->name }" }
-                                            = $detail->clothes->status->name
+                                          %td= $detail->name
+                                          %td
                                         - }
+                                        %td.return-process-reverse
+                                          :plain
+                                            <a
+                                              id               = "order-detail-price-#{ $detail->id }"
+                                              class            = "order-detail-price editable editable-click"
+                                              href             = "#"
+
+                                              data-disabled    = "#{ $order_status ne '결제대기' ? 'true' : 'false' }"
+                                              data-mode        = "inline"
+                                              data-showbuttons = "true"
+                                              data-type        = "text"
+                                              data-emptytext   = "0"
+
+                                              data-value       = "#{ $detail->price || 0 }"
+
+                                              data-url         = "/order/#{ $order->id }/update"
+                                              data-pk          = "#{ $detail->id }"
+                                              data-name        = "detail-price"
+
+                                              data-is-clothes  = "#{ $detail->clothes ? 'true' : 'false' }"
+                                              data-is-pre-paid = "#{ $detail->name eq '이전 주문 납부' ? 'true' : 'false' }"
+                                            ></a>원
+                                        %td.return-process-reverse
+                                          - if ( $detail->stage ) {
+                                            %span= sprintf('%d일', calc_overdue($order))
+                                          - }
+                                          - else {
+                                            %span= sprintf('4+%d일', $order->additional_day)
+                                          - }
+                                        %td
+                                          :plain
+                                            <a
+                                              id               = "order-detail-final-price-#{ $detail->id }"
+                                              class            = "order-detail-final-price editable editable-click"
+                                              href             = "#"
+
+                                              data-disabled    = "#{ $order_status ne '결제대기' ? 'true' : 'false' }"
+                                              data-mode        = "inline"
+                                              data-showbuttons = "true"
+                                              data-type        = "text"
+                                              data-emptytext   = "0"
+
+                                              data-value       = "#{ $detail->final_price || 0 }"
+
+                                              data-url         = "/order/#{ $order->id }/update"
+                                              data-pk          = "#{ $detail->id }"
+                                              data-name        = "detail-final_price"
+                                            ></a>원
+                                        %td
+                                          :plain
+                                            <a
+                                              id               = "order-detail-desc-#{ $detail->id }"
+                                              class            = "order-detail editable editable-click"
+                                              href             = "#"
+
+                                              data-mode        = "inline"
+                                              data-showbuttons = "true"
+                                              data-type        = "text"
+                                              data-emptytext   = "비어있음"
+
+                                              data-value       = "#{ $detail->desc || q{} }"
+
+                                              data-url         = "/order/#{ $order->id }/update"
+                                              data-pk          = "#{ $detail->id }"
+                                              data-name        = "detail-desc"
+                                            ></a>
                                     - }
-                                    - else {
-                                      %td= $detail->name
-                                      %td
-                                    - }
-                                    %td.return-process-reverse
-                                      :plain
-                                        <a
-                                          id               = "order-detail-price-#{ $detail->id }"
-                                          class            = "order-detail-price editable editable-click"
-                                          href             = "#"
 
-                                          data-disabled    = "#{ $order_status ne '결제대기' ? 'true' : 'false' }"
-                                          data-mode        = "inline"
-                                          data-showbuttons = "true"
-                                          data-type        = "text"
-                                          data-emptytext   = "0"
+                              .hr.hr8.hr-double.hr-dotted
 
-                                          data-value       = "#{ $detail->price || 0 }"
+                              .row
+                                .col-sm-3.pull-right
+                                  %h4.pull-right
+                                    총액:
+                                    %span.red.order-price 0원
+                                .col-sm-9.pull-left
+                                  %div
+                                    %strong 연체료는 연체일 x 대여금액의 20%입니다.
+                                  .space-6
+                                  :plain
+                                    <a
+                                      id               = "order-desc"
+                                      class            = "editable editable-click"
+                                      href             = "#"
 
-                                          data-url         = "/order/#{ $order->id }/update"
-                                          data-pk          = "#{ $detail->id }"
-                                          data-name        = "detail-price"
+                                      data-disabled    = "false"
+                                      data-mode        = "inline"
+                                      data-showbuttons = "true"
+                                      data-type        = "textarea"
+                                      data-emptytext   = "비어있음"
 
-                                          data-is-clothes  = "#{ $detail->clothes ? 'true' : 'false' }"
-                                          data-is-pre-paid = "#{ $detail->name eq '이전 주문 납부' ? 'true' : 'false' }"
-                                        ></a>원
-                                    %td.return-process-reverse
-                                      - if ( $detail->stage ) {
-                                        %span= sprintf('%d일', calc_overdue($order))
-                                      - }
-                                      - else {
-                                        %span= sprintf('4+%d일', $order->additional_day)
-                                      - }
-                                    %td
-                                      :plain
-                                        <a
-                                          id               = "order-detail-final-price-#{ $detail->id }"
-                                          class            = "order-detail-final-price editable editable-click"
-                                          href             = "#"
+                                      data-value       = "#{ $order->desc || q{} }"
 
-                                          data-disabled    = "#{ $order_status ne '결제대기' ? 'true' : 'false' }"
-                                          data-mode        = "inline"
-                                          data-showbuttons = "true"
-                                          data-type        = "text"
-                                          data-emptytext   = "0"
+                                      data-url         = "/order/#{ $order->id }/update"
+                                      data-pk          = "#{ $order->id }"
+                                      data-name        = "desc"
+                                    ></a>
+                        .space-6
+                    .space-6
+                    .well
+                      열린옷장을 이용해주셔서 고맙습니다.
 
-                                          data-value       = "#{ $detail->final_price || 0 }"
+                    .hr.hr8.hr-double.hr-dotted
 
-                                          data-url         = "/order/#{ $order->id }/update"
-                                          data-pk          = "#{ $detail->id }"
-                                          data-name        = "detail-final_price"
-                                        ></a>원
-                                    %td
-                                      :plain
-                                        <a
-                                          id               = "order-detail-desc-#{ $detail->id }"
-                                          class            = "order-detail editable editable-click"
-                                          href             = "#"
+                    .row
+                      .col-sm-12
+                        %div
+                          %strong 대여 메시지
+                        .space-6
+                        :plain
+                          <a
+                            id               = "order-message"
+                            class            = "editable editable-click"
+                            href             = "#"
 
-                                          data-mode        = "inline"
-                                          data-showbuttons = "true"
-                                          data-type        = "text"
-                                          data-emptytext   = "비어있음"
+                            data-disabled    = "false"
+                            data-mode        = "inline"
+                            data-showbuttons = "true"
+                            data-type        = "textarea"
+                            data-emptytext   = "비어있음"
 
-                                          data-value       = "#{ $detail->desc || q{} }"
+                            data-value       = "#{ $order->message || q{} }"
 
-                                          data-url         = "/order/#{ $order->id }/update"
-                                          data-pk          = "#{ $detail->id }"
-                                          data-name        = "detail-desc"
-                                        ></a>
-                                - }
+                            data-url         = "/order/#{ $order->id }/update"
+                            data-pk          = "#{ $order->id }"
+                            data-name        = "message"
+                          ></a>
 
-                          .hr.hr8.hr-double.hr-dotted
+          .row
+            .col-sm-10.col-sm-offset-1
+              .clearfix.form-actions
+                - if ( $order->status ) {
+                -   if ( $order_status eq '대여중' ) {
+                  .search.pull-left.return-process
+                    .input-group
+                      %input#clothes-search.form-control{ :name => 'clothes-search' :type => 'text', :placeholder => '의류 품번' }
+                      %span.input-group-btn
+                        %button#btn-clothes-search.btn.btn-default.btn-sm{ :type => 'submit' }
+                          %i.icon-search.bigger-110 검색
 
-                          .row
-                            .col-sm-3.pull-right
-                              %h4.pull-right
-                                총액:
-                                %span.red.order-price 0원
-                            .col-sm-9.pull-left
-                              %div
-                                %strong 연체료는 연체일 x 대여금액의 20%입니다.
-                              .space-6
-                              :plain
-                                <a
-                                  id               = "order-desc"
-                                  class            = "editable editable-click"
-                                  href             = "#"
+                  %a#btn-return-process.btn.btn-info.pull-right.return-process-reverse{ :type => 'button' }
+                    %i.icon-reply.bigger-110
+                    반납 진행
+                  %a#btn-refund-process.btn.btn-danger.pull-right.return-process-reverse{ :type => 'button' }
+                    %i.icon-remove.bigger-110
+                    환불 진행
+                  %a#btn-return-all.btn.btn-success.disabled.pull-right.return-process{ :type => 'button', 'data-redirect-url' => "#{ url_for('/order/' . $order->id) }" }
+                    %i.icon-ok.bigger-110
+                    전체 반납
+                  %a#btn-return-part.btn.btn-warning.disabled.pull-right.return-process{ :type => 'button', 'data-redirect-url' => "#{ url_for('/order/' . $order->id) }" }
+                    부분 반납
+                  %a#btn-return-cancel.btn.btn-danger.pull-right.return-process{ :type => 'button' }
+                    %i.icon-remove.bigger-110
+                    반납 취소
+                -   }
+                -   elsif ( $order_status eq '결제대기' ) {
+                    %a#btn-order-confirm.btn.btn-info.pull-right{ :type => 'button', :href => "#", 'data-url' => "#{ url_for('/order/' . $order->id . '/update') }", 'data-redirect-url' => "#{ url_for('/order/' . $order->id) }", 'data-monitor-url' => "#{$monitor_uri}/events" }
+                      %i.icon-ok.bigger-110
+                      주문 확정
+                    - unless ( $order->parent_id ) {
+                      %a#btn-order-clear.btn.btn-danger.pull-right{ :type => 'button', :href => "#" }
+                        %i.icon-remove.bigger-110
+                        새로 주문
+                    - }
+                -   }
+                - }
+          :plain
+            <script id="tpl-late-fee" type="text/html">
+              <% if (late_fee) { %>
+                <strong> <%= OpenCloset.commify(late_fee) %>원 </strong>
+                <span> ( = <%= overdue %>일 x <%= OpenCloset.commify(clothes_price) %>원 x 20% ) </span>
+              <% } else { %>
+                <strong> 해당사항 없음 </strong>
+              <% } %>
+            </script>
+          :plain
+            <script id="tpl-late-fee-discount" type="text/html">
+              <% if (late_fee) { %>
+                <strong>
+                <a
+                  id               = "order-late-fee-discount"
+                  class            = "editable editable-click"
+                  href             = "#"
 
-                                  data-disabled    = "false"
-                                  data-mode        = "inline"
-                                  data-showbuttons = "true"
-                                  data-type        = "textarea"
-                                  data-emptytext   = "비어있음"
+                  data-disabled    = "<%= status_id === 2 ? 'true' : 'false' %>"
+                  data-mode        = "inline"
+                  data-showbuttons = "true"
+                  data-type        = "text"
+                  data-emptytext   = "0"
 
-                                  data-value       = "#{ $order->desc || q{} }"
+                  data-value       = "0"
+                ></a>원
+                </strong>
+              <% } else { %>
+                <strong> 해당사항 없음 </strong>
+              <% } %>
+            </script>
+          :plain
+            <div id="modal-refund" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="refundModalLabel" aria-hidden="true">
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="refundModalLabel">
+                      환불을 진행하시겠습니까?
+                    </h4>
+                  </div>
+                  <div class="modal-body" style="height: 300px; overflow-y: auto;">
+                    <div>
+                      환불 금액과 환불 수수료 금액의 합이 주문서 총액과 일치해야 합니다.
+                      보통 환불 금액은 주문서 총액과 동일하며 환불 수수료 금액은 0원입니다.
+                      환불 수수료가 있을 경우 총액에서 수수료 금액을 제외한 금액을 고객에게 환불합니다.
+                    </div>
+                    <div class="space-4"></div>
+                    <div>
+                      <strong>환불을 진행한 이후에는 되돌릴 수 없습니다. 주의해서 확인한 후 진행해주세요.</strong>
+                    </div>
+                    <div class="space-12"></div>
+                    <form role="form" class="form-horizontal">
+                      <div class="form-group">
+                        <label for="order-refund-total" class="col-sm-3 control-label no-padding-right"> 주문서 총액 </label>
 
-                                  data-url         = "/order/#{ $order->id }/update"
-                                  data-pk          = "#{ $order->id }"
-                                  data-name        = "desc"
-                                ></a>
-                              .space-6
-                          .space-6
-                          .well
-                            열린옷장을 이용해주셔서 고맙습니다.
-
-                          .hr.hr8.hr-double.hr-dotted
-
-                          .row
-                            .col-sm-12
-                              %div
-                                %strong 대여 메시지
-                              .space-6
-                              :plain
-                                <a
-                                  id               = "order-message"
-                                  class            = "editable editable-click"
-                                  href             = "#"
-
-                                  data-disabled    = "false"
-                                  data-mode        = "inline"
-                                  data-showbuttons = "true"
-                                  data-type        = "textarea"
-                                  data-emptytext   = "비어있음"
-
-                                  data-value       = "#{ $order->message || q{} }"
-
-                                  data-url         = "/order/#{ $order->id }/update"
-                                  data-pk          = "#{ $order->id }"
-                                  data-name        = "message"
-                                ></a>
-
-                .row
-                  .col-sm-10.col-sm-offset-1
-                    .clearfix.form-actions
-                      - if ( $order->status ) {
-                      -   if ( $order_status eq '대여중' ) {
-                        .search.pull-left.return-process
-                          .input-group
-                            %input#clothes-search.form-control{ :name => 'clothes-search' :type => 'text', :placeholder => '의류 품번' }
-                            %span.input-group-btn
-                              %button#btn-clothes-search.btn.btn-default.btn-sm{ :type => 'submit' }
-                                %i.icon-search.bigger-110 검색
-
-                        %a#btn-return-process.btn.btn-info.pull-right.return-process-reverse{ :type => 'button' }
-                          %i.icon-reply.bigger-110
-                          반납 진행
-                        %a#btn-refund-process.btn.btn-danger.pull-right.return-process-reverse{ :type => 'button' }
-                          %i.icon-remove.bigger-110
-                          환불 진행
-                        %a#btn-return-all.btn.btn-success.disabled.pull-right.return-process{ :type => 'button', 'data-redirect-url' => "#{ url_for('/order/' . $order->id) }" }
-                          %i.icon-ok.bigger-110
-                          전체 반납
-                        %a#btn-return-part.btn.btn-warning.disabled.pull-right.return-process{ :type => 'button', 'data-redirect-url' => "#{ url_for('/order/' . $order->id) }" }
-                          부분 반납
-                        %a#btn-return-cancel.btn.btn-danger.pull-right.return-process{ :type => 'button' }
-                          %i.icon-remove.bigger-110
-                          반납 취소
-                      -   }
-                      -   elsif ( $order_status eq '결제대기' ) {
-                          %a#btn-order-confirm.btn.btn-info.pull-right{ :type => 'button', :href => "#", 'data-url' => "#{ url_for('/order/' . $order->id . '/update') }", 'data-redirect-url' => "#{ url_for('/order/' . $order->id) }", 'data-monitor-url' => "#{$monitor_uri}/events" }
-                            %i.icon-ok.bigger-110
-                            주문 확정
-                          - unless ( $order->parent_id ) {
-                            %a#btn-order-clear.btn.btn-danger.pull-right{ :type => 'button', :href => "#" }
-                              %i.icon-remove.bigger-110
-                              새로 주문
-                          - }
-                      -   }
-                      - }
-                :plain
-                  <script id="tpl-late-fee" type="text/html">
-                    <% if (late_fee) { %>
-                      <strong> <%= OpenCloset.commify(late_fee) %>원 </strong>
-                      <span> ( = <%= overdue %>일 x <%= OpenCloset.commify(clothes_price) %>원 x 20% ) </span>
-                    <% } else { %>
-                      <strong> 해당사항 없음 </strong>
-                    <% } %>
-                  </script>
-                :plain
-                  <script id="tpl-late-fee-discount" type="text/html">
-                    <% if (late_fee) { %>
-                      <strong>
-                      <a
-                        id               = "order-late-fee-discount"
-                        class            = "editable editable-click"
-                        href             = "#"
-
-                        data-disabled    = "<%= status_id === 2 ? 'true' : 'false' %>"
-                        data-mode        = "inline"
-                        data-showbuttons = "true"
-                        data-type        = "text"
-                        data-emptytext   = "0"
-
-                        data-value       = "0"
-                      ></a>원
-                      </strong>
-                    <% } else { %>
-                      <strong> 해당사항 없음 </strong>
-                    <% } %>
-                  </script>
-                :plain
-                  <div id="modal-refund" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="refundModalLabel" aria-hidden="true">
-                    <div class="modal-dialog">
-                      <div class="modal-content">
-                        <div class="modal-header">
-                          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                          <h4 class="modal-title" id="refundModalLabel">
-                            환불을 진행하시겠습니까?
-                          </h4>
-                        </div>
-                        <div class="modal-body" style="height: 300px; overflow-y: auto;">
-                          <div>
-                            환불 금액과 환불 수수료 금액의 합이 주문서 총액과 일치해야 합니다.
-                            보통 환불 금액은 주문서 총액과 동일하며 환불 수수료 금액은 0원입니다.
-                            환불 수수료가 있을 경우 총액에서 수수료 금액을 제외한 금액을 고객에게 환불합니다.
-                          </div>
-                          <div class="space-4"></div>
-                          <div>
-                            <strong>환불을 진행한 이후에는 되돌릴 수 없습니다. 주의해서 확인한 후 진행해주세요.</strong>
-                          </div>
-                          <div class="space-12"></div>
-                          <form role="form" class="form-horizontal">
-                            <div class="form-group">
-                              <label for="order-refund-total" class="col-sm-3 control-label no-padding-right"> 주문서 총액 </label>
-
-                              <div class="col-sm-9">
-                                <input type="text" class="col-xs-10 col-sm-5 order-price-input" placeholder="주문서 총액" id="order-refund-total" readonly>
-                              </div>
-                            </div>
-
-                            <div class="space-4"></div>
-
-                            <div class="form-group">
-                              <label for="order-refund-charge" class="col-sm-3 control-label no-padding-right"> 환불 수수료 </label>
-
-                              <div class="col-sm-9">
-                                <input type="text" class="col-xs-10 col-sm-5" placeholder="환불 수수료" id="order-refund-charge" value="0">
-                              </div>
-                            </div>
-
-                            <div class="space-4"></div>
-
-                            <div class="form-group">
-                              <label for="order-refund-real" class="col-sm-3 control-label no-padding-right"> 환불 금액 </label>
-
-                              <div class="col-sm-9">
-                                <input type="text" class="col-xs-10 col-sm-5" placeholder="환불 금액" id="order-refund-real" value="0">
-                              </div>
-                            </div>
-                          </form>
-
-                          <div id="order-refund-error"></div>
-                        </div>
-                        <div class="modal-footer">
-                          <button id="btn-refund-modal-cancel" type="button" class="btn btn-danger" >취소</button>
-                          <button id="btn-refund-modal-ok"     type="button" class="btn btn-primary">확인</button>
+                        <div class="col-sm-9">
+                          <input type="text" class="col-xs-10 col-sm-5 order-price-input" placeholder="주문서 총액" id="order-refund-total" readonly>
                         </div>
                       </div>
-                    </div>
+
+                      <div class="space-4"></div>
+
+                      <div class="form-group">
+                        <label for="order-refund-charge" class="col-sm-3 control-label no-padding-right"> 환불 수수료 </label>
+
+                        <div class="col-sm-9">
+                          <input type="text" class="col-xs-10 col-sm-5" placeholder="환불 수수료" id="order-refund-charge" value="0">
+                        </div>
+                      </div>
+
+                      <div class="space-4"></div>
+
+                      <div class="form-group">
+                        <label for="order-refund-real" class="col-sm-3 control-label no-padding-right"> 환불 금액 </label>
+
+                        <div class="col-sm-9">
+                          <input type="text" class="col-xs-10 col-sm-5" placeholder="환불 금액" id="order-refund-real" value="0">
+                        </div>
+                      </div>
+                    </form>
+
+                    <div id="order-refund-error"></div>
                   </div>
+                  <div class="modal-footer">
+                    <button id="btn-refund-modal-cancel" type="button" class="btn btn-danger" >취소</button>
+                    <button id="btn-refund-modal-ok"     type="button" class="btn btn-primary">확인</button>
+                  </div>
+                </div>
+              </div>
+            </div>

@@ -3,6 +3,8 @@ requires 'AnyEvent::HTTPD';
 requires 'AnyEvent::Timer::Cron';
 requires 'Data::Pageset';
 requires 'DateTime';
+requires 'DateTime::Format::Duration';
+requires 'DateTime::Format::Human::Duration', '0.62';
 requires 'FindBin';
 requires 'Getopt::Long::Descriptive';
 requires 'Gravatar::URL';
