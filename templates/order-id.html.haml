@@ -402,59 +402,64 @@
 
                     .space
 
-                    .widget-box
+                    .widget-box.stat
                       .widget-header.widget-header-flat.widget-header-small
                         %h5.widget-title
                           %i.ace-icon.icon-time
-                          %span 주문서 상태 및 통계
+                          %span 각 상태별 시각
                         .widget-toolbar.no-border
                       .widget-body
                         .widget-main
                           .row
-                            .col-xs-10
-                              .desc 주문서 상태 :
-                              .status-tracking
-                                %table.table.table-striped.table-bordered.table-hover
-                                  %thead
-                                    %tr
-                                      %th.center #
-                                      %th.center 상태
-                                      %th.center 시점
-                                      %th.center 처리시간
-                                  %tbody
-                                    - my $count = 0;
-                                    - for my $log ( @{ $analyze{logs} } ) {
-                                      %tr
-                                        %td.center= ++$count
-                                        %td.center= $log->{status}
-                                        %td.center= $log->{timestamp}->strftime('%m월 %d일 %H시 %M분');
-                                        %td.center= convert_sec_to_locale($log->{delta}) if $log->{delta}
-                                    - }
+                            %table.table.table-striped.table-bordered.table-hover
+                              %thead
+                                %tr
+                                  %th.center #
+                                  %th.center 상태
+                                  %th.center 시점
+                                  %th.center 처리시간
+                              %tbody
+                                - my $count = 0;
+                                - for my $log ( @{ $analyze{logs} } ) {
+                                  %tr
+                                    %td.center= ++$count
+                                    %td.center= $log->{status}
+                                    %td.center= $log->{timestamp}->strftime('%m월 %d일 %H시 %M분');
+                                    %td.center= convert_sec_to_locale($log->{delta}) if $log->{delta}
+                                - }
+
+                    .space
+
+                    .widget-box.stat
+                      .widget-header.widget-header-flat.widget-header-small
+                        %h5.widget-title
+                          %i.ace-icon.icon-time
+                          %span 상태 변화 소요 시간
+                        .widget-toolbar.no-border
+                      .widget-body
+                        .widget-main
                           .row
-                            .col-xs-8
-                              .desc 통계 ;
-                              .tracking-stat
-                                %table.table.table-striped.table-bordered.table-hover
-                                  %thead
-                                    %tr
-                                      %th.center 상태
-                                      %th.center 처리시간
-                                      %th %
-                                  %tbody
-                                    - my $total = sum @{$analyze{elapsed_time}}{@process};
-                                    - foreach my $step (@process) {
-                                      - my $elapsed_time = $analyze{elapsed_time}{$step};
-                                      - next unless $elapsed_time;
-                                      %tr
-                                        %td.center= $step
-                                        %td.center= convert_sec_to_locale($elapsed_time);
-                                        %td= sprintf('%.2f%', $elapsed_time / $total * 100);
-                                    - }
-                                  %thead
-                                    %tr
-                                      %td.center 총 처리시간
-                                      %td.center= convert_sec_to_locale($total)
-                                      %td 100%
+                            %table.table.table-striped.table-bordered.table-hover
+                              %thead
+                                %tr
+                                  %th.center 상태
+                                  %th.center 처리시간
+                                  %th %
+                              %tbody
+                                - my $total = sum @{$analyze{elapsed_time}}{@process};
+                                - foreach my $step (@process) {
+                                  - my $elapsed_time = $analyze{elapsed_time}{$step};
+                                  - next unless $elapsed_time;
+                                  %tr
+                                    %td.center= $step
+                                    %td.center= convert_sec_to_locale($elapsed_time);
+                                    %td= sprintf('%.2f%', $elapsed_time / $total * 100);
+                                - }
+                              %thead
+                                %tr
+                                  %td.center 총 처리시간
+                                  %td.center= convert_sec_to_locale($total)
+                                  %td 100%
 
                     .space
 
