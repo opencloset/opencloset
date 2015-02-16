@@ -1504,6 +1504,7 @@ group {
             thigh
             topbelly
             waist
+            wearon_date
             weight
         /);
 
@@ -1641,6 +1642,7 @@ group {
             thigh
             topbelly
             waist
+            wearon_date
             weight
         /);
 
@@ -1763,6 +1765,7 @@ group {
             user_id
             user_target_date
             waist
+            wearon_date
             weight
         /);
         my %order_detail_params = $self->get_params(
@@ -1843,6 +1846,7 @@ group {
             user_id
             user_target_date
             waist
+            wearon_date
             weight
         /);
         my %order_detail_params = $self->get_params(
@@ -1919,6 +1923,7 @@ group {
             user_id
             user_target_date
             waist
+            wearon_date
             weight
         /);
         my %order_detail_params = $self->get_params(
@@ -1953,6 +1958,7 @@ group {
         $order_params{additional_day}   = $order->additional_day;
         $order_params{desc}             = $order->desc;
         $order_params{parent_id}        = $order->id;
+        $order_params{wearon_date}      = $order->wearon_date;
         $order_params{purpose}          = $order->purpose;
         $order_params{purpose2}         = $order->purpose2;
         $order_params{rental_date}      = $order->rental_date;
@@ -4013,6 +4019,7 @@ any '/visit' => sub {
     my $order         = $self->param('order');
     my $booking       = $self->param('booking');
     my $booking_saved = $self->param('booking-saved');
+    my $wearon_date   = $self->param('wearon_date');
     my $purpose       = $self->param('purpose');
     my $purpose2      = $self->param('purpose2');
     my $pre_category  = $self->param('pre_category');
@@ -4037,6 +4044,7 @@ any '/visit' => sub {
     app->log->debug("order: $order");
     app->log->debug("booking: $booking");
     app->log->debug("booking-saved: $booking_saved");
+    app->log->debug("wearon_date: $wearon_date");
     app->log->debug("purpose: $purpose");
     app->log->debug("purpose2: $purpose2");
     app->log->debug("pre_category: $pre_category");
@@ -4105,6 +4113,7 @@ any '/visit' => sub {
         $user_info_params{birth}        = $birth        if $birth         && $birth        ne $user->user_info->birth;
         $user_info_params{height}       = $height       if $height        && $height       ne $user->user_info->height;
         $user_info_params{weight}       = $weight       if $weight        && $weight       ne $user->user_info->weight;
+        $user_info_params{wearon_date}  = $wearon_date  if $wearon_date   && $wearon_date  ne $user->user_info->wearon_date;
         $user_info_params{purpose}      = $purpose      if $purpose       && $purpose      ne $user->user_info->purpose;
         $user_info_params{purpose2}     = $purpose2 || q{};
         $user_info_params{pre_category} = $pre_category if $pre_category  && $pre_category ne $user->user_info->pre_category;
@@ -4233,6 +4242,7 @@ any '/visit2' => sub {
     my $order         = $self->param('order');
     my $booking       = $self->param('booking');
     my $booking_saved = $self->param('booking-saved');
+    my $wearon_date   = $self->param('wearon_date');
     my $purpose       = $self->param('purpose');
     my $purpose2      = $self->param('purpose2');
     my $pre_category  = $self->param('pre_category');
@@ -4254,6 +4264,7 @@ any '/visit2' => sub {
     app->log->debug("order: $order");
     app->log->debug("booking: $booking");
     app->log->debug("booking-saved: $booking_saved");
+    app->log->debug("wearon_date $wearon_date");
     app->log->debug("purpose: $purpose");
     app->log->debug("purpose2: $purpose2");
     app->log->debug("pre_category: $pre_category");
@@ -4300,6 +4311,7 @@ any '/visit2' => sub {
         $user_info_params{birth}        = $birth        if $birth         && $birth        ne $user->user_info->birth;
         $user_info_params{height}       = $height       if $height        && $height       ne $user->user_info->height;
         $user_info_params{weight}       = $weight       if $weight        && $weight       ne $user->user_info->weight;
+        $user_info_params{wearon_date}  = $wearon_date  if $wearon_date   && $wearon_date  ne $user->user_info->wearon_date;
         $user_info_params{purpose}      = $purpose      if $purpose       && $purpose      ne $user->user_info->purpose;
         $user_info_params{purpose2}     = $purpose2 || q{};
         $user_info_params{pre_category} = $pre_category if $pre_category  && $pre_category ne $user->user_info->pre_category;
@@ -5004,6 +5016,7 @@ get '/order/:id' => sub {
         my $comment = $user->user_info->comment ? $user->user_info->comment . "\n" : q{};
         my $desc    = $order->desc              ? $order->desc              . "\n" : q{};
         $order->update({
+            wearon_date  => $user->user_info->wearon_date,
             purpose      => $user->user_info->purpose,
             purpose2     => $user->user_info->purpose2,
             pre_category => $user->user_info->pre_category,
