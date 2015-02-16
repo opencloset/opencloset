@@ -1751,6 +1751,7 @@ group {
             parent_id
             price_pay_with
             purpose
+            purpose2
             rental_date
             return_date
             return_method
@@ -1830,6 +1831,7 @@ group {
             parent_id
             price_pay_with
             purpose
+            purpose2
             rental_date
             return_date
             return_method
@@ -1905,6 +1907,7 @@ group {
             parent_id
             price_pay_with
             purpose
+            purpose2
             rental_date
             return_date
             return_method
@@ -1951,6 +1954,7 @@ group {
         $order_params{desc}             = $order->desc;
         $order_params{parent_id}        = $order->id;
         $order_params{purpose}          = $order->purpose;
+        $order_params{purpose2}         = $order->purpose2;
         $order_params{rental_date}      = $order->rental_date;
         $order_params{target_date}      = $order->target_date;
         $order_params{user_id}          = $order->user_id;
