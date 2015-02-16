@@ -304,6 +304,12 @@ $opencloset-darken-yellow: desaturate(darken($opencloset-yellow, 4%), 10%);
                 display: block;
             }
         }
+        .widget-box.stat {
+            .widget-body {
+                padding-left: 20px;
+                padding-right: 20px;
+            }
+        }
     }
     #user-list-table table th {
         &:first-child {
