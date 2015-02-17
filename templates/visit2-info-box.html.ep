@@ -1,6 +1,8 @@
 % use utf8;
+% use DateTime;
 % my $booking;
 % $booking = $order->booking if $order;
+% my $now = DateTime->now( time_zone => $timezone );
 <!-- VISIT-INFO-BOX -->
                 <div id="visit-info-box" class="visit-info-box visible widget-box no-border">
                   <div class="widget-body">
@@ -133,11 +135,28 @@
                           <input type="hidden" name="booking-saved" value="<%= $booking ? $booking->id : '' %>" data-ymd="<%= $booking ? $booking->date->strftime('%Y-%m-%d') : '' %>" data-hm="<%= $booking ? $booking->date->strftime('%H:%M') : '' %>" />
 
                           <label class="block clearfix">
+                            <span class="block input-icon input-icon-right">
+                              <input
+                                class="form-control"
+                                name="wearon_date"
+                                placeholder="착용 날짜를 고르세요."
+                                data-date-format="yyyy-mm-dd"
+                                data-date-start-date="<%= $now->ymd %>"
+                                value="<%= ( $order || $load || $user->user_info->wearon_date ) ? $user->user_info->wearon_date->ymd : q{} %>"
+                              />
+                              <i class="icon-calendar"></i>
+                            </span>
+                          </label>
+
+                          <label class="block clearfix">
                             <select class="width-100 chosen-select" name="purpose" data-placeholder="대여 목적을 선택해주세요." data-purpose="<%= ( $order || $load ) ? $user->user_info->purpose : q{} %>">
                               <option value=""                  > 대여 목적을 선택해주세요. </option>
                               <option value="입사면접"          > 입사면접                  </option>
                               <option value="결혼식"            > 결혼식                    </option>
+                              <option value="상견례"            > 상견례                    </option>
                               <option value="대학(원)면접"      > 대학(원)면접              </option>
+                              <option value="모의면접"          > 모의면접                  </option>
+                              <option value="인턴면접"          > 인턴면접                  </option>
                               <option value="장례식"            > 장례식                    </option>
                               <option value="사진촬영(웨딩촬영)"> 사진촬영(웨딩촬영)        </option>
                               <option value="세미나"            > 세미나                    </option>

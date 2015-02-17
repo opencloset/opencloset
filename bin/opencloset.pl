@@ -30,6 +30,9 @@ use Mojolicious::Lite;
 app->controller_class("OpenCloset::Web::Controller");
 
 use Data::Pageset;
+use DateTime::Duration;
+use DateTime::Format::Duration;
+use DateTime::Format::Human::Duration;
 use DateTime;
 use Encode 'decode_utf8';
 use Gravatar::URL;
@@ -1211,6 +1214,36 @@ helper get_nearest_booked_order => sub {
     return $order;
 };
 
+helper convert_sec_to_locale => sub {
+    my ( $self, $seconds ) = @_;
+
+    my $dfd  = DateTime::Format::Duration->new( normalize => 'ISO', pattern => '%M:%S' );
+    my $dur1 = DateTime::Duration->new( seconds => $seconds );
+    my $dur2 = DateTime::Duration->new( $dfd->normalize($dur1) );
+    my $dfhd = DateTime::Format::Human::Duration->new;
+
+    my $locale = $dfhd->format_duration( $dur2, locale => "ko" );
+    $locale =~ s/\s*(년|개월|주|일|시간|분|초|나노초)/$1/gms;
+    $locale =~ s/\s+/ /gms;
+    $locale =~ s/,//gms;
+
+    return $locale;
+};
+
+helper convert_sec_to_hms => sub {
+    my ( $self, $seconds ) = @_;
+
+    my $dfd  = DateTime::Format::Duration->new( normalize => 'ISO', pattern => "%M:%S" );
+    my $dur1 = DateTime::Duration->new( seconds => $seconds );
+    my $hms  = sprintf(
+        '%02d:%s',
+        $seconds / 3600,
+        $dfd->format_duration( DateTime::Duration->new( $dfd->normalize($dur1) ) ),
+    );
+
+    return $hms;
+};
+
 #
 # csv section
 #
@@ -1504,6 +1537,7 @@ group {
             thigh
             topbelly
             waist
+            wearon_date
             weight
         /);
 
@@ -1641,6 +1675,7 @@ group {
             thigh
             topbelly
             waist
+            wearon_date
             weight
         /);
 
@@ -1751,6 +1786,7 @@ group {
             parent_id
             price_pay_with
             purpose
+            purpose2
             rental_date
             return_date
             return_method
@@ -1762,6 +1798,7 @@ group {
             user_id
             user_target_date
             waist
+            wearon_date
             weight
         /);
         my %order_detail_params = $self->get_params(
@@ -1830,6 +1867,7 @@ group {
             parent_id
             price_pay_with
             purpose
+            purpose2
             rental_date
             return_date
             return_method
@@ -1841,6 +1879,7 @@ group {
             user_id
             user_target_date
             waist
+            wearon_date
             weight
         /);
         my %order_detail_params = $self->get_params(
@@ -1905,6 +1944,7 @@ group {
             parent_id
             price_pay_with
             purpose
+            purpose2
             rental_date
             return_date
             return_method
@@ -1916,6 +1956,7 @@ group {
             user_id
             user_target_date
             waist
+            wearon_date
             weight
         /);
         my %order_detail_params = $self->get_params(
@@ -1950,7 +1991,9 @@ group {
         $order_params{additional_day}   = $order->additional_day;
         $order_params{desc}             = $order->desc;
         $order_params{parent_id}        = $order->id;
+        $order_params{wearon_date}      = $order->wearon_date;
         $order_params{purpose}          = $order->purpose;
+        $order_params{purpose2}         = $order->purpose2;
         $order_params{rental_date}      = $order->rental_date;
         $order_params{target_date}      = $order->target_date;
         $order_params{user_id}          = $order->user_id;
@@ -4009,6 +4052,7 @@ any '/visit' => sub {
     my $order         = $self->param('order');
     my $booking       = $self->param('booking');
     my $booking_saved = $self->param('booking-saved');
+    my $wearon_date   = $self->param('wearon_date');
     my $purpose       = $self->param('purpose');
     my $purpose2      = $self->param('purpose2');
     my $pre_category  = $self->param('pre_category');
@@ -4033,6 +4077,7 @@ any '/visit' => sub {
     app->log->debug("order: $order");
     app->log->debug("booking: $booking");
     app->log->debug("booking-saved: $booking_saved");
+    app->log->debug("wearon_date: $wearon_date");
     app->log->debug("purpose: $purpose");
     app->log->debug("purpose2: $purpose2");
     app->log->debug("pre_category: $pre_category");
@@ -4101,6 +4146,7 @@ any '/visit' => sub {
         $user_info_params{birth}        = $birth        if $birth         && $birth        ne $user->user_info->birth;
         $user_info_params{height}       = $height       if $height        && $height       ne $user->user_info->height;
         $user_info_params{weight}       = $weight       if $weight        && $weight       ne $user->user_info->weight;
+        $user_info_params{wearon_date}  = $wearon_date  if $wearon_date   && $wearon_date  ne $user->user_info->wearon_date;
         $user_info_params{purpose}      = $purpose      if $purpose       && $purpose      ne $user->user_info->purpose;
         $user_info_params{purpose2}     = $purpose2 || q{};
         $user_info_params{pre_category} = $pre_category if $pre_category  && $pre_category ne $user->user_info->pre_category;
@@ -4229,6 +4275,7 @@ any '/visit2' => sub {
     my $order         = $self->param('order');
     my $booking       = $self->param('booking');
     my $booking_saved = $self->param('booking-saved');
+    my $wearon_date   = $self->param('wearon_date');
     my $purpose       = $self->param('purpose');
     my $purpose2      = $self->param('purpose2');
     my $pre_category  = $self->param('pre_category');
@@ -4250,6 +4297,7 @@ any '/visit2' => sub {
     app->log->debug("order: $order");
     app->log->debug("booking: $booking");
     app->log->debug("booking-saved: $booking_saved");
+    app->log->debug("wearon_date $wearon_date");
     app->log->debug("purpose: $purpose");
     app->log->debug("purpose2: $purpose2");
     app->log->debug("pre_category: $pre_category");
@@ -4296,6 +4344,7 @@ any '/visit2' => sub {
         $user_info_params{birth}        = $birth        if $birth         && $birth        ne $user->user_info->birth;
         $user_info_params{height}       = $height       if $height        && $height       ne $user->user_info->height;
         $user_info_params{weight}       = $weight       if $weight        && $weight       ne $user->user_info->weight;
+        $user_info_params{wearon_date}  = $wearon_date  if $wearon_date   && $wearon_date  ne $user->user_info->wearon_date;
         $user_info_params{purpose}      = $purpose      if $purpose       && $purpose      ne $user->user_info->purpose;
         $user_info_params{purpose2}     = $purpose2 || q{};
         $user_info_params{pre_category} = $pre_category if $pre_category  && $pre_category ne $user->user_info->pre_category;
@@ -4601,11 +4650,26 @@ get '/clothes/:code' => sub {
         foot
     );
     my %average_size = map { $_ => [] } @measurements;
-    for my $order_detail ( $clothes->order_details->search({ status_id => { '!=' => undef } }) ) {
+    my @recent_sizes;
+    for my $order_detail (
+        $clothes->order_details->search(
+            { status_id => { '!=' => undef } },
+            { order_by  => { -desc => 'id' } },
+        )
+    )
+    {
         ++$rented_count;
         for (@measurements) {
             next unless $order_detail->order->$_;
             push @{ $average_size{$_} }, $order_detail->order->$_;
+        }
+        if ( $rented_count <= 5 ) {
+            use experimental qw( smartmatch );
+
+            my %order_data = $order_detail->order->get_columns;
+            my %size = map { $_ => $order_data{$_} } @measurements;
+
+            push @recent_sizes, \%size;
         }
     }
     for (@measurements) {
@@ -4622,6 +4686,7 @@ get '/clothes/:code' => sub {
     #
     $self->stash(
         average_size => \%average_size,
+        recent_sizes => \@recent_sizes,
         clothes      => $clothes,
         rented_count => $rented_count,
         tag_rs       => $DB->resultset('Tag'),
@@ -4984,6 +5049,7 @@ get '/order/:id' => sub {
         my $comment = $user->user_info->comment ? $user->user_info->comment . "\n" : q{};
         my $desc    = $order->desc              ? $order->desc              . "\n" : q{};
         $order->update({
+            wearon_date  => $user->user_info->wearon_date,
             purpose      => $user->user_info->purpose,
             purpose2     => $user->user_info->purpose2,
             pre_category => $user->user_info->pre_category,
