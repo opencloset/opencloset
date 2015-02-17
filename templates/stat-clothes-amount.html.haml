@@ -1,0 +1,29 @@
+- use utf8;
+- my $_id   = 'stat-clothes-amount';
+- layout 'default',
+-   page_id     => $_id,
+-   active_id   => $_id,
+-   breadcrumbs => [
+-     { text => meta_text('stat') },
+-     { text => meta_text($_id)   },
+-   ],
+-   ;
+- title meta_text($_id);
+
+.row.amount
+  .col-md-6
+    %table.table.table-striped.table-bordered.table-hover
+      %thead
+        %tr
+          %th 품목
+          %th 수량
+          %th 대여중
+      %tbody
+        - for my $item (@$amount) {
+          - my $category = $item->{category};
+          %tr
+            %td
+              %a{:href => '#{url_for("/stat/clothes/amount/category/$category")}'}= $config->{category}{$category}{str} || $category
+            %td= $item->{quantity}
+            %td= $item->{rental}
+        - }
