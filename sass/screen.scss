@@ -685,6 +685,30 @@ $opencloset-darken-yellow: desaturate(darken($opencloset-yellow, 4%), 10%);
             text-align: right;
         }
     }
+    #stat-clothes-amount {
+        .amount {
+            table th,
+            table td {
+                &:nth-child(2),
+                &:nth-child(3) {
+                    width: 25%;
+                    text-align: right;
+                }
+            }
+        }
+        .amount-category {
+            table th,
+            table td {
+                &:nth-child(2),
+                &:nth-child(3),
+                &:nth-child(4),
+                &:nth-child(5) {
+                    width: 15%;
+                    text-align: right;
+                }
+            }
+        }
+    }
     .step-content {
         .step-pane {
             h3 {
