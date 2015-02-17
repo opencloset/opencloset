@@ -31,7 +31,7 @@
       %tbody
         - for my $item (@$items) {
           %tr
-            %td= $item->{size}
+            %td= $item->{size} || '사이즈 기준 항목 없음'
             %td= $item->{qty}
             %td= $item->{rental}
             %td= $item->{repair}

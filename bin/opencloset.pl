@@ -5571,7 +5571,6 @@ get '/stat/clothes/amount/category/:category' => sub {
         push(
             @items,
             {
-                size      => 'undefined',
                 qty       => $qty,
                 rental    => $rental,
                 repair    => $repair,
