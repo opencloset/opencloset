@@ -5476,42 +5476,53 @@ get '/stat/clothes/amount' => sub {
     my $rs = $DB->resultset('Clothes')->search(
         undef,
         {
-            columns => [qw/category/],
+            columns  => [qw/ category /],
             group_by => 'category'
         }
     );
 
     my @amount;
-    while (my $c = $rs->next) {
-        my $category = $c->category;
+    while (my $clothes = $rs->next) {
+        my $category = $clothes->category;
+
         my $quantity = $DB->resultset('Clothes')->search(
-            { category => $category }
+            { category => $category },
         );
 
         my $rental = $DB->resultset('Clothes')->search(
-            { category => $category, status_id => 2 }
+            {
+                category  => $category,
+                status_id => 2,
+            }
         );
 
-        push @amount, { category => $category, quantity => $quantity, rental => $rental };
+        push(
+            @amount,
+            {
+                category => $category,
+                quantity => $quantity,
+                rental   => $rental,
+            }
+        );
     }
 
-    $self->stash(amount => [@amount]);
+    $self->stash( amount => \@amount );
 } => 'stat-clothes-amount';
 
 get '/stat/clothes/amount/category/:category' => sub {
     my $self = shift;
 
-    my %CRITERION = (
-        belt      => '',
+    my %criterion_of = (
+        belt      => q{},
         blouse    => 'bust',
         coat      => 'bust',
         jacket    => 'bust',
-        onepiece  => '',
+        onepiece  => q{},
         pants     => 'waist',
         shirt     => 'bust',
         shoes     => 'length',
         skirt     => 'waist',
-        tie       => '',
+        tie       => q{},
         waistcoat => 'bust',
     );
 
@@ -5521,46 +5532,59 @@ get '/stat/clothes/amount/category/:category' => sub {
     );
 
     my @items;
-    my $criterion = $CRITERION{$category};
+    my $criterion = $criterion_of{$category};
     if ($criterion) {
         my $rs = $DB->resultset('Clothes')->search(
             undef,
             {
-                columns => [$criterion],
+                columns  => [ $criterion ],
                 group_by => $criterion
-            }
+            },
         );
 
-        while (my $clothes = $rs->next) {
+        while ( my $clothes = $rs->next ) {
             my $size = $clothes->$criterion;
 
             my $qty      = $DB->resultset('Clothes')->search({ category => $category, $criterion => $size });
             my $rental   = $DB->resultset('Clothes')->search({ category => $category, $criterion => $size, status_id => 2 });
             my $repair   = $DB->resultset('Clothes')->search({ category => $category, $criterion => $size, status_id => 6 });
             my $cleaning = $DB->resultset('Clothes')->search({ category => $category, $criterion => $size, status_id => 5 });
-            push @items, {
-                size      => $size,
-                qty       => $qty,
-                rental    => $rental,
-                repair    => $repair,
-                cleaning  => $cleaning
-            };
+
+            push(
+                @items,
+                {
+                    size      => $size,
+                    qty       => $qty,
+                    rental    => $rental,
+                    repair    => $repair,
+                    cleaning  => $cleaning
+                },
+            );
         }
-    } else {
+    }
+    else {
         my $qty      = $DB->resultset('Clothes')->search({ category => $category });
         my $rental   = $DB->resultset('Clothes')->search({ category => $category, status_id => 2 });
         my $repair   = $DB->resultset('Clothes')->search({ category => $category, status_id => 6 });
         my $cleaning = $DB->resultset('Clothes')->search({ category => $category, status_id => 5 });
-        push @items, {
-            size      => 'undefined',
-            qty       => $qty,
-            rental    => $rental,
-            repair    => $repair,
-            cleaning  => $cleaning
-        };
+
+        push(
+            @items,
+            {
+                size      => 'undefined',
+                qty       => $qty,
+                rental    => $rental,
+                repair    => $repair,
+                cleaning  => $cleaning
+            },
+        );
     }
 
-    $self->stash(items => [@items], quantity => $quantity, criterion => $criterion);
+    $self->stash(
+        items     => \@items,
+        quantity  => $quantity,
+        criterion => $criterion,
+    );
 } => 'stat-clothes-amount-category';
 
 app->secrets( app->defaults->{secrets} );
