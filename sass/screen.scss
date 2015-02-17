@@ -253,7 +253,7 @@ $opencloset-darken-yellow: desaturate(darken($opencloset-yellow, 4%), 10%);
         .return-process {
             display: none;
         }
-        table.order-detail {
+        table.order-detail-table {
             th {
                 &:first-child {
                     width: 50px;
