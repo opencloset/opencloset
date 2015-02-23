@@ -43,9 +43,16 @@
 .space-4
 
 #clothes-hit
-  - my $category_str = $config->{category}{$category}{str} || $category;
-  %h2= sprintf "%s부터 %s사이 가장 많이 대여된 [ %s ] %d개", $end_date->ymd, $start_date->ymd, $category_str, $limit;
+  %h2
+    가장 많이 대여한
+    %span.category{ 'data-category' => "#{ $category }" }= $category;
+    = sprintf "TOP %d:", $limit;
+    %span= $start_date->ymd;
+    = '~'
+    %span= $end_date->ymd;
+
   .space-4
+
   %table.table.table-striped.table-bordered.table-hover
     %thead
       %tr

@@ -1,4 +1,7 @@
 $ ->
+  $('span.category').each (i, el) ->
+    $(el).html OpenCloset.category[ $(el).data('category') ].str
+
   $("#start_date").datepicker(
     todayHighlight: true
     autoclose:      true
