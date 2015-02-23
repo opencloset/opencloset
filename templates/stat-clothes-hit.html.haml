@@ -81,7 +81,8 @@
           %td
             %a{ :href => "#{ url_for( '/user/' . $clothes->donation->user->id ) }" }= $clothes->donation->user->name;
           %td= $clothes->get_column('count');
-          %td= $clothes->color;
+          %td
+            %span.color{ 'data-color' => "#{ $clothes->color }" }= $clothes->color;
           %td= $clothes->bust;
           %td= $clothes->waist;
           %td= $clothes->hip;
