@@ -5743,5 +5743,16 @@ get '/stat/clothes/hit/:category' => sub {
     );
 };
 
+get '/stat/status' => sub {
+    my $self = shift;
+
+    my $dt_today = DateTime->now( time_zone => app->config->{timezone} );
+    $self->redirect_to( $self->url_for( '/stat/status/' . $dt_today->ymd ) );
+};
+
+get '/stat/status/:ymd' => sub {
+    my $self = shift;
+};
+
 app->secrets( app->defaults->{secrets} );
 app->start;
