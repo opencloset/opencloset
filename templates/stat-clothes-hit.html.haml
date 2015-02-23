@@ -1,0 +1,94 @@
+- use utf8;
+- my $_id   = 'stat-clothes-hit';
+- layout 'default',
+-   page_id     => $_id,
+-   active_id   => 'stat-clothes-hit',
+-   breadcrumbs => [
+-     { text => meta_text('stat') },
+-     { text => meta_text($_id)   },
+-   ],
+-   ;
+- title meta_text($_id);
+
+.search
+  %form.form-horizontal{ :role => 'form' }
+    .form-group
+      %label.col-sm-3.control-label.no-padding-right{ :for => 'start_date' } 시작 날짜
+      .col-sm-9
+        %input#start_date.form-control{ :name => "start_date" :placeholder => 'YYYY-mm-dd', 'data-date-format' => 'yyyy-mm-dd', :value => "#{ $start_date->ymd }" }
+    .form-group
+      %label.col-sm-3.control-label.no-padding-right{ :for => 'end_date' } 종료 날짜
+      .col-sm-9
+        %input#end_date.form-control{ :name => 'end_date' :placeholder => 'YYYY-mm-dd', 'data-date-format' => 'yyyy-mm-dd', :value => "#{ $end_date->ymd }" }
+    .form-group
+      %label.col-sm-3.control-label.no-padding-right{ :for => 'category' } 종류
+      .col-sm-9
+        %select.col-xs-10.col-sm-5{ :name => "category", :type => 'hidden' }
+          - for my $k ( qw( jacket pants skirt shirt blouse shoes tie bag belt coat onepiece waistcoat ) ) {
+            %option{ :value => $k }= $app->config->{category}{$k}->{str}
+          - }
+    .form-group
+      %label.col-sm-3.control-label.no-padding-right{ :for => 'limit' } TOP (개수)
+      .col-sm-9
+        %input#query.form-control{ :name => "limit" :placeholder => '10' }
+    .form-actions.clearfix
+      .col-md-offset-3.col-md-9
+        %button.btn.btn-info.pull-right#btn-hit-search{ :type => 'button' }
+          %i.ace-icon.icon-search.bigger-110
+          검색
+        %button.btn.btn-danger.pull-right{ :type => 'reset' }
+          %i.ace-icon.icon-undo.bigger-110
+          다시 쓰기
+
+.space-4
+
+#clothes-hit
+  %h2
+    가장 많이 대여한
+    %span.category{ 'data-category' => "#{ $category }" }= $category;
+    %span.top= sprintf "TOP %d:", $limit;
+    %span.date= $start_date->ymd;
+    = '~'
+    %span.date= $end_date->ymd;
+
+  .space-4
+
+  %table.table.table-striped.table-bordered.table-hover
+    %thead
+      %tr
+        %th{ :rowspan => "2" } #
+        %th{ :rowspan => "2" } 코드
+        %th{ :rowspan => "2" } 기증자
+        %th{ :rowspan => "2" } 대여수
+        %th{ :rowspan => "2" } 색상
+        %th.center{ :colspan => "8" } 사이즈
+      %tr
+        %th 가슴
+        %th 허리
+        %th 엉덩이
+        %th 윗배
+        %th 배꼽
+        %th 팔
+        %th 허벅지
+        %th 길이
+    %tbody
+      - my $count = 0;
+      - while ( my $clothes = $clothes_rs->next ) {
+        %tr
+          %td= ++$count
+          %td
+            %a{ :href => "#{ url_for( '/clothes/' . trim_clothes_code($clothes) ) }" }= trim_clothes_code($clothes);
+          %td
+            %a{ :href => "#{ url_for( '/user/' . $clothes->donation->user->id ) }" }= $clothes->donation->user->name;
+          %td= $clothes->get_column('count');
+          %td
+            %span.color{ 'data-color' => "#{ $clothes->color }" }= $clothes->color;
+          %td= $clothes->bust;
+          %td= $clothes->waist;
+          %td= $clothes->hip;
+          %td= $clothes->topbelly;
+          %td= $clothes->belly;
+          %td= $clothes->arm;
+          %td= $clothes->thigh;
+          %td= $clothes->length;
+      - }

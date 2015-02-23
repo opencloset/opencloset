@@ -709,6 +709,68 @@ $opencloset-darken-yellow: desaturate(darken($opencloset-yellow, 4%), 10%);
             }
         }
     }
+    #stat-clothes-hit {
+        h2 {
+            span.top,
+            span.date,
+            span.category {
+                font-weight: bold;
+            }
+        }
+        #clothes-hit {
+            table tr:nth-child(1) {
+                th:nth-child(4) {
+                    text-align: right;
+                }
+            }
+            table tr:nth-child(2) {
+                th:nth-child(1),
+                th:nth-child(2),
+                th:nth-child(3),
+                th:nth-child(4),
+                th:nth-child(5),
+                th:nth-child(6),
+                th:nth-child(7),
+                th:nth-child(8) {
+                    width: 60px;
+                    text-align: right;
+                }
+            }
+            table th:first-child,
+            table td:first-child {
+                text-align: right;
+            }
+            table td {
+                &:nth-child(4),
+                &:nth-child(6),
+                &:nth-child(7),
+                &:nth-child(8),
+                &:nth-child(9),
+                &:nth-child(10),
+                &:nth-child(11),
+                &:nth-child(12),
+                &:nth-child(13) {
+                    width: 60px;
+                    text-align: right;
+                }
+            }
+            table td {
+                &:nth-child(1),
+                &:nth-child(2),
+                &:nth-child(4),
+                &:nth-child(6),
+                &:nth-child(7),
+                &:nth-child(8),
+                &:nth-child(9),
+                &:nth-child(10),
+                &:nth-child(11),
+                &:nth-child(12),
+                &:nth-child(13) {
+                    font-family: Monospace;
+                }
+            }
+        }
+    }
     .step-content {
         .step-pane {
             h3 {
