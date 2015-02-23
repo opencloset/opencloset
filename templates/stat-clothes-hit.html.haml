@@ -46,10 +46,10 @@
   %h2
     가장 많이 대여한
     %span.category{ 'data-category' => "#{ $category }" }= $category;
-    = sprintf "TOP %d:", $limit;
-    %span= $start_date->ymd;
+    %span.top= sprintf "TOP %d:", $limit;
+    %span.date= $start_date->ymd;
     = '~'
-    %span= $end_date->ymd;
+    %span.date= $end_date->ymd;
 
   .space-4
 
@@ -60,16 +60,16 @@
         %th{ :rowspan => "2" } 코드
         %th{ :rowspan => "2" } 기증자
         %th{ :rowspan => "2" } 대여수
-        %th.center{ :colspan => "9" } 사이즈
+        %th{ :rowspan => "2" } 색상
+        %th.center{ :colspan => "8" } 사이즈
       %tr
-        %th 색상
-        %th 가슴 둘레
-        %th 허리 둘레
-        %th 엉덩이 둘레
-        %th 윗배 둘레
-        %th 배꼽 둘레
-        %th 팔 길이
-        %th 허벅지 둘레
+        %th 가슴
+        %th 허리
+        %th 엉덩이
+        %th 윗배
+        %th 배꼽
+        %th 팔
+        %th 허벅지
         %th 길이
     %tbody
       - my $count = 0;
