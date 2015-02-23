@@ -5693,7 +5693,7 @@ get '/stat/clothes/hit/:category' => sub {
     }
 
     #
-    # fetchc clothes
+    # fetch clothes
     #
 
     my $dtf        = $DB->storage->datetime_parser;
