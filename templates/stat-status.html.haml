@@ -25,7 +25,8 @@
     .input-group
       %input#query.form-control{ :placeholder => '날짜를 고르세요', 'data-date-format' => 'yyyy-mm-dd' }
 
-.space-4
+.space-8
+
 #status-day
   %h2= $dt->ymd . ' 일간 주문서 처리 통계'
   .space-4
@@ -64,6 +65,8 @@
           - }
           %td= convert_sec_to_hms($total);
       - }
+
+.space-8
 
 #status-month
   %h2= $dt->strftime("%Y-%m") . ' 월간 주문서 처리 통계'
