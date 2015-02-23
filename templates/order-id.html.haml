@@ -1,5 +1,5 @@
 - use utf8;
-- use List::Util qw/sum/;
+- use List::Util;
 - my $_id = 'order-id';
 - layout 'default',
 -   page_id     => $_id,
@@ -450,7 +450,7 @@
                                   %th 처리 시간
                                   %th %
                               %tbody
-                                - my $total = sum @{$analyze{elapsed_time}}{@process};
+                                - my $total = List::Util::sum @{$analyze{elapsed_time}}{@process};
                                 - foreach my $step (@process) {
                                   - my $elapsed_time = $analyze{elapsed_time}{$step};
                                   - next unless $elapsed_time;
