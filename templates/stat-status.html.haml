@@ -13,7 +13,7 @@
 - my @process = (qw/대기 치수측정 의류준비 탈의 수선 포장 결제/);
 - my %status;
 - my %status_mean;
-- while( my $order = $status_rs->next ) {
+- while ( my $order = $status_rs->next ) {
 -   my %analyze = $order->analyze_order_status_logs();
 -   my $booking_date = $order->booking->date->ymd;
 -   push @{ $status{$booking_date} } , { order => $order, analyze => \%analyze };
