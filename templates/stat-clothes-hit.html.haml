@@ -25,12 +25,17 @@
       .col-sm-9
         %select.col-xs-10.col-sm-5{ :name => "category", :type => 'hidden' }
           - for my $k ( qw( jacket pants skirt shirt blouse shoes tie bag belt coat onepiece waistcoat ) ) {
+          -  if ( $k eq $category ) {
+            %option{ :value => $k, :selected => "selected" }= $app->config->{category}{$k}->{str}
+          -  }
+          -  else {
             %option{ :value => $k }= $app->config->{category}{$k}->{str}
+          -  }
           - }
     .form-group
       %label.col-sm-3.control-label.no-padding-right{ :for => 'limit' } TOP (개수)
       .col-sm-9
-        %input#query.form-control{ :name => "limit" :placeholder => '10' }
+        %input#query.form-control{ :name => "limit" :placeholder => '10', :value => "#{$limit}" }
     .form-actions.clearfix
       .col-md-offset-3.col-md-9
         %button.btn.btn-info.pull-right#btn-hit-search{ :type => 'button' }
