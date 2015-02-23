@@ -28,7 +28,9 @@
 .space-8
 
 #status-day
-  %h2= $dt->ymd . ' 일간 주문서 처리 통계'
+  %h2
+    상태별 처리 시간:
+    %span.date= $dt->ymd;
   .space-4
   %table.table.table-striped.table-bordered.table-hover
     %thead
@@ -69,7 +71,9 @@
 .space-8
 
 #status-month
-  %h2= $dt->strftime("%Y-%m") . ' 월간 주문서 처리 통계'
+  %h2
+    상태별 처리 시간:
+    %span.date= $dt->strftime("%Y-%m");
   .space-4
   %table.table.table-striped.table-bordered.table-hover
     %thead
