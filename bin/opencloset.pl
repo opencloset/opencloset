@@ -5752,6 +5752,52 @@ get '/stat/status' => sub {
 
 get '/stat/status/:ymd' => sub {
     my $self = shift;
+
+    #
+    # fetch params
+    #
+    my %params = $self->get_params(qw/ ymd /);
+
+    unless ( $params{ymd} ) {
+        app->log->warn("ymd is required");
+        $self->redirect_to( $self->url_for('/stat/status') );
+        return;
+    }
+
+    unless ( $params{ymd} =~ m/^(\d{4})-(\d{2})-(\d{2})$/ ) {
+        app->log->warn("invalid ymd format: $params{ymd}");
+        $self->redirect_to( $self->url_for('/stat/status') );
+        return;
+    }
+
+    my $dt = try {
+        DateTime->new(
+            time_zone => app->config->{timezone},
+            year      => $1,
+            month     => $2,
+            day       => $3,
+        );
+    };
+    unless ($dt) {
+        app->log->warn("cannot create datetime object");
+        $self->redirect_to( $self->url_for('/stat/status') );
+        return;
+    }
+
+    my $status_rs = $DB->resultset('Order')->search(
+        \[ 'DATE_FORMAT(`booking`.`date`,"%Y-%m") = ?', $dt->strftime("%Y-%m") ],
+        {
+            join     => [qw/ booking /],
+            order_by => { -asc => 'date' },
+            prefetch => 'booking',
+        },
+    );
+
+    $self->render(
+        'stat-status',
+        status_rs => $status_rs,
+        dt        => $dt,
+    );
 };
 
 app->secrets( app->defaults->{secrets} );

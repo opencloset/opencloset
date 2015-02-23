@@ -6,3 +6,98 @@
 -   csses => [ '/lib/bootstrap3-editable/css/bootstrap-editable.css'   ],
 -   ;
 - title meta_text($_id);
+
+- use List::Util qw/sum0/;
+- use Statistics::Basic qw/mean/;
+
+- my @process = (qw/대기 치수측정 의류준비 탈의 수선 포장 결제/);
+- my %status;
+- my %status_mean;
+- while( my $order = $status_rs->next ) {
+-   my %analyze = $order->analyze_order_status_logs();
+-   my $booking_date = $order->booking->date->ymd;
+-   push @{ $status{$booking_date} } , { order => $order, analyze => \%analyze };
+-   push @{ $status_mean{$booking_date}{$_} }, $analyze{elapsed_time}{$_} for @process;
+- }
+
+.search
+  %form#search-form
+    .input-group
+      %input#query.form-control{ :placeholder => '날짜를 고르세요', 'data-date-format' => 'yyyy-mm-dd' }
+
+.space-4
+#status-day
+  %h2= $dt->ymd . ' 일간 주문서 처리 통계'
+  .space-4
+  %table.table.table-striped.table-bordered.table-hover
+    %thead
+      %tr
+        %th{ :rowspan => "2" } #
+        %th{ :rowspan => "2" } 주문번호
+        %th{ :rowspan => "2" } 방문자명
+        %th.center{ :colspan => "7" } 처리시간
+        %th{ :rowspan => "2" } Total
+      %tr
+        %th 대기
+        %th 치수측정
+        %th 의류준비
+        %th 탈의
+        %th 수선
+        %th 포장
+        %th 결제
+    %tbody
+      - my $count = 0;
+      - for my $log ( @{ $status{$dt->ymd} }) {
+        - my $order = $log->{order};
+        - my %elapsed_time = %{ $log->{analyze}->{elapsed_time} };
+        - my $total = sum0 grep { defined } @elapsed_time{@process};
+        - next unless $total;
+        %tr
+          %td= ++$count
+          %td
+            %a{ :href => "#{ url_for( '/order/' . $order->id ) }" }= $order->id
+          %td
+            %a{ :href => "#{ url_for( '/user/' . $order->user->id ) }" }= $order->user->name
+          - for my $step (@process) {
+            - my $taken_sec = $elapsed_time{$step};
+            %td= $taken_sec ? convert_sec_to_hms($taken_sec) : q{};
+          - }
+          %td= convert_sec_to_hms($total);
+      - }
+
+#status-month
+  %h2= $dt->strftime("%Y-%m") . ' 월간 주문서 처리 통계'
+  .space-4
+  %table.table.table-striped.table-bordered.table-hover
+    %thead
+      %tr
+        %th{ :rowspan => "2" } 날짜
+        %th.center{ :colspan => "7" } 평균 처리시간
+        %th{ :rowspan => "2" } Total
+      %tr
+        %th 대기
+        %th 치수측정
+        %th 의류준비
+        %th 탈의
+        %th 수선
+        %th 포장
+        %th 결제
+    %tbody
+      - for my $day ( sort keys %status ) {
+        %tr
+          %td
+            %a{ :href => "#{ url_for( '/order' )->query('booking_ymd' => $day ) }" }= $day
+          - my $total = 0;
+          - for my $process (@process) {
+            - my @taken_times = grep { defined } @{ $status_mean{$day}{$process} };
+            - my $avg_sec = mean( @taken_times )->query;
+            - if( $avg_sec ) {
+              %td= convert_sec_to_hms($avg_sec);
+              - $total += $avg_sec;
+            - } else {
+              %td
+            - }
+          - }
+          %td= convert_sec_to_hms($total);
+      - }
+
