@@ -7,8 +7,8 @@
 -   ;
 - title meta_text($_id);
 
-- use List::Util qw/sum0/;
-- use Statistics::Basic qw/mean/;
+- use List::Util;
+- use Statistics::Basic;
 
 - my @process = (qw/대기 치수측정 의류준비 탈의 수선 포장 결제/);
 - my %status;
@@ -50,7 +50,7 @@
       - for my $log ( @{ $status{$dt->ymd} }) {
         - my $order = $log->{order};
         - my %elapsed_time = %{ $log->{analyze}->{elapsed_time} };
-        - my $total = sum0 grep { defined } @elapsed_time{@process};
+        - my $total = List::Util::sum0 grep { defined } @elapsed_time{@process};
         - next unless $total;
         %tr
           %td= ++$count
@@ -90,7 +90,7 @@
           - my $total = 0;
           - for my $process (@process) {
             - my @taken_times = grep { defined } @{ $status_mean{$day}{$process} };
-            - my $avg_sec = mean( @taken_times )->query;
+            - my $avg_sec = Statistics::Basic::mean( @taken_times )->query;
             - if( $avg_sec ) {
               %td= convert_sec_to_hms($avg_sec);
               - $total += $avg_sec;
@@ -100,4 +100,3 @@
           - }
           %td= convert_sec_to_hms($total);
       - }
-
