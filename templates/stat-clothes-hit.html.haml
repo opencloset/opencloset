@@ -83,10 +83,3 @@
           %td= $clothes->thigh;
           %td= $clothes->length;
       - }
-
-- use Data::Dumper;
-%pre
-  - while(my $cloth =$clothes_rs->next ) {
-    = $cloth->code;
-  - }
-
