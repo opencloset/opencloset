@@ -5800,8 +5800,10 @@ get '/stat/status/:ymd' => sub {
 
     my $dtf      = $DB->storage->datetime_parser;
     my $order_rs = $DB->resultset('Order')->search(
+        #
+        # do not query all data for specific month due to speed
+        #
         #\[ 'DATE_FORMAT(`booking`.`date`,"%Y-%m") = ?', $dt->strftime("%Y-%m") ],
-        #\[ 'DATE_FORMAT(`booking`.`date`,"%Y-%m-%d") = ?', $dt->strftime("%Y-%m-%d") ],
         {
             'booking.date' => {
                 -between => [
