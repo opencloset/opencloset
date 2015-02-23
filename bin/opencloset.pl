@@ -5699,19 +5699,37 @@ get '/stat/clothes/hit/:category' => sub {
     my $dtf        = $DB->storage->datetime_parser;
     my $clothes_rs = $DB->resultset('Clothes')->search(
         {
+            'category'          => $params{category},
             'order.rental_date' => {
-                -between => [ $dtf->format_datetime($start_date), $dtf->format_datetime($end_date), ]
+                -between => [
+                    $dtf->format_datetime($start_date),
+                    $dtf->format_datetime($end_date),
+                ],
             },
-            'category' => $params{category},
         },
         {
-            join     => [ { order_details => 'order' }, { donation => 'user' } ],
-            prefetch => [ { donation      => 'user' } ],
-            columns => [qw/category code color bust waist hip topbelly belly arm thigh length/],
-            '+columns' => [ { count => { count => 'me.id', -as => 'rent_count' } }, ],
+            join       => [
+                { order_details => 'order' },
+                { donation => 'user' },
+            ],
+            prefetch   => [ { donation => 'user' } ],
+            columns    => [qw/
+                arm
+                belly
+                bust
+                category
+                code
+                color
+                hip
+                length
+                thigh
+                topbelly
+                waist
+            /],
+            '+columns' => [ { count => { count => 'me.id', -as => 'rent_count' } } ],
             group_by   => [qw/ category code /],
-            order_by => { -desc => 'rent_count' },
-            rows     => $params{limit},
+            order_by   => { -desc => 'rent_count' },
+            rows       => $params{limit},
         }
     );
 

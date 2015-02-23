@@ -65,13 +65,13 @@
         %th 길이
     %tbody
       - my $count = 0;
-      - while( my $clothes = $clothes_rs->next ) {
+      - while ( my $clothes = $clothes_rs->next ) {
         %tr
           %td= ++$count
           %td
             %a{ :href => "#{ url_for( '/clothes/' . trim_clothes_code($clothes) ) }" }= trim_clothes_code($clothes);
           %td
-            %a{ :href => "#{ url_for( '/user/' . $clothes->donation->user->id ) }" }= $clothes->donation->user->name
+            %a{ :href => "#{ url_for( '/user/' . $clothes->donation->user->id ) }" }= $clothes->donation->user->name;
           %td= $clothes->get_column('count');
           %td= $clothes->color;
           %td= $clothes->bust;
