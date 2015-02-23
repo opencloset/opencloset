@@ -5784,8 +5784,32 @@ get '/stat/status/:ymd' => sub {
         return;
     }
 
-    my $status_rs = $DB->resultset('Order')->search(
-        \[ 'DATE_FORMAT(`booking`.`date`,"%Y-%m") = ?', $dt->strftime("%Y-%m") ],
+    my $dt_start = try { $dt->clone->truncate( to => 'day' )->add( hours => 24 * 2 * -1 ); };
+    unless ($dt_start) {
+        app->log->warn("cannot create start datetime object");
+        $self->redirect_to( $self->url_for('/stat/status') );
+        return;
+    }
+
+    my $dt_end = try { $dt->clone->truncate( to => 'day' )->add( hours => 24 * 3, seconds => -1 ); };
+    unless ($dt_end) {
+        app->log->warn("cannot create end datetime object");
+        $self->redirect_to( $self->url_for('/stat/status') );
+        return;
+    }
+
+    my $dtf      = $DB->storage->datetime_parser;
+    my $order_rs = $DB->resultset('Order')->search(
+        #\[ 'DATE_FORMAT(`booking`.`date`,"%Y-%m") = ?', $dt->strftime("%Y-%m") ],
+        #\[ 'DATE_FORMAT(`booking`.`date`,"%Y-%m-%d") = ?', $dt->strftime("%Y-%m-%d") ],
+        {
+            'booking.date' => {
+                -between => [
+                    $dtf->format_datetime($dt_start),
+                    $dtf->format_datetime($dt_end),
+                ],
+            },
+        },
         {
             join     => [qw/ booking /],
             order_by => { -asc => 'date' },
@@ -5795,8 +5819,8 @@ get '/stat/status/:ymd' => sub {
 
     $self->render(
         'stat-status',
-        status_rs => $status_rs,
-        dt        => $dt,
+        order_rs => $order_rs,
+        dt       => $dt,
     );
 };
 

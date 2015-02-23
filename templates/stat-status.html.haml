@@ -13,8 +13,8 @@
 - my @process = (qw/대기 치수측정 의류준비 탈의 수선 포장 결제/);
 - my %status;
 - my %status_mean;
-- while ( my $order = $status_rs->next ) {
--   my %analyze = $order->analyze_order_status_logs();
+- while ( my $order = $order_rs->next ) {
+-   my %analyze = $order->analyze_order_status_logs;
 -   my $booking_date = $order->booking->date->ymd;
 -   push @{ $status{$booking_date} } , { order => $order, analyze => \%analyze };
 -   push @{ $status_mean{$booking_date}{$_} }, $analyze{elapsed_time}{$_} for @process;
@@ -31,7 +31,51 @@
   %h2
     상태별 처리 시간:
     %span.date= $dt->ymd;
+
+  .space-8
+
+  %table.table.table-striped.table-bordered.table-hover
+    %thead
+      %tr
+        %th{ :rowspan => "2" } 날짜
+        %th.center{ :colspan => "7" } 평균 처리시간
+        %th{ :rowspan => "2" } Total
+      %tr
+        %th 대기
+        %th 치수측정
+        %th 의류준비
+        %th 탈의
+        %th 수선
+        %th 포장
+        %th 결제
+    %tbody
+      - for my $day ( sort keys %status ) {
+        %tr
+          %td
+            - if ( $day eq $dt->ymd ) {
+              %span.date
+                %a{ :href => "#{ url_for( '/order' )->query('booking_ymd' => $day ) }" }= $day
+            - }
+            - else {
+              %span
+                %a{ :href => "#{ url_for( '/order' )->query('booking_ymd' => $day ) }" }= $day
+            - }
+          - my $total = 0;
+          - for my $process (@process) {
+            - my @taken_times = grep { defined } @{ $status_mean{$day}{$process} };
+            - my $avg_sec = Statistics::Basic::mean( @taken_times )->query;
+            - if ($avg_sec) {
+              %td= convert_sec_to_hms($avg_sec);
+              - $total += $avg_sec;
+            - } else {
+              %td
+            - }
+          - }
+          %td= convert_sec_to_hms($total);
+      - }
+
   .space-4
+
   %table.table.table-striped.table-bordered.table-hover
     %thead
       %tr
@@ -64,46 +108,6 @@
           - for my $step (@process) {
             - my $taken_sec = $elapsed_time{$step};
             %td= $taken_sec ? convert_sec_to_hms($taken_sec) : q{};
-          - }
-          %td= convert_sec_to_hms($total);
-      - }
-
-.space-8
-
-#status-month
-  %h2
-    상태별 처리 시간:
-    %span.date= $dt->strftime("%Y-%m");
-  .space-4
-  %table.table.table-striped.table-bordered.table-hover
-    %thead
-      %tr
-        %th{ :rowspan => "2" } 날짜
-        %th.center{ :colspan => "7" } 평균 처리시간
-        %th{ :rowspan => "2" } Total
-      %tr
-        %th 대기
-        %th 치수측정
-        %th 의류준비
-        %th 탈의
-        %th 수선
-        %th 포장
-        %th 결제
-    %tbody
-      - for my $day ( sort keys %status ) {
-        %tr
-          %td
-            %a{ :href => "#{ url_for( '/order' )->query('booking_ymd' => $day ) }" }= $day
-          - my $total = 0;
-          - for my $process (@process) {
-            - my @taken_times = grep { defined } @{ $status_mean{$day}{$process} };
-            - my $avg_sec = Statistics::Basic::mean( @taken_times )->query;
-            - if ($avg_sec) {
-              %td= convert_sec_to_hms($avg_sec);
-              - $total += $avg_sec;
-            - } else {
-              %td
-            - }
           - }
           %td= convert_sec_to_hms($total);
       - }
