@@ -9,3 +9,84 @@
 -   ],
 -   ;
 - title meta_text($_id);
+
+.search
+  %form.form-horizontal{ :role => 'form' }
+    .form-group
+      %label.col-sm-3.control-label.no-padding-right{ :for => 'start_date' } 시작날짜
+      .col-sm-9
+        %input#start_date.form-control{ :name => "start_date" :placeholder => '시작날짜', 'data-date-format' => 'yyyy-mm-dd' }
+    .form-group
+      %label.col-sm-3.control-label.no-padding-right{ :for => 'end_date' } 종료날짜
+      .col-sm-9
+        %input#end_date.form-control{ :name => 'end_date' :placeholder => '종료날짜', 'data-date-format' => 'yyyy-mm-dd' }
+    .form-group
+      %label.col-sm-3.control-label.no-padding-right{ :for => 'category' } 카테고리
+      .col-sm-9
+        %select.col-xs-10.col-sm-5{ :name => "category", :type => 'hidden' }
+          - for my $k ( sort keys %{ $app->config->{category} } ) {
+            %option{ :value => $k }= $app->config->{category}{$k}->{str}
+          - }
+    .form-group
+      %label.col-sm-3.control-label.no-padding-right{ :for => 'limit' } 제한
+      .col-sm-9
+        %input#query.form-control{ :name => "limit" :placeholder => 'N' }
+    .form-actions.clearfix
+      .col-md-offset-3.col-md-9
+        %button.btn.btn-info#btn-fav-search{ :type => 'button' }
+          %i.ace-icon.icon-check.bigger-110
+          검색
+        %button.btn.btn-danger{ :type => 'reset' }
+          %i.ace-icon.icon-undo.bigger-110
+          다시 쓰기
+
+.space-4
+#clothes-fav
+  - my $category_str = $config->{category}{$category}{str} || $category;
+  %h2= sprintf "%s부터 %s사이 가장 많이 대여된 [ %s ] %d개", $end_date->ymd, $start_date->ymd, $category_str, $limit;
+  .space-4
+  %table.table.table-striped.table-bordered.table-hover
+    %thead
+      %tr
+        %th{ :rowspan => "2" } #
+        %th{ :rowspan => "2" } 코드
+        %th{ :rowspan => "2" } 기증자
+        %th{ :rowspan => "2" } 대여수
+        %th.center{ :colspan => "9" } 사이즈
+      %tr
+        %th 색상
+        %th 가슴 둘레
+        %th 허리 둘레
+        %th 엉덩이 둘레
+        %th 윗배 둘레
+        %th 배꼽 둘레
+        %th 팔 길이
+        %th 허벅지 둘레
+        %th 길이
+    %tbody
+      - my $count = 0;
+      - while( my $clothes = $clothes_rs->next ) {
+        %tr
+          %td= ++$count
+          %td
+            %a{ :href => "#{ url_for( '/clothes/' . trim_clothes_code($clothes) ) }" }= trim_clothes_code($clothes);
+          %td
+            %a{ :href => "#{ url_for( '/user/' . $clothes->donation->user->id ) }" }= $clothes->donation->user->name
+          %td= $clothes->get_column('count');
+          %td= $clothes->color;
+          %td= $clothes->bust;
+          %td= $clothes->waist;
+          %td= $clothes->hip;
+          %td= $clothes->topbelly;
+          %td= $clothes->belly;
+          %td= $clothes->arm;
+          %td= $clothes->thigh;
+          %td= $clothes->length;
+      - }
+
+- use Data::Dumper;
+%pre
+  - while(my $cloth =$clothes_rs->next ) {
+    = $cloth->code;
+  - }
+

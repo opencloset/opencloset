@@ -5611,6 +5611,118 @@ get '/stat/clothes/fav' => sub {
 
 get '/stat/clothes/fav/:category' => sub {
     my $self = shift;
+
+    #
+    # fetch params
+    #
+    my %params = $self->get_params(qw/ start_date end_date category limit /);
+
+    #
+    # validate params
+    #
+
+    my $v = $self->create_validator;
+    $v->field('category')->in( keys %{ app->config->{category} } );
+    $v->field('limit')->regexp(qr/^\d+$/);
+
+    unless ( $self->validate( $v, \%params ) ) {
+        my @error_str;
+        while ( my ( $k, $v ) = each %{ $v->errors } ) {
+            push @error_str, "$k:$v";
+        }
+        return $self->error(
+            400,
+            {
+                str  => join( ',', @error_str ),
+                data => $v->errors,
+            }
+        );
+    }
+
+    unless ( $params{start_date} ) {
+        app->log->warn("start_date is required");
+        $self->redirect_to( $self->url_for('/stat/clothes/fav') );
+        return;
+    }
+
+    unless ( $params{start_date} =~ m/^(\d{4})-(\d{2})-(\d{2})$/ ) {
+        app->log->warn("invalid ymd format: $params{start_date}");
+        $self->redirect_to( $self->url_for('/start_date') );
+        return;
+    }
+
+    my $start_date = try {
+        DateTime->new(
+            time_zone => app->config->{timezone},
+            year      => $1,
+            month     => $2,
+            day       => $3,
+        );
+    };
+
+    unless ($start_date) {
+        app->log->warn("cannot create start datetime object");
+        $self->redirect_to( $self->url_for('/stat/clothes/fav') );
+        return;
+    }
+
+    unless ( $params{end_date} ) {
+        app->log->warn("end_date is required");
+        $self->redirect_to( $self->url_for('/stat/clothes/fav') );
+        return;
+    }
+
+    unless ( $params{end_date} =~ m/^(\d{4})-(\d{2})-(\d{2})$/ ) {
+        app->log->warn("invalid ymd format: $params{end_date}");
+        $self->redirect_to( $self->url_for('/stat/clothes/fav') );
+        return;
+    }
+
+    my $end_date = try {
+        DateTime->new(
+            time_zone => app->config->{timezone},
+            year      => $1,
+            month     => $2,
+            day       => $3,
+        );
+    };
+    unless ($end_date) {
+        app->log->warn("cannot create end datetime object");
+        $self->redirect_to( $self->url_for('/stat/clothes/fav') );
+        return;
+    }
+
+    #
+    # fetchc clothes
+    #
+
+    my $dtf        = $DB->storage->datetime_parser;
+    my $clothes_rs = $DB->resultset('Clothes')->search(
+        {
+            'order.rental_date' => {
+                -between => [ $dtf->format_datetime($start_date), $dtf->format_datetime($end_date), ]
+            },
+            'category' => $params{category},
+        },
+        {
+            join     => [ { order_details => 'order' }, { donation => 'user' } ],
+            prefetch => [ { donation      => 'user' } ],
+            columns => [qw/category code color bust waist hip topbelly belly arm thigh length/],
+            '+columns' => [ { count => { count => 'me.id', -as => 'rent_count' } }, ],
+            group_by   => [qw/ category code /],
+            order_by => { -desc => 'rent_count' },
+            rows     => $params{limit},
+        }
+    );
+
+    $self->render(
+        'stat-clothes-fav',
+        clothes_rs => $clothes_rs,
+        start_date => $start_date,
+        end_date   => $end_date,
+        category   => $params{category},
+        limit      => $params{limit},
+    );
 };
 
 app->secrets( app->defaults->{secrets} );
