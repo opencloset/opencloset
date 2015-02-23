@@ -5586,7 +5586,7 @@ get '/stat/clothes/amount/category/:category' => sub {
     );
 } => 'stat-clothes-amount-category';
 
-get '/stat/clothes/fav' => sub {
+get '/stat/clothes/hit' => sub {
     my $self = shift;
 
     my $default_category = 'jacket';
@@ -5601,7 +5601,7 @@ get '/stat/clothes/fav' => sub {
     }
 
     $self->redirect_to(
-        $self->url_for( '/stat/clothes/fav/' . $default_category )->query(
+        $self->url_for( '/stat/clothes/hit/' . $default_category )->query(
             start_date => $dt_month_before->ymd,
             end_date   => $dt_today->ymd,
             limit      => $default_limit,
@@ -5609,7 +5609,7 @@ get '/stat/clothes/fav' => sub {
     );
 };
 
-get '/stat/clothes/fav/:category' => sub {
+get '/stat/clothes/hit/:category' => sub {
     my $self = shift;
 
     #
@@ -5641,7 +5641,7 @@ get '/stat/clothes/fav/:category' => sub {
 
     unless ( $params{start_date} ) {
         app->log->warn("start_date is required");
-        $self->redirect_to( $self->url_for('/stat/clothes/fav') );
+        $self->redirect_to( $self->url_for('/stat/clothes/hit') );
         return;
     }
 
@@ -5662,19 +5662,19 @@ get '/stat/clothes/fav/:category' => sub {
 
     unless ($start_date) {
         app->log->warn("cannot create start datetime object");
-        $self->redirect_to( $self->url_for('/stat/clothes/fav') );
+        $self->redirect_to( $self->url_for('/stat/clothes/hit') );
         return;
     }
 
     unless ( $params{end_date} ) {
         app->log->warn("end_date is required");
-        $self->redirect_to( $self->url_for('/stat/clothes/fav') );
+        $self->redirect_to( $self->url_for('/stat/clothes/hit') );
         return;
     }
 
     unless ( $params{end_date} =~ m/^(\d{4})-(\d{2})-(\d{2})$/ ) {
         app->log->warn("invalid ymd format: $params{end_date}");
-        $self->redirect_to( $self->url_for('/stat/clothes/fav') );
+        $self->redirect_to( $self->url_for('/stat/clothes/hit') );
         return;
     }
 
@@ -5688,7 +5688,7 @@ get '/stat/clothes/fav/:category' => sub {
     };
     unless ($end_date) {
         app->log->warn("cannot create end datetime object");
-        $self->redirect_to( $self->url_for('/stat/clothes/fav') );
+        $self->redirect_to( $self->url_for('/stat/clothes/hit') );
         return;
     }
 
@@ -5716,7 +5716,7 @@ get '/stat/clothes/fav/:category' => sub {
     );
 
     $self->render(
-        'stat-clothes-fav',
+        'stat-clothes-hit',
         clothes_rs => $clothes_rs,
         start_date => $start_date,
         end_date   => $end_date,

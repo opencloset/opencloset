@@ -1,8 +1,8 @@
 - use utf8;
-- my $_id   = 'stat-clothes-fav';
+- my $_id   = 'stat-clothes-hit';
 - layout 'default',
 -   page_id     => $_id,
--   active_id   => 'stat-clothes-fav',
+-   active_id   => 'stat-clothes-hit',
 -   breadcrumbs => [
 -     { text => meta_text('stat') },
 -     { text => meta_text($_id)   },
@@ -33,7 +33,7 @@
         %input#query.form-control{ :name => "limit" :placeholder => 'N' }
     .form-actions.clearfix
       .col-md-offset-3.col-md-9
-        %button.btn.btn-info#btn-fav-search{ :type => 'button' }
+        %button.btn.btn-info#btn-hit-search{ :type => 'button' }
           %i.ace-icon.icon-check.bigger-110
           검색
         %button.btn.btn-danger{ :type => 'reset' }
@@ -41,7 +41,7 @@
           다시 쓰기
 
 .space-4
-#clothes-fav
+#clothes-hit
   - my $category_str = $config->{category}{$category}{str} || $category;
   %h2= sprintf "%s부터 %s사이 가장 많이 대여된 [ %s ] %d개", $end_date->ymd, $start_date->ymd, $category_str, $limit;
   .space-4

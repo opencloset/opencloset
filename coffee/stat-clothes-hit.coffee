@@ -9,7 +9,7 @@ $ ->
     autoclose:      true
   )
 
-  $('#btn-fav-search').click (e) ->
+  $('#btn-hit-search').click (e) ->
     start_date  = $('input[name=start_date]').prop('value')
     end_date    = $('input[name=end_date]').prop('value')
     category    = $("select[name=category]").val()
@@ -20,4 +20,4 @@ $ ->
       $('input[name=limit]').focus()
       return
 
-    window.location = "/stat/clothes/fav/#{category}?#{$.param({ start_date: start_date, end_date: end_date, limit: limit})}"
+    window.location = "/stat/clothes/hit/#{category}?#{$.param({ start_date: start_date, end_date: end_date, limit: limit})}"
