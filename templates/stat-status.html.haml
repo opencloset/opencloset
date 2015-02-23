@@ -91,7 +91,7 @@
           - for my $process (@process) {
             - my @taken_times = grep { defined } @{ $status_mean{$day}{$process} };
             - my $avg_sec = Statistics::Basic::mean( @taken_times )->query;
-            - if( $avg_sec ) {
+            - if ($avg_sec) {
               %td= convert_sec_to_hms($avg_sec);
               - $total += $avg_sec;
             - } else {
