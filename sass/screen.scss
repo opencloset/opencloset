@@ -771,6 +771,13 @@ $opencloset-darken-yellow: desaturate(darken($opencloset-yellow, 4%), 10%);
             }
         }
     }
+    #stat-status {
+        h2 {
+            span.date {
+                font-weight: bold;
+            }
+        }
+    }
     .step-content {
         .step-pane {
             h3 {
