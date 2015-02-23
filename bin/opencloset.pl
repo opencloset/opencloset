@@ -5586,5 +5586,32 @@ get '/stat/clothes/amount/category/:category' => sub {
     );
 } => 'stat-clothes-amount-category';
 
+get '/stat/clothes/fav' => sub {
+    my $self = shift;
+
+    my $default_category = 'jacket';
+    my $default_limit    = 10;
+
+    my $dt_today = DateTime->now( time_zone => app->config->{timezone} );
+    my $dt_month_before = $dt_today->clone->subtract( months => 1 );
+    unless ($dt_month_before) {
+        app->log->warn("cannot create end datetime object");
+        $self->redirect_to( $self->url_for('/') );
+        return;
+    }
+
+    $self->redirect_to(
+        $self->url_for( '/stat/clothes/fav/' . $default_category )->query(
+            start_date => $dt_month_before->ymd,
+            end_date   => $dt_today->ymd,
+            limit      => $default_limit,
+        )
+    );
+};
+
+get '/stat/clothes/fav/:category' => sub {
+    my $self = shift;
+};
+
 app->secrets( app->defaults->{secrets} );
 app->start;
