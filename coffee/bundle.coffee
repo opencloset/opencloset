@@ -145,6 +145,21 @@ $ ->
           success_cb( data, textStatus, jqXHR )
         error: (jqXHR, textStatus, errorThrown) ->
           error_cb( jqXHR, textStatus, errorThrown )
+    charScreenWidth: (ch) ->
+      return 0 if ch is null || ch.length == 0
+
+      charCode = ch.charCodeAt(0)
+      return 1 if charCode <= 0x00007F # 1 bytes
+      return 2 if charCode <= 0x0007FF # 2 bytes
+      return 2 if charCode <= 0x00FFFF # 3 bytes
+      return 2
+    strScreenWidth: (str) ->
+      return 0 if str is null || str.length == 0
+
+      size = 0
+      for i in [ 0..str.length ]
+        size += OpenCloset.charScreenWidth( str.charAt(i) )
+      return size
 
   #
   # return nothing

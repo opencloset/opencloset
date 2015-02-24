@@ -10,6 +10,15 @@ $ ->
       text: '전화 요망'
       msg:  '안녕하세요. 열린옷장입니다. 전화부탁드립니다.'
 
+  updateMsgScreenWidth = ->
+    msg   = $('textarea[name=msg]').prop('value')
+    width = OpenCloset.strScreenWidth(msg)
+    $('.msg-screen-width').html(width)
+
+  $('textarea[name=msg]')
+    .on( 'keyup', (e)  -> updateMsgScreenWidth() )
+    .on( 'change', (e) -> updateMsgScreenWidth() )
+
   #
   # dynamic chosen item manupulation
   # http://stackoverflow.com/questions/11352207/jquery-chosen-plugin-add-options-dynamically
@@ -18,6 +27,7 @@ $ ->
   $('select[name=macro]').trigger("liszt:updated")
   $('select[name=macro]').change ->
     $('textarea[name=msg]').prop( 'value', macros[ $(this).prop('value') ].msg )
+    updateMsgScreenWidth()
 
   $('#btn-sms-send').click (e) ->
     to  = $('input[name=to]').prop('value')
