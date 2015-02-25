@@ -46,6 +46,15 @@
       <div class="widget-main">
         <p class="pre_category" data-category="<%= $order->user->user_info->pre_category %>"></p>
         <p class="pre_color"    data-color="<%= $order->user->user_info->pre_color %>"></p>
+        <p class="wearon_date">
+          착용 날짜:
+          % if ( $order->wearon_date ) {
+            %= $order->wearon_date->ymd
+          % }
+          % elsif ( $order->user->user_info->wearon_date ) {
+            %= $order->user->user_info->wearon_date->ymd
+          % }
+        </p>
         <div class="hr hr12 dotted"></div>
         <p>
           <a href="<%= url_for( '/order/' . $order->id ) %>"> 주문서 </a>
