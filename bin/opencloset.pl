@@ -5513,16 +5513,16 @@ get '/stat/clothes/amount/category/:category' => sub {
     my $self = shift;
 
     my %criterion_of = (
-        belt      => q{},
+        belt      => 'length',
         blouse    => 'bust',
-        coat      => 'bust',
-        jacket    => 'bust',
-        onepiece  => q{},
+        coat      => 'topbelly',
+        jacket    => 'topbelly',
+        onepiece  => 'topbelly',
         pants     => 'waist',
         shirt     => 'bust',
         shoes     => 'length',
-        skirt     => 'waist',
-        tie       => q{},
+        skirt     => 'hip',
+        tie       => 'color',
         waistcoat => 'bust',
     );
 
