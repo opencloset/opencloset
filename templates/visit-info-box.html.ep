@@ -199,7 +199,6 @@
                           % my @colors = (
                           %   [ 1 => '첫' ],
                           %   [ 2 => '두' ],
-                          %   [ 3 => '세' ],
                           % );
                           % for my $color (@colors) {
                             <label class="block clearfix">
