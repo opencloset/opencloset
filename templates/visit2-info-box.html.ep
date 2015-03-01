@@ -135,20 +135,6 @@
                           <input type="hidden" name="booking-saved" value="<%= $booking ? $booking->id : '' %>" data-ymd="<%= $booking ? $booking->date->strftime('%Y-%m-%d') : '' %>" data-hm="<%= $booking ? $booking->date->strftime('%H:%M') : '' %>" />
 
                           <label class="block clearfix">
-                            <span class="block input-icon input-icon-right">
-                              <input
-                                class="form-control"
-                                name="wearon_date"
-                                placeholder="착용 날짜를 고르세요."
-                                data-date-format="yyyy-mm-dd"
-                                data-date-start-date="<%= $now->ymd %>"
-                                value="<%= ( $order || $load || $user->user_info->wearon_date ) ? $user->user_info->wearon_date->ymd : q{} %>"
-                              />
-                              <i class="icon-calendar"></i>
-                            </span>
-                          </label>
-
-                          <label class="block clearfix">
                             <select class="width-100 chosen-select" name="purpose" data-placeholder="대여 목적을 선택해주세요." data-purpose="<%= ( $order || $load ) ? $user->user_info->purpose : q{} %>">
                               <option value=""                  > 대여 목적을 선택해주세요. </option>
                               <option value="입사면접"          > 입사면접                  </option>
@@ -175,6 +161,20 @@
                             <span class="block input-icon input-icon-right">
                               <input name="purpose2" type="text" class="form-control" placeholder="대여 목적에 대한 자세한 설명" value="<%= ( $order || $load ) ? $user->user_info->purpose2 : q{} %>" />
                               <p> 입사 면접인 경우 응시 기업 및 분야를, 결혼식인 경우 누구의 결혼식인지를 자세하게 입력해주세요.  저희가 적합한 옷을 준비하는데 큰 도움이 됩니다. :) </p>
+                            </span>
+                          </label>
+
+                          <label class="block clearfix">
+                            <span class="block input-icon input-icon-right">
+                              <input
+                                class="form-control"
+                                name="wearon_date"
+                                placeholder="착용 날짜를 고르세요."
+                                data-date-format="yyyy-mm-dd"
+                                data-date-start-date="<%= $now->ymd %>"
+                                value="<%= ( $order || $load || $user->user_info->wearon_date ) ? $user->user_info->wearon_date->ymd : q{} %>"
+                              />
+                              <i class="icon-calendar"></i>
                             </span>
                           </label>
 
