@@ -853,6 +853,15 @@ $opencloset-darken-yellow: desaturate(darken($opencloset-yellow, 4%), 10%);
     }
 }
 
+/*
+ * chosen.js scrolled out of view
+ *   - https://github.com/harvesthq/chosen/issues/86
+ *   - https://github.com/harvesthq/chosen/issues/59
+ */
+.login-layout .visit-info-box.widget-box {
+    overflow:visible;
+}
+
 #modal-booking {
     .modal-body {
         padding-top: 0;
