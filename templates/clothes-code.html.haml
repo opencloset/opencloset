@@ -248,4 +248,13 @@
 
                       .space-20
 
-                      = include 'partials/recent-orders', orders => [ map { $_->order } $clothes->order_details ];
+                      - my @search_params = (
+                      -   {
+                      -     'order.parent_id' => undef,
+                      -   },
+                      -   {
+                      -     join     => [qw/ order /],
+                      -     order_by => { -desc => 'order.rental_date' },
+                      -   },
+                      - );
+                      = include 'partials/recent-orders', orders => [ map { $_->order } $clothes->order_details(@search_params) ];

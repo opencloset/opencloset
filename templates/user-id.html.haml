@@ -222,4 +222,8 @@
 
                       .space-20
 
-                      = include 'partials/recent-orders', orders => [ $user->orders ];
+                      - my @search_params = (
+                      -   { 'parent_id' => undef },
+                      -   { order_by    => { -desc => 'rental_date' } },
+                      - );
+                      = include 'partials/recent-orders', orders => [ $user->orders(@search_params) ];
