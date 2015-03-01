@@ -49,49 +49,6 @@
                           빌린 횟수
                       .hr.hr16.dotted
 
-                      %div
-                        - map { $average_size->{$_} = sprintf "%.1f", $average_size->{$_} } keys %$average_size;
-                        %span.label.label-success= $average_size->{height}   || '-'
-                        %span.label.label-success= $average_size->{weight}   || '-'
-                        %br
-                        %span.label.label-info=    $average_size->{bust}     || '-'
-                        %span.label.label-info=    $average_size->{waist}    || '-'
-                        %span.label.label-info=    $average_size->{hip}      || '-'
-                        %span.label.label-info=    $average_size->{topbelly} || '-'
-                        %span.label.label-info=    $average_size->{belly}    || '-'
-                        %br
-                        %span.label.label-warning= $average_size->{thigh}    || '-'
-                        %span.label.label-warning= $average_size->{arm}      || '-'
-                        %span.label.label-warning= $average_size->{leg}      || '-'
-                        %span.label.label-warning= $average_size->{knee}     || '-'
-                        %span.label.label-warning= $average_size->{foot}     || '-'
-
-                      .space-6
-
-                      .hr.hr12.dotted
-
-                      - for my $size (@$recent_sizes) {
-                        %div
-                          %span=                     $size->{bestfit} ? 'B' : q{}
-                          %span.label.label-success= $size->{height}   || '-'
-                          %span.label.label-success= $size->{weight}   || '-'
-                          %br
-                          %span.label.label-info=    $size->{bust}     || '-'
-                          %span.label.label-info=    $size->{waist}    || '-'
-                          %span.label.label-info=    $size->{hip}      || '-'
-                          %span.label.label-info=    $size->{topbelly} || '-'
-                          %span.label.label-info=    $size->{belly}    || '-'
-                          %br
-                          %span.label.label-warning= $size->{thigh}    || '-'
-                          %span.label.label-warning= $size->{arm}      || '-'
-                          %span.label.label-warning= $size->{leg}      || '-'
-                          %span.label.label-warning= $size->{knee}     || '-'
-                          %span.label.label-warning= $size->{foot}     || '-'
-                        .space-6
-                      - }
-
-                      .hr.hr16.dotted
-
                     /
                     / right
                     /
@@ -102,7 +59,100 @@
                         /
                         .widget-header.widget-header-small
                           %h4.blue.smaller
-                            %i.icon-user.orange
+                            %i.icon-bar-chart.orange
+                            의류 정보
+                        /
+                        / body
+                        /
+                        .widget-body
+                          .widget-main.padding-8
+                            %table.table.table-striped.table-bordered
+                              %thead
+                                %tr
+                                  %th #
+                                  %th BF
+                                  %th 키
+                                  %th 몸무게
+                                  %th 가슴
+                                  %th 허리
+                                  %th 엉덩이
+                                  %th 윗배
+                                  %th 배꼽
+                                  %th 허벅지
+                                  %th 팔
+                                  %th 다리
+                                  %th 무릎
+                                  %th 발
+                              %tbody
+                                %tr
+                                  - map { $average_size->{$_} = sprintf "%.1f", $average_size->{$_} } keys %$average_size;
+                                  %td
+                                    %span Avg.
+                                  %td
+                                  %td
+                                    %span.label.label-success= $average_size->{height}   || q{}
+                                  %td
+                                    %span.label.label-success= $average_size->{weight}   || q{}
+                                  %td
+                                    %span.label.label-info=    $average_size->{bust}     || q{}
+                                  %td
+                                    %span.label.label-info=    $average_size->{waist}    || q{}
+                                  %td
+                                    %span.label.label-info=    $average_size->{hip}      || q{}
+                                  %td
+                                    %span.label.label-info=    $average_size->{topbelly} || q{}
+                                  %td
+                                    %span.label.label-info=    $average_size->{belly}    || q{}
+                                  %td
+                                    %span.label.label-warning= $average_size->{thigh}    || q{}
+                                  %td
+                                    %span.label.label-warning= $average_size->{arm}      || q{}
+                                  %td
+                                    %span.label.label-warning= $average_size->{leg}      || q{}
+                                  %td
+                                    %span.label.label-warning= $average_size->{knee}     || q{}
+                                  %td
+                                    %span.label.label-warning= $average_size->{foot}     || q{}
+                                - my $count = 0;
+                                - for my $size (@$recent_sizes) {
+                                  %tr
+                                    %td
+                                      %span= ++$count
+                                    %td
+                                      %span=                     $size->{bestfit} ? 'v' : q{}
+                                    %td
+                                      %span.label.label-success= $size->{height}   || q{}
+                                    %td
+                                      %span.label.label-success= $size->{weight}   || q{}
+                                    %td
+                                      %span.label.label-info=    $size->{bust}     || q{}
+                                    %td
+                                      %span.label.label-info=    $size->{waist}    || q{}
+                                    %td
+                                      %span.label.label-info=    $size->{hip}      || q{}
+                                    %td
+                                      %span.label.label-info=    $size->{topbelly} || q{}
+                                    %td
+                                      %span.label.label-info=    $size->{belly}    || q{}
+                                    %td
+                                      %span.label.label-warning= $size->{thigh}    || q{}
+                                    %td
+                                      %span.label.label-warning= $size->{arm}      || q{}
+                                    %td
+                                      %span.label.label-warning= $size->{leg}      || q{}
+                                    %td
+                                      %span.label.label-warning= $size->{knee}     || q{}
+                                    %td
+                                      %span.label.label-warning= $size->{foot}     || q{}
+                                - }
+
+                      .widget-box.transparent
+                        /
+                        / header
+                        /
+                        .widget-header.widget-header-small
+                          %h4.blue.smaller
+                            %i.icon-female.orange
                             의류 정보
                         /
                         / body
