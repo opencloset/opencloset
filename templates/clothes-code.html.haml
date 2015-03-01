@@ -72,6 +72,7 @@
 
                       - for my $size (@$recent_sizes) {
                         %div
+                          %span=                     $size->{bestfit} ? 'B' : q{}
                           %span.label.label-success= $size->{height}   || '-'
                           %span.label.label-success= $size->{weight}   || '-'
                           %br

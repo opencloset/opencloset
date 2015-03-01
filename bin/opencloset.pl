@@ -4674,6 +4674,7 @@ get '/clothes/:code' => sub {
 
             my %order_data = $order_detail->order->get_columns;
             my %size = map { $_ => $order_data{$_} } @measurements;
+            $size{bestfit} = $order_detail->order->bestfit;
 
             push @recent_sizes, \%size;
         }
