@@ -4653,8 +4653,14 @@ get '/clothes/:code' => sub {
     my @recent_sizes;
     for my $order_detail (
         $clothes->order_details->search(
-            { status_id => { '!=' => undef } },
-            { order_by  => { -desc => 'id' } },
+            {
+                'me.status_id'    => { '!=' => undef },
+                'order.parent_id' => undef,
+            },
+            {
+                order_by => { -desc => 'id' },
+                join     => [ qw/ order / ],
+            },
         )
     )
     {
