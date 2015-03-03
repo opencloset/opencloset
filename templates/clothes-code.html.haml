@@ -73,13 +73,13 @@
                                   %th BF
                                   %th 키
                                   %th 몸무게
-                                  %th 가슴
-                                  %th 허리
-                                  %th 엉덩이
                                   %th 윗배
+                                  %th 가슴
+                                  %th 팔
                                   %th 배꼽
                                   %th 허벅지
-                                  %th 팔
+                                  %th 엉덩이
+                                  %th 허리
                                   %th 다리
                                   %th 무릎
                                   %th 발
@@ -90,29 +90,29 @@
                                     %span Avg.
                                   %td
                                   %td
-                                    %span.label.label-success= $average_size->{height}   || q{}
+                                    %span.label.label-success{:title => 'height'}= $average_size->{height}   || q{}
                                   %td
-                                    %span.label.label-success= $average_size->{weight}   || q{}
+                                    %span.label.label-success{:title => 'weight'}= $average_size->{weight}   || q{}
                                   %td
-                                    %span.label.label-info=    $average_size->{bust}     || q{}
+                                    %span.label.label-info{:title => 'topbelly'}=  $average_size->{topbelly} || q{}
                                   %td
-                                    %span.label.label-info=    $average_size->{waist}    || q{}
+                                    %span.label.label-info{:title => 'bust'}=      $average_size->{bust}     || q{}
                                   %td
-                                    %span.label.label-info=    $average_size->{hip}      || q{}
+                                    %span.label.label-warning{:title => 'arm'}=    $average_size->{arm}      || q{}
                                   %td
-                                    %span.label.label-info=    $average_size->{topbelly} || q{}
+                                    %span.label.label-info{:title => 'belly'}=     $average_size->{belly}    || q{}
                                   %td
-                                    %span.label.label-info=    $average_size->{belly}    || q{}
+                                    %span.label.label-warning{:title => 'thigh'}=  $average_size->{thigh}    || q{}
                                   %td
-                                    %span.label.label-warning= $average_size->{thigh}    || q{}
+                                    %span.label.label-info{:title => 'hip'}=       $average_size->{hip}      || q{}
                                   %td
-                                    %span.label.label-warning= $average_size->{arm}      || q{}
+                                    %span.label.label-info{:title => 'waist'}=     $average_size->{waist}    || q{}
                                   %td
-                                    %span.label.label-warning= $average_size->{leg}      || q{}
+                                    %span.label.label-warning{:title => 'leg'}=    $average_size->{leg}      || q{}
                                   %td
-                                    %span.label.label-warning= $average_size->{knee}     || q{}
+                                    %span.label.label-warning{:title => 'knee'}=   $average_size->{knee}     || q{}
                                   %td
-                                    %span.label.label-warning= $average_size->{foot}     || q{}
+                                    %span.label.label-warning{:title => 'foot'}=   $average_size->{foot}     || q{}
                                 - my $count = 0;
                                 - for my $size (@$recent_sizes) {
                                   %tr
@@ -121,29 +121,29 @@
                                     %td
                                       %span=                     $size->{bestfit} ? 'v' : q{}
                                     %td
-                                      %span.label.label-success= $size->{height}   || q{}
+                                      %span.label.label-success{:title => 'height'}= $size->{height}   || q{}
                                     %td
-                                      %span.label.label-success= $size->{weight}   || q{}
+                                      %span.label.label-success{:title => 'weight'}= $size->{weight}   || q{}
                                     %td
-                                      %span.label.label-info=    $size->{bust}     || q{}
+                                      %span.label.label-info{:title => 'topbelly'}=  $size->{topbelly} || q{}
                                     %td
-                                      %span.label.label-info=    $size->{waist}    || q{}
+                                      %span.label.label-info{:title => 'bust'}=      $size->{bust}     || q{}
                                     %td
-                                      %span.label.label-info=    $size->{hip}      || q{}
+                                      %span.label.label-warning{:title => 'arm'}=    $size->{arm}      || q{}
                                     %td
-                                      %span.label.label-info=    $size->{topbelly} || q{}
+                                      %span.label.label-info{:title => 'belly'}=     $size->{belly}    || q{}
                                     %td
-                                      %span.label.label-info=    $size->{belly}    || q{}
+                                      %span.label.label-warning{:title => 'thigh'}=  $size->{thigh}    || q{}
                                     %td
-                                      %span.label.label-warning= $size->{thigh}    || q{}
+                                      %span.label.label-info{:title => 'hip'}=       $size->{hip}      || q{}
                                     %td
-                                      %span.label.label-warning= $size->{arm}      || q{}
+                                      %span.label.label-info{:title => 'waist'}=     $size->{waist}    || q{}
                                     %td
-                                      %span.label.label-warning= $size->{leg}      || q{}
+                                      %span.label.label-warning{:title => 'leg'}=    $size->{leg}      || q{}
                                     %td
-                                      %span.label.label-warning= $size->{knee}     || q{}
+                                      %span.label.label-warning{:title => 'knee'}=   $size->{knee}     || q{}
                                     %td
-                                      %span.label.label-warning= $size->{foot}     || q{}
+                                      %span.label.label-warning{:title => 'foot'}=   $size->{foot}     || q{}
                                 - }
 
                       .widget-box.transparent
