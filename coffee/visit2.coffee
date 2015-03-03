@@ -392,6 +392,7 @@ $ ->
   $("#postcodify").postcodify
     api: "/api/postcode/search.json"
     timeout: 10000    # 10 seconds
+    hideOldAddresses: false
     insertDbid : ".postcodify_dbid"
     insertAddress : ".postcodify_address"
     insertJibeonAddress: ".postcodify_jibeonaddress"
