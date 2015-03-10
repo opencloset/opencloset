@@ -10,14 +10,14 @@
 - use List::Util;
 - use Statistics::Basic;
 
-- my @process = (qw/대기 치수측정 의류준비 탈의 수선 포장 결제/);
+- my @status_names = (qw/대기 치수측정 의류준비 탈의 수선 포장 결제/);
 - my %status;
 - my %status_mean;
 - while ( my $order = $order_rs->next ) {
 -   my %analyze = $order->analyze_order_status_logs;
 -   my $booking_date = $order->booking->date->ymd;
 -   push @{ $status{$booking_date} } , { order => $order, analyze => \%analyze };
--   push @{ $status_mean{$booking_date}{$_} }, $analyze{elapsed_time}{$_} for @process;
+-   push @{ $status_mean{$booking_date}{$_} }, $analyze{elapsed_time}{$_} for @status_names;
 - }
 
 .search
@@ -61,8 +61,8 @@
                 %a{ :href => "#{ url_for( '/order' )->query('booking_ymd' => $day ) }" }= $day
             - }
           - my $total = 0;
-          - for my $process (@process) {
-            - my @taken_times = grep { defined && $_ > 0 } @{ $status_mean{$day}{$process} };
+          - for my $status_name (@status_names) {
+            - my @taken_times = grep { defined && $_ > 0 } @{ $status_mean{$day}{$status_name} };
             - my $avg_sec = Statistics::Basic::mean( @taken_times )->query;
             - if ($avg_sec) {
               %td= convert_sec_to_hms($avg_sec);
@@ -97,7 +97,7 @@
       - for my $log ( @{ $status{$dt->ymd} }) {
         - my $order = $log->{order};
         - my %elapsed_time = %{ $log->{analyze}->{elapsed_time} };
-        - my $total = List::Util::sum0 grep { defined } @elapsed_time{@process};
+        - my $total = List::Util::sum0 grep { defined } @elapsed_time{@status_names};
         - next unless $total;
         %tr
           %td= ++$count
@@ -105,8 +105,8 @@
             %a{ :href => "#{ url_for( '/order/' . $order->id ) }" }= $order->id
           %td
             %a{ :href => "#{ url_for( '/user/' . $order->user->id ) }" }= $order->user->name
-          - for my $step (@process) {
-            - my $taken_sec = $elapsed_time{$step};
+          - for my $status_name (@status_names) {
+            - my $taken_sec = $elapsed_time{$status_name};
             %td= $taken_sec ? convert_sec_to_hms($taken_sec) : q{};
           - }
           %td= convert_sec_to_hms($total);
