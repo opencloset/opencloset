@@ -62,14 +62,21 @@
             - }
           - my $total = 0;
           - for my $status_name (@status_names) {
-            - my @taken_times = grep { defined && $_ > 0 } @{ $status_mean{$day}{$status_name} };
-            - my $avg_sec = Statistics::Basic::mean( @taken_times )->query;
-            - if ($avg_sec) {
-              %td= convert_sec_to_hms($avg_sec);
-              - $total += $avg_sec;
-            - } else {
-              %td
-            - }
+          -   my @taken_times;
+          -   for ( @{ $status_mean{$day}{$status_name} } ) {
+          -     next unless defined;
+          -     next unless $_ > 0;
+          -     next if     $_ < 60 && $status_name =~ m/^(치수측정|의류준비|탈의|수선|포장|결제)$/; # GH 440
+          -     push @taken_times, $_;
+          -   }
+          -   my $avg_sec = Statistics::Basic::mean( @taken_times )->query;
+          -   if ($avg_sec) {
+            %td= convert_sec_to_hms($avg_sec);
+          -     $total += $avg_sec;
+          -   }
+          -   else {
+            %td
+          -   }
           - }
           %td= convert_sec_to_hms($total);
       - }
