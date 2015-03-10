@@ -45,6 +45,12 @@
     %a{ :href => "#{ url_with->query([ p => 1, status => '42' ]) }" } 환불
   %span= '|'
   %span
+    %a{ :href => "#{ url_with->query([ p => 1, status => '40' ]) }" } 대여안함
+  %span= '|'
+  %span
+    %a{ :href => "#{ url_with->query([ p => 1, status => '43' ]) }" } 사이즈없음
+  %span= '|'
+  %span
     %a{ :href => "#{ url_with->query([ p => 1, status => 'undef' ]) }" } 상태없음
 
 .space-4
