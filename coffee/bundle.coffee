@@ -74,7 +74,7 @@ $ ->
       shirt:     { str: '셔츠',     price: 5000  }
       blouse:    { str: '블라우스', price: 5000  }
       shoes:     { str: '신발',     price: 5000  }
-      tie:       { str: '넥타이',   price: 2000  }
+      tie:       { str: '넥타이',   price: 0     }
       onepiece:  { str: '원피스',   price: 10000 }
       coat:      { str: '코트',     price: 10000 }
       waistcoat: { str: '조끼',     price: 5000  }
