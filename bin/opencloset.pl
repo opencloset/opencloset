@@ -253,6 +253,7 @@ helper tracking_url => sub {
     return unless $order->return_method;
 
     my ( $company, $id ) = split /,/, $order->return_method;
+    return unless $id;
 
     my $driver;
     {
