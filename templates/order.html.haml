@@ -69,6 +69,8 @@
         %th 비고
     %tbody
       - while ( my $order = $order_list->next ) {
+      -   my $overdue  = calc_overdue($order);
+      -   my $late_fee = calc_late_fee($order);
         %tr
           %td.center
             %a{ :href => "#{url_for('/order/' . $order->id)}" }= $order->id
@@ -78,11 +80,21 @@
               - if ( $order->status ) {
               -   $status = $order->status->name;
               -   if ( $status eq '대여중' ) {
-              -     my $late_fee = calc_late_fee($order);
-              -     $status .= '(연체) ' . commify($late_fee) . '원' if $late_fee;
+              -     $status .= '(연체) ' . commify($late_fee) . '원' if $overdue;
               -   }
               - }
               %span.label.order-status{ 'data-order-status' => "#{ $order->status ? $order->status->name : q{} }" }= $status || '상태없음'
+              - if ($overdue) {
+              -   my $sms_str = sprintf(
+              -     '%s님 열린옷장 대여기간이 %d일 연체되었습니다. %s원 입금 부탁드립니다. 국민은행 20570104-269524',
+              -     $order->user->name,
+              -     $overdue,
+              -     commify($late_fee),
+              -   );
+                %br
+                %a{ :href => "#{ url_for('/sms')->query( to => $order->user->user_info->phone, msg => $sms_str ) }" }
+                  연체 문자 전송
+              - }
           %td
             = $order->rental_date ? $order->rental_date->ymd : q{}
           %td
