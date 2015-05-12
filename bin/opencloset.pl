@@ -5261,7 +5261,11 @@ get '/booking/:ymd/open' => sub {
     #   DateTime->day_of_week은 요일을 반환하며
     #   1은 월요일 7은 일요일 입니다.
     #
-    my $holiday = ( $dt_start->day_of_week == 7 || $dt_start->day_of_week == 1 ) ? 1 : 0;
+    # GH #460
+    #
+    #   열린옷장 휴무일을 기존 일, 월요일에서 일요일만으로 한정합니다.
+    #
+    my $holiday = ( $dt_start->day_of_week == 7 ) ? 1 : 0;
 
     for my $gender ( qw/ male female / ) {
         for my $key ( sort keys %{ app->config->{booking}{$gender} } ) {
