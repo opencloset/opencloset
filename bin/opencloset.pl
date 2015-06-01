@@ -971,7 +971,7 @@ helper update_order => sub {
             return $order unless $to;
             return $order if     $to == $from;
 
-            my $res = HTTP::Tiny->new(timeout => 3)->post_form(app->config->{monitor_uri} . '/events', {
+            my $res = HTTP::Tiny->new(timeout => 1)->post_form(app->config->{monitor_uri} . '/events', {
                 sender   => 'order',
                 order_id => $order->id,
                 from     => $from,
