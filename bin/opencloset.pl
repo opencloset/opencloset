@@ -39,6 +39,7 @@ use Gravatar::URL;
 use HTTP::Tiny;
 use List::MoreUtils qw( zip );
 use List::Util qw( sum );
+use MIME::Base64;
 use Mojo::Util qw( encode );
 use Parcel::Track;
 use SMS::Send::KR::CoolSMS;
@@ -1399,8 +1400,15 @@ group {
         return 1 if $self->is_user_authenticated;
 
         my $req_path = $self->req->url->path;
+        my $authorization = $self->req->headers->authorization;
         return 1 if $req_path =~ m{^/api/sms/validation(\.json)?$};
         return 1 if $req_path =~ m{^/api/postcode/search(\.json)?$};
+        if ($req_path =~ m{^/api/order/\d+(\.json)?$} && $authorization) {
+            $authorization =~ s/^Basic //;
+            $authorization = decode_base64($authorization);
+            my ($username, $password) = split /:/, $authorization;
+            return 1 if app->config->{external_service}{$username} eq $password;
+        }
 
         if ( $req_path =~ m{^/api/gui/booking-list(\.json)?$} ) {
             my $phone = $self->param('phone');
