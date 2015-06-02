@@ -5097,29 +5097,68 @@ post '/order/:id/update' => sub {
     my $order = $self->get_order( \%search_params );
     return unless $order;
 
+    my @status_objs = $DB->resultset('Status')->all;
+    my %status;
+    $status{$_->id} = $_->name for @status_objs;
+
+    my $name  = $update_params{name};
+    my $value = $update_params{value};
+    my $pk    = $update_params{pk};
+    app->log->info( "order update: $name.$value" );
+
     #
     # update column
     #
-    if ( $update_params{name} =~ s/^detail-// ) {
-        my $detail = $order->order_details({ id => $update_params{pk} });
+    if ( $name =~ s/^detail-// ) {
+        my $detail = $order->order_details({ id => $pk })->next;
         if ($detail) {
-            $detail->update({ $update_params{name} => $update_params{value} });
+            unless ( $detail->$name eq $value ) {
+                app->log->info(
+                    sprintf(
+                        "  order_detail.$name %d [%s] -> [%s]",
+                        $detail->id,
+                        $detail->$name // 'N/A',
+                        $value         // 'N/A',
+                    ),
+                );
+                $detail->update({ $name => $value });
+            }
         }
     }
     else {
-        if ( $update_params{name} eq 'status_id' ) {
+        if ( $name eq 'status_id' ) {
             my $guard = $DB->txn_scope_guard;
             try {
-                #
-                # update order.status_id
-                #
-                $order->update({ $update_params{name} => $update_params{value} });
+                unless ( $order->status_id == $value ) {
+                    #
+                    # update order.status_id
+                    #
+                    app->log->info(
+                        sprintf(
+                            "  order.status: %d [%s] -> [%s]",
+                            $order->id,
+                            $order->status->name // 'N/A',
+                            $status{$value}      // 'N/A',
+                        ),
+                    );
+                    $order->update({ $name => $value })
+                }
 
                 #
                 # update clothes.status_id
                 #
                 for my $clothes ( $order->clothes ) {
-                    $clothes->update({ $update_params{name} => $update_params{value} });
+                    unless ( $clothes->status_id == $value ) {
+                        app->log->info(
+                            sprintf(
+                                "  clothes.status: [%s] [%s] -> [%s]",
+                                $clothes->code,
+                                $clothes->status->name // 'N/A',
+                                $status{ $value }      // 'N/A',
+                            ),
+                        );
+                        $clothes->update({ $name => $value });
+                    }
                 }
 
                 #
@@ -5127,7 +5166,18 @@ post '/order/:id/update' => sub {
                 #
                 for my $order_detail ( $order->order_details ) {
                     next unless $order_detail->clothes;
-                    $order_detail->update({ $update_params{name} => $update_params{value} });
+
+                    unless ( $order_detail->status_id == $value ) {
+                        app->log->info(
+                            sprintf(
+                                "  order_detail.status: %d [%s] -> [%s]",
+                                $order_detail->id,
+                                $order_detail->status->name // 'N/A',
+                                $status{$value}             // 'N/A',
+                            ),
+                        );
+                        $order_detail->update({ $name => $value });
+                    }
                 }
 
                 $guard->commit;
@@ -5138,7 +5188,17 @@ post '/order/:id/update' => sub {
             };
         }
         else {
-            $order->update({ $update_params{name} => $update_params{value} });
+            unless ( $order->$name eq $value ) {
+                app->log->info(
+                    sprintf(
+                        "  order.$name: %d %s -> %s",
+                        $order->id,
+                        $order->$name // 'N/A',
+                        $value        // 'N/A',
+                    ),
+                );
+                $order->update({ $name => $value });
+            }
         }
     }
 
