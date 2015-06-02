@@ -647,7 +647,7 @@
                       -   if ( $order_status eq '대여중' ) {
                         .search.pull-left.return-process
                           .input-group
-                            %input#clothes-search.form-control{ :name => 'clothes-search' :type => 'text', :placeholder => '의류 품번' }
+                            %input#clothes-search.form-control{ :name => 'clothes-search' :type => 'text', :placeholder => '의류 품번', :style => 'ime-mode:disabled' }
                             %span.input-group-btn
                               %button#btn-clothes-search.btn.btn-default.btn-sm{ :type => 'submit' }
                                 %i.icon-search.bigger-110 검색
