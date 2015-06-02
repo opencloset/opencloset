@@ -245,6 +245,7 @@ $ ->
           success: (data, textStatus, jqXHR) ->
             $.ajax $(e.target).data('monitor-url'),
               type: 'POST'
+              timeout: 1000
               data:
                 sender:   'order'
                 order_id: order_id
