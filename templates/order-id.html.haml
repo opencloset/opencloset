@@ -497,7 +497,13 @@
                                     %td.center= ++$count
                                     - if ( $detail->clothes ) {
                                       %td
-                                        %a{ :href => "/clothes/#{ trim_clothes_code($detail->clothes) }" }= $detail->name
+                                        %span
+                                          %a{ :href => "/clothes/#{ trim_clothes_code($detail->clothes) }" }= $detail->name
+                                        %br
+                                        %span
+                                          %a{ :href => "/donation/#{ $detail->clothes->donation_id }" }= $detail->clothes->donation_id
+                                          = '-'
+                                          %a{ :href => "/user/#{ $detail->clothes->donation->user_id }" }= $detail->clothes->donation->user->name
                                       %td
                                         - if ( $order_status ne '결제대기' && $detail->status ) {
                                           %span.order-status.label{ 'data-order-detail-status' => "#{ $detail->status->name }" }
