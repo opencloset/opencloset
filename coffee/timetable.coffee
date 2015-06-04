@@ -274,6 +274,5 @@ $ ->
     if $box.find('.order-bestfit').data('value') isnt bestfit
       $editable = $box.find('.editable.order-bestfit')
       $editable.editable('setValue', bestfit, true)
-      updateBestfit($editable)
   sock.onerror = (e) ->
     location.reload()
