@@ -265,10 +265,14 @@ $ ->
   sock.onmessage = (e) ->
     data     = JSON.parse(e.data)
     order_id = data.order.id
+    bestfit  = data.order.bestfit
     $box     = $(".people-box[data-order-id='#{order_id}']")
     if $box.find('.order-status').data('value') isnt data.to
       $editable = $box.find('.editable.order-status')
       $editable.editable('setValue', data.to, true)
       updateStatus($editable)
+    if $box.find('.order-bestfit').data('value') isnt bestfit
+      $editable = $box.find('.editable.order-bestfit')
+      $editable.editable('setValue', bestfit, true)
   sock.onerror = (e) ->
     location.reload()
