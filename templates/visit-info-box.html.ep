@@ -193,6 +193,12 @@
                               <option value="blouse"> 블라우스 </option>
                             </select>
                             <p> 대여를 원하는 옷의 종류를 모두 선택해주세요. </p>
+                            <p id="expected-fee"></p>
+                            <p id="latefee-help" class="help-block" style="visible: none;">
+                              <small>대여기간은 3박4일 입니다. 너무 일찍 대여하시면 대여기간에 따른 연장 비용이 발생합니다.</small>
+                              <br>
+                              <small><strong>위의 연장 비용은 예상 비용이므로 실제와 다를 수 있으니 참고 용도로만 사용해주세요.<strong></small>
+                            </p>
                           </label>
 
                           <input type="hidden" name="pre_color" value="<%= ( $order || $load ) ? $user->user_info->pre_color : q{} %>">
