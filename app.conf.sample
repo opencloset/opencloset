@@ -11,6 +11,20 @@ use Mojo::JSON;
 my $SMS_FROM = '07043257521';
 my $PORT     = 8001;
 
+my %SMS = (
+    driver        => 'KR::APIStore',
+    'KR::CoolSMS' => {
+        _api_key    => $ENV{OPENCLOSET_COOLSMS_API_KEY}    || q{},
+        _api_secret => $ENV{OPENCLOSET_COOLSMS_API_SECRET} || q{},
+        _from       => $SMS_FROM,
+    },
+    'KR::APIStore' => {
+        _id            => $ENV{OPENCLOSET_APISTORE_ID}            || q{},
+        _api_store_key => $ENV{OPENCLOSET_APISTORE_API_STORE_KEY} || q{},
+        _from          => $SMS_FROM,
+    },
+);
+
 my $db_opts = $ENV{OPENCLOSET_DATABASE_OPTS} ? Mojo::JSON::decode_json( $ENV{OPENCLOSET_DATABASE_OPTS} ) : +{
     quote_char        => q{`},
     mysql_enable_utf8 => 1,
@@ -159,8 +173,7 @@ $db_opts->{AutoCommit} //= 1;
         base_url   => "http://localhost:$PORT/api",
         email      => q{},
         password   => q{},
-        api_key    => $ENV{OPENCLOSET_COOLSMS_API_KEY}    || q{},
-        api_secret => $ENV{OPENCLOSET_COOLSMS_API_SECRET} || q{},
+        sms        => \%SMS,
     },
 
     'opencloset-cron.pl' => {
@@ -181,11 +194,7 @@ $db_opts->{AutoCommit} //= 1;
     #
     # SMS
     #
-    sms => {
-        api_key    => $ENV{OPENCLOSET_COOLSMS_API_KEY}    || q{},
-        api_secret => $ENV{OPENCLOSET_COOLSMS_API_SECRET} || q{},
-        from       => $SMS_FROM,
-    },
+    sms => \%SMS,
 
     #
     # session

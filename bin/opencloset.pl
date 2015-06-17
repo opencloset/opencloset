@@ -41,6 +41,7 @@ use List::MoreUtils qw( zip );
 use List::Util qw( sum );
 use Mojo::Util qw( encode );
 use Parcel::Track;
+use SMS::Send::KR::APIStore;
 use SMS::Send::KR::CoolSMS;
 use SMS::Send;
 use String::Random;
@@ -3101,7 +3102,7 @@ group {
 
         my $sms = $DB->resultset('SMS')->create({
             %params,
-            from => app->config->{sms}{from},
+            from => app->config->{sms}{ app->config->{sms}{driver} }{_from},
         });
         return $self->error( 404, {
             str  => 'failed to create a new sms',
@@ -5437,12 +5438,13 @@ get '/sms' => sub {
     my %params = $self->get_params(qw/ to msg /);
 
     my $sender = SMS::Send->new(
-        'KR::CoolSMS',
-        _api_key    => app->config->{sms}{api_key},
-        _api_secret => app->config->{sms}{api_secret},
-        _from       => app->config->{sms}{from},
+        app->config->{sms}{driver},
+        %{ app->config->{sms}{ app->config->{sms}{driver} } },
     );
-    my $balance = $sender->balance;
+    app->log->debug( sprintf('sms.driver: [%s]', app->config->{sms}{driver}) );
+
+    my $balance = +{ success => undef };
+    $balance = $sender->balance if $sender->_OBJECT_->can('balance');
 
     $self->stash(
         to      => $params{to}  || q{},
