@@ -3317,7 +3317,7 @@ group {
 
         my $sms = $DB->resultset('SMS')->create({
             to   => $params{to},
-            from => app->config->{sms}{from},
+            from => app->config->{sms}{ app->config->{sms}{driver} }{_from},
             text => "열린옷장 인증번호: $password",
         });
         return $self->error( 404, {
@@ -4194,7 +4194,7 @@ any '/visit' => sub {
                 );
                 $DB->resultset('SMS')->create({
                     to   => $user->user_info->phone,
-                    from => app->config->{sms}{from},
+                    from => app->config->{sms}{ app->config->{sms}{driver} }{_from},
                     text => $msg,
                 }) or app->log->warn("failed to create a new sms: $msg");
 
@@ -4224,7 +4224,7 @@ any '/visit' => sub {
                         );
                         $DB->resultset('SMS')->create({
                             to   => $user->user_info->phone,
-                            from => app->config->{sms}{from},
+                            from => app->config->{sms}{ app->config->{sms}{driver} }{_from},
                             text => $msg,
                         }) or app->log->warn("failed to create a new sms: $msg");
                     }
@@ -4248,7 +4248,7 @@ any '/visit' => sub {
                         );
                         $DB->resultset('SMS')->create({
                             to   => $user->user_info->phone,
-                            from => app->config->{sms}{from},
+                            from => app->config->{sms}{ app->config->{sms}{driver} }{_from},
                             text => $msg,
                         }) or app->log->warn("failed to create a new sms: $msg");
                     }
