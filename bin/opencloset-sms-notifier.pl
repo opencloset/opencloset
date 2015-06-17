@@ -7,6 +7,7 @@ use warnings;
 use FindBin qw( $Bin $Script );
 use HTTP::Tiny;
 use JSON;
+use SMS::Send::KR::APIStore;
 use SMS::Send::KR::CoolSMS;
 use SMS::Send;
 use Unicode::GCString;
@@ -45,7 +46,7 @@ while ($continue) {
 
 sub do_work {
     for my $sms ( get_pending_sms_list() ) {
-        print STDERR "$CONF->{fake_sms},$sms->{id},$sms->{from},$sms->{to},$sms->{text}\n";
+        print STDERR "$CONF->{fake_sms},$CONF->{sms}{driver},$sms->{id},$sms->{from},$sms->{to},$sms->{text}\n";
 
         #
         # updating status to sending
@@ -59,13 +60,20 @@ sub do_work {
         # if fake_sms is set then fake sending sms
         # then return true always
         #
-        $ret = !$CONF->{fake_sms} ? send_sms($sms) : 1;
-        next unless $ret;
+        $ret = !$CONF->{fake_sms} ? send_sms($sms) : +{ success => 1, fake_sms => 1 };
+        next unless $ret->{success};
 
         #
         # updating status to sent and set return value
         #
-        update_sms( $sms, status => 'sent', ret => $ret || 0 );
+        update_sms(
+            $sms,
+            status    => 'sent',
+            ret       => $ret->{success} || 0,
+            method    => ( $CONF->{fake_sms} ? 'fake_sms' : $CONF->{sms}{driver} ),
+            detail    => encode_json($ret),
+            sent_date => time,
+        );
 
         sleep $CONF->{send_delay};
     }
@@ -130,15 +138,14 @@ sub send_sms {
         my $gcs  = Unicode::GCString->new($nfc);
         my $cols = $gcs->columns;
 
-        $type = 'LMS' if $cols > 88;
+        $type = 'LMS' if $cols > 80;
     }
 
     my $sender = SMS::Send->new(
-        'KR::CoolSMS',
-        _api_key    => $CONF->{api_key},
-        _api_secret => $CONF->{api_secret},
-        _from       => $sms->{from},
-        _type       => $type,
+        $CONF->{sms}{driver},
+        %{ $CONF->{sms}{ $CONF->{sms}{driver} } },
+        _from => $sms->{from},
+        _type => $type,
     );
 
     my $sent = $sender->send_sms(
@@ -146,5 +153,5 @@ sub send_sms {
         text => $sms->{text},
     );
 
-    return $sent->{success};
+    return $sent;
 }
