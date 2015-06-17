@@ -3125,7 +3125,7 @@ group {
         #
         # fetch params
         #
-        my %params = $self->get_params(qw/ id from to text status /);
+        my %params = $self->get_params(qw/ id from to text ret status /);
 
         #
         # validate params
@@ -3135,6 +3135,7 @@ group {
         $v->field(qw/ from to /)
             ->each( sub { shift->regexp(qr/^\d+$/) } );
         $v->field('text')->regexp(qr/^.+$/);
+        $v->field('ret')->regexp(qr/^\d+$/);
         $v->field('status')->in(qw/ pending sending sent /);
 
         unless ( $self->validate( $v, \%params ) ) {
