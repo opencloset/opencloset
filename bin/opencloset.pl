@@ -3125,7 +3125,7 @@ group {
         #
         # fetch params
         #
-        my %params = $self->get_params(qw/ id from to text ret status sent_date /);
+        my %params = $self->get_params(qw/ id from to text ret status method detail sent_date /);
 
         #
         # validate params

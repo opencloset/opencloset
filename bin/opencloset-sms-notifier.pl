@@ -45,7 +45,7 @@ while ($continue) {
 
 sub do_work {
     for my $sms ( get_pending_sms_list() ) {
-        print STDERR "$CONF->{fake_sms},$sms->{id},$sms->{from},$sms->{to},$sms->{text}\n";
+        print STDERR "$CONF->{fake_sms},SMS::Send::KR::CoolSMS,$sms->{id},$sms->{from},$sms->{to},$sms->{text}\n";
 
         #
         # updating status to sending
@@ -59,8 +59,8 @@ sub do_work {
         # if fake_sms is set then fake sending sms
         # then return true always
         #
-        $ret = !$CONF->{fake_sms} ? send_sms($sms) : 1;
-        next unless $ret;
+        $ret = !$CONF->{fake_sms} ? send_sms($sms) : +{ success => 1, fake_sms => 1 };
+        next unless $ret->{success};
 
         #
         # updating status to sent and set return value
@@ -69,6 +69,8 @@ sub do_work {
             $sms,
             status    => 'sent',
             ret       => $ret || 0,
+            method    => 'SMS::Send::KR::CoolSMS',
+            detail    => encode_json($ret),
             sent_date => time,
         );
 
@@ -151,5 +153,5 @@ sub send_sms {
         text => $sms->{text},
     );
 
-    return $sent->{success};
+    return $sent;
 }
