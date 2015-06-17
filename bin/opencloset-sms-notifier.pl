@@ -65,7 +65,12 @@ sub do_work {
         #
         # updating status to sent and set return value
         #
-        update_sms( $sms, status => 'sent', ret => $ret || 0 );
+        update_sms(
+            $sms,
+            status    => 'sent',
+            ret       => $ret || 0,
+            sent_date => time,
+        );
 
         sleep $CONF->{send_delay};
     }

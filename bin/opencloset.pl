@@ -3125,7 +3125,7 @@ group {
         #
         # fetch params
         #
-        my %params = $self->get_params(qw/ id from to text ret status /);
+        my %params = $self->get_params(qw/ id from to text ret status sent_date /);
 
         #
         # validate params
@@ -3137,6 +3137,7 @@ group {
         $v->field('text')->regexp(qr/^.+$/);
         $v->field('ret')->regexp(qr/^\d+$/);
         $v->field('status')->in(qw/ pending sending sent /);
+        $v->field('sent_date')->regexp(qr/^\d+$/);
 
         unless ( $self->validate( $v, \%params ) ) {
             my @error_str;
@@ -3147,6 +3148,13 @@ group {
                 str  => join(',', @error_str),
                 data => $v->errors,
             }), return;
+        }
+
+        if ( $params{sent_date} ) {
+            $params{sent_date} = DateTime->from_epoch(
+                epoch     => $params{sent_date},
+                time_zone => app->config->{timezone},
+            );
         }
 
         #
