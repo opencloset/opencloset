@@ -10,6 +10,12 @@ $ ->
     $(el).addClass('active open') if $(el).find('li.active').length > 0
 
   #
+  # facebox settings
+  #
+  $.facebox.settings.loadingImage = '/lib/facebox/loading.gif'
+  $.facebox.settings.closeImage = '/lib/facebox/closelabel.png'
+
+  #
   # keyboard shortcut
   #
   Mousetrap.bind ['1', 'ctrl+h', 'command+h'], -> location.href = '/'

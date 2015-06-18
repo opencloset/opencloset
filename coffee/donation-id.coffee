@@ -15,8 +15,6 @@ $ ->
         console.log textStatus
       complete: (jqXHR, textStatus) ->
 
-  $.facebox.settings.loadingImage = '/lib/facebox/loading.gif'
-  $.facebox.settings.closeImage = '/lib/facebox/closelabel.png'
   $('a[rel*=facebox]').facebox()
   $(document).bind 'reveal.facebox', ->
     $('#facebox #username').focus()
