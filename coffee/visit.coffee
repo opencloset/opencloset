@@ -26,6 +26,7 @@ $ ->
     # 예상대여비 계산
     #
     costMap = OpenCloset.category
+    costMap.tie.price = 2000
     expectedCost = 0
     seen = []
     _.map category, (c) -> seen[c] = true
