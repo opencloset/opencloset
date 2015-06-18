@@ -10,6 +10,21 @@ $ ->
     $(el).addClass('active open') if $(el).find('li.active').length > 0
 
   #
+  # keyboard shortcut
+  #
+  Mousetrap.bind ['ctrl+h', 'command+h'], -> location.href = '/'
+  Mousetrap.bind ['ctrl+n', 'command+n'], -> location.href = '/new-clothes'
+  Mousetrap.bind ['ctrl+c', 'command+c'], -> location.href = '/clothes'
+  Mousetrap.bind ['ctrl+u', 'command+u'], -> location.href = '/user'
+  Mousetrap.bind ['ctrl+d', 'command+d'], -> location.href = '/donation'
+  Mousetrap.bind ['ctrl+shift+t', 'command+shift+t'], -> location.href = '/tag'
+  Mousetrap.bind ['ctrl+b', 'command+b'], -> location.href = '/booking'
+  Mousetrap.bind ['ctrl+s', 'command+s'], -> location.href = '/sms'
+  Mousetrap.bind ['ctrl+t', 'command+t'], -> location.href = '/timetable'
+  Mousetrap.bind ['ctrl+o', 'command+o'], -> location.href = '/order'
+  Mousetrap.bind ['ctrl+r', 'command+r'], -> location.href = '/rental'
+
+  #
   # common fuction for OpenCloset
   #
   Window::OpenCloset =
