@@ -12,17 +12,15 @@ $ ->
   #
   # keyboard shortcut
   #
-  Mousetrap.bind ['ctrl+h', 'command+h'], -> location.href = '/'
-  Mousetrap.bind ['ctrl+n', 'command+n'], -> location.href = '/new-clothes'
-  Mousetrap.bind ['ctrl+c', 'command+c'], -> location.href = '/clothes'
-  Mousetrap.bind ['ctrl+u', 'command+u'], -> location.href = '/user'
-  Mousetrap.bind ['ctrl+d', 'command+d'], -> location.href = '/donation'
-  Mousetrap.bind ['ctrl+shift+t', 'command+shift+t'], -> location.href = '/tag'
-  Mousetrap.bind ['ctrl+b', 'command+b'], -> location.href = '/booking'
-  Mousetrap.bind ['ctrl+s', 'command+s'], -> location.href = '/sms'
-  Mousetrap.bind ['ctrl+t', 'command+t'], -> location.href = '/timetable'
-  Mousetrap.bind ['ctrl+o', 'command+o'], -> location.href = '/order'
-  Mousetrap.bind ['ctrl+r', 'command+r'], -> location.href = '/rental'
+  Mousetrap.bind ['1', 'ctrl+h', 'command+h'], -> location.href = '/'
+  Mousetrap.bind ['2', 'ctrl+n', 'command+n'], -> location.href = '/new-clothes'
+  Mousetrap.bind ['3', 'ctrl+u', 'command+u'], -> location.href = '/user'
+  Mousetrap.bind ['4', 'ctrl+d', 'command+d'], -> location.href = '/donation'
+  Mousetrap.bind ['5', 'ctrl+b', 'command+b'], -> location.href = '/booking'
+  Mousetrap.bind ['6', 'ctrl+s', 'command+s'], -> location.href = '/sms'
+  Mousetrap.bind ['7', 'ctrl+t', 'command+t'], -> location.href = '/timetable'
+  Mousetrap.bind ['8', 'ctrl+o', 'command+o'], -> location.href = '/order'
+  Mousetrap.bind ['9', 'ctrl+r', 'command+r'], -> location.href = '/rental'
 
   #
   # common fuction for OpenCloset
