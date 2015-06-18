@@ -25,21 +25,13 @@ $ ->
     #
     # 예상대여비 계산
     #
-    costMap =
-      jacket: 10000
-      pants : 10000
-      shirt :  5000
-      tie   :  2000
-      shoes : 10000
-      belt  :  2000
-      skirt : 10000
-      blouse:  5000
+    costMap = OpenCloset.category
     expectedCost = 0
     seen = []
     _.map category, (c) -> seen[c] = true
-    if seen['jacket'] and seen['pants'] then costMap['tie'] = 0
+    if seen.jacket and seen.pants and seen.tie then expectedCost -= costMap.tie.price
     _.each category, (el) ->
-      expectedCost += costMap[el]
+      expectedCost += costMap[el]['price']
     refreshExpectedFee(expectedCost)
 
   #
