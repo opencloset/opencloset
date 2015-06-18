@@ -76,7 +76,7 @@
 
                           <label class="block clearfix sms">
                             <span class="block input-icon input-icon-right">
-                              <input name="sms" type="text" class="form-control" placeholder="인증번호" />
+                              <input name="sms" type="text" inputmode="numeric" class="form-control" placeholder="인증번호" />
                               <i class="icon-key"></i>
                             </span>
                           </label>

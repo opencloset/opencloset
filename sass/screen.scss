@@ -911,6 +911,11 @@ $opencloset-darken-yellow: desaturate(darken($opencloset-yellow, 4%), 10%);
         }
     }
 }
+
+#latefee-help {
+    display: none;
+}
+
 kbd {
     font-family: Menlo,Monaco,Consolas,"Courier New",monospace;
     background-color: #333;

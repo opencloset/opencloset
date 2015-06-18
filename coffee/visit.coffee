@@ -22,6 +22,18 @@ $ ->
   $("select[name=pre_category_temp]").chosen({ width: "100%" }).change ->
     category = $(this).val() || []
     $("input[name=pre_category]").val category.join(',')
+    #
+    # 예상대여비 계산
+    #
+    costMap = OpenCloset.category
+    costMap.tie.price = 2000
+    expectedCost = 0
+    seen = []
+    _.map category, (c) -> seen[c] = true
+    if seen.jacket and seen.pants and seen.tie then expectedCost -= costMap.tie.price
+    _.each category, (el) ->
+      expectedCost += costMap[el]['price']
+    refreshExpectedFee(expectedCost)
 
   #
   # 첫/두 번째 선호 색상 변경시 pre_color 양식 자동 설정
@@ -35,7 +47,8 @@ $ ->
   $("input[name=wearon_date]").datepicker(
     todayHighlight: true
     autoclose:      true
-  )
+  ).on 'changeDate', (e) ->
+    refreshExpectedFee()
 
   #
   # 대여 목적
@@ -496,6 +509,7 @@ $ ->
       $("#lbl-booking").html(" - #{booking.data('ymd')} #{booking.data('hm')}")
       $("#modal-booking .modal-body").scrollTop(0)
       $("#modal-booking").modal('hide')
+      refreshExpectedFee()
 
   #
   # 성별 변경시 방문 일자를 다시 선택하게 함
@@ -537,3 +551,41 @@ $ ->
         .remove()
     afterSearch: (keywords, results, lang, sort) ->
       $('summary.postcodify_search_status.postcode_search_status').hide()
+
+  #
+  # 예상대여비
+  #
+  refreshExpectedFee = (cost) ->
+    if cost? and cost is 0
+      return $('#expected-fee').data('expected-fee', cost).html ''
+
+    expectedCost = cost or $('#expected-fee').data('expected-fee')
+    return unless expectedCost
+
+    wearon_ymd = $("input[name=wearon_date]").val()
+    lateDay = 0
+    if wearon_ymd
+      wearonDate = new Date("#{wearon_ymd}T00:00:00")
+      booking_ymd = $('#lbl-booking').text().trim()
+      if booking_ymd
+        booking_ymd = booking_ymd.substring(2, 12)
+        bookingDate = new Date("#{booking_ymd}T00:00:00")
+        duration = wearonDate.getTime() - bookingDate.getTime()
+        durationDay = duration / (60 * 60 * 24 * 1000)
+        lateDay = durationDay - 3 if durationDay > 3
+
+    if lateDay
+      $('#latefee-help').show()
+      LATE_FEE_RATE = 0.2
+      lateFee = expectedCost * lateDay * LATE_FEE_RATE
+      $('#expected-fee').data('expected-fee', expectedCost).html """
+        <samp>#{(expectedCost + lateFee).toLocaleString()} = #{(expectedCost).toLocaleString()} + #{(lateFee).toLocaleString()}</samp>
+        <br>
+        <small class="text-muted">총대여비 = 기본대여비 + #{lateDay}일 추가연장비</small>
+      """
+    else
+      $('#latefee-help').hide()
+      $('#expected-fee').data('expected-fee', expectedCost).html """
+        <samp>#{expectedCost.toLocaleString()}</samp>
+        <small class="text-muted">총대여비</small>
+      """
