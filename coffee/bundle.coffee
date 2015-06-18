@@ -27,6 +27,7 @@ $ ->
   Mousetrap.bind ['7', 'ctrl+t', 'command+t'], -> location.href = '/timetable'
   Mousetrap.bind ['8', 'ctrl+o', 'command+o'], -> location.href = '/order'
   Mousetrap.bind ['9', 'ctrl+r', 'command+r'], -> location.href = '/rental'
+  Mousetrap.bind '?', -> $.facebox { ajax: '/html/shortcut.html' }
 
   #
   # common fuction for OpenCloset
