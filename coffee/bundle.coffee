@@ -18,15 +18,15 @@ $ ->
   #
   # keyboard shortcut
   #
-  Mousetrap.bind ['1', 'ctrl+h', 'command+h'], -> location.href = '/'
-  Mousetrap.bind ['2', 'ctrl+n', 'command+n'], -> location.href = '/new-clothes'
-  Mousetrap.bind ['3', 'ctrl+u', 'command+u'], -> location.href = '/user'
-  Mousetrap.bind ['4', 'ctrl+d', 'command+d'], -> location.href = '/donation'
-  Mousetrap.bind ['5', 'ctrl+b', 'command+b'], -> location.href = '/booking'
-  Mousetrap.bind ['6', 'ctrl+s', 'command+s'], -> location.href = '/sms'
-  Mousetrap.bind ['7', 'ctrl+t', 'command+t'], -> location.href = '/timetable'
-  Mousetrap.bind ['8', 'ctrl+o', 'command+o'], -> location.href = '/order'
-  Mousetrap.bind ['9', 'ctrl+r', 'command+r'], -> location.href = '/rental'
+  Mousetrap.bind ['1', 'o h'], -> location.href = '/'
+  Mousetrap.bind ['2', 'o n'], -> location.href = '/new-clothes'
+  Mousetrap.bind ['3', 'o u'], -> location.href = '/user'
+  Mousetrap.bind ['4', 'o d'], -> location.href = '/donation'
+  Mousetrap.bind ['5', 'o b'], -> location.href = '/booking'
+  Mousetrap.bind ['6', 'o s'], -> location.href = '/sms'
+  Mousetrap.bind ['7', 'o t'], -> location.href = '/timetable'
+  Mousetrap.bind ['8', 'o o'], -> location.href = '/order'
+  Mousetrap.bind ['9', 'o r'], -> location.href = '/rental'
   Mousetrap.bind '?', -> $.facebox { ajax: '/html/shortcut.html' }
 
   #
