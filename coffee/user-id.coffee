@@ -126,9 +126,6 @@ $ ->
 
     $(el).editable params
 
-  $.facebox.settings.loadingImage = '/lib/facebox/loading.gif'
-  $.facebox.settings.closeImage = '/lib/facebox/closelabel.png'
-
   $('#user-address').click (e) ->
     e.preventDefault()
     $.facebox

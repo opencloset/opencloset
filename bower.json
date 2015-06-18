@@ -1,0 +1,23 @@
+{
+  "name": "opencloset",
+  "version": "0.0.0",
+  "homepage": "https://github.com/opencloset/opencloset",
+  "authors": [
+    "Keedi Kim <keedi.k@gmail.com>",
+    "Hyungsuk Hong <aanoaa@gmail.com>"
+  ],
+  "moduleType": [
+    "amd"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "mousetrap": "~1.5.2"
+  }
+}
