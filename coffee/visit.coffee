@@ -579,13 +579,13 @@ $ ->
       LATE_FEE_RATE = 0.2
       lateFee = expectedCost * lateDay * LATE_FEE_RATE
       $('#expected-fee').data('expected-fee', expectedCost).html """
-        <samp>#{(expectedCost + lateFee).toLocaleString()} = #{(expectedCost).toLocaleString()} + #{(lateFee).toLocaleString()}</samp>
+        <samp>#{OpenCloset.commify(expectedCost + lateFee)}원 = #{OpenCloset.commify(expectedCost)}원 + #{OpenCloset.commify(lateFee)}원</samp>
         <br>
         <small class="text-muted">총대여비 = 기본대여비 + #{lateDay}일 추가연장비</small>
       """
     else
       $('#latefee-help').hide()
       $('#expected-fee').data('expected-fee', expectedCost).html """
-        <samp>#{expectedCost.toLocaleString()}</samp>
+        <samp>#{OpenCloset.commify(expectedCost)}원</samp>
         <small class="text-muted">총대여비</small>
       """
