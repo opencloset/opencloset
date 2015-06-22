@@ -12,3 +12,14 @@
           <script type="text/javascript" src="/js/<%= $js %>"></script>
     %   }
     % }
+
+    <script>
+    % for my $k ( keys %{ $sidebar->{meta} } ) {
+    %   my $v        = $sidebar->{meta}{$k};
+    %   my $shortcut = $v->{shortcut};
+    %   my $link     = $v->{link} || "/$k";
+    %   next unless $shortcut;
+      Mousetrap.bind('<%= $shortcut %>', function() { location.href = '<%= $link %>'; });
+    % }
+      Mousetrap.bind('?', function() { return $.facebox({ ajax: '/shortcut' }); });
+    </script>

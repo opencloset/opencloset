@@ -16,20 +16,6 @@ $ ->
   $.facebox.settings.closeImage = '/lib/facebox/closelabel.png'
 
   #
-  # keyboard shortcut
-  #
-  Mousetrap.bind '1', -> location.href = '/'
-  Mousetrap.bind '2', -> location.href = '/new-clothes'
-  Mousetrap.bind '3', -> location.href = '/user'
-  Mousetrap.bind '4', -> location.href = '/donation'
-  Mousetrap.bind '5', -> location.href = '/booking'
-  Mousetrap.bind '6', -> location.href = '/sms'
-  Mousetrap.bind '7', -> location.href = '/timetable'
-  Mousetrap.bind '8', -> location.href = '/order'
-  Mousetrap.bind '9', -> location.href = '/rental'
-  Mousetrap.bind '?', -> $.facebox { ajax: '/html/shortcut.html' }
-
-  #
   # common fuction for OpenCloset
   #
   Window::OpenCloset =
