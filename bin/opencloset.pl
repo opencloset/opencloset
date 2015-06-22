@@ -5913,5 +5913,7 @@ get '/stat/status/:ymd' => sub {
     );
 };
 
+get '/shortcut' => 'shortcut';
+
 app->secrets( app->defaults->{secrets} );
 app->start;

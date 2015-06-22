@@ -72,6 +72,9 @@
               <%= $space %><a href="<%= $link %>">
                 <%= $space %><i class="<%= $icon %>"></i>
                 <%= $space %><span class="menu-text"> <%= $meta->{text} %> </span>
+                % if (my $shortcut = $meta->{shortcut}) {
+                  <%= $space %><span class="pull-right text-info"><%= $shortcut %></span>
+                % }
               <%= $space %></a>
             <%= $space %></li>
           %
