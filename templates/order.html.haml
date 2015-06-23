@@ -86,7 +86,7 @@
               %span.label.order-status{ 'data-order-status' => "#{ $order->status ? $order->status->name : q{} }" }= $status || '상태없음'
               - if ($overdue) {
               -   my $sms_str = sprintf(
-              -     '%s님 열린옷장 대여기간이 %d일 연체되었습니다. %s원 입금 부탁드립니다. 국민은행 20570104-269524',
+              -     '[열린옷장] %s님, 대여기간이 %d일 연체되었습니다. 확인하시고 반납 바랍니다.',
               -     $order->user->name,
               -     $overdue,
               -     commify($late_fee),
