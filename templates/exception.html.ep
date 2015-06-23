@@ -13,7 +13,7 @@
                         <i class="icon-random"></i>
                         500
                       </span>
-                      <%= $exception->message %>
+                      <%= $error %>
                     </h1>
 
                     <hr />
@@ -45,7 +45,7 @@
                     <div class="space"></div>
 
                     <div class="center">
-                      <a href="#" class="btn btn-grey">
+                      <a href="<%= $self->req->headers->referrer %>" class="btn btn-grey">
                         <i class="icon-arrow-left"></i>
                         Go Back
                       </a>
