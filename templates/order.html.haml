@@ -84,7 +84,9 @@
               -   }
               - }
               %span.label.order-status{ 'data-order-status' => "#{ $order->status ? $order->status->name : q{} }" }= $status || '상태없음'
-              - if ($overdue) {
+              - use DateTime;
+              - my $dt_today = DateTime->now( time_zone => $timezone );
+              - if ( $overdue && $order->status->name eq '대여중' && $dt_today > $order->user_target_date ) {
               -   my $sms_str = sprintf(
               -     '[열린옷장] %s님, 대여기간이 %d일 연체되었습니다. 확인하시고 반납 바랍니다.',
               -     $order->user->name,
