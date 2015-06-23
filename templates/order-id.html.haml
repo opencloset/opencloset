@@ -466,6 +466,43 @@
 
                     .space
 
+                    .clearfix.form-actions
+                      - if ( $order->status ) {
+                      -   if ( $order_status eq '대여중' ) {
+                        .search.pull-left.return-process
+                          .input-group
+                            %input#clothes-search.form-control{ :name => 'clothes-search' :type => 'text', :placeholder => '의류 품번', :style => 'ime-mode:disabled' }
+                            %span.input-group-btn
+                              %button#btn-clothes-search.btn.btn-default.btn-sm{ :type => 'submit' }
+                                %i.icon-search.bigger-110 검색
+
+                        %a#btn-return-process.btn.btn-info.pull-right.return-process-reverse{ :type => 'button' }
+                          %i.icon-reply.bigger-110
+                          반납 진행
+                        %a#btn-refund-process.btn.btn-danger.pull-right.return-process-reverse{ :type => 'button' }
+                          %i.icon-remove.bigger-110
+                          환불 진행
+                        %a#btn-return-all.btn.btn-success.disabled.pull-right.return-process{ :type => 'button', 'data-redirect-url' => "#{ url_for('/order/' . $order->id) }" }
+                          %i.icon-ok.bigger-110
+                          전체 반납
+                        %a#btn-return-part.btn.btn-warning.disabled.pull-right.return-process{ :type => 'button', 'data-redirect-url' => "#{ url_for('/order/' . $order->id) }" }
+                          부분 반납
+                        %a#btn-return-cancel.btn.btn-danger.pull-right.return-process{ :type => 'button' }
+                          %i.icon-remove.bigger-110
+                          반납 취소
+                      -   }
+                      -   elsif ( $order_status eq '결제대기' ) {
+                          %a#btn-order-confirm.btn.btn-info.pull-right{ :type => 'button', :href => "#", 'data-url' => "#{ url_for('/order/' . $order->id . '/update') }", 'data-redirect-url' => "#{ url_for('/order/' . $order->id) }", 'data-monitor-url' => "#{$monitor_uri}/events" }
+                            %i.icon-ok.bigger-110
+                            주문 확정
+                          - unless ( $order->parent_id ) {
+                            %a#btn-order-clear.btn.btn-danger.pull-right{ :type => 'button', :href => "#" }
+                              %i.icon-remove.bigger-110
+                              새로 주문
+                          - }
+                      -   }
+                      - }
+
                     .widget-box.invoice-box
                       /
                       / body
@@ -646,44 +683,6 @@
                                   data-name        = "message"
                                 ></a>
 
-                .row
-                  .col-sm-10.col-sm-offset-1
-                    .clearfix.form-actions
-                      - if ( $order->status ) {
-                      -   if ( $order_status eq '대여중' ) {
-                        .search.pull-left.return-process
-                          .input-group
-                            %input#clothes-search.form-control{ :name => 'clothes-search' :type => 'text', :placeholder => '의류 품번', :style => 'ime-mode:disabled' }
-                            %span.input-group-btn
-                              %button#btn-clothes-search.btn.btn-default.btn-sm{ :type => 'submit' }
-                                %i.icon-search.bigger-110 검색
-
-                        %a#btn-return-process.btn.btn-info.pull-right.return-process-reverse{ :type => 'button' }
-                          %i.icon-reply.bigger-110
-                          반납 진행
-                        %a#btn-refund-process.btn.btn-danger.pull-right.return-process-reverse{ :type => 'button' }
-                          %i.icon-remove.bigger-110
-                          환불 진행
-                        %a#btn-return-all.btn.btn-success.disabled.pull-right.return-process{ :type => 'button', 'data-redirect-url' => "#{ url_for('/order/' . $order->id) }" }
-                          %i.icon-ok.bigger-110
-                          전체 반납
-                        %a#btn-return-part.btn.btn-warning.disabled.pull-right.return-process{ :type => 'button', 'data-redirect-url' => "#{ url_for('/order/' . $order->id) }" }
-                          부분 반납
-                        %a#btn-return-cancel.btn.btn-danger.pull-right.return-process{ :type => 'button' }
-                          %i.icon-remove.bigger-110
-                          반납 취소
-                      -   }
-                      -   elsif ( $order_status eq '결제대기' ) {
-                          %a#btn-order-confirm.btn.btn-info.pull-right{ :type => 'button', :href => "#", 'data-url' => "#{ url_for('/order/' . $order->id . '/update') }", 'data-redirect-url' => "#{ url_for('/order/' . $order->id) }", 'data-monitor-url' => "#{$monitor_uri}/events" }
-                            %i.icon-ok.bigger-110
-                            주문 확정
-                          - unless ( $order->parent_id ) {
-                            %a#btn-order-clear.btn.btn-danger.pull-right{ :type => 'button', :href => "#" }
-                              %i.icon-remove.bigger-110
-                              새로 주문
-                          - }
-                      -   }
-                      - }
                 :plain
                   <script id="tpl-late-fee" type="text/html">
                     <% if (late_fee) { %>
