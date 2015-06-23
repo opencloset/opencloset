@@ -4977,6 +4977,8 @@ post '/order' => sub {
     my ( $order, $error ) = do {
         my $guard = $DB->txn_scope_guard;
         try {
+            use experimental qw( smartmatch );
+
             #
             # find order
             #
