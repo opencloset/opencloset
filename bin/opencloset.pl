@@ -4983,6 +4983,13 @@ post '/order' => sub {
             my $order = $DB->resultset('Order')->find( $order_params{id} );
             die "order not found: $order_params{id}\n" unless $order;
 
+            my $status_id = $order->status_id;
+            my @invalid = qw/2 9 10 11 12 19 40 42 43/;
+            if (grep {/^$status_id$/} @invalid) {
+                my $status = $DB->resultset('Status')->find( $status_id )->name;
+                die "이미 $status 인 주문서 입니다.\n";
+            }
+
             #
             # 주문서를 결제대기(19) 상태로 변경
             #
@@ -5044,7 +5051,7 @@ post '/order' => sub {
             return ( undef, $_ );
         }
     };
-    return unless $order;
+    return $self->error(500, {str => $error}) unless $order;
 
     #
     # response
