@@ -200,6 +200,8 @@ $ ->
     success: (response, newValue) -> updateOrder()
 
   $('#btn-order-clear').click (e) ->
+    e.preventDefault()
+    return unless confirm '정말 새로 주문하시겠습니까?'
     order_id = $('#order').data('order-id')
     $.ajax "/api/order/#{ order_id }/set-package.json",
       type: 'GET'
