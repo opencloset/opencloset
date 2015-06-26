@@ -32,13 +32,15 @@ sub calc {
     my ( $self, $part ) = @_;
 
     my ( $height, $weight ) = ( $self->height, $self->weight );
-    my $rs = $self->schema->resultset('UserInfo')->search(
+    my $rs = $self->schema->resultset('Order')->search(
         {
-            gender => $self->gender,
-            height => { -between => [$height - $ROE, $height + $ROE] },
-            weight => { -between => [$weight - $ROE, $weight + $ROE] },
-            -and   => [$part => { '!=' => 0 }, $part => { '!=' => undef }],
-        }
+            'user_info.gender' => $self->gender,
+            'me.height' => { -between => [$height - $ROE, $height + $ROE] },
+            'me.weight' => { -between => [$weight - $ROE, $weight + $ROE] },
+            -and =>
+                ["me.$part" => { '!=' => 0 }, "me.$part" => { '!=' => undef }],
+        },
+        { join => { 'user' => 'user_info' } }
     );
 
     my ( $sum, $i ) = ( 0, 0 );
