@@ -43,10 +43,14 @@ sub calc {
         { join => { 'user' => 'user_info' } }
     );
 
+
     my ( $sum, $i ) = ( 0, 0 );
-    while ( my $info = $rs->next ) {
-        my $size = $info->$part;
+    while ( my $order = $rs->next ) {
+        my $size = $order->$part;
         next unless $size;
+        ## 이렇게 안하고 한방에 찾아야 한다
+        my $dt = $order->booking->date;
+        next if $dt->hour >= 19;
         $sum += $size;
         $i++;
     }
