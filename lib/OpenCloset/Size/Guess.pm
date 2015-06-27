@@ -28,6 +28,28 @@ use overload '""' => sub {
     return sprintf $format, @args;
 };
 
+sub average {
+    my ( $self, $part, $dbh, $where, @bind ) = @_;
+
+    my $select = qq{o.$part};
+    my $from   = qq{`order` o};
+    my $join
+        = qq{`user` u ON o.user_id = u.id JOIN `user_info` ui ON u.id = ui.user_id JOIN `booking` b ON o.booking_id = b.id};
+    my $sql = qq{SELECT $select FROM $from JOIN $join WHERE $where};
+    my $sth = $dbh->prepare($sql);
+    $sth->execute(@bind);
+    my ( $sum, $i ) = ( 0, 0 );
+    while ( my @row = $sth->fetchrow_array ) {
+        my ($size) = @row;
+        next unless $size;
+        $sum += $size;
+        $i++;
+    }
+
+    return 0 unless $sum;
+    return $sum / $i;
+}
+
 sub calc {
     my ( $self, $part ) = @_;
 
@@ -35,32 +57,28 @@ sub calc {
     my $average = $self->schema->storage->dbh_do(
         sub {
             my ( $storage, $dbh, @cols ) = @_;
-            my $select = qq{o.$part};
-            my $from   = qq{`order` o};
-            my $join
-                = qq{`user` u ON o.user_id = u.id JOIN `user_info` ui ON u.id = ui.user_id JOIN `booking` b ON o.booking_id = b.id};
-            my $where
-                = qq{ui.gender = ? AND o.height BETWEEN ? AND ? AND o.weight BETWEEN ? AND ? AND o.$part != 0 AND o.$part IS NOT NULL AND DATE_FORMAT(b.date, '%H') < 19};
-            my $sql = qq{SELECT $select FROM $from JOIN $join WHERE $where};
-            my $sth = $dbh->prepare($sql);
-            $sth->execute(
+            my $where1
+                = qq{UNIX_TIMESTAMP(b.date) < UNIX_TIMESTAMP('2015-05-29 00:00:00') AND DATE_FORMAT(b.date, '%H') < 19 AND ui.gender = ? AND o.height BETWEEN ? AND ? AND o.weight BETWEEN ? AND ? AND o.$part != 0 AND o.$part IS NOT NULL};
+            my $where2
+                = qq{UNIX_TIMESTAMP(b.date) > UNIX_TIMESTAMP('2015-05-29 00:00:00') AND DATE_FORMAT(b.date, '%H') < 22 AND ui.gender = ? AND o.height BETWEEN ? AND ? AND o.weight BETWEEN ? AND ? AND o.$part != 0 AND o.$part IS NOT NULL};
+            my @bind = (
                 $self->gender,
                 $height - $ROE,
                 $height + $ROE,
                 $weight - $ROE,
                 $weight + $ROE
             );
-
-            my ( $sum, $i ) = ( 0, 0 );
-            while ( my @row = $sth->fetchrow_array ) {
-                my ($size) = @row;
-                next unless $size;
-                $sum += $size;
-                $i++;
+            my $average1 = $self->average( $part, $dbh, $where1, @bind );
+            my $average2 = $self->average( $part, $dbh, $where2, @bind );
+            if ( $average1 && $average2 ) {
+                if ( abs( $average1 - $average2 ) > 5 ) {
+                    warn sprintf
+                        "$part data looks wrong: %.1f < 5/29, %.1f > 5/29\n",
+                        $average1, $average2;
+                }
+                return ( $average1 + $average2 ) / 2;
             }
-
-            return 0 unless $sum;
-            return $sum / $i;
+            return $average1 // $average2 // 0;
         }
     );
 
