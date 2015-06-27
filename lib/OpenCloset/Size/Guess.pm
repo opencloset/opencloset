@@ -35,8 +35,13 @@ sub calc {
     my $average = $self->schema->storage->dbh_do(
         sub {
             my ( $storage, $dbh, @cols ) = @_;
-            my $sql
-                = qq{SELECT o.$part FROM `order` o JOIN `user` u ON o.user_id = u.id JOIN `user_info` ui ON u.id = ui.user_id JOIN `booking` b ON o.booking_id = b.id WHERE ui.gender = ? AND o.height BETWEEN ? AND ? AND o.weight BETWEEN ? AND ? AND o.$part != 0 AND o.$part IS NOT NULL AND DATE_FORMAT(b.date, '%H') < 19};
+            my $select = qq{o.$part};
+            my $from   = qq{`order` o};
+            my $join
+                = qq{`user` u ON o.user_id = u.id JOIN `user_info` ui ON u.id = ui.user_id JOIN `booking` b ON o.booking_id = b.id};
+            my $where
+                = qq{ui.gender = ? AND o.height BETWEEN ? AND ? AND o.weight BETWEEN ? AND ? AND o.$part != 0 AND o.$part IS NOT NULL AND DATE_FORMAT(b.date, '%H') < 19};
+            my $sql = qq{SELECT $select FROM $from JOIN $join WHERE $where};
             my $sth = $dbh->prepare($sql);
             $sth->execute(
                 $self->gender,
