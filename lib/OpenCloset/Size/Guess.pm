@@ -32,31 +32,34 @@ sub calc {
     my ( $self, $part ) = @_;
 
     my ( $height, $weight ) = ( $self->height, $self->weight );
-    my $rs = $self->schema->resultset('Order')->search(
-        {
-            'user_info.gender' => $self->gender,
-            'me.height' => { -between => [$height - $ROE, $height + $ROE] },
-            'me.weight' => { -between => [$weight - $ROE, $weight + $ROE] },
-            -and =>
-                ["me.$part" => { '!=' => 0 }, "me.$part" => { '!=' => undef }],
-        },
-        { join => { 'user' => 'user_info' } }
+    my $average = $self->schema->storage->dbh_do(
+        sub {
+            my ( $storage, $dbh, @cols ) = @_;
+            my $sql
+                = qq{SELECT o.$part FROM `order` o JOIN `user` u ON o.user_id = u.id JOIN `user_info` ui ON u.id = ui.user_id JOIN `booking` b ON o.booking_id = b.id WHERE ui.gender = ? AND o.height BETWEEN ? AND ? AND o.weight BETWEEN ? AND ? AND o.$part != 0 AND o.$part IS NOT NULL AND DATE_FORMAT(b.date, '%H') < 19};
+            my $sth = $dbh->prepare($sql);
+            $sth->execute(
+                $self->gender,
+                $height - $ROE,
+                $height + $ROE,
+                $weight - $ROE,
+                $weight + $ROE
+            );
+
+            my ( $sum, $i ) = ( 0, 0 );
+            while ( my @row = $sth->fetchrow_array ) {
+                my ($size) = @row;
+                next unless $size;
+                $sum += $size;
+                $i++;
+            }
+
+            return 0 unless $sum;
+            return $sum / $i;
+        }
     );
 
-
-    my ( $sum, $i ) = ( 0, 0 );
-    while ( my $order = $rs->next ) {
-        my $size = $order->$part;
-        next unless $size;
-        ## 이렇게 안하고 한방에 찾아야 한다
-        my $dt = $order->booking->date;
-        next if $dt->hour >= 19;
-        $sum += $size;
-        $i++;
-    }
-
-    return unless $sum;
-    return sprintf "%.1f", $sum /= $i;    # zero division possibility
+    return sprintf "%.1f", $average;
 }
 
 sub belly { shift->calc('belly') }
