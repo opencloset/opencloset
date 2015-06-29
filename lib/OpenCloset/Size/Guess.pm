@@ -11,7 +11,7 @@ has gender => (
     isa => sub { die "male or female only" unless $_[0] =~ /^(fe)?male$/i }
 );
 
-my $ROE = $ENV{OPENCLOSET_RANGE_OF_ERROR} // 3;    # Range of error -3 ~ +3
+my $ROE = $ENV{OPENCLOSET_RANGE_OF_ERROR} // 1;    # Range of error -1 ~ +1
 
 use overload '""' => sub {
     my $self = shift;
