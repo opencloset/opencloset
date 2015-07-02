@@ -6,14 +6,14 @@ use strict;
 use warnings;
 use open ':locale';
 
+use OpenCloset::Config;
 use OpenCloset::Schema;
-use OpenCloset::Util;
 
 my $email    = shift;
 my $password = shift;
 die "Usage: $0 <email> [<password>]\n" unless $email;
 
-my $CONF = OpenCloset::Util::load_config( $ENV{MOJO_CONFIG} || 'app.conf' );
+my $CONF = OpenCloset::Config::load('app.conf');
 my $DB = OpenCloset::Schema->connect(
     {
         dsn      => $CONF->{database}{dsn},

@@ -43,5 +43,5 @@ requires 'namespace::clean';
 requires 'git://github.com/aanoaa/p5-postcodify.git@v0.2.6';
 
 # from opencloset cpan
-requires 'OpenCloset::Config', '0.001';
-requires 'OpenCloset::Schema', '0.008';
+requires 'OpenCloset::Config', '0.002';
+requires 'OpenCloset::Schema', '0.012';

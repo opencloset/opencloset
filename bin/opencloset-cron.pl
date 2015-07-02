@@ -19,6 +19,7 @@ use AnyEvent;
 use HTTP::Tiny;
 use JSON;
 
+use OpenCloset::Config;
 use OpenCloset::Cron;
 use OpenCloset::Cron::Worker;
 use OpenCloset::Util;
@@ -26,9 +27,9 @@ use OpenCloset::Util;
 my $config_file = shift || "$Bin/../app.conf";
 die "cannot find $config_file\n" unless -f $config_file;
 
-my $CONF = OpenCloset::Util::load_config(
+my $CONF = OpenCloset::Config::load(
     $config_file,
-    $Script,
+    { root => $Script },
     ping_port => 5001,
     delay     => 10,
     ae_log    => 'filter=debug:log=stderr',

@@ -13,7 +13,7 @@ use SMS::Send;
 use Unicode::GCString;
 use Unicode::Normalize;
 
-use OpenCloset::Util;
+use OpenCloset::Config;
 
 binmode STDOUT, ':utf8';
 binmode STDERR, ':utf8';
@@ -21,9 +21,9 @@ binmode STDERR, ':utf8';
 my $config_file = shift || "$Bin/../app.conf";
 die "cannot find $config_file\n" unless -f $config_file;
 
-my $CONF = OpenCloset::Util::load_config(
+my $CONF = OpenCloset::Config::load(
     $config_file,
-    $Script,
+    { root => $Script },
     delay      => 60,
     send_delay => 1,
 );
@@ -31,9 +31,9 @@ my $CONF = OpenCloset::Util::load_config(
 my $continue = 1;
 $SIG{TERM} = sub { $continue = 0;        };
 $SIG{HUP}  = sub {
-    $CONF = OpenCloset::Util::load_config(
+    $CONF = OpenCloset::Config::load(
         $config_file,
-        $Script,
+        { root => $Script },
         delay      => 60,
         send_delay => 1,
     );
