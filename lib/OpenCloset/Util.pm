@@ -7,21 +7,6 @@ use strict;
 use warnings;
 
 use AnyEvent::Log;
-use Path::Tiny;
-
-sub load_config {
-    my ( $conf_file, $section, %default ) = @_;
-
-    $conf_file ||= 'app.conf';
-    die "cannot find config file" unless -e $conf_file;
-    my $conf = eval path($conf_file)->slurp_utf8;
-
-    return $conf unless $section;
-
-    $conf->{$section}{$_} //= $default{$_} for keys %default;
-
-    return $conf->{$section};
-}
 
 sub set_ae_log {
     my ( $class, $conf ) = @_;

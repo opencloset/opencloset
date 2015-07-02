@@ -6,13 +6,14 @@ use strict;
 use warnings;
 use open ':locale';
 
+use OpenCloset::Config;
 use OpenCloset::Schema;
-use OpenCloset::Util;
 
-my $email = shift;
-die "Usage: $0 <email>\n" unless $email;
+my $email    = shift;
+my $password = shift;
+die "Usage: $0 <email> [<password>]\n" unless $email;
 
-my $CONF = OpenCloset::Util::load_config( $ENV{MOJO_CONFIG} || 'app.conf' );
+my $CONF = OpenCloset::Config::load('app.conf');
 my $DB = OpenCloset::Schema->connect(
     {
         dsn      => $CONF->{database}{dsn},
@@ -25,10 +26,9 @@ my $DB = OpenCloset::Schema->connect(
 my $user = $DB->resultset('User')->find( { email => $email } );
 die "not found such email: $email\n" unless $user;
 
-my $epoch = `date +%s`;
-chomp $epoch;
-$epoch += 86400 * 30;
+if ($password) {
+    $user->update( { password => $password } );
+    print "successfully updated password\n";
+}
 
-$user->update( { expires => $epoch } );
-say "Update expires successfully";
-say "$user";
+print "$user\n";
