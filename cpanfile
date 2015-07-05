@@ -1,6 +1,3 @@
-requires 'AnyEvent';
-requires 'AnyEvent::HTTPD';
-requires 'AnyEvent::Timer::Cron';
 requires 'Data::Pageset';
 requires 'DateTime';
 requires 'DateTime::Format::Duration';
@@ -17,9 +14,6 @@ requires 'Mojolicious::Plugin::Authentication';
 requires 'Mojolicious::Plugin::FillInFormLite';
 requires 'Mojolicious::Plugin::HamlRenderer';
 requires 'Mojolicious::Plugin::Validator';
-requires 'Moo';
-requires 'MooX::Types::MooseLike';
-requires 'Object::Event';
 requires 'Parcel::Track', '0.005';
 requires 'Parcel::Track::KR::CJKorea';
 requires 'Parcel::Track::KR::Dongbu';
@@ -37,7 +31,6 @@ requires 'Text::Haml', '0.990114';
 requires 'Try::Tiny';
 requires 'Unicode::GCString';
 requires 'experimental';
-requires 'namespace::clean';
 
 # from git repository
 requires 'git://github.com/aanoaa/p5-postcodify.git@v0.2.6';
