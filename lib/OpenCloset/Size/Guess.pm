@@ -4,8 +4,8 @@ use utf8;
 use Moo;
 
 has schema => ( is => 'ro', required => 1 );
-has height => ( is => 'rw', required => 1 );
-has weight => ( is => 'rw', required => 1 );
+has height => ( is => 'rw', required => 1, trigger => 1 );
+has weight => ( is => 'rw', required => 1, trigger => 1 );
 has gender => (
     is  => 'rw',
     isa => sub { die "male or female only" unless $_[0] =~ /^(fe)?male$/i }
@@ -26,11 +26,13 @@ sub BUILD { shift->calc }
 
 sub _trigger_height {
     my $self = shift;
+    return unless $self->schema;
     $self->clear && $self->calc;
 }
 
 sub _trigger_weight {
     my $self = shift;
+    return unless $self->schema;
     $self->clear && $self->calc;
 }
 
