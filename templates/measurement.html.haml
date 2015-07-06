@@ -15,7 +15,7 @@
         검색
 
 - if ($height && $weight) {
-  %table.table
+  %table.table.table-condensed.table-bordered
     %thead
       %tr
         %th
@@ -28,7 +28,13 @@
         %tr
           %th= $w
           - for my $h ($height - 1 .. $height + 1) {
-            %td= $size->{$h}{$w}
+            - if ($height == $h && $weight == $w) {
+              %td.success
+                %samp= $size->{$h}{$w}
+            - } else {
+              %td
+                %samp= $size->{$h}{$w}
+            - }
           - }
       - }
 - }
