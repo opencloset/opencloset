@@ -5,30 +5,30 @@
 
 %form.form-inline{:method => 'GET'}
   .input-group
-    %input#query.form-control{ :name => 'q', :type => 'text', :placeholder => '키 / 몸무게' :value => "#{$q}" }
+    %input{:type => 'hidden', :name => 'gender', :value => "#{$gender}"}
+    %input#query.form-control{ :name => 'q', :type => 'text', :placeholder => '키 몸무게' :value => "#{$q}" }
     %span.input-group-btn
+      %a.btn.btn-info.btn-sm{:href => "#{url_with->query([gender => 'male'])}", :class => "#{$gender eq 'male' ? 'active' : ''}"} 남자
+      %a.btn.btn-danger.btn-sm{:href => "#{url_with->query([gender => 'female'])}", :class => "#{$gender eq 'female' ? 'active' : ''}"} 여자
       %button#btn-search.btn.btn-sm.btn-default{ :type => 'button' }
         %i.icon-search.bigger-110
         검색
 
 - if ($height && $weight) {
-  - for my $gender (qw/male female/) {
-    %hr
-    %table.table
-      %thead
-        %tr
-          %th
-            %i{:class => "icon-#{$gender} #{$gender}"}
-          - for my $h ($height - 1 .. $height + 1) {
-            %th= $h
-          - }
-      %tbody
-        - for my $w ($weight - 1 .. $weight + 1) {
-          %tr
-            %th= $w
-            - for my $h ($height - 1 .. $height + 1) {
-              %td= $size->{$gender}{$h}{$w}
-            - }
+  %table.table
+    %thead
+      %tr
+        %th
+          %i{:class => "icon-#{$gender} #{$gender}"}
+        - for my $h ($height - 1 .. $height + 1) {
+          %th= $h
         - }
-  - }
+    %tbody
+      - for my $w ($weight - 1 .. $weight + 1) {
+        %tr
+          %th= $w
+          - for my $h ($height - 1 .. $height + 1) {
+            %td= $size->{$h}{$w}
+          - }
+      - }
 - }

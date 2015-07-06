@@ -5936,28 +5936,31 @@ get '/stat/status/:ymd' => sub {
 get '/shortcut' => 'shortcut';
 
 get '/measurement' => sub {
-    my $self = shift;
-    my $q    = $self->param('q') || '';
+    my $self   = shift;
+    my $q      = $self->param('q') || '';
+    my $gender = $self->param('gender') || 'male';
 
-    $self->stash(q => $q, height => '', weight => '', size => '');
+    $self->stash(q => $q, height => '', weight => '', size => '', gender => $gender);
     return unless $q;
 
     $q =~ s/(^ +| +$)//g;
     my ($height, $weight) = split / /, $q;
     return unless $height && $weight;
 
-    my $guess = OpenCloset::Size::Guess->new(schema => $DB, height => $height, weight => $weight);
+    my $guess = OpenCloset::Size::Guess->new(
+        schema => $DB,
+        height => $height,
+        weight => $weight,
+        gender => $gender
+    );
 
     my $roe = 1;    # range of error
     my %size;
-    for my $gender (qw/male female/) {
-        $guess->gender($gender);
-        for my $h ($height - $roe .. $height + $roe) {
-            for my $w ($weight - $roe .. $weight + $roe) {
-                $guess->weight($w);
-                $guess->height($h);
-                $size{$gender}{$h}{$w} = "$guess";
-            }
+    for my $h ($height - $roe .. $height + $roe) {
+        for my $w ($weight - $roe .. $weight + $roe) {
+            $guess->weight($w);
+            $guess->height($h);
+            $size{$h}{$w} = "$guess";
         }
     }
 
