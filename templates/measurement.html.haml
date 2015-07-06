@@ -20,6 +20,8 @@
       %tr
         %th
           %i{:class => "icon-#{$gender} #{$gender}"}
+          = $cnt
+          건의 평균
         - for my $h ($height - 1 .. $height + 1) {
           %th= $h
         - }

@@ -22,6 +22,8 @@ has foot     => ( is => 'rw', default => 0 );
 has hip      => ( is => 'rw', default => 0 );
 has knee     => ( is => 'rw', default => 0 );
 
+has cnt => ( is => 'rw', default => 0 );
+
 sub BUILD { shift->calc }
 
 sub _trigger_height {
@@ -39,7 +41,7 @@ sub _trigger_weight {
 sub clear {
     my $self = shift;
     map { $self->$_(0) }
-        qw/belly topbelly bust arm thigh waist leg foot hip knee/;
+        qw/cnt belly topbelly bust arm thigh waist leg foot hip knee/;
 }
 
 my $ROE = $ENV{OPENCLOSET_RANGE_OF_ERROR} // 1;    # Range of error -1 ~ +1
@@ -72,6 +74,7 @@ sub average {
     my ( %sum, %i, %measurement );
 
     while ( my $measurement = $sth->fetchrow_hashref ) {
+        $self->cnt( $self->cnt + 1 );
         while ( my ( $part, $size ) = each %$measurement ) {
             next unless $size;
             $sum{$part} += $size;
@@ -117,7 +120,10 @@ sub calc {
                             "$part data looks wrong: %.1f < 5/29, %.1f > 5/29\n",
                             $part1, $part2;
                     }
-                    $self->$part( sprintf "%.1f", ( $part1 + $part2 ) / 2 );
+
+                    my $n = 2;
+                    $n = 1 unless $part1 && $part2;
+                    $self->$part( sprintf "%.1f", ( $part1 + $part2 ) / $n );
                 }
             }
             else {

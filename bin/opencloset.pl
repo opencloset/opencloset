@@ -5940,7 +5940,7 @@ get '/measurement' => sub {
     my $q      = $self->param('q') || '';
     my $gender = $self->param('gender') || 'male';
 
-    $self->stash(q => $q, height => '', weight => '', size => '', gender => $gender);
+    $self->stash(q => $q, height => '', weight => '', size => '', gender => $gender, cnt => 0);
     return unless $q;
 
     $q =~ s/(^ +| +$)//g;
@@ -5964,7 +5964,7 @@ get '/measurement' => sub {
         }
     }
 
-    $self->render(q => $q, height => $height, weight => $weight, size => {%size});
+    $self->render(q => $q, height => $height, weight => $weight, size => {%size}, cnt => $guess->cnt);
 };
 
 app->secrets( app->defaults->{secrets} );
