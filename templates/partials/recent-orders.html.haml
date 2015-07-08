@@ -36,4 +36,11 @@
                                     .time
                                       %i.icon-time.bigger-110
                                       = $order->create_date->ymd . q{ } . $order->create_date->hms
+                                      - my $booking_date = $order->booking->date;
+                                      - my $booking_ymd  = $booking_date->ymd;
+                                      - my $booking_hhmm = sprintf "%02d%02d", $booking_date->hour, $booking_date->minute;
+                                      %i.icon-calendar.bigger-110
+                                      %a{:href => '#{url_for("/timetable/" . $booking_ymd)->fragment("timetable-$booking_hhmm")}', :title => '시간표'}
+                                        = $booking_ymd
+                                        = $booking_date->hms
                               - }
