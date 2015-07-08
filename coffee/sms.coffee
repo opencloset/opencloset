@@ -23,6 +23,9 @@ $ ->
     macro7:
       text: '온라인 자동 취소 고지'
       msg:  '[열린옷장] 00님 금일 3시까지 입금되지 않을 경우 발송 취소 됨을 알립니다.'
+    macro8:
+      text: 'SMS 인증발송'
+      msg:  '열린옷장입니다. 전화번호 확인을 위해 SMS 확인 문자를 발송하였습니다. 인증번호는 OOOO입니다. 발송된 인증번호를 담당자에게 보여주시기 바랍니다'
 
   updateMsgScreenWidth = ->
     msg   = $('textarea[name=msg]').prop('value')
