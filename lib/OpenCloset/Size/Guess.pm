@@ -1,14 +1,17 @@
 package OpenCloset::Size::Guess;
 
 use utf8;
-use Moo;
+use Moo::Role;
 
-has schema => ( is => 'ro', required => 1 );
-has height => ( is => 'rw', required => 1, trigger => 1 );
-has weight => ( is => 'rw', required => 1, trigger => 1 );
+our $ROE = $ENV{OPENCLOSET_RANGE_OF_ERROR} // 1;    # Range of error -1 ~ +1
+
+has height => ( is => 'rw', required => 1 );
+has weight => ( is => 'rw', required => 1 );
 has gender => (
     is  => 'rw',
-    isa => sub { die "male or female only" unless $_[0] =~ /^(fe)?male$/i }
+    isa => sub {
+        die "male or female only" unless $_[0] =~ /^(fe)?male$/i;
+    }
 );
 
 has belly    => ( is => 'rw', default => 0 );
@@ -22,29 +25,15 @@ has foot     => ( is => 'rw', default => 0 );
 has hip      => ( is => 'rw', default => 0 );
 has knee     => ( is => 'rw', default => 0 );
 
-has cnt => ( is => 'rw', default => 0 );
+sub BUILD { shift->refresh }
 
-sub BUILD { shift->calc }
-
-sub _trigger_height {
-    my $self = shift;
-    return unless $self->schema;
-    $self->clear && $self->calc;
-}
-
-sub _trigger_weight {
-    my $self = shift;
-    return unless $self->schema;
-    $self->clear && $self->calc;
-}
+sub refresh {...}
 
 sub clear {
     my $self = shift;
     map { $self->$_(0) }
-        qw/cnt belly topbelly bust arm thigh waist leg foot hip knee/;
+        qw/belly topbelly bust arm thigh waist leg foot hip knee/;
 }
-
-my $ROE = $ENV{OPENCLOSET_RANGE_OF_ERROR} // 1;    # Range of error -1 ~ +1
 
 use overload '""' => sub {
     my $self = shift;
@@ -60,81 +49,6 @@ use overload '""' => sub {
         qw/height weight belly bust arm hip waist knee foot/;
     return sprintf $format, @args;
 };
-
-sub average {
-    my ( $self, $dbh, $where, @bind ) = @_;
-
-    my $from = qq{`order` o};
-    my $join
-        = qq{`user` u ON o.user_id = u.id JOIN `user_info` ui ON u.id = ui.user_id JOIN `booking` b ON o.booking_id = b.id};
-    my $sql
-        = qq{SELECT o.belly AS belly, o.topbelly AS topbelly, o.bust AS bust, o.arm AS arm, o.thigh AS thigh, o.waist AS waist, o.leg AS leg, o.hip AS hip, o.knee AS knee, o.foot AS foot FROM $from JOIN $join WHERE $where};
-    my $sth = $dbh->prepare($sql);
-    $sth->execute(@bind);
-    my ( %sum, %i, %measurement );
-
-    while ( my $measurement = $sth->fetchrow_hashref ) {
-        $self->cnt( $self->cnt + 1 );
-        while ( my ( $part, $size ) = each %$measurement ) {
-            next unless $size;
-            $sum{$part} += $size;
-            $i{$part}++;
-        }
-    }
-
-    for my $part ( keys %sum ) {
-        $measurement{$part} = $sum{$part} / $i{$part};
-    }
-
-    return {%measurement};
-}
-
-sub calc {
-    my $self = shift;
-
-    my ( $height, $weight ) = ( $self->height, $self->weight );
-    my $average = $self->schema->storage->dbh_do(
-        sub {
-            my ( $storage, $dbh, @cols ) = @_;
-            my $where1
-                = qq{UNIX_TIMESTAMP(b.date) < UNIX_TIMESTAMP('2015-05-29 00:00:00') AND DATE_FORMAT(b.date, '%H') < 19 AND ui.gender = ? AND o.height BETWEEN ? AND ? AND o.weight BETWEEN ? AND ?};
-            my $where2
-                = qq{UNIX_TIMESTAMP(b.date) > UNIX_TIMESTAMP('2015-05-29 00:00:00') AND DATE_FORMAT(b.date, '%H') < 22 AND ui.gender = ? AND o.height BETWEEN ? AND ? AND o.weight BETWEEN ? AND ?};
-            my @bind = (
-                $self->gender,
-                $height - $ROE,
-                $height + $ROE,
-                $weight - $ROE,
-                $weight + $ROE
-            );
-
-            my $average1 = $self->average( $dbh, $where1, @bind );
-            my $average2 = $self->average( $dbh, $where2, @bind );
-            my @parts = keys %$average1 or keys %$average2;
-            if ( keys %$average1 && keys %$average2 ) {
-                for my $part (@parts) {
-                    my $part1 = $average1->{$part} // 0;
-                    my $part2 = $average2->{$part} // 0;
-                    if ( abs( $part1 - $part2 ) > 5 ) {
-                        warn sprintf
-                            "$part data looks wrong: %.1f < 5/29, %.1f > 5/29\n",
-                            $part1, $part2;
-                    }
-
-                    my $n = 2;
-                    $n = 1 unless $part1 && $part2;
-                    $self->$part( sprintf "%.1f", ( $part1 + $part2 ) / $n );
-                }
-            }
-            else {
-                for my $part (@parts) {
-                    $self->$part( sprintf "%.1f",
-                        $average1->{$part} // $average2->{$part} // 0 );
-                }
-            }
-        }
-    );
-}
 
 1;
 
