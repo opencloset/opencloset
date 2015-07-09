@@ -5970,16 +5970,18 @@ get '/measurement' => sub {
             $local->weight($w);
             $local->height($h);
             $local->refresh;
-            $size{local}{$h}{$w} = "$local";
-
-            $bodykit->weight($w);
-            $bodykit->height($h);
-            $bodykit->refresh;
-            $size{bodykit}{$h}{$w} = "$bodykit";
+            $size{$h}{$w} = "$local";
         }
     }
 
-    $self->render(q => $q, height => $height, weight => $weight, size => {%size}, cnt => $local->cnt);
+    $self->render(
+        q       => $q,
+        height  => $height,
+        weight  => $weight,
+        size    => { %size },
+        cnt     => $local->cnt,
+        bodykit => $bodykit
+    );
 };
 
 app->secrets( app->defaults->{secrets} );
