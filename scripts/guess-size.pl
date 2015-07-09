@@ -5,7 +5,8 @@ use strict;
 use warnings;
 
 use OpenCloset::Schema;
-use OpenCloset::Size::Guess;
+use OpenCloset::Size::Guess::Local;
+use OpenCloset::Size::Guess::BodyKit;
 use OpenCloset::Config;
 
 binmode STDOUT, ':utf8';
@@ -28,11 +29,20 @@ my $DB = OpenCloset::Schema->connect(
     }
 );
 
-my $guess = OpenCloset::Size::Guess->new(
+my $local = OpenCloset::Size::Guess::Local->new(
     schema => $DB,
     gender => $gender,
     height => $height,
     weight => $weight
 );
 
-print "$guess\n";
+my $bodykit = OpenCloset::Size::Guess::BodyKit->new(
+    access_key => $CONF->{bodykit}{access_key},
+    secret     => $CONF->{bodykit}{secret},
+    gender     => $gender,
+    height     => $height,
+    weight     => $weight
+);
+
+print "$local\n";
+print "$bodykit\n";
