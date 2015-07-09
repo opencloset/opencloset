@@ -283,4 +283,11 @@ $db_opts->{AutoCommit} //= 1;
     # monitor
     #
     monitor_uri => 'http://localhost:5000',
+    #
+    # bodykit
+    #
+    bodykit => {
+        access_key => $ENV{OPENCLOSET_BODYKIT_ACCESSKEY} || q{},
+        secret     => $ENV{OPENCLOSET_BODYKIT_SECRET}    || q{},
+    },
 };

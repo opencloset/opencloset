@@ -53,7 +53,8 @@ use Unicode::Normalize;
 use Postcodify;
 
 use OpenCloset::Schema;
-use OpenCloset::Size::Guess;
+use OpenCloset::Size::Guess::Local;
+use OpenCloset::Size::Guess::BodyKit;
 
 app->defaults( %{ plugin 'Config' => { default => {
     jses        => [],
@@ -5947,24 +5948,38 @@ get '/measurement' => sub {
     my ($height, $weight) = split / /, $q;
     return unless $height && $weight;
 
-    my $guess = OpenCloset::Size::Guess->new(
+    my $local = OpenCloset::Size::Guess::Local->new(
         schema => $DB,
         height => $height,
         weight => $weight,
         gender => $gender
     );
 
+    my $bodykit = OpenCloset::Size::Guess::BodyKit->new(
+        access_key => app->config->{bodykit}{access_key},
+        secret     => app->config->{bodykit}{secret},
+        height     => $height,
+        weight     => $weight,
+        gender     => $gender
+    );
+
     my $roe = 1;    # range of error
     my %size;
     for my $h ($height - $roe .. $height + $roe) {
         for my $w ($weight - $roe .. $weight + $roe) {
-            $guess->weight($w);
-            $guess->height($h);
-            $size{$h}{$w} = "$guess";
+            $local->weight($w);
+            $local->height($h);
+            $local->refresh;
+            $size{local}{$h}{$w} = "$local";
+
+            $bodykit->weight($w);
+            $bodykit->height($h);
+            $bodykit->refresh;
+            $size{bodykit}{$h}{$w} = "$bodykit";
         }
     }
 
-    $self->render(q => $q, height => $height, weight => $weight, size => {%size}, cnt => $guess->cnt);
+    $self->render(q => $q, height => $height, weight => $weight, size => {%size}, cnt => $local->cnt);
 };
 
 app->secrets( app->defaults->{secrets} );

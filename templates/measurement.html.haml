@@ -32,10 +32,33 @@
           - for my $h ($height - 1 .. $height + 1) {
             - if ($height == $h && $weight == $w) {
               %td.success
-                %samp= $size->{$h}{$w}
+                %samp= $size->{local}{$h}{$w}
             - } else {
               %td
-                %samp= $size->{$h}{$w}
+                %samp= $size->{local}{$h}{$w}
+            - }
+          - }
+      - }
+  %hr
+  %table.table.table-condensed.table-bordered
+    %thead
+      %tr
+        %th
+          %i{:class => "icon-#{$gender} #{$gender}"}
+        - for my $h ($height - 1 .. $height + 1) {
+          %th= $h
+        - }
+    %tbody
+      - for my $w ($weight - 1 .. $weight + 1) {
+        %tr
+          %th= $w
+          - for my $h ($height - 1 .. $height + 1) {
+            - if ($height == $h && $weight == $w) {
+              %td.success
+                %samp= $size->{bodykit}{$h}{$w}
+            - } else {
+              %td
+                %samp= $size->{bodykit}{$h}{$w}
             - }
           - }
       - }
