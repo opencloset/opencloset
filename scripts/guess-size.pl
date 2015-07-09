@@ -6,7 +6,7 @@ use warnings;
 
 use OpenCloset::Schema;
 use OpenCloset::Size::Guess;
-use OpenCloset::Util;
+use OpenCloset::Config;
 
 binmode STDOUT, ':utf8';
 
@@ -18,7 +18,7 @@ die "Usage: $0 <gender> <height> <weight>\n"
     and $height
     and $weight;
 
-my $CONF = OpenCloset::Util::load_config( $ENV{MOJO_CONFIG} || 'app.conf' );
+my $CONF = OpenCloset::Config::load( $ENV{MOJO_CONFIG} || 'app.conf' );
 my $DB = OpenCloset::Schema->connect(
     {
         dsn      => $CONF->{database}{dsn},
