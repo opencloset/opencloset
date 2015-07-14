@@ -48,13 +48,14 @@ sub refresh {
 
     my $measure = decode_json( $res->{content} )->{output}{measurements};
     $self->clear;
+    $self->belly( $measure->{waist_girth} );
     $self->bust( $measure->{bust_girth} );
-    $self->arm( $measure->{full_sleeve_length} );
+    $self->arm( $measure->{side_arm_length} );
     $self->thigh( $measure->{thigh_girth} );
     $self->waist( $measure->{waist_girth} );
-    $self->leg( $measure->{waist_height} );
-    $self->hip( $measure->{high_hip_girth} );
-    $self->knee( $measure->{waist_height} - $measure->{knee_height} );
+    $self->leg( $measure->{outseam} );
+    $self->hip( $measure->{low_hip_girth} );
+    $self->knee( $measure->{outseam} - $measure->{knee_height} );
 }
 
 1;
