@@ -20,7 +20,7 @@
       %tr
         %th
           %i{:class => "icon-#{$gender} #{$gender}"}
-          = $cnt
+          = $local->cnt
           건의 평균
         - for my $h ($height - 1 .. $height + 1) {
           %th= $h
@@ -40,7 +40,37 @@
           - }
       - }
   %hr
-  %h4 BodyKit
-  %p
-    %samp= "$bodykit"
+  %table.table.table-bordered.table-condensed
+    %thead
+      %tr
+        %th= "$height / $weight"
+        %th 중동
+        %th 윗배
+        %th 가슴
+        %th 팔
+        %th 허벅지
+        %th 허리
+        %th 다리
+        %th 발
+    %tbody
+      %tr
+        %th opencloset
+        %td= $local->belly
+        %td= $local->topbelly
+        %td= $local->bust
+        %td= $local->arm
+        %td= $local->thigh
+        %td= $local->waist
+        %td= $local->leg
+        %td= $local->foot
+      %tr
+        %th Bodykit
+        %td= $bodykit->belly
+        %td= $bodykit->topbelly
+        %td= $bodykit->bust
+        %td= $bodykit->arm
+        %td= $bodykit->thigh
+        %td= $bodykit->waist
+        %td= $bodykit->leg
+        %td= $bodykit->foot
 - }

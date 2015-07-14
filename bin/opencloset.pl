@@ -5967,10 +5967,12 @@ get '/measurement' => sub {
     my %size;
     for my $h ($height - $roe .. $height + $roe) {
         for my $w ($weight - $roe .. $weight + $roe) {
-            $local->weight($w);
-            $local->height($h);
-            $local->refresh;
-            $size{$h}{$w} = "$local";
+            $size{$h}{$w} = OpenCloset::Size::Guess::Local->new(
+                schema => $DB,
+                height => $h,
+                weight => $w,
+                gender => $gender
+            );
         }
     }
 
@@ -5979,8 +5981,8 @@ get '/measurement' => sub {
         height  => $height,
         weight  => $weight,
         size    => { %size },
-        cnt     => $local->cnt,
-        bodykit => $bodykit
+        bodykit => $bodykit,
+        local   => $local
     );
 };
 
