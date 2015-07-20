@@ -73,7 +73,7 @@
 
                           <label class="block clearfix">
                             <span class="block input-icon input-icon-right">
-                              <input name="email" type="email" class="form-control" placeholder="이메일 (예: info@theopencloset.net)" value="<%= $user->email %>" />
+                              <input name="email" type="email" class="form-control" placeholder="이메일을 입력해주세요" value="<%= $user->email %>" />
                               <i class="icon-envelope"></i>
                             </span>
                           </label>
