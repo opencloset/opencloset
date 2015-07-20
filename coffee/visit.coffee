@@ -542,7 +542,7 @@ $ ->
     onReady: ->
       $("#postcodify").find('.postcodify_search_controls.postcode_search_controls')
         .addClass('input-group').find('input[type=text]')
-        .prop('placeholder', "동과 번지수 혹은 동과 건물 이름")
+        .prop('placeholder', "동과 번지수 혹은 아파트 이름")
         .addClass('form-control').val($('.postcodify_address').val()).end().find('button')
         .addClass('btn btn-default btn-sm')
         .wrap('<span class="input-group-btn"></span>')
