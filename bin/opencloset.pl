@@ -3927,6 +3927,9 @@ under '/' => sub {
                         when ('/login') {
                             return 1;
                         }
+                        when ('/volunteers/new') {
+                            return 1;
+                        }
                         default {
                             $self->redirect_to( $self->url_for('/visit') );
                             return;
@@ -3970,6 +3973,9 @@ under '/' => sub {
                         when ('/login') {
                             return 1;
                         }
+                        when ('/volunteers/new') {
+                            return 1;
+                        }
                         default {
                             $self->redirect_to( $self->url_for('/login') );
                             return;
@@ -3983,6 +3989,9 @@ under '/' => sub {
                         return 1;
                     }
                     when ('/browse-happy') {
+                        return 1;
+                    }
+                    when ('/volunteers/new') {
                         return 1;
                     }
                     default {
@@ -6018,6 +6027,17 @@ get '/stat/status/:ymd' => sub {
 };
 
 get '/shortcut' => 'shortcut';
+
+group {
+    under '/volunteers' => sub {
+        my $self = shift;
+        $self->stash(layout => 'volunteers');
+    };
+
+    get '/new' => sub {
+        my $self = shift;
+    } => 'volunteers/new';
+};
 
 any '/size/guess' => sub {
     my $self   = shift;
