@@ -20,7 +20,7 @@
     <script src="/lib/jquery/js/jquery.mask.min.js"></script>
     <script src="/lib/datepicker/js/bootstrap-datepicker.js"></script>
     <script src="/lib/datepicker/js/locales/bootstrap-datepicker.kr.js"></script>
-    % if ($js) {
+    % for my $js (@$jses) {
       <script src="<%= $js %>"></script>
     % }
   </head>
