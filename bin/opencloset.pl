@@ -3927,7 +3927,7 @@ under '/' => sub {
                         when ('/login') {
                             return 1;
                         }
-                        when ('/volunteers/new') {
+                        when (/^\/volunteers/) {
                             return 1;
                         }
                         default {
@@ -3973,7 +3973,7 @@ under '/' => sub {
                         when ('/login') {
                             return 1;
                         }
-                        when ('/volunteers/new') {
+                        when (/^\/volunteers/) {
                             return 1;
                         }
                         default {
@@ -3991,7 +3991,7 @@ under '/' => sub {
                     when ('/browse-happy') {
                         return 1;
                     }
-                    when ('/volunteers/new') {
+                    when (/^\/volunteers/) {
                         return 1;
                     }
                     default {
@@ -6031,12 +6031,17 @@ get '/shortcut' => 'shortcut';
 group {
     under '/volunteers' => sub {
         my $self = shift;
-        $self->stash(layout => 'volunteers');
     };
 
     get '/new' => sub {
         my $self = shift;
     } => 'volunteers/new';
+
+    post '/' => sub {
+        my $self = shift;
+
+        $self->render(template => 'volunteers/done');
+    };
 };
 
 any '/size/guess' => sub {
