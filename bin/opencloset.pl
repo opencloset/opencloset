@@ -6111,7 +6111,10 @@ group {
         my $work = $DB->resultset('VolunteerWork')->find({ id => $work_id });
         return $self->error(404, str => "Not Found Volunteer Work: $work_id") unless $work;
 
-        $self->render(work => $work);
+        my $volunteer = $work->volunteer;
+        my $works     = $volunteer->volunteer_works({ id => { '!=' => $work->id } });
+
+        $self->render(work => $work, works => [$works->all]);
     } => 'volunteers/id';
 };
 
