@@ -6033,15 +6033,86 @@ group {
         my $self = shift;
     };
 
+    # GET /volunteers/new
     get '/new' => sub {
         my $self = shift;
     } => 'volunteers/new';
 
+    # POST /volunteers
     post '/' => sub {
         my $self = shift;
 
-        $self->render(template => 'volunteers/done');
+        my $v = $self->validation;
+        $v->required('name');
+        $v->required('activity_date')->like(qr/^\d{4}-\d{2}-\d{2}$/);
+
+        $v->optional('email');    # TODO: check valid email
+        $v->optional('birthdate')->like(qr/^\d{4}-\d{2}-\d{2}$/);
+        $v->optional('phonenumber')->like(qr/^\d{3}-\d{4}-\d{3,4}$/);
+        $v->optional('address');
+        $v->optional('activity_hour_from');
+        $v->optional('activity_hour_to');
+        $v->optional('reason');
+        $v->optional('path');
+        $v->optional('period');
+        $v->optional('activity');
+        $v->optional('comment');
+
+        return $self->error(400, str => 'Parameter Validation Failed') if $v->has_error;
+
+        my $name          = $v->param('name');
+        my $activity_date = $v->param('activity_date');
+        my $email         = $v->param('email');
+        my $birth_date    = $v->param('birthdate');
+        my $phone         = $v->param('phonenumber');
+        my $address       = $v->param('address');
+        my $from          = sprintf '%02s', $v->param('activity_hour_from') || '00';
+        my $to            = sprintf '%02s', $v->param('activity_hour_to')   || '00';
+        my $period        = $v->param('period');
+        my $comment       = $v->param('comment');
+        my $reasons       = $v->every_param('reason');
+        my $paths         = $v->every_param('path');
+        my $activities    = $v->every_param('activity');
+
+        my $volunteer = $DB->resultset('Volunteer')->find_or_create(
+            {
+                name       => $name,
+                email      => $email,
+                phone      => $phone,
+                address    => $address,
+                birth_date => $birth_date
+            }
+        );
+
+        return $self->error(500, str => 'Failed to find or create Volunteer') unless $volunteer;
+
+        my $work = $DB->resultset('VolunteerWork')->create(
+            {
+                volunteer_id       => $volunteer->id,
+                activity_from_date => "$activity_date $from:00:00",
+                activity_to_date   => "$activity_date $to:00:00",
+                period             => $period,
+                reason             => join( ',', @$reasons ),
+                path               => join( ',', @$paths ),
+                activity           => join( ',', @$activities ),
+                comment            => $comment
+            }
+        );
+
+        return $self->error(500, str => 'Failed to create Volunteer Work') unless $work;
+        $self->redirect_to('/volunteers/' . $work->id);
     };
+
+    # GET /volunteers/:work_id
+    get '/:work_id' => sub {
+        my $self = shift;
+        my $work_id = $self->param('work_id');
+
+        my $work = $DB->resultset('VolunteerWork')->find({ id => $work_id });
+        return $self->error(404, str => "Not Found Volunteer Work: $work_id") unless $work;
+
+        $self->render(work => $work);
+    } => 'volunteers/id';
 };
 
 any '/size/guess' => sub {
