@@ -6033,6 +6033,15 @@ group {
         my $self = shift;
     };
 
+    get '/' => sub {
+        my $self = shift;
+
+        my $now   = DateTime->now;
+        my $works = $DB->resultset('VolunteerWork')->search;
+
+        $self->render(works => $works);
+    } => 'volunteers/list';
+
     # GET /volunteers/new
     get '/new' => sub {
         my $self = shift;

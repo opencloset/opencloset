@@ -1,0 +1,22 @@
+% use utf8;
+% my $_id = 'volunteer';
+% layout 'default', page_id => $_id, active_id => 'volunteer',
+%   breadcrumbs => [
+%     { text => meta_text('volunteer'), link => url_for( meta_link('volunteer') ) },
+%     { text => meta_text($_id)      },
+%   ];
+% title meta_text($_id);
+
+<div class="list-group">
+  % while (my $work = $works->next) {
+    % my $volunteer = $work->volunteer;
+    % my $from = $work->activity_from_date;
+    % my $to   = $work->activity_to_date;
+    <a href="/volunteers/<%= $work->id %>" target="_blank" class="list-group-item">
+      <h4 class="list-group-item-heading"><%= $volunteer->name %> <small><%= $volunteer->birth_date->ymd %></small></h4>
+      <p class="list-group-item-text">
+        <span class="label label-info"><%= $from->ymd %> <%= $from->hms %></span> ~ <span class="label label-info"><%= $to->ymd %> <%= $to->hms %></span>
+      </p>
+    </a>
+  % }
+</div>

@@ -108,6 +108,7 @@ $db_opts->{AutoCommit} //= 1;
             'visit'               => { text => '방문 예약',             icon => 'group',     desc => '열린옷장 방문 예약', link => '/visit'  },
             'visit2'              => { text => '방문 예약 (직원 전용)', icon => 'group',     desc => '열린옷장 방문 예약', link => '/visit2' },
             'stat'                => { text => '통계',                  icon => 'bar-chart', desc => '통계',               link => '#' },
+            'volunteer'           => { text => '봉사활동',              icon => 'male',      desc => '봉사활동 현황입니다.',      link => '/volunteers' },
             'stat-bestfit'        => { text => '어울림',                icon => q{},         desc => '베스트핏에 해당하는 의류와 대여자 신체 치수 정보를 보여줍니다.', link => '/stat/bestfit'        },
             'stat-clothes-amount' => { text => '수량',                  icon => q{},         desc => '옷의 종류별 수량을 보여줍니다.',                                 link => '/stat/clothes/amount' },
             'stat-clothes-hit'    => { text => '인기 의류',             icon => q{},         desc => '가장 많이 대여한 옷을 종류별로 보여줍니다.',                     link => '/stat/clothes/hit'    },
@@ -137,6 +138,7 @@ $db_opts->{AutoCommit} //= 1;
                     { id => 'stat-status'         },
                 ],
             },
+            { id => 'volunteer'   },
         ],
     },
 
