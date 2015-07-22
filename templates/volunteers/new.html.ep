@@ -1,4 +1,4 @@
-% title '자원봉사 신청서';
+% title '자원봉사신청서';
 % layout 'volunteers', jses => ['/js/volunteers-new.js'];
 
 <div class="row">
