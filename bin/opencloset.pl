@@ -6092,9 +6092,9 @@ group {
                 activity_from_date => "$activity_date $from:00:00",
                 activity_to_date   => "$activity_date $to:00:00",
                 period             => $period,
-                reason             => join( ',', @$reasons ),
-                path               => join( ',', @$paths ),
-                activity           => join( ',', @$activities ),
+                reason             => join( '|', @$reasons ),
+                path               => join( '|', @$paths ),
+                activity           => join( '|', @$activities ),
                 comment            => $comment
             }
         );
