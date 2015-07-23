@@ -121,7 +121,7 @@
       </div>
       <hr class="colorgraph">
       <div class="row">
-	<div class="col-xs-6 col-md-6"><input type="submit" value="신청" class="btn btn-primary btn-block btn-lg" tabindex="10"></div>
+	<div class="col-xs-6 col-md-6"><input type="submit" value="수정" class="btn btn-primary btn-block btn-lg" tabindex="10"></div>
         <div class="col-xs-6 col-md-6"><button type="reset" class="btn btn-danger btn-block btn-lg" tabindex="11">다시작성</button></div>
       </div>
     </form>
