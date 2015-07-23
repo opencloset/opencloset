@@ -6101,7 +6101,7 @@ group {
             }
         );
 
-        return $self->error(500, str => 'Failed to find or create Volunteer') unless $volunteer;
+        return $self->error(500, { str => 'Failed to find or create Volunteer' }) unless $volunteer;
 
         my $work = $DB->resultset('VolunteerWork')->create(
             {
@@ -6117,23 +6117,96 @@ group {
             }
         );
 
-        return $self->error(500, str => 'Failed to create Volunteer Work') unless $work;
+        return $self->error(500, { str => 'Failed to create Volunteer Work' }) unless $work;
         $self->render('volunteers/done', work => $work);
     };
 
-    # GET /volunteers/:work_id
-    get '/:work_id' => sub {
-        my $self = shift;
+    # reset under /volunteers
+    # UNDER /volunteers/:work_id
+    under '/volunteers/:work_id' => sub {
+        my $self    = shift;
         my $work_id = $self->param('work_id');
 
         my $work = $DB->resultset('VolunteerWork')->find({ id => $work_id });
-        return $self->error(404, str => "Not Found Volunteer Work: $work_id") unless $work;
+        unless ($work) {
+            $self->error(404, { str => "Not Found Volunteer Work: $work_id" });
+            return;
+        }
+
+        $self->stash(work => $work);
+        return 1;
+    };
+
+    # GET /volunteers/:work_id
+    get '/' => sub {
+        my $self = shift;
+        my $work = $self->stash('work');
 
         my $volunteer = $work->volunteer;
         my $works     = $volunteer->volunteer_works({ id => { '!=' => $work->id } });
 
-        $self->render(work => $work, works => [$works->all]);
+        $self->render(works => [$works->all]);
     } => 'volunteers/id';
+
+    # POST|PUT /volunteers/:work_id
+    any [qw/POST PUT/] => sub {
+        my $self      = shift;
+        my $authcode  = $self->param('authcode') || '';
+        my $work      = $self->stash('work');
+        my $volunteer = $work->volunteer;
+
+        return $self->render('volunteers/error/bad_request', status => 400, error => 'Wrong authcode')
+            if $authcode ne $work->authcode;
+
+        my $v = $self->validation;
+        $self->_validate_volunteer_work($v);
+        return $self->error(400, { str => 'Parameter Validation Failed' }) if $v->has_error;
+
+        my $activity_date = $v->param('activity_date');
+        my $from          = sprintf '%02s', $v->param('activity_hour_from') || '00';
+        my $to            = sprintf '%02s', $v->param('activity_hour_to')   || '00';
+        my $period        = $v->param('period');
+        my $comment       = $v->param('comment');
+        my $reasons       = $v->every_param('reason');
+        my $paths         = $v->every_param('path');
+        my $activities    = $v->every_param('activity');
+
+        $work->update({
+            activity_from_date => "$activity_date $from:00:00",
+            activity_to_date   => "$activity_date $to:00:00",
+            period             => $period,
+            reason             => join( '|', @$reasons ),
+            path               => join( '|', @$paths ),
+            activity           => join( '|', @$activities ),
+            comment            => $comment,
+        });
+
+        $self->render('volunteers/done', work => $work);
+    };
+
+    # GET /volunteers/:work_id/edit?authcode=xxxx
+    get '/edit' => sub {
+        my $self      = shift;
+        my $authcode  = $self->param('authcode') || '';
+        my $work      = $self->stash('work');
+        my $volunteer = $work->volunteer;
+
+        return $self->render('volunteers/error/bad_request', status => 400, error => 'Wrong authcode')
+            if $authcode ne $work->authcode;
+
+        my $from = $work->activity_from_date;
+        my $to   = $work->activity_to_date;
+
+        my %filled = ($work->get_columns, $volunteer->get_columns);
+        $filled{reason}   = [split /\|/, $filled{reason}];
+        $filled{path}     = [split /\|/, $filled{path}];
+        $filled{activity} = [split /\|/, $filled{activity}];
+        $filled{activity_date}      = $from->ymd;
+        $filled{activity_hour_from} = $from->hour;
+        $filled{activity_hour_to}   = $to->hour;
+        $filled{birth_date}         = $volunteer->birth_date->ymd;
+        $self->render_fillinform(\%filled);
+    } => 'volunteers/edit';
 };
 
 any '/size/guess' => sub {
