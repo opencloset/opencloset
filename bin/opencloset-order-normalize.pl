@@ -36,55 +36,63 @@ my $DB   = OpenCloset::Schema->connect({
     use experimental qw( smartmatch );
 
     given ($cmd) {
-        when ('normalize') {
-            my $order_rs = $DB->resultset('Order');
-            while ( my $order = $order_rs->next ) {
-                next unless $order->purpose;
-                my $normalized_purpose = normalize( $order->purpose );
+        normalize($DB) when 'normalize';
+        trim($DB)      when 'trim';
+    }
+}
 
-                my $purpose2;
-                if ( $order->purpose2 ) {
-                    $purpose2
-                        = $order->purpose eq $normalized_purpose
-                        ? $order->purpose2
-                        : join( ' - ', $order->purpose, $order->purpose2 );
-                }
-                else {
-                    $purpose2 = $order->purpose;
-                }
+sub normalize {
+    my $db = shift;
 
-                if (   $order->purpose ne $normalized_purpose
-                    || $order->purpose2 ne $purpose2 )
-                {
-                    say sprintf "(%7d) : [%s] / (%s) => [%s] / (%s) ", $order->id,
-                        $order->purpose, $order->purpose2, $normalized_purpose,
-                        $purpose2;
+    my $order_rs = $db->resultset('Order');
+    while ( my $order = $order_rs->next ) {
+        next unless $order->purpose;
+        my $normalized_purpose = normalize_mapper( $order->purpose );
 
-                        $order->update( { purpose => $normalized_purpose, purpose2 => $purpose2 } );
-                }
-            }
+        my $purpose2;
+        if ( $order->purpose2 ) {
+            $purpose2
+                = $order->purpose eq $normalized_purpose
+                ? $order->purpose2
+                : join( ' - ', $order->purpose, $order->purpose2 );
         }
-        when ('trim') {
-            my $order_rs = $DB->resultset('Order');
-            while ( my $order = $order_rs->next ) {
-                next unless $order->purpose2;
-                if ( $order->purpose2 =~ /(^\s+|\s+$)/ || $order->purpose2 =~ /\s+/ ) {
-                    my $trimed_purpose2 = $order->purpose2;
-                    $trimed_purpose2 =~ s/(^\s+|\s+$)//;
-                    $trimed_purpose2 =~ s/\s+/ /;
-                    if ( $order->purpose2 ne $trimed_purpose2 ) {
-                        say sprintf "(%7d) : [%s] => [%s]", $order->id,
-                            $order->purpose2, $trimed_purpose2;
+        else {
+            $purpose2 = $order->purpose;
+        }
 
-                            $order->update( { purpose2 => $trimed_purpose2 } );
-                    }
-                }
+        if (   $order->purpose ne $normalized_purpose
+            || $order->purpose2 ne $purpose2 )
+        {
+            say sprintf "(%7d) : [%s] / (%s) => [%s] / (%s) ", $order->id,
+                $order->purpose, $order->purpose2, $normalized_purpose,
+                $purpose2;
+
+                $order->update( { purpose => $normalized_purpose, purpose2 => $purpose2 } );
+        }
+    }
+}
+
+sub trim {
+    my $db = shift;
+
+    my $order_rs = $db->resultset('Order');
+    while ( my $order = $order_rs->next ) {
+        next unless $order->purpose2;
+        if ( $order->purpose2 =~ /(^\s+|\s+$)/ || $order->purpose2 =~ /\s+/ ) {
+            my $trimed_purpose2 = $order->purpose2;
+            $trimed_purpose2 =~ s/(^\s+|\s+$)//;
+            $trimed_purpose2 =~ s/\s+/ /;
+            if ( $order->purpose2 ne $trimed_purpose2 ) {
+                say sprintf "(%7d) : [%s] => [%s]", $order->id,
+                    $order->purpose2, $trimed_purpose2;
+
+                    $order->update( { purpose2 => $trimed_purpose2 } );
             }
         }
     }
 }
 
-sub normalize {
+sub normalize_mapper {
     my $purpose = shift;
 
     my %map = (
