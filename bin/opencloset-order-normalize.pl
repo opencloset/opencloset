@@ -49,31 +49,26 @@ sub normalize {
         next unless $order->purpose;
 
         my $normalized = normalize_mapper( $order->purpose );
+        if ( $order->purpose ne $normalized ) {
+            my $purpose2 = join( ' - ', grep { defined && $_ } $order->purpose, $order->purpose2 );
+            $purpose2 =~ s/^\s+//gms;
+            $purpose2 =~ s/\s+$//gms;
+            $purpose2 =~ s/\s/ /gms;
+            $purpose2 =~ s/\s+/ /gms;
 
-        my $purpose2;
-        if ( $order->purpose2 ) {
-            $purpose2
-                = $order->purpose eq $normalized
-                ? $order->purpose2
-                : join( ' - ', $order->purpose, $order->purpose2 );
-        }
-        else {
-            $purpose2 = $order->purpose;
-        }
-
-        if (   $order->purpose ne $normalized
-            || $order->purpose2 ne $purpose2 )
-        {
             printf(
-                "(%7d) : [%s] / (%s) => [%s] / (%s)\n",
+                "%d\t%s\t%s\t%s\t%s\n",
                 $order->id,
-                $order->purpose,
-                $order->purpose2,
+                $order->purpose || q{N/A},
                 $normalized,
+                $order->purpose2 || q{N/A},
                 $purpose2,
             );
 
-            $order->update( { purpose => $normalized, purpose2 => $purpose2 } );
+            $order->update({
+                purpose  => $normalized,
+                purpose2 => $purpose2,
+            });
         }
     }
 }
