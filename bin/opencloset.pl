@@ -1247,6 +1247,29 @@ helper convert_sec_to_hms => sub {
     return $hms;
 };
 
+helper _validate_volunteer => sub {
+    my ($self, $v) = @_;
+
+    $v->required('name');
+    $v->optional('email');    # TODO: check valid email
+    $v->optional('birth_date')->like(qr/^\d{4}-\d{2}-\d{2}$/);
+    $v->optional('phone')->like(qr/^\d{3}-\d{4}-\d{3,4}$/);
+    $v->optional('address');
+};
+
+helper _validate_volunteer_work => sub {
+    my ($self, $v) = @_;
+
+    $v->required('activity_date')->like(qr/^\d{4}-\d{2}-\d{2}$/);
+    $v->optional('activity_hour_from')->like(qr/^\d{1,2}$/);
+    $v->optional('activity_hour_to')->like(qr/^\d{1,2}$/);
+    $v->optional('reason');
+    $v->optional('path');
+    $v->optional('period');
+    $v->optional('activity');
+    $v->optional('comment');
+};
+
 #
 # csv section
 #
@@ -6029,9 +6052,7 @@ get '/stat/status/:ymd' => sub {
 get '/shortcut' => 'shortcut';
 
 group {
-    under '/volunteers' => sub {
-        my $self = shift;
-    };
+    under '/volunteers';
 
     get '/' => sub {
         my $self = shift;
@@ -6052,22 +6073,9 @@ group {
         my $self = shift;
 
         my $v = $self->validation;
-        $v->required('name');
-        $v->required('activity_date')->like(qr/^\d{4}-\d{2}-\d{2}$/);
-
-        $v->optional('email');    # TODO: check valid email
-        $v->optional('birthdate')->like(qr/^\d{4}-\d{2}-\d{2}$/);
-        $v->optional('phonenumber')->like(qr/^\d{3}-\d{4}-\d{3,4}$/);
-        $v->optional('address');
-        $v->optional('activity_hour_from')->like(qr/^\d{1,2}$/);
-        $v->optional('activity_hour_to')->like(qr/^\d{1,2}$/);
-        $v->optional('reason');
-        $v->optional('path');
-        $v->optional('period');
-        $v->optional('activity');
-        $v->optional('comment');
-
-        return $self->error(400, str => 'Parameter Validation Failed') if $v->has_error;
+        $self->_validate_volunteer($v);
+        $self->_validate_volunteer_work($v);
+        return $self->error(400, { str => 'Parameter Validation Failed' }) if $v->has_error;
 
         my $name          = $v->param('name');
         my $activity_date = $v->param('activity_date');
