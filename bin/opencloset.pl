@@ -6112,7 +6112,8 @@ group {
                 reason             => join( '|', @$reasons ),
                 path               => join( '|', @$paths ),
                 activity           => join( '|', @$activities ),
-                comment            => $comment
+                comment            => $comment,
+                authcode           => String::Random->new->randregex('[a-zA-Z0-9]{32}')
             }
         );
 
