@@ -6072,8 +6072,8 @@ group {
         my $name          = $v->param('name');
         my $activity_date = $v->param('activity_date');
         my $email         = $v->param('email');
-        my $birth_date    = $v->param('birthdate');
-        my $phone         = $v->param('phonenumber');
+        my $birth_date    = $v->param('birth_date');
+        my $phone         = $v->param('phone');
         my $address       = $v->param('address');
         my $from          = sprintf '%02s', $v->param('activity_hour_from') || '00';
         my $to            = sprintf '%02s', $v->param('activity_hour_to')   || '00';
