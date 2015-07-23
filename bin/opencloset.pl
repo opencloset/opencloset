@@ -6109,7 +6109,7 @@ group {
         );
 
         return $self->error(500, str => 'Failed to create Volunteer Work') unless $work;
-        $self->redirect_to('/volunteers/' . $work->id);
+        $self->render('volunteers/done', work => $work);
     };
 
     # GET /volunteers/:work_id
