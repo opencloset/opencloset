@@ -32,52 +32,54 @@ my $DB   = OpenCloset::Schema->connect({
     %{ $CONF->{database}{opts} },
 });
 
-if ( $cmd eq 'normalize_purpose' ) {
-    for my $order ( $DB->resultset('Order')->all ) {
-        next unless $order->purpose;
-        my $normalized_purpose = normalize( $order->purpose );
+{
+    use experimental qw( smartmatch );
 
-        my $purpose2;
-        if ( $order->purpose2 ) {
-            $purpose2
-                = $order->purpose eq $normalized_purpose
-                ? $order->purpose2
-                : join( ' - ', $order->purpose, $order->purpose2 );
+    given ($cmd) {
+        when ('normalize_purpose') {
+            for my $order ( $DB->resultset('Order')->all ) {
+                next unless $order->purpose;
+                my $normalized_purpose = normalize( $order->purpose );
+
+                my $purpose2;
+                if ( $order->purpose2 ) {
+                    $purpose2
+                        = $order->purpose eq $normalized_purpose
+                        ? $order->purpose2
+                        : join( ' - ', $order->purpose, $order->purpose2 );
+                }
+                else {
+                    $purpose2 = $order->purpose;
+                }
+
+                if (   $order->purpose ne $normalized_purpose
+                    || $order->purpose2 ne $purpose2 )
+                {
+                    say sprintf "(%7d) : [%s] / (%s) => [%s] / (%s) ", $order->id,
+                        $order->purpose, $order->purpose2, $normalized_purpose,
+                        $purpose2;
+
+                        $order->update( { purpose => $normalized_purpose, purpose2 => $purpose2 } );
+                }
+            }
         }
-        else {
-            $purpose2 = $order->purpose;
-        }
+        when ('trim_purpose2') {
+            for my $order ( $DB->resultset('Order')->all ) {
+                next unless $order->purpose2;
+                if ( $order->purpose2 =~ /(^\s+|\s+$)/ || $order->purpose2 =~ /\s+/ ) {
+                    my $trimed_purpose2 = $order->purpose2;
+                    $trimed_purpose2 =~ s/(^\s+|\s+$)//;
+                    $trimed_purpose2 =~ s/\s+/ /;
+                    if ( $order->purpose2 ne $trimed_purpose2 ) {
+                        say sprintf "(%7d) : [%s] => [%s]", $order->id,
+                            $order->purpose2, $trimed_purpose2;
 
-        if (   $order->purpose ne $normalized_purpose
-            || $order->purpose2 ne $purpose2 )
-        {
-            say sprintf "(%7d) : [%s] / (%s) => [%s] / (%s) ", $order->id,
-                $order->purpose, $order->purpose2, $normalized_purpose,
-                $purpose2;
-
-                $order->update( { purpose => $normalized_purpose, purpose2 => $purpose2 } );
-        }
-    }
-}
-elsif ( $cmd eq 'trim_purpose2' ) {
-    for my $order ( $DB->resultset('Order')->all ) {
-        next unless $order->purpose2;
-        if ( $order->purpose2 =~ /(^\s+|\s+$)/ || $order->purpose2 =~ /\s+/ ) {
-            my $trimed_purpose2 = $order->purpose2;
-            $trimed_purpose2 =~ s/(^\s+|\s+$)//;
-            $trimed_purpose2 =~ s/\s+/ /;
-            if ( $order->purpose2 ne $trimed_purpose2 ) {
-                say sprintf "(%7d) : [%s] => [%s]", $order->id,
-                    $order->purpose2, $trimed_purpose2;
-
-                    $order->update( { purpose2 => $trimed_purpose2 } );
+                            $order->update( { purpose2 => $trimed_purpose2 } );
+                    }
+                }
             }
         }
     }
-}
-else {
-    die
-        "allowed commands: [normalize_purpose|trim_purpose2]\nunknown command: $cmd\n";
 }
 
 sub normalize {
