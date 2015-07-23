@@ -64,9 +64,14 @@ sub normalize {
         if (   $order->purpose ne $normalized
             || $order->purpose2 ne $purpose2 )
         {
-            say sprintf "(%7d) : [%s] / (%s) => [%s] / (%s) ", $order->id,
-                $order->purpose, $order->purpose2, $normalized,
-                $purpose2;
+            printf(
+                "(%7d) : [%s] / (%s) => [%s] / (%s)\n",
+                $order->id,
+                $order->purpose,
+                $order->purpose2,
+                $normalized,
+                $purpose2,
+            );
 
                 $order->update( { purpose => $normalized, purpose2 => $purpose2 } );
         }
@@ -85,8 +90,12 @@ sub trim {
             $trimed_purpose2 =~ s/(^\s+|\s+$)//;
             $trimed_purpose2 =~ s/\s+/ /;
             if ( $order->purpose2 ne $trimed_purpose2 ) {
-                say sprintf "(%7d) : [%s] => [%s]", $order->id,
-                    $order->purpose2, $trimed_purpose2;
+                printf(
+                    "(%7d) : [%s] => [%s]\n",
+                    $order->id,
+                    $order->purpose2,
+                    $trimed_purpose2,
+                );
 
                     $order->update( { purpose2 => $trimed_purpose2 } );
             }
