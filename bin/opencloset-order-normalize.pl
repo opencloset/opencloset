@@ -21,7 +21,8 @@ die "Usage: $Script <config file> <normalize_purpose|trim_purpose2>\n"
     unless @ARGV == 2;
 
 my ( $config_file, $cmd ) = @ARGV;
-die "cannot find $config_file\n" unless -f $config_file;
+die "cannot find $config_file\n"                           unless -f $config_file;
+die "allowed commands: normalize_purpose, trim_purpose2\n" unless $cmd =~ m/^(normalize_purpose|trim_purpose2)$/;
 
 my $CONF = OpenCloset::Config::load($config_file);
 my $DB   = OpenCloset::Schema->connect({
