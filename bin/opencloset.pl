@@ -6059,8 +6059,8 @@ group {
         $v->optional('birthdate')->like(qr/^\d{4}-\d{2}-\d{2}$/);
         $v->optional('phonenumber')->like(qr/^\d{3}-\d{4}-\d{3,4}$/);
         $v->optional('address');
-        $v->optional('activity_hour_from');
-        $v->optional('activity_hour_to');
+        $v->optional('activity_hour_from')->like(qr/^\d{1,2}$/);
+        $v->optional('activity_hour_to')->like(qr/^\d{1,2}$/);
         $v->optional('reason');
         $v->optional('path');
         $v->optional('period');
