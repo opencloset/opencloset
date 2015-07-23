@@ -37,7 +37,8 @@ my $DB   = OpenCloset::Schema->connect({
 
     given ($cmd) {
         when ('normalize_purpose') {
-            for my $order ( $DB->resultset('Order')->all ) {
+            my $order_rs = $DB->resultset('Order');
+            while ( my $order = $order_rs->next ) {
                 next unless $order->purpose;
                 my $normalized_purpose = normalize( $order->purpose );
 
@@ -64,7 +65,8 @@ my $DB   = OpenCloset::Schema->connect({
             }
         }
         when ('trim_purpose2') {
-            for my $order ( $DB->resultset('Order')->all ) {
+            my $order_rs = $DB->resultset('Order');
+            while ( my $order = $order_rs->next ) {
                 next unless $order->purpose2;
                 if ( $order->purpose2 =~ /(^\s+|\s+$)/ || $order->purpose2 =~ /\s+/ ) {
                     my $trimed_purpose2 = $order->purpose2;
