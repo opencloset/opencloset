@@ -17,7 +17,7 @@ use OpenCloset::Schema;
 binmode STDOUT, ':utf8';
 binmode STDERR, ':utf8';
 
-die "Usage: $Script <config file> (normalize_purpose|trim_purpose2)\n"
+die "Usage: $Script <config file> <normalize_purpose|trim_purpose2>\n"
     unless @ARGV == 2;
 
 my ( $config_file, $cmd ) = @ARGV;
