@@ -47,12 +47,13 @@ sub normalize {
     my $order_rs = $db->resultset('Order');
     while ( my $order = $order_rs->next ) {
         next unless $order->purpose;
-        my $normalized_purpose = normalize_mapper( $order->purpose );
+
+        my $normalized = normalize_mapper( $order->purpose );
 
         my $purpose2;
         if ( $order->purpose2 ) {
             $purpose2
-                = $order->purpose eq $normalized_purpose
+                = $order->purpose eq $normalized
                 ? $order->purpose2
                 : join( ' - ', $order->purpose, $order->purpose2 );
         }
@@ -60,14 +61,14 @@ sub normalize {
             $purpose2 = $order->purpose;
         }
 
-        if (   $order->purpose ne $normalized_purpose
+        if (   $order->purpose ne $normalized
             || $order->purpose2 ne $purpose2 )
         {
             say sprintf "(%7d) : [%s] / (%s) => [%s] / (%s) ", $order->id,
-                $order->purpose, $order->purpose2, $normalized_purpose,
+                $order->purpose, $order->purpose2, $normalized,
                 $purpose2;
 
-                $order->update( { purpose => $normalized_purpose, purpose2 => $purpose2 } );
+                $order->update( { purpose => $normalized, purpose2 => $purpose2 } );
         }
     }
 }
@@ -78,6 +79,7 @@ sub trim {
     my $order_rs = $db->resultset('Order');
     while ( my $order = $order_rs->next ) {
         next unless $order->purpose2;
+
         if ( $order->purpose2 =~ /(^\s+|\s+$)/ || $order->purpose2 =~ /\s+/ ) {
             my $trimed_purpose2 = $order->purpose2;
             $trimed_purpose2 =~ s/(^\s+|\s+$)//;
