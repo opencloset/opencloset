@@ -6202,8 +6202,8 @@ group {
         $filled{path}     = [split /\|/, $filled{path}];
         $filled{activity} = [split /\|/, $filled{activity}];
         $filled{activity_date}      = $from->ymd;
-        $filled{activity_hour_from} = $from->hour;
-        $filled{activity_hour_to}   = $to->hour;
+        $filled{activity_hour_from} = sprintf '%02d', $from->hour;
+        $filled{activity_hour_to}   = sprintf '%02d', $to->hour;
         $filled{birth_date}         = $volunteer->birth_date->ymd;
         $self->render_fillinform(\%filled);
     } => 'volunteers/edit';
