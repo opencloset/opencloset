@@ -17,12 +17,12 @@ use OpenCloset::Schema;
 binmode STDOUT, ':utf8';
 binmode STDERR, ':utf8';
 
-die "Usage: $Script <config file> <normalize_purpose|trim_purpose2>\n"
+die "Usage: $Script <config file> <normalize|trim>\n"
     unless @ARGV == 2;
 
 my ( $config_file, $cmd ) = @ARGV;
-die "cannot find $config_file\n"                           unless -f $config_file;
-die "allowed commands: normalize_purpose, trim_purpose2\n" unless $cmd =~ m/^(normalize_purpose|trim_purpose2)$/;
+die "cannot find $config_file\n"          unless -f $config_file;
+die "allowed commands: normalize, trim\n" unless $cmd =~ m/^(normalize|trim)$/;
 
 my $CONF = OpenCloset::Config::load($config_file);
 my $DB   = OpenCloset::Schema->connect({
@@ -36,7 +36,7 @@ my $DB   = OpenCloset::Schema->connect({
     use experimental qw( smartmatch );
 
     given ($cmd) {
-        when ('normalize_purpose') {
+        when ('normalize') {
             my $order_rs = $DB->resultset('Order');
             while ( my $order = $order_rs->next ) {
                 next unless $order->purpose;
@@ -64,7 +64,7 @@ my $DB   = OpenCloset::Schema->connect({
                 }
             }
         }
-        when ('trim_purpose2') {
+        when ('trim') {
             my $order_rs = $DB->resultset('Order');
             while ( my $order = $order_rs->next ) {
                 next unless $order->purpose2;
