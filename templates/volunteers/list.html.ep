@@ -4,11 +4,19 @@
 %   breadcrumbs => [
 %     { text => meta_text('volunteer'), link => url_for( meta_link('volunteer') ) },
 %     { text => meta_text($_id)      },
-%   ];
+%   ],
+%   jses => ['/js/volunteers-list.js'];
 % title meta_text($_id);
 
-<div class="text-center">
-  <iframe src="https://www.google.com/calendar/embed?height=600&amp;wkst=1&amp;bgcolor=%23FFFFFF&amp;src=volunteer%40theopencloset.net&amp;color=%231B887A&amp;ctz=Asia%2FSeoul" style=" border-width:0 " width="800" height="600" frameborder="0" scrolling="no"></iframe>
+<div class="row">
+  <div class="col-xs-2 col-sm-2 col-md-2">
+    <div class="datepicker" data-date="<%= param('date') %>"></div>
+  </div>
+  <div class="col-xs-10 col-sm-10 col-md-10">
+    <div class="text-center">
+      <iframe src="https://www.google.com/calendar/embed?height=600&amp;wkst=1&amp;bgcolor=%23FFFFFF&amp;src=volunteer%40theopencloset.net&amp;color=%231B887A&amp;ctz=Asia%2FSeoul" style=" border-width:0 " width="800" height="600" frameborder="0" scrolling="no"></iframe>
+    </div>
+  </div>
 </div>
 
 <div class="list-group">
@@ -19,6 +27,8 @@
     <a href="/volunteers/<%= $work->id %>" target="_blank" class="list-group-item">
       <h4 class="list-group-item-heading"><%= $volunteer->name %> <small><%= $volunteer->birth_date->ymd %></small></h4>
       <p class="list-group-item-text">
+        <p title="create date"><%= $work->create_date->ymd %></p>
+        <p title="status"><%= $work->get_column('status') %></p>
         <span class="label label-info"><%= $from->ymd %> <%= $from->hms %></span> ~ <span class="label label-info"><%= $to->ymd %> <%= $to->hms %></span>
       </p>
     </a>
