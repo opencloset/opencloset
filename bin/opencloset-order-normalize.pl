@@ -73,7 +73,7 @@ sub normalize {
                 $purpose2,
             );
 
-                $order->update( { purpose => $normalized, purpose2 => $purpose2 } );
+            $order->update( { purpose => $normalized, purpose2 => $purpose2 } );
         }
     }
 }
@@ -97,7 +97,7 @@ sub trim {
                     $trimed_purpose2,
                 );
 
-                    $order->update( { purpose2 => $trimed_purpose2 } );
+                $order->update( { purpose2 => $trimed_purpose2 } );
             }
         }
     }
