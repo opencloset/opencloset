@@ -8,29 +8,60 @@
 %   jses => ['/js/volunteers-list.js'];
 % title meta_text($_id);
 
+% use Time::Piece;
+% use Time::Seconds;
+% use DateTime;
+
 <div class="row">
-  <div class="col-xs-2 col-sm-2 col-md-2">
-    <div class="datepicker" data-date="<%= param('date') %>"></div>
+  <div class="col-xs-4 col-sm-4 col-md-4">
+    <ul class="list-inline">
+      <li><a href="<%= url_for('/volunteers')->query(status => 'reported') %>"><span class="label label-reported">신청</span></a></li>
+      <li><a href="<%= url_for('/volunteers')->query(status => 'approved') %>"><span class="label label-approved">승인</span></a></li>
+      <li><a href="<%= url_for('/volunteers')->query(status => 'done') %>"><span class="label label-done">완료</span></a></li>
+      <li><a href="<%= url_for('/volunteers')->query(status => 'canceled') %>"><span class="label label-canceled">취소</span></a></li>
+    </ul>
+    <hr class="colorgraph">
+    <div class="list-group">
+      % while (my $work = $works->next) {
+        % my $volunteer = $work->volunteer;
+        % my $from = $work->activity_from_date;
+        % my $to   = $work->activity_to_date;
+        % my $birthday = Time::Piece->strptime( $volunteer->birth_date->ymd,  '%Y-%m-%d' );
+        % my $today    = Time::Piece->strptime( DateTime->now->ymd,  '%Y-%m-%d' );
+        % my $age = sprintf("%.2d", ($today - $birthday) / ONE_YEAR);
+        % my $status = $work->get_column('status');
+        <span class="list-group-item status-<%= $status %>" data-work-id="<%= $work->id %>">
+          <h4 class="list-group-item-heading"><%= $volunteer->name %> <small><%= $age %></small> <span class="label label-<%= $status %>"><%= $status %></span></h4>
+          <p class="list-group-item-text">
+            <mark><%= sprintf "%02d", $from->month %>-<%= sprintf "%02d", $from->day %></mark>
+            <span>
+              <time><%= sprintf "%02d", $from->hour %>:00</time>
+              ~
+              <time><%= sprintf "%02d", $to->hour %>:00</time>
+            </span>
+            <dl>
+              <dt>신청일</dt>
+              <dd><%= $work->create_date->ymd %></dd>
+              % my @activities = split /\|/, $work->activity;
+              <dt>관심있는 활동</dt>
+              <dd>
+                <%= join(', ', @activities) %>
+              </dd>
+              <dd>
+                <button type="button" data-work-id="<%= $work->id %>" class="btn btn-success btn-sm btn-approve">승인</button>
+                <button type="button" data-work-id="<%= $work->id %>" class="btn btn-danger btn-sm btn-cancel">취소</button>
+                <a href="/volunteers/<%= $work->id %>" target="_blank" class="btn btn-default btn-sm">자세히</a>
+                <a href="/volunteers/<%= $work->id %>/edit?authcode=<%= $work->authcode %>" target="_blank" class="btn btn-default btn-sm">수정</a>
+              </dd>
+            </dl>
+          </p>
+        </span>
+      % }
+    </div>
   </div>
-  <div class="col-xs-10 col-sm-10 col-md-10">
+  <div class="col-xs-8 col-sm-8 col-md-8">
     <div class="text-center">
       <iframe src="https://www.google.com/calendar/embed?height=600&amp;wkst=1&amp;bgcolor=%23FFFFFF&amp;src=volunteer%40theopencloset.net&amp;color=%231B887A&amp;ctz=Asia%2FSeoul" style=" border-width:0 " width="800" height="600" frameborder="0" scrolling="no"></iframe>
     </div>
   </div>
-</div>
-
-<div class="list-group">
-  % while (my $work = $works->next) {
-    % my $volunteer = $work->volunteer;
-    % my $from = $work->activity_from_date;
-    % my $to   = $work->activity_to_date;
-    <a href="/volunteers/<%= $work->id %>" target="_blank" class="list-group-item">
-      <h4 class="list-group-item-heading"><%= $volunteer->name %> <small><%= $volunteer->birth_date->ymd %></small></h4>
-      <p class="list-group-item-text">
-        <p title="create date"><%= $work->create_date->ymd %></p>
-        <p title="status"><%= $work->get_column('status') %></p>
-        <span class="label label-info"><%= $from->ymd %> <%= $from->hms %></span> ~ <span class="label label-info"><%= $to->ymd %> <%= $to->hms %></span>
-      </p>
-    </a>
-  % }
 </div>

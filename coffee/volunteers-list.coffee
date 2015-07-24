@@ -1,14 +1,24 @@
-Date.prototype.ymd = ->
-  yyyy = @getFullYear().toString()
-  mm = (@getMonth() + 1).toString()
-  dd = @getDate().toString()
-  return yyyy + '-' + (if mm[1] then mm else "0" + mm[0]) + '-' + (if dd[1] then dd else "0"+dd[0])
-
 $ ->
-  $('.datepicker').datepicker
-    language: 'kr'
-    todayHighlight: true
-    format: 'yyyy-mm-dd'
-  .on 'changeDate', (e) ->
-    ymd = e.date.ymd()
-    location.href = "/volunteers?date=#{ymd}"
+  $('.btn-approve').on 'click', ->
+    $this  = $(@)
+    workId = $this.data('work-id')
+    $.ajax "/volunteers/#{workId}/status",
+      type: 'PUT'
+      data: { status: 'approved' }
+      success: (data, textStatus, jqXHR) ->
+        $this.closest('.list-group-item').remove()
+      error: (jqXHR, textStatus, errorThrown) ->
+        console.log textStatus
+      complete: (jqXHR, textStatus) ->
+
+  $('.btn-cancel').on 'click', ->
+    $this  = $(@)
+    workId = $this.data('work-id')
+    $.ajax "/volunteers/#{workId}/status",
+      type: 'PUT'
+      data: { status: 'canceled' }
+      success: (data, textStatus, jqXHR) ->
+        $this.closest('.list-group-item').remove()
+      error: (jqXHR, textStatus, errorThrown) ->
+        console.log textStatus
+      complete: (jqXHR, textStatus) ->

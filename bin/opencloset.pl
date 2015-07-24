@@ -6055,16 +6055,21 @@ group {
     under '/volunteers';
 
     get '/' => sub {
-        my $self = shift;
-        my $date = $self->param('date') || DateTime->now->ymd;
+        my $self   = shift;
+        my $status = $self->param('status') || 'reported';
 
-        my ($yyyy, $mm, $dd) = split /-/, $date;
-        my $dt = DateTime->new(year => $yyyy, month => $mm, day => $dd);
-        my $dt_parser    = $DB->storage->datetime_parser;
-        my $works = $DB->resultset('VolunteerWork')->search({
-            activity_from_date => { '>=' => $dt_parser->format_datetime($dt) },
-            activity_to_date   => { '<=' => $dt_parser->format_datetime($dt->add(days => 1)) }
-        });
+        my $parser = $DB->storage->datetime_parser;
+        my $now    = DateTime->now;
+        my $works = $DB->resultset('VolunteerWork')->search(
+            {
+                status => $status,
+                activity_from_date => { -between => [
+                    $parser->format_datetime($now->clone->subtract(days => 15)),
+                    $parser->format_datetime($now->clone->add(days => 15))
+                ] }
+            },
+            { order_by => 'activity_from_date' }
+        );
 
         $self->render(works => $works);
     } => 'volunteers/list';
