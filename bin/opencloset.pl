@@ -6159,8 +6159,8 @@ group {
         $self->render(works => [$works->all]);
     } => 'volunteers/id';
 
-    # POST|PUT /volunteers/:work_id
-    any [qw/POST PUT/] => sub {
+    # POST /volunteers/:work_id
+    post '/' => sub {
         my $self      = shift;
         my $authcode  = $self->param('authcode') || '';
         my $work      = $self->stash('work');
@@ -6218,6 +6218,36 @@ group {
         $filled{birth_date}         = $volunteer->birth_date->ymd;
         $self->render_fillinform(\%filled);
     } => 'volunteers/edit';
+
+    # PUT /volunteers/:work_id/status?status=reported|approved|done|canceled
+    put '/status' => sub {
+        my $self      = shift;
+        my $work      = $self->stash('work');
+        my $volunteer = $work->volunteer;
+
+        my $validation = $self->validation;
+        $validation->required('status')->in(qw/reported approved done canceled/);
+        return $self->error(400, { str => 'Parameter Validation Failed' }) if $validation->has_error;
+
+        my $status = $validation->param('status');
+        $work->update({ status => $status });
+
+        if ($status eq 'approved') {
+            ## sms
+            my $to = $volunteer->phone;
+            $to =~ s/-//g;
+            my $sender = SMS::Send->new(
+                app->config->{sms}{driver},
+                %{ app->config->{sms}{ app->config->{sms}{driver} } },
+            );
+
+            my $sent = $sender->send_sms(text => '', to => $to);
+
+            ## google calendar
+        }
+
+        $self->render(json => {$work->get_columns});
+    };
 };
 
 any '/size/guess' => sub {
