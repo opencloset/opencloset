@@ -18,12 +18,11 @@ use OpenCloset::Schema;
 binmode STDOUT, ':utf8';
 binmode STDERR, ':utf8';
 
-die "Usage: $Script <config file> <normalize|trim>\n"
+die "Usage: $Script <config file>\n"
     unless @ARGV == 2;
 
 my ( $config_file, $cmd ) = @ARGV;
-die "cannot find $config_file\n"          unless -f $config_file;
-die "allowed commands: normalize, trim\n" unless $cmd =~ m/^(normalize|trim)$/;
+die "cannot find $config_file\n" unless -f $config_file;
 
 my $CONF = OpenCloset::Config::load($config_file);
 my $DB   = OpenCloset::Schema->connect({
@@ -33,14 +32,7 @@ my $DB   = OpenCloset::Schema->connect({
     %{ $CONF->{database}{opts} },
 });
 
-{
-    use experimental qw( smartmatch );
-
-    given ($cmd) {
-        normalize($DB) when 'normalize';
-        trim($DB)      when 'trim';
-    }
-}
+normalize($DB);
 
 sub normalize {
     my $db = shift;
@@ -54,8 +46,14 @@ sub normalize {
     while ( my $order = $order_rs->next ) {
         next unless $order->purpose;
 
-        my $normalized = normalize_mapper( $order->purpose );
-        if ( $order->purpose ne $normalized ) {
+        #
+        # normalize
+        #
+        my $normalized = normalize_mapper( _trim_spaces($order->purpose) );
+        if ( $order->purpose eq $normalized ) {
+            $order->update({ purpose2 => _trim_spaces( $order->purpose2 ) });
+        }
+        else {
             my $purpose2 = join( ' - ', grep { defined && $_ } $order->purpose, $order->purpose2 );
             $purpose2 = _trim_spaces($purpose2);
 
@@ -86,31 +84,6 @@ sub _trim_spaces {
     $str =~ s/\s+/ /gms;
 
     return $str;
-}
-
-sub trim {
-    my $db = shift;
-
-    my $order_rs = $db->resultset('Order');
-    while ( my $order = $order_rs->next ) {
-        next unless $order->purpose2;
-
-        if ( $order->purpose2 =~ /(^\s+|\s+$)/ || $order->purpose2 =~ /\s+/ ) {
-            my $trimed_purpose2 = $order->purpose2;
-            $trimed_purpose2 =~ s/(^\s+|\s+$)//;
-            $trimed_purpose2 =~ s/\s+/ /;
-            if ( $order->purpose2 ne $trimed_purpose2 ) {
-                printf(
-                    "(%7d) : [%s] => [%s]\n",
-                    $order->id,
-                    $order->purpose2,
-                    $trimed_purpose2,
-                );
-
-                $order->update( { purpose2 => $trimed_purpose2 } );
-            }
-        }
-    }
 }
 
 sub normalize_mapper {
