@@ -7,6 +7,7 @@ use warnings;
 
 use FindBin qw( $Script );
 
+use Getopt::Long::Descriptive;
 use Text::CSV;
 
 use OpenCloset::Config;
@@ -15,14 +16,24 @@ use OpenCloset::Schema;
 binmode STDOUT, ':utf8';
 binmode STDERR, ':utf8';
 
-die "Usage: $Script <config file>\n"
-    unless @ARGV == 1;
+my ( $opt, $usage ) = do {
+    describe_options(
+        "%c %o <config file>",
+        [ 'dry-run', 'do not actually change anything; just print what would happen.' ],
+        [ 'help|h',  'print usage message and exit' ],
+    );
+};
 
-my ( $config_file, $cmd ) = @ARGV;
-die "cannot find $config_file\n" unless -f $config_file;
+print( $usage->text ), exit if $opt->help;
+
+my $config_file = shift;
+print( $usage->text ), die("config file is needed\n")    unless $config_file;
+print( $usage->text ), die("cannot open $config_file\n") unless -f $config_file;
 
 my $CONF = OpenCloset::Config::load($config_file);
-my $DB   = OpenCloset::Schema->connect(
+print( $usage->text ), die("cannot load $config_file\n") unless $DB;
+
+my $DB = OpenCloset::Schema->connect(
     {
         dsn      => $CONF->{database}{dsn},
         user     => $CONF->{database}{user},
@@ -30,11 +41,12 @@ my $DB   = OpenCloset::Schema->connect(
         %{ $CONF->{database}{opts} },
     }
 );
+print( $usage->text ), die("cannot connect to db\n") unless $DB;
 
-normalize($DB);
+normalize( $DB, $opt->dry_run );
 
 sub normalize {
-    my $db = shift;
+    my ( $db, $dry_run ) = @_;
 
     my $csv = Text::CSV->new(
         {
@@ -58,7 +70,9 @@ sub normalize {
         #
         if ( $order->purpose && $order->purpose eq $normalized ) {
             my $purpose2 = _trim_spaces( $order->purpose2 );
-            $order->update( { purpose2 => $purpose2 } ) if defined $purpose2;
+            if ( defined $purpose2 ) {
+                $order->update( { purpose2 => $purpose2 } ) unless $dry_run;
+            }
         }
         else {
             my $purpose2 = join(
@@ -83,7 +97,7 @@ sub normalize {
                     purpose  => $normalized,
                     purpose2 => $purpose2,
                 }
-            );
+            ) unless $dry_run;
         }
     }
 }
