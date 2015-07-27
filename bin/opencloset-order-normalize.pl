@@ -25,28 +25,32 @@ my ( $config_file, $cmd ) = @ARGV;
 die "cannot find $config_file\n" unless -f $config_file;
 
 my $CONF = OpenCloset::Config::load($config_file);
-my $DB   = OpenCloset::Schema->connect({
-    dsn      => $CONF->{database}{dsn},
-    user     => $CONF->{database}{user},
-    password => $CONF->{database}{pass},
-    %{ $CONF->{database}{opts} },
-});
+my $DB   = OpenCloset::Schema->connect(
+    {
+        dsn      => $CONF->{database}{dsn},
+        user     => $CONF->{database}{user},
+        password => $CONF->{database}{pass},
+        %{ $CONF->{database}{opts} },
+    }
+);
 
 normalize($DB);
 
 sub normalize {
     my $db = shift;
 
-    my $csv = Text::CSV->new({
-        binary => 1,
-        eol    => "\n",
-    });
+    my $csv = Text::CSV->new(
+        {
+            binary => 1,
+            eol    => "\n",
+        }
+    );
 
     my $order_rs = $db->resultset('Order');
     while ( my $order = $order_rs->next ) {
         next unless $order->rental_date;
 
-        my $normalized = normalize_mapper( _trim_spaces($order->purpose) );
+        my $normalized = normalize_mapper( _trim_spaces( $order->purpose ) );
         unless ($normalized) {
             warn "cannot find normalized purpose: [" . $order->purpose . "]\n";
             next;
@@ -57,10 +61,13 @@ sub normalize {
         #
         if ( $order->purpose && $order->purpose eq $normalized ) {
             my $purpose2 = _trim_spaces( $order->purpose2 );
-            $order->update({ purpose2 => $purpose2 }) if defined $purpose2;
+            $order->update( { purpose2 => $purpose2 } ) if defined $purpose2;
         }
         else {
-            my $purpose2 = join( ' - ', grep { defined $_ && $_ } $order->purpose, $order->purpose2 );
+            my $purpose2 = join(
+                ' - ',
+                grep { defined $_ && $_ } $order->purpose, $order->purpose2,
+            );
             $purpose2 = _trim_spaces($purpose2);
 
             $csv->combine(
@@ -74,10 +81,12 @@ sub normalize {
 
             print $csv->string;
 
-            $order->update({
-                purpose  => $normalized,
-                purpose2 => $purpose2,
-            });
+            $order->update(
+                {
+                    purpose  => $normalized,
+                    purpose2 => $purpose2,
+                }
+            );
         }
     }
 }
