@@ -10,6 +10,7 @@ use FindBin qw( $Script );
 use DateTime::Duration;
 use DateTime::Format::Duration;
 use DateTime::Format::Human::Duration;
+use Text::CSV;
 
 use OpenCloset::Config;
 use OpenCloset::Schema;
@@ -44,6 +45,11 @@ my $DB   = OpenCloset::Schema->connect({
 sub normalize {
     my $db = shift;
 
+    my $csv = Text::CSV->new({
+        binary => 1,
+        eol    => "\n",
+    });
+
     my $order_rs = $db->resultset('Order');
     while ( my $order = $order_rs->next ) {
         next unless $order->purpose;
@@ -53,14 +59,15 @@ sub normalize {
             my $purpose2 = join( ' - ', grep { defined && $_ } $order->purpose, $order->purpose2 );
             $purpose2 = _trim_spaces($purpose2);
 
-            printf(
-                "%d\t%s\t%s\t%s\t%s\n",
+            $csv->combine(
                 $order->id,
                 $order->purpose || q{N/A},
                 $normalized,
                 $order->purpose2 || q{N/A},
                 $purpose2,
             );
+
+            print $csv->string;
 
             $order->update({
                 purpose  => $normalized,
