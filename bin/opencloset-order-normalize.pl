@@ -19,7 +19,7 @@ binmode STDOUT, ':utf8';
 binmode STDERR, ':utf8';
 
 die "Usage: $Script <config file>\n"
-    unless @ARGV == 2;
+    unless @ARGV == 1;
 
 my ( $config_file, $cmd ) = @ARGV;
 die "cannot find $config_file\n" unless -f $config_file;
