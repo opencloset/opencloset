@@ -7,9 +7,6 @@ use warnings;
 
 use FindBin qw( $Script );
 
-use DateTime::Duration;
-use DateTime::Format::Duration;
-use DateTime::Format::Human::Duration;
 use Text::CSV;
 
 use OpenCloset::Config;
