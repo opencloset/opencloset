@@ -51,10 +51,7 @@ sub normalize {
         my $normalized = normalize_mapper( $order->purpose );
         if ( $order->purpose ne $normalized ) {
             my $purpose2 = join( ' - ', grep { defined && $_ } $order->purpose, $order->purpose2 );
-            $purpose2 =~ s/^\s+//gms;
-            $purpose2 =~ s/\s+$//gms;
-            $purpose2 =~ s/\s/ /gms;
-            $purpose2 =~ s/\s+/ /gms;
+            $purpose2 = _trim_spaces($purpose2);
 
             printf(
                 "%d\t%s\t%s\t%s\t%s\n",
@@ -71,6 +68,17 @@ sub normalize {
             });
         }
     }
+}
+
+sub _trim_spaces {
+    my $str = shift;
+
+    $str =~ s/^\s+//gms;
+    $str =~ s/\s+$//gms;
+    $str =~ s/\s/ /gms;
+    $str =~ s/\s+/ /gms;
+
+    return $str;
 }
 
 sub trim {
