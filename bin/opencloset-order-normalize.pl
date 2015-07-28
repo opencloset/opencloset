@@ -31,7 +31,7 @@ print( $usage->text ), die("config file is needed\n")    unless $config_file;
 print( $usage->text ), die("cannot open $config_file\n") unless -f $config_file;
 
 my $CONF = OpenCloset::Config::load($config_file);
-print( $usage->text ), die("cannot load $config_file\n") unless $DB;
+print( $usage->text ), die("cannot load $config_file\n") unless $CONF;
 
 my $DB = OpenCloset::Schema->connect(
     {
