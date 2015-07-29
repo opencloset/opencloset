@@ -48,14 +48,24 @@
                 <%= join(', ', @activities) %>
               </dd>
               <dd>
-                <button type="button" data-work-id="<%= $work->id %>" class="btn btn-success btn-sm btn-approve">승인</button>
-                <button type="button" data-work-id="<%= $work->id %>" class="btn btn-danger btn-sm btn-cancel">취소</button>
+                % if ($work->status eq 'reported') {
+                  <button type="button" data-work-id="<%= $work->id %>" class="btn btn-success btn-sm btn-approve">승인</button>
+                % } elsif ($work->status eq 'approved') {
+                  <button type="button" data-work-id="<%= $work->id %>" class="btn btn-info btn-sm btn-done">완료</button>
+                % }
+                % if ($work->status ne 'canceled') {
+                  <button type="button" data-work-id="<%= $work->id %>" class="btn btn-danger btn-sm btn-cancel">취소</button>
+                % }
                 <a href="/volunteers/<%= $work->id %>" target="_blank" class="btn btn-default btn-sm">자세히</a>
                 <a href="/volunteers/<%= $work->id %>/edit?authcode=<%= $work->authcode %>" target="_blank" class="btn btn-default btn-sm">수정</a>
               </dd>
             </dl>
           </p>
         </span>
+      % }
+      % unless ($works->count) {
+        % my $status = param('status') || 'reported';
+        <span class="list-group-item"><%= $status %> 신청서가 없습니다</span>
       % }
     </div>
   </div>
