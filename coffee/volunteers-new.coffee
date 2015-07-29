@@ -6,4 +6,5 @@ $ ->
   $("input[name=activity_date]").datepicker(
     todayHighlight: true
     autoclose:      true
+    startDate: new Date() 
   )
