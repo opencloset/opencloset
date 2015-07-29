@@ -2,15 +2,77 @@
 % title $volunteer->name;
 % layout 'volunteers';
 
+% my $volunteer = $work->volunteer;
+% my $from      = $work->activity_from_date;
+% my $to        = $work->activity_to_date;
+
 <div class="row">
   <div class="col-xs-12 col-sm-8 col-md-6 col-sm-offset-2 col-md-offset-3">
-    <h2>자원봉사신청서 <small>열린옷장</small></h2>
+    <h2>자원봉사 신청서 <small>열린옷장 <span class="label label-<%= $work->status %>"><%= $work->status %></span></small></h2>
     <hr class="colorgraph">
-    %= include 'partials/volunteer', work => $work;
-  <h3>다른활동</h3>
-  <hr class="colorgraph">
-  % for my $w (@$works) {
-    %= include 'partials/volunteer', work => $w;
-  % }
+    <div class="row">
+      <div class="col-xs-5 col-sm-5 col-md-5">
+        <dl class="dl-horizontal">
+          <dt>이름</dt>
+          <dd><%= $volunteer->name %></dd>
+          <dt>이메일</dt>
+          <dd><%= $volunteer->email %></dd>
+          <dt>전화번호</dt>
+          <dd><%= $volunteer->phone %></dd>
+          <dt>주소</dt>
+          <dd><%= $volunteer->address %></dd>
+        </dl>
+      </div>
+      <div class="col-xs-7 col-sm-7 col-md-7">
+        <dl>
+          <dd>
+            <h4 class="text-center">
+              <mark><%= $from->ymd %> <%= $from->hms %></mark> ~ <mark><%= $to->ymd %> <%= $to->hms %></mark>
+            </h4>
+          </dd>
+          <dd>
+            % my @reasons = split /\|/, $work->reason;
+            <ul class="list-group">
+              <li class="list-group-item text-center text-info">열린옷장을 만나게 된 이유</li>
+              % for my $reason (@reasons) {
+              <li class="list-group-item"><%= $reason %></li>
+              % }
+            </ul>
+          </dd>
+
+          <dd>
+            % my @paths = split /\|/, $work->path;
+            <ul class="list-group">
+              <li class="list-group-item text-center text-info">접한경로</li>
+              % for my $path (@paths) {
+              <li class="list-group-item"><%= $path %></li>
+              % }
+            </ul>
+          </dd>
+
+          <dd>
+            % my @activities = split /\|/, $work->activity;
+            <ul class="list-group">
+              <li class="list-group-item text-center text-info">관심있는 활동</li>
+              % for my $activity (@activities) {
+              <li class="list-group-item"><%= $activity %></li>
+              % }
+            </ul>
+          </dd>
+          <dt>Comment</dt>
+          <dd><%= $work->comment %></dd>
+        </dl>
+      </div>
+    </div>
+    <h3>다른 활동</h3>
+    <ul>
+      % for my $w (@$works) {
+        % my $from = $w->activity_from_date;
+        <li>
+          <a href="<%= url_for('/volunteers/' . $w->id) %>"><mark><%= $from->ymd %></mark></a>
+          <span class="label label-<%= $w->status %>"><%= $w->status %></span>
+        </li>
+      % }
+    </ul>
   </div>
 </div>
