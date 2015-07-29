@@ -1,10 +1,10 @@
-% title '자원봉사신청서';
+% title '자원봉사 신청서';
 % layout 'volunteers', jses => ['/js/volunteers-new.js'];
 
 <div class="row">
   <div class="col-xs-12 col-sm-8 col-md-6 col-sm-offset-2 col-md-offset-3">
     <form action="<%= url_for '/volunteers' %>" method="POST" role="form">
-      <h2>자원봉사신청서 <small>열린옷장</small></h2>
+      <h2>자원봉사 신청서 <small>열린옷장</small></h2>
       <hr class="colorgraph">
       <div class="form-group">
 	<input type="text" name="name" class="form-control input-lg" placeholder="이름 Name" tabindex="1">
