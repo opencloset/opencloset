@@ -7,6 +7,7 @@ $ ->
       data: { status: 'approved' }
       success: (data, textStatus, jqXHR) ->
         $this.closest('.list-group-item').remove()
+        location.reload true
       error: (jqXHR, textStatus, errorThrown) ->
         console.log textStatus
       complete: (jqXHR, textStatus) ->

@@ -37,10 +37,13 @@ use DateTime;
 use Encode 'decode_utf8';
 use Gravatar::URL;
 use HTTP::Tiny;
+use JSON::WebToken;
+use JSON;
 use List::MoreUtils qw( zip );
 use List::Util qw( sum );
 use Mojo::Util qw( encode );
 use Parcel::Track;
+use Path::Tiny;
 use SMS::Send::KR::APIStore;
 use SMS::Send::KR::CoolSMS;
 use SMS::Send;
@@ -1268,6 +1271,92 @@ helper _validate_volunteer_work => sub {
     $v->optional('period');
     $v->optional('activity');
     $v->optional('comment');
+};
+
+helper auth_google => sub {
+    my $self = shift;
+
+    my $private_key = app->config->{google_private_key};
+    return unless $private_key;
+
+    my $json_private = path($private_key);
+    return unless $json_private;
+
+    my $private = try {
+        decode_json( $json_private->slurp );
+    }
+    catch {
+        app->log->error("Failed to decode json: $_");
+    };
+
+    return unless $private;
+
+    my $time               = time;
+    my $private_key_string = $private->{private_key};
+    my $claim_set          = {
+        iss   => $private->{client_email},
+        scope => 'https://www.googleapis.com/auth/calendar',
+        aud   => 'https://www.googleapis.com/oauth2/v3/token',
+        exp   => $time + 3600,
+        iat   => $time
+    };
+
+    my $jwt  = encode_jwt $claim_set, $private_key_string, 'RS256', { typ => 'JWT' };
+    my $http = HTTP::Tiny->new;
+    my $res  = $http->post_form( "https://www.googleapis.com/oauth2/v3/token",
+        { grant_type => 'urn:ietf:params:oauth:grant-type:jwt-bearer', assertion => $jwt } );
+    unless ( $res->{success} ) {
+        app->log->error("Google Authorization Failed");
+        app->log->error("$res->{status}: $res->{reason}\n$res->{content}\n");
+        return;
+    }
+
+    my $token = try {
+        decode_json( $res->{content} );
+    }
+    catch {
+        app->log->error("Failed to decode json: $_");
+    };
+
+    return unless $token;
+
+    $self->session(token => {%$token, exp => $time + 3600, iat => $time});
+    return 1;
+};
+
+# google calendar quickAdd
+helper quickAdd => sub {
+    my ( $self, $text ) = @_;
+
+    my $time  = time;
+    my $token = $self->session('token');
+    if ( !$token || $token->{exp} < $time ) {
+        my $is_auth = $self->auth_google;
+        unless ($is_auth) {
+            app->log->debug("Failed to add calendar event: Authorization failed");
+            return;
+        }
+
+        $token = $self->session('token');
+    }
+
+    my $calendarId = app->config->{google_calendar_id};
+    my $url        = "https://www.googleapis.com/calendar/v3/calendars/$calendarId/events/quickAdd";
+    my $http       = HTTP::Tiny->new;
+    my $res        = $http->post_form(
+        "$url",
+        { text    => $text },
+        { headers => { authorization => "$token->{token_type} $token->{access_token}" } }
+    );
+
+    unless ( $res->{success} ) {
+        app->log->error("Failed to posting a new calendar event");
+        app->log->error("$res->{status}: $res->{reason}\n$res->{content}\n");
+        return;
+    }
+
+    app->log->debug("Added an event successfully");
+    return 1;
 };
 
 #
@@ -6227,26 +6316,31 @@ group {
 
         my $validation = $self->validation;
         $validation->required('status')->in(qw/reported approved done canceled/);
-        return $self->error(400, { str => 'Parameter Validation Failed' }) if $validation->has_error;
+        return $self->error( 400, { str => 'Parameter Validation Failed' } ) if $validation->has_error;
 
         my $status = $validation->param('status');
-        $work->update({ status => $status });
+        $work->update( { status => $status } );
 
-        if ($status eq 'approved') {
+        if ( $status eq 'approved' ) {
             ## sms
-            my $to = $volunteer->phone;
-            $to =~ s/-//g;
-            my $sender = SMS::Send->new(
-                app->config->{sms}{driver},
-                %{ app->config->{sms}{ app->config->{sms}{driver} } },
-            );
+            my $sms_to = $volunteer->phone;
+            $sms_to =~ s/-//g;
+            my $sender
+                = SMS::Send->new( app->config->{sms}{driver}, %{ app->config->{sms}{ app->config->{sms}{driver} } }, );
 
-            my $sent = $sender->send_sms(text => '', to => $to);
+            # my $sent = $sender->send_sms(text => '', to => $to);
 
             ## google calendar
+            my $volunteer = $work->volunteer;
+            my $from      = $work->activity_from_date;
+            my $to        = $work->activity_to_date;
+            my $text      = sprintf "%s %s on %s %s %s%s-%s%s", $volunteer->name, $work->activity, $from->month_name,
+                $from->day, $from->hour_12, $from->am_or_pm, $to->hour_12, $to->am_or_pm;
+            app->log->debug($text);
+            $self->quickAdd("$text");
         }
 
-        $self->render(json => {$work->get_columns});
+        $self->render(json => { $work->get_columns });
     };
 };
 

@@ -283,5 +283,11 @@ $db_opts->{AutoCommit} //= 1;
     bodykit => {
         accessKey => q{},
         secret    => q{},
-    }
+    },
+
+    #
+    # volunteer
+    #
+    google_private_key => $ENV{OPENCLOSET_GOOGLE_PRIVATE_KEY} || '',
+    google_calendar_id => 'volunteer@theopencloset.net',
 };
