@@ -22,6 +22,27 @@
           <dt>주소</dt>
           <dd><%= $volunteer->address %></dd>
         </dl>
+
+        % if ($guestbook) {
+          <h5>방명록</h5>
+          <dl class="dl-horizontal">
+            <dt>연령대</dt>
+            <dd><%= $guestbook->age_group %></dd>
+            <dt>성별</dt>
+            <dd><%= $guestbook->gender %></dd>
+            <dt>직업</dt>
+            <dd><%= $guestbook->job %></dd>
+            <dt>소감</dt>
+            <dd><%= $guestbook->impression %></dd>
+            <dt>활동</dt>
+            <dd><%= $guestbook->activity %></dd>
+            <dt>하고싶은활동</dt>
+            <dd><%= $guestbook->want_to_do %></dd>
+            <dt>하고싶은말</dt>
+            <dd><%= $guestbook->comment %></dd>
+          </dl>
+        % }
+
       </div>
       <div class="col-xs-7 col-sm-7 col-md-7">
         <dl>
@@ -64,15 +85,17 @@
         </dl>
       </div>
     </div>
-    <h3>다른 활동</h3>
-    <ul>
-      % for my $w (@$works) {
-        % my $from = $w->activity_from_date;
-        <li>
-          <a href="<%= url_for('/volunteers/' . $w->id) %>"><mark><%= $from->ymd %></mark></a>
-          <span class="label label-<%= $w->status %>"><%= $w->status %></span>
-        </li>
-      % }
-    </ul>
+    % if (@$works) {
+      <h3>다른 활동</h3>
+      <ul>
+        % for my $w (@$works) {
+          % my $from = $w->activity_from_date;
+          <li>
+            <a href="<%= url_for('/volunteers/' . $w->id) %>"><mark><%= $from->ymd %></mark></a>
+            <span class="label label-<%= $w->status %>"><%= $w->status %></span>
+          </li>
+        % }
+      </ul>
+    % }
   </div>
 </div>

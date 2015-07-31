@@ -6244,8 +6244,9 @@ group {
 
         my $volunteer = $work->volunteer;
         my $works     = $volunteer->volunteer_works({ id => { '!=' => $work->id } });
+        my $guestbook = $work->volunteer_guestbooks->next;
 
-        $self->render(works => [$works->all]);
+        $self->render(works => [$works->all], guestbook => $guestbook);
     } => 'volunteers/id';
 
     # POST /volunteers/:work_id
