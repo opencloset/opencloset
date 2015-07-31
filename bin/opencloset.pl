@@ -6288,6 +6288,42 @@ group {
         my $self = shift;
     } => 'volunteers/guestbook';
 
+    post '/guestbook' => sub {
+        my $self = shift;
+        my $work = $self->stash('work');
+
+        my $name       = $self->param('name');
+        my $age_group  = $self->param('age-group');
+        my $gender     = $self->param('gender');
+        my $job        = $self->param('job');
+        my $impression = $self->param('impression');
+        my $imprss_etc = $self->param('impression-etc');
+        my $activities = $self->every_param('activity');
+        my $atvt_etc   = $self->param('activity-etc');
+        my $want_to_do = $self->every_param('want-to-do');
+        my $todo_etc   = $self->param('want-to-do-etc');
+        my $comment    = $self->param('comment');
+
+        my $guestbook = $DB->resultset('VolunteerGuestbook')->create(
+            {
+                volunteer_id => $work->id,
+                name         => $name,
+                age_group    => $age_group,
+                gender       => $gender,
+                job          => $job,
+                impression   => $impression || $imprss_etc,
+                activity     => join( '|', @$activities ) || $atvt_etc,
+                want_to_do   => join( '|', @$want_to_do ) || $todo_etc,
+                comment      => $comment
+            }
+        );
+
+        return $self->error( 500,
+            { str => 'Failed to create Volunteer Guestbook' } )
+            unless $guestbook;
+        $self->render( 'volunteers/thanks', guestbook => $guestbook );
+    };
+
     # GET /volunteers/:work_id/edit?authcode=xxxx
     get '/edit' => sub {
         my $self      = shift;

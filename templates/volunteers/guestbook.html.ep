@@ -75,7 +75,7 @@
             </div>
             % }
             <div>
-              <input type="text" name="impression" class="form-control" placeholder="기타">
+              <input type="text" name="impression-etc" class="form-control" placeholder="기타">
             </div>
           </div>
         </div>
@@ -96,7 +96,7 @@
             </div>
             % }
             <div>
-              <input type="text" name="activity" class="form-control" placeholder="기타">
+              <input type="text" name="activity-etc" class="form-control" placeholder="기타">
             </div>
           </div>
         </div>
@@ -115,7 +115,7 @@
             </div>
             % }
             <div>
-              <input type="text" name="want-to-do" class="form-control" placeholder="기타">
+              <input type="text" name="want-to-do-etc" class="form-control" placeholder="기타">
             </div>
           </div>
         </div>
