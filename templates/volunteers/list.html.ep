@@ -26,9 +26,10 @@
         % my $volunteer = $work->volunteer;
         % my $from = $work->activity_from_date;
         % my $to   = $work->activity_to_date;
-        % my $birthday = Time::Piece->strptime( $volunteer->birth_date->ymd,  '%Y-%m-%d' );
-        % my $today    = Time::Piece->strptime( DateTime->now->ymd,  '%Y-%m-%d' );
-        % my $age = sprintf("%.2d", ($today - $birthday) / ONE_YEAR);
+        % my $birthdate = $volunteer->birth_date;
+        % my $birthday = $birthdate ? Time::Piece->strptime( $birthdate->ymd, '%Y-%m-%d' ) : '';
+        % my $today    = Time::Piece->strptime( DateTime->now->ymd, '%Y-%m-%d' );
+        % my $age = $birthday ? sprintf("%.2d", ($today - $birthday) / ONE_YEAR) : '나이모름';
         % my $status = $work->get_column('status');
         <span class="list-group-item status-<%= $status %>" data-work-id="<%= $work->id %>">
           <h4 class="list-group-item-heading"><%= $volunteer->name %> <small><%= $age %></small> <span class="label label-<%= $status %>"><%= $status %></span></h4>
