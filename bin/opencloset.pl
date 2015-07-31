@@ -6284,6 +6284,10 @@ group {
         $self->render('volunteers/done', work => $work);
     };
 
+    get '/guestbook' => sub {
+        my $self = shift;
+    } => 'volunteers/guestbook';
+
     # GET /volunteers/:work_id/edit?authcode=xxxx
     get '/edit' => sub {
         my $self      = shift;

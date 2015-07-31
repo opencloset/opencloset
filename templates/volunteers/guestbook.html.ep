@@ -1,0 +1,132 @@
+% title '자원봉사 방명록';
+% layout 'volunteers';
+
+<div class="row">
+  <div class="col-xs-12 col-sm-8 col-md-6 col-sm-offset-2 col-md-offset-3">
+    <form action="<%= url_for %>" method="POST" role="form">
+      <h2>자원봉사 방명록 <small>열린옷장</small></h2>
+      <hr class="colorgraph">
+      <div class="form-group">
+	<input type="text" name="name" class="form-control input-lg" placeholder="이름 Name" tabindex="1">
+      </div>
+
+      <div class="row">
+	<div class="col-xs-6 col-sm-6 col-md-6">
+          <div class="form-group">
+            <p class="help-block">연령대</p>
+          </div>
+          <div class="form-group">
+            % for my $group ('10대', '20대 초중반', '20대 후반', '30대', '40대 이상') {
+            <div class="radio">
+              <label>
+                <input type="radio" name="age-group" value="<%= $group %>">
+                %= $group
+              </label>
+            </div>
+            % }
+          </div>
+        </div>
+        <div class="col-xs-6 col-sm-6 col-md-6">
+          <div class="form-group">
+            <p class="help-block">성별</p>
+          </div>
+          <div class="form-group">
+            % for my $gender ('male', 'female') {
+            <div class="radio">
+              <label>
+                <input type="radio" name="gender" value="<%= $gender %>">
+                %= $gender eq 'male' ? '남' : '여'
+                <i class="icon-<%= $gender %> <%= $gender %>"></i>
+              </label>
+            </div>
+            % }
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+	<div class="col-xs-6 col-sm-6 col-md-6">
+          <div class="form-group">
+            <p class="help-block">해당 직업에 선택해주세요</p>
+          </div>
+          <div class="form-group">
+            % for my $job ('중고등학생', '대학생 및 취업 준비생', '직장인', '재취업 및 휴직기', '주부') {
+            <div class="radio">
+              <label>
+                <input type="radio" name="job" value="<%= $job %>">
+                %= $job
+              </label>
+            </div>
+            % }
+          </div>
+        </div>
+
+        <div class="col-xs-6 col-sm-6 col-md-6">
+          <div class="form-group">
+            <p class="help-block">오늘 하루 열린옷장 활동 어떠셨나요?</p>
+          </div>
+          <div class="form-group">
+            % for my $impression ('힘들었다', '힘들었지만 다시 방문하고 싶은 곳이다', '재미있었다') {
+            <div class="radio">
+              <label>
+                <input type="radio" name="impression" value="<%= $impression %>">
+                %= $impression
+              </label>
+            </div>
+            % }
+            <div>
+              <input type="text" name="impression" class="form-control" placeholder="기타">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+	<div class="col-xs-6 col-sm-6 col-md-6">
+          <div class="form-group">
+            <p class="help-block">오늘 어떤 활동을 하셨나요?</p>
+          </div>
+          <div class="form-group">
+            % for my $activity ('5층 정리 및 포장', '4층 반납 및 정리', '구두닦기', '다림질', '친절한 안내 봉사') {
+            <div class="checkbox">
+              <label>
+                <input type="checkbox" name="activity" value="<%= $activity %>">
+                %= $activity
+              </label>
+            </div>
+            % }
+            <div>
+              <input type="text" name="activity" class="form-control" placeholder="기타">
+            </div>
+          </div>
+        </div>
+
+        <div class="col-xs-6 col-sm-6 col-md-6">
+          <div class="form-group">
+            <p class="help-block">다음 방문시, 열린옷장에서 어떤 활동을 하고 싶나요?</p>
+          </div>
+          <div class="form-group">
+            % for my $activity ('5층 정리 및 포장', '4층 반납 및 정리', '구두닦기', '다림질', '친절한 안내 봉사') {
+            <div class="checkbox">
+              <label>
+                <input type="checkbox" name="want-to-do" value="<%= $activity %>">
+                %= $activity
+              </label>
+            </div>
+            % }
+            <div>
+              <input type="text" name="want-to-do" class="form-control" placeholder="기타">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <textarea name="comment" class="form-control input-lg" placeholder="열린옷장에서 활동에 대해 자유롭게 적어주세요 About Opencloset Activity" tabindex="2"></textarea>
+      </div>
+      <hr class="colorgraph">
+
+      <input type="submit" value="제출" class="btn btn-primary btn-block btn-lg" tabindex="3">
+    </form>
+  </div>
+</div>
