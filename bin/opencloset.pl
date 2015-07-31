@@ -6306,15 +6306,15 @@ group {
 
         my $guestbook = $DB->resultset('VolunteerGuestbook')->create(
             {
-                volunteer_id => $work->id,
-                name         => $name,
-                age_group    => $age_group,
-                gender       => $gender,
-                job          => $job,
-                impression   => $impression || $imprss_etc,
-                activity     => join( '|', @$activities ) || $atvt_etc,
-                want_to_do   => join( '|', @$want_to_do ) || $todo_etc,
-                comment      => $comment
+                volunteer_work_id => $work->id,
+                name              => $name,
+                age_group         => $age_group,
+                gender            => $gender,
+                job               => $job,
+                impression        => $impression || $imprss_etc,
+                activity          => join( '|', @$activities ) || $atvt_etc,
+                want_to_do        => join( '|', @$want_to_do ) || $todo_etc,
+                comment           => $comment
             }
         );
 
