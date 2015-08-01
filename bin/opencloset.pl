@@ -53,8 +53,7 @@ use Unicode::Normalize;
 use Postcodify;
 
 use OpenCloset::Schema;
-use OpenCloset::Size::Guess::Local;
-use OpenCloset::Size::Guess::BodyKit;
+use OpenCloset::Size::Guess;
 
 app->defaults( %{ plugin 'Config' => { default => {
     jses        => [],
@@ -5936,53 +5935,37 @@ get '/stat/status/:ymd' => sub {
 
 get '/shortcut' => 'shortcut';
 
-get '/measurement' => sub {
+any '/size/guess' => sub {
     my $self   = shift;
-    my $q      = $self->param('q') || '';
-    my $gender = $self->param('gender') || 'male';
 
-    $self->stash(q => $q, height => '', weight => '', size => '', gender => $gender, cnt => 0);
-    return unless $q;
+    #
+    # fetch params
+    #
+    my %params = $self->get_params(qw/ height weight gender /);
 
-    $q =~ s/(^ +| +$)//g;
-    my ($height, $weight) = split / /, $q;
-    return unless $height && $weight;
+    my $height = $params{height};
+    my $weight = $params{weight};
+    my $gender = $params{gender};
 
-    my $local = OpenCloset::Size::Guess::Local->new(
-        schema => $DB,
-        height => $height,
-        weight => $weight,
-        gender => $gender
+    my $osg_db = OpenCloset::Size::Guess->new(
+        'DB',
+        _time_zone => app->config->{timezone},
+        _schema    => $DB,
     );
 
-    my $bodykit = OpenCloset::Size::Guess::BodyKit->new(
-        access_key => app->config->{bodykit}{access_key},
-        secret     => app->config->{bodykit}{secret},
-        height     => $height,
-        weight     => $weight,
-        gender     => $gender
+    my $osg_bodykit = OpenCloset::Size::Guess->new(
+        'BodyKit',
+        _accessKey => app->config->{bodykit}{accessKey},
+        _secret    => app->config->{bodykit}{secret},
     );
-
-    my $roe = 1;    # range of error
-    my %size;
-    for my $h ($height - $roe .. $height + $roe) {
-        for my $w ($weight - $roe .. $weight + $roe) {
-            $size{$h}{$w} = OpenCloset::Size::Guess::Local->new(
-                schema => $DB,
-                height => $h,
-                weight => $w,
-                gender => $gender
-            );
-        }
-    }
 
     $self->render(
-        q       => $q,
-        height  => $height,
-        weight  => $weight,
-        size    => { %size },
-        bodykit => $bodykit,
-        local   => $local
+        'size-guess',
+        height      => $height,
+        weight      => $weight,
+        gender      => $gender,
+        osg_bodykit => $osg_bodykit,
+        osg_db      => $osg_db
     );
 };
 

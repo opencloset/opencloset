@@ -1,0 +1,97 @@
+- use utf8;
+- my $_id = 'size-guess';
+- layout 'default', page_id => $_id;
+- title meta_text($_id);
+
+.search
+  - my $action_url = url_for("/size/guess");
+  %form.form-horizontal#form-size-guess{ :role => 'form', :method => 'post', :action => "#{ $action_url }" }
+    .form-group
+      %label.col-sm-3.control-label.no-padding-right{ :for => 'height' } 키
+      .col-sm-9
+        %input.form-control{ :name => "height", :value => "#{$height}" }
+    .form-group
+      %label.col-sm-3.control-label.no-padding-right{ :for => 'weight' } 몸무게
+      .col-sm-9
+        %input.form-control{ :name => "weight", :value => "#{$weight}" }
+    .form-group
+      %label.col-sm-3.control-label.no-padding-right{ :for => 'gender' } 성별
+      .col-sm-9
+        %select.col-xs-10.col-sm-5{ :name => "gender", :type => 'hidden' }
+          %option{ :value => '' }
+          - use feature qw( switch );
+          - use experimental qw( smartmatch );
+          - given ($gender) {
+          -   when ('male') {
+            %option{ :value => 'male',  :selected => 'selected' } 남성
+            %option{ :value => 'female'                         } 여성
+          -   }
+          -   when ('female') {
+            %option{ :value => 'male'                            } 남성
+            %option{ :value => 'female', :selected => 'selected' } 여성
+          -   }
+          -   default {
+            %option{ :value => 'male'   } 남성
+            %option{ :value => 'female' } 여성
+          -   }
+          - }
+    .form-group.form-actions.clearfix
+      .col-md-offset-3.col-md-9
+        %button.btn.btn-info.pull-right#btn-size-guess{ :type => 'button' }
+          %i.ace-icon.icon-search.bigger-110
+          치수 검색
+        %button.btn.btn-danger.pull-right#btn-clear{ :type => 'button' }
+          %i.ace-icon.icon-undo.bigger-110
+          다시 쓰기
+
+.space-4
+
+- if ( $gender && $gender =~ m/^(male|female)$/ && $height && $weight ) {
+-   $osg_db->gender($gender);
+-   $osg_db->height( int $height );
+-   $osg_db->weight( int $weight );
+-   $osg_bodykit->gender($gender);
+-   $osg_bodykit->height( int $height );
+-   $osg_bodykit->weight( int $weight );
+-   my $ret1 = $osg_db->guess;
+-   my $ret2 = $osg_bodykit->guess;
+-   for my $r ( $ret1, $ret2 ) {
+-     for ( qw/ belly topbelly bust arm thigh waist leg foot / ) {
+-       $r->{$_} = $r->{$_} ? sprintf('%.1f', $r->{$_}) : 'N/A';
+-     }
+-   }
+-   my %gender_str = ( male => '남성', female => '여성' );
+  %table.table.table-bordered.table-condensed
+    %thead
+      %tr
+        %th= sprintf( '%s / %s / %s', int($height), int($weight), $gender_str{$gender} );
+        %th.text-right 중동
+        %th.text-right 윗배
+        %th.text-right 가슴
+        %th.text-right 팔
+        %th.text-right 허벅지
+        %th.text-right 허리
+        %th.text-right 다리
+        %th.text-right 발
+    %tbody
+      %tr
+        %th DB
+        %td.text-right= $ret1->{belly}
+        %td.text-right= $ret1->{topbelly}
+        %td.text-right= $ret1->{bust}
+        %td.text-right= $ret1->{arm}
+        %td.text-right= $ret1->{thigh}
+        %td.text-right= $ret1->{waist}
+        %td.text-right= $ret1->{leg}
+        %td.text-right= $ret1->{foot}
+      %tr
+        %th BodyKit
+        %td.text-right= $ret2->{belly}
+        %td.text-right= $ret2->{topbelly}
+        %td.text-right= $ret2->{bust}
+        %td.text-right= $ret2->{arm}
+        %td.text-right= $ret2->{thigh}
+        %td.text-right= $ret2->{waist}
+        %td.text-right= $ret2->{leg}
+        %td.text-right= $ret2->{foot}
+- }
