@@ -6412,7 +6412,14 @@ group {
             app->log->debug($text);
             $self->quickAdd("$text");
         } elsif ( $status eq 'done' ) {
-            # 방명록작성안내문자
+            ## 방명록작성안내문자
+            my $sms_to = $volunteer->phone =~ s/-//gr;
+            my $template
+                = qq{수고하셨습니다. 오늘 봉사활동 어떠셨나요? %s 에서 방명록을 적어주세요. 다음 봉사자들을 위해 활용됩니다.};
+            my $id   = $work->id;
+            my $msg  = sprintf $template, $self->url_for("/volunteers/$id/guestbook")->to_abs;
+            my $sent = $sender->send_sms( text => $msg, to => $sms_to );
+            app->log->error("Failed to send SMS: $sms_to, $msg") unless $sent;
         }
 
         $self->render(json => { $work->get_columns });
