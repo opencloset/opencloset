@@ -4059,8 +4059,6 @@ any '/visit' => sub {
     my $address3      = $self->param('address3');
     my $address4      = $self->param('address4');
     my $birth         = $self->param('birth');
-    my $height        = $self->param('height');
-    my $weight        = $self->param('weight');
     my $order         = $self->param('order');
     my $booking       = $self->param('booking');
     my $booking_saved = $self->param('booking-saved');
@@ -4084,8 +4082,6 @@ any '/visit' => sub {
     app->log->debug("address3: $address3");
     app->log->debug("address4: $address4");
     app->log->debug("birth: $birth");
-    app->log->debug("height: $height");
-    app->log->debug("weight: $weight");
     app->log->debug("order: $order");
     app->log->debug("booking: $booking");
     app->log->debug("booking-saved: $booking_saved");
@@ -4156,8 +4152,6 @@ any '/visit' => sub {
         $user_info_params{address3}     = $address3     if $address3      && $address3     ne $user->user_info->address3;
         $user_info_params{address4}     = $address4     if $address4      && $address4     ne $user->user_info->address4;
         $user_info_params{birth}        = $birth        if $birth         && $birth        ne $user->user_info->birth;
-        $user_info_params{height}       = $height       if $height        && $height       ne $user->user_info->height;
-        $user_info_params{weight}       = $weight       if $weight        && $weight       ne $user->user_info->weight;
         $user_info_params{wearon_date}  = $wearon_date  if $wearon_date   && $wearon_date  ne $user->user_info->wearon_date;
         $user_info_params{purpose}      = $purpose      if $purpose       && $purpose      ne $user->user_info->purpose;
         $user_info_params{purpose2}     = $purpose2 || q{};

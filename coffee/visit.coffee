@@ -237,8 +237,6 @@ $ ->
     email       = $("input[name=email]").val()
     address2    = $("input[name=address2]").val()
     birth       = $("input[name=birth]").val()
-    height      = $("input[name=height]").val()
-    weight      = $("input[name=weight]").val()
     booking     = $("input[name=booking]").val()
     wearon_date = $("input[name=wearon_date]").val()
     purpose     = $("select[name=purpose]").val()
@@ -307,26 +305,6 @@ $ ->
       return
     unless /^(19|20)|\d\d$/.test( birth )
       OpenCloset.alert 'danger', '유효하지 않은 생년입니다.', '#visit-alert'
-      return
-
-    #
-    # 키 점검
-    #
-    unless height
-      OpenCloset.alert 'danger', '키를 입력해주세요.', '#visit-alert'
-      return
-    unless /^\d+$/.test( height )
-      OpenCloset.alert 'danger', '유효하지 않은 키입니다.', '#visit-alert'
-      return
-
-    #
-    # 몸무게 점검
-    #
-    unless weight
-      OpenCloset.alert 'danger', '몸무게를 입력해주세요.', '#visit-alert'
-      return
-    unless /^\d+$/.test( weight )
-      OpenCloset.alert 'danger', '유효하지 않은 몸무게입니다.', '#visit-alert'
       return
 
     #
