@@ -100,24 +100,6 @@
                           </label>
 
                           <label class="block clearfix">
-                            <div class="input-group">
-                              <input name="height" type="text" class="form-control" placeholder="키" value="<%= $user->user_info->height %>" />
-                              <span class="input-group-addon">
-                                <i>cm</i>
-                              </span>
-                            </div>
-                          </label>
-
-                          <label class="block clearfix">
-                            <div class="input-group">
-                              <input name="weight" type="text" class="form-control" placeholder="몸무게" value="<%= $user->user_info->weight %>" />
-                              <span class="input-group-addon">
-                                <i>kg</i>
-                              </span>
-                            </div>
-                          </label>
-
-                          <label class="block clearfix">
                             <button id="btn-booking" class="width-100 pull-right btn btn-sm btn-success" data-toggle="modal" data-target="#modal-booking">
                               <span>
                                 방문 일자 선택
