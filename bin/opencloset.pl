@@ -6231,7 +6231,7 @@ group {
 봉사 승인에 대한 SMS 또는 전화연락이 없는 경우 070-4325-7521 혹은 카카오톡 옐로아이디를 통해 문의해주시기 바랍니다. 감사합니다.};
         my $msg
             = sprintf( $template, $volunteer->name, $from_date->month, $from_date->day, $from, $to, $volunteer->name );
-        my $sent = $sender->send_sms( text => $msg, to => $phone =~ s/-//r );
+        my $sent = $sender->send_sms( text => $msg, to => $phone =~ s/-//gr );
         app->log->error("Failed to send SMS: $msg, $phone") unless $sent;
 
         $self->render('volunteers/done', work => $work);
