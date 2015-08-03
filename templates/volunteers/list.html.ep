@@ -66,7 +66,7 @@
       % }
       % unless ($works->count) {
         % my $status = param('status') || 'reported';
-        <span class="list-group-item"><%= $status %> 신청서가 없습니다</span>
+        <span class="list-group-item"><span class="label label-<%= $status %>"><%= $status %></span> 신청서가 없습니다</span>
       % }
     </div>
   </div>
