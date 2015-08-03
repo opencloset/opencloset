@@ -120,11 +120,9 @@ $ ->
     booking     = $("input[name=booking]").val()
     wearon_date = $("input[name=wearon_date]").val()
     purpose     = $("select[name=purpose]").val()
-    purpose2    = $("input[name=purpose2]").val()
 
     pre_category_temp = $("select[name=pre_category_temp]").val()
     pre_color1        = $("select[name=pre_color1]").val()
-    pre_color2        = $("select[name=pre_color2]").val()
 
     #
     # 이름 점검
@@ -202,13 +200,6 @@ $ ->
       return
 
     #
-    # 상세 대여 목적 점검
-    #
-    unless purpose2
-      OpenCloset.alert 'danger', '상세 대여 목적을 입력해주세요.', '#visit-alert'
-      return
-
-    #
     # 대여할 옷의 종류 점검
     #
     unless pre_category_temp
@@ -220,13 +211,6 @@ $ ->
     #
     unless pre_color1
       OpenCloset.alert 'danger', '첫 번째 선호하는 색상을 입력해주세요.', '#visit-alert'
-      return
-
-    #
-    # 두 번째 선호하는 색상 점검
-    #
-    unless pre_color2
-      OpenCloset.alert 'danger', '두 번째 선호하는 색상을 입력해주세요.', '#visit-alert'
       return
 
     return true
