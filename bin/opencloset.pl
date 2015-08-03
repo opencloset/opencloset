@@ -1256,7 +1256,7 @@ helper _validate_volunteer => sub {
     $v->required('name');
     $v->optional('email');    # TODO: check valid email
     $v->optional('birth_date')->like(qr/^\d{4}-\d{2}-\d{2}$/);
-    $v->optional('phone')->like(qr/^\d{3}-\d{4}-\d{3,4}$/);
+    $v->required('phone')->like(qr/^\d{3}-\d{4}-\d{3,4}$/);
     $v->optional('address');
 };
 
