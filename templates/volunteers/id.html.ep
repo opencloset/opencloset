@@ -2,7 +2,6 @@
 % title $volunteer->name;
 % layout 'volunteers';
 
-% my $volunteer = $work->volunteer;
 % my $from      = $work->activity_from_date;
 % my $to        = $work->activity_to_date;
 
