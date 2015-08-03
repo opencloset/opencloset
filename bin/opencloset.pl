@@ -6218,6 +6218,22 @@ group {
         );
 
         return $self->error(500, { str => 'Failed to create Volunteer Work' }) unless $work;
+
+        ## SMS
+        my $sender
+            = SMS::Send->new( app->config->{sms}{driver}, %{ app->config->{sms}{ app->config->{sms}{driver} } } );
+        my $from_date = $work->activity_from_date;
+        my $to_date   = $work->activity_to_date;
+        my $template
+            = qq{안녕하세요. %s님이 %s월 %s일 %s~%s시에 신청하신 자원봉사신청이 정상적으로 접수되었습니다.
+현재 열린옷장 담당자가 접수된 봉사신청 내역을 확인하고 있습니다. (최종승인까지 소요기간 1일 이내)
+신청하신 봉사시간 및 봉사활동내역에 대해 변경사항이 없는 경우 %s님이 신청해 주신 자원봉사에 대한 최종승인여부가 SMS로 발송될 예정입니다.
+봉사 승인에 대한 SMS 또는 전화연락이 없는 경우 070-4325-7521 혹은 카카오톡 옐로아이디를 통해 문의해주시기 바랍니다. 감사합니다.};
+        my $msg
+            = sprintf( $template, $volunteer->name, $from_date->month, $from_date->day, $from, $to, $volunteer->name );
+        my $sent = $sender->send_sms( text => $msg, to => $phone =~ s/-//r );
+        app->log->error("Failed to send SMS: $msg, $phone") unless $sent;
+
         $self->render('volunteers/done', work => $work);
     };
 
@@ -6362,23 +6378,41 @@ group {
         my $status = $validation->param('status');
         $work->update( { status => $status } );
 
+        my $sender
+                = SMS::Send->new( app->config->{sms}{driver}, %{ app->config->{sms}{ app->config->{sms}{driver} } }, );
         if ( $status eq 'approved' ) {
-            ## sms
+            my $from = $work->activity_from_date;
+            my $to   = $work->activity_to_date;
+
+            ## SMS
             my $sms_to = $volunteer->phone;
             $sms_to =~ s/-//g;
-            my $sender
-                = SMS::Send->new( app->config->{sms}{driver}, %{ app->config->{sms}{ app->config->{sms}{driver} } }, );
+            my $template
+                = qq{축하합니다! %s님이 %s월 %s일 %s~%s시에 신청하신 봉사활동이 최종 승인 완료되었습니다.
+%s님은 봉사당일 열린옷장에서 %s 봉사활동을 담당해주시게 됩니다. (당일 상황에 따라 변동이 이루어질 수 있습니다.)
+추가로 궁금한 점이 있는 경우에는 070-4325-7521 혹은 카카오톡 옐로아이디를 통해 문의해주시기 바랍니다. 봉사당일 밝은 얼굴로 인사드리겠습니다. 감사합니다.};
+            my $sms_msg = sprintf( $template,
+                $volunteer->name, $from->month, $from->day, $from->hour, $to->hour, $volunteer->name,
+                $work->activity =~ s/\|/, /r );
 
-            # my $sent = $sender->send_sms(text => '', to => $to);
+            my $sent = $sender->send_sms( text => $sms_msg, to => $sms_to );
+            app->log->error("Failed to send SMS: $sms_to, $sms_msg") unless $sent;
 
-            ## google calendar
+            $sms_msg = qq{<열린옷장 위치안내>
+서울특별시 광진구 아차산로 213 국민은행
+건대입구역 1번 출구로 나오신 뒤 오른쪽으로 꺾어 100M 가량 직진하시면 1층에 국민은행이 있는 건물 4층으로 올라오시면 됩니다. (도보로 2~3분 소요)
+네이버 지도 안내: http://me2.do/xMi9nmgc};
+            $sent = $sender->send_sms( text => $sms_msg, to => $sms_to );
+            app->log->error("Failed to send SMS: $sms_to, $sms_msg") unless $sent;
+
+            ## Google Calendar
             my $volunteer = $work->volunteer;
-            my $from      = $work->activity_from_date;
-            my $to        = $work->activity_to_date;
             my $text      = sprintf "%s %s on %s %s %s%s-%s%s", $volunteer->name, $work->activity, $from->month_name,
                 $from->day, $from->hour_12, $from->am_or_pm, $to->hour_12, $to->am_or_pm;
             app->log->debug($text);
             $self->quickAdd("$text");
+        } elsif ( $status eq 'done' ) {
+            # 방명록작성안내문자
         }
 
         $self->render(json => { $work->get_columns });
