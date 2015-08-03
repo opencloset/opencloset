@@ -53,6 +53,7 @@ use Unicode::Normalize;
 use Postcodify;
 
 use OpenCloset::Schema;
+use OpenCloset::Size::Guess;
 
 app->defaults( %{ plugin 'Config' => { default => {
     jses        => [],
@@ -5933,6 +5934,40 @@ get '/stat/status/:ymd' => sub {
 };
 
 get '/shortcut' => 'shortcut';
+
+any '/size/guess' => sub {
+    my $self   = shift;
+
+    #
+    # fetch params
+    #
+    my %params = $self->get_params(qw/ height weight gender /);
+
+    my $height = $params{height};
+    my $weight = $params{weight};
+    my $gender = $params{gender};
+
+    my $osg_db = OpenCloset::Size::Guess->new(
+        'DB',
+        _time_zone => app->config->{timezone},
+        _schema    => $DB,
+    );
+
+    my $osg_bodykit = OpenCloset::Size::Guess->new(
+        'BodyKit',
+        _accessKey => app->config->{bodykit}{accessKey},
+        _secret    => app->config->{bodykit}{secret},
+    );
+
+    $self->render(
+        'size-guess',
+        height      => $height,
+        weight      => $weight,
+        gender      => $gender,
+        osg_bodykit => $osg_bodykit,
+        osg_db      => $osg_db
+    );
+};
 
 app->secrets( app->defaults->{secrets} );
 app->start;
