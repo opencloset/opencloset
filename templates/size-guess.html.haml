@@ -75,15 +75,39 @@
         %th.text-right 발
     %tbody
       %tr
-        %th DB
-        %td.text-right= $ret1->{belly}
-        %td.text-right= $ret1->{topbelly}
-        %td.text-right= $ret1->{bust}
-        %td.text-right= $ret1->{arm}
-        %td.text-right= $ret1->{thigh}
-        %td.text-right= $ret1->{waist}
-        %td.text-right= $ret1->{leg}
-        %td.text-right= $ret1->{foot}
+        %th= sprintf( 'DB (%d)', $ret1->{count}{total} );
+        %td.text-right
+          = $ret1->{count}{belly}
+          %br
+          = $ret1->{belly}
+        %td.text-right
+          = $ret1->{count}{topbelly}
+          %br
+          = $ret1->{topbelly}
+        %td.text-right
+          = $ret1->{count}{bust}
+          %br
+          = $ret1->{bust}
+        %td.text-right
+          = $ret1->{count}{arm}
+          %br
+          = $ret1->{arm}
+        %td.text-right
+          = $ret1->{count}{thigh}
+          %br
+          = $ret1->{thigh}
+        %td.text-right
+          = $ret1->{count}{waist}
+          %br
+          = $ret1->{waist}
+        %td.text-right
+          = $ret1->{count}{leg}
+          %br
+          = $ret1->{leg}
+        %td.text-right
+          = $ret1->{count}{foot}
+          %br
+          = $ret1->{foot}
       %tr
         %th BodyKit
         %td.text-right= $ret2->{belly}
