@@ -33,6 +33,26 @@
           -  }
           - }
     .form-group
+      %label.col-sm-3.control-label.no-padding-right{ :for => 'gender' } 성별
+      .col-sm-9
+        %select.col-xs-10.col-sm-5{ :name => "gender", :type => 'hidden' }
+          - use feature qw( switch );
+          - use experimental qw( smartmatch );
+          - given ($gender) {
+          -   when ('male') {
+            %option{ :value => 'male',  :selected => 'selected' } 남성
+            %option{ :value => 'female'                         } 여성
+          -   }
+          -   when ('female') {
+            %option{ :value => 'male'                            } 남성
+            %option{ :value => 'female', :selected => 'selected' } 여성
+          -   }
+          -   default {
+            %option{ :value => 'male'   } 남성
+            %option{ :value => 'female' } 여성
+          -   }
+          - }
+    .form-group
       %label.col-sm-3.control-label.no-padding-right{ :for => 'limit' } TOP (개수)
       .col-sm-9
         %input#query.form-control{ :name => "limit" :placeholder => '10', :value => "#{$limit}" }

@@ -5685,6 +5685,7 @@ get '/stat/clothes/hit' => sub {
     my $self = shift;
 
     my $default_category = 'jacket';
+    my $default_gender   = 'male';
     my $default_limit    = 10;
 
     my $dt_today = DateTime->now( time_zone => app->config->{timezone} );
@@ -5699,6 +5700,7 @@ get '/stat/clothes/hit' => sub {
         $self->url_for( '/stat/clothes/hit/' . $default_category )->query(
             start_date => $dt_month_before->ymd,
             end_date   => $dt_today->ymd,
+            gender     => $default_gender,
             limit      => $default_limit,
         )
     );
@@ -5710,7 +5712,7 @@ get '/stat/clothes/hit/:category' => sub {
     #
     # fetch params
     #
-    my %params = $self->get_params(qw/ start_date end_date category limit /);
+    my %params = $self->get_params(qw/ start_date end_date category gender limit /);
 
     #
     # validate params
@@ -5718,6 +5720,7 @@ get '/stat/clothes/hit/:category' => sub {
 
     my $v = $self->create_validator;
     $v->field('category')->in( keys %{ app->config->{category} } );
+    $v->field('gender')->in(qw/ male female /);
     $v->field('limit')->regexp(qr/^\d+$/);
 
     unless ( $self->validate( $v, \%params ) ) {
@@ -5795,6 +5798,7 @@ get '/stat/clothes/hit/:category' => sub {
     my $clothes_rs = $DB->resultset('Clothes')->search(
         {
             'category'          => $params{category},
+            'gender'            => $params{gender},
             'order.rental_date' => {
                 -between => [
                     $dtf->format_datetime($start_date),
@@ -5834,6 +5838,7 @@ get '/stat/clothes/hit/:category' => sub {
         start_date => $start_date,
         end_date   => $end_date,
         category   => $params{category},
+        gender     => $params{gender},
         limit      => $params{limit},
     );
 };
