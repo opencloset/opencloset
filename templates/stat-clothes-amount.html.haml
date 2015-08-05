@@ -11,19 +11,33 @@
 - title meta_text($_id);
 
 .row.amount
-  .col-md-6
+  .col-md-12
     %table.table.table-striped.table-bordered.table-hover
       %thead
         %tr
           %th 품목
           %th 수량
           %th 대여중
+          %th 수량(남성)
+          %th 대여중(남성)
+          %th 수량(여성)
+          %th 대여중(여성)
       %tbody
         - for my $item (@$amount) {
           - my $category = $item->{category};
           %tr
             %td
-              %a{:href => '#{url_for("/stat/clothes/amount/category/$category")}'}= $config->{category}{$category}{str} || $category
-            %td= $item->{quantity}
-            %td= $item->{rental}
+              = $config->{category}{$category}{str} || $category
+            %td
+              = $item->{quantity}
+            %td
+              = $item->{rental}
+            %td
+              %a{:href => '#{url_for("/stat/clothes/amount/category/$category/gender/male")}'}= $item->{male}{quantity}
+            %td
+              %a{:href => '#{url_for("/stat/clothes/amount/category/$category/gender/male")}'}= $item->{male}{rental}
+            %td
+              %a{:href => '#{url_for("/stat/clothes/amount/category/$category/gender/female")}'}= $item->{female}{quantity}
+            %td
+              %a{:href => '#{url_for("/stat/clothes/amount/category/$category/gender/female")}'}= $item->{female}{rental}
         - }

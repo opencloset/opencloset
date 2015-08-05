@@ -13,6 +13,7 @@
 %h2
   = $config->{category}{$category}{str} || $category
   %small= $quantity
+  %small= $gender eq 'male' ? '남성용' : $gender eq 'female' ? '여성용' : 'N/A'
 
 .space-6
 

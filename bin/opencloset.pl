@@ -5580,13 +5580,30 @@ get '/stat/clothes/amount' => sub {
     while (my $clothes = $rs->next) {
         my $category = $clothes->category;
 
-        my $quantity = $DB->resultset('Clothes')->search(
-            { category => $category },
+        my $m_quantity = $DB->resultset('Clothes')->search(
+            {
+                category => $category,
+                gender   => 'male',
+            },
+        );
+        my $f_quantity = $DB->resultset('Clothes')->search(
+            {
+                category => $category,
+                gender   => 'female',
+            },
         );
 
-        my $rental = $DB->resultset('Clothes')->search(
+        my $m_rental = $DB->resultset('Clothes')->search(
             {
                 category  => $category,
+                gender    => 'male',
+                status_id => 2,
+            }
+        );
+        my $f_rental = $DB->resultset('Clothes')->search(
+            {
+                category  => $category,
+                gender    => 'female',
                 status_id => 2,
             }
         );
@@ -5595,8 +5612,16 @@ get '/stat/clothes/amount' => sub {
             @amount,
             {
                 category => $category,
-                quantity => $quantity,
-                rental   => $rental,
+                quantity => $m_quantity + $f_quantity,
+                rental   => $m_rental + $f_rental,
+                male     => {
+                    quantity => $m_quantity,
+                    rental   => $m_rental,
+                },
+                female => {
+                    quantity => $f_quantity,
+                    rental   => $f_rental,
+                },
             }
         );
     }
@@ -5604,7 +5629,7 @@ get '/stat/clothes/amount' => sub {
     $self->stash( amount => \@amount );
 } => 'stat-clothes-amount';
 
-get '/stat/clothes/amount/category/:category' => sub {
+get '/stat/clothes/amount/category/:category/gender/:gender' => sub {
     my $self = shift;
 
     my %criterion_of = (
@@ -5622,8 +5647,12 @@ get '/stat/clothes/amount/category/:category' => sub {
     );
 
     my $category = $self->param('category');
+    my $gender   = $self->param('gender');
     my $quantity = $DB->resultset('Clothes')->search(
-        { category => $category }
+        {
+            category => $category,
+            gender   => $gender,
+        }
     );
 
     my @items;
@@ -5640,10 +5669,10 @@ get '/stat/clothes/amount/category/:category' => sub {
         while ( my $clothes = $rs->next ) {
             my $size = $clothes->$criterion;
 
-            my $qty      = $DB->resultset('Clothes')->search({ category => $category, $criterion => $size });
-            my $rental   = $DB->resultset('Clothes')->search({ category => $category, $criterion => $size, status_id => 2 });
-            my $repair   = $DB->resultset('Clothes')->search({ category => $category, $criterion => $size, status_id => 6 });
-            my $cleaning = $DB->resultset('Clothes')->search({ category => $category, $criterion => $size, status_id => 5 });
+            my $qty      = $DB->resultset('Clothes')->search({ category => $category, gender => $gender, $criterion => $size });
+            my $rental   = $DB->resultset('Clothes')->search({ category => $category, gender => $gender, $criterion => $size, status_id => 2 });
+            my $repair   = $DB->resultset('Clothes')->search({ category => $category, gender => $gender, $criterion => $size, status_id => 6 });
+            my $cleaning = $DB->resultset('Clothes')->search({ category => $category, gender => $gender, $criterion => $size, status_id => 5 });
 
             push(
                 @items,
@@ -5658,10 +5687,10 @@ get '/stat/clothes/amount/category/:category' => sub {
         }
     }
     else {
-        my $qty      = $DB->resultset('Clothes')->search({ category => $category });
-        my $rental   = $DB->resultset('Clothes')->search({ category => $category, status_id => 2 });
-        my $repair   = $DB->resultset('Clothes')->search({ category => $category, status_id => 6 });
-        my $cleaning = $DB->resultset('Clothes')->search({ category => $category, status_id => 5 });
+        my $qty      = $DB->resultset('Clothes')->search({ category => $category, gender => $gender, });
+        my $rental   = $DB->resultset('Clothes')->search({ category => $category, gender => $gender, status_id => 2 });
+        my $repair   = $DB->resultset('Clothes')->search({ category => $category, gender => $gender, status_id => 6 });
+        my $cleaning = $DB->resultset('Clothes')->search({ category => $category, gender => $gender, status_id => 5 });
 
         push(
             @items,
@@ -5678,8 +5707,9 @@ get '/stat/clothes/amount/category/:category' => sub {
         items     => \@items,
         quantity  => $quantity,
         criterion => $criterion,
+        gender    => $gender,
     );
-} => 'stat-clothes-amount-category';
+} => 'stat-clothes-amount-category-gender';
 
 get '/stat/clothes/hit' => sub {
     my $self = shift;
