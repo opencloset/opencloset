@@ -22,6 +22,7 @@
     </ul>
     <hr class="colorgraph">
     <div class="list-group">
+      % my $volunteer_uri = $config->{volunteer_uri};
       % while (my $work = $works->next) {
         % my $volunteer = $work->volunteer;
         % my $from = $work->activity_from_date;
@@ -57,8 +58,8 @@
                 % if ($work->status ne 'canceled') {
                   <button type="button" data-work-id="<%= $work->id %>" class="btn btn-danger btn-sm btn-cancel">취소</button>
                 % }
-                <a href="/volunteers/<%= $work->id %>" target="_blank" class="btn btn-default btn-sm">자세히</a>
-                <a href="/volunteers/<%= $work->id %>/edit?authcode=<%= $work->authcode %>" target="_blank" class="btn btn-default btn-sm">수정</a>
+                <a href="<%= $volunteer_uri %>/works/<%= $work->id %>" target="_blank" class="btn btn-default btn-sm">자세히</a>
+                <a href="<%= $volunteer_uri %>/works/<%= $work->id %>/edit?authcode=<%= $work->authcode %>" target="_blank" class="btn btn-default btn-sm">수정</a>
               </dd>
             </dl>
           </p>
