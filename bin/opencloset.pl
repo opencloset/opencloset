@@ -37,13 +37,10 @@ use DateTime;
 use Encode 'decode_utf8';
 use Gravatar::URL;
 use HTTP::Tiny;
-use JSON::WebToken;
-use JSON;
 use List::MoreUtils qw( zip );
 use List::Util qw( sum );
 use Mojo::Util qw( encode );
 use Parcel::Track;
-use Path::Tiny;
 use SMS::Send::KR::APIStore;
 use SMS::Send::KR::CoolSMS;
 use SMS::Send;
@@ -1248,115 +1245,6 @@ helper convert_sec_to_hms => sub {
     );
 
     return $hms;
-};
-
-helper _validate_volunteer => sub {
-    my ($self, $v) = @_;
-
-    $v->required('name');
-    $v->optional('email');    # TODO: check valid email
-    $v->optional('birth_date')->like(qr/^\d{4}-\d{2}-\d{2}$/);
-    $v->required('phone')->like(qr/^\d{3}-\d{4}-\d{3,4}$/);
-    $v->optional('address');
-};
-
-helper _validate_volunteer_work => sub {
-    my ($self, $v) = @_;
-
-    $v->required('activity_date')->like(qr/^\d{4}-\d{2}-\d{2}$/);
-    $v->optional('activity_hour_from')->like(qr/^\d{1,2}$/);
-    $v->optional('activity_hour_to')->like(qr/^\d{1,2}$/);
-    $v->optional('reason');
-    $v->optional('path');
-    $v->optional('period');
-    $v->optional('activity');
-    $v->optional('comment');
-};
-
-helper auth_google => sub {
-    my $self = shift;
-
-    my $private_key = app->config->{google_private_key};
-    return unless $private_key;
-
-    my $json_private = path($private_key);
-    return unless $json_private;
-
-    my $private = try {
-        decode_json( $json_private->slurp );
-    }
-    catch {
-        app->log->error("Failed to decode json: $_");
-    };
-
-    return unless $private;
-
-    my $time               = time;
-    my $private_key_string = $private->{private_key};
-    my $claim_set          = {
-        iss   => $private->{client_email},
-        scope => 'https://www.googleapis.com/auth/calendar',
-        aud   => 'https://www.googleapis.com/oauth2/v3/token',
-        exp   => $time + 3600,
-        iat   => $time
-    };
-
-    my $jwt  = encode_jwt $claim_set, $private_key_string, 'RS256', { typ => 'JWT' };
-    my $http = HTTP::Tiny->new;
-    my $res  = $http->post_form( "https://www.googleapis.com/oauth2/v3/token",
-        { grant_type => 'urn:ietf:params:oauth:grant-type:jwt-bearer', assertion => $jwt } );
-    unless ( $res->{success} ) {
-        app->log->error("Google Authorization Failed");
-        app->log->error("$res->{status}: $res->{reason}\n$res->{content}\n");
-        return;
-    }
-
-    my $token = try {
-        decode_json( $res->{content} );
-    }
-    catch {
-        app->log->error("Failed to decode json: $_");
-    };
-
-    return unless $token;
-
-    $self->session(token => {%$token, exp => $time + 3600, iat => $time});
-    return 1;
-};
-
-# google calendar quickAdd
-helper quickAdd => sub {
-    my ( $self, $text ) = @_;
-
-    my $time  = time;
-    my $token = $self->session('token');
-    if ( !$token || $token->{exp} < $time ) {
-        my $is_auth = $self->auth_google;
-        unless ($is_auth) {
-            app->log->debug("Failed to add calendar event: Authorization failed");
-            return;
-        }
-
-        $token = $self->session('token');
-    }
-
-    my $calendarId = app->config->{google_calendar_id};
-    my $url        = "https://www.googleapis.com/calendar/v3/calendars/$calendarId/events/quickAdd";
-    my $http       = HTTP::Tiny->new;
-    my $res        = $http->post_form(
-        "$url",
-        { text    => $text },
-        { headers => { authorization => "$token->{token_type} $token->{access_token}" } }
-    );
-
-    unless ( $res->{success} ) {
-        app->log->error("Failed to posting a new calendar event");
-        app->log->error("$res->{status}: $res->{reason}\n$res->{content}\n");
-        return;
-    }
-
-    app->log->debug("Added an event successfully");
-    return 1;
 };
 
 #
@@ -4039,9 +3927,6 @@ under '/' => sub {
                         when ('/login') {
                             return 1;
                         }
-                        when (/^\/volunteers/) {
-                            return 1;
-                        }
                         default {
                             $self->redirect_to( $self->url_for('/visit') );
                             return;
@@ -4085,9 +3970,6 @@ under '/' => sub {
                         when ('/login') {
                             return 1;
                         }
-                        when (/^\/volunteers/) {
-                            return 1;
-                        }
                         default {
                             $self->redirect_to( $self->url_for('/login') );
                             return;
@@ -4101,9 +3983,6 @@ under '/' => sub {
                         return 1;
                     }
                     when ('/browse-happy') {
-                        return 1;
-                    }
-                    when (/^\/volunteers/) {
                         return 1;
                     }
                     default {
@@ -6140,291 +6019,27 @@ get '/stat/status/:ymd' => sub {
 
 get '/shortcut' => 'shortcut';
 
-group {
-    under '/volunteers';
+get '/volunteers' => sub {
+    my $self = shift;
+    my $status = $self->param('status') || 'reported';
 
-    get '/' => sub {
-        my $self   = shift;
-        my $status = $self->param('status') || 'reported';
-
-        my $parser = $DB->storage->datetime_parser;
-        my $now    = DateTime->now;
-        my $works = $DB->resultset('VolunteerWork')->search(
-            {
-                status => $status,
-                activity_from_date => { -between => [
-                    $parser->format_datetime($now->clone->subtract(days => 15)),
-                    $parser->format_datetime($now->clone->add(days => 15))
-                ] }
-            },
-            { order_by => 'activity_from_date' }
-        );
-
-        $self->render(works => $works);
-    } => 'volunteers/list';
-
-    # GET /volunteers/new
-    get '/new' => sub {
-        my $self = shift;
-    } => 'volunteers/new';
-
-    # POST /volunteers
-    post '/' => sub {
-        my $self = shift;
-
-        my $v = $self->validation;
-        $self->_validate_volunteer($v);
-        $self->_validate_volunteer_work($v);
-        return $self->error(400, { str => 'Parameter Validation Failed' }) if $v->has_error;
-
-        my $name          = $v->param('name');
-        my $activity_date = $v->param('activity_date');
-        my $email         = $v->param('email');
-        my $birth_date    = $v->param('birth_date');
-        my $phone         = $v->param('phone');
-        my $address       = $v->param('address');
-        my $from          = sprintf '%02s', $v->param('activity_hour_from') || '00';
-        my $to            = sprintf '%02s', $v->param('activity_hour_to')   || '00';
-        my $period        = $v->param('period');
-        my $comment       = $v->param('comment');
-        my $reasons       = $v->every_param('reason');
-        my $paths         = $v->every_param('path');
-        my $activities    = $v->every_param('activity');
-
-        my $volunteer = $DB->resultset('Volunteer')->find_or_create(
-            {
-                name       => $name,
-                email      => $email,
-                phone      => $phone,
-                address    => $address,
-                birth_date => $birth_date
+    my $parser = $DB->storage->datetime_parser;
+    my $now    = DateTime->now;
+    my $works  = $DB->resultset('VolunteerWork')->search(
+        {
+            status             => $status,
+            activity_from_date => {
+                -between => [
+                    $parser->format_datetime( $now->clone->subtract( days => 15 ) ),
+                    $parser->format_datetime( $now->clone->add( days => 15 ) )
+                ]
             }
-        );
+        },
+        { order_by => 'activity_from_date' }
+    );
 
-        return $self->error(500, { str => 'Failed to find or create Volunteer' }) unless $volunteer;
-
-        my $work = $DB->resultset('VolunteerWork')->create(
-            {
-                volunteer_id       => $volunteer->id,
-                activity_from_date => "$activity_date $from:00:00",
-                activity_to_date   => "$activity_date $to:00:00",
-                period             => $period,
-                reason             => join( '|', @$reasons ),
-                path               => join( '|', @$paths ),
-                activity           => join( '|', @$activities ),
-                comment            => $comment,
-                authcode           => String::Random->new->randregex('[a-zA-Z0-9]{32}')
-            }
-        );
-
-        return $self->error(500, { str => 'Failed to create Volunteer Work' }) unless $work;
-
-        ## SMS
-        my $sender
-            = SMS::Send->new( app->config->{sms}{driver}, %{ app->config->{sms}{ app->config->{sms}{driver} } } );
-        my $from_date = $work->activity_from_date;
-        my $to_date   = $work->activity_to_date;
-        my $template
-            = qq{안녕하세요. %s님이 %s월 %s일 %s~%s시에 신청하신 자원봉사신청이 정상적으로 접수되었습니다.
-현재 열린옷장 담당자가 접수된 봉사신청 내역을 확인하고 있습니다. (최종승인까지 소요기간 1일 이내)
-신청하신 봉사시간 및 봉사활동내역에 대해 변경사항이 없는 경우 %s님이 신청해 주신 자원봉사에 대한 최종승인여부가 SMS로 발송될 예정입니다.
-봉사 승인에 대한 SMS 또는 전화연락이 없는 경우 070-4325-7521 혹은 카카오톡 옐로아이디를 통해 문의해주시기 바랍니다. 감사합니다.};
-        my $msg
-            = sprintf( $template, $volunteer->name, $from_date->month, $from_date->day, $from, $to, $volunteer->name );
-        my $sent = $sender->send_sms( text => $msg, to => $phone =~ s/-//gr );
-        app->log->error("Failed to send SMS: $msg, $phone") unless $sent;
-
-        $self->render('volunteers/done', work => $work);
-    };
-
-    # reset under /volunteers
-    # UNDER /volunteers/:work_id
-    under '/volunteers/:work_id' => sub {
-        my $self    = shift;
-        my $work_id = $self->param('work_id');
-
-        my $work = $DB->resultset('VolunteerWork')->find({ id => $work_id });
-        unless ($work) {
-            $self->error(404, { str => "Not Found Volunteer Work: $work_id" });
-            return;
-        }
-
-        $self->stash(work => $work);
-        return 1;
-    };
-
-    # GET /volunteers/:work_id
-    get '/' => sub {
-        my $self = shift;
-        my $work = $self->stash('work');
-
-        my $volunteer = $work->volunteer;
-        my $works     = $volunteer->volunteer_works({ id => { '!=' => $work->id } });
-        my $guestbook = $work->volunteer_guestbooks->next;
-
-        $self->render(works => [$works->all], guestbook => $guestbook);
-    } => 'volunteers/id';
-
-    # POST /volunteers/:work_id
-    post '/' => sub {
-        my $self      = shift;
-        my $authcode  = $self->param('authcode') || '';
-        my $work      = $self->stash('work');
-        my $volunteer = $work->volunteer;
-
-        return $self->render('volunteers/error/bad_request', status => 400, error => 'Wrong authcode')
-            if $authcode ne $work->authcode;
-
-        my $v = $self->validation;
-        $self->_validate_volunteer_work($v);
-        return $self->error(400, { str => 'Parameter Validation Failed' }) if $v->has_error;
-
-        my $activity_date = $v->param('activity_date');
-        my $from          = sprintf '%02s', $v->param('activity_hour_from') || '00';
-        my $to            = sprintf '%02s', $v->param('activity_hour_to')   || '00';
-        my $period        = $v->param('period');
-        my $comment       = $v->param('comment');
-        my $reasons       = $v->every_param('reason');
-        my $paths         = $v->every_param('path');
-        my $activities    = $v->every_param('activity');
-
-        $work->update({
-            activity_from_date => "$activity_date $from:00:00",
-            activity_to_date   => "$activity_date $to:00:00",
-            period             => $period,
-            reason             => join( '|', @$reasons ),
-            path               => join( '|', @$paths ),
-            activity           => join( '|', @$activities ),
-            comment            => $comment,
-        });
-
-        $self->render('volunteers/done', work => $work);
-    };
-
-    get '/guestbook' => sub {
-        my $self = shift;
-    } => 'volunteers/guestbook';
-
-    post '/guestbook' => sub {
-        my $self = shift;
-        my $work = $self->stash('work');
-
-        my $name       = $self->param('name');
-        my $age_group  = $self->param('age-group');
-        my $gender     = $self->param('gender');
-        my $job        = $self->param('job');
-        my $impression = $self->param('impression');
-        my $imprss_etc = $self->param('impression-etc');
-        my $activities = $self->every_param('activity');
-        my $atvt_etc   = $self->param('activity-etc');
-        my $want_to_do = $self->every_param('want-to-do');
-        my $todo_etc   = $self->param('want-to-do-etc');
-        my $comment    = $self->param('comment');
-
-        my $guestbook = $DB->resultset('VolunteerGuestbook')->create(
-            {
-                volunteer_work_id => $work->id,
-                name              => $name,
-                age_group         => $age_group,
-                gender            => $gender,
-                job               => $job,
-                impression        => $impression || $imprss_etc,
-                activity          => join( '|', @$activities ) || $atvt_etc,
-                want_to_do        => join( '|', @$want_to_do ) || $todo_etc,
-                comment           => $comment
-            }
-        );
-
-        return $self->error( 500,
-            { str => 'Failed to create Volunteer Guestbook' } )
-            unless $guestbook;
-        $self->render( 'volunteers/thanks', guestbook => $guestbook );
-    };
-
-    # GET /volunteers/:work_id/edit?authcode=xxxx
-    get '/edit' => sub {
-        my $self      = shift;
-        my $authcode  = $self->param('authcode') || '';
-        my $work      = $self->stash('work');
-        my $volunteer = $work->volunteer;
-
-        return $self->render('volunteers/error/bad_request', status => 400, error => 'Wrong authcode')
-            if $authcode ne $work->authcode;
-
-        my $from = $work->activity_from_date;
-        my $to   = $work->activity_to_date;
-
-        my %filled = ($work->get_columns, $volunteer->get_columns);
-        $filled{reason}   = [split /\|/, $filled{reason}];
-        $filled{path}     = [split /\|/, $filled{path}];
-        $filled{activity} = [split /\|/, $filled{activity}];
-        $filled{activity_date}      = $from->ymd;
-        $filled{activity_hour_from} = sprintf '%02d', $from->hour;
-        $filled{activity_hour_to}   = sprintf '%02d', $to->hour;
-        $filled{birth_date}         = $volunteer->birth_date->ymd;
-        $self->render_fillinform(\%filled);
-    } => 'volunteers/edit';
-
-    # PUT /volunteers/:work_id/status?status=reported|approved|done|canceled
-    put '/status' => sub {
-        my $self      = shift;
-        my $work      = $self->stash('work');
-        my $volunteer = $work->volunteer;
-
-        my $validation = $self->validation;
-        $validation->required('status')->in(qw/reported approved done canceled/);
-        return $self->error( 400, { str => 'Parameter Validation Failed' } ) if $validation->has_error;
-
-        my $status = $validation->param('status');
-        $work->update( { status => $status } );
-
-        my $sender
-                = SMS::Send->new( app->config->{sms}{driver}, %{ app->config->{sms}{ app->config->{sms}{driver} } }, );
-        if ( $status eq 'approved' ) {
-            my $from = $work->activity_from_date;
-            my $to   = $work->activity_to_date;
-
-            ## SMS
-            my $sms_to = $volunteer->phone;
-            $sms_to =~ s/-//g;
-            my $template
-                = qq{축하합니다! %s님이 %s월 %s일 %s~%s시에 신청하신 봉사활동이 최종 승인 완료되었습니다.
-%s님은 봉사당일 열린옷장에서 %s 봉사활동을 담당해주시게 됩니다. (당일 상황에 따라 변동이 이루어질 수 있습니다.)
-추가로 궁금한 점이 있는 경우에는 070-4325-7521 혹은 카카오톡 옐로아이디를 통해 문의해주시기 바랍니다. 봉사당일 밝은 얼굴로 인사드리겠습니다. 감사합니다.};
-            my $sms_msg = sprintf( $template,
-                $volunteer->name, $from->month, $from->day, $from->hour, $to->hour, $volunteer->name,
-                $work->activity =~ s/\|/, /r );
-
-            my $sent = $sender->send_sms( text => $sms_msg, to => $sms_to );
-            app->log->error("Failed to send SMS: $sms_to, $sms_msg") unless $sent;
-
-            $sms_msg = qq{<열린옷장 위치안내>
-서울특별시 광진구 아차산로 213 국민은행
-건대입구역 1번 출구로 나오신 뒤 오른쪽으로 꺾어 100M 가량 직진하시면 1층에 국민은행이 있는 건물 4층으로 올라오시면 됩니다. (도보로 2~3분 소요)
-네이버 지도 안내: http://me2.do/xMi9nmgc};
-            $sent = $sender->send_sms( text => $sms_msg, to => $sms_to );
-            app->log->error("Failed to send SMS: $sms_to, $sms_msg") unless $sent;
-
-            ## Google Calendar
-            my $volunteer = $work->volunteer;
-            my $text      = sprintf "%s %s on %s %s %s%s-%s%s", $volunteer->name, $work->activity, $from->month_name,
-                $from->day, $from->hour_12, $from->am_or_pm, $to->hour_12, $to->am_or_pm;
-            app->log->debug($text);
-            $self->quickAdd("$text");
-        } elsif ( $status eq 'done' ) {
-            ## 방명록작성안내문자
-            my $sms_to = $volunteer->phone =~ s/-//gr;
-            my $template
-                = qq{수고하셨습니다. 오늘 봉사활동 어떠셨나요? %s 에서 방명록을 적어주세요. 다음 봉사자들을 위해 활용됩니다.};
-            my $id   = $work->id;
-            my $msg  = sprintf $template, $self->url_for("/volunteers/$id/guestbook")->to_abs;
-            my $sent = $sender->send_sms( text => $msg, to => $sms_to );
-            app->log->error("Failed to send SMS: $sms_to, $msg") unless $sent;
-        }
-
-        $self->render(json => { $work->get_columns });
-    };
-};
+    $self->render( works => $works );
+} => 'volunteers-list';
 
 any '/size/guess' => sub {
     my $self   = shift;

@@ -288,6 +288,5 @@ $db_opts->{AutoCommit} //= 1;
     #
     # volunteer
     #
-    google_private_key => $ENV{OPENCLOSET_GOOGLE_PRIVATE_KEY} || '',
-    google_calendar_id => 'volunteer@theopencloset.net',
+    volunteer_uri => 'http://volunteer.theopencloset.net:5000',
 };

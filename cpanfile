@@ -1,4 +1,3 @@
-requires 'Crypt::OpenSSL::RSA';
 requires 'Data::Pageset';
 requires 'DateTime';
 requires 'DateTime::Format::Duration';
@@ -8,7 +7,6 @@ requires 'Getopt::Long::Descriptive';
 requires 'Gravatar::URL';
 requires 'HTTP::Tiny';
 requires 'JSON';
-requires 'JSON::WebToken';
 requires 'List::MoreUtils';
 requires 'List::Util';
 requires 'Mojolicious','5.48';
