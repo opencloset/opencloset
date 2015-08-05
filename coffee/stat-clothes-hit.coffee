@@ -19,6 +19,7 @@ $ ->
     start_date  = $('input[name=start_date]').prop('value')
     end_date    = $('input[name=end_date]').prop('value')
     category    = $("select[name=category]").val()
+    gender      = $("select[name=gender]").val()
     limit       = $('input[name=limit]').prop('value')
 
     unless /^\d+$/.test( limit )
@@ -26,4 +27,4 @@ $ ->
       $('input[name=limit]').focus()
       return
 
-    window.location = "/stat/clothes/hit/#{category}?#{$.param({ start_date: start_date, end_date: end_date, limit: limit})}"
+    window.location = "/stat/clothes/hit/#{category}?#{$.param({ start_date: start_date, end_date: end_date, gender: gender, limit: limit })}"
