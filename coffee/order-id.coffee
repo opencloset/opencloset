@@ -429,7 +429,7 @@ $ ->
     overdue               = $('#order').data('order-overdue')
 
     if late_fee_final != 0 and not late_fee_pay_with
-      OpenCloset.alert 'danger', '연체료를 납부받지 않았습니다.'
+      OpenCloset.alert 'danger', '연장료를 납부받지 않았습니다.'
       return
 
     if compensation == 0 and compensation_discount != 0
@@ -441,13 +441,13 @@ $ ->
       return
 
     #
-    # 연체료 항목 추가
+    # 연장료 항목 추가
     #
     $.ajax "/api/order_detail.json",
       type: 'POST'
       data: {
         order_id:    order_id
-        name:        '연체료'
+        name:        '연장료'
         price:       clothes_price * 0.2
         final_price: late_fee
         stage:       1
@@ -455,14 +455,14 @@ $ ->
       }
       complete: (jqXHR, textStatus) ->
         #
-        # 연체료 에누리 항목 추가
+        # 연장료 에누리 항목 추가
         #
         if late_fee_discount != 0
           $.ajax "/api/order_detail.json",
             type: 'POST'
             data: {
               order_id:    order_id
-              name:        '연체료 에누리'
+              name:        '연장료 에누리'
               price:       Math.round( late_fee_discount / overdue )
               final_price: late_fee_discount
               stage:       1

@@ -18,13 +18,13 @@
     %a{ :href => "#{ url_with->query([ p => 1, status => 'all' ]) }" } 전체보기
   %span= '|'
   %span
-    %a{ :href => "#{ url_with->query([ p => 1, status => 'late' ]) }" } 연체중
+    %a{ :href => "#{ url_with->query([ p => 1, status => 'late' ]) }" } 연장중
   %span= '|'
   %span
-    %a{ :href => "#{ url_with->query([ p => 1, status => 'rental-late' ]) }" } 대여중(연체아님)
+    %a{ :href => "#{ url_with->query([ p => 1, status => 'rental-late' ]) }" } 대여중(연장아님)
   %span= '|'
   %span
-    %a{ :href => "#{ url_with->query([ p => 1, status => '2' ]) }" } 대여중(연체포함)
+    %a{ :href => "#{ url_with->query([ p => 1, status => '2' ]) }" } 대여중(연장포함)
   %span= '|'
   %span
     %a{ :href => "#{ url_with->query([ p => 1, status => '9' ]) }" } 반납
@@ -80,7 +80,7 @@
               - if ( $order->status ) {
               -   $status = $order->status->name;
               -   if ( $status eq '대여중' ) {
-              -     $status .= '(연체) ' . commify($late_fee) . '원' if $overdue;
+              -     $status .= '(연장) ' . commify($late_fee) . '원' if $overdue;
               -   }
               - }
               %span.label.order-status{ 'data-order-status' => "#{ $order->status ? $order->status->name : q{} }" }= $status || '상태없음'
@@ -88,14 +88,14 @@
               - my $dt_today = DateTime->now( time_zone => $timezone );
               - if ( $overdue && $order->status->name eq '대여중' && $dt_today > $order->user_target_date ) {
               -   my $sms_str = sprintf(
-              -     '[열린옷장] %s님, 대여기간이 %d일 연체되었습니다. 확인하시고 반납 바랍니다.',
+              -     '[열린옷장] %s님, 대여기간이 %d일 연장되었습니다. 확인하시고 반납 바랍니다.',
               -     $order->user->name,
               -     $overdue,
               -     commify($late_fee),
               -   );
                 %br
                 %a{ :href => "#{ url_for('/sms')->query( to => $order->user->user_info->phone, msg => $sms_str ) }" }
-                  연체 문자 전송
+                  연장 문자 전송
               - }
           %td
             = $order->rental_date ? $order->rental_date->ymd : q{}
