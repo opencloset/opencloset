@@ -335,7 +335,7 @@ $ ->
         desc:        "환불 수수료: #{charge}원"
         stage:       3
       }
-    returnClothesReal 'refund', "/order/#{order_id}", order_id, '미납', '미납'
+    returnClothesReal 'refund', "/order/#{order_id}", order_id, '결제 방법 선택', '결제 방법 선택'
 
   #
   # 반납 진행 버튼 클릭
@@ -356,7 +356,7 @@ $ ->
     $('.return-process-reverse').show()
     $('#order-late-fee-pay-with').editable 'disable'
     $('#order-late-fee-pay-with').editable 'setValue', ''
-    $('#order-late-fee-pay-with').html '미납'
+    $('#order-late-fee-pay-with').html '결제 방법 선택'
 
   returnClothesReal = (type, redirect_url, order_id, late_fee_pay_with, compensation_pay_with) ->
     if type is 'part'
@@ -562,7 +562,7 @@ $ ->
       $('#order-compensation-discount').editable 'setValue', '0'
       $('#order-compensation-pay-with').editable 'disable'
       $('#order-compensation-pay-with').editable 'setValue', ''
-      $('#order-compensation-pay-with').html '미납'
+      $('#order-compensation-pay-with').html '결제 방법 선택'
 
   #
   # 주문서 목록의 체크박스 클릭시 반납 버튼 활성화 여부 갱신

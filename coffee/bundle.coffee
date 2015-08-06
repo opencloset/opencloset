@@ -122,6 +122,7 @@ $ ->
       '계좌이체',
       '현금영수증',
       '세금계산서',
+      '미납',
     ]
     trimClothesCode: (code) ->
       code = code.replace /^\s+/, ''
