@@ -4796,6 +4796,7 @@ get '/order' => sub {
     # undef       => '상태없음'
     # late        => '연장중'
     # rental-late => '대여중(연장아님)'
+    # unpaid      => '미납'
     #
     # 1     =>  '대여가능'
     # 2     =>  '대여중'
@@ -4848,6 +4849,7 @@ get '/order' => sub {
         my $dt_day_end = DateTime->today( time_zone => app->config->{timezone} )->add( hours => 24, seconds => -1 );
         my $dtf        = $DB->storage->datetime_parser;
         my %cond;
+        my %attr;
         given ($status_id) {
             when ('undef') {
                 %cond = ( status_id => { '=' => undef },);
@@ -4868,12 +4870,57 @@ get '/order' => sub {
                     ],
                 );
             }
+            when ('unpaid') {
+                #
+                # SELECT
+                #     o.id                  AS o_id,
+                #     o.user_id             AS o_user_id,
+                #     o.status_id           AS o_status_id,
+                #     SUM( od.final_price ) AS sum_final_price
+                # FROM `order` AS o
+                # LEFT JOIN `order_detail` AS od ON o.id = od.order_id
+                # WHERE (
+                #     o.`status_id` = 9
+                #     AND (
+                #         o.`late_fee_pay_with` = '미납'
+                #         OR o.`compensation_pay_with` = '미납'
+                #     )
+                #     AND od.stage > 0
+                # )
+                # GROUP BY o.id
+                # HAVING sum_final_price > 0
+                # ;
+                #
+
+                %cond = (
+                    -and => [
+                        'me.status_id'        => 9,
+                        'order_details.stage' => { '>' => 0 },
+                        -or => [
+                            'me.late_fee_pay_with'     => '미납',
+                            'me.compensation_pay_with' => '미납',
+                        ],
+                    ],
+                );
+
+                %attr = (
+                    join      => [qw/ order_details /],
+                    group_by  => [qw/ me.id /],
+                    having    => { 'sum_final_price' => { '>' => 0 } },
+                    '+select' => [
+                        {
+                            sum => 'order_details.final_price',
+                            -as => 'sum_final_price'
+                        },
+                    ],
+                );
+            }
             default {
                 my @valid = 1 .. 43;
                 %cond = ( status_id => $status_id ) if $status_id ~~ @valid;
             }
         }
-        $rs = $rs->search(\%cond);
+        $rs = $rs->search( \%cond, \%attr );
     }
 
     {

@@ -51,6 +51,9 @@
     %a{ :href => "#{ url_with->query([ p => 1, status => '43' ]) }" } 사이즈없음
   %span= '|'
   %span
+    %a{ :href => "#{ url_with->query([ p => 1, status => 'unpaid' ]) }" } 미납
+  %span= '|'
+  %span
     %a{ :href => "#{ url_with->query([ p => 1, status => 'undef' ]) }" } 상태없음
 
 .space-4
@@ -81,6 +84,10 @@
               -   $status = $order->status->name;
               -   if ( $status eq '대여중' ) {
               -     $status .= '(연장) ' . commify($late_fee) . '원' if $overdue;
+              -   }
+              -   elsif ( $status eq '반납' ) {
+              -     my $unpaid = $order->get_column('sum_final_price');
+              -     $status .= '(미납) ' . commify($unpaid) . '원' if $unpaid;
               -   }
               - }
               %span.label.order-status{ 'data-order-status' => "#{ $order->status ? $order->status->name : q{} }" }= $status || '상태없음'
