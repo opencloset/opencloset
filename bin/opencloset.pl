@@ -5928,6 +5928,16 @@ get '/stat/status/:ymd' => sub {
         return;
     }
 
+    my $basis_dt = try {
+        DateTime->new(
+            time_zone => app->config->{timezone},
+            year      => 2015,
+            month     => 5,
+            day       => 29
+        );
+    };
+    my $online_order_hour = $dt >= $basis_dt ? 12 + 10 : 12 + 7;
+
     my $dtf      = $DB->storage->datetime_parser;
     my $order_rs = $DB->resultset('Order')->search(
         #
@@ -5935,12 +5945,15 @@ get '/stat/status/:ymd' => sub {
         #
         #\[ 'DATE_FORMAT(`booking`.`date`,"%Y-%m") = ?', $dt->strftime("%Y-%m") ],
         {
-            'booking.date' => {
-                -between => [
-                    $dtf->format_datetime($dt_start),
-                    $dtf->format_datetime($dt_end),
-                ],
-            },
+            -and => [
+                'booking.date' => {
+                    -between => [
+                        $dtf->format_datetime($dt_start),
+                        $dtf->format_datetime($dt_end),
+                    ],
+                },
+                \[ 'HOUR(`booking`.`date`) != ?', $online_order_hour ]
+            ]
         },
         {
             join     => [qw/ booking /],
