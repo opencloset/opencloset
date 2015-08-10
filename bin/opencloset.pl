@@ -6035,7 +6035,7 @@ get '/volunteers' => sub {
                 ]
             }
         },
-        { order_by => 'activity_from_date' }
+        { order_by => { -desc => 'activity_from_date' } }
     );
 
     $self->render( works => $works );
