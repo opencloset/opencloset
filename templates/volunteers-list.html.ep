@@ -52,12 +52,12 @@
               </dd>
               <dd>
                 % if ($work->status eq 'reported') {
-                  <button type="button" data-work-id="<%= $work->id %>" class="btn btn-success btn-sm btn-approve">승인</button>
+                  <button type="button" data-work-id="<%= $work->id %>" class="btn btn-success btn-sm btn-status" data-status="approved">승인</button>
                 % } elsif ($work->status eq 'approved') {
-                  <button type="button" data-work-id="<%= $work->id %>" class="btn btn-info btn-sm btn-done">방문</button>
+                  <button type="button" data-work-id="<%= $work->id %>" class="btn btn-info btn-sm btn-status" data-status="done">방문</button>
                 % }
                 % if ($work->status ne 'canceled') {
-                  <button type="button" data-work-id="<%= $work->id %>" class="btn btn-danger btn-sm btn-cancel">취소</button>
+                  <button type="button" data-work-id="<%= $work->id %>" class="btn btn-danger btn-sm btn-status" data-status="canceled">취소</button>
                 % }
                 <a href="<%= $volunteer_uri %>/works/<%= $work->id %>" target="_blank" class="btn btn-default btn-sm">자세히</a>
                 <a href="<%= $volunteer_uri %>/works/<%= $work->id %>/edit?authcode=<%= $work->authcode %>" target="_blank" class="btn btn-default btn-sm">수정</a>
