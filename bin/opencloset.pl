@@ -5936,7 +5936,7 @@ get '/stat/status/:ymd' => sub {
             day       => 29
         );
     };
-    my $online_order_hour = $dt >= $basis_dt ? 12 + 10 : 12 + 7;
+    my $online_order_hour = $dt >= $basis_dt ? 22 : 19;
 
     my $dtf      = $DB->storage->datetime_parser;
     my $order_rs = $DB->resultset('Order')->search(
@@ -5952,7 +5952,7 @@ get '/stat/status/:ymd' => sub {
                         $dtf->format_datetime($dt_end),
                     ],
                 },
-                \[ 'HOUR(`booking`.`date`) != ?', $online_order_hour ]
+                \[ 'HOUR(`booking`.`date`) != ?', $online_order_hour ],
             ]
         },
         {
