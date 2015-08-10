@@ -3,33 +3,46 @@ opencloset
 
 ## Requirements ##
 
+열린옷장 웹 시스템은 perl로 구현되어있으며, 부수적으로 node.js와 ruby 환경에서
+제공하는 도구들을 활용하고 있습니다. 개발환경을 구성하기 위해서는 각각의 환경을
+아래와 같이 구성해야합니다.
+
+### perl ###
+
+[perlbrew](http://perlbrew.pl/)와
+[cpanm](http://search.cpan.org/~miyagawa/App-cpanminus-1.7039/bin/cpanm) 사용을
+추천합니다. 아래 명령을 통해 CPAN(Comprehensive Perl Archive Network)에서 필요한
+모듈을 설치하면 됩니다.
+
     $ cpanm --installdeps .
     $ cpanm --mirror https://cpan.theopencloset.net OpenCloset::Schema OpenCloset::Config OpenCloset::Size::Guess::DB OpenCloset::Size::Guess::BodyKit
 
-node.js 를 사용할 수 있는 환경이라고 가정합니다.
+### node.js ###
+
 [nvm](https://github.com/creationix/nvm) 의 사용을 추천합니다.
 
-ruby를 사용할 수 있는 환경이라고 가정합니다.
-rbenv 또는 rvm 의 사용을 추천합니다.
+coffeescript 파일을 컴파일하고, 컴파일된 javascript 파일을 minify
+하기위해 [grunt](http://gruntjs.com/) 도구를 설치합니다.
+
+    $ npm install -g grunt-cli
+    $ npm install
+
+front-end 패키지 관리를 위해 [bower](http://bower.io/)를 설치합니다.
+
+    $ npm install -g bower
+
+bower를 통해 front-end 패키지를 설치합니다.
+
+    $ bower install
+
+### ruby ###
+
+[rbenv](https://github.com/sstephenson/rbenv) 또는 [rvm](https://rvm.io/) 의 사용을 추천합니다.
 
 `scss` 파일의 컴파일을 위한 도구를 설치해야 합니다.
 
     $ gem install bundler
     $ bundle install
-
-coffeescript 파일을 컴파일하고, 컴파일된 javascript 파일을 minify
-하기위한 도구를 설치합니다.
-
-    $ npm install -g grunt-cli
-    $ npm install
-
-front-end 패키지 관리자를 설치합니다.
-
-    $ npm install -g bower
-
-front-end 패키지를 설치합니다.
-
-    $ bower install
 
 ### 데이터베이스 초기화
 
@@ -194,3 +207,4 @@ is, in this case, a form of mere aggregation.)  This is my interpretation
 of the GPL.  If you still have concerns or difficulties understanding
 my intent, feel free to contact me.  Of course, the Artistic License
 spells all this out for your protection, so you may prefer to use that.
+
