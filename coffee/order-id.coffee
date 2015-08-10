@@ -335,7 +335,7 @@ $ ->
         desc:        "환불 수수료: #{charge}원"
         stage:       3
       }
-    returnClothesReal 'refund', "/order/#{order_id}", order_id, '미납', '미납'
+    returnClothesReal 'refund', "/order/#{order_id}", order_id, '결제 방법 선택', '결제 방법 선택'
 
   #
   # 반납 진행 버튼 클릭
@@ -356,7 +356,7 @@ $ ->
     $('.return-process-reverse').show()
     $('#order-late-fee-pay-with').editable 'disable'
     $('#order-late-fee-pay-with').editable 'setValue', ''
-    $('#order-late-fee-pay-with').html '미납'
+    $('#order-late-fee-pay-with').html '결제 방법 선택'
 
   returnClothesReal = (type, redirect_url, order_id, late_fee_pay_with, compensation_pay_with) ->
     if type is 'part'
@@ -429,7 +429,7 @@ $ ->
     overdue               = $('#order').data('order-overdue')
 
     if late_fee_final != 0 and not late_fee_pay_with
-      OpenCloset.alert 'danger', '연체료를 납부받지 않았습니다.'
+      OpenCloset.alert 'danger', '연장료를 납부받지 않았습니다.'
       return
 
     if compensation == 0 and compensation_discount != 0
@@ -441,13 +441,13 @@ $ ->
       return
 
     #
-    # 연체료 항목 추가
+    # 연장료 항목 추가
     #
     $.ajax "/api/order_detail.json",
       type: 'POST'
       data: {
         order_id:    order_id
-        name:        '연체료'
+        name:        '연장료'
         price:       clothes_price * 0.2
         final_price: late_fee
         stage:       1
@@ -455,14 +455,14 @@ $ ->
       }
       complete: (jqXHR, textStatus) ->
         #
-        # 연체료 에누리 항목 추가
+        # 연장료 에누리 항목 추가
         #
         if late_fee_discount != 0
           $.ajax "/api/order_detail.json",
             type: 'POST'
             data: {
               order_id:    order_id
-              name:        '연체료 에누리'
+              name:        '연장료 에누리'
               price:       Math.round( late_fee_discount / overdue )
               final_price: late_fee_discount
               stage:       1
@@ -562,7 +562,7 @@ $ ->
       $('#order-compensation-discount').editable 'setValue', '0'
       $('#order-compensation-pay-with').editable 'disable'
       $('#order-compensation-pay-with').editable 'setValue', ''
-      $('#order-compensation-pay-with').html '미납'
+      $('#order-compensation-pay-with').html '결제 방법 선택'
 
   #
   # 주문서 목록의 체크박스 클릭시 반납 버튼 활성화 여부 갱신

@@ -27,7 +27,7 @@
       - if ($late_fee) {
         :plain
           <span>
-            연체료 #{ commify($late_fee) }원 = #{ commify($clothes->price) }원 x #{ calc_overdue($order) }일 x 20%
+            연장료 #{ commify($late_fee) }원 = #{ commify($clothes->price) }원 x #{ calc_overdue($order) }일 x 20%
           </span>
       - }
     - }

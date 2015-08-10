@@ -185,7 +185,7 @@
                                           data-mode        = "inline"
                                           data-showbuttons = "true"
                                           data-type        = "select"
-                                          data-emptytext   = "미납"
+                                          data-emptytext   = "결제 방법 선택"
 
                                           data-value       = "#{ $order->price_pay_with || q{} }"
 
@@ -199,20 +199,20 @@
                                     %li.row
                                       .col-sm-1
                                         %i.icon-caret-right.blue
-                                      .col-sm-3.no-padding-left 연체료:
+                                      .col-sm-3.no-padding-left 연장료:
                                       .col-sm-8
                                         #late-fee
                                     %li.row.return-process
                                       .col-sm-1
                                         %i.icon-caret-right.blue
-                                      .col-sm-3.no-padding-left 연체료 에누리:
+                                      .col-sm-3.no-padding-left 연장료 에누리:
                                       .col-sm-8
                                         #late-fee-discount
                                   - }
                                   %li.row
                                     .col-sm-1
                                       %i.icon-caret-right.blue
-                                    .col-sm-3.no-padding-left 최종 연체료:
+                                    .col-sm-3.no-padding-left 최종 연장료:
                                     .col-sm-8
                                       :plain
                                         <a
@@ -224,10 +224,10 @@
                                           data-mode        = "inline"
                                           data-showbuttons = "true"
                                           data-type        = "select"
-                                          data-emptytext   = "미납"
+                                          data-emptytext   = "결제 방법 선택"
 
                                           data-value       = "#{ $order->late_fee_pay_with || q{} }"
-                                        >#{ $order->late_fee_pay_with || q{미납} }</a>
+                                        >#{ $order->late_fee_pay_with || q{결제 방법 선택} }</a>
                                       \/
                                       %strong.late-fee-final 0원
                                   %li.row.return-process
@@ -283,10 +283,10 @@
                                           data-mode        = "inline"
                                           data-showbuttons = "true"
                                           data-type        = "select"
-                                          data-emptytext   = "미납"
+                                          data-emptytext   = "결제 방법 선택"
 
                                           data-value       = "#{ $order->compensation_pay_with || q{} }"
-                                        >#{ $order->compensation_pay_with || q{미납} }</a>
+                                        >#{ $order->compensation_pay_with || q{결제 방법 선택} }</a>
                                       \/
                                       %strong.compensation-final 0원
                             /
@@ -632,7 +632,7 @@
                                 %span.red.order-price 0원
                             .col-sm-9.pull-left
                               %div
-                                %strong 연체료는 연체일 x 대여금액의 20%입니다.
+                                %strong 연장료는 연장일 x 대여금액의 20%입니다.
                               .space-6
                               :plain
                                 <a
