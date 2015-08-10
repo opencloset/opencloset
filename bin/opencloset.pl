@@ -6024,20 +6024,13 @@ get '/volunteers' => sub {
     my $status = $self->param('status') || 'reported';
 
     my $parser = $DB->storage->datetime_parser;
-    my $now    = DateTime->now;
-    my $works  = $DB->resultset('VolunteerWork')->search(
-        {
-            status             => $status,
-            activity_from_date => {
-                -between => [
-                    $parser->format_datetime( $now->clone->subtract( days => 15 ) ),
-                    $parser->format_datetime( $now->clone->add( days => 15 ) )
-                ]
-            }
-        },
-        { order_by => { -desc => 'activity_from_date' } }
-    );
-
+    my $cond
+        = $status eq 'done'
+        ? { activity_from_date => { '>' => $parser->format_datetime( DateTime->now->subtract( days => 7 ) ) } }
+        : {};
+    $cond->{status} = $status;
+    my $attr = { order_by => { -desc => 'activity_from_date' } };
+    my $works = $DB->resultset('VolunteerWork')->search( $cond, $attr );
     $self->render( works => $works );
 } => 'volunteers-list';
 
