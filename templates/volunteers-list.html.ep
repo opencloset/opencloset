@@ -34,7 +34,25 @@
         % my $age = $birthday ? sprintf("%.2d", ($today - $birthday) / ONE_YEAR) : '나이모름';
         % my $status = $work->get_column('status');
         <span class="list-group-item status-<%= $status %>" data-work-id="<%= $work->id %>">
-          <h4 class="list-group-item-heading"><%= $volunteer->name %> <small><%= $age %></small> <span class="label label-<%= $status %>"><%= $status_map{$status} %></span></h4>
+          <h4 class="list-group-item-heading"><%= $volunteer->name %> 
+            <small><%= $age %></small> 
+            <span class="label label-<%= $status %>"><%= $status_map{$status} %></span>
+            % if ($status eq 'done' && $work->need_1365) {
+              % my $done = $work->done_1365;
+              % my $from = $work->activity_from_date;
+              % my $to   = $work->activity_to_date;
+              % my $duration = $to - $from;
+              <p class="pull-right">
+                <button type="button" data-work-id="<%= $work->id %>" class="btn btn-xs btn-1365 btn-<%= $done ? 'success' : 'danger' %>">
+                  1365 
+                  %= $duration->hours . '시간'
+                  <span>
+                    %= $done ? '승인됨' : '승인대기중'
+                  </span>
+                </button>
+              </p>
+            % }
+          </h4>
           <p class="list-group-item-text">
             <mark><%= sprintf "%02d", $from->month %>-<%= sprintf "%02d", $from->day %></mark>
             <span>
