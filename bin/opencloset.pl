@@ -4981,8 +4981,9 @@ get '/order' => sub {
     # response
     #
     $self->stash(
-        order_list => $rs,
-        pageset    => $pageset,
+        order_list    => $rs,
+        pageset       => $pageset,
+        search_status => $search_params{status} || q{},
     );
 
     $self->respond_to( html => { status => 200 } );

@@ -85,7 +85,7 @@
               -   if ( $status eq '대여중' ) {
               -     $status .= '(연장) ' . commify($late_fee) . '원' if $overdue;
               -   }
-              -   elsif ( $status eq '반납' ) {
+              -   elsif ( $search_status eq 'unpaid' && $status eq '반납' ) {
               -     my $unpaid = $order->get_column('sum_final_price');
               -     $status .= '(미납) ' . commify($unpaid) . '원' if $unpaid;
               -   }
@@ -93,7 +93,7 @@
               %span.label.order-status{ 'data-order-status' => "#{ $order->status ? $order->status->name : q{} }" }= $status || '상태없음'
               - my $sms_label;
               - my $sms_str;
-              - if ( $order->status->name eq '반납' ) {
+              - if ( $search_status eq 'unpaid' && $order->status->name eq '반납' ) {
               -   my $unpaid = $order->get_column('sum_final_price');
               -   if ($unpaid) {
               -     $sms_label = '미납 문자 전송';
