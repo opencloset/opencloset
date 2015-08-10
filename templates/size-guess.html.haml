@@ -3,6 +3,8 @@
 - layout 'default', page_id => $_id;
 - title meta_text($_id);
 
+- my %gender_str = ( male => '남성', female => '여성' );
+
 .search
   - my $action_url = url_for("/size/guess");
   %form.form-horizontal#form-size-guess{ :role => 'form', :method => 'post', :action => "#{ $action_url }" }
@@ -48,6 +50,72 @@
 
 - if ( $gender && $gender =~ m/^(male|female)$/ && $height && $weight ) {
 -   $osg_db->gender($gender);
+  %table.table.table-bordered.table-condensed.table-striped
+    %thead
+      %tr
+        %th{ :rowspan => "2" }
+        %th.center{ :colspan => "9" }= int($height) - 1
+        %th.center{ :colspan => "9" }= int($height)
+        %th.center{ :colspan => "9" }= int($height) + 1
+      %tr
+        %td.center 중동
+        %td.center 윗배
+        %td.center 가슴
+        %td.center 팔
+        %td.center 엉덩이
+        %td.center 허벅지
+        %td.center 허리
+        %td.center 다리
+        %td.center 발
+
+        %td.center 중동
+        %td.center 윗배
+        %td.center 가슴
+        %td.center 팔
+        %td.center 엉덩이
+        %td.center 허벅지
+        %td.center 허리
+        %td.center 다리
+        %td.center 발
+
+        %td.center 중동
+        %td.center 윗배
+        %td.center 가슴
+        %td.center 팔
+        %td.center 엉덩이
+        %td.center 허벅지
+        %td.center 허리
+        %td.center 다리
+        %td.center 발
+    %tbody
+      -   for my $w ( $weight - 1 .. $weight + 1 ) {
+      %tr
+        %th.text-right= $w
+        - for my $h ( $height - 1 .. $height + 1 ) {
+        -   $osg_db->height( int $h );
+        -   $osg_db->weight( int $w );
+        -   my $r = $osg_db->guess;
+        -   for ( qw/ belly topbelly bust arm thigh waist hip leg foot / ) {
+        -     $r->{$_} = $r->{$_} ? sprintf('%.1f', $r->{$_}) : 'N/A';
+        -   }
+        -   my $class = ( int($w) == int($weight) && int($h) == int($height) ) ? "success" : q{};
+          %td.text-right{ :class => "#{$class}" }= $r->{belly}
+          %td.text-right{ :class => "#{$class}" }= $r->{topbelly}
+          %td.text-right{ :class => "#{$class}" }= $r->{bust}
+          %td.text-right{ :class => "#{$class}" }= $r->{arm}
+          %td.text-right{ :class => "#{$class}" }= $r->{hip}
+          %td.text-right{ :class => "#{$class}" }= $r->{thigh}
+          %td.text-right{ :class => "#{$class}" }= $r->{waist}
+          %td.text-right{ :class => "#{$class}" }= $r->{leg}
+          %td.text-right{ :class => "#{$class}" }= $r->{foot}
+        -   }
+        - }
+- }
+
+.space-4
+
+- if ( $gender && $gender =~ m/^(male|female)$/ && $height && $weight ) {
+-   $osg_db->gender($gender);
 -   $osg_db->height( int $height );
 -   $osg_db->weight( int $weight );
 -   $osg_bodykit->gender($gender);
@@ -56,11 +124,10 @@
 -   my $ret1 = $osg_db->guess;
 -   my $ret2 = $osg_bodykit->guess;
 -   for my $r ( $ret1, $ret2 ) {
--     for ( qw/ belly topbelly bust arm thigh waist leg foot / ) {
+-     for ( qw/ belly topbelly bust arm thigh waist hip leg foot / ) {
 -       $r->{$_} = $r->{$_} ? sprintf('%.1f', $r->{$_}) : 'N/A';
 -     }
 -   }
--   my %gender_str = ( male => '남성', female => '여성' );
   %table.table.table-bordered.table-condensed
     %thead
       %tr
@@ -69,6 +136,7 @@
         %th.text-right 윗배
         %th.text-right 가슴
         %th.text-right 팔
+        %th.text-right 엉덩이
         %th.text-right 허벅지
         %th.text-right 허리
         %th.text-right 다리
@@ -93,6 +161,10 @@
           %br
           = $ret1->{arm}
         %td.text-right
+          = $ret1->{count}{hip}
+          %br
+          = $ret1->{hip}
+        %td.text-right
           = $ret1->{count}{thigh}
           %br
           = $ret1->{thigh}
@@ -114,6 +186,7 @@
         %td.text-right= $ret2->{topbelly}
         %td.text-right= $ret2->{bust}
         %td.text-right= $ret2->{arm}
+        %td.text-right= $ret2->{hip}
         %td.text-right= $ret2->{thigh}
         %td.text-right= $ret2->{waist}
         %td.text-right= $ret2->{leg}

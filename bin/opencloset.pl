@@ -6021,6 +6021,7 @@ any '/size/guess' => sub {
         'DB',
         _time_zone => app->config->{timezone},
         _schema    => $DB,
+        _range     => 0,
     );
 
     my $osg_bodykit = OpenCloset::Size::Guess->new(
