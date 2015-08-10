@@ -91,18 +91,36 @@
               -   }
               - }
               %span.label.order-status{ 'data-order-status' => "#{ $order->status ? $order->status->name : q{} }" }= $status || '상태없음'
-              - use DateTime;
-              - my $dt_today = DateTime->now( time_zone => $timezone );
-              - if ( $overdue && $order->status->name eq '대여중' && $dt_today > $order->user_target_date ) {
-              -   my $sms_str = sprintf(
-              -     '[열린옷장] %s님, 대여기간이 %d일 연장되었습니다. 확인하시고 반납 바랍니다.',
-              -     $order->user->name,
-              -     $overdue,
-              -     commify($late_fee),
-              -   );
+              - my $sms_label;
+              - my $sms_str;
+              - if ( $order->status->name eq '반납' ) {
+              -   my $unpaid = $order->get_column('sum_final_price');
+              -   if ($unpaid) {
+              -     $sms_label = '미납 문자 전송';
+              -     $sms_str   = sprintf(
+              -       '[열린옷장] %s님, %d일 연장으로 인한 미납 금액 %s원 입금바랍니다. 국민은행 205701-04-269524',
+              -       $order->user->name,
+              -       $overdue,
+              -       commify($unpaid),
+              -     );
+              -   }
+              - }
+              - else {
+              -   use DateTime;
+              -   my $dt_today = DateTime->now( time_zone => $timezone );
+              -   if ( $overdue && $order->status->name eq '대여중' && $dt_today > $order->user_target_date ) {
+              -     $sms_label = '연장 문자 전송';
+              -     $sms_str   = sprintf(
+              -       '[열린옷장] %s님, 대여기간이 %d일 연장되었습니다. 확인하시고 반납 바랍니다.',
+              -       $order->user->name,
+              -       $overdue,
+              -       commify($late_fee),
+              -     );
+              -   }
+              - }
+              - if ( $sms_label && $sms_str ) {
                 %br
-                %a{ :href => "#{ url_for('/sms')->query( to => $order->user->user_info->phone, msg => $sms_str ) }" }
-                  연장 문자 전송
+                %a{ :href => "#{ url_for('/sms')->query( to => $order->user->user_info->phone, msg => $sms_str ) }" }= $sms_label
               - }
           %td
             = $order->rental_date ? $order->rental_date->ymd : q{}
