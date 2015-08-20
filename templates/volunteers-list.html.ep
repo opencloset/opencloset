@@ -1,0 +1,98 @@
+% use utf8;
+% my $_id = 'volunteer';
+% layout 'default', page_id => $_id, active_id => 'volunteer',
+%   breadcrumbs => [
+%     { text => meta_text('volunteer'), link => url_for( meta_link('volunteer') ) },
+%     { text => meta_text($_id)      },
+%   ],
+%   jses => ['/js/volunteers-list.js'];
+% title meta_text($_id);
+% my %status_map = (reported => '신청', approved => '승인', done => '방문', canceled => '취소');
+
+% use Time::Piece;
+% use Time::Seconds;
+% use DateTime;
+
+<div class="row">
+  <div class="col-xs-4 col-sm-4 col-md-4">
+    <ul class="list-inline">
+      <li><a href="<%= url_for('/volunteers')->query(status => 'reported') %>"><span class="label label-reported">신청</span></a></li>
+      <li><a href="<%= url_for('/volunteers')->query(status => 'approved') %>"><span class="label label-approved">승인</span></a></li>
+      <li><a href="<%= url_for('/volunteers')->query(status => 'done') %>"><span class="label label-done">방문</span></a></li>
+      <li><a href="<%= url_for('/volunteers')->query(status => 'canceled') %>"><span class="label label-canceled">취소</span></a></li>
+    </ul>
+    <hr class="colorgraph">
+    <div class="list-group">
+      % my $volunteer_uri = $config->{volunteer_uri};
+      % while (my $work = $works->next) {
+        % my $volunteer = $work->volunteer;
+        % my $from = $work->activity_from_date;
+        % my $to   = $work->activity_to_date;
+        % my $birthdate = $volunteer->birth_date;
+        % my $birthday = $birthdate ? Time::Piece->strptime( $birthdate->ymd, '%Y-%m-%d' ) : '';
+        % my $today    = Time::Piece->strptime( DateTime->now->ymd, '%Y-%m-%d' );
+        % my $age = $birthday ? sprintf("%.2d", ($today - $birthday) / ONE_YEAR) : '나이모름';
+        % my $status = $work->get_column('status');
+        <span class="list-group-item status-<%= $status %>" data-work-id="<%= $work->id %>">
+          <h4 class="list-group-item-heading"><%= $volunteer->name %> 
+            <small><%= $age %></small> 
+            <span class="label label-<%= $status %>"><%= $status_map{$status} %></span>
+            % if ($status eq 'done' && $work->need_1365) {
+              % my $done = $work->done_1365;
+              % my $from = $work->activity_from_date;
+              % my $to   = $work->activity_to_date;
+              % my $duration = $to - $from;
+              <p class="pull-right">
+                <button type="button" data-work-id="<%= $work->id %>" class="btn btn-xs btn-1365 btn-<%= $done ? 'success' : 'danger' %>">
+                  1365 
+                  %= $duration->hours . '시간'
+                  <span>
+                    %= $done ? '승인됨' : '승인대기중'
+                  </span>
+                </button>
+              </p>
+            % }
+          </h4>
+          <p class="list-group-item-text">
+            <mark><%= sprintf "%02d", $from->month %>-<%= sprintf "%02d", $from->day %></mark>
+            <span>
+              <time><%= sprintf "%02d", $from->hour %>:00</time>
+              ~
+              <time><%= sprintf "%02d", $to->hour %>:00</time>
+            </span>
+            <dl>
+              <dt>신청일</dt>
+              <dd><%= $work->create_date->ymd %></dd>
+              % my @activities = split /\|/, $work->activity;
+              <dt>관심있는 활동</dt>
+              <dd>
+                <%= join(', ', @activities) %>
+              </dd>
+              <dd>
+                % if ($work->status eq 'reported') {
+                  <button type="button" data-work-id="<%= $work->id %>" class="btn btn-success btn-sm btn-status" data-status="approved">승인</button>
+                % } elsif ($work->status eq 'approved') {
+                  <button type="button" data-work-id="<%= $work->id %>" class="btn btn-info btn-sm btn-status" data-status="done">방문</button>
+                % }
+                % if ($work->status ne 'canceled') {
+                  <button type="button" data-work-id="<%= $work->id %>" class="btn btn-danger btn-sm btn-status" data-status="canceled">취소</button>
+                % }
+                <a href="<%= $volunteer_uri %>/works/<%= $work->id %>" target="_blank" class="btn btn-default btn-sm">자세히</a>
+                <a href="<%= $volunteer_uri %>/works/<%= $work->id %>/edit?authcode=<%= $work->authcode %>" target="_blank" class="btn btn-default btn-sm">수정</a>
+              </dd>
+            </dl>
+          </p>
+        </span>
+      % }
+      % unless ($works->count) {
+        % my $status = param('status') || 'reported';
+        <span class="list-group-item"><span class="label label-<%= $status %>"><%= $status_map{$status} %></span> 신청서가 없습니다</span>
+      % }
+    </div>
+  </div>
+  <div class="col-xs-8 col-sm-8 col-md-8">
+    <div class="text-center">
+      <iframe src="https://www.google.com/calendar/embed?height=600&amp;wkst=1&amp;bgcolor=%23FFFFFF&amp;src=volunteer%40theopencloset.net&amp;color=%231B887A&amp;ctz=Asia%2FSeoul" style=" border-width:0 " width="800" height="600" frameborder="0" scrolling="no"></iframe>
+    </div>
+  </div>
+</div>

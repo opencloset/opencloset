@@ -6019,6 +6019,21 @@ get '/stat/status/:ymd' => sub {
 
 get '/shortcut' => 'shortcut';
 
+get '/volunteers' => sub {
+    my $self = shift;
+    my $status = $self->param('status') || 'reported';
+
+    my $parser = $DB->storage->datetime_parser;
+    my $cond
+        = $status eq 'done'
+        ? { activity_from_date => { '>' => $parser->format_datetime( DateTime->now->subtract( days => 7 ) ) } }
+        : {};
+    $cond->{status} = $status;
+    my $attr = { order_by => { -desc => 'activity_from_date' } };
+    my $works = $DB->resultset('VolunteerWork')->search( $cond, $attr );
+    $self->render( works => $works );
+} => 'volunteers-list';
+
 any '/size/guess' => sub {
     my $self   = shift;
 
