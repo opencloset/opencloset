@@ -2,9 +2,10 @@ $ ->
   volunteer_uri = CONFIG.volunteer_uri
   $('.btn-status:not(.disabled)').on 'click', ->
     $this  = $(@)
-    $this.addClass('disabled')
     workId = $this.data('work-id')
     status = $this.data('status')
+    return unless confirm "상태를 변경하시겠습니까? -> #{status}"
+    $this.addClass('disabled')
     $.ajax "#{volunteer_uri}/works/#{workId}/status",
       type: 'PUT'
       crossDomain: true
