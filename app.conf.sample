@@ -288,5 +288,5 @@ $db_opts->{AutoCommit} //= 1;
     #
     # volunteer
     #
-    volunteer_uri => 'http://volunteer.theopencloset.net:5000',
+    volunteer_uri => 'http://localhost:5000',
 };
