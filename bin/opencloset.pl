@@ -5638,20 +5638,30 @@ get '/stat/clothes/amount' => sub {
         }
     );
 
+    my @available_status_ids = (
+        1, # 대여가능
+        2, # 대여중
+        5, # 세탁
+        6, # 수선
+        9, # 반납
+    );
+
     my @amount;
     while (my $clothes = $rs->next) {
         my $category = $clothes->category;
 
         my $m_quantity = $DB->resultset('Clothes')->search(
             {
-                category => $category,
-                gender   => 'male',
+                category  => $category,
+                gender    => 'male',
+                status_id => \@available_status_ids,
             },
         );
         my $f_quantity = $DB->resultset('Clothes')->search(
             {
-                category => $category,
-                gender   => 'female',
+                category  => $category,
+                gender    => 'female',
+                status_id => \@available_status_ids,
             },
         );
 
@@ -5659,14 +5669,14 @@ get '/stat/clothes/amount' => sub {
             {
                 category  => $category,
                 gender    => 'male',
-                status_id => 2,
+                status_id => 2, # 대여중
             }
         );
         my $f_rental = $DB->resultset('Clothes')->search(
             {
                 category  => $category,
                 gender    => 'female',
-                status_id => 2,
+                status_id => 2, # 대여중
             }
         );
 
