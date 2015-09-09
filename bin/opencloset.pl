@@ -6029,7 +6029,7 @@ get '/volunteers' => sub {
         ? { activity_from_date => { '>' => $parser->format_datetime( DateTime->now->subtract( days => 7 ) ) } }
         : {};
     $cond->{status} = $status;
-    my $attr = { order_by => { -desc => 'activity_from_date' } };
+    my $attr = { order_by => 'activity_from_date' };
     my $works = $DB->resultset('VolunteerWork')->search( $cond, $attr );
     $self->render( works => $works );
 } => 'volunteers-list';
