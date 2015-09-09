@@ -8,6 +8,6 @@
 %   my $v        = $sidebar->{meta}{$k};
 %   my $shortcut = $v->{shortcut};
 %   my $text     = $v->{text};
-  <li> <kbd><%= $shortcut %></kbd> <%= $text %> </li>
+  <li> <kbd>ctrl+<%= $shortcut %></kbd> <%= $text %> </li>
 % }
 </ul>
