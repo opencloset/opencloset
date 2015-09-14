@@ -4455,6 +4455,10 @@ get '/user' => sub {
     my $q     = $self->param('q');
     my $staff = $self->param('staff');
 
+    if ($q && $q =~ m/^[0-9]{3}-?[0-9]{3,4}-?[0-9]{3,4}$/) {
+        $q =~ s/-//g;
+    }
+
     my $cond1 = $q
         ? [
         { 'name'               => { like => "%$q%" } },
