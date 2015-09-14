@@ -3110,6 +3110,7 @@ group {
             }), return;
         }
 
+        $params{to} =~ s/-//g;
         my $sms = $DB->resultset('SMS')->create({
             %params,
             from => app->config->{sms}{ app->config->{sms}{driver} }{_from},
