@@ -39,6 +39,7 @@
     <hr class="colorgraph">
     <div class="list-group">
       % my $volunteer_uri = $config->{volunteer_uri};
+      % my $schema        = $works->result_source->schema;
       % while (my $work = $works->next) {
         % my $volunteer = $work->volunteer;
         % my $from = $work->activity_from_date;
@@ -66,6 +67,10 @@
                   </span>
                 </button>
               </p>
+            % }
+            % my $nth = $schema->resultset('VolunteerWork')->count({ volunteer_id => $work->volunteer_id });
+            % if ($nth != 1) {
+              <p><small><%= $nth %>번째 방문</small></p>
             % }
           </h4>
           <p class="list-group-item-text">
