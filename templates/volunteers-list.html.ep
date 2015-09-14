@@ -15,6 +15,21 @@
 
 <div class="row">
   <div class="col-xs-4 col-sm-4 col-md-4">
+    <div class="search">
+      <form method="GET">
+        <div class="input-group">
+          <input type="text" name="q" value="<%= param('q') %>" placeholder="이름, 전화번호, 이메일" class="form-control">
+          <span class="input-group-btn">
+            <button type="button" class="btn btn-default btn-sm">
+              <i class="bigger-110 icon-search">검색</i>
+            </button>
+          </span>
+        </div>
+      </form>
+    </div>
+
+    <hr>
+
     <ul class="list-inline">
       <li><a href="<%= url_for('/volunteers')->query(status => 'reported') %>"><span class="label label-reported">신청</span></a></li>
       <li><a href="<%= url_for('/volunteers')->query(status => 'approved') %>"><span class="label label-approved">승인</span></a></li>
