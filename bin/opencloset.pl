@@ -1247,6 +1247,15 @@ helper convert_sec_to_hms => sub {
     return $hms;
 };
 
+helper phone_format => sub {
+    my ($self, $phone) = @_;
+    return $phone if $phone !~ m/^[0-9]{10,11}$/;
+
+    $phone =~ s/(\d{3})(\d{4})/$1-$2/;
+    $phone =~ s/(\d{4})(\d{3,4})/$1-$2/;
+    return $phone;
+};
+
 #
 # csv section
 #
