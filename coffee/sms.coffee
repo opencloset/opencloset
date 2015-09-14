@@ -57,7 +57,7 @@ $ ->
       OpenCloset.alert 'danger', '휴대전화를 입력해주세요.'
       $('input[name=to]').focus()
       return
-    unless /^\d+$/.test( to )
+    unless /^\d{3}-?\d{3,4}-?\d{3,4}$/.test( to )
       OpenCloset.alert 'danger', '유효하지 않은 휴대전화입니다.'
       $('input[name=to]').focus()
       return

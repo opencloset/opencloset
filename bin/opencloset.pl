@@ -3095,7 +3095,7 @@ group {
         # validate params
         #
         my $v = $self->create_validator;
-        $v->field('to')->required(1)->regexp(qr/^\d+$/);
+        $v->field('to')->required(1)->regexp(qr/^[0-9]{3}-?[0-9]{3,4}-?[0-9]{3,4}$/);
         $v->field('text')->required(1)->regexp(qr/^(\s|\S)+$/);
         $v->field('status')->in(qw/ pending sending sent /);
 
@@ -4454,6 +4454,10 @@ get '/user' => sub {
     my $s     = $self->param('s') || app->config->{entries_per_page};
     my $q     = $self->param('q');
     my $staff = $self->param('staff');
+
+    if ($q && $q =~ m/^[0-9]{3}-?[0-9]{3,4}-?[0-9]{3,4}$/) {
+        $q =~ s/-//g;
+    }
 
     my $cond1 = $q
         ? [
