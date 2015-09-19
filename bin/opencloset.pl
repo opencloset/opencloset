@@ -1303,6 +1303,67 @@ helper user_avg_diff => sub {
     return \%data;
 };
 
+helper count_visitor => sub {
+    my ( $self, $start_dt, $end_dt, $cb ) = @_;
+
+    my $dtf        = $DB->storage->datetime_parser;
+    my $booking_rs = $DB->resultset('Booking')->search(
+        {
+            date => {
+                -between => [
+                    $dtf->format_datetime($start_dt),
+                    $dtf->format_datetime($end_dt),
+                ],
+            },
+        },
+        {
+            order_by => { -asc => 'date' },
+        },
+    );
+
+    my %count = (
+        all        => { total => 0, male => 0, female => 0 },
+        visited    => { total => 0, male => 0, female => 0 },
+        notvisited => { total => 0, male => 0, female => 0 },
+        bestfit    => { total => 0, male => 0, female => 0 },
+        loanee     => { total => 0, male => 0, female => 0 },
+    );
+    while ( my $booking = $booking_rs->next ) {
+        for my $order ( $booking->orders ) {
+            my $gender = $order->user->user_info->gender;
+
+            ++$count{all}{total};
+            ++$count{all}{$gender};
+
+            if ( $order->rental_date ) {
+                ++$count{loanee}{total};
+                ++$count{loanee}{$gender};
+            }
+
+            if ( $order->bestfit ) {
+                ++$count{bestfit}{total};
+                ++$count{bestfit}{$gender};
+            }
+
+            use feature qw( switch );
+            use experimental qw( smartmatch );
+            given ( $order->status_id ) {
+                when (/^12|14$/) {
+                    ++$count{notvisited}{total};
+                    ++$count{notvisited}{$gender};
+                }
+            }
+
+            $cb->( $booking, $order, $gender ) if $cb && ref($cb) eq 'CODE';
+        }
+    }
+    $count{visited}{total}  = $count{all}{total}  - $count{notvisited}{total};
+    $count{visited}{male}   = $count{all}{male}   - $count{notvisited}{male};
+    $count{visited}{female} = $count{all}{female} - $count{notvisited}{female};
+
+    return \%count;
+};
+
 #
 # csv section
 #
@@ -3905,54 +3966,9 @@ group {
             day       => $3,
         );
         my $dt_end = $dt_start->clone->add( hours => 24, seconds => -1 );
+        my $count  = $self->count_visitor( $dt_start, $dt_end );
 
-        my $dtf        = $DB->storage->datetime_parser;
-        my $booking_rs = $DB->resultset('Booking')->search(
-            {
-                date => {
-                    -between => [
-                        $dtf->format_datetime($dt_start),
-                        $dtf->format_datetime($dt_end),
-                    ],
-                },
-            },
-            {
-                order_by => { -asc => 'date' },
-            },
-        );
-
-        my %count = (
-            all        => { total => 0, male => 0, female => 0 },
-            visited    => { total => 0, male => 0, female => 0 },
-            notvisited => { total => 0, male => 0, female => 0 },
-            bestfit    => { total => 0, male => 0, female => 0 },
-        );
-        while ( my $booking = $booking_rs->next ) {
-            for my $order ( $booking->orders ) {
-                my $gender = $order->user->user_info->gender;
-
-                ++$count{all}{total};
-                ++$count{all}{$gender};
-                if ( $order->bestfit ) {
-                    ++$count{bestfit}{total};
-                    ++$count{bestfit}{$gender};
-                }
-
-                use feature qw( switch );
-                use experimental qw( smartmatch );
-                given ( $order->status_id ) {
-                    when (/^12|14$/) {
-                        ++$count{notvisited}{total};
-                        ++$count{notvisited}{$gender};
-                    }
-                }
-            }
-        }
-        $count{visited}{total}  = $count{all}{total}  - $count{notvisited}{total};
-        $count{visited}{male}   = $count{all}{male}   - $count{notvisited}{male};
-        $count{visited}{female} = $count{all}{female} - $count{notvisited}{female};
-
-        $self->respond_to( json => { status => 200, json => \%count } );
+        $self->respond_to( json => { status => 200, json => $count } );
 
     }
 
@@ -5625,26 +5641,21 @@ get '/timetable/:ymd' => sub {
         return;
     }
 
-    my $dtf        = $DB->storage->datetime_parser;
-    my $booking_rs = $DB->resultset('Booking')->search(
-        {
-            date => {
-                -between => [
-                    $dtf->format_datetime($dt_start),
-                    $dtf->format_datetime($dt_end),
-                ],
-            },
-        },
-        {
-            order_by => { -asc => 'date' },
-        },
-    );
+    my %orders;
+    my $count = $self->count_visitor( $dt_start, $dt_end, sub {
+        my ( $booking, $order, $gender ) = @_;
+
+        my $hm = sprintf '%02d:%02d', $booking->date->hour, $booking->date->minute;
+        $orders{$hm}{$gender} = [] unless $orders{$hm}{$gender};
+        push @{ $orders{$hm}{$gender} }, $order;
+    });
 
     $self->render(
         'timetable',
-        booking_rs => $booking_rs,
-        dt_start   => $dt_start,
-        dt_end     => $dt_end,
+        count    => $count,
+        orders   => \%orders,
+        dt_start => $dt_start,
+        dt_end   => $dt_end,
     );
 };
 
