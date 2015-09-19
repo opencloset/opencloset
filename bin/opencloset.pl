@@ -6367,5 +6367,101 @@ any '/size/guess' => sub {
     );
 };
 
+get '/stat/visitor' => sub {
+    my $self = shift;
+
+    my $dt_today = DateTime->now( time_zone => app->config->{timezone} );
+    $self->redirect_to( $self->url_for( '/stat/visitor/' . $dt_today->ymd ) );
+};
+
+get '/stat/visitor/:ymd' => sub {
+    my $self = shift;
+
+    #
+    # fetch params
+    #
+    my %params = $self->get_params(qw/ ymd /);
+
+    unless ( $params{ymd} ) {
+        app->log->warn("ymd is required");
+        $self->redirect_to( $self->url_for('/stat/status') );
+        return;
+    }
+
+    unless ( $params{ymd} =~ m/^(\d{4})-(\d{2})-(\d{2})$/ ) {
+        app->log->warn("invalid ymd format: $params{ymd}");
+        $self->redirect_to( $self->url_for('/stat/status') );
+        return;
+    }
+
+    my $dt = try {
+        DateTime->new(
+            time_zone => app->config->{timezone},
+            year      => $1,
+            month     => $2,
+            day       => $3,
+        );
+    };
+    unless ($dt) {
+        app->log->warn("cannot create datetime object");
+        $self->redirect_to( $self->url_for('/stat/status') );
+        return;
+    }
+
+    my $dt_start = try { $dt->clone->truncate( to => 'day' )->add( hours => 24 * 2 * -1 ); };
+    unless ($dt_start) {
+        app->log->warn("cannot create start datetime object");
+        $self->redirect_to( $self->url_for('/stat/status') );
+        return;
+    }
+
+    my $dt_end = try { $dt->clone->truncate( to => 'day' )->add( hours => 24 * 3, seconds => -1 ); };
+    unless ($dt_end) {
+        app->log->warn("cannot create end datetime object");
+        $self->redirect_to( $self->url_for('/stat/status') );
+        return;
+    }
+
+    my $basis_dt = try {
+        DateTime->new(
+            time_zone => app->config->{timezone},
+            year      => 2015,
+            month     => 5,
+            day       => 29
+        );
+    };
+    my $online_order_hour = $dt >= $basis_dt ? 22 : 19;
+
+    my $dtf      = $DB->storage->datetime_parser;
+    my $order_rs = $DB->resultset('Order')->search(
+        #
+        # do not query all data for specific month due to speed
+        #
+        #\[ 'DATE_FORMAT(`booking`.`date`,"%Y-%m") = ?', $dt->strftime("%Y-%m") ],
+        {
+            -and => [
+                'booking.date' => {
+                    -between => [
+                        $dtf->format_datetime($dt_start),
+                        $dtf->format_datetime($dt_end),
+                    ],
+                },
+                \[ 'HOUR(`booking`.`date`) != ?', $online_order_hour ],
+            ]
+        },
+        {
+            join     => [qw/ booking /],
+            order_by => { -asc => 'date' },
+            prefetch => 'booking',
+        },
+    );
+
+    $self->render(
+        'stat-visitor',
+        order_rs => $order_rs,
+        dt       => $dt,
+    );
+};
+
 app->secrets( app->defaults->{secrets} );
 app->start;

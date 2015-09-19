@@ -1,0 +1,120 @@
+- use utf8;
+- my $_id = 'stat-visitor';
+- layout 'default',
+-   page_id     => $_id,
+-   jses  => [ '/lib/bootstrap3-editable/js/bootstrap-editable.min.js' ],
+-   csses => [ '/lib/bootstrap3-editable/css/bootstrap-editable.css'   ],
+-   ;
+- title meta_text($_id);
+
+- use List::Util;
+- use Statistics::Basic;
+
+- my @status_names = (qw/대기 치수측정 의류준비 탈의 수선 포장 결제/);
+- my %status;
+- my %status_mean;
+- while ( my $order = $order_rs->next ) {
+-   my %analyze = $order->analyze_order_status_logs;
+-   my $booking_date = $order->booking->date->ymd;
+-   push @{ $status{$booking_date} } , { order => $order, analyze => \%analyze };
+-   push @{ $status_mean{$booking_date}{$_} }, $analyze{elapsed_time}{$_} for @status_names;
+- }
+
+.search
+  %form#search-form
+    .input-group
+      %input#query.form-control{ :placeholder => '날짜를 고르세요', 'data-date-format' => 'yyyy-mm-dd' }
+
+.space-8
+
+#status-day
+  %h2
+    상태별 처리 시간:
+    %span.date= $dt->ymd;
+
+  .space-8
+
+  %table.table.table-striped.table-bordered.table-hover
+    %thead
+      %tr
+        %th{ :rowspan => "2" } 날짜
+        %th.center{ :colspan => "7" } 평균 처리시간
+        %th{ :rowspan => "2" } Total
+      %tr
+        %th 대기
+        %th 치수측정
+        %th 의류준비
+        %th 탈의
+        %th 수선
+        %th 포장
+        %th 결제
+    %tbody
+      - for my $day ( sort keys %status ) {
+        %tr
+          %td
+            - if ( $day eq $dt->ymd ) {
+              %span.date
+                %a{ :href => "#{ url_for( '/order' )->query('booking_ymd' => $day ) }" }= $day
+            - }
+            - else {
+              %span
+                %a{ :href => "#{ url_for( '/order' )->query('booking_ymd' => $day ) }" }= $day
+            - }
+          - my $total = 0;
+          - for my $status_name (@status_names) {
+          -   my @taken_times;
+          -   for ( @{ $status_mean{$day}{$status_name} } ) {
+          -     next unless defined;
+          -     next unless $_ > 0;
+          -     next if     $_ < 60 && $status_name =~ m/^(치수측정|의류준비|탈의|수선|포장|결제)$/; # GH 440
+          -     push @taken_times, $_;
+          -   }
+          -   my $avg_sec = Statistics::Basic::mean( @taken_times )->query;
+          -   if ($avg_sec) {
+            %td= convert_sec_to_hms($avg_sec);
+          -     $total += $avg_sec;
+          -   }
+          -   else {
+            %td
+          -   }
+          - }
+          %td= convert_sec_to_hms($total);
+      - }
+
+  .space-4
+
+  %table.table.table-striped.table-bordered.table-hover
+    %thead
+      %tr
+        %th{ :rowspan => "2" } #
+        %th{ :rowspan => "2" } 주문번호
+        %th{ :rowspan => "2" } 방문자명
+        %th.center{ :colspan => "7" } 처리시간
+        %th{ :rowspan => "2" } Total
+      %tr
+        %th 대기
+        %th 치수측정
+        %th 의류준비
+        %th 탈의
+        %th 수선
+        %th 포장
+        %th 결제
+    %tbody
+      - my $count = 0;
+      - for my $log ( @{ $status{$dt->ymd} }) {
+        - my $order = $log->{order};
+        - my %elapsed_time = %{ $log->{analyze}->{elapsed_time} };
+        - my $total = List::Util::sum0 grep { defined } @elapsed_time{@status_names};
+        - next unless $total;
+        %tr
+          %td= ++$count
+          %td
+            %a{ :href => "#{ url_for( '/order/' . $order->id ) }" }= $order->id
+          %td
+            %a{ :href => "#{ url_for( '/user/' . $order->user->id ) }" }= $order->user->name
+          - for my $status_name (@status_names) {
+            - my $taken_sec = $elapsed_time{$status_name};
+            %td= $taken_sec ? convert_sec_to_hms($taken_sec) : q{};
+          - }
+          %td= convert_sec_to_hms($total);
+      - }
