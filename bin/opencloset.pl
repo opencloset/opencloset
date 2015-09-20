@@ -1317,6 +1317,11 @@ helper count_visitor => sub {
             },
         },
         {
+            prefetch       => {
+                'orders' => {
+                    'user' => 'user_info'
+                }
+            },
             order_by => { -asc => 'date' },
         },
     );
@@ -6148,13 +6153,13 @@ get '/stat/status/:ymd' => sub {
 
     unless ( $params{ymd} ) {
         app->log->warn("ymd is required");
-        $self->redirect_to( $self->url_for('/stat/status') );
+        $self->redirect_to( $self->url_for('/stat/visitor') );
         return;
     }
 
     unless ( $params{ymd} =~ m/^(\d{4})-(\d{2})-(\d{2})$/ ) {
         app->log->warn("invalid ymd format: $params{ymd}");
-        $self->redirect_to( $self->url_for('/stat/status') );
+        $self->redirect_to( $self->url_for('/stat/visitor') );
         return;
     }
 
@@ -6404,61 +6409,54 @@ get '/stat/visitor/:ymd' => sub {
     };
     unless ($dt) {
         app->log->warn("cannot create datetime object");
-        $self->redirect_to( $self->url_for('/stat/status') );
+        $self->redirect_to( $self->url_for('/stat/visitor') );
         return;
     }
 
-    my $dt_start = try { $dt->clone->truncate( to => 'day' )->add( hours => 24 * 2 * -1 ); };
+    my $dt_start = try { $dt->clone->truncate( to => 'day' ) };
     unless ($dt_start) {
         app->log->warn("cannot create start datetime object");
-        $self->redirect_to( $self->url_for('/stat/status') );
+        $self->redirect_to( $self->url_for('/stat/visitor') );
         return;
     }
 
-    my $dt_end = try { $dt->clone->truncate( to => 'day' )->add( hours => 24 * 3, seconds => -1 ); };
+    my $dt_end = try { $dt->clone->truncate( to => 'day' )->add( days => 1, seconds => -1 ); };
     unless ($dt_end) {
         app->log->warn("cannot create end datetime object");
-        $self->redirect_to( $self->url_for('/stat/status') );
+        $self->redirect_to( $self->url_for('/stat/visitor') );
         return;
     }
 
-    my $basis_dt = try {
-        DateTime->new(
-            time_zone => app->config->{timezone},
-            year      => 2015,
-            month     => 5,
-            day       => 29
-        );
-    };
-    my $online_order_hour = $dt >= $basis_dt ? 22 : 19;
+    # -2 ~ +2 days from now
+    my %count;
+    my $from = $dt->clone->truncate( to => 'day' )->add( days => -2 );
+    my $to   = $dt->clone->truncate( to => 'day' )->add( days =>  2 );
+    for ( $from ; $from <= $to ; $from->add( days => 1 ) ) {
+        my $from = $from->clone->truncate( to => 'day' );
+        my $to   = $from->clone->truncate( to => 'day' )->add( days => 1, seconds => -1 );
 
-    my $dtf      = $DB->storage->datetime_parser;
-    my $order_rs = $DB->resultset('Order')->search(
-        #
-        # do not query all data for specific month due to speed
-        #
-        #\[ 'DATE_FORMAT(`booking`.`date`,"%Y-%m") = ?', $dt->strftime("%Y-%m") ],
-        {
-            -and => [
-                'booking.date' => {
-                    -between => [
-                        $dtf->format_datetime($dt_start),
-                        $dtf->format_datetime($dt_end),
-                    ],
-                },
-                \[ 'HOUR(`booking`.`date`) != ?', $online_order_hour ],
-            ]
-        },
-        {
-            join     => [qw/ booking /],
-            order_by => { -asc => 'date' },
-            prefetch => 'booking',
-        },
-    );
+        push @{ $count{day} }, $self->count_visitor( $from, $to );
+    }
+
+    # from first to current week of this year
+    for ( my $i = $dt->clone->truncate( to => 'year') ; $i <= $dt ; $i -> add( weeks => 1 ) ) {
+        my $from = $i->clone->truncate( to => 'week' );
+        my $to   = $i->clone->truncate( to => 'week' )->add( weeks => 1, seconds => -1 );
+
+        push @{ $count{week} }, $self->count_visitor( $from, $to );
+    }
+
+    # from january to current months of this year
+    for ( my $i = $dt->clone->truncate( to => 'year') ; $i <= $dt ; $i -> add( months => 1 ) ) {
+        my $from = $i->clone->truncate( to => 'month' );
+        my $to   = $i->clone->truncate( to => 'month' )->add( months => 1, seconds => -1 );
+
+        push @{ $count{month} }, $self->count_visitor( $from, $to );
+    }
 
     $self->render(
         'stat-visitor',
-        order_rs => $order_rs,
+        count    => \%count,
         dt       => $dt,
     );
 };

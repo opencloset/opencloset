@@ -804,6 +804,11 @@ $opencloset-darken-yellow: desaturate(darken($opencloset-yellow, 4%), 10%);
             font-weight: bold;
         }
     }
+    #stat-visitor {
+        span.date {
+            font-weight: bold;
+        }
+    }
     .step-content {
         .step-pane {
             h3 {
