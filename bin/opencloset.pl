@@ -54,6 +54,8 @@ use Postcodify;
 
 use OpenCloset::Schema;
 use OpenCloset::Size::Guess;
+use CHI;
+my $cache = CHI->new( driver => 'Memory', global => 1 );
 
 app->defaults( %{ plugin 'Config' => { default => {
     jses        => [],
@@ -6435,7 +6437,11 @@ get '/stat/visitor/:ymd' => sub {
         my $from = $from->clone->truncate( to => 'day' );
         my $to   = $from->clone->truncate( to => 'day' )->add( days => 1, seconds => -1 );
 
-        push @{ $count{day} }, $self->count_visitor( $from, $to );
+		my $count = $cache->compute("day-$from-$to", "1 day", sub {
+										$self->count_visitor( $from, $to );
+									});
+
+        push @{ $count{day} }, $count;
     }
 
     # from first to current week of this year
@@ -6443,7 +6449,11 @@ get '/stat/visitor/:ymd' => sub {
         my $from = $i->clone->truncate( to => 'week' );
         my $to   = $i->clone->truncate( to => 'week' )->add( weeks => 1, seconds => -1 );
 
-        push @{ $count{week} }, $self->count_visitor( $from, $to );
+		my $count = $cache->compute("week-$from-$to", "1 week", sub {
+										$self->count_visitor( $from, $to );
+									});
+
+        push @{ $count{week} }, $count;
     }
 
     # from january to current months of this year
@@ -6451,7 +6461,11 @@ get '/stat/visitor/:ymd' => sub {
         my $from = $i->clone->truncate( to => 'month' );
         my $to   = $i->clone->truncate( to => 'month' )->add( months => 1, seconds => -1 );
 
-        push @{ $count{month} }, $self->count_visitor( $from, $to );
+		my $count = $cache->compute("month-$from-$to", "1 week", sub {
+										$self->count_visitor( $from, $to );
+									});
+
+        push @{ $count{month} }, $count;
     }
 
     $self->render(
