@@ -1,6 +1,7 @@
 % use utf8;
 % my $user = current_user;
 <!-- navbar -->
+% if ($user) {
     <div class="navbar navbar-default" id="navbar">
       <div class="navbar-container" id="navbar-container">
         <div class="navbar-header pull-left">
@@ -30,3 +31,4 @@
         </div><!-- /.navbar-header -->
       </div><!-- /.container -->
     </div>
+% }
