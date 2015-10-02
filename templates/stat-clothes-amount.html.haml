@@ -10,17 +10,23 @@
 -   ;
 - title meta_text($_id);
 
+.row
+  %h2
+    가용 수량은 대여가능, 대여중, 세탁, 수선, 반납 상태를 의미합니다.
+
+.space-8
+
 .row.amount
   .col-md-12
     %table.table.table-striped.table-bordered.table-hover
       %thead
         %tr
           %th 품목
-          %th 수량
+          %th 가용 수량
           %th 대여중
-          %th 수량(남성)
+          %th 가용 수량(남성)
           %th 대여중(남성)
-          %th 수량(여성)
+          %th 가용 수량(여성)
           %th 대여중(여성)
       %tbody
         - for my $item (@$amount) {

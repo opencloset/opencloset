@@ -12,13 +12,13 @@
 
 %h2
   = $config->{category}{$category}{str} || $category
-  %small= $quantity
+  %small= "$available_quantity / $quantity"
   %small= $gender eq 'male' ? '남성용' : $gender eq 'female' ? '여성용' : 'N/A'
 
 .space-6
 
 .row.amount-category
-  .col-md-6
+  .col-md-12
     %table.table.table-striped.table-bordered.table-hover
       %thead
         %tr
@@ -26,15 +26,21 @@
             사이즈
             %small= $criterion
           %th 수량
+          %th 가용 수량
           %th 대여중
           %th 수선중
           %th 세탁중
+          %th 분실
+          %th 폐기
       %tbody
         - for my $item (@$items) {
           %tr
             %td= $item->{size} || '사이즈 기준 항목 없음'
             %td= $item->{qty}
+            %td= $item->{available_qty}
             %td= $item->{rental}
             %td= $item->{repair}
             %td= $item->{cleaning}
+            %td= $item->{lost}
+            %td= $item->{disused}
         - }
