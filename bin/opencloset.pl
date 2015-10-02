@@ -3701,9 +3701,6 @@ group {
             return;
         }
 
-        #
-        # [GH 279] 직원 전용 방문 예약은 인원 제한과 상관없이 예약 가능하게 함
-        #
         my %search_attrs = (
             '+columns' => [
                 { user_count => { count => 'user.id', -as => 'user_count' } },
@@ -3712,15 +3709,6 @@ group {
             group_by   => [ qw/ me.id / ],
             order_by   => { -asc => 'me.date' },
         );
-        unless (
-            $self->is_user_authenticated
-            && $self->current_user
-            && $self->current_user->user_info
-            && $self->current_user->user_info->staff
-        )
-        {
-            $search_attrs{having} = \[ 'COUNT(user.id) < me.slot' ];
-        }
 
         #
         # SELECT
@@ -3770,7 +3758,27 @@ group {
         # additional information for clothes list
         #
         my @data;
-        push @data, $self->flatten_booking($_) for @booking_list;
+        #
+        # [GH 279] 직원 전용 방문 예약은 인원 제한과 상관없이 예약 가능하게 함
+        # [GH 548] 방문 예약시 예약 마감된 시간을 표시할 수 있도록 수정
+        #
+        for my $b (@booking_list) {
+            my $flat = $self->flatten_booking($b);
+
+            unless (
+                $self->is_user_authenticated
+                && $self->current_user
+                && $self->current_user->user_info
+                && $self->current_user->user_info->staff
+            )
+            {
+                next unless $flat->{slot} > 0;
+
+                $flat->{id} = 0 unless $flat->{slot} > $flat->{user_count};
+            }
+
+            push @data, $flat;
+        }
 
         #
         # response

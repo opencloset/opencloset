@@ -304,12 +304,21 @@
                     <%% var dt = moment(date); %>
                     <%% var ymd = dt.format('YYYY-MM-DD'); %>
                     <%% var hm  = dt.format('HH:mm'); %>
-                    <td class="center">
-                      <input type="radio" name="booking_id" value="<%%= id %>" data-id="<%%= id %>" data-ymd="<%%= ymd %>" data-hm="<%%= hm %>">
-                      <span class="lbl"></span>
-                    </td>
-                    <td> <%%= ymd %> </td>
-                    <td> <%%= hm %> </td>
+                    <%% if ( id > 0 ) { %>
+                      <td class="center">
+                        <input type="radio" name="booking_id" value="<%%= id %>" data-id="<%%= id %>" data-ymd="<%%= ymd %>" data-hm="<%%= hm %>">
+                        <span class="lbl"></span>
+                      </td>
+                      <td> <%%= ymd %> </td>
+                      <td> <%%= hm %> </td>
+                    <%% } else { %>
+                      <td class="center">
+                        <input type="radio" name="booking_id" disabled data-ymd="<%%= ymd %>" data-hm="<%%= hm %>">
+                        <span class="lbl"></span>
+                      </td>
+                      <td> <del> <%%= ymd %> </del> </td>
+                      <td> <del> <%%= hm %>  </del> </td>
+                    <%% } %>
                   </tr>
                 </script>
                 <script id="tpl-booking-error-404" type="text/html">
