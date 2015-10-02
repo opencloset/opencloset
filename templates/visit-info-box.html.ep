@@ -179,7 +179,7 @@
                             <p id="latefee-help" class="help-block">
                               <small>대여기간은 3박4일 입니다. 너무 일찍 대여하시면 대여기간에 따른 연장 비용이 발생합니다.</small>
                               <br>
-                              <small><strong>위의 연장 비용은 예상 비용이므로 실제와 다를 수 있으니 참고 용도로만 사용해주세요.<strong></small>
+                              <small><strong>위의 연장 비용은 예상 비용이므로 실제와 다를 수 있으니 참고 용도로만 사용해주세요.</strong></small>
                             </p>
                           </label>
 
@@ -304,12 +304,21 @@
                     <%% var dt = moment(date); %>
                     <%% var ymd = dt.format('YYYY-MM-DD'); %>
                     <%% var hm  = dt.format('HH:mm'); %>
-                    <td class="center">
-                      <input type="radio" name="booking_id" value="<%%= id %>" data-id="<%%= id %>" data-ymd="<%%= ymd %>" data-hm="<%%= hm %>">
-                      <span class="lbl"></span>
-                    </td>
-                    <td> <%%= ymd %> </td>
-                    <td> <%%= hm %> </td>
+                    <%% if ( id > 0 ) { %>
+                      <td class="center">
+                        <input type="radio" name="booking_id" value="<%%= id %>" data-id="<%%= id %>" data-ymd="<%%= ymd %>" data-hm="<%%= hm %>">
+                        <span class="lbl"></span>
+                      </td>
+                      <td> <%%= ymd %> </td>
+                      <td> <%%= hm %> </td>
+                    <%% } else { %>
+                      <td class="center">
+                        <input type="radio" name="booking_id" disabled data-ymd="<%%= ymd %>" data-hm="<%%= hm %>">
+                        <span class="lbl"></span>
+                      </td>
+                      <td> <del> <%%= ymd %> </del> </td>
+                      <td> <del> <%%= hm %>  </del> </td>
+                    <%% } %>
                   </tr>
                 </script>
                 <script id="tpl-booking-error-404" type="text/html">
