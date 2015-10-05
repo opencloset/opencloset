@@ -152,6 +152,67 @@
                         /
                         .widget-header.widget-header-small
                           %h4.blue.smaller
+                            %i.icon-ok.orange
+                            어울림 정보
+                        /
+                        / body
+                        /
+                        .widget-body
+                          .widget-main.padding-8
+                            %table.table.table-striped.table-bordered
+                              %thead
+                                %tr
+                                  %th #
+                                  %th 키
+                                  %th 몸무게
+                                  %th 윗배
+                                  %th 가슴
+                                  %th 팔
+                                  %th 배꼽
+                                  %th 허벅지
+                                  %th 엉덩이
+                                  %th 허리
+                                  %th 다리
+                                  %th 무릎
+                                  %th 발
+                              %tbody
+                                - my $count = 0;
+                                - for my $size (@$bestfit_sizes) {
+                                  %tr
+                                    %td
+                                      %span= ++$count
+                                    %td
+                                      %span.label.label-success{:title => 'height'}= $size->{height}   || q{}
+                                    %td
+                                      %span.label.label-success{:title => 'weight'}= $size->{weight}   || q{}
+                                    %td
+                                      %span.label.label-info{:title => 'topbelly'}=  $size->{topbelly} || q{}
+                                    %td
+                                      %span.label.label-info{:title => 'bust'}=      $size->{bust}     || q{}
+                                    %td
+                                      %span.label.label-info{:title => 'arm'}=       $size->{arm}      || q{}
+                                    %td
+                                      %span.label.label-info{:title => 'belly'}=     $size->{belly}    || q{}
+                                    %td
+                                      %span.label.label-warning{:title => 'thigh'}=  $size->{thigh}    || q{}
+                                    %td
+                                      %span.label.label-warning{:title => 'hip'}=    $size->{hip}      || q{}
+                                    %td
+                                      %span.label.label-warning{:title => 'waist'}=  $size->{waist}    || q{}
+                                    %td
+                                      %span.label.label-warning{:title => 'leg'}=    $size->{leg}      || q{}
+                                    %td
+                                      %span.label.label-warning{:title => 'knee'}=   $size->{knee}     || q{}
+                                    %td
+                                      %span.label.label-warning{:title => 'foot'}=   $size->{foot}     || q{}
+                                - }
+
+                      .widget-box.transparent
+                        /
+                        / header
+                        /
+                        .widget-header.widget-header-small
+                          %h4.blue.smaller
                             %i.icon-female.orange
                             의류 정보
                         /
