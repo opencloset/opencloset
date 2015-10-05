@@ -4676,6 +4676,7 @@ get '/clothes/:code' => sub {
     );
     my %average_size = map { $_ => [] } @measurements;
     my @recent_sizes;
+    my @bestfit_sizes;
     for my $order_detail (
         $clothes->order_details->search(
             {
@@ -4694,15 +4695,13 @@ get '/clothes/:code' => sub {
             next unless $order_detail->order->$_;
             push @{ $average_size{$_} }, $order_detail->order->$_;
         }
-        if ( $rented_count <= 5 ) {
-            use experimental qw( smartmatch );
 
-            my %order_data = $order_detail->order->get_columns;
-            my %size = map { $_ => $order_data{$_} } @measurements;
-            $size{bestfit} = $order_detail->order->bestfit;
+        my %order_data = $order_detail->order->get_columns;
+        my %size = map { $_ => $order_data{$_} } @measurements;
+        $size{bestfit} = $order_detail->order->bestfit;
 
-            push @recent_sizes, \%size;
-        }
+        push @recent_sizes, \%size  if $rented_count <= 5;
+        push @bestfit_sizes, \%size if $order_detail->order->bestfit;
     }
     for (@measurements) {
         if ( @{ $average_size{$_} } ) {
@@ -4717,11 +4716,12 @@ get '/clothes/:code' => sub {
     # response
     #
     $self->stash(
-        average_size => \%average_size,
-        recent_sizes => \@recent_sizes,
-        clothes      => $clothes,
-        rented_count => $rented_count,
-        tag_rs       => $DB->resultset('Tag'),
+        average_size  => \%average_size,
+        recent_sizes  => \@recent_sizes,
+        bestfit_sizes => \@bestfit_sizes,
+        clothes       => $clothes,
+        rented_count  => $rented_count,
+        tag_rs        => $DB->resultset('Tag'),
     );
 } => 'clothes-code';
 
