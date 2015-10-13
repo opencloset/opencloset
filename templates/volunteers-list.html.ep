@@ -54,10 +54,12 @@
               % my $from = $work->activity_from_date;
               % my $to   = $work->activity_to_date;
               % my $duration = $to - $from;
+              % my $hours = $duration->hours;
+              % $hours-- if $hours >= 8;
               <p class="pull-right">
                 <button type="button" data-work-id="<%= $work->id %>" class="btn btn-xs btn-1365 btn-<%= $done ? 'success' : 'danger' %>">
                   1365 
-                  %= $duration->hours . '시간'
+                  %= $hours . '시간'
                   <span>
                     %= $done ? '승인됨' : '승인대기중'
                   </span>
