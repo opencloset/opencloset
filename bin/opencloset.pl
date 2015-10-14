@@ -6095,7 +6095,7 @@ get '/volunteers' => sub {
                 activity_from_date =>
                     { '>' => $parser->format_datetime( DateTime->now->subtract( days => 7 ) ) },
                 need_1365 => 1,
-                done_1365 => 1,
+                done_1365 => { '<>' => 0 },
             },
             {
                 order_by => [

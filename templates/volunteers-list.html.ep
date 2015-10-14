@@ -31,11 +31,17 @@
         % my $hours = $duration->hours;
         % $hours-- if $hours >= 8;
         <p class="pull-right">
-          <button type="button" data-work-id="<%= $work->id %>" class="btn btn-xs btn-1365 btn-<%= $done ? 'success' : 'danger' %>">
+          <button type="button" data-work-id="<%= $work->id %>" data-1365="<%= $done %>" class="btn btn-xs btn-1365 btn-<%= $done == 1 ? 'success' : $done == 0 ? 'danger' : 'default' %>">
             1365
             %= $hours . '시간'
             <span>
-              %= $done ? '승인됨' : '승인대기중'
+              % if ($done == 0) {
+                승인대기중
+              % } elsif ($done == 1) {
+                승인됨
+              % } else {
+                필요없음
+              % }
             </span>
           </button>
         </p>

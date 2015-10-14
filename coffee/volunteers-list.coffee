@@ -18,19 +18,25 @@ $ ->
       complete: (jqXHR, textStatus) ->
         $this.removeClass('disabled')
 
+  ## 0: 승인대기, 1: 승인됨, 2: 필요없음
+  ## 0 -> 1 -> 2 -> 0 -> 1 -> 2 -> 0 -> ...
+  _1365StateMap = { 0: 1, 1: 2, 2: 0 }
+  _1365ClassMap = { 0: 'btn-danger', 1: 'btn-success', 2: 'btn-default' }
+  _1365TextMap = { 0: '승인대기중', 1: '승인됨', 2: '필요없음' }
   $('.btn-1365:not(.disabled)').on 'click', ->
     $this  = $(@)
     $this.addClass('disabled')
     workId = $this.data('work-id')
-    hasSuccess = $this.hasClass('btn-success')
-    $this.removeClass('btn-success btn-danger')
+    _1365  = _1365StateMap[$this.data('1365')]
+    $this.removeClass('btn-success btn-danger btn-default')
     $.ajax "#{volunteer_uri}/works/#{workId}/1365",
       type: 'PUT'
       crossDomain: true
-      data: { 1365: if hasSuccess then '0' else '1' }
+      data: { 1365: _1365 }
       success: (data, textStatus, jqXHR) ->
-        $this.addClass(if hasSuccess then 'btn-danger' else 'btn-success')
-        $this.find('span').text(if hasSuccess then '승인대기중' else '승인됨')
+        $this.addClass(_1365ClassMap[_1365])
+        $this.find('span').text(_1365TextMap[_1365])
+        $this.data('1365', _1365)
       error: (jqXHR, textStatus, errorThrown) ->
         console.log textStatus
       complete: (jqXHR, textStatus) ->
