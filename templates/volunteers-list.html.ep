@@ -11,6 +11,72 @@
 
 % use DateTime;
 
+<% my $volunteer_item_block = begin %>
+  % my ($work, $schema) = @_;
+  % my $volunteer = $work->volunteer;
+  % my $from = $work->activity_from_date;
+  % my $to   = $work->activity_to_date;
+  % my $birthdate = $volunteer->birth_date;
+  % my $age = $birthdate ? DateTime->now->year - $birthdate->year + 1 : '나이모름';
+  % my $status = $work->get_column('status');
+  <span class="list-group-item status-<%= $status %>" data-work-id="<%= $work->id %>">
+    <h4 class="list-group-item-heading"><%= $volunteer->name %>
+      <small><%= $age %></small>
+      <span class="label label-<%= $status %>"><%= $status_map{$status} %></span>
+      % if ($status eq 'done' && $work->need_1365) {
+        % my $done = $work->done_1365;
+        % my $from = $work->activity_from_date;
+        % my $to   = $work->activity_to_date;
+        % my $duration = $to - $from;
+        % my $hours = $duration->hours;
+        % $hours-- if $hours >= 8;
+        <p class="pull-right">
+          <button type="button" data-work-id="<%= $work->id %>" class="btn btn-xs btn-1365 btn-<%= $done ? 'success' : 'danger' %>">
+            1365
+            %= $hours . '시간'
+            <span>
+              %= $done ? '승인됨' : '승인대기중'
+            </span>
+          </button>
+        </p>
+      % }
+      % my $nth = $schema->resultset('VolunteerWork')->count({ volunteer_id => $work->volunteer_id });
+      % if ($nth != 1) {
+        <p><small><%= $nth %>번째 방문</small></p>
+      % }
+    </h4>
+    <p class="list-group-item-text">
+      <mark><%= sprintf "%02d", $from->month %>-<%= sprintf "%02d", $from->day %></mark>
+      <span>
+        <time><%= sprintf "%02d", $from->hour %>:00</time>
+        ~
+        <time><%= sprintf "%02d", $to->hour %>:00</time>
+      </span>
+      <dl>
+        <dt>신청일</dt>
+        <dd><%= $work->create_date->ymd %></dd>
+        % my @activities = split /\|/, $work->activity // '';
+        <dt>관심있는 활동</dt>
+        <dd>
+          <%= join(', ', @activities) %>
+        </dd>
+        <dd>
+          % if ($work->status eq 'reported') {
+            <button type="button" data-work-id="<%= $work->id %>" class="btn btn-success btn-sm btn-status" data-status="approved">승인</button>
+          % } elsif ($work->status eq 'approved') {
+            <button type="button" data-work-id="<%= $work->id %>" class="btn btn-info btn-sm btn-status" data-status="done">방문</button>
+          % }
+          % if ($work->status ne 'canceled') {
+            <button type="button" data-work-id="<%= $work->id %>" class="btn btn-danger btn-sm btn-status" data-status="canceled">취소</button>
+          % }
+          <a href="<%= $volunteer_uri %>/works/<%= $work->id %>" target="_blank" class="btn btn-default btn-sm">자세히</a>
+          <a href="<%= $volunteer_uri %>/works/<%= $work->id %>/edit?authcode=<%= $work->authcode %>" target="_blank" class="btn btn-default btn-sm">수정</a>
+        </dd>
+      </dl>
+    </p>
+  </span>
+<% end %>
+
 <div class="row">
   <div class="col-xs-4 col-sm-4 col-md-4">
     <div class="search">
@@ -38,69 +104,11 @@
     <div class="list-group">
       % my $volunteer_uri = $config->{volunteer_uri};
       % my $schema        = $works->result_source->schema;
+      % while (my $work = $standby ? $standby->next : undef) {
+        %= $volunteer_item_block->($work, $schema)
+      % }
       % while (my $work = $works->next) {
-        % my $volunteer = $work->volunteer;
-        % my $from = $work->activity_from_date;
-        % my $to   = $work->activity_to_date;
-        % my $birthdate = $volunteer->birth_date;
-        % my $age = $birthdate ? DateTime->now->year - $birthdate->year + 1 : '나이모름';
-        % my $status = $work->get_column('status');
-        <span class="list-group-item status-<%= $status %>" data-work-id="<%= $work->id %>">
-          <h4 class="list-group-item-heading"><%= $volunteer->name %> 
-            <small><%= $age %></small> 
-            <span class="label label-<%= $status %>"><%= $status_map{$status} %></span>
-            % if ($status eq 'done' && $work->need_1365) {
-              % my $done = $work->done_1365;
-              % my $from = $work->activity_from_date;
-              % my $to   = $work->activity_to_date;
-              % my $duration = $to - $from;
-              % my $hours = $duration->hours;
-              % $hours-- if $hours >= 8;
-              <p class="pull-right">
-                <button type="button" data-work-id="<%= $work->id %>" class="btn btn-xs btn-1365 btn-<%= $done ? 'success' : 'danger' %>">
-                  1365 
-                  %= $hours . '시간'
-                  <span>
-                    %= $done ? '승인됨' : '승인대기중'
-                  </span>
-                </button>
-              </p>
-            % }
-            % my $nth = $schema->resultset('VolunteerWork')->count({ volunteer_id => $work->volunteer_id });
-            % if ($nth != 1) {
-              <p><small><%= $nth %>번째 방문</small></p>
-            % }
-          </h4>
-          <p class="list-group-item-text">
-            <mark><%= sprintf "%02d", $from->month %>-<%= sprintf "%02d", $from->day %></mark>
-            <span>
-              <time><%= sprintf "%02d", $from->hour %>:00</time>
-              ~
-              <time><%= sprintf "%02d", $to->hour %>:00</time>
-            </span>
-            <dl>
-              <dt>신청일</dt>
-              <dd><%= $work->create_date->ymd %></dd>
-              % my @activities = split /\|/, $work->activity;
-              <dt>관심있는 활동</dt>
-              <dd>
-                <%= join(', ', @activities) %>
-              </dd>
-              <dd>
-                % if ($work->status eq 'reported') {
-                  <button type="button" data-work-id="<%= $work->id %>" class="btn btn-success btn-sm btn-status" data-status="approved">승인</button>
-                % } elsif ($work->status eq 'approved') {
-                  <button type="button" data-work-id="<%= $work->id %>" class="btn btn-info btn-sm btn-status" data-status="done">방문</button>
-                % }
-                % if ($work->status ne 'canceled') {
-                  <button type="button" data-work-id="<%= $work->id %>" class="btn btn-danger btn-sm btn-status" data-status="canceled">취소</button>
-                % }
-                <a href="<%= $volunteer_uri %>/works/<%= $work->id %>" target="_blank" class="btn btn-default btn-sm">자세히</a>
-                <a href="<%= $volunteer_uri %>/works/<%= $work->id %>/edit?authcode=<%= $work->authcode %>" target="_blank" class="btn btn-default btn-sm">수정</a>
-              </dd>
-            </dl>
-          </p>
-        </span>
+        %= $volunteer_item_block->($work, $schema)
       % }
       % unless ($works->count) {
         % my $status = param('status') || 'reported';

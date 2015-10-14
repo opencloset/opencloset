@@ -6084,36 +6084,56 @@ get '/volunteers' => sub {
     my $status = $self->param('status') || 'reported';
     my $query  = $self->param('q') // '';
 
+    my ( $works, $standby );
     my $parser = $DB->storage->datetime_parser;
-    my $cond
-        = $status eq 'done'
-        ? { activity_from_date => { '>' => $parser->format_datetime( DateTime->now->subtract( days => 7 ) ) } }
-        : {};
-    $cond->{status} = $status;
-    my $attr = {
-        order_by => $status eq 'done'
-        ? [
-            { -desc => 'need_1365' },
-            { -asc  => 'done_1365' }
-            ]
-        : 'activity_from_date'
-    };
+    $works = $DB->resultset('VolunteerWork')
+        ->search( { status => $status }, { order_by => 'activity_from_date' } );
+
+    if ( $status eq 'done' ) {
+        $works = $works->search(
+            {
+                activity_from_date =>
+                    { '>' => $parser->format_datetime( DateTime->now->subtract( days => 7 ) ) },
+                need_1365 => 1,
+                done_1365 => 1,
+            },
+            {
+                order_by => [
+                    { -desc => 'need_1365' },
+                    { -asc  => 'done_1365' },
+                    { -asc  => 'activity_from_date' }
+                ]
+            }
+        );
+        $standby = $DB->resultset('VolunteerWork')->search(
+            {
+                status    => $status,
+                need_1365 => 1,
+                done_1365 => 0,
+            },
+            {
+                order_by => [
+                    { -desc => 'need_1365' },
+                    { -asc  => 'done_1365' }
+                ]
+            }
+        );
+    }
 
     if ($query) {
-        $attr = {
-            order_by => 'activity_from_date',
-            join     => 'volunteer'
-        };
-        $cond = {
-            -or => {
-                'volunteer.name'  => $query,
-                'volunteer.phone' => $self->phone_format($query),
-                'volunteer.email' => $query
-            }
-        };
+        $works = $DB->resultset('VolunteerWork')->search(
+            {
+                -or => {
+                    'volunteer.name'  => $query,
+                    'volunteer.phone' => $self->phone_format($query),
+                    'volunteer.email' => $query
+                }
+            },
+            { join => 'volunteer' }
+        );
     }
-    my $works = $DB->resultset('VolunteerWork')->search( $cond, $attr );
-    $self->render( works => $works );
+
+    $self->render( works => $works, standby => $standby );
 } => 'volunteers-list';
 
 any '/size/guess' => sub {
