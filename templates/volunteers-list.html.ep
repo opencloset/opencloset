@@ -7,7 +7,7 @@
 %   ],
 %   jses => ['/js/volunteers-list.js'];
 % title meta_text($_id);
-% my %status_map = (reported => '신청', approved => '승인', done => '방문', canceled => '취소');
+% my %status_map = (reported => '신청', approved => '승인', done => '방문', canceled => '취소', drop => '방문안함');
 
 % use DateTime;
 
@@ -71,6 +71,7 @@
             <button type="button" data-work-id="<%= $work->id %>" class="btn btn-success btn-sm btn-status" data-status="approved">승인</button>
           % } elsif ($work->status eq 'approved') {
             <button type="button" data-work-id="<%= $work->id %>" class="btn btn-info btn-sm btn-status" data-status="done">방문</button>
+            <button type="button" data-work-id="<%= $work->id %>" class="btn btn-warning btn-sm btn-status" data-status="drop">방문안함</button>
           % }
           % if ($work->status ne 'canceled') {
             <button type="button" data-work-id="<%= $work->id %>" class="btn btn-danger btn-sm btn-status" data-status="canceled">취소</button>
@@ -105,6 +106,7 @@
       <li><a href="<%= url_for('/volunteers')->query(status => 'approved') %>"><span class="label label-approved">승인</span></a></li>
       <li><a href="<%= url_for('/volunteers')->query(status => 'done') %>"><span class="label label-done">방문</span></a></li>
       <li><a href="<%= url_for('/volunteers')->query(status => 'canceled') %>"><span class="label label-canceled">취소</span></a></li>
+      <li><a href="<%= url_for('/volunteers')->query(status => 'drop') %>"><span class="label label-drop">방문안함</span></a></li>
     </ul>
     <hr class="colorgraph">
     <div class="list-group">
