@@ -488,7 +488,7 @@ helper update_user => sub {
     $v->field('phone')->regexp(qr/^\d+$/);
     $v->field('gender')->in(qw/ male female /);
     $v->field('birth')->regexp(qr/^(0|((19|20)\d{2}))$/);
-    $v->field(qw/ height weight bust waist hip topbelly belly thigh arm leg knee foot /)->each(sub {
+    $v->field(qw/ height weight bust waist hip topbelly belly thigh arm leg knee foot pants /)->each(sub {
         shift->regexp(qr/^\d{1,3}$/);
     });
     $v->field('staff')->in( 0, 1 );
@@ -1543,6 +1543,7 @@ group {
             hip
             knee
             leg
+            pants
             phone
             purpose
             purpose2
@@ -1562,7 +1563,7 @@ group {
         $v->field('phone')->regexp(qr/^\d+$/);
         $v->field('gender')->in(qw/ male female /);
         $v->field('birth')->regexp(qr/^(19|20)\d{2}$/);
-        $v->field(qw/ height weight bust waist hip topbelly belly thigh arm leg knee foot /)->each(sub {
+        $v->field(qw/ height weight bust waist hip topbelly belly thigh arm leg knee foot pants /)->each(sub {
             shift->regexp(qr/^\d{1,3}$/);
         });
         unless ( $self->validate( $v, { %user_params, %user_info_params } ) ) {
@@ -1678,6 +1679,7 @@ group {
             hip
             knee
             leg
+            pants
             phone
             pre_category
             pre_color
