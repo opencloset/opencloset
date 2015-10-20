@@ -89,6 +89,7 @@ $ ->
     measurement:
       height:   '키'
       weight:   '몸무게'
+      neck:     '목 둘레'
       bust:     '가슴 둘레'
       waist:    '허리 둘레'
       hip:      '엉덩이 둘레'
@@ -99,6 +100,7 @@ $ ->
       leg:      '다리 길이'
       knee:     '무릎 길이'
       foot:     '발 크기'
+      pants:    '바지 길이'
     color:
       black:        '블랙'
       navy:         '네이비'
