@@ -90,16 +90,16 @@ $ ->
   #
   clear_clothes_form = (show) ->
     if show
-      _.each [ 'bust', 'waist', 'hip', 'topbelly', 'belly', 'thigh', 'arm', 'length', 'foot' ], (name) ->
+      _.each [ 'neck', 'bust', 'waist', 'hip', 'topbelly', 'belly', 'thigh', 'arm', 'length', 'foot' ], (name) ->
         $("#display-clothes-#{name}").show()
     else
-      _.each [ 'bust', 'waist', 'hip', 'topbelly', 'belly', 'thigh', 'arm', 'length', 'foot' ], (name) ->
+      _.each [ 'neck', 'bust', 'waist', 'hip', 'topbelly', 'belly', 'thigh', 'arm', 'length', 'foot' ], (name) ->
         $("#display-clothes-#{name}").hide()
 
     $('#clothes-code').val('')
     $('input[name=clothes-gender]').prop('checked', false)
     $('#clothes-color').select2('val', '')
-    _.each [ 'bust', 'waist', 'hip', 'topbelly', 'belly', 'thigh', 'arm', 'length', 'foot' ], (name) ->
+    _.each [ 'neck', 'bust', 'waist', 'hip', 'topbelly', 'belly', 'thigh', 'arm', 'length', 'foot' ], (name) ->
       $("#clothes-#{name}").prop('disabled', true).val('')
 
   $('#clothes-category').select2({
@@ -110,17 +110,17 @@ $ ->
       clear_clothes_form false
       types = []
       switch e.val
-        when 'jacket'    then types = [ 'bust', 'arm', 'topbelly', 'belly'      ]
-        when 'pants'     then types = [ 'waist', 'hip', 'thigh', 'length'       ]
-        when 'shirt'     then types = [ 'bust', 'arm', 'topbelly', 'belly'      ]
-        when 'waistcoat' then types = [ 'waist', 'topbelly', 'belly'            ]
-        when 'coat'      then types = [ 'bust', 'arm', 'length'                 ]
-        when 'onepiece'  then types = [ 'bust', 'waist', 'hip', 'arm', 'length' ]
-        when 'skirt'     then types = [ 'waist', 'hip', 'length'                ]
-        when 'blouse'    then types = [ 'bust', 'arm'                           ]
-        when 'belt'      then types = [ 'length'                                ]
-        when 'shoes'     then types = [ 'foot'                                  ]
-        else                  types = [                                         ]
+        when 'jacket'    then types = [ 'bust', 'arm', 'topbelly', 'belly'         ]
+        when 'pants'     then types = [ 'waist', 'hip', 'thigh', 'length'          ]
+        when 'shirt'     then types = [ 'neck', 'bust', 'arm', 'topbelly', 'belly' ]
+        when 'waistcoat' then types = [ 'waist', 'topbelly', 'belly'               ]
+        when 'coat'      then types = [ 'bust', 'arm', 'length'                    ]
+        when 'onepiece'  then types = [ 'bust', 'waist', 'hip', 'arm', 'length'    ]
+        when 'skirt'     then types = [ 'waist', 'hip', 'length'                   ]
+        when 'blouse'    then types = [ 'bust', 'arm'                              ]
+        when 'belt'      then types = [ 'length'                                   ]
+        when 'shoes'     then types = [ 'foot'                                     ]
+        else                  types = [                                            ]
       for type in types
         $("#display-clothes-#{type}").show()
         $("#clothes-#{type}").prop('disabled', false)
@@ -152,6 +152,7 @@ $ ->
       clothes_gender_str:   $('input[name=clothes-gender]:checked').next().text()
       clothes_color:        $('#clothes-color').val()
       clothes_color_str:    OpenCloset.color[ $('#clothes-color').val() ]
+      clothes_neck:         $('#clothes-neck').val()
       clothes_bust:         $('#clothes-bust').val()
       clothes_waist:        $('#clothes-waist').val()
       clothes_hip:          $('#clothes-hip').val()
@@ -278,6 +279,7 @@ $ ->
                       category:    $(el).data('clothes-category')
                       gender:      $(el).data('clothes-gender')
                       color:       $(el).data('clothes-color')
+                      neck:        $(el).data('clothes-neck')
                       bust:        $(el).data('clothes-bust')
                       waist:       $(el).data('clothes-waist')
                       hip:         $(el).data('clothes-hip')

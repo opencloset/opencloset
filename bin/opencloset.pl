@@ -1362,6 +1362,7 @@ group {
                 $clothes->category,
                 $clothes->gender,
                 $clothes->color,
+                $clothes->neck,
                 $clothes->bust,
                 $clothes->waist,
                 $clothes->hip,
@@ -1381,6 +1382,7 @@ group {
             category
             gender
             color
+            neck
             bust
             waist
             hip
@@ -2204,6 +2206,7 @@ group {
             group_id
             hip
             length
+            neck
             price
             status_id
             thigh
@@ -2219,7 +2222,7 @@ group {
         $v->field('category')->required(1)->in( keys %{ app->config->{category} } );
         $v->field('gender')->in(qw/ male female unisex /);
         $v->field('price')->regexp(qr/^\d*$/);
-        $v->field(qw/ topbelly belly bust waist hip thigh arm length /)->each(sub {
+        $v->field(qw/ topbelly belly neck bust waist hip thigh arm length /)->each(sub {
             shift->regexp(qr/^\d{1,3}$/);
         });
         $v->field('donation_id')->regexp(qr/^\d*$/)->callback(sub {
@@ -2317,6 +2320,7 @@ group {
             group_id
             hip
             length
+            neck
             price
             status_id
             thigh
@@ -2332,7 +2336,7 @@ group {
         $v->field('category')->in( keys %{ app->config->{category} } );
         $v->field('gender')->in(qw/ male female unisex /);
         $v->field('price')->regexp(qr/^\d*$/);
-        $v->field(qw/ topbelly belly bust waist hip thigh arm length /)->each(sub {
+        $v->field(qw/ topbelly belly neck bust waist hip thigh arm length /)->each(sub {
             shift->regexp(qr/^\d{1,3}$/);
         });
         $v->field('donation_id')->regexp(qr/^\d*$/)->callback(sub {
@@ -2626,6 +2630,7 @@ group {
             group_id
             hip
             length
+            neck
             price
             status_id
             thigh
@@ -2640,7 +2645,7 @@ group {
         $v->field('category')->in( keys %{ app->config->{category} } );
         $v->field('gender')->in(qw/ male female unisex /);
         $v->field('price')->regexp(qr/^\d*$/);
-        $v->field(qw/ bust waist hip thigh arm length /)->each(sub {
+        $v->field(qw/ neck bust waist hip thigh arm length /)->each(sub {
             shift->regexp(qr/^\d{1,3}$/);
         });
         $v->field('donation_id')->regexp(qr/^\d*$/)->callback(sub {
@@ -4673,6 +4678,7 @@ get '/clothes/:code' => sub {
     my @measurements = qw(
         height
         weight
+        neck
         bust
         waist
         hip
@@ -5971,6 +5977,7 @@ get '/stat/clothes/hit/:category' => sub {
                 color
                 hip
                 length
+                neck
                 thigh
                 topbelly
                 waist
