@@ -215,6 +215,17 @@
                       .col-xs-12.col-sm-6
                         %input#clothes-color{ :name => 'clothes-color', :type => 'hidden', 'data-placeholder' => '옷의 색상을 선택하세요' }
 
+                  #display-clothes-neck
+                    .space-2
+
+                    .form-group.has-info
+                      %label.control-label.no-padding-right.col-xs-12.col-sm-3{ :for => 'clothes-neck' } 목 둘레:
+                      .col-xs-12.col-sm-5
+                        .input-group
+                          %input#clothes-neck.valid.form-control{ :name => 'neck', :type => 'text' }
+                          %span.input-group-addon
+                            %i cm
+
                   #display-clothes-bust
                     .space-2
 
@@ -336,11 +347,12 @@
                             <div>
                               <label>
                                 <input type="checkbox" class="ace valid" name="clothes-list"
-                                  value="<%= [ user_id, clothes_code, clothes_category, clothes_color, clothes_bust, clothes_waist, clothes_hip, clothes_topbelly, clothes_belly, clothes_thigh, clothes_arm, clothes_length, clothes_foot, clothes_gender ].join('-') %>"
+                                  value="<%= [ user_id, clothes_code, clothes_category, clothes_color, clothes_neck, clothes_bust, clothes_waist, clothes_hip, clothes_topbelly, clothes_belly, clothes_thigh, clothes_arm, clothes_length, clothes_foot, clothes_gender ].join('-') %>"
                                   data-user-id          = "<%= user_id %>"
                                   data-clothes-code     = "<%= clothes_code %>"
                                   data-clothes-category = "<%= clothes_category %>"
                                   data-clothes-color    = "<%= clothes_color %>"
+                                  data-clothes-neck     = "<%= clothes_neck %>"
                                   data-clothes-bust     = "<%= clothes_bust %>"
                                   data-clothes-arm      = "<%= clothes_arm %>"
                                   data-clothes-waist    = "<%= clothes_waist %>"
@@ -357,6 +369,7 @@
                                   typeof yourvar != 'undefined'
                                   if ( typeof clothes_gender != 'undefined' ) { clothes_detail.push( clothes_gender_str ) }
                                   if ( typeof clothes_color  != 'undefined' ) { clothes_detail.push( clothes_color_str  ) }
+                                  if ( clothes_neck     > 0 ) { clothes_detail.push( "목("      + clothes_neck       + "cm)" ) }
                                   if ( clothes_bust     > 0 ) { clothes_detail.push( "가슴("    + clothes_bust       + "cm)" ) }
                                   if ( clothes_arm      > 0 ) { clothes_detail.push( "팔 길이(" + clothes_arm        + "cm)" ) }
                                   if ( clothes_waist    > 0 ) { clothes_detail.push( "허리("    + clothes_waist      + "cm)" ) }
