@@ -218,6 +218,11 @@
                                 .profile-info-value
                                   %span.editable#user-foot{ 'data-name' => 'foot' }= $user->user_info->foot
 
+                              .profile-info-row
+                                .profile-info-name 바지 길이
+                                .profile-info-value
+                                  %span.editable#user-pants{ 'data-name' => 'pants' }= $user->user_info->pants
+
                       .space-20
 
                       - my @search_params = (

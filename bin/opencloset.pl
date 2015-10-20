@@ -488,7 +488,7 @@ helper update_user => sub {
     $v->field('phone')->regexp(qr/^\d+$/);
     $v->field('gender')->in(qw/ male female /);
     $v->field('birth')->regexp(qr/^(0|((19|20)\d{2}))$/);
-    $v->field(qw/ height weight bust waist hip topbelly belly thigh arm leg knee foot /)->each(sub {
+    $v->field(qw/ height weight bust waist hip topbelly belly thigh arm leg knee foot pants /)->each(sub {
         shift->regexp(qr/^\d{1,3}$/);
     });
     $v->field('staff')->in( 0, 1 );
@@ -632,7 +632,7 @@ helper create_order => sub {
             return ( 0, 'user not found using user_id' );
         });
         $v->field('additional_day')->regexp(qr/^\d+$/);
-        $v->field(qw/ height weight bust waist hip topbelly belly thigh arm leg knee foot /)->each(sub {
+        $v->field(qw/ height weight bust waist hip topbelly belly thigh arm leg knee foot pants /)->each(sub {
             shift->regexp(qr/^\d{1,3}$/);
         });
         $v->field('bestfit')->in( 0, 1 );
@@ -689,7 +689,7 @@ helper create_order => sub {
         #
         # we believe user is exist since parameter validator
         #
-        for (qw/ height weight bust waist hip topbelly belly thigh arm leg knee foot /) {
+        for (qw/ height weight bust waist hip topbelly belly thigh arm leg knee foot pants /) {
             next if     defined $order_params->{$_};
             next unless defined $user->user_info->$_;
 
@@ -845,7 +845,7 @@ helper update_order => sub {
             return ( 0, 'user not found using user_id' );
         });
         $v->field('additional_day')->regexp(qr/^\d+$/);
-        $v->field(qw/ height weight bust waist hip topbelly belly thigh arm leg knee foot /)->each(sub {
+        $v->field(qw/ height weight bust waist hip topbelly belly thigh arm leg knee foot pants /)->each(sub {
             shift->regexp(qr/^\d{1,3}$/);
         });
         $v->field('bestfit')->in( 0, 1 );
@@ -1543,6 +1543,7 @@ group {
             hip
             knee
             leg
+            pants
             phone
             purpose
             purpose2
@@ -1562,7 +1563,7 @@ group {
         $v->field('phone')->regexp(qr/^\d+$/);
         $v->field('gender')->in(qw/ male female /);
         $v->field('birth')->regexp(qr/^(19|20)\d{2}$/);
-        $v->field(qw/ height weight bust waist hip topbelly belly thigh arm leg knee foot /)->each(sub {
+        $v->field(qw/ height weight bust waist hip topbelly belly thigh arm leg knee foot pants /)->each(sub {
             shift->regexp(qr/^\d{1,3}$/);
         });
         unless ( $self->validate( $v, { %user_params, %user_info_params } ) ) {
@@ -1678,6 +1679,7 @@ group {
             hip
             knee
             leg
+            pants
             phone
             pre_category
             pre_color
@@ -1795,6 +1797,7 @@ group {
             late_fee_pay_with
             leg
             message
+            pants
             parent_id
             price_pay_with
             purpose
@@ -1876,6 +1879,7 @@ group {
             late_fee_pay_with
             leg
             message
+            pants
             parent_id
             price_pay_with
             purpose
@@ -1953,6 +1957,7 @@ group {
             late_fee_pay_with
             leg
             message
+            pants
             parent_id
             price_pay_with
             purpose
@@ -5166,6 +5171,7 @@ get '/order/:id' => sub {
             leg          => $user->user_info->leg,
             knee         => $user->user_info->knee,
             foot         => $user->user_info->foot,
+            pants        => $user->user_info->pants,
             desc         => $comment . $desc,
         });
     }
