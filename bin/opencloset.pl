@@ -4569,7 +4569,22 @@ get '/clothes' => sub {
     #
     # fetch params
     #
-    my %params = $self->get_params(qw/ status tag /);
+    my %params = $self->get_params(qw/
+        arm
+        belly
+        bust
+        category
+        color
+        gender
+        hip
+        length
+        neck
+        status
+        tag
+        thigh
+        topbelly
+        waist
+    /);
 
     #
     # validate params
@@ -4577,6 +4592,12 @@ get '/clothes' => sub {
     my $v = $self->create_validator;
     $v->field('status')->regexp(qr/^\d+$/);
     $v->field('tag')->regexp(qr/^\d+$/);
+    $v->field('category')->required(1)->in( keys %{ app->config->{category} } );
+    $v->field('gender')->in(qw/ male female unisex /);
+    $v->field(qw/ arm belly bust hip length neck thigh topbelly waist /)->each(sub {
+        shift->regexp(qr/^\d{1,3}$/);
+    });
+
     unless ( $self->validate( $v, \%params ) ) {
         my @error_str;
         while ( my ( $k, $v ) = each %{ $v->errors } ) {
@@ -4623,14 +4644,38 @@ get '/clothes' => sub {
     #
     # search clothes
     #
-    my $p      = $self->param('p') || 1;
-    my $s      = $self->param('s') || app->config->{entries_per_page};
-    my $status = $self->param('status');
-    my $tag    = $self->param('tag');
+    my $p        = $self->param('p') || 1;
+    my $s        = $self->param('s') || app->config->{entries_per_page};
+    my $status   = $self->param('status');
+    my $tag      = $self->param('tag');
+    my $arm      = $self->param('arm');
+    my $belly    = $self->param('belly');
+    my $bust     = $self->param('bust');
+    my $category = $self->param('category');
+    my $color    = $self->param('color');
+    my $gender   = $self->param('gender');
+    my $hip      = $self->param('hip');
+    my $length   = $self->param('length');
+    my $neck     = $self->param('neck');
+    my $thigh    = $self->param('thigh');
+    my $topbelly = $self->param('topbelly');
+    my $waist    = $self->param('waist');
 
     my $cond = {};
-    $cond->{status_id}             = $status if $status;
-    $cond->{'clothes_tags.tag_id'} = $tag    if $tag;
+    $cond->{status_id}             = $status   if $status;
+    $cond->{'clothes_tags.tag_id'} = $tag      if $tag;
+    $cond->{'arm'}                 = $arm      if defined $arm;
+    $cond->{'belly'}               = $belly    if defined $belly;
+    $cond->{'bust'}                = $bust     if defined $bust;
+    $cond->{'category'}            = $category if defined $category;
+    $cond->{'color'}               = $color    if defined $color;
+    $cond->{'gender'}              = $gender   if defined $gender;
+    $cond->{'hip'}                 = $hip      if defined $hip;
+    $cond->{'length'}              = $length   if defined $length;
+    $cond->{'neck'}                = $neck     if defined $neck;
+    $cond->{'thigh'}               = $thigh    if defined $thigh;
+    $cond->{'topbelly'}            = $topbelly if defined $topbelly;
+    $cond->{'waist'}               = $waist    if defined $waist;
 
     my $attrs = {
         order_by => { -asc => 'id' },
