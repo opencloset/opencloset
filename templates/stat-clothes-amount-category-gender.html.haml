@@ -34,13 +34,24 @@
           %th 폐기
       %tbody
         - for my $item (@$items) {
+        -   my %query_params = (
+        -     category   => $category,
+        -     gender     => $gender,
+        -     $criterion => $item->{size},
+        -   );
           %tr
             %td= $item->{size} || '사이즈 기준 항목 없음'
-            %td= $item->{qty}
+            %td
+              %a{ :href => "#{ url_for( '/clothes' )->query( %query_params ) }" }= $item->{qty}
             %td= $item->{available_qty}
-            %td= $item->{rental}
-            %td= $item->{repair}
-            %td= $item->{cleaning}
-            %td= $item->{lost}
-            %td= $item->{disused}
+            %td
+              %a{ :href => "#{ url_for( '/clothes' )->query( %query_params, status => 2 ) }" }= $item->{rental}
+            %td
+              %a{ :href => "#{ url_for( '/clothes' )->query( %query_params, status => 6 ) }" }= $item->{repair}
+            %td
+              %a{ :href => "#{ url_for( '/clothes' )->query( %query_params, status => 5 ) }" }= $item->{cleaning}
+            %td
+              %a{ :href => "#{ url_for( '/clothes' )->query( %query_params, status => 7 ) }" }= $item->{lost}
+            %td
+              %a{ :href => "#{ url_for( '/clothes' )->query( %query_params, status => 8 ) }" }= $item->{disused}
         - }
