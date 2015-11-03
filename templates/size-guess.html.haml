@@ -192,3 +192,158 @@
         %td.text-right= $ret2->{leg}
         %td.text-right= $ret2->{foot}
 - }
+
+#bestfit-1-table
+  %h2 어울렸던 의류 정보
+  .space-4
+  %table.table.table-striped.table-bordered.table-hover
+    %thead
+      %tr
+        %th
+        %th 키
+        %th 몸무게
+        %th
+          %strong 상의
+        %th 가슴
+        %th 윗배
+        %th 배
+        %th 팔
+        %th
+          %strong 하의
+        %th 허리
+        %th 엉덩이
+        %th 허벅지
+        %th 길이
+    %tbody
+      - if ( $height && $weight ) {
+      -   while ( my $order = $bestfit_1_order_rs->next ) {
+      -     my $jacket;
+      -     my $pants;
+      -     my $skirt;
+      -     for my $clothes ( $order->clothes ) {
+      -       use experimental qw( smartmatch );
+      -       given ( $clothes->category ) {
+      -         $jacket = $clothes when 'jacket';
+      -         $pants  = $clothes when 'pants';
+      -         $skirt  = $clothes when 'skirt';
+      -       }
+      -     }
+        %tr{ 'data-order-id' => "#{ $order->id }" }
+          %td.center
+            %a{ :href => "/order/#{ $order->id }" }= $order->id
+          %td= $order->height
+          %td= $order->weight
+          - if ($jacket) {
+          -   my $c = $jacket;
+          %td
+            %strong
+              %a{ :href => "/clothes/#{ $c->code }" }= trim_clothes_code($c)
+          %td= $c->bust     || '-'
+          %td= $c->topbelly || '-'
+          %td= $c->belly    || '-'
+          %td= $c->arm      || '-'
+          - }
+          - else {
+          %td
+          %td
+          %td
+          %td
+          %td
+          - }
+          - if ( $pants || $skirt ) {
+          -   my $c = $pants ? $pants : $skirt;
+          %td
+            %strong
+              %a{ :href => "/clothes/#{ $c->code }" }= trim_clothes_code($c)
+          %td= $c->waist  || '-'
+          %td= $c->hip    || '-'
+          %td= $c->thigh  || '-'
+          %td= $c->length || '-'
+          - }
+          - else {
+          %td
+          %td
+          %td
+          %td
+          %td
+          - }
+      -   }
+      - }
+
+#bestfit-3x3-table
+  %h2 어울렸던 유사 의류 정보
+  .space-4
+  %table.table.table-striped.table-bordered.table-hover
+    %thead
+      %tr
+        %th
+        %th 키
+        %th 몸무게
+        %th
+          %strong 상의
+        %th 가슴
+        %th 윗배
+        %th 배
+        %th 팔
+        %th
+          %strong 하의
+        %th 허리
+        %th 엉덩이
+        %th 허벅지
+        %th 길이
+    %tbody
+      - if ( $height && $weight ) {
+      -   while ( my $order = $bestfit_3x3_order_rs->next ) {
+      -     my $class = ( int($order->weight) == int($weight) && int($order->height) == int($height) ) ? "success" : q{};
+      -     my $jacket;
+      -     my $pants;
+      -     my $skirt;
+      -     for my $clothes ( $order->clothes ) {
+      -       use experimental qw( smartmatch );
+      -       given ( $clothes->category ) {
+      -         $jacket = $clothes when 'jacket';
+      -         $pants  = $clothes when 'pants';
+      -         $skirt  = $clothes when 'skirt';
+      -       }
+      -     }
+        %tr{ :class => "#{$class}", 'data-order-id' => "#{ $order->id }" }
+          %td.center
+            %a{ :href => "/order/#{ $order->id }" }= $order->id
+          %td= $order->height
+          %td= $order->weight
+          - if ($jacket) {
+          -   my $c = $jacket;
+          %td
+            %strong
+              %a{ :href => "/clothes/#{ $c->code }" }= trim_clothes_code($c)
+          %td= $c->bust     || '-'
+          %td= $c->topbelly || '-'
+          %td= $c->belly    || '-'
+          %td= $c->arm      || '-'
+          - }
+          - else {
+          %td
+          %td
+          %td
+          %td
+          %td
+          - }
+          - if ( $pants || $skirt ) {
+          -   my $c = $pants ? $pants : $skirt;
+          %td
+            %strong
+              %a{ :href => "/clothes/#{ $c->code }" }= trim_clothes_code($c)
+          %td= $c->waist  || '-'
+          %td= $c->hip    || '-'
+          %td= $c->thigh  || '-'
+          %td= $c->length || '-'
+          - }
+          - else {
+          %td
+          %td
+          %td
+          %td
+          %td
+          - }
+      -   }
+      - }
