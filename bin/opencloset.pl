@@ -6225,13 +6225,59 @@ any '/size/guess' => sub {
         _secret    => app->config->{bodykit}{secret},
     );
 
+    my $bestfit_1_order_rs = $DB->resultset('Order')->search(
+        {
+            bestfit => 1,
+            height  => $height,
+            weight  => $weight,
+        },
+        {
+            order_by => [
+                { -asc => 'me.height' },
+                { -asc => 'me.weight' },
+            ],
+            prefetch => {
+                'order_details' => 'clothes',
+            },
+        },
+    );
+
+    my $bestfit_3x3_order_rs = $DB->resultset('Order')->search(
+        {
+            bestfit => 1,
+            height  => {
+                -between => [
+                    $height - 1,
+                    $height + 1,
+                ],
+            },
+            weight  => {
+                -between => [
+                    $weight - 1,
+                    $weight + 1,
+                ],
+            },
+        },
+        {
+            order_by => [
+                { -asc => 'me.height' },
+                { -asc => 'me.weight' },
+            ],
+            prefetch => {
+                'order_details' => 'clothes',
+            },
+        },
+    );
+
     $self->render(
         'size-guess',
-        height      => $height,
-        weight      => $weight,
-        gender      => $gender,
-        osg_bodykit => $osg_bodykit,
-        osg_db      => $osg_db
+        height               => $height,
+        weight               => $weight,
+        gender               => $gender,
+        osg_bodykit          => $osg_bodykit,
+        osg_db               => $osg_db,
+        bestfit_1_order_rs   => $bestfit_1_order_rs,
+        bestfit_3x3_order_rs => $bestfit_3x3_order_rs,
     );
 };
 
