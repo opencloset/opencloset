@@ -4553,6 +4553,22 @@ get '/user/:id' => sub {
     my $rented_clothes_count = 0;
     $rented_clothes_count += $_->clothes->count for $user->orders;
 
+    my $osg_db = OpenCloset::Size::Guess->new(
+        'DB',
+        _time_zone => app->config->{timezone},
+        _schema    => $DB,
+        _range     => 0,
+    );
+    $osg_db->gender( $user->user_info->gender );
+    $osg_db->height( int $user->user_info->height );
+    $osg_db->weight( int $user->user_info->weight );
+    my $avg = $osg_db->guess;
+    my $diff;
+    for ( qw/ neck belly topbelly bust arm thigh waist hip leg foot knee / ) {
+        $diff->{$_} = $user->user_info->$_ && $avg->{$_} ? sprintf( '%+.1f', $user->user_info->$_ - $avg->{$_} ) : '-';
+        $avg->{$_}  = $avg->{$_} ? sprintf('%.1f', $avg->{$_}) : 'N/A';
+    }
+
     #
     # response
     #
@@ -4560,6 +4576,8 @@ get '/user/:id' => sub {
         user                  => $user,
         donated_clothes_count => $donated_clothes_count,
         rented_clothes_count  => $rented_clothes_count,
+        avg                   => $avg,
+        diff                  => $diff,
     );
 } => 'user-id';
 
