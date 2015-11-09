@@ -4532,15 +4532,16 @@ get '/user' => sub {
     my $q     = $self->param('q');
     my $staff = $self->param('staff');
 
-    if ($q && $q =~ m/^[0-9]{3}-?[0-9]{3,4}-?[0-9]{3,4}$/) {
-        $q =~ s/-//g;
+    my $q_phone = $q;
+    if ( $q_phone ) {
+        $q_phone =~ s/\D//g;
     }
 
     my $cond1 = $q
         ? [
         { 'name'               => { like => "%$q%" } },
         { 'email'              => { like => "%$q%" } },
-        { 'user_info.phone'    => { like => "%$q%" } },
+        { 'user_info.phone'    => { like => "%$q_phone%" } },
         { 'user_info.address4' => { like => "%$q%" } },    # 상세주소만 검색
         { 'user_info.birth'    => { like => "%$q%" } },
         { 'user_info.gender'   => $q },
