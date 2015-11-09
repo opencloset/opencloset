@@ -45,6 +45,19 @@ $ ->
         params.success = (response, newValue) ->
           $('.user-name').each (i, el) ->
             $(el).html newValue
+      when 'user-phone'
+        params.type    = 'text'
+        params.display = (value) ->
+          phone = value.replace /\D/g, ''
+          $(this).html phone
+        params.url     = (params) ->
+          phone = params.value.replace /\D/g, ''
+          url = $('#profile-user-info-data').data('url')
+          data = {}
+          data[params.name] = phone
+          $.ajax url,
+            type: 'PUT'
+            data: data
       when 'user-gender'
         params.type   = 'select'
         params.source = [
