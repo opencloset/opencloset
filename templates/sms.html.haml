@@ -1,6 +1,11 @@
 - use utf8;
 - my $_id = 'sms';
-- layout 'default', page_id => $_id;
+- layout 'default',
+-   page_id => $_id,
+-   jses    => [
+-     '/lib/jquery/js/jquery.mask.min.js',
+-   ],
+-   ;
 - title meta_text($_id);
 
 .row

@@ -40,6 +40,11 @@ $ ->
     .on( 'change', (e) -> updateMsgScreenWidth() )
 
   #
+  # 전화번호에 `-` 기호를 무시하도록 함
+  #
+  $('input[type="tel"]').mask('00000000000')
+
+  #
   # dynamic chosen item manupulation
   # http://stackoverflow.com/questions/11352207/jquery-chosen-plugin-add-options-dynamically
   #
@@ -60,7 +65,7 @@ $ ->
       OpenCloset.alert 'danger', '휴대전화를 입력해주세요.'
       $('input[name=to]').focus()
       return
-    unless /^\d{3}-?\d{3,4}-?\d{3,4}$/.test( to )
+    unless /^\d+$/.test( to )
       OpenCloset.alert 'danger', '유효하지 않은 휴대전화입니다.'
       $('input[name=to]').focus()
       return

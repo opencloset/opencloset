@@ -3111,7 +3111,7 @@ group {
         # validate params
         #
         my $v = $self->create_validator;
-        $v->field('to')->required(1)->regexp(qr/^[0-9]{3}-?[0-9]{3,4}-?[0-9]{3,4}$/);
+        $v->field('to')->required(1)->regexp(qr/^\d+$/);
         $v->field('text')->required(1)->regexp(qr/^(\s|\S)+$/);
         $v->field('status')->in(qw/ pending sending sent /);
 
