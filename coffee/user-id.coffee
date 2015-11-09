@@ -1,4 +1,23 @@
 $ ->
+  updateAverageDiff = ->
+    userID = $('#profile-user-info-data').data('pk')
+    $.ajax "/api/gui/user/#{userID}/avg.json",
+      type: 'GET'
+      success: (data, textStatus, jqXHR) ->
+        if data.ret is 1
+          for i in [ 'neck', 'belly', 'topbelly', 'bust', 'arm', 'thigh', 'waist', 'hip', 'leg', 'foot', 'knee' ]
+            $(".#{i} .diff").html( data.diff[i] )
+            $(".#{i} .avg").html( data.avg[i] )
+        else
+          OpenCloset.alert('warning', "키, 몸무게, 성별의 오류로 평균값을 구할 수 없습니다.")
+          for i in [ 'neck', 'belly', 'topbelly', 'bust', 'arm', 'thigh', 'waist', 'hip', 'leg', 'foot', 'knee' ]
+            $(".#{i} .diff").html( '-' )
+            $(".#{i} .avg").html( 'N/A' )
+      error: (jqXHR, textStatus, errorThrown) ->
+        type = jqXHR.status is 404 ? 'warning' : 'danger'
+        OpenCloset.alert(type, "평균값을 구할 수 없습니다: #{jqXHR.status}")
+      complete: (jqXHR, textStatus) ->
+
   $('.order-status').each (i, el) ->
     $(el).addClass OpenCloset.status[ $(el).data('status') ].css
     $(el).find('.order-status-str').html('연장중') if $(el).data('status') is '대여중' and $(el).data('late-fee') > 0
@@ -121,6 +140,9 @@ $ ->
           $.ajax url,
             type: 'PUT'
             data: data
+      when 'user-height', 'user-weight', 'user-neck', 'user-bust', 'user-waist', 'user-topbelly', 'user-belly', 'user-arm', 'user-leg', 'user-knee', 'user-thigh', 'user-hip', 'user-foot'
+        params.success = (response, newValue) ->
+          updateAverageDiff()
       else
         params.type = 'text'
 

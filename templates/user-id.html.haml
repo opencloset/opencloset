@@ -168,60 +168,82 @@
                                 .profile-info-value
                                   %span.editable#user-weight{ 'data-name' => 'weight' }= $user->user_info->weight
 
-                              .profile-info-row
+                              .profile-info-row.neck
                                 .profile-info-name 목 둘레
                                 .profile-info-value
                                   %span.editable#user-neck{ 'data-name' => 'neck' }= $user->user_info->neck
+                                  %span.diff= $diff->{neck}
+                                  %span.avg= $avg->{neck}
 
-                              .profile-info-row
+                              .profile-info-row.bust
                                 .profile-info-name 가슴 둘레
                                 .profile-info-value
                                   %span.editable#user-bust{ 'data-name' => 'bust' }= $user->user_info->bust
+                                  %span.diff= $diff->{bust}
+                                  %span.avg= $avg->{bust}
 
-                              .profile-info-row
+                              .profile-info-row.waist
                                 .profile-info-name 허리 둘레
                                 .profile-info-value
                                   %span.editable#user-waist{ 'data-name' => 'waist' }= $user->user_info->waist
+                                  %span.diff= $diff->{waist}
+                                  %span.avg= $avg->{waist}
 
-                              .profile-info-row
+                              .profile-info-row.topbelly
                                 .profile-info-name 윗배 둘레
                                 .profile-info-value
                                   %span.editable#user-topbelly{ 'data-name' => 'topbelly' }= $user->user_info->topbelly
+                                  %span.diff= $diff->{topbelly}
+                                  %span.avg= $avg->{topbelly}
 
-                              .profile-info-row
+                              .profile-info-row.belly
                                 .profile-info-name 배꼽 둘레
                                 .profile-info-value
                                   %span.editable#user-belly{ 'data-name' => 'belly' }= $user->user_info->belly
+                                  %span.diff= $diff->{belly}
+                                  %span.avg= $avg->{belly}
 
-                              .profile-info-row
+                              .profile-info-row.arm
                                 .profile-info-name 팔 길이
                                 .profile-info-value
                                   %span.editable#user-arm{ 'data-name' => 'arm' }= $user->user_info->arm
+                                  %span.diff= $diff->{arm}
+                                  %span.avg= $avg->{arm}
 
-                              .profile-info-row
+                              .profile-info-row.leg
                                 .profile-info-name 다리 길이
                                 .profile-info-value
                                   %span.editable#user-leg{ 'data-name' => 'leg' }= $user->user_info->leg
+                                  %span.diff= $diff->{leg}
+                                  %span.avg= $avg->{leg}
 
-                              .profile-info-row
+                              .profile-info-row.knee
                                 .profile-info-name 무릎 길이
                                 .profile-info-value
                                   %span.editable#user-knee{ 'data-name' => 'knee' }= $user->user_info->knee
+                                  %span.diff= $diff->{knee}
+                                  %span.avg= $avg->{knee}
 
-                              .profile-info-row
+                              .profile-info-row.thigh
                                 .profile-info-name 허벅지 둘레
                                 .profile-info-value
                                   %span.editable#user-thigh{ 'data-name' => 'thigh' }= $user->user_info->thigh
+                                  %span.diff= $diff->{thigh}
+                                  %span.avg= $avg->{thigh}
 
-                              .profile-info-row
+                              .profile-info-row.hip
                                 .profile-info-name 엉덩이 둘레
                                 .profile-info-value
                                   %span.editable#user-hip{ 'data-name' => 'hip' }= $user->user_info->hip
+                                  %span.diff= $diff->{hip}
+                                  %span.avg= $avg->{hip}
 
-                              .profile-info-row
+                              .profile-info-row.foot
                                 .profile-info-name 발 크기
                                 .profile-info-value
                                   %span.editable#user-foot{ 'data-name' => 'foot' }= $user->user_info->foot
+                                  %span.diff= $diff->{foot}
+                                  %span.avg= $avg->{foot}
 
                               .profile-info-row
                                 .profile-info-name 바지 길이

@@ -467,6 +467,27 @@ $opencloset-darken-yellow: desaturate(darken($opencloset-yellow, 4%), 10%);
                 text-decoration: none;
             }
         }
+        .profile-info-value > span + span.diff::before {
+            border-bottom: 1px solid #fff;
+            color: #666;
+            content: "(";
+            display: inline;
+            margin-left: 3px;
+            margin-right: 1px;
+        }
+        .profile-info-value > span + span.diff::after {
+            content: ")";
+            display: inline;
+            margin-left: 1px;
+        }
+        .profile-info-value > span + span.avg::before {
+            border-bottom: 1px solid #fff;
+            color: #666;
+            content: "";
+            display: inline;
+            margin-left: 1px;
+            margin-right: 30px;
+        }
     }
     #clothes {
         #clothes-list-table table {
