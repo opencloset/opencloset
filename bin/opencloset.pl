@@ -4547,6 +4547,10 @@ get '/user' => sub {
         { 'user_info.gender'   => $q },
         ]
         : {};
+
+    ## q_phone 이 없으면 삭제 'user_info.phone LIKE %%' 검색이 되어버림
+    splice @$cond1, 2, 1 if $q && !$q_phone;
+
     my $cond2
         = !defined($staff)           ? {}
         : !$staff                    ? { 'user_info.staff' => 0 }
