@@ -1256,6 +1256,53 @@ helper phone_format => sub {
     return $phone;
 };
 
+helper user_avg_diff => sub {
+    my ( $self, $user ) = @_;
+
+    my %data = (
+        ret  => 0,
+        diff => undef,
+        avg  => undef,
+    );
+    for ( qw/ neck belly topbelly bust arm thigh waist hip leg foot knee / ) {
+        $data{diff}{$_} = '-';
+        $data{avg}{$_}  = 'N/A';
+    }
+
+    unless (
+        $user->user_info->gender =~ m/^(male|female)$/
+        && $user->user_info->height
+        && $user->user_info->weight
+    )
+    {
+        return \%data;
+    }
+
+    my $osg_db = OpenCloset::Size::Guess->new(
+        'DB',
+        _time_zone => app->config->{timezone},
+        _schema    => $DB,
+        _range     => 0,
+    );
+    $osg_db->gender( $user->user_info->gender );
+    $osg_db->height( int $user->user_info->height );
+    $osg_db->weight( int $user->user_info->weight );
+    my $avg = $osg_db->guess;
+    my $diff;
+    for ( qw/ neck belly topbelly bust arm thigh waist hip leg foot knee / ) {
+        $diff->{$_} = $user->user_info->$_ && $avg->{$_} ? sprintf( '%+.1f', $user->user_info->$_ - $avg->{$_} ) : '-';
+        $avg->{$_}  = $avg->{$_} ? sprintf('%.1f', $avg->{$_}) : 'N/A';
+    }
+
+    %data = (
+        ret  => 1,
+        diff => $diff,
+        avg  => $avg,
+    );
+
+    return \%data;
+};
+
 #
 # csv section
 #
@@ -3920,45 +3967,9 @@ group {
         my $user = $self->get_user( \%params );
         return unless $user;
 
-        my %data = (
-            ret  => 0,
-            diff => undef,
-            avg  => undef,
-        );
+        my $data = $self->user_avg_diff($user);
 
-        unless (
-            $user->user_info->gender =~ m/^(male|female)$/
-            && $user->user_info->height
-            && $user->user_info->weight
-        )
-        {
-            $self->respond_to( json => { status => 200, json => \%data } );
-            return;
-        }
-
-        my $osg_db = OpenCloset::Size::Guess->new(
-            'DB',
-            _time_zone => app->config->{timezone},
-            _schema    => $DB,
-            _range     => 0,
-        );
-        $osg_db->gender( $user->user_info->gender );
-        $osg_db->height( int $user->user_info->height );
-        $osg_db->weight( int $user->user_info->weight );
-        my $avg = $osg_db->guess;
-        my $diff;
-        for ( qw/ neck belly topbelly bust arm thigh waist hip leg foot knee / ) {
-            $diff->{$_} = $user->user_info->$_ && $avg->{$_} ? sprintf( '%+.1f', $user->user_info->$_ - $avg->{$_} ) : '-';
-            $avg->{$_}  = $avg->{$_} ? sprintf('%.1f', $avg->{$_}) : 'N/A';
-        }
-
-        %data = (
-            ret  => 1,
-            diff => $diff,
-            avg  => $avg,
-        );
-
-        $self->respond_to( json => { status => 200, json => \%data } );
+        $self->respond_to( json => { status => 200, json => $data } );
     }
 
     sub api_postcode_search {
@@ -4613,21 +4624,7 @@ get '/user/:id' => sub {
     my $rented_clothes_count = 0;
     $rented_clothes_count += $_->clothes->count for $user->orders;
 
-    my $osg_db = OpenCloset::Size::Guess->new(
-        'DB',
-        _time_zone => app->config->{timezone},
-        _schema    => $DB,
-        _range     => 0,
-    );
-    $osg_db->gender( $user->user_info->gender ) if $user->user_info->gender;
-    $osg_db->height( int $user->user_info->height );
-    $osg_db->weight( int $user->user_info->weight );
-    my $avg = $osg_db->guess;
-    my $diff;
-    for ( qw/ neck belly topbelly bust arm thigh waist hip leg foot knee / ) {
-        $diff->{$_} = $user->user_info->$_ && $avg->{$_} ? sprintf( '%+.1f', $user->user_info->$_ - $avg->{$_} ) : '-';
-        $avg->{$_}  = $avg->{$_} ? sprintf('%.1f', $avg->{$_}) : 'N/A';
-    }
+    my $data = $self->user_avg_diff($user);
 
     #
     # response
@@ -4636,8 +4633,8 @@ get '/user/:id' => sub {
         user                  => $user,
         donated_clothes_count => $donated_clothes_count,
         rented_clothes_count  => $rented_clothes_count,
-        avg                   => $avg,
-        diff                  => $diff,
+        avg                   => $data->{avg},
+        diff                  => $data->{diff},
     );
 } => 'user-id';
 
