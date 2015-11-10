@@ -4617,7 +4617,7 @@ get '/user/:id' => sub {
         _schema    => $DB,
         _range     => 0,
     );
-    $osg_db->gender( $user->user_info->gender );
+    $osg_db->gender( $user->user_info->gender ) if $user->user_info->gender;
     $osg_db->height( int $user->user_info->height );
     $osg_db->weight( int $user->user_info->weight );
     my $avg = $osg_db->guess;
