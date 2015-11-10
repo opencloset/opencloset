@@ -4667,7 +4667,7 @@ get '/clothes' => sub {
     my $v = $self->create_validator;
     $v->field('status')->regexp(qr/^\d+$/);
     $v->field('tag')->regexp(qr/^\d+$/);
-    $v->field('category')->required(1)->in( keys %{ app->config->{category} } );
+    $v->field('category')->in( keys %{ app->config->{category} } );
     $v->field('gender')->in(qw/ male female unisex /);
     $v->field(qw/ arm belly bust hip length neck thigh topbelly waist /)->each(sub {
         shift->regexp(qr/^\d{1,3}$/);
