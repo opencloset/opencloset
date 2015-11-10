@@ -4545,7 +4545,7 @@ get '/user' => sub {
 
     my $q_phone = $q;
     if ( $q_phone ) {
-        $q_phone =~ s/\D//g;
+        $q_phone =~ s/-//g;
     }
 
     my $cond1 = {};
