@@ -4537,19 +4537,21 @@ get '/user' => sub {
         $q_phone =~ s/\D//g;
     }
 
-    my $cond1 = $q
-        ? [
-        { 'name'               => { like => "%$q%" } },
-        { 'email'              => { like => "%$q%" } },
-        { 'user_info.phone'    => { like => "%$q_phone%" } },
-        { 'user_info.address4' => { like => "%$q%" } },    # 상세주소만 검색
-        { 'user_info.birth'    => { like => "%$q%" } },
-        { 'user_info.gender'   => $q },
-        ]
-        : {};
+    my $cond1 = {};
+    if ($q) {
+        $cond1 = [
+            { 'name'               => { like => "%$q%" } },
+            { 'email'              => { like => "%$q%" } },
+            { 'user_info.address4' => { like => "%$q%" } }, # 상세주소만 검색
+            { 'user_info.birth'    => { like => "%$q%" } },
+            { 'user_info.gender'   => $q },
+        ];
 
-    ## q_phone 이 없으면 삭제 'user_info.phone LIKE %%' 검색이 되어버림
-    splice @$cond1, 2, 1 if $q && !$q_phone;
+        #
+        # q_phone 이 없으면 삭제 'user_info.phone LIKE %%' 검색이 되어버림
+        #
+        push @$cond1, { 'user_info.phone' => { like => "%$q_phone%" } } if $q_phone;
+    }
 
     my $cond2
         = !defined($staff)           ? {}
