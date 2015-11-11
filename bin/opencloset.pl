@@ -29,6 +29,7 @@ use Mojolicious::Lite;
 }
 app->controller_class("OpenCloset::Web::Controller");
 
+use CHI;
 use Data::Pageset;
 use DateTime::Duration;
 use DateTime::Format::Duration;
@@ -54,7 +55,6 @@ use Postcodify;
 
 use OpenCloset::Schema;
 use OpenCloset::Size::Guess;
-use CHI;
 my $cache = CHI->new( driver => 'Memory', global => 1 );
 
 app->defaults( %{ plugin 'Config' => { default => {
