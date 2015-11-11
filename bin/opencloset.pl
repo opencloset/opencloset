@@ -6415,20 +6415,6 @@ get '/stat/visitor/:ymd' => sub {
         return;
     }
 
-    my $dt_start = try { $dt->clone->truncate( to => 'day' ) };
-    unless ($dt_start) {
-        app->log->warn("cannot create start datetime object");
-        $self->redirect_to( $self->url_for('/stat/visitor') );
-        return;
-    }
-
-    my $dt_end = try { $dt->clone->truncate( to => 'day' )->add( days => 1, seconds => -1 ); };
-    unless ($dt_end) {
-        app->log->warn("cannot create end datetime object");
-        $self->redirect_to( $self->url_for('/stat/visitor') );
-        return;
-    }
-
     # -2 ~ +2 days from now
     my %count;
     my $from = $dt->clone->truncate( to => 'day' )->add( days => -2 );
