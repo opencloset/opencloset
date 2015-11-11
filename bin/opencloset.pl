@@ -6391,13 +6391,13 @@ get '/stat/visitor/:ymd' => sub {
 
     unless ( $params{ymd} ) {
         app->log->warn("ymd is required");
-        $self->redirect_to( $self->url_for('/stat/status') );
+        $self->redirect_to( $self->url_for('/stat/visitor') );
         return;
     }
 
     unless ( $params{ymd} =~ m/^(\d{4})-(\d{2})-(\d{2})$/ ) {
         app->log->warn("invalid ymd format: $params{ymd}");
-        $self->redirect_to( $self->url_for('/stat/status') );
+        $self->redirect_to( $self->url_for('/stat/visitor') );
         return;
     }
 
