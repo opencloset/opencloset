@@ -6437,9 +6437,11 @@ get '/stat/visitor/:ymd' => sub {
         my $from = $from->clone->truncate( to => 'day' );
         my $to   = $from->clone->truncate( to => 'day' )->add( days => 1, seconds => -1 );
 
-		my $count = $cache->compute("day-$from-$to", "1 day", sub {
-										$self->count_visitor( $from, $to );
-									});
+        my $count = $cache->compute(
+            "day-$from-$to",
+            "1 day",
+            sub { $self->count_visitor( $from, $to ) },
+        );
 
         push @{ $count{day} }, $count;
     }
@@ -6449,9 +6451,11 @@ get '/stat/visitor/:ymd' => sub {
         my $from = $i->clone->truncate( to => 'week' );
         my $to   = $i->clone->truncate( to => 'week' )->add( weeks => 1, seconds => -1 );
 
-		my $count = $cache->compute("week-$from-$to", "1 week", sub {
-										$self->count_visitor( $from, $to );
-									});
+        my $count = $cache->compute(
+            "week-$from-$to",
+            "1 week",
+            sub { $self->count_visitor( $from, $to ) },
+        );
 
         push @{ $count{week} }, $count;
     }
@@ -6461,17 +6465,19 @@ get '/stat/visitor/:ymd' => sub {
         my $from = $i->clone->truncate( to => 'month' );
         my $to   = $i->clone->truncate( to => 'month' )->add( months => 1, seconds => -1 );
 
-		my $count = $cache->compute("month-$from-$to", "1 week", sub {
-										$self->count_visitor( $from, $to );
-									});
+        my $count = $cache->compute(
+            "month-$from-$to",
+            "1 week",
+            sub { $self->count_visitor( $from, $to ) },
+        );
 
         push @{ $count{month} }, $count;
     }
 
     $self->render(
         'stat-visitor',
-        count    => \%count,
-        dt       => $dt,
+        count => \%count,
+        dt    => $dt,
     );
 };
 
