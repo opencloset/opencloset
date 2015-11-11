@@ -55,7 +55,6 @@ use Postcodify;
 
 use OpenCloset::Schema;
 use OpenCloset::Size::Guess;
-my $cache = CHI->new( driver => 'Memory', global => 1 );
 
 app->defaults( %{ plugin 'Config' => { default => {
     jses        => [],
@@ -66,6 +65,8 @@ app->defaults( %{ plugin 'Config' => { default => {
     alert       => q{},
     type        => q{},
 }}});
+
+my $CACHE = CHI->new( driver => 'Memory', global => 1 );
 
 my $DB = OpenCloset::Schema->connect({
     dsn      => app->config->{database}{dsn},
@@ -6423,7 +6424,7 @@ get '/stat/visitor/:ymd' => sub {
         my $f = $from->clone->truncate( to => 'day' );
         my $t = $from->clone->truncate( to => 'day' )->add( days => 1, seconds => -1 );
 
-        my $count = $cache->compute(
+        my $count = $CACHE->compute(
             "day-$f-$t",
             "1 day",
             sub { $self->count_visitor( $f, $t ) },
@@ -6437,7 +6438,7 @@ get '/stat/visitor/:ymd' => sub {
         my $f = $i->clone->truncate( to => 'week' );
         my $t = $i->clone->truncate( to => 'week' )->add( weeks => 1, seconds => -1 );
 
-        my $count = $cache->compute(
+        my $count = $CACHE->compute(
             "week-$f-$t",
             "1 week",
             sub { $self->count_visitor( $f, $t ) },
@@ -6451,7 +6452,7 @@ get '/stat/visitor/:ymd' => sub {
         my $f = $i->clone->truncate( to => 'month' );
         my $t = $i->clone->truncate( to => 'month' )->add( months => 1, seconds => -1 );
 
-        my $count = $cache->compute(
+        my $count = $CACHE->compute(
             "month-$f-$t",
             "1 week",
             sub { $self->count_visitor( $f, $t ) },
