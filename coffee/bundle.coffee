@@ -73,6 +73,7 @@ $ ->
       '포장취소':   { id: 41, css: 'label-inverse'   }
       '환불':       { id: 42, css: 'label-inverse'   }
       '사이즈없음': { id: 43, css: 'label-inverse'   }
+      '포장완료':   { id: 44, css: 'label-inverse'   }
     category:
       jacket:    { str: '재킷',     price: 10000 }
       pants:     { str: '바지',     price: 10000 }
