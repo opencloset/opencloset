@@ -4974,6 +4974,7 @@ get '/order' => sub {
     # 16    =>  '치수측정'
     # 17    =>  '의류준비'
     # 18    =>  '포장'
+    # 44    =>  '포장완료'
     # 19    =>  '결제대기'
     # 20    =>  '탈의01'
     # 21    =>  '탈의02'
@@ -5074,7 +5075,7 @@ get '/order' => sub {
                 );
             }
             default {
-                my @valid = 1 .. 43;
+                my @valid = 1 .. 44;
                 %cond = ( status_id => $status_id ) if $status_id ~~ @valid;
             }
         }
@@ -5198,14 +5199,14 @@ post '/order' => sub {
             }
 
             #
-            # 주문서를 결제대기(19) 상태로 변경
+            # 주문서를 포장완료(44) 상태로 변경
             #
-            $order->update({ status_id => 19 });
+            $order->update({ status_id => 44 });
             my $res = HTTP::Tiny->new(timeout => 1)->post_form(app->config->{monitor_uri} . '/events', {
                 sender   => 'order',
                 order_id => $order_params{id},
                 from     => 18,
-                to       => 19
+                to       => 44
             });
 
             $self->app->log->error("Failed to posting event: $res->{reason}") unless $res->{success};

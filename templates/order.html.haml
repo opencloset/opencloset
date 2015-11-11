@@ -39,6 +39,9 @@
     %a{ :href => "#{ url_with->query([ p => 1, status => '18' ]) }" } 포장
   %span= '|'
   %span
+    %a{ :href => "#{ url_with->query([ p => 1, status => '44' ]) }" } 포장완료
+  %span= '|'
+  %span
     %a{ :href => "#{ url_with->query([ p => 1, status => '19' ]) }" } 결제대기
   %span= '|'
   %span
@@ -79,7 +82,7 @@
             %a{ :href => "#{url_for('/order/' . $order->id)}" }= $order->id
           %td
             %a{ :href => "#{url_for('/order/' . $order->id)}" }
-              - my $status;
+              - my $status = '';
               - if ( $order->status ) {
               -   $status = $order->status->name;
               -   if ( $status eq '대여중' ) {
@@ -90,7 +93,13 @@
               -     $status .= '(미납) ' . commify($unpaid) . '원' if $unpaid;
               -   }
               - }
-              %span.label.order-status{ 'data-order-status' => "#{ $order->status ? $order->status->name : q{} }" }= $status || '상태없음'
+              %span.label.order-status{ 'data-order-status' => "#{$status}" }= $status || '상태없음'
+              - if ($status eq '포장완료') {
+                %span.pull-right
+                  %span.text-primary.glyphicon.glyphicon-arrow-right{:aria-hidden => 'true'}
+                  %span.status-update.label.order-status{ 'data-order-status' => "결제대기", 'data-order-id' => "#{$order->id}", 'data-status-to' => '19' }
+                    결제대기
+              - }
               - my $sms_label;
               - my $sms_str;
               - if ( $search_status eq 'unpaid' && $order->status->name eq '반납' ) {
