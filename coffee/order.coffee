@@ -14,3 +14,16 @@ $ ->
 
   $('.clothes-category').each (i, el) ->
     $(el).html OpenCloset.category[el.text].str
+
+  $('.status-update').on 'click', (e) ->
+    e.preventDefault()
+    $this = $(@)
+    order_id  = $this.data('order-id')
+    status_to = $this.data('status-to')
+    $.ajax "/api/order/#{order_id}.json",
+      type: 'PUT'
+      data: { id: order_id, status_id: status_to }
+      success: (data) ->
+        location.href = $this.closest('a').prop('href')
+      error: (jqXHR, textStatus) ->
+        OpenCloset.alert('danger', "주문서 상태 변경에 실패했습니다: #{jqXHR.responseJSON.error.str}")
