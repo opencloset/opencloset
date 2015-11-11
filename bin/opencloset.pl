@@ -6433,42 +6433,42 @@ get '/stat/visitor/:ymd' => sub {
     my %count;
     my $from = $dt->clone->truncate( to => 'day' )->add( days => -2 );
     my $to   = $dt->clone->truncate( to => 'day' )->add( days =>  2 );
-    for ( $from ; $from <= $to ; $from->add( days => 1 ) ) {
-        my $from = $from->clone->truncate( to => 'day' );
-        my $to   = $from->clone->truncate( to => 'day' )->add( days => 1, seconds => -1 );
+    for ( $from; $from <= $to; $from->add( days => 1 ) ) {
+        my $f = $from->clone->truncate( to => 'day' );
+        my $t = $from->clone->truncate( to => 'day' )->add( days => 1, seconds => -1 );
 
         my $count = $cache->compute(
-            "day-$from-$to",
+            "day-$f-$t",
             "1 day",
-            sub { $self->count_visitor( $from, $to ) },
+            sub { $self->count_visitor( $f, $t ) },
         );
 
         push @{ $count{day} }, $count;
     }
 
     # from first to current week of this year
-    for ( my $i = $dt->clone->truncate( to => 'year') ; $i <= $dt ; $i -> add( weeks => 1 ) ) {
-        my $from = $i->clone->truncate( to => 'week' );
-        my $to   = $i->clone->truncate( to => 'week' )->add( weeks => 1, seconds => -1 );
+    for ( my $i = $dt->clone->truncate( to => 'year'); $i <= $dt; $i->add( weeks => 1 ) ) {
+        my $f = $i->clone->truncate( to => 'week' );
+        my $t = $i->clone->truncate( to => 'week' )->add( weeks => 1, seconds => -1 );
 
         my $count = $cache->compute(
-            "week-$from-$to",
+            "week-$f-$t",
             "1 week",
-            sub { $self->count_visitor( $from, $to ) },
+            sub { $self->count_visitor( $f, $t ) },
         );
 
         push @{ $count{week} }, $count;
     }
 
     # from january to current months of this year
-    for ( my $i = $dt->clone->truncate( to => 'year') ; $i <= $dt ; $i -> add( months => 1 ) ) {
-        my $from = $i->clone->truncate( to => 'month' );
-        my $to   = $i->clone->truncate( to => 'month' )->add( months => 1, seconds => -1 );
+    for ( my $i = $dt->clone->truncate( to => 'year'); $i <= $dt; $i->add( months => 1 ) ) {
+        my $f = $i->clone->truncate( to => 'month' );
+        my $t = $i->clone->truncate( to => 'month' )->add( months => 1, seconds => -1 );
 
         my $count = $cache->compute(
-            "month-$from-$to",
+            "month-$f-$t",
             "1 week",
-            sub { $self->count_visitor( $from, $to ) },
+            sub { $self->count_visitor( $f, $t ) },
         );
 
         push @{ $count{month} }, $count;
