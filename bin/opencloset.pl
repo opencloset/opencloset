@@ -6420,7 +6420,7 @@ get '/stat/visitor/:ymd' => sub {
     my %count;
     my $from = $dt->clone->truncate( to => 'day' )->add( days => -2 );
     my $to   = $dt->clone->truncate( to => 'day' )->add( days =>  2 );
-    for ( $from; $from <= $to; $from->add( days => 1 ) ) {
+    for ( ; $from <= $to; $from->add( days => 1 ) ) {
         my $f = $from->clone->truncate( to => 'day' );
         my $t = $from->clone->truncate( to => 'day' )->add( days => 1, seconds => -1 );
 
