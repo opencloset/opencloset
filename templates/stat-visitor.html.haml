@@ -45,11 +45,11 @@
                 %a{ :href => "#{ url_for( '/order' )->query('booking_ymd' => $date ) }" }= $date
             - }
 
-          %td= $count->{day}->[$i]->{all}{total}
-          %td= $count->{day}->[$i]->{visited}{total}
-          %td= $count->{day}->[$i]->{notvisited}{total}
-          %td= $count->{day}->[$i]->{bestfit}{total}
-          %td= $count->{day}->[$i]->{loanee}{total}
+          %td= $count->{day}[$i]{all}{total}
+          %td= $count->{day}[$i]{visited}{total}
+          %td= $count->{day}[$i]{notvisited}{total}
+          %td= $count->{day}[$i]{bestfit}{total}
+          %td= $count->{day}[$i]{loanee}{total}
       - }
 
 #status-week
@@ -76,11 +76,11 @@
             - my $from = $week->clone->truncate( to => 'week' )->add( weeks => $i )->strftime('%m/%d');
             - my $to   = $week->clone->truncate( to => 'week' )->add( weeks => $i + 1 )->strftime('%m/%d');
             = sprintf("%02d : %s ~ %s", $i + 1, $from, $to)
-          %td= $count->{week}->[$i]->{all}{total}
-          %td= $count->{week}->[$i]->{visited}{total}
-          %td= $count->{week}->[$i]->{notvisited}{total}
-          %td= $count->{week}->[$i]->{bestfit}{total}
-          %td= $count->{week}->[$i]->{loanee}{total}
+          %td= $count->{week}[$i]{all}{total}
+          %td= $count->{week}[$i]{visited}{total}
+          %td= $count->{week}[$i]{notvisited}{total}
+          %td= $count->{week}[$i]{bestfit}{total}
+          %td= $count->{week}[$i]{loanee}{total}
       - }
 
 #status-month
@@ -104,9 +104,9 @@
         %tr
           %td
             = $i + 1
-          %td= $count->{month}->[$i]->{all}{total}
-          %td= $count->{month}->[$i]->{visited}{total}
-          %td= $count->{month}->[$i]->{notvisited}{total}
-          %td= $count->{month}->[$i]->{bestfit}{total}
-          %td= $count->{month}->[$i]->{loanee}{total}
+          %td= $count->{month}[$i]{all}{total}
+          %td= $count->{month}[$i]{visited}{total}
+          %td= $count->{month}[$i]{notvisited}{total}
+          %td= $count->{month}[$i]{bestfit}{total}
+          %td= $count->{month}[$i]{loanee}{total}
       - }
