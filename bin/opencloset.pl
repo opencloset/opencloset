@@ -6440,11 +6440,22 @@ get '/stat/visitor/:ymd' => sub {
         my $f = $from->clone->truncate( to => 'day' );
         my $t = $from->clone->truncate( to => 'day' )->add( days => 1, seconds => -1 );
 
-        my $count = $CACHE->compute(
-            "day-$f-$t",
-            "1 day",
-            sub { $self->count_visitor( $f, $t ) },
-        );
+        my $f_str = $f->strftime('%Y%m%d%H%M%S');
+        my $t_str = $t->strftime('%Y%m%d%H%M%S');
+        my $name  = "day-$f_str-$t_str";
+
+        my $count;
+        if ( $f < $today && $t < $today ) {
+            $count = $CACHE->compute(
+                $name,
+                undef,
+                sub { $self->count_visitor( $f, $t ) },
+            );
+        }
+        else {
+            app->log->info( "do not caching and by-pass cache: $name" );
+            $count = $self->count_visitor( $f, $t );
+        }
 
         push @{ $count{day} }, $count;
     }
@@ -6454,11 +6465,23 @@ get '/stat/visitor/:ymd' => sub {
         my $f = $i->clone->truncate( to => 'week' );
         my $t = $i->clone->truncate( to => 'week' )->add( weeks => 1, seconds => -1 );
 
-        my $count = $CACHE->compute(
-            "week-$f-$t",
-            "1 week",
-            sub { $self->count_visitor( $f, $t ) },
-        );
+        my $f_str = $f->strftime('%Y%m%d%H%M%S');
+        my $t_str = $t->strftime('%Y%m%d%H%M%S');
+        my $name  = "week-$f_str-$t_str";
+
+        my $count;
+        if ( $f < $today && $t < $today ) {
+            $count = $CACHE->compute(
+                $name,
+                undef,
+                sub { $self->count_visitor( $f, $t ) },
+            );
+        }
+        else {
+            app->log->info( "do not caching and by-pass cache: $name" );
+            $count = $self->count_visitor( $f, $t );
+        }
+
 
         push @{ $count{week} }, $count;
     }
@@ -6468,11 +6491,22 @@ get '/stat/visitor/:ymd' => sub {
         my $f = $i->clone->truncate( to => 'month' );
         my $t = $i->clone->truncate( to => 'month' )->add( months => 1, seconds => -1 );
 
-        my $count = $CACHE->compute(
-            "month-$f-$t",
-            "1 week",
-            sub { $self->count_visitor( $f, $t ) },
-        );
+        my $f_str = $f->strftime('%Y%m%d%H%M%S');
+        my $t_str = $t->strftime('%Y%m%d%H%M%S');
+        my $name  = "month-$f_str-$t_str";
+
+        my $count;
+        if ( $f < $today && $t < $today ) {
+            $count = $CACHE->compute(
+                $name,
+                undef,
+                sub { $self->count_visitor( $f, $t ) },
+            );
+        }
+        else {
+            app->log->info( "do not caching and by-pass cache: $name" );
+            $count = $self->count_visitor( $f, $t );
+        }
 
         push @{ $count{month} }, $count;
     }
