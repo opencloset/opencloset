@@ -6448,14 +6448,10 @@ get '/stat/visitor/:ymd' => sub {
 
         my $data;
         if ( $f < $today && $t < $today ) {
-            $data = $CACHE->compute(
-                $name,
-                undef,
-                sub { $self->count_visitor( $f, $t ) },
-            );
+            $data = $CACHE->get($name);
         }
-        else {
-            app->log->info( "do not caching and by-pass cache: $name" );
+        elsif ( $f->clone->truncate( to => 'day' ) == $today ) {
+            app->log->info( "do not cache and by-pass cache: $name" );
             $data = $self->count_visitor( $f, $t );
         }
 
@@ -6473,17 +6469,8 @@ get '/stat/visitor/:ymd' => sub {
 
         my $data;
         if ( $f < $today && $t < $today ) {
-            $data = $CACHE->compute(
-                $name,
-                undef,
-                sub { $self->count_visitor( $f, $t ) },
-            );
+            $data = $CACHE->get($name);
         }
-        else {
-            app->log->info( "do not caching and by-pass cache: $name" );
-            $data = $self->count_visitor( $f, $t );
-        }
-
 
         push @{ $count{week} }, $data;
     }
@@ -6499,15 +6486,7 @@ get '/stat/visitor/:ymd' => sub {
 
         my $data;
         if ( $f < $today && $t < $today ) {
-            $data = $CACHE->compute(
-                $name,
-                undef,
-                sub { $self->count_visitor( $f, $t ) },
-            );
-        }
-        else {
-            app->log->info( "do not caching and by-pass cache: $name" );
-            $data = $self->count_visitor( $f, $t );
+            $data = $CACHE->get($name);
         }
 
         push @{ $count{month} }, $data;
