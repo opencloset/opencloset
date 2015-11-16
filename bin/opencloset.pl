@@ -66,7 +66,11 @@ app->defaults( %{ plugin 'Config' => { default => {
     type        => q{},
 }}});
 
-my $CACHE = CHI->new( driver => 'Memory', global => 1 );
+my $CACHE = CHI->new(
+    driver   => 'File',
+    root_dir => app->config->{cache}{dir} || './cache',
+);
+app->log->info( "cache dir: " . $CACHE->root_dir );
 
 my $DB = OpenCloset::Schema->connect({
     dsn      => app->config->{database}{dsn},

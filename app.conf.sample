@@ -262,6 +262,13 @@ $db_opts->{AutoCommit} //= 1;
     },
 
     #
+    # cache
+    #
+    cache => {
+        dir => './cache',
+    },
+
+    #
     # postcodify
     #
     postcodify => {
