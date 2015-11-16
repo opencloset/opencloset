@@ -6444,9 +6444,9 @@ get '/stat/visitor/:ymd' => sub {
         my $t_str = $t->strftime('%Y%m%d%H%M%S');
         my $name  = "day-$f_str-$t_str";
 
-        my $count;
+        my $data;
         if ( $f < $today && $t < $today ) {
-            $count = $CACHE->compute(
+            $data = $CACHE->compute(
                 $name,
                 undef,
                 sub { $self->count_visitor( $f, $t ) },
@@ -6454,10 +6454,10 @@ get '/stat/visitor/:ymd' => sub {
         }
         else {
             app->log->info( "do not caching and by-pass cache: $name" );
-            $count = $self->count_visitor( $f, $t );
+            $data = $self->count_visitor( $f, $t );
         }
 
-        push @{ $count{day} }, $count;
+        push @{ $count{day} }, $data;
     }
 
     # from first to current week of this year
@@ -6469,9 +6469,9 @@ get '/stat/visitor/:ymd' => sub {
         my $t_str = $t->strftime('%Y%m%d%H%M%S');
         my $name  = "week-$f_str-$t_str";
 
-        my $count;
+        my $data;
         if ( $f < $today && $t < $today ) {
-            $count = $CACHE->compute(
+            $data = $CACHE->compute(
                 $name,
                 undef,
                 sub { $self->count_visitor( $f, $t ) },
@@ -6479,11 +6479,11 @@ get '/stat/visitor/:ymd' => sub {
         }
         else {
             app->log->info( "do not caching and by-pass cache: $name" );
-            $count = $self->count_visitor( $f, $t );
+            $data = $self->count_visitor( $f, $t );
         }
 
 
-        push @{ $count{week} }, $count;
+        push @{ $count{week} }, $data;
     }
 
     # from january to current months of this year
@@ -6495,9 +6495,9 @@ get '/stat/visitor/:ymd' => sub {
         my $t_str = $t->strftime('%Y%m%d%H%M%S');
         my $name  = "month-$f_str-$t_str";
 
-        my $count;
+        my $data;
         if ( $f < $today && $t < $today ) {
-            $count = $CACHE->compute(
+            $data = $CACHE->compute(
                 $name,
                 undef,
                 sub { $self->count_visitor( $f, $t ) },
@@ -6505,10 +6505,10 @@ get '/stat/visitor/:ymd' => sub {
         }
         else {
             app->log->info( "do not caching and by-pass cache: $name" );
-            $count = $self->count_visitor( $f, $t );
+            $data = $self->count_visitor( $f, $t );
         }
 
-        push @{ $count{month} }, $count;
+        push @{ $count{month} }, $data;
     }
 
     $self->render(
