@@ -6420,6 +6420,18 @@ get '/stat/visitor/:ymd' => sub {
         return;
     }
 
+    my $today = try {
+        DateTime->now(
+            time_zone => app->config->{timezone},
+        );
+    };
+    unless ($today) {
+        app->log->warn("cannot create datetime object: today");
+        $self->redirect_to( $self->url_for('/stat/visitor') );
+        return;
+    }
+    $today->truncate( to => 'day' );
+
     # -2 ~ +2 days from now
     my %count;
     my $from = $dt->clone->truncate( to => 'day' )->add( days => -2 );
@@ -6438,7 +6450,7 @@ get '/stat/visitor/:ymd' => sub {
     }
 
     # from first to current week of this year
-    for ( my $i = $dt->clone->truncate( to => 'year'); $i <= $dt; $i->add( weeks => 1 ) ) {
+    for ( my $i = $today->clone->truncate( to => 'year'); $i <= $today; $i->add( weeks => 1 ) ) {
         my $f = $i->clone->truncate( to => 'week' );
         my $t = $i->clone->truncate( to => 'week' )->add( weeks => 1, seconds => -1 );
 
@@ -6452,7 +6464,7 @@ get '/stat/visitor/:ymd' => sub {
     }
 
     # from january to current months of this year
-    for ( my $i = $dt->clone->truncate( to => 'year'); $i <= $dt; $i->add( months => 1 ) ) {
+    for ( my $i = $today->clone->truncate( to => 'year'); $i <= $today; $i->add( months => 1 ) ) {
         my $f = $i->clone->truncate( to => 'month' );
         my $t = $i->clone->truncate( to => 'month' )->add( months => 1, seconds => -1 );
 
