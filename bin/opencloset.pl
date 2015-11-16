@@ -1341,6 +1341,8 @@ helper count_visitor => sub {
     );
     while ( my $booking = $booking_rs->next ) {
         for my $order ( $booking->orders ) {
+            next unless $order->user->user_info;
+
             my $gender = $order->user->user_info->gender;
             next unless $gender;
 
