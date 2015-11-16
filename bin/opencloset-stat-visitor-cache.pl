@@ -76,10 +76,10 @@ die "$config_file: cannot load config\n" unless $CONF;
     die "cannot create datetime object: today\n" unless $today;
     $today->truncate( to => 'day' );
 
-    # -2 ~ +2 days from now
+    # 01/01 ~ specified day
     my %count;
-    my $from = $dt->clone->truncate( to => 'day' )->add( days => -2 );
-    my $to   = $dt->clone->truncate( to => 'day' )->add( days =>  2 );
+    my $from = $dt->clone->truncate( to => 'year' );
+    my $to   = $dt->clone->truncate( to => 'day' );
     for ( ; $from <= $to; $from->add( days => 1 ) ) {
         my $f = $from->clone->truncate( to => 'day' );
         my $t = $from->clone->truncate( to => 'day' )->add( days => 1, seconds => -1 );
