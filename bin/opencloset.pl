@@ -1329,7 +1329,6 @@ helper count_visitor => sub {
                     'user' => 'user_info'
                 }
             },
-            order_by => { -asc => 'date' },
         },
     );
 
