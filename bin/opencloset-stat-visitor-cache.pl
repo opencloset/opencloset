@@ -8,6 +8,7 @@ use FindBin qw( $Bin $Script );
 
 use CHI;
 use DateTime;
+use Time::Piece;
 use Try::Tiny;
 
 use OpenCloset::Config;
@@ -17,9 +18,9 @@ binmode STDOUT, ':utf8';
 binmode STDERR, ':utf8';
 
 my $config_file = shift || "$Bin/../app.conf";
-my $ymd         = shift;
+my $ymd         = shift || localtime->ymd;
 
-die "Usage: $Script <config path> <yyyy-mm-dd>\n"
+die "Usage: $Script <config path> [ <yyyy-mm-dd> ] \n"
     unless (
         $config_file
         && -f $config_file
