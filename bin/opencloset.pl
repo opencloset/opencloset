@@ -29,6 +29,7 @@ use Mojolicious::Lite;
 }
 app->controller_class("OpenCloset::Web::Controller");
 
+use CHI;
 use Data::Pageset;
 use DateTime::Duration;
 use DateTime::Format::Duration;
@@ -64,6 +65,12 @@ app->defaults( %{ plugin 'Config' => { default => {
     alert       => q{},
     type        => q{},
 }}});
+
+my $CACHE = CHI->new(
+    driver   => 'File',
+    root_dir => app->config->{cache}{dir} || './cache',
+);
+app->log->info( "cache dir: " . $CACHE->root_dir );
 
 my $DB = OpenCloset::Schema->connect({
     dsn      => app->config->{database}{dsn},
@@ -1301,6 +1308,74 @@ helper user_avg_diff => sub {
     );
 
     return \%data;
+};
+
+helper count_visitor => sub {
+    my ( $self, $start_dt, $end_dt, $cb ) = @_;
+
+    my $dtf        = $DB->storage->datetime_parser;
+    my $booking_rs = $DB->resultset('Booking')->search(
+        {
+            date => {
+                -between => [
+                    $dtf->format_datetime($start_dt),
+                    $dtf->format_datetime($end_dt),
+                ],
+            },
+        },
+        {
+            prefetch       => {
+                'orders' => {
+                    'user' => 'user_info'
+                }
+            },
+        },
+    );
+
+    my %count = (
+        all        => { total => 0, male => 0, female => 0 },
+        visited    => { total => 0, male => 0, female => 0 },
+        notvisited => { total => 0, male => 0, female => 0 },
+        bestfit    => { total => 0, male => 0, female => 0 },
+        loanee     => { total => 0, male => 0, female => 0 },
+    );
+    while ( my $booking = $booking_rs->next ) {
+        for my $order ( $booking->orders ) {
+            next unless $order->user->user_info;
+
+            my $gender = $order->user->user_info->gender;
+            next unless $gender;
+
+            ++$count{all}{total};
+            ++$count{all}{$gender};
+
+            if ( $order->rental_date ) {
+                ++$count{loanee}{total};
+                ++$count{loanee}{$gender};
+            }
+
+            if ( $order->bestfit ) {
+                ++$count{bestfit}{total};
+                ++$count{bestfit}{$gender};
+            }
+
+            use feature qw( switch );
+            use experimental qw( smartmatch );
+            given ( $order->status_id ) {
+                when (/^12|14$/) {
+                    ++$count{notvisited}{total};
+                    ++$count{notvisited}{$gender};
+                }
+            }
+
+            $cb->( $booking, $order, $gender ) if $cb && ref($cb) eq 'CODE';
+        }
+    }
+    $count{visited}{total}  = $count{all}{total}  - $count{notvisited}{total};
+    $count{visited}{male}   = $count{all}{male}   - $count{notvisited}{male};
+    $count{visited}{female} = $count{all}{female} - $count{notvisited}{female};
+
+    return \%count;
 };
 
 #
@@ -3905,54 +3980,9 @@ group {
             day       => $3,
         );
         my $dt_end = $dt_start->clone->add( hours => 24, seconds => -1 );
+        my $count  = $self->count_visitor( $dt_start, $dt_end );
 
-        my $dtf        = $DB->storage->datetime_parser;
-        my $booking_rs = $DB->resultset('Booking')->search(
-            {
-                date => {
-                    -between => [
-                        $dtf->format_datetime($dt_start),
-                        $dtf->format_datetime($dt_end),
-                    ],
-                },
-            },
-            {
-                order_by => { -asc => 'date' },
-            },
-        );
-
-        my %count = (
-            all        => { total => 0, male => 0, female => 0 },
-            visited    => { total => 0, male => 0, female => 0 },
-            notvisited => { total => 0, male => 0, female => 0 },
-            bestfit    => { total => 0, male => 0, female => 0 },
-        );
-        while ( my $booking = $booking_rs->next ) {
-            for my $order ( $booking->orders ) {
-                my $gender = $order->user->user_info->gender;
-
-                ++$count{all}{total};
-                ++$count{all}{$gender};
-                if ( $order->bestfit ) {
-                    ++$count{bestfit}{total};
-                    ++$count{bestfit}{$gender};
-                }
-
-                use feature qw( switch );
-                use experimental qw( smartmatch );
-                given ( $order->status_id ) {
-                    when (/^12|14$/) {
-                        ++$count{notvisited}{total};
-                        ++$count{notvisited}{$gender};
-                    }
-                }
-            }
-        }
-        $count{visited}{total}  = $count{all}{total}  - $count{notvisited}{total};
-        $count{visited}{male}   = $count{all}{male}   - $count{notvisited}{male};
-        $count{visited}{female} = $count{all}{female} - $count{notvisited}{female};
-
-        $self->respond_to( json => { status => 200, json => \%count } );
+        $self->respond_to( json => { status => 200, json => $count } );
 
     }
 
@@ -5626,26 +5656,21 @@ get '/timetable/:ymd' => sub {
         return;
     }
 
-    my $dtf        = $DB->storage->datetime_parser;
-    my $booking_rs = $DB->resultset('Booking')->search(
-        {
-            date => {
-                -between => [
-                    $dtf->format_datetime($dt_start),
-                    $dtf->format_datetime($dt_end),
-                ],
-            },
-        },
-        {
-            order_by => { -asc => 'date' },
-        },
-    );
+    my %orders;
+    my $count = $self->count_visitor( $dt_start, $dt_end, sub {
+        my ( $booking, $order, $gender ) = @_;
+
+        my $hm = sprintf '%02d:%02d', $booking->date->hour, $booking->date->minute;
+        $orders{$hm}{$gender} = [] unless $orders{$hm}{$gender};
+        push @{ $orders{$hm}{$gender} }, $order;
+    });
 
     $self->render(
         'timetable',
-        booking_rs => $booking_rs,
-        dt_start   => $dt_start,
-        dt_end     => $dt_end,
+        count    => $count,
+        orders   => \%orders,
+        dt_start => $dt_start,
+        dt_end   => $dt_end,
     );
 };
 
@@ -6138,13 +6163,13 @@ get '/stat/status/:ymd' => sub {
 
     unless ( $params{ymd} ) {
         app->log->warn("ymd is required");
-        $self->redirect_to( $self->url_for('/stat/status') );
+        $self->redirect_to( $self->url_for('/stat/visitor') );
         return;
     }
 
     unless ( $params{ymd} =~ m/^(\d{4})-(\d{2})-(\d{2})$/ ) {
         app->log->warn("invalid ymd format: $params{ymd}");
-        $self->redirect_to( $self->url_for('/stat/status') );
+        $self->redirect_to( $self->url_for('/stat/visitor') );
         return;
     }
 
@@ -6354,6 +6379,124 @@ any '/size/guess' => sub {
         osg_db               => $osg_db,
         bestfit_1_order_rs   => $bestfit_1_order_rs,
         bestfit_3x3_order_rs => $bestfit_3x3_order_rs,
+    );
+};
+
+get '/stat/visitor' => sub {
+    my $self = shift;
+
+    my $dt_today = DateTime->now( time_zone => app->config->{timezone} );
+    $self->redirect_to( $self->url_for( '/stat/visitor/' . $dt_today->ymd ) );
+};
+
+get '/stat/visitor/:ymd' => sub {
+    my $self = shift;
+
+    #
+    # fetch params
+    #
+    my %params = $self->get_params(qw/ ymd /);
+
+    unless ( $params{ymd} ) {
+        app->log->warn("ymd is required");
+        $self->redirect_to( $self->url_for('/stat/visitor') );
+        return;
+    }
+
+    unless ( $params{ymd} =~ m/^(\d{4})-(\d{2})-(\d{2})$/ ) {
+        app->log->warn("invalid ymd format: $params{ymd}");
+        $self->redirect_to( $self->url_for('/stat/visitor') );
+        return;
+    }
+
+    my $dt = try {
+        DateTime->new(
+            time_zone => app->config->{timezone},
+            year      => $1,
+            month     => $2,
+            day       => $3,
+        );
+    };
+    unless ($dt) {
+        app->log->warn("cannot create datetime object");
+        $self->redirect_to( $self->url_for('/stat/visitor') );
+        return;
+    }
+
+    my $today = try {
+        DateTime->now(
+            time_zone => app->config->{timezone},
+        );
+    };
+    unless ($today) {
+        app->log->warn("cannot create datetime object: today");
+        $self->redirect_to( $self->url_for('/stat/visitor') );
+        return;
+    }
+    $today->truncate( to => 'day' );
+
+    # -2 ~ +2 days from now
+    my %count;
+    my $from = $dt->clone->truncate( to => 'day' )->add( days => -2 );
+    my $to   = $dt->clone->truncate( to => 'day' )->add( days =>  2 );
+    for ( ; $from <= $to; $from->add( days => 1 ) ) {
+        my $f = $from->clone->truncate( to => 'day' );
+        my $t = $from->clone->truncate( to => 'day' )->add( days => 1, seconds => -1 );
+
+        my $f_str = $f->strftime('%Y%m%d%H%M%S');
+        my $t_str = $t->strftime('%Y%m%d%H%M%S');
+        my $name  = "day-$f_str-$t_str";
+
+        my $data;
+        if ( $f < $today && $t < $today ) {
+            $data = $CACHE->get($name);
+        }
+        elsif ( $f->clone->truncate( to => 'day' ) == $today ) {
+            app->log->info( "do not cache and by-pass cache: $name" );
+            $data = $self->count_visitor( $f, $t );
+        }
+
+        push @{ $count{day} }, $data;
+    }
+
+    # from first to current week of this year
+    for ( my $i = $today->clone->truncate( to => 'year'); $i <= $today; $i->add( weeks => 1 ) ) {
+        my $f = $i->clone->truncate( to => 'week' );
+        my $t = $i->clone->truncate( to => 'week' )->add( weeks => 1, seconds => -1 );
+
+        my $f_str = $f->strftime('%Y%m%d%H%M%S');
+        my $t_str = $t->strftime('%Y%m%d%H%M%S');
+        my $name  = "week-$f_str-$t_str";
+
+        my $data;
+        if ( $f < $today && $t < $today ) {
+            $data = $CACHE->get($name);
+        }
+
+        push @{ $count{week} }, $data;
+    }
+
+    # from january to current months of this year
+    for ( my $i = $today->clone->truncate( to => 'year'); $i <= $today; $i->add( months => 1 ) ) {
+        my $f = $i->clone->truncate( to => 'month' );
+        my $t = $i->clone->truncate( to => 'month' )->add( months => 1, seconds => -1 );
+
+        my $f_str = $f->strftime('%Y%m%d%H%M%S');
+        my $t_str = $t->strftime('%Y%m%d%H%M%S');
+        my $name  = "month-$f_str-$t_str";
+
+        my $data;
+        if ( $f < $today && $t < $today ) {
+            $data = $CACHE->get($name);
+        }
+
+        push @{ $count{month} }, $data;
+    }
+
+    $self->render(
+        'stat-visitor',
+        count => \%count,
+        dt    => $dt,
     );
 };
 

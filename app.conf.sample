@@ -113,6 +113,7 @@ $db_opts->{AutoCommit} //= 1;
             'stat-clothes-amount' => { text => '수량',                  icon => q{},         desc => '옷의 종류별 수량을 보여줍니다.',                                 link => '/stat/clothes/amount' },
             'stat-clothes-hit'    => { text => '인기 의류',             icon => q{},         desc => '가장 많이 대여한 옷을 종류별로 보여줍니다.',                     link => '/stat/clothes/hit'    },
             'stat-status'         => { text => '상태',                  icon => q{},         desc => '주문서의 상태별 처리 시간을 보여줍니다.',                        link => '/stat/status'         },
+            'stat-visitor'        => { text => '방문자',                icon => q{},         desc => '일/주/월 별 방문자 정보',                                        link => '/stat/visitor'        },
             'size-guess'          => { text => '신체 치수 예측',        icon => 'info',      desc => '키와 몸무게로 신체 치수를 예측합니다.',                          link => '/size/guess' },
         },
         items => [
@@ -137,6 +138,7 @@ $db_opts->{AutoCommit} //= 1;
                     { id => 'stat-clothes-amount' },
                     { id => 'stat-clothes-hit'    },
                     { id => 'stat-status'         },
+                    { id => 'stat-visitor'        },
                 ],
             },
         ],
@@ -257,6 +259,13 @@ $db_opts->{AutoCommit} //= 1;
             '21:30' => 0,
             '22:00' => 0,
         },
+    },
+
+    #
+    # cache
+    #
+    cache => {
+        dir => './cache',
     },
 
     #

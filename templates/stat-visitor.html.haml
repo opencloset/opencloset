@@ -1,0 +1,139 @@
+- use utf8;
+- my $_id = 'stat-visitor';
+- layout 'default',
+-   page_id     => $_id,
+-   jses  => [ '/lib/bootstrap3-editable/js/bootstrap-editable.min.js' ],
+-   csses => [ '/lib/bootstrap3-editable/css/bootstrap-editable.css'   ],
+-   ;
+- title meta_text($_id);
+
+.search
+  %form#search-form
+    .input-group
+      %input#query.form-control{ :placeholder => '날짜를 고르세요', 'data-date-format' => 'yyyy-mm-dd' }
+
+.space-8
+
+#status-day
+  %h2
+    일별
+  .space-8
+
+  %table.table.table-striped.table-bordered.table-hover
+    %thead
+      %tr
+        %th{ :rowspan => "2" } 일
+        %th.center{ :colspan => "5" } 방문자
+      %tr
+        %th 예약자
+        %th 방문자
+        %th 미방문자
+        %th BestFit
+        %th 대여자
+    %tbody
+      - my $day = $dt->clone->truncate( to => 'day' )->subtract( days => 2 );
+      - for ( my $i = 0 ; $i <  @{ $count->{day} } ; $i++ ) {
+        %tr
+          %td
+            - my $date = $day->clone->truncate( to => 'day' )->add( days => $i)->ymd;
+            - if ( $dt->ymd eq $date ) {
+              %span.date
+                %a{ :href => "#{ url_for( '/order' )->query('booking_ymd' => $date ) }" }= $date
+            - }
+            - else {
+              %span
+                %a{ :href => "#{ url_for( '/order' )->query('booking_ymd' => $date ) }" }= $date
+            - }
+
+          - if ( $count->{day}[$i] ) {
+            %td= $count->{day}[$i]{all}{total}
+            %td= $count->{day}[$i]{visited}{total}
+            %td= $count->{day}[$i]{notvisited}{total}
+            %td= $count->{day}[$i]{bestfit}{total}
+            %td= $count->{day}[$i]{loanee}{total}
+          - }
+          - else {
+            %td N/A
+            %td N/A
+            %td N/A
+            %td N/A
+            %td N/A
+          - }
+      - }
+
+#status-week
+  %h2
+    주별 방문자
+  .space-8
+
+  %table.table.table-striped.table-bordered.table-hover
+    %thead
+      %tr
+        %th{ :rowspan => "2" } 주차(시작일 ~ 종료일)
+        %th.center{ :colspan => "5" } 방문자
+      %tr
+        %th 예약자
+        %th 방문자
+        %th 미방문자
+        %th BestFit
+        %th 대여자
+    %tbody
+      - my $week = $dt->clone->truncate( to => 'year' );
+      - for ( my $i = 0 ; $i <  @{ $count->{week} } ; $i++ ) {
+        %tr
+          %td
+            - my $from = $week->clone->truncate( to => 'week' )->add( weeks => $i )->strftime('%m/%d');
+            - my $to   = $week->clone->truncate( to => 'week' )->add( weeks => $i + 1 )->strftime('%m/%d');
+            = sprintf("%02d : %s ~ %s", $i + 1, $from, $to)
+          - if ( $count->{week}[$i] ) {
+            %td= $count->{week}[$i]{all}{total}
+            %td= $count->{week}[$i]{visited}{total}
+            %td= $count->{week}[$i]{notvisited}{total}
+            %td= $count->{week}[$i]{bestfit}{total}
+            %td= $count->{week}[$i]{loanee}{total}
+          - }
+          - else {
+            %td N/A
+            %td N/A
+            %td N/A
+            %td N/A
+            %td N/A
+          - }
+      - }
+
+#status-month
+  %h2
+    월별 방문자
+  .space-8
+
+  %table.table.table-striped.table-bordered.table-hover
+    %thead
+      %tr
+        %th{ :rowspan => "2" } 월 
+        %th.center{ :colspan => "5" } 방문자
+      %tr
+        %th 예약자
+        %th 방문자
+        %th 미방문자
+        %th BestFit
+        %th 대여자
+    %tbody
+      - for ( my $i = 0 ; $i <  @{ $count->{month} } ; $i++ ) {
+        %tr
+          %td
+            = $i + 1
+          - if ( $count->{month}[$i] ) {
+            %td= $count->{month}[$i]{all}{total}
+            %td= $count->{month}[$i]{visited}{total}
+            %td= $count->{month}[$i]{notvisited}{total}
+            %td= $count->{month}[$i]{bestfit}{total}
+            %td= $count->{month}[$i]{loanee}{total}
+          - }
+          - else {
+            %td N/A
+            %td N/A
+            %td N/A
+            %td N/A
+            %td N/A
+          - }
+      - }

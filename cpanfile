@@ -1,3 +1,4 @@
+requires 'CHI';
 requires 'Data::Pageset';
 requires 'DateTime';
 requires 'DateTime::Format::Duration';
