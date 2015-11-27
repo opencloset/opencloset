@@ -104,7 +104,8 @@ $ ->
     template:    'YYYY-MM-DD'
 
     combodate:
-      minYear: 2013,
+      minYear: 2013
+      maxYear: moment().year() + 1
     url: (params) ->
       url = $('#order').data('url')
       data = {}
@@ -125,7 +126,8 @@ $ ->
     template:    'YYYY-MM-DD'
 
     combodate:
-      minYear: 2013,
+      minYear: 2013
+      maxYear: moment().year() + 1
     url: (params) ->
       url = $('#order').data('url')
       data = {}
@@ -146,7 +148,8 @@ $ ->
     template:    'YYYY-MM-DD'
 
     combodate:
-      minYear: 2013,
+      minYear: 2013
+      maxYear: moment().year() + 1
     url: (params) ->
       url = $('#order').data('url')
       data = {}
