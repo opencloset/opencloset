@@ -21,6 +21,7 @@
     "mousetrap": "~1.5.2",
     "bootstrap": "~3.3.6",
     "jquery": "~2.1.4",
-    "font-awesome": "~4.5.0"
+    "font-awesome": "~4.5.0",
+    "bootstrap-validator": "~0.9.0"
   }
 }
