@@ -5585,11 +5585,26 @@ get '/booking/:ymd/open' => sub {
     #
     #   열린옷장 휴무일을 기존 일, 월요일에서 일요일만으로 한정합니다.
     #
-    my $holiday = ( $dt_start->day_of_week == 7 ) ? 1 : 0;
+    # GH #618
+    #
+    #  월요일 예약 슬롯을 2~3명으로 조정하기 위해
+    #  설정 및 처리 방식을 완전히 변경합니다.
+    #
 
+    my %map_day_of_week = (
+        1 => 'mon',
+        2 => 'tue',
+        3 => 'wed',
+        4 => 'thu',
+        5 => 'fri',
+        6 => 'sat',
+        7 => 'sun',
+    );
+
+    my $day_of_week = $map_day_of_week{ $dt_start->day_of_week };
     for my $gender ( qw/ male female / ) {
-        for my $key ( sort keys %{ app->config->{booking}{$gender} } ) {
-            my $value = $holiday ? 0 : app->config->{booking}{$gender}{$key};
+        for my $key ( sort keys %{ app->config->{booking}{$day_of_week}{$gender} } ) {
+            my $value = app->config->{booking}{$day_of_week}{$gender}{$key} || 0;
 
             my ( $h, $m ) = split /:/, $key, 2;
             my $dt = $dt_start->clone;
