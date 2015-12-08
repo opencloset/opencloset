@@ -18,6 +18,8 @@
     "tests"
   ],
   "dependencies": {
-    "mousetrap": "~1.5.2"
+    "mousetrap": "~1.5.2",
+    "bootstrap": "~3.3.6",
+    "jquery": "~2.1.4"
   }
 }
