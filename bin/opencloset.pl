@@ -6548,5 +6548,51 @@ get '/order/:order_id/return/success' => sub {
     $self->render('order-return-success');
 };
 
+get '/order/:order_id/extension' => sub {
+    my $self = shift;
+
+    my $error = $self->flash('error');
+    $self->render('order-extension', error => $error);
+};
+
+post '/order/:order_id/extension' => sub {
+    my $self     = shift;
+    my $order_id = $self->param('order_id');
+    my $order    = $self->get_order({ id => $order_id });
+    return unless $order;
+
+    ## parameters validation
+    my $v = $self->validation;
+    $v->required('phone');
+    $v->required('user-target-date');
+
+    if ( $v->has_error ) {
+        my $errors = {};
+        my $failed = $v->failed;
+        map { $errors->{$_} = $v->error($_) } @$failed;
+        $self->flash(error => $errors);
+        return $self->redirect_to($self->url_for);
+    }
+
+    my $phone       = $v->param('phone');
+    my $target_date = $v->param('user-target-date');
+
+    ## phone number validation
+    my $user_phone = $order->user->user_info->phone;
+    if ( $phone ne $user_phone ) {
+        $self->flash(error => { phone => ['Invalid number'] });
+        return $self->redirect_to($self->url_for);
+    }
+
+    $self->update_order({ id => $order_id, user_target_date => $target_date });
+    $self->redirect_to( $self->url_for("/order/$order_id/extension/success") );
+};
+
+get '/order/:order_id/extension/success' => sub {
+    my $self = shift;
+
+    $self->render('order-extension-success');
+};
+
 app->secrets( app->defaults->{secrets} );
 app->start;

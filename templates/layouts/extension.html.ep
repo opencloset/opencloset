@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title><%= title %></title>
+
+    <link rel="stylesheet" href="/components/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/components/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/components/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css">
+    <link rel="stylesheet" href="/css/screen.css">
+  </head>
+  <body>
+    <div class="container">
+      <div id="content">
+        <%= content %>
+      </div>
+    </div>
+    <script src="/components/jquery/dist/jquery.min.js"></script>
+    <script src="/components/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script src="/components/bootstrap-validator/dist/validator.min.js"></script>
+    <script src="/components/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js "></script>
+    <script src="/components/bootstrap-datepicker/dist/locales/bootstrap-datepicker.kr.min.js"></script>
+    <script src="/components/jQuery-Mask-Plugin/dist/jquery.mask.min.js"></script>
+    <script src="/js/order-extension.js"></script>
+  </body>
+</html>

@@ -1,0 +1,43 @@
+% layout 'extension';
+% title '대여연장신청서';
+% my @err;
+
+<h1>열린옷장 <%= title %> <small>반납예정일을 선택해주세요</small></h1>
+
+<p>일일 연장비는 총대여비의 <samp>20%</samp> 로 계산됩니다.</p>
+
+<hr>
+
+<form method="POST" action="<%= url_for; %>" data-toggle="validator" role="form">
+  % @err = @{ $error->{phone} || [] };
+  <div class="form-group<%= @err ? ' has-error' : '' %>">
+    <label for="phone">핸드폰번호</label>
+    <input type="text" name="phone" class="form-control" id="phone" placeholder="핸드폰번호 Phone" required>
+    <div class="help-block with-errors">
+      % if (@err) {
+        <ul class="list-unstyled">
+          % for my $err (@err) {
+            <li><%= $err %></li>
+          % }
+        </ul>
+      % }
+    </div>
+  </div>
+
+  % @err = @{ $error->{user_target_date} || [] };
+  <div class="form-group<%= @err ? ' has-error' : '' %>">
+    <label for="user-target-date">반납예정일</label>
+    <input type="text" name="user-target-date" class="form-control" id="user-target-date" placeholder="반납예정일 Target date" required>
+    <div class="help-block with-errors">
+      % if (@err) {
+        <ul class="list-unstyled">
+          % for my $err (@err) {
+            <li><%= $err %></li>
+          % }
+        </ul>
+      % }
+    </div>
+  </div>
+
+  <button type="submit" class="btn btn-primary">전송</button>
+</form>
