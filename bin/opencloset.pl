@@ -6513,10 +6513,6 @@ post '/order/:order_id/return' => sub {
     my $order    = $self->get_order( { id => $order_id } );
     return unless $order;
 
-    my $parcel  = $self->param('parcel');
-    my $phone   = $self->param('phone');
-    my $waybill = $self->param('waybill');
-
     ## parameters validation
     my $v = $self->validation;
     $v->required('parcel');
@@ -6530,6 +6526,10 @@ post '/order/:order_id/return' => sub {
         $self->flash(error => $errors);
         return $self->redirect_to($self->url_for);
     }
+
+    my $parcel  = $v->param('parcel');
+    my $phone   = $v->param('phone');
+    my $waybill = $v->param('waybill');
 
     ## phone number validation
     my $user_phone = $order->user->user_info->phone;
