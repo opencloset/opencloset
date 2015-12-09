@@ -31,10 +31,11 @@
       <option value="CJ대한통운">CJ대한통운</option>
       <option value="KGB">KGB</option>
       <option value="동부">동부</option>
+      <option value="로젠">로젠</option>
       <option value="옐로우캡">옐로우캡</option>
       <option value="우체국">우체국</option>
       <option value="한진">한진</option>
-      <option value="기타">기타</option>
+      <option value="현대">현대</option>
     </select>
     <div class="help-block with-errors">
       % if (@err) {
