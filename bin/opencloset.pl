@@ -4051,6 +4051,9 @@ under '/' => sub {
                         when ('/browse-happy') {
                             return 1;
                         }
+                        when (/(return|extension)(\/success\/?)?$/) {
+                            return 1;
+                        }
                         when ('/login') {
                             return 1;
                         }
@@ -5412,23 +5415,20 @@ post '/order/:id/update' => sub {
                     if ( $value == 2 ) {
                         my $from = app->config->{sms}{ app->config->{sms}{driver} }{_from};
                         my $to   = $order->user->user_info->phone;
+                        my $msg = $self->render_to_string(
+                            "sms/order-confirmed", format => 'txt',
+                            order => $order
+                        );
 
-                        for my $i (qw/1 2 3/) {
-                            my $msg = $self->render_to_string(
-                                "sms/order-confirmed-$i", format => 'txt',
-                                order => $order
-                            );
+                        my $sms = $DB->resultset('SMS')->create(
+                            {
+                                to   => $to,
+                                from => $from,
+                                text => $msg
+                            }
+                        );
 
-                            my $sms = $DB->resultset('SMS')->create(
-                                {
-                                    to   => $to,
-                                    from => $from,
-                                    text => $msg
-                                }
-                            );
-
-                            $self->app->log->error("Failed to create a new SMS: $msg") unless $sms;
-                        }
+                        $self->app->log->error("Failed to create a new SMS: $msg") unless $sms;
                     }
                 }
 
@@ -6531,8 +6531,12 @@ get '/stat/visitor/:ymd' => sub {
 get '/order/:order_id/return' => sub {
     my $self = shift;
 
+    my $order_id = $self->param('order_id');
+    my $order    = $self->get_order( { id => $order_id } );
+    return unless $order;
+
     my $error = $self->flash('error');
-    $self->render('order-return', error => $error);
+    $self->render('order-return', order => $order, error => $error);
 };
 
 post '/order/:order_id/return' => sub {
@@ -6573,14 +6577,22 @@ post '/order/:order_id/return' => sub {
 get '/order/:order_id/return/success' => sub {
     my $self = shift;
 
-    $self->render('order-return-success');
+    my $order_id = $self->param('order_id');
+    my $order    = $self->get_order( { id => $order_id } );
+    return unless $order;
+
+    $self->render('order-return-success', order => $order);
 };
 
 get '/order/:order_id/extension' => sub {
     my $self = shift;
 
+    my $order_id = $self->param('order_id');
+    my $order    = $self->get_order( { id => $order_id } );
+    return unless $order;
+
     my $error = $self->flash('error');
-    $self->render('order-extension', error => $error);
+    $self->render('order-extension', order => $order, error => $error);
 };
 
 post '/order/:order_id/extension' => sub {
@@ -6619,7 +6631,11 @@ post '/order/:order_id/extension' => sub {
 get '/order/:order_id/extension/success' => sub {
     my $self = shift;
 
-    $self->render('order-extension-success');
+    my $order_id = $self->param('order_id');
+    my $order    = $self->get_order( { id => $order_id } );
+    return unless $order;
+
+    $self->render('order-extension-success', order => $order);
 };
 
 app->secrets( app->defaults->{secrets} );
