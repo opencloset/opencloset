@@ -6534,7 +6534,7 @@ post '/order/:order_id/return' => sub {
     ## phone number validation
     my $user_phone = $order->user->user_info->phone;
     if ( $phone ne $user_phone ) {
-        $self->flash(error => { phone => ['Invalid number'] });
+        $self->flash(error => { phone => ['대여예약시에 사용했던 동일한 핸드폰 번호를 입력해주세요'] });
         return $self->redirect_to($self->url_for);
     }
 
@@ -6580,7 +6580,7 @@ post '/order/:order_id/extension' => sub {
     ## phone number validation
     my $user_phone = $order->user->user_info->phone;
     if ( $phone ne $user_phone ) {
-        $self->flash(error => { phone => ['Invalid number'] });
+        $self->flash(error => { phone => ['대여예약시에 사용했던 동일한 핸드폰 번호를 입력해주세요'] });
         return $self->redirect_to($self->url_for);
     }
 

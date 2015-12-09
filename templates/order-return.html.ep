@@ -1,9 +1,9 @@
 % layout 'parcel';
-% title '택배반납신청서';
+% title '반납택배 발송알리미';
 % my @err;
 
-<h1>열린옷장 <%= title %> <small>운송장 번호를 입력해주세요</small></h1>
-<p>대여하신 정장을 택배로 발송하신후에 운송장 번호를 입력해주세요</p>
+<h1>열린옷장 <%= title %></h1>
+<p>대여하신 의류를 택배발송 한 후, 아래 정보를 정확히 입력해주세요.</p>
 
 <hr>
 
@@ -65,3 +65,21 @@
 
   <button type="submit" class="btn btn-primary">전송</button>
 </form>
+
+<div class="modal fade" tabindex="-1" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title"><%= title %></h4>
+      </div>
+      <div class="modal-body">
+        <p>입력하신 내용</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">취소</button>
+        <button type="button" class="btn btn-primary">계속</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->

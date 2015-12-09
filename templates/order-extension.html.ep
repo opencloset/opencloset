@@ -2,10 +2,15 @@
 % title '대여연장신청서';
 % my @err;
 
-<h1>열린옷장 <%= title %> <small>반납예정일을 선택해주세요</small></h1>
+<h1>열린옷장 <%= title %></h1>
 
-<p>일일 연장비는 총대여비의 <samp>20%</samp> 로 계산됩니다.</p>
+<p>
+  연장을 신청하신 후, 추가로 연장이 필요하신 경우에도 변경된 최종반납일을 다시 입력해주세요.
+  1일 연장비용은 총대여비의 <samp>20%</samp>입니다.
+</p>
 
+<hr>
+<samp>예) 총 대여비 : 30,000원, 2일 연장금액 : 6,000원</samp>
 <hr>
 
 <form method="POST" action="<%= url_for; %>" data-toggle="validator" role="form">
