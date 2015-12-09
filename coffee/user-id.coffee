@@ -96,6 +96,9 @@ $ ->
         params.emptytext = '착용 날짜를 입력해주세요.'
         params.format    = 'YYYY-MM-DD'
         params.template  = 'YYYY / MM / DD'
+        params.combodate =
+          minYear: 2013
+          maxYear: moment().year() + 1
       when 'user-purpose2'
         params.type = 'textarea'
       when 'user-pre_category'
