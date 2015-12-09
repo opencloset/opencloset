@@ -23,6 +23,7 @@
     "jquery": "~2.1.4",
     "font-awesome": "~4.5.0",
     "bootstrap-validator": "~0.9.0",
-    "jquery-mask-plugin": "jQuery-Mask-Plugin#~1.13.4"
+    "jquery-mask-plugin": "jQuery-Mask-Plugin#~1.13.4",
+    "bootstrap-datepicker": "~1.5.0"
   }
 }
