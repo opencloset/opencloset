@@ -1,9 +1,12 @@
 % layout 'parcel';
 % title '반납택배 발송알리미';
+% my $name = $order->user->name;
 % my @err;
 
 <h1>열린옷장 <%= title %></h1>
+<p><%= $name %>님 안녕하세요.</p>
 <p>대여하신 의류를 택배발송 한 후, 아래 정보를 정확히 입력해주세요.</p>
+<p>택배 반납 후에도 발송알리미가 작성되지 않은 경우 본 발송물은 미반납으로 처리되오니, 택배 발송 후에는 반드시 발송알리미 작성을 요청드립니다. (택배 발송은 반납일 1일 전 발송, 택배비는 본인부담)</p>
 
 <hr>
 
@@ -29,6 +32,7 @@
     <select class="form-control" id="parcel" name="parcel" required>
       <option value=""></option>
       <option value="CJ대한통운">CJ대한통운</option>
+      <option value="CSVnet편의점">CSVnet 편의점</option>
       <option value="KGB">KGB</option>
       <option value="동부">동부</option>
       <option value="로젠">로젠</option>
@@ -36,6 +40,7 @@
       <option value="우체국">우체국</option>
       <option value="한진">한진</option>
       <option value="현대">현대</option>
+      <option value="기타">기타</option>
     </select>
     <div class="help-block with-errors">
       % if (@err) {
