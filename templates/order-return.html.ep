@@ -1,0 +1,66 @@
+% layout 'parcel';
+% title '택배반납신청서';
+% my @err;
+
+<h1>열린옷장 <%= title %> <small>운송장 번호를 입력해주세요</small></h1>
+<p>대여하신 정장을 택배로 발송하신후에 운송장 번호를 입력해주세요</p>
+
+<hr>
+
+<form method="POST" action="<%= url_for; %>" data-toggle="validator" role="form">
+  % @err = @{ $error->{phone} || [] };
+  <div class="form-group<%= @err ? ' has-error' : '' %>">
+    <label for="phone">핸드폰번호</label>
+    <input type="text" name="phone" class="form-control" id="phone" placeholder="핸드폰번호 Phone" required>
+    <div class="help-block with-errors">
+      % if (@err) {
+        <ul class="list-unstyled">
+          % for my $err (@err) {
+            <li><%= $err %></li>
+          % }
+        </ul>
+      % }
+    </div>
+  </div>
+
+  % @err = @{ $error->{parcel} || [] };
+  <div class="form-group<%= @err ? ' has-error' : '' %>">
+    <label for="parcel">택배사</label>
+    <select class="form-control" id="parcel" name="parcel" required>
+      <option value=""></option>
+      <option value="CJ대한통운">CJ대한통운</option>
+      <option value="KGB">KGB</option>
+      <option value="동부">동부</option>
+      <option value="옐로우캡">옐로우캡</option>
+      <option value="우체국">우체국</option>
+      <option value="한진">한진</option>
+      <option value="기타">기타</option>
+    </select>
+    <div class="help-block with-errors">
+      % if (@err) {
+        <ul class="list-unstyled">
+          % for my $err (@err) {
+            <li><%= $err %></li>
+          % }
+        </ul>
+      % }
+    </div>
+  </div>
+
+  % @err = @{ $error->{waybill} || [] };
+  <div class="form-group<%= @err ? ' has-error' : '' %>">
+    <label for="waybill">운송장번호</label>
+    <input id="waybill" class="form-control" name="waybill" type="text" placeholder="운송장번호 Waybill" required>
+    <div class="help-block with-errors">
+      % if (@err) {
+        <ul class="list-unstyled">
+          % for my $err (@err) {
+            <li><%= $err %></li>
+          % }
+        </ul>
+      % }
+    </div>
+  </div>
+
+  <button type="submit" class="btn btn-primary">전송</button>
+</form>

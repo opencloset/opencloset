@@ -1,0 +1,5 @@
+% layout 'parcel';
+% title '택배반납신청서';
+
+<h1 class="text-success">신청이 완료되었습니다</h1>
+<p>감사합니다.</p>

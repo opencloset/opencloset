@@ -6500,5 +6500,53 @@ get '/stat/visitor/:ymd' => sub {
     );
 };
 
+get '/order/:order_id/return' => sub {
+    my $self = shift;
+
+    my $error = $self->flash('error');
+    $self->render('order-return', error => $error);
+};
+
+post '/order/:order_id/return' => sub {
+    my $self     = shift;
+    my $order_id = $self->param('order_id');
+    my $order    = $self->get_order( { id => $order_id } );
+    return unless $order;
+
+    my $parcel  = $self->param('parcel');
+    my $phone   = $self->param('phone');
+    my $waybill = $self->param('waybill');
+
+    ## parameters validation
+    my $v = $self->validation;
+    $v->required('parcel');
+    $v->required('phone');
+    $v->required('waybill');
+
+    if ( $v->has_error ) {
+        my $errors = {};
+        my $failed = $v->failed;
+        map { $errors->{$_} = $v->error($_) } @$failed;
+        $self->flash(error => $errors);
+        return $self->redirect_to($self->url_for);
+    }
+
+    ## phone number validation
+    my $user_phone = $order->user->user_info->phone;
+    if ( $phone ne $user_phone ) {
+        $self->flash(error => { phone => ['Invalid number'] });
+        return $self->redirect_to($self->url_for);
+    }
+
+    $order->update( { return_method => join( ',', $parcel, $waybill ) } );
+    $self->redirect_to( $self->url_for("/order/$order_id/return/success") );
+};
+
+get '/order/:order_id/return/success' => sub {
+    my $self = shift;
+
+    $self->render('order-return-success');
+};
+
 app->secrets( app->defaults->{secrets} );
 app->start;
