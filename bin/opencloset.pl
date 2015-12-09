@@ -5401,7 +5401,35 @@ post '/order/:id/update' => sub {
                             $status{$value}      // 'N/A',
                         ),
                     );
-                    $order->update({ $name => $value })
+                    $order->update({ $name => $value });
+
+                    #
+                    # GH #614
+                    #
+                    #   주문확정일때에 SMS 를 전송
+                    #   주문서의 상태가 -> 대여중
+                    #
+                    if ( $value == 2 ) {
+                        my $from = app->config->{sms}{ app->config->{sms}{driver} }{_from};
+                        my $to   = $order->user->user_info->phone;
+
+                        for my $i (qw/1 2 3/) {
+                            my $msg = $self->render_to_string(
+                                "sms/order-confirmed-$i", format => 'txt',
+                                order => $order
+                            );
+
+                            my $sms = $DB->resultset('SMS')->create(
+                                {
+                                    to   => $to,
+                                    from => $from,
+                                    text => $msg
+                                }
+                            );
+
+                            $self->app->log->error("Failed to create a new SMS: $msg") unless $sms;
+                        }
+                    }
                 }
 
                 #
