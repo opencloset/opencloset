@@ -6538,7 +6538,7 @@ post '/order/:order_id/return' => sub {
         return $self->redirect_to($self->url_for);
     }
 
-    $order->update( { return_method => join( ',', $parcel, $waybill ) } );
+    $self->update_order({ id => $order_id, return_method => join( ',', $parcel, $waybill ) });
     $self->redirect_to( $self->url_for("/order/$order_id/return/success") );
 };
 
