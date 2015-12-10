@@ -4870,7 +4870,8 @@ get '/clothes/:code' => sub {
 
         my %order_data = $order_detail->order->get_columns;
         my %size = map { $_ => $order_data{$_} } @measurements;
-        $size{bestfit} = $order_detail->order->bestfit;
+        $size{bestfit}  = $order_detail->order->bestfit;
+        $size{order_id} = $order_detail->order_id;
 
         push @recent_sizes, \%size  if $rented_count <= 5;
         push @bestfit_sizes, \%size if $order_detail->order->bestfit;

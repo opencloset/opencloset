@@ -113,11 +113,11 @@
                                     %span.label.label-warning{:title => 'knee'}=   $average_size->{knee}     || q{}
                                   %td
                                     %span.label.label-warning{:title => 'foot'}=   $average_size->{foot}     || q{}
-                                - my $count = 0;
+                                - my $recent_sizes_count = 0;
                                 - for my $size (@$recent_sizes) {
                                   %tr
                                     %td
-                                      %span= ++$count
+                                      %span= ++$recent_sizes_count
                                     %td
                                       %span=                     $size->{bestfit} ? 'v' : q{}
                                     %td
@@ -163,6 +163,7 @@
                               %thead
                                 %tr
                                   %th #
+                                  %th 주문서
                                   %th 키
                                   %th 몸무게
                                   %th 윗배
@@ -176,11 +177,14 @@
                                   %th 무릎
                                   %th 발
                               %tbody
-                                - my $count = 0;
+                                - my $bestfit_sizes_count = 0;
                                 - for my $size (@$bestfit_sizes) {
                                   %tr
                                     %td
-                                      %span= ++$count
+                                      %span= ++$bestfit_sizes_count
+                                    %td
+                                      %span
+                                        %a{ :href => "/order/#{ $size->{order_id} }" }= $size->{order_id}
                                     %td
                                       %span.label.label-success{:title => 'height'}= $size->{height}   || q{}
                                     %td
