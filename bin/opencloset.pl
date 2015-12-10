@@ -4078,6 +4078,9 @@ under '/' => sub {
                         when ('/browse-happy') {
                             return 1;
                         }
+                        when (/(return|extension)(\/success\/?)?$/) {
+                            return 1;
+                        }
                         when ('/login') {
                             $self->redirect_to( $self->url_for('/') );
                             return 1;
