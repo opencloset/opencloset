@@ -314,7 +314,7 @@ helper flatten_order => sub {
         late_fee         => $self->calc_late_fee($order),
         overdue          => $self->calc_overdue($order),
         return_method    => $order->return_method || q{},
-        tracking_url     => $self->tracking_url($order),
+        tracking_url     => $self->tracking_url($order) || q{},
     );
 
     if ( $order->rental_date ) {
