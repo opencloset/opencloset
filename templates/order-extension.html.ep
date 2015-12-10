@@ -1,0 +1,52 @@
+% layout 'extension';
+% title '대여연장신청서';
+% my $name = $order->user->name;
+% my @err;
+
+<h1>열린옷장 <%= title %></h1>
+<p><%= $name %>님 안녕하세요.</p>
+<p>
+  연장금액은 반납 이후, 문자(SMS)로 연장금액과 계좌번호가 발송됩니다. 이후 전송된 문자 정보에 따라 추가금액 입금을 진행해주세요. 
+</p>
+
+<p>1회 연장 후, 추가로 연장이 필요하신 경우에는 이곳에서 변경된 최종반납일을 다시 수정해주세요.</p>
+<p>
+  1일 연장비용은 총대여비의 <samp>20%</samp>입니다.
+  <pre>예&gt; 총 대여비 30,000 - 2일 연장비 6,000</pre>
+</p>
+
+<hr>
+
+<form method="POST" action="<%= url_for; %>" data-toggle="validator" role="form">
+  % @err = @{ $error->{phone} || [] };
+  <div class="form-group<%= @err ? ' has-error' : '' %>">
+    <label for="phone">핸드폰번호</label>
+    <input type="text" name="phone" class="form-control" id="phone" placeholder="핸드폰번호 Phone" required>
+    <div class="help-block with-errors">
+      % if (@err) {
+        <ul class="list-unstyled">
+          % for my $err (@err) {
+            <li><%= $err %></li>
+          % }
+        </ul>
+      % }
+    </div>
+  </div>
+
+  % @err = @{ $error->{user_target_date} || [] };
+  <div class="form-group<%= @err ? ' has-error' : '' %>">
+    <label for="user-target-date">반납예정일</label>
+    <input type="text" name="user-target-date" class="form-control" id="user-target-date" placeholder="반납예정일 Target date" required>
+    <div class="help-block with-errors">
+      % if (@err) {
+        <ul class="list-unstyled">
+          % for my $err (@err) {
+            <li><%= $err %></li>
+          % }
+        </ul>
+      % }
+    </div>
+  </div>
+
+  <button type="submit" class="btn btn-primary">전송</button>
+</form>

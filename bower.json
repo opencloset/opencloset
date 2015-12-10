@@ -18,6 +18,12 @@
     "tests"
   ],
   "dependencies": {
-    "mousetrap": "~1.5.2"
+    "mousetrap": "~1.5.2",
+    "bootstrap": "~3.3.6",
+    "jquery": "~2.1.4",
+    "font-awesome": "~4.5.0",
+    "bootstrap-validator": "~0.9.0",
+    "jquery-mask-plugin": "jQuery-Mask-Plugin#~1.13.4",
+    "bootstrap-datepicker": "~1.5.0"
   }
 }

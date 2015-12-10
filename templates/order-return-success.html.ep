@@ -1,0 +1,22 @@
+% layout 'parcel';
+% title '반납택배 발송알리미';
+% my $order_id = $order->id;
+% my $user = $order->user;
+% my ($parcel, $waybill) = split /,/, $order->return_method;
+
+<h1>열린옷장</h1>
+<h2 class="text-success">택배 반납신청이 정상적으로 접수되었습니다.</h2>
+
+<dl class="dl-horizontal well">
+  <dt>이름</dt>
+  <dd><%= $user->name %></dd>
+  <dt>택배사</dt>
+  <dd><%= $parcel %> 택배</dd>
+  <dt>운송장</dt>
+  <dd><%= $waybill %></dd>
+</dl>
+
+<p>잘못입력하셨다면, <a href="<%= url_for("/order/$order_id/return") %>">여기</a>에서 다시 입력해주세요</p>
+
+<hr>
+<p>운송장번호와 택배사의 정보가 정확하게 기입된 경우, 택배 반납은 접수일을 기준으로 확인됩니다. 감사합니다.</p>

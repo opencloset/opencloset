@@ -1,0 +1,90 @@
+% layout 'parcel';
+% title '반납택배 발송알리미';
+% my $name = $order->user->name;
+% my @err;
+
+<h1>열린옷장 <%= title %></h1>
+<p><%= $name %>님 안녕하세요.</p>
+<p>대여하신 의류를 택배발송 한 후, 아래 정보를 정확히 입력해주세요.</p>
+<p>택배 반납 후에도 발송알리미가 작성되지 않은 경우 본 발송물은 미반납으로 처리되오니, 택배 발송 후에는 반드시 발송알리미 작성을 요청드립니다. (택배 발송은 반납일 1일 전 발송, 택배비는 본인부담)</p>
+
+<hr>
+
+<form method="POST" action="<%= url_for; %>" data-toggle="validator" role="form">
+  % @err = @{ $error->{phone} || [] };
+  <div class="form-group<%= @err ? ' has-error' : '' %>">
+    <label for="phone">핸드폰번호</label>
+    <input type="text" name="phone" class="form-control" id="phone" placeholder="핸드폰번호 Phone" required>
+    <div class="help-block with-errors">
+      % if (@err) {
+        <ul class="list-unstyled">
+          % for my $err (@err) {
+            <li><%= $err %></li>
+          % }
+        </ul>
+      % }
+    </div>
+  </div>
+
+  % @err = @{ $error->{parcel} || [] };
+  <div class="form-group<%= @err ? ' has-error' : '' %>">
+    <label for="parcel">택배사</label>
+    <select class="form-control" id="parcel" name="parcel" required>
+      <option value=""></option>
+      <option value="CJ대한통운">CJ대한통운</option>
+      <option value="CSVnet편의점">CSVnet 편의점</option>
+      <option value="KGB">KGB</option>
+      <option value="동부">동부</option>
+      <option value="로젠">로젠</option>
+      <option value="옐로우캡">옐로우캡</option>
+      <option value="우체국">우체국</option>
+      <option value="한진">한진</option>
+      <option value="현대">현대</option>
+      <option value="기타">기타</option>
+    </select>
+    <div class="help-block with-errors">
+      % if (@err) {
+        <ul class="list-unstyled">
+          % for my $err (@err) {
+            <li><%= $err %></li>
+          % }
+        </ul>
+      % }
+    </div>
+  </div>
+
+  % @err = @{ $error->{waybill} || [] };
+  <div class="form-group<%= @err ? ' has-error' : '' %>">
+    <label for="waybill">운송장번호</label>
+    <input id="waybill" class="form-control" name="waybill" type="text" placeholder="운송장번호 Waybill" required>
+    <div class="help-block with-errors">
+      % if (@err) {
+        <ul class="list-unstyled">
+          % for my $err (@err) {
+            <li><%= $err %></li>
+          % }
+        </ul>
+      % }
+    </div>
+  </div>
+
+  <button type="submit" class="btn btn-primary">전송</button>
+</form>
+
+<div class="modal fade" tabindex="-1" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title"><%= title %></h4>
+      </div>
+      <div class="modal-body">
+        <p>입력하신 내용</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">취소</button>
+        <button type="button" class="btn btn-primary">계속</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
