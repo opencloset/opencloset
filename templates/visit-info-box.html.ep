@@ -317,7 +317,7 @@
                         <span class="lbl"></span>
                       </td>
                       <td> <del> <%%= ymd %> </del> </td>
-                      <td> <del> <%%= hm %>  </del> </td>
+                      <td> <del> <%%= hm %>  </del> <strong>예약 인원 초과</strong> </td>
                     <%% } %>
                   </tr>
                 </script>
