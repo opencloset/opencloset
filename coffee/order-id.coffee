@@ -30,15 +30,28 @@ $ ->
         #
         compiled = _.template( $('#tpl-late-fee-discount').html() )
         $("#late-fee-discount").html( $(compiled(data)) )
+        updateLateFeeDiscountAndLateFeeFinal = ( late_fee, discount ) ->
+          late_fee_discount = parseInt discount
+          late_fee_final    = late_fee + late_fee_discount
+          $('.late-fee-final').html OpenCloset.commify(late_fee_final) + '원'
+          $('#order').data('order-late-fee-discount', late_fee_discount)
+          $('#order').data('order-late-fee-final',    late_fee_final)
         $('#order-late-fee-discount').editable
+          savenochange: true
           display: (value, sourceData, response) ->
             $(this).html( OpenCloset.commify value )
           success: (response, newValue) ->
-            late_fee_discount = parseInt newValue
-            late_fee_final    = data.late_fee + late_fee_discount
-            $('.late-fee-final').html OpenCloset.commify(late_fee_final) + '원'
-            $('#order').data('order-late-fee-discount', late_fee_discount)
-            $('#order').data('order-late-fee-final',    late_fee_final)
+            updateLateFeeDiscountAndLateFeeFinal( data.late_fee, newValue )
+        $('#order-late-fee-discount-all').click (e) ->
+          discount = data.late_fee * -1
+          $('#order-late-fee-discount').editable 'setValue', discount
+
+          #
+          # bootstrap-xeditable가 로컬 submit이라던가
+          # activate이 제대로 동작하지 않는 버그로 인해
+          # 별도로 버튼을 클릭한 경우에 강제로 에누리 결과를 갱신하도록 합니다.
+          #
+          updateLateFeeDiscountAndLateFeeFinal( data.late_fee, discount )
 
         #
         # update late_fee final

@@ -421,10 +421,10 @@
                                   %th 시점
                                   %th 처리 시간
                               %tbody
-                                - my $count = 0;
+                                - my $log_count = 0;
                                 - for my $log ( @{ $analyze{logs} } ) {
                                   %tr
-                                    %td.center= ++$count
+                                    %td.center= ++$log_count
                                     %td= $log->{status}
                                     %td= $log->{timestamp}->strftime('%m월 %d일 %H시 %M분');
                                     %td= convert_sec_to_locale($log->{delta}) if $log->{delta}
@@ -522,7 +522,7 @@
                                   %th 소계
                                   %th 기타
                               %tbody
-                                - my $count = 0;
+                                - my $detail_count = 0;
                                 - for my $detail ( $order->order_details ) {
                                   %tr
                                     %td.center.return-process
@@ -531,7 +531,7 @@
                                           %input.ace{ :type => 'checkbox', 'data-clothes-code' => "#{ trim_clothes_code($detail->clothes) }", 'data-id' => "#{ $detail->id }" }
                                           %span.lbl
                                       - }
-                                    %td.center= ++$count
+                                    %td.center= ++$detail_count
                                     - if ( $detail->clothes ) {
                                       %td
                                         %span
@@ -710,6 +710,7 @@
                         data-value       = "0"
                       ></a>원
                       </strong>
+                      <button class="btn btn-default btn-xs" id="order-late-fee-discount-all">전체 에누리</button>
                     <% } else { %>
                       <strong> 해당사항 없음 </strong>
                     <% } %>
