@@ -65,6 +65,7 @@
         %td.center 엉덩이
         %td.center 허벅지
         %td.center 허리
+        %td.center 무릎
         %td.center 다리
         %td.center 발
 
@@ -75,6 +76,7 @@
         %td.center 엉덩이
         %td.center 허벅지
         %td.center 허리
+        %td.center 무릎
         %td.center 다리
         %td.center 발
 
@@ -85,6 +87,7 @@
         %td.center 엉덩이
         %td.center 허벅지
         %td.center 허리
+        %td.center 무릎
         %td.center 다리
         %td.center 발
     %tbody
@@ -95,7 +98,7 @@
         -   $osg_db->height( int $h );
         -   $osg_db->weight( int $w );
         -   my $r = $osg_db->guess;
-        -   for ( qw/ belly topbelly bust arm thigh waist hip leg foot / ) {
+        -   for ( qw/ belly topbelly bust arm thigh waist knee hip leg foot / ) {
         -     $r->{$_} = $r->{$_} ? sprintf('%.1f', $r->{$_}) : 'N/A';
         -   }
         -   my $class = ( int($w) == int($weight) && int($h) == int($height) ) ? "success" : q{};
@@ -106,6 +109,7 @@
           %td.text-right{ :class => "#{$class}" }= $r->{hip}
           %td.text-right{ :class => "#{$class}" }= $r->{thigh}
           %td.text-right{ :class => "#{$class}" }= $r->{waist}
+          %td.text-right{ :class => "#{$class}" }= $r->{knee}
           %td.text-right{ :class => "#{$class}" }= $r->{leg}
           %td.text-right{ :class => "#{$class}" }= $r->{foot}
         -   }
@@ -124,7 +128,7 @@
 -   my $ret1 = $osg_db->guess;
 -   my $ret2 = $osg_bodykit->guess;
 -   for my $r ( $ret1, $ret2 ) {
--     for ( qw/ belly topbelly bust arm thigh waist hip leg foot / ) {
+-     for ( qw/ belly topbelly bust arm thigh waist knee hip leg foot / ) {
 -       $r->{$_} = $r->{$_} ? sprintf('%.1f', $r->{$_}) : 'N/A';
 -     }
 -   }
@@ -139,6 +143,7 @@
         %th.text-right 엉덩이
         %th.text-right 허벅지
         %th.text-right 허리
+        %th.text-right 무릎
         %th.text-right 다리
         %th.text-right 발
     %tbody
@@ -165,6 +170,10 @@
           %br
           = $ret1->{hip}
         %td.text-right
+          = $ret1->{count}{knee}
+          %br
+          = $ret1->{knee}
+        %td.text-right
           = $ret1->{count}{thigh}
           %br
           = $ret1->{thigh}
@@ -187,6 +196,7 @@
         %td.text-right= $ret2->{bust}
         %td.text-right= $ret2->{arm}
         %td.text-right= $ret2->{hip}
+        %td.text-right= $ret2->{knee}
         %td.text-right= $ret2->{thigh}
         %td.text-right= $ret2->{waist}
         %td.text-right= $ret2->{leg}
@@ -199,7 +209,7 @@
   %table.table.table-striped.table-bordered.table-hover
     %thead
       %tr
-        %th
+        %th 주문서
         %th 키
         %th 몸무게
         %th
@@ -276,7 +286,7 @@
   %table.table.table-striped.table-bordered.table-hover
     %thead
       %tr
-        %th
+        %th 주문서
         %th 키
         %th 몸무게
         %th
