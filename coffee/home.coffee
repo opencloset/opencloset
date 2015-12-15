@@ -22,6 +22,7 @@ $ ->
       success: (data, textStatus, jqXHR) ->
         data.code = data.code.replace /^0/, ''
         data.statusCode = OpenCloset.status[ data.status ].id
+        data.count = $("#clothes-table table tbody tr").length + 1
         if data.status is '대여중'
           return if $("#clothes-table table tbody tr[data-order-id='#{data.order.id}']").length
           compiled = _.template($('#tpl-row-checkbox-clothes-with-order').html())

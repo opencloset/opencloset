@@ -66,6 +66,7 @@
           %label
             %input#input-check-all.ace{ :type => 'checkbox' }
             %span.lbl
+        %th #
         %th 옷
         %th 상태
         %th 묶음
@@ -95,6 +96,7 @@
           <span class="lbl"></span>
         </label>
       </td>
+      <td> <%= count %> </td> <!-- 넘버링 -->
       <td> <a href="/clothes/<%= code %>"> <%= code %> </a> </td> <!-- 옷 -->
       <td>
         <span class="order-status label">
@@ -125,6 +127,7 @@
           <span class="lbl"></span>
         </label>
       </td>
+      <td> <%= count %> </td> <!-- 넘버링 -->
       <td> <a href="/clothes/<%= code %>"> <%= code %> </a> </td> <!-- 옷 -->
       <td> <span class="order-status label"><%= status %></span> </td> <!-- 상태 -->
       <td> </td> <!-- 묶음 -->
