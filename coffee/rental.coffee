@@ -42,6 +42,8 @@ $ ->
         data.categoryStr = OpenCloset.category[ data.category ].str
 
         return if $("#clothes-table table tbody tr[data-clothes-code='#{data.code}']").length
+
+        data.count = $("#clothes-table table tbody tr").length + 1
         if data.status is '대여중'
           compiled = _.template($('#tpl-row-checkbox-disabled-with-order').html())
           $html = $(compiled(data))
