@@ -45,6 +45,7 @@ use Parcel::Track;
 use SMS::Send::KR::APIStore;
 use SMS::Send::KR::CoolSMS;
 use SMS::Send;
+use Statistics::Basic;
 use String::Random;
 use Text::CSV;
 use Try::Tiny;
@@ -1310,6 +1311,145 @@ helper user_avg_diff => sub {
     return \%data;
 };
 
+helper user_avg2 => sub {
+    my ( $self, $user ) = @_;
+
+    my %data = (
+        ret  => 0,
+        avg  => undef,
+    );
+    for ( qw/ bust waist topbelly belly thigh hip / ) {
+        $data{avg}{$_}  = 'N/A';
+    }
+
+    unless (
+        $user->user_info->gender =~ m/^(male|female)$/
+        && $user->user_info->height
+        && $user->user_info->weight
+    )
+    {
+        return \%data;
+    }
+
+    my $height = $user->user_info->height;
+    my $weight = $user->user_info->weight;
+    my $gender = $user->user_info->gender;
+    my $range  = 0;
+    my %ret;
+    do {
+        my $dt_base = try {
+            DateTime->new(
+                time_zone => app->config->{timezone},
+                year      => 2015,
+                month     => 5,
+                day       => 29,
+            );
+        };
+        last unless $dt_base;
+
+        my $dtf  = $DB->storage->datetime_parser;
+        my $cond = {
+            -or => [
+                {
+                    # 대여일이 2015-05-29 이전
+                    -and => [
+                        { 'booking.date' => { '<' => $dtf->format_datetime($dt_base) }, },
+                        \[ "DATE_FORMAT(booking.date, '%H') < ?" => 19 ],
+                    ],
+                },
+                {
+                    # 대여일이 2015-05-29 이후
+                    -and => [
+                        { 'booking.date' => { '>=' => $dtf->format_datetime($dt_base) }, },
+                        \[ "DATE_FORMAT(booking.date, '%H') < ?" => 22 ],
+                    ],
+                },
+            ],
+            'booking.gender' => $gender,
+            'height' => { -between => [ $height - $range, $height + $range ] },
+            'weight' => { -between => [ $weight - $range, $weight + $range ] },
+        };
+        my $attr = { join => [qw/ booking /] };
+
+        $cond->{belly}    = $user->user_info->belly    if $user->user_info->belly;
+        $cond->{bust}     = $user->user_info->bust     if $user->user_info->bust;
+        $cond->{hip}      = $user->user_info->hip      if $user->user_info->hip;
+        $cond->{thigh}    = $user->user_info->thigh    if $user->user_info->thigh;
+        $cond->{topbelly} = $user->user_info->topbelly if $user->user_info->topbelly;
+        $cond->{waist}    = $user->user_info->waist    if $user->user_info->waist;
+
+        my $order_rs = $DB->resultset('Order')->search( $cond, $attr );
+
+        my %item = (
+            belly    => [],
+            bust     => [],
+            hip      => [],
+            thigh    => [],
+            topbelly => [],
+            waist    => [],
+        );
+        my %count = (
+            total    => 0,
+            belly    => 0,
+            bust     => 0,
+            hip      => 0,
+            thigh    => 0,
+            topbelly => 0,
+            waist    => 0,
+        );
+        while ( my $order = $order_rs->next ) {
+            ++$count{total};
+            for (
+                qw/
+                belly
+                bust
+                hip
+                thigh
+                topbelly
+                waist
+                /
+                )
+            {
+                next unless $order->$_; # remove undef & 0
+
+                ++$count{$_};
+                push @{ $item{$_} }, $order->$_;
+            }
+        }
+        %ret = (
+            height   => $height,
+            weight   => $weight,
+            gender   => $gender,
+            count    => \%count,
+            belly    => 0,
+            bust     => 0,
+            hip      => 0,
+            thigh    => 0,
+            topbelly => 0,
+            waist    => 0,
+        );
+        $ret{belly}    = Statistics::Basic::mean( $item{belly} )->query;
+        $ret{bust}     = Statistics::Basic::mean( $item{bust} )->query;
+        $ret{hip}      = Statistics::Basic::mean( $item{hip} )->query;
+        $ret{thigh}    = Statistics::Basic::mean( $item{thigh} )->query;
+        $ret{topbelly} = Statistics::Basic::mean( $item{topbelly} )->query;
+        $ret{waist}    = Statistics::Basic::mean( $item{waist} )->query;
+    };
+    return \%data unless %ret;
+
+    my $avg = \%ret;
+    for ( qw/ bust waist topbelly belly thigh hip / ) {
+        $avg->{$_}  = $avg->{$_} ? sprintf('%.1f', $avg->{$_}) : 'N/A';
+    }
+
+    %data = (
+        ret  => 1,
+        avg  => $avg,
+    );
+
+    return \%data;
+};
+
 helper count_visitor => sub {
     my ( $self, $start_dt, $end_dt, $cb ) = @_;
 
@@ -1636,6 +1776,7 @@ group {
     get  '/gui/booking-list'      => \&api_gui_booking_list;
     get  '/gui/timetable/:ymd'    => \&api_gui_timetable;
     get  '/gui/user/:id/avg'      => \&api_gui_user_id_avg;
+    get  '/gui/user/:id/avg2'     => \&api_gui_user_id_avg2;
 
     any '/postcode/search'       => \&api_postcode_search;
 
@@ -4002,6 +4143,22 @@ group {
         $self->respond_to( json => { status => 200, json => $data } );
     }
 
+    sub api_gui_user_id_avg2 {
+        my $self = shift;
+
+        #
+        # fetch params
+        #
+        my %params = $self->get_params(qw/ id /);
+
+        my $user = $self->get_user( \%params );
+        return unless $user;
+
+        my $data = $self->user_avg2($user);
+
+        $self->respond_to( json => { status => 200, json => $data } );
+    }
+
     sub api_postcode_search {
         my $self   = shift;
         my $q      = $self->param('q');
@@ -4660,7 +4817,8 @@ get '/user/:id' => sub {
     my $rented_clothes_count = 0;
     $rented_clothes_count += $_->clothes->count for $user->orders;
 
-    my $data = $self->user_avg_diff($user);
+    my $data  = $self->user_avg_diff($user);
+    my $data2 = $self->user_avg2($user);
 
     #
     # response
@@ -4671,6 +4829,7 @@ get '/user/:id' => sub {
         rented_clothes_count  => $rented_clothes_count,
         avg                   => $data->{avg},
         diff                  => $data->{diff},
+        avg2                  => $data2->{avg2},
     );
 } => 'user-id';
 
