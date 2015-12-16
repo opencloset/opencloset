@@ -106,7 +106,7 @@ $ ->
           success: (data, textStatus, jqXHR) ->
             for clothes in data
               code = clothes.code.replace /^0/, ''
-              $("#clothes-table table tbody tr[data-clothes-code='#{code}'] td:nth-child(3) span.order-status")
+              $("#clothes-table table tbody tr[data-clothes-code='#{code}'] td:nth-child(4) span.order-status")
                 .html(clothes.status)
                 .removeClass( (i, c) -> c )
                 .addClass [ 'order-status', 'label', OpenCloset.status[ clothes.status ].css ].join(' ')
