@@ -170,10 +170,6 @@
           %br
           = $ret1->{hip}
         %td.text-right
-          = $ret1->{count}{knee}
-          %br
-          = $ret1->{knee}
-        %td.text-right
           = $ret1->{count}{thigh}
           %br
           = $ret1->{thigh}
@@ -181,6 +177,10 @@
           = $ret1->{count}{waist}
           %br
           = $ret1->{waist}
+        %td.text-right
+          = $ret1->{count}{knee}
+          %br
+          = $ret1->{knee}
         %td.text-right
           = $ret1->{count}{leg}
           %br
@@ -196,9 +196,9 @@
         %td.text-right= $ret2->{bust}
         %td.text-right= $ret2->{arm}
         %td.text-right= $ret2->{hip}
-        %td.text-right= $ret2->{knee}
         %td.text-right= $ret2->{thigh}
         %td.text-right= $ret2->{waist}
+        %td.text-right= $ret2->{knee}
         %td.text-right= $ret2->{leg}
         %td.text-right= $ret2->{foot}
 - }
