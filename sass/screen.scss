@@ -492,7 +492,8 @@ $opencloset-darken-yellow: desaturate(darken($opencloset-yellow, 4%), 10%);
             display: inline;
             margin-left: 1px;
         }
-        .profile-info-value > span + span.avg::before {
+        .profile-info-value > span + span.avg::before,
+        .profile-info-value > span + span.avg2::before {
             border-bottom: 1px solid #fff;
             color: #666;
             content: "";
