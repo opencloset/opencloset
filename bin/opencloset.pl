@@ -6643,6 +6643,7 @@ get '/stat/visitor/:ymd' => sub {
 
     # -2 ~ +2 days from now
     my %count;
+    my $today_data;
     my $from = $dt->clone->truncate( to => 'day' )->add( days => -2 );
     my $to   = $dt->clone->truncate( to => 'day' )->add( days =>  2 );
     for ( ; $from <= $to; $from->add( days => 1 ) ) {
@@ -6660,12 +6661,15 @@ get '/stat/visitor/:ymd' => sub {
         elsif ( $f->clone->truncate( to => 'day' ) == $today ) {
             app->log->info( "do not cache and by-pass cache: $name" );
             $data = $self->count_visitor( $f, $t );
+            $today_data = $data;
         }
 
         push @{ $count{day} }, $data;
     }
 
     # from first to current week of this year
+    my $current_week_start_dt;
+    my $current_week_end_dt;
     for ( my $i = $today->clone->truncate( to => 'year'); $i <= $today; $i->add( weeks => 1 ) ) {
         my $f = $i->clone->truncate( to => 'week' );
         my $t = $i->clone->truncate( to => 'week' )->add( weeks => 1, seconds => -1 );
@@ -6673,6 +6677,9 @@ get '/stat/visitor/:ymd' => sub {
         my $f_str = $f->strftime('%Y%m%d%H%M%S');
         my $t_str = $t->strftime('%Y%m%d%H%M%S');
         my $name  = "week-$f_str-$t_str";
+
+        $current_week_start_dt = $f->clone;
+        $current_week_end_dt   = $t->clone;
 
         my $data;
         if ( $f < $today && $t < $today ) {
@@ -6683,6 +6690,8 @@ get '/stat/visitor/:ymd' => sub {
     }
 
     # from january to current months of this year
+    my $current_month_start_dt;
+    my $current_month_end_dt;
     for ( my $i = $today->clone->truncate( to => 'year'); $i <= $today; $i->add( months => 1 ) ) {
         my $f = $i->clone->truncate( to => 'month' );
         my $t = $i->clone->truncate( to => 'month' )->add( months => 1, seconds => -1 );
@@ -6691,6 +6700,9 @@ get '/stat/visitor/:ymd' => sub {
         my $t_str = $t->strftime('%Y%m%d%H%M%S');
         my $name  = "month-$f_str-$t_str";
 
+        $current_month_start_dt = $f->clone;
+        $current_month_end_dt   = $t->clone;
+
         my $data;
         if ( $f < $today && $t < $today ) {
             $data = $CACHE->get($name);
@@ -6698,6 +6710,78 @@ get '/stat/visitor/:ymd' => sub {
 
         push @{ $count{month} }, $data;
     }
+
+    # current data with and without cache
+    my %current_week = (
+        all        => { total => 0, male => 0, female => 0 },
+        visited    => { total => 0, male => 0, female => 0 },
+        notvisited => { total => 0, male => 0, female => 0 },
+        bestfit    => { total => 0, male => 0, female => 0 },
+        loanee     => { total => 0, male => 0, female => 0 },
+    );
+    my %current_month = (
+        all        => { total => 0, male => 0, female => 0 },
+        visited    => { total => 0, male => 0, female => 0 },
+        notvisited => { total => 0, male => 0, female => 0 },
+        bestfit    => { total => 0, male => 0, female => 0 },
+        loanee     => { total => 0, male => 0, female => 0 },
+    );
+    for ( my $i = $today->clone->add( months => -1 )->truncate( to => 'month' ); $i <= $today; $i->add( days => 1 ) ) {
+        my $f = $i->clone->truncate( to => 'day' );
+        my $t = $i->clone->truncate( to => 'day' )->add( days => 1, seconds => -1 );
+
+        my $f_str = $f->strftime('%Y%m%d%H%M%S');
+        my $t_str = $t->strftime('%Y%m%d%H%M%S');
+        my $name  = "day-$f_str-$t_str";
+
+        my $data;
+        if ( $f < $today && $t < $today ) {
+            $data = $CACHE->get($name);
+        }
+        elsif ( $f->clone->truncate( to => 'day' ) == $today ) {
+            app->log->info( "do not cache and by-pass cache: $name" );
+            $data = $today_data;
+        }
+
+        if ( $current_week_start_dt <= $i && $i <= $current_week_end_dt ) {
+            app->log->info( "calculationg for this week: $name" );
+            $current_week{all}{total}         += $data->{all}{total};
+            $current_week{all}{male}          += $data->{all}{male};
+            $current_week{all}{female}        += $data->{all}{female};
+            $current_week{visited}{total}     += $data->{visited}{total};
+            $current_week{visited}{male}      += $data->{visited}{male};
+            $current_week{visited}{female}    += $data->{visited}{female};
+            $current_week{notvisited}{total}  += $data->{notvisited}{total};
+            $current_week{notvisited}{male}   += $data->{notvisited}{male};
+            $current_week{notvisited}{female} += $data->{notvisited}{female};
+            $current_week{bestfit}{total}     += $data->{bestfit}{total};
+            $current_week{bestfit}{male}      += $data->{bestfit}{male};
+            $current_week{bestfit}{female}    += $data->{bestfit}{female};
+            $current_week{loanee}{total}      += $data->{loanee}{total};
+            $current_week{loanee}{male}       += $data->{loanee}{male};
+            $current_week{loanee}{female}     += $data->{loanee}{female};
+        }
+        if ( $current_month_start_dt <= $i && $i <= $current_month_end_dt ) {
+            app->log->info( "calculationg for this month $name" );
+            $current_month{all}{total}         += $data->{all}{total};
+            $current_month{all}{male}          += $data->{all}{male};
+            $current_month{all}{female}        += $data->{all}{female};
+            $current_month{visited}{total}     += $data->{visited}{total};
+            $current_month{visited}{male}      += $data->{visited}{male};
+            $current_month{visited}{female}    += $data->{visited}{female};
+            $current_month{notvisited}{total}  += $data->{notvisited}{total};
+            $current_month{notvisited}{male}   += $data->{notvisited}{male};
+            $current_month{notvisited}{female} += $data->{notvisited}{female};
+            $current_month{bestfit}{total}     += $data->{bestfit}{total};
+            $current_month{bestfit}{male}      += $data->{bestfit}{male};
+            $current_month{bestfit}{female}    += $data->{bestfit}{female};
+            $current_month{loanee}{total}      += $data->{loanee}{total};
+            $current_month{loanee}{male}       += $data->{loanee}{male};
+            $current_month{loanee}{female}     += $data->{loanee}{female};
+        }
+    }
+    $count{week}[-1]  = \%current_week;
+    $count{month}[-1] = \%current_month;
 
     $self->render(
         'stat-visitor',
