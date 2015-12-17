@@ -1371,12 +1371,13 @@ helper user_avg2 => sub {
         };
         my $attr = { join => [qw/ booking /] };
 
-        $cond->{belly}    = $user->user_info->belly    if $user->user_info->belly;
-        $cond->{bust}     = $user->user_info->bust     if $user->user_info->bust;
-        $cond->{hip}      = $user->user_info->hip      if $user->user_info->hip;
-        $cond->{thigh}    = $user->user_info->thigh    if $user->user_info->thigh;
-        $cond->{topbelly} = $user->user_info->topbelly if $user->user_info->topbelly;
-        $cond->{waist}    = $user->user_info->waist    if $user->user_info->waist;
+        my $avg2_range = 1;
+        $cond->{belly}    = { -between => [ $user->user_info->belly    - $avg2_range, $user->user_info->belly    + $avg2_range ] } if $user->user_info->belly;
+        $cond->{bust}     = { -between => [ $user->user_info->bust     - $avg2_range, $user->user_info->bust     + $avg2_range ] } if $user->user_info->bust;
+        $cond->{hip}      = { -between => [ $user->user_info->hip      - $avg2_range, $user->user_info->hip      + $avg2_range ] } if $user->user_info->hip;
+        $cond->{thigh}    = { -between => [ $user->user_info->thigh    - $avg2_range, $user->user_info->thigh    + $avg2_range ] } if $user->user_info->thigh;
+        $cond->{topbelly} = { -between => [ $user->user_info->topbelly - $avg2_range, $user->user_info->topbelly + $avg2_range ] } if $user->user_info->topbelly;
+        $cond->{waist}    = { -between => [ $user->user_info->waist    - $avg2_range, $user->user_info->waist    + $avg2_range ] } if $user->user_info->waist;
 
         my $order_rs = $DB->resultset('Order')->search( $cond, $attr );
 
