@@ -48,7 +48,18 @@ for my $k ( sort keys %code ) {
         my $code
             = Math::Fleximal->new($_)->change_flex( \@digits )->add($last)
             ->add( $last->one )->to_str;
-        printf( "%s%03s\n", $k, $code );
+
+        my ( $code_1, $code_2, $code_3 ) = split //, sprintf('%03s', $code);
+        printf(
+            qq{"%s%03s","%02d%02d-%02d%02d"\n},
+            $k,
+            $code,
+            Math::Fleximal->new( $k, \@digits )->base_10,
+            Math::Fleximal->new( $code_1, \@digits )->base_10,
+            Math::Fleximal->new( $code_2, \@digits )->base_10,
+            Math::Fleximal->new( $code_3, \@digits )->base_10,
+        );
+
         $next{$k} = $code;
     }
 }
