@@ -6643,6 +6643,7 @@ get '/stat/visitor/:ymd' => sub {
 
     # -2 ~ +2 days from now
     my %count;
+    my $today_data;
     my $from = $dt->clone->truncate( to => 'day' )->add( days => -2 );
     my $to   = $dt->clone->truncate( to => 'day' )->add( days =>  2 );
     for ( ; $from <= $to; $from->add( days => 1 ) ) {
@@ -6660,6 +6661,7 @@ get '/stat/visitor/:ymd' => sub {
         elsif ( $f->clone->truncate( to => 'day' ) == $today ) {
             app->log->info( "do not cache and by-pass cache: $name" );
             $data = $self->count_visitor( $f, $t );
+            $today_data = $data;
         }
 
         push @{ $count{day} }, $data;
@@ -6738,7 +6740,7 @@ get '/stat/visitor/:ymd' => sub {
         }
         elsif ( $f->clone->truncate( to => 'day' ) == $today ) {
             app->log->info( "do not cache and by-pass cache: $name" );
-            $data = $self->count_visitor( $f, $t );
+            $data = $today_data;
         }
 
         if ( $current_week_start_dt <= $i && $i <= $current_week_end_dt ) {
