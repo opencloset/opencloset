@@ -1,12 +1,10 @@
 #!/usr/bin/env perl
 
-use 5.010;
 use utf8;
 use strict;
 use warnings;
 
 use Math::Fleximal;
-use DDP;
 
 my %last = (
     A => q{},    # 신발      / shoes
@@ -57,6 +55,6 @@ for my $k ( sort keys %code ) {
 %next = ( %last, %next );
 
 print STDERR "[ last code ]\n";
-foreach my $k ( sort keys %next ) {
+for my $k ( sort keys %next ) {
     print STDERR sprintf( "%s%03s\n", $k, $next{$k} );
 }
