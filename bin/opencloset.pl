@@ -3375,7 +3375,7 @@ group {
         # validate params
         #
         my $v = $self->create_validator;
-        $v->field('to')->required(1)->regexp(qr/^\d+$/);
+        $v->field('to')->required(1)->regexp(qr/^#?\d+$/);
         $v->field('text')->required(1)->regexp(qr/^(\s|\S)+$/);
         $v->field('status')->in(qw/ pending sending sent /);
 
@@ -3391,9 +3391,38 @@ group {
         }
 
         $params{to} =~ s/-//g;
+        my $from = app->config->{sms}{ app->config->{sms}{driver} }{_from};
+        my $to   = $params{to};
+        if ( $params{to} =~ m/^#(\d+)/ ) {
+            my $order_id = $1;
+            return $self->error( 404, {
+                str  => 'failed to create a new sms: no order id',
+                data => {},
+            }) unless $order_id;
+
+            my $order_obj = $DB->resultset('Order')->find($order_id);
+            return $self->error( 404, {
+                str  => 'failed to create a new sms: cannot get order object',
+                data => {},
+            }) unless $order_obj;
+
+            my $phone = $order_obj->user->user_info->phone;
+            return $self->error( 404, {
+                str  => 'failed to create a new sms: cannot get order.user.user_info.phone',
+                data => {},
+            }) unless $phone;
+
+            my $booking_time = $order_obj->booking->date->strftime('%H%M');
+            app->log->debug( "booking time: $booking_time" );
+            if ( $booking_time eq '22:00' ) {
+                $from = app->config->{sms}{from}{online};
+            }
+            $to = $phone;
+        }
         my $sms = $DB->resultset('SMS')->create({
             %params,
-            from => app->config->{sms}{ app->config->{sms}{driver} }{_from},
+            from => $from,
+            to   => $to,
         });
         return $self->error( 404, {
             str  => 'failed to create a new sms',
