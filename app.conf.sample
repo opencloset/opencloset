@@ -8,20 +8,24 @@ use warnings;
 
 use Mojo::JSON;
 
-my $SMS_FROM = '07043257521';
 my $PORT     = 8001;
+my %SMS_FROM = (
+    official => '07043257521',
+    online   => '07075837521',
+);
 
 my %SMS = (
+    from          => \%SMS_FROM,
     driver        => 'KR::APIStore',
     'KR::CoolSMS' => {
         _api_key    => $ENV{OPENCLOSET_COOLSMS_API_KEY}    || q{},
         _api_secret => $ENV{OPENCLOSET_COOLSMS_API_SECRET} || q{},
-        _from       => $SMS_FROM,
+        _from       => $SMS_FROM{official},
     },
     'KR::APIStore' => {
         _id            => $ENV{OPENCLOSET_APISTORE_ID}            || q{},
         _api_store_key => $ENV{OPENCLOSET_APISTORE_API_STORE_KEY} || q{},
-        _from          => $SMS_FROM,
+        _from          => $SMS_FROM{official},
     },
 );
 

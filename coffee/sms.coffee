@@ -40,9 +40,13 @@ $ ->
     .on( 'change', (e) -> updateMsgScreenWidth() )
 
   #
-  # 전화번호에 `-` 기호를 무시하도록 함
+  # 전화번호로 숫자나 또는 주문서 번호(#숫자)만 입력 가능하게 함
   #
-  $('input[type="tel"]').mask('00000000000')
+  $('input[name="to"]').mask '#00000000000',
+    translation:
+      '#':
+        pattern:  /[#]/
+        optional: true
 
   #
   # dynamic chosen item manupulation
@@ -65,7 +69,7 @@ $ ->
       OpenCloset.alert 'danger', '휴대전화를 입력해주세요.'
       $('input[name=to]').focus()
       return
-    unless /^\d+$/.test( to )
+    unless /^#?\d+$/.test( to )
       OpenCloset.alert 'danger', '유효하지 않은 휴대전화입니다.'
       $('input[name=to]').focus()
       return
