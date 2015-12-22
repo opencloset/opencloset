@@ -3412,7 +3412,7 @@ group {
                 data => {},
             }) unless $phone;
 
-            my $booking_time = $order_obj->booking->date->strftime('%H%M');
+            my $booking_time = $order_obj->booking->date->strftime('%H:%M');
             app->log->debug( "booking time: $booking_time" );
             if ( $booking_time eq '22:00' ) {
                 $from = app->config->{sms}{from}{online};
