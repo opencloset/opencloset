@@ -1,4 +1,6 @@
 $ ->
+  sock = null
+
   $("#booking-ymd").datepicker(
     todayHighlight: true
     autoclose:      true
@@ -23,23 +25,24 @@ $ ->
     $.ajax "/api/order/#{order_id}.json",
       type: 'PUT'
       data: { id: order_id, status_id: status_to }
+      beforeSend: ->
+        sock.close() if sock
       success: (data) ->
         location.href = $this.closest('a').prop('href')
       error: (jqXHR, textStatus) ->
         OpenCloset.alert('danger', "주문서 상태 변경에 실패했습니다: #{jqXHR.responseJSON.error.str}")
 
-
   ## 포장완료 상태에 대해서 실시간으로 갱신 Github #647
   boxed_id = OpenCloset.status['포장완료'].id
   if /44/.test(location.search or '')
     url  = "#{CONFIG.monitor_uri}/socket".replace 'http', 'ws'
-    sock = new ReconnectingWebSocket url, null, { debug: false }
+    sock = new ReconnectingWebSocket url, null, { debug: false, reconnectInterval: 3000 }
     sock.onopen = (e) ->
       sock.send '/subscribe order'
     sock.onmessage = (e) ->
       data     = JSON.parse(e.data)
       order_id = data.order.id
-      if parseInt(data.to) is boxed_id
+      if parseInt(data.to) is boxed_id or parseInt(data.from) is boxed_id
         location.reload()
     sock.onerror = (e) ->
       location.reload()
