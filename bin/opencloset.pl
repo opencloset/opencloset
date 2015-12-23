@@ -5350,7 +5350,7 @@ get '/order' => sub {
             },
             {
                 join     => [ qw/ booking / ],
-                order_by => { -asc => 'booking.date' },
+                order_by => [{ -asc => 'booking.date' }, { -desc => 'update_date' }],
             },
         );
     }
