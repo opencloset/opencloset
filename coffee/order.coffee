@@ -33,7 +33,7 @@ $ ->
   boxed_id = OpenCloset.status['포장완료'].id
   if /44/.test(location.search or '')
     url  = "#{CONFIG.monitor_uri}/socket".replace 'http', 'ws'
-    sock = new ReconnectingWebSocket url, null, { debug: true }
+    sock = new ReconnectingWebSocket url, null, { debug: false }
     sock.onopen = (e) ->
       sock.send '/subscribe order'
     sock.onmessage = (e) ->
