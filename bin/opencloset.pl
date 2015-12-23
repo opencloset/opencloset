@@ -5298,6 +5298,7 @@ get '/order' => sub {
                             -as => 'sum_final_price'
                         },
                     ],
+                    order_by  => 'target_date'
                 );
             }
             default {
