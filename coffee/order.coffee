@@ -46,3 +46,52 @@ $ ->
         location.reload()
     sock.onerror = (e) ->
       location.reload()
+
+  ## 미납금 완납, 불납
+  $('a.late-fee-done[rel*=facebox]').on 'click', (e) ->
+    e.preventDefault()
+    $(@).closest('tr').toggleClass('active')
+    $.facebox({ div: $(@).attr('href') })
+  $(document).bind 'reveal.facebox', ->
+    $tr      = $('table tr.active')
+    late_fee = $tr.find('td:nth-child(2) a:first').text()
+    username = $tr.find('td:nth-child(5) a').text()
+    $('#facebox span.username').text("#{username}님")
+    $('#facebox code.late-fee').text(late_fee)
+  $(document).bind 'afterClose.facebox', ->
+    $('table tr').removeClass('active')
+
+  $('body').on 'click', '#facebox .late-fee-method', (e) ->
+    e.preventDefault()
+    order_id = $('table tr.active td:first a').text()
+    method   = $(@).text()
+    $.ajax "/api/order/#{order_id}.json",
+      type: 'PUT'
+      data:
+        id: order_id
+        compensation_pay_with: '완납'
+        late_fee_pay_with: method
+      success: (data) ->
+        $('table tr.active').remove()
+        $.facebox.close()
+        OpenCloset.alert('success', "완납 처리되었습니다")
+      error: (jqXHR, textStatus) ->
+        OpenCloset.alert('danger', "오류가 발생했습니다: #{jqXHR.responseJSON.error.str}")
+
+  $('.late-fee-deny').on 'click', (e) ->
+    e.preventDefault()
+    return unless confirm '불납 으로 변경하시겠습니까?'
+    $tr      = $(@).closest('tr')
+    order_id = $tr.find('td:first a').text()
+    $.ajax "/api/order/#{order_id}.json",
+      type: 'PUT'
+      data:
+        id: order_id
+        compensation_pay_with: '불납'
+        late_fee_pay_with: 'NULL'
+      success: (data) ->
+        $tr.remove()
+        OpenCloset.alert('success', "불납 처리되었습니다")
+      error: (jqXHR, textStatus) ->
+        OpenCloset.alert('danger', "오류가 발생했습니다: #{jqXHR.responseJSON.error.str}")
+  ## 미납금 완납, 불납 end
