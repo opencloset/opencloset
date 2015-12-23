@@ -2,8 +2,10 @@
 - my $_id = 'order';
 - layout 'default',
 -   page_id     => $_id,
--   breadcrumbs => [ { text => meta_text($_id) } ]
--   ;
+-   breadcrumbs => [ { text => meta_text($_id) } ],
+-   jses  => [
+-     '/lib/reconnectingWebsocket/reconnecting-websocket.js',
+-   ];
 - title meta_text($_id);
 
 .search
