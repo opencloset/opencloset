@@ -109,6 +109,7 @@
       <li><a href="<%= url_for('/volunteers')->query(status => 'drop') %>"><span class="label label-drop">방문안함</span></a></li>
     </ul>
     <hr class="colorgraph">
+    %= include 'partials/pagination' if $pageset;
     <div class="list-group">
       % my $volunteer_uri = $config->{volunteer_uri};
       % my $schema        = $works->result_source->schema;
