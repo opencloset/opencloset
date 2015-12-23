@@ -6486,6 +6486,8 @@ get '/volunteers' => sub {
     my $status = $self->param('status') || 'reported';
     my $query  = $self->param('q') // '';
 
+    $self->stash(pageset => '');    # prevent undefined error in template
+
     my ( $works, $standby );
     my $parser = $DB->storage->datetime_parser;
     $works = $DB->resultset('VolunteerWork')
@@ -6520,6 +6522,28 @@ get '/volunteers' => sub {
                 ]
             }
         );
+    }
+    elsif ( $status eq 'canceled' ) {
+        my $p = $self->param('p') || 1;
+        $works = $works->search(
+            undef,
+            {
+                page => $p,
+                rows => 10,
+                order_by => { -desc => 'id' }
+            }
+        );
+
+        my $pageset = Data::Pageset->new(
+            {
+                total_entries    => $works->pager->total_entries,
+                entries_per_page => $works->pager->entries_per_page,
+                pages_per_set    => 5,
+                current_page     => $p,
+            }
+        );
+
+        $self->stash( pageset => $pageset );
     }
 
     if ($query) {
