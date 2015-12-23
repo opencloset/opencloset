@@ -39,7 +39,7 @@ $ ->
     sock.onmessage = (e) ->
       data     = JSON.parse(e.data)
       order_id = data.order.id
-      if parseInt(data.from) is boxed_id or parseInt(data.to) is boxed_id
+      if parseInt(data.to) is boxed_id
         location.reload()
     sock.onerror = (e) ->
       location.reload()
