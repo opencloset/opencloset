@@ -1735,6 +1735,7 @@ group {
     get  '/order/:id'             => \&api_get_order;
     put  '/order/:id'             => \&api_update_order;
     del  '/order/:id'             => \&api_delete_order;
+    put  '/order/:id/latefee'     => \&api_update_order_latefee;
 
     put  '/order/:id/return-part' => \&api_order_return_part;
     get  '/order/:id/set-package' => \&api_order_set_package;
@@ -2205,6 +2206,130 @@ group {
         # response
         #
         $self->respond_to( json => { status => 200, json => $data } );
+    }
+
+    sub api_update_order_latefee {
+        my $self = shift;
+
+        my $v = $self->validation;
+        $v->required('price')->like(qr/^[0-9]+$/);
+        unless ( $v->has_error('price') ) {
+            my $price = $v->param('price');
+            $v->required('method') if $price;
+        }
+
+        if ( $v->has_error ) {
+            my $failed = $v->failed;
+            return $self->error( 400,
+                { str => 'Parameter validation failed: ' . join( ',', @$failed ) } );
+        }
+
+        my $price  = $v->param('price');
+        my $method = $v->param('method');
+        my $order  = $DB->resultset('Order')->find(
+            { id => $self->param('id') },
+            {
+                join      => [qw/ order_details /],
+                group_by  => [qw/ me.id /],
+                having    => { 'sum_final_price' => { '>' => 0 } },
+                '+select' => [
+                    {
+                        sum => 'order_details.final_price',
+                        -as => 'sum_final_price'
+                    },
+                ]
+            }
+        );
+
+        ## TODO: 최근 행(row)을 검사하는 것이 맞는가?
+        my $last_od =
+            $order->order_details( undef, { order_by => { -desc => 'id' } } )->first;
+
+        ## stage
+        ##
+        ## - 연장: 1
+        ## - 배상: 2
+        ## - 환불: 3
+        ## - 불납: 4
+        ## - 완납: 5
+        if ( $last_od->stage != 1 && $last_od->stage != 2 ) {
+            return $self->error( 400, { str => 'Invalid stage: ' . $last_od->stage } );
+        }
+
+        my $final_price     = $last_od->final_price;
+        my $sum_final_price = $order->get_column('sum_final_price');
+        $self->app->log->info( '미납금 Total ' . $self->commify($sum_final_price) );
+        $self->app->log->info( '미납금 Last ' . $self->commify($final_price) );
+
+        my $stage = $price ? 5 : 4;
+        my $hangul_stage =
+            $price ? $price == $final_price ? '완납' : '부분완납' : '불납';
+        if ($price) {
+            if ( $price != $last_od->final_price ) {
+                ## 부분완납은 완납으로 처리 하지만 로그를 남기자
+                $self->app->log->info(
+                    '부분완납 - 받을금액: ' . $self->commify($final_price) );
+                $self->app->log->info( '부분완납 - 받은금액: ' . $self->commify($price) );
+            }
+            else {
+                $self->app->log->info( '완납: ' . $self->commify($price) );
+            }
+        }
+        else {
+            $self->app->log->info( '불납: ' . $self->commify($final_price) );
+        }
+
+        ## 주문서에서의 합계를 위해 금액을 reset 할 수 있는 행을 추가
+        my $reset_od = $self->create_order_detail(
+            {
+                order_id    => $order->id,
+                name        => $last_od->name,
+                price       => -( $last_od->price ),
+                final_price => -($final_price),
+                stage       => $stage,
+                desc        => $last_od->desc
+            }
+        );
+
+        unless ($reset_od) {
+            my $error = "Failed to create a new order_detail";
+            $self->app->log->error($error);
+            return $self->error( 500, { str => $error } );
+        }
+
+        my $od = $self->create_order_detail(
+            {
+                order_id    => $order->id,
+                name        => $hangul_stage,
+                price       => $last_od->price,
+                final_price => $price,
+                stage       => $stage,
+                desc        => undef
+            }
+        );
+
+        unless ($od) {
+            my $error = "Failed to create a new order_detail";
+            $self->app->log->error($error);
+            return $self->error( 500, { str => $error } );
+        }
+
+        # order update
+        my $update_columns        = {};
+        my $late_fee_pay_with     = $order->late_fee_pay_with;
+        my $compensation_pay_with = $order->compensation_pay_with;
+
+        $method = '불납' if $stage == 4;
+
+        if ($late_fee_pay_with) {
+            $update_columns = { late_fee_pay_with => $method, compensation_pay_with => undef };
+        }
+        else {
+            $update_columns = { late_fee_pay_with => undef, compensation_pay_with => $method };
+        }
+
+        $order->update($update_columns);
+        return $self->render( json => { $od->get_columns } );
     }
 
     sub api_order_return_part {
