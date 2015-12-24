@@ -5661,10 +5661,27 @@ get '/order/:id' => sub {
         });
     }
 
+    my $warn;
+    my $orders = $order->user->orders({ parent_id => undef });
+    while (my $order = $orders->next) {
+        my $late_fee_pay_with = $order->late_fee_pay_with;
+        my $compensation_pay_with = $order->compensation_pay_with;
+
+        if ($late_fee_pay_with && $late_fee_pay_with =~ /(미납|불납)/) {
+            $warn = $1;
+            last;
+        }
+
+        if ($compensation_pay_with && $compensation_pay_with =~ /(미납|불납)/) {
+            $warn = $1;
+            last;
+        }
+    }
+
     #
     # response
     #
-    $self->render( 'order-id', order => $order );
+    $self->render( 'order-id', order => $order, warn => $warn );
 };
 
 post '/order/:id/update' => sub {
