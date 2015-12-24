@@ -58,23 +58,25 @@ $ ->
     username = $tr.find('td:nth-child(5) a').text()
     $('#facebox span.username').text("#{username}님")
     $('#facebox code.late-fee').text(late_fee)
+    $('#facebox input[name=price]').val(late_fee.replace(/[^0-9]/g, ''))
   $(document).bind 'afterClose.facebox', ->
     $('table tr').removeClass('active')
 
   $('body').on 'click', '#facebox .late-fee-method', (e) ->
     e.preventDefault()
     order_id = $('table tr.active td:first a').text()
+    price    = $('#facebox input[name=price]').val()
     method   = $(@).text()
-    $.ajax "/api/order/#{order_id}.json",
+    $.ajax "/api/order/#{order_id}/latefee.json",
       type: 'PUT'
       data:
-        id: order_id
-        compensation_pay_with: '완납'
-        late_fee_pay_with: method
+        price: price
+        method: method
       success: (data) ->
         $('table tr.active').remove()
         $.facebox.close()
-        OpenCloset.alert('success', "완납 처리되었습니다")
+        hangulStage = if price then '완납' else '불납'
+        OpenCloset.alert('success', "#{hangulStage} 처리되었습니다")
       error: (jqXHR, textStatus) ->
         OpenCloset.alert('danger', "오류가 발생했습니다: #{jqXHR.responseJSON.error.str}")
 
@@ -83,12 +85,10 @@ $ ->
     return unless confirm '불납 으로 변경하시겠습니까?'
     $tr      = $(@).closest('tr')
     order_id = $tr.find('td:first a').text()
-    $.ajax "/api/order/#{order_id}.json",
+    $.ajax "/api/order/#{order_id}/latefee.json",
       type: 'PUT'
       data:
-        id: order_id
-        compensation_pay_with: '불납'
-        late_fee_pay_with: 'NULL'
+        price: 0
       success: (data) ->
         $tr.remove()
         OpenCloset.alert('success', "불납 처리되었습니다")

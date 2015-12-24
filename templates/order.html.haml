@@ -16,6 +16,11 @@
     %span.username
     %code.late-fee
   %hr
+  %form.form-inline
+    .form-group
+      %label 받은 금액
+      %input.form-control{:type => 'text', :name => 'price'}
+  %hr
   %ul.list-inline
     %li
       %a.late-fee-method.label.label-default{:href => '#'} 현금
