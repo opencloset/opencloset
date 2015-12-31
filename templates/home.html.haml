@@ -70,6 +70,7 @@
         %th 옷
         %th 상태
         %th 묶음
+        %th 태그
         %th 기타
     %tbody
   #action-buttons.btn-group
@@ -108,6 +109,11 @@
         <% _.each(order.clothes, function(c) { c = c.replace(/^0/, ''); %> <a href="/clothes/<%= c %>"><%= c %></a><% }); %>
       </td> <!-- 묶음 -->
       <td>
+        <% _.each(tags, function(tag) { %>
+        <span class="label label-default"><%= tag.name %></span>
+        <% }); %>
+      </td> <!-- 태그 -->
+      <td>
         <a href="/order/<%= order.id %>"><span class="label label-info arrowed-right arrowed-in">
           <strong>주문서</strong>
           <time class="js-relative-date" datetime="<%= order.rental_date.raw %>" title="<%= order.rental_date.ymd %>"><%= order.rental_date.md %></time>
@@ -131,6 +137,11 @@
       <td> <a href="/clothes/<%= code %>"> <%= code %> </a> </td> <!-- 옷 -->
       <td> <span class="order-status label"><%= status %></span> </td> <!-- 상태 -->
       <td> </td> <!-- 묶음 -->
+      <td>
+        <% _.each(tags, function(tag) { %>
+        <span class="label label-default"><%= tag.name %></span>
+        <% }); %>
+      </td> <!-- 태그 -->
       <td> </td> <!-- 기타 -->
     </tr>
   </script>
