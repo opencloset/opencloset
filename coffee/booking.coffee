@@ -33,6 +33,8 @@ $ ->
   $('.order-cancel').click (e) ->
     e.preventDefault()
 
+    return unless confirm "취소하시겠습니까?"
+
     $this = $(@)
     to   = $this.data('phone')
     name = $this.data('name')
