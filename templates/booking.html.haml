@@ -92,6 +92,8 @@
               -   for my $u (@$users) {
                 - my $user_info = $u->user_info;
                 - my $order = $booking->orders({ user_id => $u->id })->first;
+                - my $booking_date = $booking->date;
+                - my $msg = sprintf("[열린옷장] %s님 %s 방문 예약이 취소되었습니다. 감사합니다.", $u->name, $booking_date->strftime('%m월 %d일 %H시 %M분'));
                 %span.dropdown
                   %a{:href => '#', :data-toggle => 'dropdown'}
                     = $u->name
@@ -99,7 +101,7 @@
                     %li
                       %a{:href => "#{url_for( '/user/' . $u->id )}"} 사용자 정보
                     %li
-                      %a.order-cancel{:href => "#{url_for('/api/order/' . $order->id)}", :title => "#{$u->name}님 [#{param('ymd')}] 열린옷장 방문 예약이 취소되었습니다.", :data-phone => $user_info->phone, :data-name => $u->name}
+                      %a.order-cancel{:href => "#{url_for('/api/order/' . $order->id)}", :title => $msg, :data-phone => $user_info->phone, :data-name => $u->name}
                         %i.icon-warning-sign.red
                         예약 취소
               -   }
