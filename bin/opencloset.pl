@@ -376,10 +376,13 @@ helper flatten_clothes => sub {
     my $order = $clothes->orders->find({ status_id => 2 });
     $extra_data{order} = $self->flatten_order($order) if $order;
 
+    my @tags = $clothes->tags;;
+
     my %data = (
         $clothes->get_columns,
         %extra_data,
         status => $clothes->status->name,
+        tags => [map { { $_->get_columns } } @tags],
     );
 
     return \%data;
