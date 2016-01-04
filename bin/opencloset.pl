@@ -5313,6 +5313,7 @@ get '/order' => sub {
     }
 
     {
+        my $status_id   = $search_params{status} || '';
         my $dt_today    = DateTime->now( time_zone => app->config->{timezone} );
         my $booking_ymd = $search_params{booking_ymd} || $dt_today->ymd;
         last unless $booking_ymd;
@@ -5342,6 +5343,8 @@ get '/order' => sub {
         }
 
         my $dtf = $DB->storage->datetime_parser;
+        my @order_by = ( { -asc => 'booking.date' }, { -desc => 'update_date' } );
+        @order_by = reverse @order_by if $status_id =~ /^44$/;    # 포장완료, #647
         $rs = $rs->search(
             {
                 'booking.date' => {
@@ -5352,8 +5355,8 @@ get '/order' => sub {
                 },
             },
             {
-                join     => [ qw/ booking / ],
-                order_by => [{ -asc => 'booking.date' }, { -desc => 'update_date' }],
+                join     => [qw/ booking /],
+                order_by => [@order_by],
             },
         );
     }
