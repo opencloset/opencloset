@@ -8,13 +8,13 @@
 -   ];
 - title meta_text($_id);
 
-#late-fee-done-method{:style => 'display: none'}
+#unpaid-done-pay-with{:style => 'display: none'}
   %h3
     미납금 - 완납
     %small 결제방법을 선택해주세요
-  %p.late-fee
+  %p.unpaid
     %span.username
-    %code.late-fee
+    %code.unpaid
   %hr
   %form.form-inline
     .form-group
@@ -23,9 +23,9 @@
   %hr
   %ul.list-inline
     %li
-      %a.late-fee-method.label.label-default{:href => '#'} 현금
-      %a.late-fee-method.label.label-default{:href => '#'} 카드
-      %a.late-fee-method.label.label-default{:href => '#'} 계좌이체
+      %a.unpaid-pay-with.label.label-default{:href => '#'} 현금
+      %a.unpaid-pay-with.label.label-default{:href => '#'} 카드
+      %a.unpaid-pay-with.label.label-default{:href => '#'} 계좌이체
 
 .search
   %form#search-form
@@ -155,8 +155,8 @@
                 %a{ :href => "#{ url_for('/sms')->query( to => $order->user->user_info->phone, msg => $sms_str ) }" }= $sms_label
                 - if ( $is_unpaid ) {
                   %br
-                  %a.late-fee-done.label.label-success{:href => "#late-fee-done-method", :rel => "facebox"} 완납
-                  %a.late-fee-deny.label.label-danger{:href => '#'} 불납
+                  %a.unpaid-done.label.label-success{:href => "#unpaid-done-pay-with", :rel => "facebox"} 완납
+                  %a.unpaid-deny.label.label-danger{:href => '#'} 불납
                 - }
               - }
           %td

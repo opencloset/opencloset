@@ -304,10 +304,10 @@
                                     .col-sm-3.no-padding-left 이름:
                                     .col-sm-8
                                       %a{ :href => "#{ url_for('/user/' . $order->user->id) }" }= $order->user->name
-                                      - if ($warn) {
+                                      - if ($history) {
                                         %span.label.label-danger
                                           %i.icon-warning-sign
-                                          = $warn
+                                          = $history
                                       - }
                                   %li.row
                                     .col-sm-1
