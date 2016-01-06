@@ -58,7 +58,10 @@ $ ->
     username = $tr.find('td:nth-child(5) a').text()
     $('#facebox span.username').text("#{username}님")
     $('#facebox code.unpaid').text(late_fee)
-    $('#facebox input[name=price]').val(late_fee.replace(/[^0-9]/g, ''))
+    $('#facebox input[name=price]').val(late_fee.replace(/[^0-9]/g, '')).select().focus()
+    $('#facebox input[name=price]').keypress (e) ->
+      if e.keyCode is 13
+        e.preventDefault()
   $(document).bind 'afterClose.facebox', ->
     $('table tr').removeClass('active')
 
