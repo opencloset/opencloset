@@ -5796,21 +5796,18 @@ get '/order/:id' => sub {
         });
     }
 
-    my $history;
+    my ($history, $nonpayment);
     my $orders = $order->user->orders;
     while ( my $order = $orders->next ) {
-        my $late_fee_pay_with     = $order->late_fee_pay_with;
-        my $compensation_pay_with = $order->compensation_pay_with;
+        my $late_fee_pay_with     = $order->late_fee_pay_with     || '';
+        my $compensation_pay_with = $order->compensation_pay_with || '';
 
-        if ( $late_fee_pay_with && $late_fee_pay_with =~ /(미납|불납|부분완납)/ ) {
-            $history = $1;
-            last;
+        if ( $late_fee_pay_with =~ /미납/ || $compensation_pay_with =~ /미납/ ) {
+            $history = '미납';
         }
 
-        if ( $compensation_pay_with && $compensation_pay_with =~ /(미납|불납|부분완납)/ ) {
-            $history = $1;
-            last;
-        }
+        $nonpayment = $self->is_nonpayment( $order->id ) unless $nonpayment;
+        last if $history && $nonpayment;
     }
 
     #
@@ -5818,8 +5815,9 @@ get '/order/:id' => sub {
     #
     $self->render(
         'order-id',
-        order   => $order,
-        history => $history,
+        order      => $order,
+        history    => $history,
+        nonpayment => $nonpayment,
     );
 };
 
