@@ -5580,8 +5580,11 @@ get '/order' => sub {
         }
 
         my $dtf = $DB->storage->datetime_parser;
-        my @order_by = ( { -asc => 'booking.date' }, { -desc => 'update_date' } );
-        @order_by = reverse @order_by if $status_id =~ /^44$/;    # 포장완료, #647
+        ## 포장완료, #647
+        my @order_by =
+            $status_id =~ /^44$/
+            ? ( { -asc => 'booking.date' }, { -desc => 'update_date' } )
+            : ( { -asc => 'update_date' }, { -asc => 'booking.date' } );
         $rs = $rs->search(
             {
                 'booking.date' => {
