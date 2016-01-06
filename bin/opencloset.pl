@@ -1586,6 +1586,20 @@ helper get_dbic_cond_attr_unpaid => sub {
     return ( \%cond, \%attr );
 };
 
+=head2 is_nonpayment($order_id)
+
+C<order_id> 에 대해 불납의 이력이 있는지 확인
+불납이면 order_detail 에 대한 C<$resultset> 아니면 C<undef> 를 return
+
+=cut
+
+helper is_nonpayment => sub {
+    my ($self, $order_id) = @_;
+    return unless $order_id;
+
+    return $DB->resultset('OrderDetail')->search({ order_id => $order_id, stage => 4 })->next;
+};
+
 #
 # csv section
 #
