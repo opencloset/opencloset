@@ -8,6 +8,25 @@
 -   ];
 - title meta_text($_id);
 
+#unpaid-done-pay-with{:style => 'display: none'}
+  %h3
+    미납금 - 완납
+    %small 결제방법을 선택해주세요
+  %p.unpaid
+    %span.username
+    %code.unpaid
+  %hr
+  %form.form-inline
+    .form-group
+      %label 받은 금액
+      %input.form-control{:type => 'text', :name => 'price'}
+  %hr
+  %ul.list-inline
+    %li
+      %a.unpaid-pay-with.label.label-default{:href => '#'} 현금
+      %a.unpaid-pay-with.label.label-default{:href => '#'} 카드
+      %a.unpaid-pay-with.label.label-default{:href => '#'} 계좌이체
+
 .search
   %form#search-form
     .input-group
@@ -104,9 +123,11 @@
               - }
               - my $sms_label;
               - my $sms_str;
+              - my $is_unpaid;
               - if ( $search_status eq 'unpaid' && $order->status->name eq '반납' ) {
               -   my $unpaid = $order->get_column('sum_final_price');
               -   if ($unpaid) {
+              -     $is_unpaid = 1;
               -     $sms_label = '미납 문자 전송';
               -     $sms_str   = sprintf(
               -       '[열린옷장] %s님, %d일 연장으로 인한 미납 금액 %s원 입금바랍니다. 국민은행 205737-04-003013',
@@ -132,6 +153,11 @@
               - if ( $sms_label && $sms_str ) {
                 %br
                 %a{ :href => "#{ url_for('/sms')->query( to => $order->user->user_info->phone, msg => $sms_str ) }" }= $sms_label
+                - if ( $is_unpaid ) {
+                  %br
+                  %a.unpaid-done.label.label-success{:href => "#unpaid-done-pay-with", :rel => "facebox"} 완납
+                  %a.unpaid-deny.label.label-danger{:href => '#'} 불납
+                - }
               - }
           %td
             = $order->rental_date ? $order->rental_date->ymd : q{}

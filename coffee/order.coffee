@@ -46,3 +46,54 @@ $ ->
         location.reload()
     sock.onerror = (e) ->
       location.reload()
+
+  ## 미납금 완납, 불납
+  $('a.unpaid-done[rel*=facebox]').on 'click', (e) ->
+    e.preventDefault()
+    $(@).closest('tr').toggleClass('active')
+    $.facebox({ div: $(@).attr('href') })
+  $(document).bind 'reveal.facebox', ->
+    $tr      = $('table tr.active')
+    late_fee = $tr.find('td:nth-child(2) a:first').text()
+    username = $tr.find('td:nth-child(5) a').text()
+    $('#facebox span.username').text("#{username}님")
+    $('#facebox code.unpaid').text(late_fee)
+    $('#facebox input[name=price]').val(late_fee.replace(/[^0-9]/g, '')).select().focus()
+    $('#facebox input[name=price]').keypress (e) ->
+      if e.keyCode is 13
+        e.preventDefault()
+  $(document).bind 'afterClose.facebox', ->
+    $('table tr').removeClass('active')
+
+  $('body').on 'click', '#facebox .unpaid-pay-with', (e) ->
+    e.preventDefault()
+    order_id = $('table tr.active td:first a').text()
+    price    = $('#facebox input[name=price]').val()
+    pay_with = $(@).text()
+    $.ajax "/api/order/#{order_id}/unpaid.json",
+      type: 'PUT'
+      data:
+        price: price
+        pay_with: pay_with
+      success: (data) ->
+        $('table tr.active').remove()
+        $.facebox.close()
+        OpenCloset.alert('success', "미납금이 처리되었습니다")
+      error: (jqXHR, textStatus) ->
+        OpenCloset.alert('danger', "오류가 발생했습니다: #{jqXHR.responseJSON.error.str}")
+
+  $('.unpaid-deny').on 'click', (e) ->
+    e.preventDefault()
+    return unless confirm '불납 으로 변경하시겠습니까?'
+    $tr      = $(@).closest('tr')
+    order_id = $tr.find('td:first a').text()
+    $.ajax "/api/order/#{order_id}/unpaid.json",
+      type: 'PUT'
+      data:
+        price: 0
+      success: (data) ->
+        $tr.remove()
+        OpenCloset.alert('success', "미납금이 처리되었습니다")
+      error: (jqXHR, textStatus) ->
+        OpenCloset.alert('danger', "오류가 발생했습니다: #{jqXHR.responseJSON.error.str}")
+  ## 미납금 완납, 불납 end

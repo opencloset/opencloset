@@ -285,21 +285,32 @@ helper tracking_url => sub {
     return $tracking_url;
 };
 
-helper flatten_order => sub {
+helper order_price => sub {
     my ( $self, $order ) = @_;
 
     return unless $order;
 
-    my $order_price        = 0;
+    my $order_price       = 0;
     my %order_stage_price = (
         0 => 0,
-        1 => 0,
-        2 => 0,
+        1 => 0, # 연장료 / 연장료 에누리
+        2 => 0, # 배상비 / 배상비 에누리
+        3 => 0, # 환불 수수료
     );
     for my $order_detail ( $order->order_details ) {
         $order_price                               += $order_detail->final_price;
         $order_stage_price{ $order_detail->stage } += $order_detail->final_price;
     }
+
+    return ( $order_price, \%order_stage_price );
+};
+
+helper flatten_order => sub {
+    my ( $self, $order ) = @_;
+
+    return unless $order;
+
+    my ( $order_price, $order_stage_price ) = $self->order_price($order);
 
     my %data = (
         $order->get_columns,
@@ -309,7 +320,7 @@ helper flatten_order => sub {
         user_target_date => undef,
         return_date      => undef,
         price            => $order_price,
-        stage_price      => \%order_stage_price,
+        stage_price      => $order_stage_price,
         clothes_price    => $self->order_clothes_price($order),
         clothes          => [ $order->order_details({ clothes_code => { '!=' => undef } })->get_column('clothes_code')->all ],
         late_fee         => $self->calc_late_fee($order),
@@ -1522,6 +1533,59 @@ helper count_visitor => sub {
     return \%count;
 };
 
+helper get_dbic_cond_attr_unpaid => sub {
+    my $self = shift;
+
+    #
+    # SELECT
+    #     o.id                    AS o_id,
+    #     o.user_id               AS o_user_id,
+    #     o.status_id             AS o_status_id,
+    #     o.late_fee_pay_with     AS o_late_fee_pay_with,
+    #     o.compensation_pay_with AS o_compensation_pay_with,
+    #     SUM( od.final_price )   AS sum_final_price
+    # FROM `order` AS o
+    # LEFT JOIN `order_detail` AS od ON o.id = od.order_id
+    # WHERE (
+    #     o.`status_id` = 9
+    #     AND (
+    #         -- 연체료나 배상비 중 최소 하나는 미납이어야 함
+    #         o.`late_fee_pay_with` = '미납'
+    #         OR o.`compensation_pay_with` = '미납'
+    #     )
+    #     AND od.stage > 0
+    # )
+    # GROUP BY o.id
+    # HAVING sum_final_price > 0
+    # ;
+    #
+
+    my %cond = (
+        -and => [
+            'me.status_id'        => 9,
+            'order_details.stage' => { '>' => 0 },
+            -or => [
+                'me.late_fee_pay_with'     => '미납',
+                'me.compensation_pay_with' => '미납',
+            ],
+        ],
+    );
+
+    my %attr = (
+        join      => [qw/ order_details /],
+        group_by  => [qw/ me.id /],
+        having    => { 'sum_final_price' => { '>' => 0 } },
+        '+select' => [
+            {
+                sum => 'order_details.final_price',
+                -as => 'sum_final_price'
+            },
+        ],
+    );
+
+    return ( \%cond, \%attr );
+};
+
 #
 # csv section
 #
@@ -1738,6 +1802,7 @@ group {
     get  '/order/:id'             => \&api_get_order;
     put  '/order/:id'             => \&api_update_order;
     del  '/order/:id'             => \&api_delete_order;
+    put  '/order/:id/unpaid'      => \&api_update_order_unpaid;
 
     put  '/order/:id/return-part' => \&api_order_return_part;
     get  '/order/:id/set-package' => \&api_order_set_package;
@@ -2207,6 +2272,215 @@ group {
         #
         # response
         #
+        $self->respond_to( json => { status => 200, json => $data } );
+    }
+
+    sub api_update_order_unpaid {
+        my $self = shift;
+
+        #
+        # fetch params
+        #
+        my %params = $self->get_params(qw/
+            id
+            price
+            pay_with
+        /);
+
+        #
+        # validate params
+        #
+        my $v = $self->create_validator;
+        $v->field('id')->required(1)->regexp(qr/^\d+$/);
+        $v->field('price')->required(1)->regexp(qr/^\d+$/);
+        unless ( $self->validate( $v, \%params ) ) {
+            my @error_str;
+            while ( my ( $k, $v ) = each %{ $v->errors } ) {
+                push @error_str, "$k:$v";
+            }
+            return $self->error( 400, {
+                str  => join(',', @error_str),
+                data => $v->errors,
+            });
+        }
+
+        my $id       = $params{id};
+        my $price    = $params{price} || 0;
+        my $pay_with = $params{pay_with} || q{};
+
+        #
+        # find order
+        #
+        my ( $cond_ref, $attr_ref ) = $self->get_dbic_cond_attr_unpaid;
+        $cond_ref->{id} = $id;
+        my $order = $DB->resultset('Order')->find( $cond_ref, $attr_ref );
+        return $self->error( 404, {
+            str  => 'unpaid order not found',
+            data => {},
+        }) unless $order;
+
+        #
+        # stage
+        #
+        # - 연장: 1
+        # - 배상: 2
+        # - 환불: 3
+        # - 불납: 4
+        # - 완납: 5
+        # - 부분완납: 6
+        #
+
+        #
+        # 연장
+        #
+        my $unpaid_late_fee = 0;
+        if ( $order->late_fee_pay_with eq '미납' ) {
+            for my $od ( $order->order_details->search( { stage => 1 } )->all ) {
+                $unpaid_late_fee += $od->final_price;
+            }
+
+        }
+
+        #
+        # 배상
+        #
+        my $unpaid_compensation_pay = 0;
+        if ( $order->compensation_pay_with eq '미납' ) {
+            for my $od ( $order->order_details->search( { stage => 2 } )->all ) {
+                $unpaid_compensation_pay += $od->final_price;
+            }
+        }
+
+        #
+        # 미납금 = 미납 연장료 + 미납 배상료
+        #
+        my $unpaid = $unpaid_late_fee + $unpaid_compensation_pay;
+
+        app->log->info( '미납금.연장료: ' . $self->commify($unpaid_late_fee) );
+        app->log->info( '미납금.배상료: ' . $self->commify($unpaid_compensation_pay) );
+        app->log->info( '미납금.총합: ' . $self->commify($unpaid) );
+
+        #
+        # 완납 / 부분완납 / 불납 구분
+        #
+        my $stage;
+        my $od_name = q{};
+        if ($price) {
+            if ( $price == $unpaid ) {
+                $stage   = 5;
+                $od_name = '완납';
+            }
+            else {
+                $stage   = 6;
+                $od_name = '부분완납';
+            }
+        }
+        else {
+            $stage   = 4;
+            $od_name = '불납';
+        }
+
+        app->log->info("미납금.상태: $od_name");
+        app->log->info("미납금.지불방식: $pay_with");
+        app->log->info("미납금.받은금액: $price");
+
+        #
+        # TRANSACTION:
+        #
+        my ( $ret, $status, $error ) = do {
+            my $guard = $DB->txn_scope_guard;
+            try {
+                #
+                # 미납 주문서의 경우 주문서 표시 금액보다 적은 금액을 받았기 때문에
+                # 실제 열린옷장에서 현재 시점 기준 받은 금액으로 맞춰주기 위해
+                # 미납료 만큼을 제거하는 항목 추가
+                #
+                # 예)
+                # 3만원 주문서에 2만원 연장료와 5만원 배상료가 나왔을 경우
+                # 주문서상으로 10만원을 받은 것으로 표시되지만 실제로는 3만원만
+                # 받은 상태입니다. 따라서 주문서에 -7만원을 표시해서 결과적으로
+                # 3만원만을 현재 받은 것으로 계산하기 위한 항목을 추가합니다.
+                #
+                {
+                    my $od = $self->create_order_detail(
+                        {
+                            order_id    => $order->id,
+                            name        => '미납금 총합',
+                            price       => -($unpaid),
+                            final_price => -($unpaid),
+                            stage       => $stage,
+                            desc        => sprintf(
+                                "미납금 = 연장료 + 배상료 ( %s = %s + %s )",
+                                $self->commify($unpaid),
+                                $self->commify($unpaid_late_fee),
+                                $self->commify($unpaid_compensation_pay),
+                            ),
+                        }
+                    );
+                    die "failed to create a new order_detail: unpaid\n" unless $od;
+                }
+
+                #
+                # 받은 금액 표시 및 완납 / 부분완납 / 불납 여부 표시
+                #
+                {
+                    my $od = $self->create_order_detail(
+                        {
+                            order_id    => $order->id,
+                            name        => $od_name,
+                            price       => $price,
+                            final_price => $price,
+                            stage       => $stage,
+                            desc        => sprintf(
+                                "결제방식(%s), 포기금액(%s), 미납금 중 대여자로부터 받은 최종 금액",
+                                $pay_with,
+                                $self->commify( $unpaid - $price ),
+                            ),
+                        }
+                    );
+                    die "failed to create a new order_detail: final user paid\n" unless $od;
+                }
+
+                #
+                # 주문서의 연장료 납부 방식 및 배상료 납부 방식 갱신
+                #
+                {
+                    my %order_params;
+                    if ( $order->late_fee_pay_with eq '미납' ) {
+                        $order_params{late_fee_pay_with} = $pay_with;
+                    }
+                    if ( $order->compensation_pay_with eq '미납' ) {
+                        $order_params{compensation_pay_with} = $pay_with;
+                    }
+                    $order->update( \%order_params );
+                }
+
+                $guard->commit;
+
+                return 1;
+            }
+            catch {
+                chomp;
+                my $err = $_;
+                app->log->error($err);
+
+                no warnings 'experimental';
+
+                my $status;
+                given ($err) {
+                    default { $status = 500 }
+                }
+
+                return ( undef, $status, $err );
+            };
+        };
+
+        #
+        # response
+        #
+        $order = $self->get_order( { id => $id } );
+        my $data = $self->flatten_order($order);
+
         $self->respond_to( json => { status => 200, json => $data } );
     }
 
@@ -5259,49 +5533,12 @@ get '/order' => sub {
                 );
             }
             when ('unpaid') {
-                #
-                # SELECT
-                #     o.id                  AS o_id,
-                #     o.user_id             AS o_user_id,
-                #     o.status_id           AS o_status_id,
-                #     SUM( od.final_price ) AS sum_final_price
-                # FROM `order` AS o
-                # LEFT JOIN `order_detail` AS od ON o.id = od.order_id
-                # WHERE (
-                #     o.`status_id` = 9
-                #     AND (
-                #         o.`late_fee_pay_with` = '미납'
-                #         OR o.`compensation_pay_with` = '미납'
-                #     )
-                #     AND od.stage > 0
-                # )
-                # GROUP BY o.id
-                # HAVING sum_final_price > 0
-                # ;
-                #
+                my ( $cond_ref, $attr_ref ) = $self->get_dbic_cond_attr_unpaid;
 
-                %cond = (
-                    -and => [
-                        'me.status_id'        => 9,
-                        'order_details.stage' => { '>' => 0 },
-                        -or => [
-                            'me.late_fee_pay_with'     => '미납',
-                            'me.compensation_pay_with' => '미납',
-                        ],
-                    ],
-                );
-
+                %cond = %$cond_ref;
                 %attr = (
-                    join      => [qw/ order_details /],
-                    group_by  => [qw/ me.id /],
-                    having    => { 'sum_final_price' => { '>' => 0 } },
-                    '+select' => [
-                        {
-                            sum => 'order_details.final_price',
-                            -as => 'sum_final_price'
-                        },
-                    ],
-                    order_by  => 'target_date'
+                    %$attr_ref,
+                    order_by => 'target_date',
                 );
             }
             default {
@@ -5542,10 +5779,31 @@ get '/order/:id' => sub {
         });
     }
 
+    my $history;
+    my $orders = $order->user->orders;
+    while ( my $order = $orders->next ) {
+        my $late_fee_pay_with     = $order->late_fee_pay_with;
+        my $compensation_pay_with = $order->compensation_pay_with;
+
+        if ( $late_fee_pay_with && $late_fee_pay_with =~ /(미납|불납|부분완납)/ ) {
+            $history = $1;
+            last;
+        }
+
+        if ( $compensation_pay_with && $compensation_pay_with =~ /(미납|불납|부분완납)/ ) {
+            $history = $1;
+            last;
+        }
+    }
+
     #
     # response
     #
-    $self->render( 'order-id', order => $order );
+    $self->render(
+        'order-id',
+        order   => $order,
+        history => $history,
+    );
 };
 
 post '/order/:id/update' => sub {
