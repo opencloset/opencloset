@@ -5583,8 +5583,8 @@ get '/order' => sub {
         ## 포장완료, #647
         my @order_by =
             $status_id =~ /^44$/
-            ? ( { -asc => 'update_date' }, { -asc => 'booking.date' } );
-            : ( { -asc => 'booking.date' }, { -desc => 'update_date' } )
+            ? ( { -asc => 'update_date' }, { -asc => 'booking.date' } )
+            : ( { -asc => 'booking.date' }, { -desc => 'update_date' } );
         $rs = $rs->search(
             {
                 'booking.date' => {
