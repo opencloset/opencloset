@@ -75,7 +75,7 @@
     %a{ :href => "#{ url_with->query([ p => 1, status => '43' ]) }" } 사이즈없음
   %span= '|'
   %span
-    %a{ :href => "#{ url_with->query([ p => 1, status => 'unpaid' ]) }" } 미납
+    %a{ :href => "#{ url_for->query([ booking_ymd => 'all', status => 'unpaid' ]) }" } 미납
   %span= '|'
   %span
     %a{ :href => "#{ url_with->query([ p => 1, status => 'undef' ]) }" } 상태없음
