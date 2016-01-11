@@ -21,7 +21,7 @@
   % @err = @{ $error->{phone} || [] };
   <div class="form-group<%= @err ? ' has-error' : '' %>">
     <label for="phone">핸드폰번호</label>
-    <input type="text" name="phone" class="form-control" id="phone" placeholder="핸드폰번호 Phone" required>
+    <input type="text" name="phone" class="form-control" id="phone" placeholder="'-'를 제외한 번호만 입력" required>
     <div class="help-block with-errors">
       % if (@err) {
         <ul class="list-unstyled">
@@ -36,7 +36,7 @@
   % @err = @{ $error->{user_target_date} || [] };
   <div class="form-group<%= @err ? ' has-error' : '' %>">
     <label for="user-target-date">반납예정일</label>
-    <input type="text" name="user-target-date" class="form-control" id="user-target-date" placeholder="반납예정일 Target date" required>
+    <input type="text" name="user-target-date" class="form-control" id="user-target-date" placeholder="yyyy-mm-dd 형식으로 입력" required>
     <div class="help-block with-errors">
       % if (@err) {
         <ul class="list-unstyled">
