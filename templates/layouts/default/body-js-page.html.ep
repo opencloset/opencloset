@@ -12,17 +12,3 @@
           <script type="text/javascript" src="/js/<%= $js %>"></script>
     %   }
     % }
-
-    <script>
-      // https://craig.is/killing/mice#api.stopCallback
-      // Mousetrap.stopCallback = function (e, el) { return false }    // not working
-      Mousetrap.prototype.stopCallback = function (e, el) { return false }
-    % for my $k ( keys %{ $sidebar->{meta} } ) {
-    %   my $v        = $sidebar->{meta}{$k};
-    %   my $shortcut = $v->{shortcut};
-    %   my $link     = $v->{link} || "/$k";
-    %   next unless $shortcut;
-      Mousetrap.bind('ctrl+<%= $shortcut %>', function() { location.href = '<%= $link %>'; });
-    % }
-      Mousetrap.bind('?', function() { return $.facebox({ ajax: '/shortcut' }); });
-    </script>
