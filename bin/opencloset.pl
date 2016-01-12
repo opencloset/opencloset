@@ -6746,8 +6746,6 @@ get '/stat/status/:ymd' => sub {
     );
 };
 
-get '/shortcut' => 'shortcut';
-
 get '/volunteers' => sub {
     my $self = shift;
     my $status = $self->param('status') || 'reported';
