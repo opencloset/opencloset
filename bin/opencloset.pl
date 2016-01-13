@@ -5418,6 +5418,19 @@ get '/clothes/:code' => sub {
         }
     }
 
+    my @clothes_group = $clothes->group->clothes( { code => { '!=' => $clothes->code } },
+        { order_by => 'category' } );
+    my $code = $self->trim_clothes_code($clothes);
+    my $suit;
+    if ( my ($first) = $code =~ /^(J|P|K)/ ) { # Jacket, Pants, sKirt
+        if ( $first eq 'J' ) {
+            $suit = $clothes->suit_code_top;
+        }
+        else {
+            $suit = $clothes->suit_code_bottom;
+        }
+    }
+
     #
     # response
     #
@@ -5426,6 +5439,8 @@ get '/clothes/:code' => sub {
         recent_sizes  => \@recent_sizes,
         bestfit_sizes => \@bestfit_sizes,
         clothes       => $clothes,
+        clothes_group => \@clothes_group,
+        suit          => $suit,
         rented_count  => $rented_count,
         tag_rs        => $DB->resultset('Tag'),
     );

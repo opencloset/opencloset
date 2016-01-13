@@ -48,6 +48,67 @@
                           %br
                           빌린 횟수
                       .hr.hr16.dotted
+                      - if (my ($first) = $clothes_code =~ /^(J|P|K)/) {
+                        %h2 상하의 셋트
+                        - if ($suit) {
+                          - my $set = $first eq 'J' ? $suit->code_bottom : $suit->code_top;
+                          - my $set_code = trim_clothes_code($set);
+                          %a{:href => "#{ url_for('/clothes/' . $set_code) }"}= $set_code
+                        - } else {
+                          %form#form-suit.form-inline{:method => 'POST', :action => "#{ url_for('/api/suit') }"}
+                            %input{:type => 'hidden', :name => "#{ $first eq 'J' ? 'code_top' : 'code_bottom'}", :value => $clothes_code}
+                            .input-group
+                              %input.form-control{:type => 'text', :placeholder => 'code', :name => "#{ $first eq 'J' ? 'code_bottom' : 'code_top'}"}
+                              %span.input-group-btn
+                                %button.btn.btn-sm.btn-default{:type => 'button'} 등록
+                        - }
+                        %hr
+                      - }
+                      %h3 관련된 옷
+                      %ul#list-clothes-group.text-left
+                        - for my $c (@$clothes_group) {
+                          - my $c_code = trim_clothes_code($c);
+                          %li.clothes-group-item
+                            - if (my ($first) = $clothes_code =~ /^(J|P|K)/) {
+                              - unless ($suit) {
+                                - if ($first eq 'J' && $c_code =~ /^(P|K)/) {
+                                  - if (my $s = $c->suit_code_bottom) {
+                                    - my $top = $s->code_top;
+                                    %a{:href => "#{ url_for('/clothes/' . $c_code) }"}= $c_code
+                                    = '- ' . $c->category
+                                    %a{:href => "#{ url_for('/clothes/' . $top->code) }"}= $top->code
+                                  - } else {
+                                    .checkbox
+                                      %input{:type => 'checkbox'}
+                                      %a{:href => "#{ url_for('/clothes/' . $c_code) }"}= $c_code
+                                      = '- ' . $c->category
+                                  - }
+                                - } elsif ($first =~ /P|K/ && $c_code =~ /^J/) {
+                                  - if (my $s = $c->suit_code_top) {
+                                    - my $bottom = $s->code_bottom;
+                                    %a{:href => "#{ url_for('/clothes/' . $c_code) }"}= $c_code
+                                    = '- ' . $c->category
+                                    %a{:href => "#{ url_for('/clothes/' . $bottom->code) }"}= $bottom->code
+                                  - } else {
+                                    .checkbox
+                                      %input{:type => 'checkbox'}
+                                      %a{:href => "#{ url_for('/clothes/' . $c_code) }"}= $c_code
+                                      = '- ' . $c->category
+                                  - }
+                                - } else {
+                                  %a{:href => "#{ url_for('/clothes/' . $c_code) }"}= $c_code
+                                  = '- ' . $c->category
+                                - }
+                              - } else {
+                                %a{:href => "#{ url_for('/clothes/' . $c_code) }"}= $c_code
+                                = '- ' . $c->category
+                              - }
+                            - } else {
+                              %a{:href => "#{ url_for('/clothes/' . $c_code) }"}= $c_code
+                              = '- ' . $c->category
+                            - }
+                        - }
+                      %hr
 
                     /
                     / right
