@@ -62,3 +62,24 @@ $ ->
         params.type = 'text'
 
     $(el).editable params
+
+  $('#form-suit').submit (e) ->
+    e.preventDefault()
+    action = $(@).attr('action')
+    $.ajax action,
+      type: 'POST'
+      data: $(@).serialize()
+      dataType: 'json'
+      success: (data, textStatus, jqXHR) ->
+        location.reload()
+      error: (jqXHR, textStatus, errorThrown) ->
+        OpenCloset.alert 'error', textStatus
+      complete: (jqXHR, textStatus) ->
+
+  $('.clothes-group-item :checkbox').on 'click', (e) ->
+    bool = $(@).prop 'checked'
+    return unless bool
+
+    code = $(@).next().text()
+    $('#form-suit input[type=text]').val(code)
+    $('#form-suit').trigger('submit')
