@@ -1845,6 +1845,8 @@ group {
 
     post '/group'                 => \&api_create_group;
 
+    post '/suit'                  => \&api_create_suit;
+
     post '/sms'                   => \&api_create_sms;
     put  '/sms/:id'               => \&api_update_sms;
     post '/sms/validation'        => \&api_create_sms_validation;
@@ -3651,6 +3653,57 @@ group {
         $self->res->headers->header(
             'Location' => $self->url_for( '/api/group/' . $group->id ),
         );
+        $self->respond_to( json => { status => 201, json => \%data } );
+    }
+
+    sub api_create_suit {
+        my $self = shift;
+
+        #
+        # fetch params
+        #
+        my %params = $self->get_params(qw/code_top code_bottom/);
+
+        #
+        # validate params
+        #
+        my $v = $self->create_validator;
+        $v->field('code_top')->required(1)->regexp(qr/^J/);
+        $v->field('code_bottom')->required(1)->regexp(qr/^(P|K)/);
+
+        unless ( $self->validate( $v, \%params ) ) {
+            my @error_str;
+            while ( my ( $k, $v ) = each %{ $v->errors } ) {
+                push @error_str, "$k:$v";
+            }
+            return $self->error(
+                400,
+                {
+                    str  => join( ',', @error_str ),
+                    data => $v->errors,
+                }
+            );
+        }
+
+        $params{code_top}    = sprintf( '%05s', $params{code_top} );
+        $params{code_bottom} = sprintf( '%05s', $params{code_bottom} );
+
+        #
+        # create suit
+        #
+        my $suit = $DB->resultset('Suit')->create( \%params );
+        return $self->error(
+            500,
+            {
+                str  => 'failed to create a new suit',
+                data => {},
+            }
+        ) unless $suit;
+
+        #
+        # response
+        #
+        my %data = ( $suit->get_columns );
         $self->respond_to( json => { status => 201, json => \%data } );
     }
 
