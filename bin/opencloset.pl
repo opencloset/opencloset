@@ -1586,6 +1586,20 @@ helper get_dbic_cond_attr_unpaid => sub {
     return ( \%cond, \%attr );
 };
 
+=head2 is_nonpayment($order_id)
+
+C<order_id> 에 대해 불납의 이력이 있는지 확인
+불납이면 order_detail 에 대한 C<$resultset> 아니면 C<undef> 를 return
+
+=cut
+
+helper is_nonpayment => sub {
+    my ($self, $order_id) = @_;
+    return unless $order_id;
+
+    return $DB->resultset('OrderDetail')->search({ order_id => $order_id, stage => 4 })->next;
+};
+
 #
 # csv section
 #
@@ -5782,21 +5796,18 @@ get '/order/:id' => sub {
         });
     }
 
-    my $history;
+    my ($history, $nonpayment);
     my $orders = $order->user->orders;
     while ( my $order = $orders->next ) {
-        my $late_fee_pay_with     = $order->late_fee_pay_with;
-        my $compensation_pay_with = $order->compensation_pay_with;
+        my $late_fee_pay_with     = $order->late_fee_pay_with     || '';
+        my $compensation_pay_with = $order->compensation_pay_with || '';
 
-        if ( $late_fee_pay_with && $late_fee_pay_with =~ /(미납|불납|부분완납)/ ) {
-            $history = $1;
-            last;
+        if ( $late_fee_pay_with =~ /미납/ || $compensation_pay_with =~ /미납/ ) {
+            $history = '미납';
         }
 
-        if ( $compensation_pay_with && $compensation_pay_with =~ /(미납|불납|부분완납)/ ) {
-            $history = $1;
-            last;
-        }
+        $nonpayment = $self->is_nonpayment( $order->id ) unless $nonpayment;
+        last if $history && $nonpayment;
     }
 
     #
@@ -5804,8 +5815,9 @@ get '/order/:id' => sub {
     #
     $self->render(
         'order-id',
-        order   => $order,
-        history => $history,
+        order      => $order,
+        history    => $history,
+        nonpayment => $nonpayment,
     );
 };
 

@@ -33,11 +33,16 @@
                                       %span.label.order-status{ 'data-status' => "#{ $order->status->name }", 'data-late-fee' => "#{ $late_fee }" }
                                         %span.order-status-str= $order->status->name
                                         %span.late-fee= $order->status->name eq '대여중' && $late_fee ? commify($late_fee) . q{원} : q{}
-                                      - if (($order->late_fee_pay_with && $order->late_fee_pay_with =~ /(미납|불납)/)
-                                      -   || ($order->compensation_pay_with && $order->compensation_pay_with =~ /(미납|불납)/)) {
+                                      - if (($order->late_fee_pay_with && $order->late_fee_pay_with =~ /미납/)
+                                      -   || ($order->compensation_pay_with && $order->compensation_pay_with =~ /미납/)) {
                                         %span.label.label-danger
                                           %i.icon-warning-sign
-                                          = $1
+                                          미납
+                                      - }
+                                      - if (is_nonpayment($order->id)) {
+                                        %span.label.label-danger
+                                          %i.icon-warning-sign
+                                          불납
                                       - }
                                     .time
                                       %i.icon-time.bigger-110
