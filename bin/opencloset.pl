@@ -5538,7 +5538,7 @@ get '/order' => sub {
                 %cond = %$cond_ref;
                 %attr = (
                     %$attr_ref,
-                    order_by => 'target_date',
+                    order_by => 'return_date',
                 );
             }
             default {
