@@ -32,7 +32,17 @@ my $DB   = OpenCloset::Schema->connect({
 });
 
 for my $order_id (@order_ids) {
-    my $order = $DB->resultset('Order')->find($order_id);
+    my $order = $DB->resultset('Order')->find(
+        $order_id,
+        {
+            prefetch => [
+                'booking',
+                'staff',
+                'status',
+                { 'user' => 'user_info' },
+            ],
+        }
+    );
     unless ($order) {
         warn "cannot find such order: $order_id\n";
         next;
