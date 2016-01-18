@@ -101,7 +101,7 @@
         %tr
           %td.center
             %a{ :href => "#{url_for('/order/' . $order->id)}" }= $order->id
-          %td
+          %td{:class => "#{ $order->is_wearing ? 'success' : '' }"}
             %a{ :href => "#{url_for('/order/' . $order->id)}" }
               - my $status = '';
               - if ( $order->status ) {
