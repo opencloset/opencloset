@@ -50,6 +50,7 @@
           %th
           %th 이름
           %th 연락처
+          %th 착용여부
           %th 대여 희망 품목
       %tbody
         - for my $order ( $order_rs->all ) {
@@ -67,6 +68,12 @@
               %br
               %i.icon-phone
               = $user->user_info->phone
+            %td
+              - if ($order->is_wearing) {
+                %button.btn.btn-success.btn-wearing{:type => 'button'} 입고감
+              - } else {
+                %button.btn.btn-default.btn-wearing{:type => 'button'} 안입고감
+              - }
             %td
               %span.pre_category= $user->user_info->pre_category  || ''
         - }
