@@ -1846,6 +1846,7 @@ group {
     post '/group'                 => \&api_create_group;
 
     post '/suit'                  => \&api_create_suit;
+    del  '/suit/:code'            => \&api_delete_suit;
 
     post '/sms'                   => \&api_create_sms;
     put  '/sms/:id'               => \&api_update_sms;
@@ -3705,6 +3706,58 @@ group {
         #
         my %data = ( $suit->get_columns );
         $self->respond_to( json => { status => 201, json => \%data } );
+    }
+
+    sub api_delete_suit {
+        my $self = shift;
+
+        #
+        # fetch params
+        #
+        my %params = $self->get_params(qw/ code /);
+
+        #
+        # validate params
+        #
+        my $v = $self->create_validator;
+        $v->field('code')->required(1)->regexp(qr/^0?[JPS][A-Z0-9]{3}$/);
+        unless ( $self->validate( $v, \%params ) ) {
+            my @error_str;
+            while ( my ( $k, $v ) = each %{ $v->errors } ) {
+                push @error_str, "$k:$v";
+            }
+            return $self->error(
+                400,
+                {
+                    str  => join( ',', @error_str ),
+                    data => $v->errors,
+                }
+            );
+        }
+
+        #
+        # adjust params
+        #
+        $params{code} = sprintf( '%05s', $params{code} ) if length( $params{code} ) == 4;
+        my $key = $params{code} =~ /0J/ ? 'code_top' : 'code_bottom';
+
+        #
+        # find suit
+        #
+        my $suit = $DB->resultset('Suit')->find( { $key => $params{code} });
+        return $self->error(
+            404,
+            {
+                str  => 'suit not found',
+                data => {},
+            }
+        ) unless $suit;
+
+        #
+        # delete & response
+        #
+        $suit->delete;
+        $self->respond_to( json => { status => 200, json => {} } );
     }
 
     sub api_create_sms {
