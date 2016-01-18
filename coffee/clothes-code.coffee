@@ -83,3 +83,21 @@ $ ->
     code = $(@).next().text()
     $('#form-suit input[type=text]').val(code)
     $('#form-suit').trigger('submit')
+
+  $('.btn-not-suit:not(.disabled)').on 'click', (e) ->
+    e.preventDefault()
+
+    return unless confirm "셋트 의류를 해체하시겠습니까?"
+
+    $this = $(@)
+    $this.addClass('disabled')
+    href = $this.attr('href')
+    $.ajax href,
+      type: 'DELETE'
+      dataType: 'json'
+      success: (data, textStatus, jqXHR) ->
+        location.reload()
+      error: (jqXHR, textStatus, errorThrown) ->
+        OpenCloset.alert 'error', textStatus
+      complete: (jqXHR, textStatus) ->
+        $this.removeClass('disabled')

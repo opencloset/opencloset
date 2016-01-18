@@ -53,7 +53,10 @@
                         - if ($suit) {
                           - my $set = $first eq 'J' ? $suit->code_bottom : $suit->code_top;
                           - my $set_code = trim_clothes_code($set);
-                          %a{:href => "#{ url_for('/clothes/' . $set_code) }"}= $set_code
+                          %h4
+                            %a{:href => "#{ url_for('/clothes/' . $set_code) }"}= $set_code
+                          %div.not-suit
+                            %a.btn.btn-danger.btn-xs.btn-not-suit{:href => "#{ url_for('/api/suit/' . $set_code) }"} 셋트아님
                         - } else {
                           %form#form-suit.form-inline{:method => 'POST', :action => "#{ url_for('/api/suit') }"}
                             %input{:type => 'hidden', :name => "#{ $first eq 'J' ? 'code_top' : 'code_bottom'}", :value => $clothes_code}
@@ -64,7 +67,7 @@
                         - }
                         %hr
                       - }
-                      %h3 관련된 옷
+                      %h3 함께 기증된 의류
                       %ul#list-clothes-group.text-left
                         - for my $c (@$clothes_group) {
                           - my $c_code = trim_clothes_code($c);

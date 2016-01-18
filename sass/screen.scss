@@ -530,6 +530,9 @@ $opencloset-darken-yellow: desaturate(darken($opencloset-yellow, 4%), 10%);
             ul {
                 list-style-type: none;
             }
+            .not-suit {
+                padding-top: 30px;
+            }
         }
         .profile-activity {
             img {
