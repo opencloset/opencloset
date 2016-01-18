@@ -2227,6 +2227,7 @@ group {
             height
             hip
             id
+            is_wearing
             knee
             late_fee_pay_with
             leg
