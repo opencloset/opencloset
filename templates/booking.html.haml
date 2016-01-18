@@ -90,8 +90,9 @@
             %td
               - if ($users) {
               -   for my $u (@$users) {
-                - my $user_info = $u->user_info;
                 - my $order = $booking->orders({ user_id => $u->id })->first;
+                - next unless $order;
+                - my $user_info = $u->user_info;
                 - my $booking_date = $booking->date;
                 - my $msg = sprintf("[열린옷장] %s님 %s 방문 예약이 취소되었습니다. 감사합니다.", $u->name, $booking_date->strftime('%m월 %d일 %H시 %M분'));
                 %span.dropdown
