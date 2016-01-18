@@ -104,14 +104,14 @@ $ ->
     $this = $(@)
     $this.addClass('disabled')
 
-    is_wearing = if $this.hasClass('btn-success') then 0 else 1
+    does_wear = if $this.hasClass('btn-success') then 0 else 1
     order_id = $this.closest('tr').data('order-id')
 
     $.ajax "/api/order/#{order_id}.json",
       type: 'PUT'
       data:
         id: order_id
-        is_wearing: is_wearing
+        does_wear: does_wear
       success: (data, textStatus, jqXHR) ->
         if $this.hasClass('btn-success')
           $this.removeClass('btn-success').addClass('btn-default').html('안입고감')

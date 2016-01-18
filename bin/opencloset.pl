@@ -2223,11 +2223,11 @@ group {
             bust
             compensation_pay_with
             desc
+            does_wear
             foot
             height
             hip
             id
-            is_wearing
             knee
             late_fee_pay_with
             leg

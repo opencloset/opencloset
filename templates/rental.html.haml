@@ -69,7 +69,7 @@
               %i.icon-phone
               = $user->user_info->phone
             %td
-              - if ($order->is_wearing) {
+              - if ($order->does_wear) {
                 %button.btn.btn-success.btn-wearing{:type => 'button'} 입고감
               - } else {
                 %button.btn.btn-default.btn-wearing{:type => 'button'} 안입고감
