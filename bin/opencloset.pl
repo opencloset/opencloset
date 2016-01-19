@@ -2234,6 +2234,7 @@ group {
             neck
             pants
             parent_id
+            pass
             price_pay_with
             purpose
             purpose2

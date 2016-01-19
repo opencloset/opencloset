@@ -374,6 +374,28 @@ $ ->
     $('#order-late-fee-pay-with').editable 'setValue', ''
     $('#order-late-fee-pay-with').html '결제 방법 선택'
 
+  #
+  # 합격 버튼 클릭
+  #
+  $('#btn-interview-pass:not(.disabled)').click (e) ->
+    $this    = $(@)
+    pass     = if $this.hasClass('btn-success') then 0 else 1
+    order_id = $('#order').data('order-id')
+
+    $this.addClass('disabled')
+
+    $.ajax "/api/order/#{order_id}",
+      type: 'PUT'
+      data: { pass: pass }
+      dataType: 'json'
+      success: (data, textStatus, jqXHR) ->
+        if $this.hasClass('btn-success')
+          $this.removeClass('btn-success').addClass('btn-default').html('합격하셨나요?')
+        else
+          $this.removeClass('btn-default').addClass('btn-success').html('합격')
+      complete: ->
+        $this.removeClass('disabled')
+
   returnClothesReal = (type, redirect_url, order_id, late_fee_pay_with, compensation_pay_with) ->
     if type is 'part'
       #
