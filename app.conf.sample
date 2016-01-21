@@ -7,6 +7,7 @@ use strict;
 use warnings;
 
 use Mojo::JSON;
+use POSIX qw( ceil );
 
 my $PORT     = 8001;
 my %SMS_FROM = (
@@ -122,6 +123,7 @@ $db_opts->{AutoCommit} //= 1;
             'stat-status'         => { text => '상태',                  icon => q{},         desc => '주문서의 상태별 처리 시간을 보여줍니다.',                        link => '/stat/status'         },
             'stat-visitor'        => { text => '방문자',                icon => q{},         desc => '일/주/월 별 방문자 정보',                                        link => '/stat/visitor'        },
             'size-guess'          => { text => '신체 치수 예측',        icon => 'info',      desc => '키와 몸무게로 신체 치수를 예측합니다.',                          link => '/size/guess' },
+            'user-id-search-clothes'      => { text => '의류검색',      icon => 'search',    desc => '신체치수로 잘 맞을 의류를 검색합니다.',                          link => '#' },
         },
         items => [
             { id => 'home'        },
@@ -391,4 +393,48 @@ $db_opts->{AutoCommit} //= 1;
     # volunteer
     #
     volunteer_uri => 'http://localhost:5000',
+
+    #
+    # /user/:id/search/clothes
+    #
+    'user-id-search-clothes' => {
+        male => {
+            upper_name   => 'jacket',
+            lower_name   => 'pants',
+            upper_params => [qw/
+                arm
+                bust
+                topbelly
+            /],
+            lower_params => [qw/
+                thigh
+                waist
+            /],
+            range_rules  => {
+                bust     => sub { ( ceil( $_[0] ) - 2, ceil( $_[0] ) + 2 ) },
+                topbelly => sub { ( ceil( $_[0] ) - 2, ceil( $_[0] ) + 2 ) },
+                arm      => sub { ( ceil( $_[0] ) - 1, ceil( $_[0] ) + 1 ) },
+                thigh    => sub { ( ceil( $_[0] ) - 2, ceil( $_[0] ) + 2 ) },
+                waist    => sub { ( ceil( $_[0] ),     ceil( $_[0] ) + 2 ) },
+            },
+        },
+        female => {
+            upper_name   => 'jacket',
+            lower_name   => 'skirt',
+            upper_params => [qw/
+                bust
+                topbelly
+            /],
+            lower_params => [qw/
+                hip
+                waist
+            /],
+            range_rules  => {
+                bust     => sub { ( ceil( $_[0] ) - 2, ceil( $_[0] ) + 2 ) },
+                topbelly => sub { ( ceil( $_[0] ) - 2, ceil( $_[0] ) + 2 ) },
+                hip      => sub { ( ceil( $_[0] ) - 2, ceil( $_[0] ) + 2 ) },
+                waist    => sub { ( ceil( $_[0] ),     ceil( $_[0] ) + 2 ) },
+            },
+        },
+    },
 };

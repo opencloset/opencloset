@@ -7360,4 +7360,184 @@ get '/order/:order_id/extension/success' => sub {
     $self->render('order-extension-success', order => $order);
 };
 
+get '/user/:id/search/clothes' => sub {
+    my $self = shift;
+
+    #
+    # fetch user
+    #
+    my %params =
+        $self->get_params(qw/ id gender height weight bust waist topbelly thigh arm leg /);
+
+    my $user = $self->get_user( { id => $params{id} } );
+    return unless $user;
+
+    #
+    # validate params
+    #
+
+    my $v = $self->create_validator;
+    $v->field('gender')->in(qw/ male female /);
+    $v->field('height')->regexp(qr/^\d+$/);
+    $v->field('weight')->regexp(qr/^\d+$/);
+    $v->field('bust')->regexp(qr/^\d+$/);
+    $v->field('waist')->regexp(qr/^\d+$/);
+    $v->field('topbelly')->regexp(qr/^\d+$/);
+    $v->field('thigh')->regexp(qr/^\d+$/);
+    $v->field('arm')->regexp(qr/^\d+$/);
+    $v->field('leg')->regexp(qr/^\d+$/);
+
+    unless ( $self->validate( $v, \%params ) ) {
+        my @error_str;
+        while ( my ( $k, $v ) = each %{ $v->errors } ) {
+            push @error_str, "$k:$v";
+        }
+        return $self->error(
+            400,
+            {
+                str => join( ',', @error_str ),
+                data => $v->errors,
+            }
+        );
+    }
+
+    %params = (
+        gender => $user->user_info->gender,
+        height => $user->user_info->height,
+        weight => $user->user_info->weight,
+        bust => $user->user_info->bust,
+        waist => $user->user_info->waist,
+        topbelly => $user->user_info->waist,
+        thigh => $user->user_info->thigh,
+        arm => $user->user_info->arm,
+        leg => $user->user_info->leg,
+        %params
+    );
+
+    #
+    # guess size
+    #
+    my $guesser = OpenCloset::Size::Guess->new(
+        'OpenCPU::RandomForest',
+        gender    => $params{gender},
+        height    => $params{height},
+        weight    => $params{weight},
+        _bust     => $params{bust},
+        _waist    => $params{waist},
+        _topbelly => $params{topbelly},
+        _thigh    => $params{thigh},
+        _arm      => $params{arm},
+        _leg      => $params{leg},
+    );
+
+    my $result = $guesser->guess;
+    my %guess = map { $_ => $result->{$_} } grep { $result->{$_} } keys %{$result};
+
+    #
+    # fetch clothes
+    #
+
+    my $gender     = $params{gender};
+    my $config     = app->config->{'user-id-search-clothes'}{$gender};
+    my $upper_name = $config->{upper_name};
+    my $lower_name = $config->{lower_name};
+
+    my %guess_range;
+    for my $k ( keys %guess ) {
+        next unless exists $config->{range_rules}{$k};
+        $guess_range{$k} = [ &{ $config->{range_rules}{$k} }( $guess{$k} ) ];
+    }
+
+    my $rent_pair = $DB->resultset('Clothes')->search(
+        {
+            'category' => { '-in' => [ $upper_name, $lower_name ] },
+            'gender' => $gender,
+            'order_details.order_id' => { '!=' => undef },
+        },
+        {
+            join      => 'order_details',
+            '+select' => ['order_details.order_id'],
+            '+as'     => ['order_id'],
+        }
+    );
+
+    my %order_pair;
+    while ( my $cloth = $rent_pair->next ) {
+        my $order_id = $cloth->get_column('order_id');
+        my $category = $cloth->get_column('category');
+        my $code     = $cloth->get_column('code');
+
+        $order_pair{$order_id}{$category} = $code;
+    }
+
+    my %pair_count;
+    while ( my ( $order_id, $pair ) = each %order_pair ) {
+        next unless exists $pair->{$upper_name};
+        next unless exists $pair->{$lower_name};
+        next unless keys %{$pair} == 2;
+
+        $pair_count{ $pair->{$upper_name} }->{ $pair->{$lower_name} }++;
+    }
+
+    my %pair;
+    for my $upper_code ( keys %pair_count ) {
+        my $max_rented_pair_lower_code = (
+            sort { $pair_count{$upper_code}{$b} <=> $pair_count{$upper_code}{$a} }
+                keys %{ $pair_count{$upper_code} }
+        )[0];
+
+        $pair{$upper_code} = {
+            $upper_name => $upper_code,
+            $lower_name => $max_rented_pair_lower_code,
+            count       => $pair_count{$upper_code}{$max_rented_pair_lower_code},
+        };
+    }
+
+    my $upper_rs = $DB->resultset('Clothes')->search(
+        {
+            'category'  => $upper_name,
+            'gender'    => $gender,
+            'status.id' => 1,
+            map { $_ => { -between => $guess_range{$_} } } @{ $config->{upper_params} }
+        },
+        { prefetch => [ { 'donation' => 'user' }, 'status' ], }
+    );
+
+    my $lower_rs = $DB->resultset('Clothes')->search(
+        {
+            'category'  => $lower_name,
+            'gender'    => $gender,
+            'status.id' => 1,
+            map { $_ => { -between => $guess_range{$_} } } @{ $config->{lower_params} }
+        },
+        { prefetch => [ { 'donation' => 'user' }, 'status' ], }
+    );
+
+    my %upper_map = map { $_->code => $_ } $upper_rs->all;
+    my %lower_map = map { $_->code => $_ } $lower_rs->all;
+
+    my @result;
+    for my $up ( keys %upper_map ) {
+        next unless $pair{$up};
+        next unless List::MoreUtils::any { $_ eq $pair{$up}{$lower_name} } keys %lower_map;
+
+        my $upper_code = $pair{$up}{$upper_name};
+        my $lower_code = $pair{$up}{$lower_name};
+        my $pair_count = $pair{$up}{'count'};
+
+        push @result,
+            [
+                $upper_code,
+                $lower_code,
+                $upper_map{$upper_code},
+                $lower_map{$lower_code},
+                $pair_count
+            ];
+    }
+
+    $self->render(
+        'user-id-search-clothes',
+        result => [ sort { $b->[4] <=> $a->[4] } @result ],
+    );
+};
 app->start;
