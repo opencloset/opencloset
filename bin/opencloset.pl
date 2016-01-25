@@ -5471,7 +5471,7 @@ get '/clothes/:code' => sub {
         }
     }
 
-    my @clothes_group = $clothes->group->clothes( { code => { '!=' => $clothes->code } },
+    my @clothes_group = $clothes->donation->clothes( { code => { '!=' => $clothes->code } },
         { order_by => 'category' } );
     my $code = $self->trim_clothes_code($clothes);
     my $suit;
