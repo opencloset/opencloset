@@ -323,3 +323,19 @@ $ ->
       false
     .on 'stepclick', (e) ->
       # false
+
+  #
+  # 추가 버튼 클릭
+  #
+  $('#btn-add').click (e) ->
+    name = $('input[name=user-search]').val()
+    $.ajax '/api/user.json',
+      type: 'POST'
+      data: { name: name }
+      success: (data, textStatus, jqXHR) ->
+        userID = data.id
+        url    = "/user/#{userID}"
+        window.location.assign url
+      error: (jqXHR, textStatus, errorThrown) ->
+        OpenCloset.alert('warning', "사용자를 추가하지 못했습니다. - #{jqXHR.responseJSON.error.str}")
+      complete: (jqXHR, textStatus) ->
