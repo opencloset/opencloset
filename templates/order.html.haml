@@ -153,6 +153,10 @@
               - if ( $sms_label && $sms_str ) {
                 %br
                 %a{ :href => "#{ url_for('/sms')->query( to => $order->user->user_info->phone, msg => $sms_str ) }" }= $sms_label
+                - if (my $tracking_url = tracking_url($order)) {
+                  %a{ :href => "#{ $tracking_url }", :target => '_blank', :title => '배송조회' }
+                    %span.glyphicon.glyphicon-link
+                - }
                 - if ( $is_unpaid ) {
                   %br
                   %a.unpaid-done.label.label-success{:href => "#unpaid-done-pay-with", :rel => "facebox"} 완납
