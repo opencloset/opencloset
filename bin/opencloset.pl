@@ -2223,6 +2223,7 @@ group {
             bust
             compensation_pay_with
             desc
+            does_wear
             foot
             height
             hip

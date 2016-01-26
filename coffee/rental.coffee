@@ -96,3 +96,28 @@ $ ->
     return OpenCloset.alert('danger', '대여할 옷을 선택해 주세요.')    unless clothes
 
     $('#order-form').submit()
+
+  #
+  # 착용 버튼 토글
+  #
+  $('.btn-wearing:not(.disabled)').click (e) ->
+    $this = $(@)
+    $this.addClass('disabled')
+
+    does_wear = if $this.hasClass('btn-success') then 0 else 1
+    order_id = $this.closest('tr').data('order-id')
+
+    $.ajax "/api/order/#{order_id}.json",
+      type: 'PUT'
+      data:
+        id: order_id
+        does_wear: does_wear
+      success: (data, textStatus, jqXHR) ->
+        if $this.hasClass('btn-success')
+          $this.removeClass('btn-success').addClass('btn-default').html('안입고감')
+        else
+          $this.removeClass('btn-default').addClass('btn-success').html('입고감')
+      error: (jqXHR, textStatus, errorThrown) ->
+        OpenCloset.alert('danger', "착용여부 변경에 실패했습니다: #{jqXHR.responseJSON.error.str}")
+      complete: (jqXHR, textStatus) ->
+        $this.removeClass('disabled')
