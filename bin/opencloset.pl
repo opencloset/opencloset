@@ -1845,6 +1845,9 @@ group {
 
     post '/group'                 => \&api_create_group;
 
+    post '/suit'                  => \&api_create_suit;
+    del  '/suit/:code'            => \&api_delete_suit;
+
     post '/sms'                   => \&api_create_sms;
     put  '/sms/:id'               => \&api_update_sms;
     post '/sms/validation'        => \&api_create_sms_validation;
@@ -3656,6 +3659,109 @@ group {
         $self->respond_to( json => { status => 201, json => \%data } );
     }
 
+    sub api_create_suit {
+        my $self = shift;
+
+        #
+        # fetch params
+        #
+        my %params = $self->get_params(qw/code_top code_bottom/);
+
+        #
+        # validate params
+        #
+        my $v = $self->create_validator;
+        $v->field('code_top')->required(1)->regexp(qr/^J/);
+        $v->field('code_bottom')->required(1)->regexp(qr/^(P|K)/);
+
+        unless ( $self->validate( $v, \%params ) ) {
+            my @error_str;
+            while ( my ( $k, $v ) = each %{ $v->errors } ) {
+                push @error_str, "$k:$v";
+            }
+            return $self->error(
+                400,
+                {
+                    str  => join( ',', @error_str ),
+                    data => $v->errors,
+                }
+            );
+        }
+
+        $params{code_top}    = sprintf( '%05s', $params{code_top} );
+        $params{code_bottom} = sprintf( '%05s', $params{code_bottom} );
+
+        #
+        # create suit
+        #
+        my $suit = $DB->resultset('Suit')->create( \%params );
+        return $self->error(
+            500,
+            {
+                str  => 'failed to create a new suit',
+                data => {},
+            }
+        ) unless $suit;
+
+        #
+        # response
+        #
+        my %data = ( $suit->get_columns );
+        $self->respond_to( json => { status => 201, json => \%data } );
+    }
+
+    sub api_delete_suit {
+        my $self = shift;
+
+        #
+        # fetch params
+        #
+        my %params = $self->get_params(qw/ code /);
+
+        #
+        # validate params
+        #
+        my $v = $self->create_validator;
+        $v->field('code')->required(1)->regexp(qr/^0?[JPS][A-Z0-9]{3}$/);
+        unless ( $self->validate( $v, \%params ) ) {
+            my @error_str;
+            while ( my ( $k, $v ) = each %{ $v->errors } ) {
+                push @error_str, "$k:$v";
+            }
+            return $self->error(
+                400,
+                {
+                    str  => join( ',', @error_str ),
+                    data => $v->errors,
+                }
+            );
+        }
+
+        #
+        # adjust params
+        #
+        $params{code} = sprintf( '%05s', $params{code} ) if length( $params{code} ) == 4;
+        my $key = $params{code} =~ /0J/ ? 'code_top' : 'code_bottom';
+
+        #
+        # find suit
+        #
+        my $suit = $DB->resultset('Suit')->find( { $key => $params{code} });
+        return $self->error(
+            404,
+            {
+                str  => 'suit not found',
+                data => {},
+            }
+        ) unless $suit;
+
+        #
+        # delete & response
+        #
+        $suit->delete;
+        $self->respond_to( json => { status => 200, json => {} } );
+    }
+
     sub api_create_sms {
         my $self = shift;
 
@@ -5367,6 +5473,19 @@ get '/clothes/:code' => sub {
         }
     }
 
+    my @clothes_group = $clothes->donation->clothes( { code => { '!=' => $clothes->code } },
+        { order_by => 'category' } );
+    my $code = $self->trim_clothes_code($clothes);
+    my $suit;
+    if ( my ($first) = $code =~ /^(J|P|K)/ ) { # Jacket, Pants, sKirt
+        if ( $first eq 'J' ) {
+            $suit = $clothes->suit_code_top;
+        }
+        else {
+            $suit = $clothes->suit_code_bottom;
+        }
+    }
+
     #
     # response
     #
@@ -5375,6 +5494,8 @@ get '/clothes/:code' => sub {
         recent_sizes  => \@recent_sizes,
         bestfit_sizes => \@bestfit_sizes,
         clothes       => $clothes,
+        clothes_group => \@clothes_group,
+        suit          => $suit,
         rented_count  => $rented_count,
         tag_rs        => $DB->resultset('Tag'),
     );

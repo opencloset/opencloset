@@ -518,9 +518,20 @@ $opencloset-darken-yellow: desaturate(darken($opencloset-yellow, 4%), 10%);
         }
     }
     #clothes-code {
-        .user-profile.row .grid2 {
-            a:hover {
-                text-decoration: none;
+        .user-profile.row {
+            .grid2 {
+                a:hover {
+                    text-decoration: none;
+                }
+            }
+            h2, h3 {
+                padding-bottom: 15px;
+            }
+            ul {
+                list-style-type: none;
+            }
+            .not-suit {
+                padding-top: 30px;
             }
         }
         .profile-activity {
