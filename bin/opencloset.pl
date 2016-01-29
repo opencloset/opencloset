@@ -4739,7 +4739,7 @@ post '/login' => sub {
 
         my $remain   = $self->current_user->expires - DateTime->now( time_zone => app->config->{timezone} )->epoch;
         my $deadline = 60 * 60 * 24 * 7;
-        my $uri      = q{/};
+        my $uri      = $self->param('return') || q{/};
 
         if ( $remain < $deadline ) {
             $uri = '/user/' . $self->current_user->id;
