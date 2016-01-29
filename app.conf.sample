@@ -85,9 +85,7 @@ $db_opts->{AutoCommit} //= 1;
     #
     # site UI
     #
-    secrets      => [
-        '2013-11-01 15:53:55 Asia/Seoul',
-    ],
+    secrets      => [$ENV{OPENCLOSET_SECRET}],
     theme        => 'ace',
     site         => { name => '열린옷장', icon => 'archive' },
     company_name => '열린옷장',
