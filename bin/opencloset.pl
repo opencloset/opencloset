@@ -80,6 +80,11 @@ my $DB = OpenCloset::Schema->connect({
     %{ app->config->{database}{opts} },
 });
 
+app->secrets( app->defaults->{secrets} );
+app->sessions->cookie_domain( $ENV{OPENCLOSET_DOMAIN} || '.theopencloset.net' );
+app->sessions->cookie_name('opencloset');
+app->sessions->default_expiration(86400);
+
 plugin 'validator';
 plugin 'haml_renderer';
 plugin 'FillInFormLite';
@@ -7355,5 +7360,4 @@ get '/order/:order_id/extension/success' => sub {
     $self->render('order-extension-success', order => $order);
 };
 
-app->secrets( app->defaults->{secrets} );
 app->start;
