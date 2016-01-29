@@ -83,9 +83,14 @@ $db_opts->{AutoCommit} //= 1;
     visit_load => 0,
 
     #
+    # cookies
+    #
+    secrets       => [$ENV{OPENCLOSET_SECRET}],
+    cookie_domain => $ENV{OPENCLOSET_DOMAIN} || 'localhost' || '.theopencloset.net',
+
+    #
     # site UI
     #
-    secrets      => [$ENV{OPENCLOSET_SECRET}],
     theme        => 'ace',
     site         => { name => '열린옷장', icon => 'archive' },
     company_name => '열린옷장',

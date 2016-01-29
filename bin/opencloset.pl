@@ -81,7 +81,7 @@ my $DB = OpenCloset::Schema->connect({
 });
 
 app->secrets( app->defaults->{secrets} );
-app->sessions->cookie_domain( $ENV{OPENCLOSET_DOMAIN} || '.theopencloset.net' );
+app->sessions->cookie_domain( app->defaults->{cookie_domain} );
 app->sessions->cookie_name('opencloset');
 app->sessions->default_expiration(86400);
 
