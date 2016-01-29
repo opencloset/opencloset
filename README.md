@@ -15,7 +15,7 @@ opencloset
 모듈을 설치하면 됩니다.
 
     $ cpanm --installdeps .
-    $ cpanm --mirror https://cpan.theopencloset.net OpenCloset::Schema OpenCloset::Config OpenCloset::Size::Guess::DB OpenCloset::Size::Guess::BodyKit
+    $ cpanm --mirror https://cpan.theopencloset.net OpenCloset::Schema OpenCloset::Config OpenCloset::Size::Guess::DB OpenCloset::Size::Guess::BodyKit OpenCloset::Size::Guess::OpenCPU::RandomForest
 
 ### node.js ###
 

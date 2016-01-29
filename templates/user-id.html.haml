@@ -43,6 +43,9 @@
                           %a.btn.btn-link{ :href => 'mailto:#{ $user->email }' }
                             %i.icon-envelope.bigger-120.green
                             메일 보내기
+                          %a.btn.btn-link{ :href => "#{ url_for('/user/' . $user->id . '/search/clothes/') }" }
+                            %i.icon-search.bigger-120.green
+                            의류검색
 
                       .hr.hr12.dotted
 
