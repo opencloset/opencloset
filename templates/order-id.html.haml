@@ -486,19 +486,19 @@
                               %button#btn-clothes-search.btn.btn-default.btn-sm{ :type => 'submit' }
                                 %i.icon-search.bigger-110 검색
 
+                        - if ($order->pass) {
+                          %a#btn-interview-pass.btn.btn-success.pull-right{ :type => 'button' }
+                            합격
+                        - } else {
+                          %a#btn-interview-pass.btn.btn-default.pull-right{ :type => 'button' }
+                            합격하셨나요?
+                        - }
                         %a#btn-return-process.btn.btn-info.pull-right.return-process-reverse{ :type => 'button' }
                           %i.icon-reply.bigger-110
                           반납 진행
                         %a#btn-refund-process.btn.btn-danger.pull-right.return-process-reverse{ :type => 'button' }
                           %i.icon-remove.bigger-110
                           환불 진행
-                        - if ($order->pass) {
-                          %a#btn-interview-pass.btn.btn-success.pull-right.return-process-reverse{ :type => 'button' }
-                            합격
-                        - } else {
-                          %a#btn-interview-pass.btn.btn-default.pull-right.return-process-reverse{ :type => 'button' }
-                            합격하셨나요?
-                        - }
                         %a#btn-return-all.btn.btn-success.disabled.pull-right.return-process{ :type => 'button', 'data-redirect-url' => "#{ url_for('/order/' . $order->id) }" }
                           %i.icon-ok.bigger-110
                           전체 반납
