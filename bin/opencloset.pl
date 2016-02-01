@@ -1763,6 +1763,7 @@ group {
         my $req_path = $self->req->url->path;
         return 1 if $req_path =~ m{^/api/sms/validation(\.json)?$};
         return 1 if $req_path =~ m{^/api/postcode/search(\.json)?$};
+        return 1 if $req_path =~ m{^/api/search/user(\.json)?$};
 
         if ( $req_path =~ m{^/api/gui/booking-list(\.json)?$} ) {
             my $phone = $self->param('phone');
