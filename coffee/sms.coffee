@@ -29,7 +29,10 @@ $ ->
     macro9:
       text: '최종통보'
       msg:  '[열린옷장] ooo님 대여기간이 oo일 연체되었습니다. 더 이상 반납의사가 없다고 판단되어 명일(0/0) 내용증명서가 발송됩니다. 추후 광진경찰서에 고소장 접수 후 법적 절차를 통해 정장을 회수할 예정입니다. 참고 바라며, 최종 고지하는 것이오니 바로 답변바랍니다.'
-
+    macro10:
+      text: '방문대여 예약 가이드'
+      msg:  '[열린옷장] 방문대여 예약 가이드, 링크 참고하셔서 예약하세요.^^ http://goo.gl/3Q1BB9'
+  
   updateMsgScreenWidth = ->
     msg   = $('textarea[name=msg]').prop('value')
     width = OpenCloset.strScreenWidth(msg)
