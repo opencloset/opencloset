@@ -289,6 +289,25 @@
                                         >#{ $order->compensation_pay_with || q{결제 방법 선택} }</a>
                                       \/
                                       %strong.compensation-final 0원
+                                  %li.row
+                                    .col-sm-1
+                                      %i.icon-caret-right.green
+                                    .col-sm-3.no-padding-left 주문 신체 치수:
+                                    .col-sm-8
+                                      %span.label.label-success= $order->height   || '-'
+                                      %span.label.label-success= $order->weight   || '-'
+                                      %br
+                                      %span.label.label-info=    $order->bust     || '-'
+                                      %span.label.label-info=    $order->waist    || '-'
+                                      %span.label.label-info=    $order->hip      || '-'
+                                      %span.label.label-info=    $order->topbelly || '-'
+                                      %span.label.label-info=    $order->belly    || '-'
+                                      %br
+                                      %span.label.label-warning= $order->thigh    || '-'
+                                      %span.label.label-warning= $order->arm      || '-'
+                                      %span.label.label-warning= $order->leg      || '-'
+                                      %span.label.label-warning= $order->knee     || '-'
+                                      %span.label.label-warning= $order->foot     || '-'
                             /
                             / 대여자 정보
                             /
