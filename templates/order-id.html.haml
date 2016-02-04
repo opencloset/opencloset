@@ -497,6 +497,15 @@
 
                     .clearfix.form-actions
                       - if ( $order->status ) {
+                        - if ( $order_status eq '대여중' || $order_status eq '반납' ) {
+                          - if ($order->pass) {
+                            %a#btn-interview-pass.btn.btn-success.pull-right{ :type => 'button' }
+                              합격
+                          - } else {
+                            %a#btn-interview-pass.btn.btn-default.pull-right{ :type => 'button' }
+                              합격하셨나요?
+                          - }
+                        - }
                       -   if ( $order_status eq '대여중' ) {
                         .search.pull-left.return-process
                           .input-group
@@ -504,14 +513,6 @@
                             %span.input-group-btn
                               %button#btn-clothes-search.btn.btn-default.btn-sm{ :type => 'submit' }
                                 %i.icon-search.bigger-110 검색
-
-                        - if ($order->pass) {
-                          %a#btn-interview-pass.btn.btn-success.pull-right{ :type => 'button' }
-                            합격
-                        - } else {
-                          %a#btn-interview-pass.btn.btn-default.pull-right{ :type => 'button' }
-                            합격하셨나요?
-                        - }
                         %a#btn-return-process.btn.btn-info.pull-right.return-process-reverse{ :type => 'button' }
                           %i.icon-reply.bigger-110
                           반납 진행
