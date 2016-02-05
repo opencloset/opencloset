@@ -280,7 +280,15 @@ $ ->
       error: (jqXHR, textStatus, errorThrown) ->
       complete: (jqXHR, textStatus) ->
 
-  autoSetByAdditionalDay = ->
+  $.ajax "#{CONFIG.monitor_uri}/target_date",
+    type: 'GET'
+    dataType: 'json'
+    success: (data, textStatus, jqXHR) ->
+      autoSetByAdditionalDay(data)
+    error: (jqXHR, textStatus, errorThrown) ->
+    complete: (jqXHR, textStatus) ->
+
+  autoSetByAdditionalDay = (target_dt) ->
     return if $('#order-additional-day').data('disabled')
 
     day = parseInt $('#order-additional-day').data('value')
@@ -302,12 +310,13 @@ $ ->
       $('#order-rental-date').editable 'setValue', moment().format('YYYY-MM-DD HH:mm:ss'), true
       $('#order-rental-date').editable 'submit'
 
+      targetDate = moment(target_dt?.ymd).format('YYYY-MM-DD HH:mm:ss')
       # 반납 예정일을 오늘을 기준으로 자동으로 계산
-      $('#order-target-date').editable 'setValue', moment().add('days', day + 3).endOf('day').format('YYYY-MM-DD HH:mm:ss'), true
+      $('#order-target-date').editable 'setValue', targetDate, true
       $('#order-target-date').editable 'submit'
 
       # 반납 희망일을 오늘을 기준으로 자동으로 계산
-      $('#order-user-target-date').editable 'setValue', moment().add('days', day + 3).endOf('day').format('YYYY-MM-DD HH:mm:ss'), true
+      $('#order-user-target-date').editable 'setValue', targetDate, true
       $('#order-user-target-date').editable 'submit'
 
     # 주문표의 대여일을 자동 설정
@@ -316,8 +325,6 @@ $ ->
     # 주문표의 소계를 자동 설정
     $('.order-detail-price').each (i, el) ->
       setOrderDetailFinalPrice $(el).data('pk')
-
-  autoSetByAdditionalDay()
 
   #
   # 환불 진행 버튼 클릭
