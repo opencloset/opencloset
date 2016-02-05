@@ -40,7 +40,7 @@
 <div class="people-box" data-target="<%= $alert_target %>" data-order-id="<%= $order->id %>" data-ymd="<%= $dt_start->ymd %>">
   <div class="widget-box">
     <div class="widget-header">
-      <h4> <a tabindex="-1" href="<%= url_for( '/user/' . $order->user->id ) %>"><%= $order->user->name %> <%= $revisited ? '(재방문)' : q{} %> </a> </h4>
+      <h4> <a tabindex="-1" href="<%= url_for( '/user/' . $order->user->id ) %>"><%= $order->user->name %> <%= $revisited ? $revisited . '회 대여' : q{} %> </a> </h4>
     </div>
     <div class="widget-body">
       <div class="widget-main">
