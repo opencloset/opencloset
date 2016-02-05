@@ -98,25 +98,28 @@
       - while ( my $order = $order_list->next ) {
       -   my $overdue  = calc_overdue($order);
       -   my $late_fee = calc_late_fee($order);
+      -   my $status = '';
+      -   if ( $order->status ) {
+      -     $status = $order->status->name;
+      -     if ( $status eq '대여중' ) {
+      -       $status .= '(연장) ' . commify($late_fee) . '원' if $overdue;
+      -     }
+      -     elsif ( $search_status eq 'unpaid' && $status eq '반납' ) {
+      -       my $unpaid = $order->get_column('sum_final_price');
+      -       $status .= '(미납) ' . commify($unpaid) . '원' if $unpaid;
+      -     }
+      -   }
         %tr
           %td.center
             %a{ :href => "#{url_for('/order/' . $order->id)}" }= $order->id
-          %td{:class => "#{ $order->does_wear ? 'success' : '' }"}
+          %td
+            - if ($status eq '포장완료' && $order->does_wear) {
+              %p 입고감
+            - }
             %a{ :href => "#{url_for('/order/' . $order->id)}" }
-              - my $status = '';
-              - if ( $order->status ) {
-              -   $status = $order->status->name;
-              -   if ( $status eq '대여중' ) {
-              -     $status .= '(연장) ' . commify($late_fee) . '원' if $overdue;
-              -   }
-              -   elsif ( $search_status eq 'unpaid' && $status eq '반납' ) {
-              -     my $unpaid = $order->get_column('sum_final_price');
-              -     $status .= '(미납) ' . commify($unpaid) . '원' if $unpaid;
-              -   }
-              - }
               %span.label.order-status{ 'data-order-status' => "#{$status}" }= $status || '상태없음'
               - if ($status eq '포장완료') {
-                %span.pull-right
+                %span
                   %span.text-primary.glyphicon.glyphicon-arrow-right{:aria-hidden => 'true'}
                   %span.status-update.label.order-status{ 'data-order-status' => "결제대기", 'data-order-id' => "#{$order->id}", 'data-status-to' => '19' }
                     결제대기
