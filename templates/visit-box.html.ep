@@ -115,6 +115,15 @@
                           <span> 열린옷장 홈페이지로 돌아가기 </span>
                         </a>
                       </div>
+                      
+                      <div class="space-6"></div>
+
+                      <div class="clearfix">
+                        <a class="width-100 pull-right btn btn-sm btn-green" href="http://blog.theopencloset.net/220614995880">
+                          <i class="icon-hand-up"></i>
+                          <span> 예약 가이드 보러가기 </span>
+                        </a>
+                      </div>
 
                     </div>
                   </div><!-- /widget-body -->
