@@ -1,6 +1,10 @@
 opencloset
 ==========
 
+## Version ##
+
+v1.0.0
+
 ## Requirements ##
 
 열린옷장 웹 시스템은 perl로 구현되어있으며, 부수적으로 node.js와 ruby 환경에서
