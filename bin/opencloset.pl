@@ -73,9 +73,9 @@ app->defaults(
     }
 );
 
-my $CACHE =
-    CHI->new( driver => 'File', root_dir => app->config->{cache}{dir} || './cache',
-    );
+my $CACHE = CHI->new(
+    driver => 'File', root_dir => app->config->{cache}{dir} || './cache',
+);
 app->log->info( "cache dir: " . $CACHE->root_dir );
 
 my $DB = OpenCloset::Schema->connect(
@@ -553,32 +553,36 @@ helper update_user => sub {
         delete $_user_params{id};
 
         if ( $_user_params{create_date} ) {
-            $_user_params{create_date} =
-                DateTime->from_epoch( epoch => $_user_params{create_date},
-                time_zone => app->config->{timezone}, );
+            $_user_params{create_date} = DateTime->from_epoch(
+                epoch     => $_user_params{create_date},
+                time_zone => app->config->{timezone},
+            );
         }
         if ( $_user_params{update_date} ) {
-            $_user_params{update_date} =
-                DateTime->from_epoch( epoch => $_user_params{update_date},
-                time_zone => app->config->{timezone}, );
+            $_user_params{update_date} = DateTime->from_epoch(
+                epoch     => $_user_params{update_date},
+                time_zone => app->config->{timezone},
+            );
         }
 
         $user->update( \%_user_params )
             or return $self->error( 500, { str => 'failed to update a user', data => {}, } );
 
         $user->user_info->update( { %$user_info_params, user_id => $user->id, } )
-            or return $self->error( 500,
-            { str => 'failed to update a user info', data => {}, } );
+            or return $self->error(
+            500,
+            { str => 'failed to update a user info', data => {}, }
+            );
 
         $guard->commit;
 
         #
         # event posting to opencloset/monitor
         #
-        my $res =
-            HTTP::Tiny->new( timeout => 1 )
-            ->post_form( app->config->{monitor_uri} . '/events',
-            { sender => 'user', user_id => $user->id } );
+        my $res = HTTP::Tiny->new( timeout => 1 )->post_form(
+            app->config->{monitor_uri} . '/events',
+            { sender => 'user', user_id => $user->id }
+        );
 
         $self->app->log->error("Failed to posting event: $res->{reason}")
             unless $res->{success};
@@ -1140,9 +1144,10 @@ helper create_order_detail => sub {
         if $params->{clothes_code} && length( $params->{clothes_code} ) == 4;
 
     my $order_detail = $DB->resultset('OrderDetail')->create($params);
-    return $self->error( 500,
-        { str => 'failed to create a new order_detail', data => {}, } )
-        unless $order_detail;
+    return $self->error(
+        500,
+        { str => 'failed to create a new order_detail', data => {}, }
+    ) unless $order_detail;
 
     return $order_detail;
 };
@@ -1256,9 +1261,10 @@ helper user_avg_diff => sub {
         return \%data;
     }
 
-    my $osg_db =
-        OpenCloset::Size::Guess->new( 'DB', _time_zone => app->config->{timezone},
-        _schema => $DB, _range => 0, );
+    my $osg_db = OpenCloset::Size::Guess->new(
+        'DB', _time_zone => app->config->{timezone},
+        _schema => $DB, _range => 0,
+    );
     $osg_db->gender( $user->user_info->gender );
     $osg_db->height( int $user->user_info->height );
     $osg_db->weight( int $user->user_info->weight );
@@ -1297,8 +1303,10 @@ helper user_avg2 => sub {
     my %ret;
     do {
         my $dt_base = try {
-            DateTime->new( time_zone => app->config->{timezone}, year => 2015, month => 5,
-                day => 29, );
+            DateTime->new(
+                time_zone => app->config->{timezone}, year => 2015, month => 5,
+                day       => 29,
+            );
         };
         last unless $dt_base;
 
@@ -1359,11 +1367,13 @@ helper user_avg2 => sub {
 
         my $order_rs = $DB->resultset('Order')->search( $cond, $attr );
 
-        my %item =
-            ( belly => [], bust => [], hip => [], thigh => [], topbelly => [], waist => [],
-            );
-        my %count = ( total => 0, belly => 0, bust => 0, hip => 0, thigh => 0, topbelly => 0,
-            waist => 0, );
+        my %item = (
+            belly => [], bust => [], hip => [], thigh => [], topbelly => [], waist => [],
+        );
+        my %count = (
+            total => 0, belly => 0, bust => 0, hip => 0, thigh => 0, topbelly => 0,
+            waist => 0,
+        );
         while ( my $order = $order_rs->next ) {
             ++$count{total};
             for (
@@ -1555,8 +1565,10 @@ group {
         my $self = shift;
 
         my $csv = Text::CSV->new( { binary => 1, eol => "\n", } )
-            or return $self->error( 500,
-            { str => "Cannot use CSV: " . Text::CSV->error_diag, data => {}, } );
+            or return $self->error(
+            500,
+            { str => "Cannot use CSV: " . Text::CSV->error_diag, data => {}, }
+            );
 
         my $dt = DateTime->now( time_zone => app->config->{timezone} );
         my $filename = 'user-' . $dt->ymd(q{}) . '-' . $dt->hms(q{}) . '.csv';
@@ -1607,8 +1619,10 @@ group {
         my $self = shift;
 
         my $csv = Text::CSV->new( { binary => 1, eol => "\n", } )
-            or return $self->error( 500,
-            { str => "Cannot use CSV: " . Text::CSV->error_diag, data => {}, } );
+            or return $self->error(
+            500,
+            { str => "Cannot use CSV: " . Text::CSV->error_diag, data => {}, }
+            );
 
         my $dt = DateTime->now( time_zone => app->config->{timezone} );
         my $filename = 'clothes-' . $dt->ymd(q{}) . '-' . $dt->hms(q{}) . '.csv';
@@ -1878,9 +1892,10 @@ group {
 
             my $user_info = $DB->resultset('UserInfo')
                 ->create( { %user_info_params, user_id => $user->id, } );
-            return $self->error( 500,
-                { str => 'failed to create a new user info', data => {}, } )
-                unless $user_info;
+            return $self->error(
+                500,
+                { str => 'failed to create a new user info', data => {}, }
+            ) unless $user_info;
 
             $guard->commit;
 
@@ -3227,7 +3242,8 @@ group {
         #
         my %data = $tag->get_columns;
 
-        $self->res->headers->header( 'Location' => $self->url_for( '/api/tag/' . $tag->id ),
+        $self->res->headers->header(
+            'Location' => $self->url_for( '/api/tag/' . $tag->id ),
         );
         $self->respond_to( json => { status => 201, json => \%data } );
     }
@@ -3442,9 +3458,10 @@ group {
         {
             my %_params = %params;
             if ( $_params{create_date} ) {
-                $_params{create_date} =
-                    DateTime->from_epoch( epoch => $_params{create_date},
-                    time_zone => app->config->{timezone}, );
+                $_params{create_date} = DateTime->from_epoch(
+                    epoch     => $_params{create_date},
+                    time_zone => app->config->{timezone},
+                );
             }
             $donation = $DB->resultset('Donation')->create( \%_params );
             return $self->error( 500, { str => 'failed to create a new donation', data => {}, } )
@@ -3640,14 +3657,16 @@ group {
         my $to   = $params{to};
         if ( $params{to} =~ m/^#(\d+)/ ) {
             my $order_id = $1;
-            return $self->error( 404,
-                { str => 'failed to create a new sms: no order id', data => {}, } )
-                unless $order_id;
+            return $self->error(
+                404,
+                { str => 'failed to create a new sms: no order id', data => {}, }
+            ) unless $order_id;
 
             my $order_obj = $DB->resultset('Order')->find($order_id);
-            return $self->error( 404,
-                { str => 'failed to create a new sms: cannot get order object', data => {}, } )
-                unless $order_obj;
+            return $self->error(
+                404,
+                { str => 'failed to create a new sms: cannot get order object', data => {}, }
+            ) unless $order_obj;
 
             my $phone = $order_obj->user->user_info->phone;
             return $self->error(
@@ -3674,7 +3693,8 @@ group {
         #
         my %data = ( $sms->get_columns );
 
-        $self->res->headers->header( 'Location' => $self->url_for( '/api/sms/' . $sms->id ),
+        $self->res->headers->header(
+            'Location' => $self->url_for( '/api/sms/' . $sms->id ),
         );
         $self->respond_to( json => { status => 201, json => \%data } );
     }
@@ -3708,9 +3728,10 @@ group {
         }
 
         if ( $params{sent_date} ) {
-            $params{sent_date} =
-                DateTime->from_epoch( epoch => $params{sent_date},
-                time_zone => app->config->{timezone}, );
+            $params{sent_date} = DateTime->from_epoch(
+                epoch     => $params{sent_date},
+                time_zone => app->config->{timezone},
+            );
         }
 
         #
@@ -3864,7 +3885,8 @@ group {
         #
         my %data = ( $sms->get_columns );
 
-        $self->res->headers->header( 'Location' => $self->url_for( '/api/sms/' . $sms->id ),
+        $self->res->headers->header(
+            'Location' => $self->url_for( '/api/sms/' . $sms->id ),
         );
         $self->respond_to( json => { status => 201, json => \%data } );
     }
@@ -4276,8 +4298,10 @@ group {
                 }
 
                 my $dt = try {
-                    DateTime->new( time_zone => app->config->{timezone}, year => $1, month => $2,
-                        day => $3, );
+                    DateTime->new(
+                        time_zone => app->config->{timezone}, year => $1, month => $2,
+                        day       => $3,
+                    );
                 };
                 unless ($dt) {
                     my $msg = "cannot create start datetime object: $params{ymd}";
@@ -4297,9 +4321,10 @@ group {
         }
 
         $params{ymd} =~ m/^(\d{4})-(\d{2})-(\d{2})$/;
-        my $dt_start =
-            DateTime->new( time_zone => app->config->{timezone}, year => $1, month => $2,
-            day => $3, );
+        my $dt_start = DateTime->new(
+            time_zone => app->config->{timezone}, year => $1, month => $2,
+            day       => $3,
+        );
         my $dt_end = $dt_start->clone->add( hours => 24, seconds => -1 );
         my $count = $self->count_visitor( $dt_start, $dt_end );
 
@@ -4569,10 +4594,10 @@ any '/visit' => sub {
     #
     # find user
     #
-    my @users =
-        $DB->resultset('User')
-        ->search( { 'me.name' => $name, 'user_info.phone' => $phone, },
-        { join => 'user_info' }, );
+    my @users = $DB->resultset('User')->search(
+        { 'me.name' => $name, 'user_info.phone' => $phone, },
+        { join      => 'user_info' },
+    );
     my $user = shift @users;
     unless ($user) {
         app->log->warn('user not found');
@@ -4744,8 +4769,10 @@ any '/visit' => sub {
         }
     }
 
-    $self->stash( load => app->config->{visit_load}, type => $type, user => $user,
-        password => $password, );
+    $self->stash(
+        load     => app->config->{visit_load}, type => $type, user => $user,
+        password => $password,
+    );
 };
 
 any '/visit2' => sub {
@@ -4794,10 +4821,10 @@ any '/visit2' => sub {
     #
     # find user
     #
-    my @users =
-        $DB->resultset('User')
-        ->search( { 'me.name' => $name, 'user_info.phone' => $phone, },
-        { join => 'user_info' }, );
+    my @users = $DB->resultset('User')->search(
+        { 'me.name' => $name, 'user_info.phone' => $phone, },
+        { join      => 'user_info' },
+    );
     my $user = shift @users;
     unless ($user) {
         app->log->warn('user not found');
@@ -5151,8 +5178,10 @@ get '/clothes' => sub {
     #
     # response
     #
-    $self->stash( condition => \%status, clothes_list => $rs, tag_list => $tag_rs,
-        pageset => $pageset, );
+    $self->stash(
+        condition => \%status, clothes_list => $rs, tag_list => $tag_rs,
+        pageset   => $pageset,
+    );
 } => 'clothes';
 
 get '/clothes/:code' => sub {
@@ -5216,9 +5245,10 @@ get '/clothes/:code' => sub {
         }
     }
 
-    my @clothes_group =
-        $clothes->donation->clothes( { code => { '!=' => $clothes->code } },
-        { order_by => 'category' } );
+    my @clothes_group = $clothes->donation->clothes(
+        { code     => { '!=' => $clothes->code } },
+        { order_by => 'category' }
+    );
     my $code = $self->trim_clothes_code($clothes);
     my $suit;
     if ( my ($first) = $code =~ /^(J|P|K)/ ) { # Jacket, Pants, sKirt
@@ -5273,8 +5303,10 @@ get '/rental/:ymd' => sub {
     }
 
     my $dt_start = try {
-        DateTime->new( time_zone => app->config->{timezone}, year => $1, month => $2,
-            day => $3, );
+        DateTime->new(
+            time_zone => app->config->{timezone}, year => $1, month => $2,
+            day       => $3,
+        );
     };
     unless ($dt_start) {
         app->log->warn("cannot create start datetime object");
@@ -5421,8 +5453,10 @@ get '/order' => sub {
         }
 
         my $dt_start = try {
-            DateTime->new( time_zone => app->config->{timezone}, year => $1, month => $2,
-                day => $3, );
+            DateTime->new(
+                time_zone => app->config->{timezone}, year => $1, month => $2,
+                day       => $3,
+            );
         };
         unless ($dt_start) {
             app->log->warn("cannot create start datetime object using booking_ymd");
@@ -5464,8 +5498,10 @@ get '/order' => sub {
     #
     # response
     #
-    $self->stash( order_list => $rs, pageset => $pageset,
-        search_status => $search_params{status} || q{}, );
+    $self->stash(
+        order_list => $rs, pageset => $pageset,
+        search_status => $search_params{status} || q{},
+    );
 
     $self->respond_to( html => { status => 200 } );
 } => 'order';
@@ -5648,8 +5684,10 @@ get '/order/:id' => sub {
     #
     # response
     #
-    $self->render( 'order-id', order => $order, history => $history,
-        nonpayment => $nonpayment, );
+    $self->render(
+        'order-id', order => $order, history => $history,
+        nonpayment => $nonpayment,
+    );
 };
 
 post '/order/:id/update' => sub {
@@ -5719,8 +5757,10 @@ post '/order/:id/update' => sub {
                     if ( $value == 2 ) {
                         my $from = app->config->{sms}{ app->config->{sms}{driver} }{_from};
                         my $to   = $order->user->user_info->phone;
-                        my $msg  = $self->render_to_string( "sms/order-confirmed", format => 'txt',
-                            order => $order );
+                        my $msg  = $self->render_to_string(
+                            "sms/order-confirmed", format => 'txt',
+                            order => $order
+                        );
 
                         my $sms =
                             $DB->resultset('SMS')->create( { to => $to, from => $from, text => $msg } );
@@ -5818,8 +5858,10 @@ get '/booking/:ymd' => sub {
     }
 
     my $dt_start = try {
-        DateTime->new( time_zone => app->config->{timezone}, year => $1, month => $2,
-            day => $3, );
+        DateTime->new(
+            time_zone => app->config->{timezone}, year => $1, month => $2,
+            day       => $3,
+        );
     };
     unless ($dt_start) {
         app->log->warn("cannot create start datetime object");
@@ -5844,8 +5886,10 @@ get '/booking/:ymd' => sub {
         { order_by => { -asc => 'date' }, },
     );
 
-    $self->render( 'booking', booking_rs => $booking_rs, dt_start => $dt_start,
-        dt_end => $dt_end, );
+    $self->render(
+        'booking', booking_rs => $booking_rs, dt_start => $dt_start,
+        dt_end => $dt_end,
+    );
 };
 
 get '/booking/:ymd/open' => sub {
@@ -5869,8 +5913,10 @@ get '/booking/:ymd/open' => sub {
     }
 
     my $dt_start = try {
-        DateTime->new( time_zone => app->config->{timezone}, year => $1, month => $2,
-            day => $3, );
+        DateTime->new(
+            time_zone => app->config->{timezone}, year => $1, month => $2,
+            day       => $3,
+        );
     };
     unless ($dt_start) {
         app->log->warn("cannot create start datetime object");
@@ -5896,9 +5942,10 @@ get '/booking/:ymd/open' => sub {
     #  설정 및 처리 방식을 완전히 변경합니다.
     #
 
-    my %map_day_of_week =
-        ( 1 => 'mon', 2 => 'tue', 3 => 'wed', 4 => 'thu', 5 => 'fri', 6 => 'sat',
-        7 => 'sun', );
+    my %map_day_of_week = (
+        1 => 'mon', 2 => 'tue', 3 => 'wed', 4 => 'thu', 5 => 'fri', 6 => 'sat',
+        7 => 'sun',
+    );
 
     my $day_of_week = $map_day_of_week{ $dt_start->day_of_week };
     for my $gender (qw/ male female /) {
@@ -5948,8 +5995,10 @@ get '/timetable/:ymd' => sub {
     }
 
     my $dt_start = try {
-        DateTime->new( time_zone => app->config->{timezone}, year => $1, month => $2,
-            day => $3, );
+        DateTime->new(
+            time_zone => app->config->{timezone}, year => $1, month => $2,
+            day       => $3,
+        );
     };
     unless ($dt_start) {
         app->log->warn("cannot create start datetime object");
@@ -5977,8 +6026,10 @@ get '/timetable/:ymd' => sub {
         }
     );
 
-    $self->render( 'timetable', count => $count, orders => \%orders,
-        dt_start => $dt_start, dt_end => $dt_end, );
+    $self->render(
+        'timetable', count => $count, orders => \%orders,
+        dt_start => $dt_start, dt_end => $dt_end,
+    );
 };
 
 get '/sms' => sub {
@@ -5986,8 +6037,10 @@ get '/sms' => sub {
 
     my %params = $self->get_params(qw/ to msg /);
 
-    my $sender = SMS::Send->new( app->config->{sms}{driver},
-        %{ app->config->{sms}{ app->config->{sms}{driver} } }, );
+    my $sender = SMS::Send->new(
+        app->config->{sms}{driver},
+        %{ app->config->{sms}{ app->config->{sms}{driver} } },
+    );
     app->log->debug( sprintf( 'sms.driver: [%s]', app->config->{sms}{driver} ) );
 
     my $balance = +{ success => undef };
@@ -6029,10 +6082,10 @@ get '/donation' => sub {
         $cond = {};
     }
 
-    my $rs =
-        $DB->resultset('Donation')
-        ->search( $cond,
-        { join => $join, order_by => { -asc => 'id' }, page => $p, rows => $s }, );
+    my $rs = $DB->resultset('Donation')->search(
+        $cond,
+        { join => $join, order_by => { -asc => 'id' }, page => $p, rows => $s },
+    );
 
     my $bucket = $DB->resultset('Clothes')->search( { donation_id => undef } );
 
@@ -6045,8 +6098,10 @@ get '/donation' => sub {
         }
     );
 
-    $self->stash( donation_list => $rs, bucket => $bucket, pageset => $pageset,
-        q => $q || q{}, );
+    $self->stash(
+        donation_list => $rs, bucket => $bucket, pageset => $pageset,
+        q => $q || q{},
+    );
 };
 
 get '/donation/:id' => sub {
@@ -6060,8 +6115,10 @@ get '/donation/:id' => sub {
     return $self->error( 404, { str => 'donation not found', data => {} } )
         unless $donation;
 
-    $self->stash( donation => $donation, bucket => $bucket,
-        clothes_list => [ $donation->clothes ] );
+    $self->stash(
+        donation     => $donation, bucket => $bucket,
+        clothes_list => [ $donation->clothes ]
+    );
 } => 'donation-id';
 
 get '/stat/bestfit' => sub {
@@ -6100,11 +6157,9 @@ get '/stat/clothes/amount' => sub {
             $DB->resultset('Clothes')
             ->search(
             { category => $category, gender => 'male', status_id => \@available_status_ids, }, );
-        my $f_quantity =
-            $DB->resultset('Clothes')
-            ->search(
+        my $f_quantity = $DB->resultset('Clothes')->search(
             { category => $category, gender => 'female', status_id => \@available_status_ids, },
-            );
+        );
 
         my $m_rental = $DB->resultset('Clothes')->search(
             {
@@ -6183,7 +6238,7 @@ get '/stat/clothes/amount/category/:category/gender/:gender' => sub {
                 ->search( { category => $category, gender => $gender, $criterion => $size } );
             my $available_qty = $DB->resultset('Clothes')->search(
                 {
-                    category => $category, gender => $gender, $criterion => $size,
+                    category  => $category, gender => $gender, $criterion => $size,
                     status_id => \@available_status_ids
                 }
             );
@@ -6327,8 +6382,10 @@ get '/stat/clothes/hit/:category' => sub {
     }
 
     my $start_date = try {
-        DateTime->new( time_zone => app->config->{timezone}, year => $1, month => $2,
-            day => $3, );
+        DateTime->new(
+            time_zone => app->config->{timezone}, year => $1, month => $2,
+            day       => $3,
+        );
     };
 
     unless ($start_date) {
@@ -6350,8 +6407,10 @@ get '/stat/clothes/hit/:category' => sub {
     }
 
     my $end_date = try {
-        DateTime->new( time_zone => app->config->{timezone}, year => $1, month => $2,
-            day => $3, );
+        DateTime->new(
+            time_zone => app->config->{timezone}, year => $1, month => $2,
+            day       => $3,
+        );
     };
     unless ($end_date) {
         app->log->warn("cannot create end datetime object");
@@ -6438,8 +6497,10 @@ get '/stat/status/:ymd' => sub {
     }
 
     my $dt = try {
-        DateTime->new( time_zone => app->config->{timezone}, year => $1, month => $2,
-            day => $3, );
+        DateTime->new(
+            time_zone => app->config->{timezone}, year => $1, month => $2,
+            day       => $3,
+        );
     };
     unless ($dt) {
         app->log->warn("cannot create datetime object");
@@ -6465,8 +6526,10 @@ get '/stat/status/:ymd' => sub {
     }
 
     my $basis_dt = try {
-        DateTime->new( time_zone => app->config->{timezone}, year => 2015, month => 5,
-            day => 29 );
+        DateTime->new(
+            time_zone => app->config->{timezone}, year => 2015, month => 5,
+            day       => 29
+        );
     };
     my $online_order_hour = $dt >= $basis_dt ? 22 : 19;
 
@@ -6523,8 +6586,10 @@ get '/volunteers' => sub {
     }
     elsif ( $status eq 'canceled' ) {
         my $p = $self->param('p') || 1;
-        $works = $works->search( undef,
-            { page => $p, rows => 10, order_by => { -desc => 'id' } } );
+        $works = $works->search(
+            undef,
+            { page => $p, rows => 10, order_by => { -desc => 'id' } }
+        );
 
         my $pageset = Data::Pageset->new(
             {
@@ -6566,9 +6631,10 @@ any '/size/guess' => sub {
     my $weight = $params{weight};
     my $gender = $params{gender};
 
-    my $osg_db =
-        OpenCloset::Size::Guess->new( 'DB', _time_zone => app->config->{timezone},
-        _schema => $DB, _range => 0, );
+    my $osg_db = OpenCloset::Size::Guess->new(
+        'DB', _time_zone => app->config->{timezone},
+        _schema => $DB, _range => 0,
+    );
 
     my $osg_bodykit = OpenCloset::Size::Guess->new(
         'BodyKit',
@@ -6636,8 +6702,10 @@ get '/stat/visitor/:ymd' => sub {
     }
 
     my $dt = try {
-        DateTime->new( time_zone => app->config->{timezone}, year => $1, month => $2,
-            day => $3, );
+        DateTime->new(
+            time_zone => app->config->{timezone}, year => $1, month => $2,
+            day       => $3,
+        );
     };
     unless ($dt) {
         app->log->warn("cannot create datetime object");
@@ -7025,7 +7093,7 @@ get '/user/:id/search/clothes' => sub {
             'order_details.order_id' => { '!=' => undef },
         },
         {
-            join => 'order_details', '+select' => ['order_details.order_id'],
+            join  => 'order_details', '+select' => ['order_details.order_id'],
             '+as' => ['order_id'],
         }
     );
@@ -7095,11 +7163,15 @@ get '/user/:id/search/clothes' => sub {
         my $pair_count = $pair{$up}{'count'};
 
         push @result,
-            [ $upper_code, $lower_code, $upper_map{$upper_code}, $lower_map{$lower_code},
-            $pair_count ];
+            [
+            $upper_code, $lower_code, $upper_map{$upper_code}, $lower_map{$lower_code},
+            $pair_count
+            ];
     }
 
-    $self->render( 'user-id-search-clothes',
-        result => [ sort { $b->[4] <=> $a->[4] } @result ], );
+    $self->render(
+        'user-id-search-clothes',
+        result => [ sort { $b->[4] <=> $a->[4] } @result ],
+    );
 };
 app->start;
