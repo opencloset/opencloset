@@ -1,3 +1,6 @@
+v1.0.1    Fri, 12 Feb 2016 12:17:26 +0900
+  - Rollback Check email duplication at reservation(55c1173)
+
 v1.0.0    Fri, 12 Feb 2016 11:40:38 +0900
   - Add Changes
   - perltidy bin/opencloset.pl
