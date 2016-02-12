@@ -58,6 +58,8 @@ use Postcodify;
 use OpenCloset::Schema;
 use OpenCloset::Size::Guess;
 
+use version; our $VERSION = version->declare("v1.0.0");
+
 app->defaults(
     %{ plugin 'Config' => {
             default => {
