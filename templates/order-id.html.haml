@@ -21,7 +21,7 @@
 - my %analyze = $order->analyze_order_status_logs;
 - my @process = (qw/대기 치수측정 의류준비 탈의 포장 수선 결제/);
 
-                .row#order{ 'data-order-id' => "#{ $order->id }", 'data-order-parent-id' => "#{ $order->parent_id // q{} } ", 'data-url' => "#{ url_for( '/api/order/' . $order->id ) }" }
+                .row#order{ 'data-order-id' => "#{ $order->id }", 'data-order-parent-id' => "#{ $order->parent_id // q{} } ", 'data-url' => "#{ url_for( '/api/order/' . $order->id ) }", 'data-today' => "#{ $today // q{} }" }
                   .col-sm-10.col-sm-offset-1
                     .widget-box.transparent.invoice-box
                       /

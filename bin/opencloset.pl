@@ -35,6 +35,7 @@ use Data::Pageset;
 use DateTime::Duration;
 use DateTime::Format::Duration;
 use DateTime::Format::Human::Duration;
+use DateTime::Format::Strptime;
 use DateTime;
 use Encode 'decode_utf8';
 use Gravatar::URL;
@@ -216,7 +217,7 @@ helper order_clothes_price => sub {
 };
 
 helper calc_overdue => sub {
-    my ( $self, $order ) = @_;
+    my ( $self, $order, $today ) = @_;
 
     return 0 unless $order;
 
@@ -225,7 +226,19 @@ helper calc_overdue => sub {
 
     return 0 unless $target_dt;
 
-    $return_dt ||= DateTime->now( time_zone => app->config->{timezone} );
+    my $now = DateTime->now( time_zone => app->config->{timezone} );
+    if ( $today && $today =~ m/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/ ) {
+        my $strp = DateTime::Format::Strptime->new(
+            pattern   => q{%F %T},
+            time_zone => app->config->{timezone},
+            on_error  => 'undef',
+        );
+
+        my $dt = $strp->parse_datetime($today);
+        $now = $dt if $dt;
+    }
+
+    $return_dt ||= $now;
 
     my $DAY_AS_SECONDS = 60 * 60 * 24;
 
@@ -245,10 +258,10 @@ helper commify => sub {
 };
 
 helper calc_late_fee => sub {
-    my ( $self, $order ) = @_;
+    my ( $self, $order, $today ) = @_;
 
     my $price   = $self->order_clothes_price($order);
-    my $overdue = $self->calc_overdue($order);
+    my $overdue = $self->calc_overdue( $order, $today );
     return 0 unless $overdue;
 
     my $late_fee = $price * 0.2 * $overdue;
@@ -317,7 +330,7 @@ helper order_price => sub {
 };
 
 helper flatten_order => sub {
-    my ( $self, $order ) = @_;
+    my ( $self, $order, $today ) = @_;
 
     return unless $order;
 
@@ -337,9 +350,9 @@ helper flatten_order => sub {
             $order->order_details( { clothes_code => { '!=' => undef } } )
                 ->get_column('clothes_code')->all
         ],
-        late_fee      => $self->calc_late_fee($order),
-        overdue       => $self->calc_overdue($order),
-        return_method => $order->return_method || q{},
+        late_fee => $self->calc_late_fee( $order, $today ),
+        overdue  => $self->calc_overdue( $order,  $today ),
+        return_method => $order->return_method       || q{},
         tracking_url  => $self->tracking_url($order) || q{},
     );
 
@@ -2130,7 +2143,20 @@ group {
         #
         # fetch params
         #
-        my %params = $self->get_params(qw/ id /);
+        my %params = $self->get_params(qw/ id today /);
+
+        #
+        # validate params
+        #
+        my $v = $self->create_validator;
+        $v->field('today')->regexp(qr/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/);
+        unless ( $self->validate( $v, \%params ) ) {
+            my @error_str;
+            while ( my ( $k, $v ) = each %{ $v->errors } ) {
+                push @error_str, "$k:$v";
+            }
+            return $self->error( 400, { str => join( ',', @error_str ), data => $v->errors, } );
+        }
 
         my $order = $self->get_order( \%params );
         return unless $order;
@@ -2138,7 +2164,7 @@ group {
         #
         # response
         #
-        my $data = $self->flatten_order($order);
+        my $data = $self->flatten_order( $order, $params{today} );
 
         $self->respond_to( json => { status => 200, json => $data } );
     }
@@ -5630,7 +5656,20 @@ get '/order/:id' => sub {
     #
     # fetch params
     #
-    my %params = $self->get_params(qw/ id /);
+    my %params = $self->get_params(qw/ id today /);
+
+    #
+    # validate params
+    #
+    my $v = $self->create_validator;
+    $v->field('today')->regexp(qr/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/);
+    unless ( $self->validate( $v, \%params ) ) {
+        my @error_str;
+        while ( my ( $k, $v ) = each %{ $v->errors } ) {
+            push @error_str, "$k:$v";
+        }
+        return $self->error( 400, { str => join( ',', @error_str ), data => $v->errors, } );
+    }
 
     my $order = $self->get_order( \%params );
     return unless $order;
@@ -5688,6 +5727,7 @@ get '/order/:id' => sub {
     $self->render(
         'order-id', order => $order, history => $history,
         nonpayment => $nonpayment,
+        today      => $params{today},
     );
 };
 
