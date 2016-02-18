@@ -119,7 +119,7 @@
                       <div class="space-6"></div>
 
                       <div class="clearfix">
-                        <a class="width-100 pull-right btn btn-sm btn-green" href="http://blog.theopencloset.net/220614995880">
+                        <a class="width-100 pull-right btn btn-sm btn-success" href="http://blog.theopencloset.net/220614995880" target="_blank">
                           <i class="icon-hand-up"></i>
                           <span> 예약 가이드 보러가기 </span>
                         </a>

@@ -1,4 +1,5 @@
   - 주문서에 `today` parameter 를 반납일(return_date) 로 사용가능하도록 함
+  - 예약가이드 버튼 스타일 수정 및 외부링크로 변경
 
 v1.0.1    Fri, 12 Feb 2016 12:17:26 +0900
   - Rollback Check email duplication at reservation(55c1173)
