@@ -3,6 +3,7 @@ $ ->
     order_id = $('#order').data('order-id')
     $.ajax "/api/order/#{ order_id }.json",
       type: 'GET'
+      data: { today: $('#order').data('today') }
       success: (data, textStatus, jqXHR) ->
         $('#order').data('order-clothes-price',     data.clothes_price)
         $('#order').data('order-late-fee',          data.late_fee)
@@ -358,6 +359,10 @@ $ ->
         desc:        "환불 수수료: #{charge}원"
         stage:       3
       }
+    #
+    # 반납일
+    #
+    today = $('#order').data('today')
     returnClothesReal 'refund', "/order/#{order_id}", order_id, '결제 방법 선택', '결제 방법 선택'
 
   #
@@ -403,7 +408,12 @@ $ ->
       complete: ->
         $this.removeClass('disabled')
 
-  returnClothesReal = (type, redirect_url, order_id, late_fee_pay_with, compensation_pay_with) ->
+  returnClothesReal = (type, redirect_url, order_id, late_fee_pay_with, compensation_pay_with, today) ->
+    if today and /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(today)
+      return_date = moment().format(today)
+    else
+      return_date = moment().format('YYYY-MM-DD HH:mm:ss')
+
     if type is 'part'
       #
       # 부분 반납
@@ -416,7 +426,7 @@ $ ->
       url  = "/api/order/#{ order_id }/return-part.json"
       data =
         status_id:              9
-        return_date:            moment().format('YYYY-MM-DD HH:mm:ss')
+        return_date:            return_date
         late_fee_pay_with:      late_fee_pay_with
         order_detail_id:        order_detail_id
     else if type is 'refund'
@@ -430,7 +440,7 @@ $ ->
       url  = "/api/order/#{ order_id }.json"
       data =
         status_id:              42
-        return_date:            moment().format('YYYY-MM-DD HH:mm:ss')
+        return_date:            return_date
         late_fee_pay_with:      late_fee_pay_with
         compensation_pay_with:  compensation_pay_with
         order_detail_id:        order_detail_id
@@ -446,7 +456,7 @@ $ ->
       url  = "/api/order/#{ order_id }.json"
       data =
         status_id:              9
-        return_date:            moment().format('YYYY-MM-DD HH:mm:ss')
+        return_date:            return_date
         late_fee_pay_with:      late_fee_pay_with
         compensation_pay_with:  compensation_pay_with
         order_detail_id:        order_detail_id
@@ -541,7 +551,12 @@ $ ->
                 stage:       2
               }
 
-    returnClothesReal type, redirect_url, order_id, late_fee_pay_with, compensation_pay_with
+    #
+    # 반납일
+    #
+    today = $('#order').data('today')
+
+    returnClothesReal type, redirect_url, order_id, late_fee_pay_with, compensation_pay_with, today
 
   #
   # 전체 반납 버튼 클릭
