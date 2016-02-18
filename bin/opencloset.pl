@@ -260,7 +260,7 @@ helper commify => sub {
 helper calc_late_fee => sub {
     my ( $self, $order, $today ) = @_;
 
-    my $price   = $self->order_clothes_price($order);
+    my $price = $self->order_clothes_price($order);
     my $overdue = $self->calc_overdue( $order, $today );
     return 0 unless $overdue;
 
