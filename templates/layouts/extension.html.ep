@@ -22,7 +22,7 @@
     <script src="/components/bootstrap-validator/dist/validator.min.js"></script>
     <script src="/components/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js "></script>
     <script src="/components/bootstrap-datepicker/dist/locales/bootstrap-datepicker.kr.min.js"></script>
-    <script src="/components/jQuery-Mask-Plugin/dist/jquery.mask.min.js"></script>
+    <script src="/components/jquery-mask-plugin/dist/jquery.mask.min.js"></script>
     <script src="/js/order-extension.js"></script>
   </body>
 </html>
