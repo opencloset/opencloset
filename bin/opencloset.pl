@@ -59,7 +59,7 @@ use Postcodify;
 use OpenCloset::Schema;
 use OpenCloset::Size::Guess;
 
-use version; our $VERSION = version->declare("v1.0.2");
+use version; our $VERSION = version->declare("v1.0.3");
 
 app->defaults(
     %{ plugin 'Config' => {
@@ -535,8 +535,8 @@ helper update_user => sub {
     $v->field('gender')->in(qw/ male female /);
     $v->field('birth')->regexp(qr/^(0|((19|20)\d{2}))$/);
     $v->field(
-        qw/ height weight neck bust waist hip topbelly belly thigh arm leg knee foot pants /)
-        ->each(
+        qw/ height weight neck bust waist hip topbelly belly thigh arm leg knee foot pants skirt /
+        )->each(
         sub {
             shift->regexp(qr/^\d{1,3}$/);
         }
@@ -665,8 +665,8 @@ helper create_order => sub {
         );
         $v->field('additional_day')->regexp(qr/^\d+$/);
         $v->field(
-            qw/ height weight neck bust waist hip topbelly belly thigh arm leg knee foot pants /)
-            ->each(
+            qw/ height weight neck bust waist hip topbelly belly thigh arm leg knee foot pants skirt /
+            )->each(
             sub {
                 shift->regexp(qr/^\d{1,3}$/);
             }
@@ -722,7 +722,8 @@ helper create_order => sub {
         # we believe user is exist since parameter validator
         #
         for (
-            qw/ height weight neck bust waist hip topbelly belly thigh arm leg knee foot pants /)
+            qw/ height weight neck bust waist hip topbelly belly thigh arm leg knee foot pants skirt /
+            )
         {
             next if defined $order_params->{$_};
             next unless defined $user->user_info->$_;
@@ -871,8 +872,8 @@ helper update_order => sub {
         );
         $v->field('additional_day')->regexp(qr/^\d+$/);
         $v->field(
-            qw/ height weight neck bust waist hip topbelly belly thigh arm leg knee foot pants /)
-            ->each(
+            qw/ height weight neck bust waist hip topbelly belly thigh arm leg knee foot pants skirt /
+            )->each(
             sub {
                 shift->regexp(qr/^\d{1,3}$/);
             }
@@ -1847,6 +1848,7 @@ group {
                 leg
                 neck
                 pants
+                skirt
                 phone
                 purpose
                 purpose2
@@ -1868,8 +1870,8 @@ group {
         $v->field('gender')->in(qw/ male female /);
         $v->field('birth')->regexp(qr/^(19|20)\d{2}$/);
         $v->field(
-            qw/ height weight neck bust waist hip topbelly belly thigh arm leg knee foot pants /)
-            ->each(
+            qw/ height weight neck bust waist hip topbelly belly thigh arm leg knee foot pants skirt /
+            )->each(
             sub {
                 shift->regexp(qr/^\d{1,3}$/);
             }
@@ -1982,6 +1984,7 @@ group {
                 leg
                 neck
                 pants
+                skirt
                 phone
                 pre_category
                 pre_color
@@ -2097,6 +2100,7 @@ group {
                 message
                 neck
                 pants
+                skirt
                 parent_id
                 price_pay_with
                 purpose
@@ -2195,6 +2199,7 @@ group {
                 message
                 neck
                 pants
+                skirt
                 parent_id
                 pass
                 price_pay_with
@@ -2481,6 +2486,7 @@ group {
                 message
                 neck
                 pants
+                skirt
                 parent_id
                 price_pay_with
                 purpose
@@ -5576,6 +5582,7 @@ post '/order' => sub {
                 40, # 대여안함
                 42, # 환불
                 43, # 사이즈없음
+                44, # 포장완료
             );
             my $status_id = $order->status_id;
             if ( $status_id ~~ @invalid ) {
@@ -5702,6 +5709,7 @@ get '/order/:id' => sub {
                 knee         => $user->user_info->knee,
                 foot         => $user->user_info->foot,
                 pants        => $user->user_info->pants,
+                skirt        => $user->user_info->skirt,
                 desc         => $comment . $desc,
             }
         );

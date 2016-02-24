@@ -124,13 +124,20 @@ $db_opts->{AutoCommit} //= 1;
             'stat-visitor'        => { text => '방문자',                icon => q{},         desc => '일/주/월 별 방문자 정보',                                        link => '/stat/visitor'        },
             'size-guess'          => { text => '신체 치수 예측',        icon => 'info',      desc => '키와 몸무게로 신체 치수를 예측합니다.',                          link => '/size/guess' },
             'user-id-search-clothes'      => { text => '의류검색',      icon => 'search',    desc => '신체치수로 잘 맞을 의류를 검색합니다.',                          link => '#' },
+            'donation-list'      => { text => '기증신청목록',           icon => q{},         desc => '기증신청서 목록 입니다',                                         link => 'https://donation.theopencloset.net/forms' },
         },
         items => [
             { id => 'home'        },
             { id => 'new-clothes' },
             { id => 'clothes'     },
             { id => 'user'        },
-            { id => 'donation'    },
+            {
+                id => 'donation',
+                items => [
+                    { id => 'donation' },
+                    { id => 'donation-list' },
+                ]
+            },
             { id => 'tag'         },
             { id => 'booking'     },
             { id => 'visit2'      },
