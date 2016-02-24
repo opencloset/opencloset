@@ -194,6 +194,11 @@
                                   %span.avg= $avg->{waist}
                                   %span.avg2= $avg2->{waist}
 
+                              .profile-info-row
+                                .profile-info-name 스커트 둘레
+                                .profile-info-value
+                                  %span.editable#user-skirt{ 'data-name' => 'skirt' }= $user->user_info->skirt
+
                               .profile-info-row.topbelly
                                 .profile-info-name 윗배 둘레
                                 .profile-info-value
@@ -258,11 +263,6 @@
                                 .profile-info-name 바지 길이
                                 .profile-info-value
                                   %span.editable#user-pants{ 'data-name' => 'pants' }= $user->user_info->pants
-
-                              .profile-info-row
-                                .profile-info-name 스커트 둘레
-                                .profile-info-value
-                                  %span.editable#user-skirt{ 'data-name' => 'skirt' }= $user->user_info->skirt
 
                       .space-20
 
