@@ -5576,6 +5576,7 @@ post '/order' => sub {
                 40, # 대여안함
                 42, # 환불
                 43, # 사이즈없음
+                44, # 포장완료
             );
             my $status_id = $order->status_id;
             if ( $status_id ~~ @invalid ) {
