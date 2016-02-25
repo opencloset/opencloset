@@ -47,6 +47,18 @@
                           %span.bigger-175.blue= $rented_count
                           %br
                           빌린 횟수
+                        .grid2
+                          %span.bigger-175.blue= $clothes->rentable_duration()
+                          %br
+                          대여가능 일
+                        .grid2
+                          %span.bigger-175.blue= $clothes->rented_duration();
+                          %br
+                          대여일
+                        .grid2
+                          %span.bigger-175.blue= sprintf("%.1f%%",$clothes->rent_ratio() * 100);
+                          %br
+                          대여율
                       .hr.hr16.dotted
                       - if (my ($first) = $clothes_code =~ /^(J|P|K)/) {
                         %h2 상하의 셋트
