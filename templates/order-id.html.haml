@@ -671,54 +671,61 @@
                               %div
                                 %strong 연장료는 연장일 x 대여금액의 20%입니다.
                               .space-6
-                              :plain
-                                <a
-                                  id               = "order-desc"
-                                  class            = "editable editable-click"
-                                  href             = "#"
-
-                                  data-disabled    = "false"
-                                  data-mode        = "inline"
-                                  data-showbuttons = "true"
-                                  data-type        = "textarea"
-                                  data-emptytext   = "비어있음"
-
-                                  data-value       = "#{ $order->desc || q{} }"
-
-                                  data-url         = "/order/#{ $order->id }/update"
-                                  data-pk          = "#{ $order->id }"
-                                  data-name        = "desc"
-                                ></a>
                               .space-6
                           .space-6
-                          .well
-                            열린옷장을 이용해주셔서 고맙습니다.
-
-                          .hr.hr8.hr-double.hr-dotted
 
                           .row
-                            .col-sm-12
-                              %div
-                                %strong 대여 메시지
                               .space-6
-                              :plain
-                                <a
-                                  id               = "order-message"
-                                  class            = "editable editable-click"
-                                  href             = "#"
+                              .space-6
+                              .row
+                                .col-xs-11.label.label-info.arrowed-in.arrowed-in-right
+                                  %strong 주문서 메모
+                                .row
+                                .space-6
+                                :plain
+                                  <a
+                                    id               = "order-desc"
+                                    class            = "editable editable-click"
+                                    href             = "#"
 
-                                  data-disabled    = "false"
-                                  data-mode        = "inline"
-                                  data-showbuttons = "true"
-                                  data-type        = "textarea"
-                                  data-emptytext   = "비어있음"
+                                    data-disabled    = "false"
+                                    data-mode        = "inline"
+                                    data-showbuttons = "true"
+                                    data-type        = "textarea"
+                                    data-emptytext   = "비어있음"
 
-                                  data-value       = "#{ $order->message || q{} }"
+                                    data-value       = "#{ $order->desc || q{} }"
 
-                                  data-url         = "/order/#{ $order->id }/update"
-                                  data-pk          = "#{ $order->id }"
-                                  data-name        = "message"
-                                ></a>
+                                    data-url         = "/order/#{ $order->id }/update"
+                                    data-pk          = "#{ $order->id }"
+                                    data-name        = "desc"
+                                  ></a>
+                              .space-6
+                              .hr.hr8.hr-double.hr-dotted
+                              .space-6
+                              .row
+                                .col-xs-11.label.label-success.arrowed-in.arrowed-in-right
+                                  %strong 대여 메세지
+                                .row
+                                .space-6
+                                :plain
+                                  <a
+                                    id               = "order-message"
+                                    class            = "editable editable-click"
+                                    href             = "#"
+
+                                    data-disabled    = "false"
+                                    data-mode        = "inline"
+                                    data-showbuttons = "true"
+                                    data-type        = "textarea"
+                                    data-emptytext   = "비어있음"
+
+                                    data-value       = "#{ $order->message || q{} }"
+
+                                    data-url         = "/order/#{ $order->id }/update"
+                                    data-pk          = "#{ $order->id }"
+                                    data-name        = "message"
+                                  ></a>
 
                 :plain
                   <script id="tpl-late-fee" type="text/html">
