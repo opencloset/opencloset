@@ -81,7 +81,7 @@ $ ->
   #
   $('#input-check-all').click (e) ->
     is_checked = $('#input-check-all').is(':checked')
-    $(@).closest('thead').next().find('.ace:checkbox:not(:disabled):not([readonly])').prop('checked', is_checked)
+    $(@).closest('thead').next().find(':checkbox:not(:disabled):not([readonly])').prop('checked', is_checked)
 
   #
   # 대여 버튼 클릭
