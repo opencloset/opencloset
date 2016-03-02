@@ -127,18 +127,21 @@ $ ->
 
   $("#clothes-table table tbody").on 'click', 'input[type=checkbox][readonly=readonly]', (e) ->
     e.preventDefault()
+
+    return unless confirm "대여가능상태로 변경하시겠습니까?"
+
     $this = $(@)
     clothes_code = $this.closest('tr').data('clothes-code')
-
-    if confirm "대여가능상태로 변경하시겠습니까?"
-      $.ajax "/api/clothes/#{clothes_code}",
-        type: 'PUT'
-        data: { status_id: 1 }
-        dataType: 'json'
-        success: (data, textStatus, jqXHR) ->
-          OpenCloset.alert 'info', "#{clothes_code} 의류 상태가 대여가능으로 변경되었습니다"
-          $this.closest('td').nextAll().slice(2, 3).find('span').text('대여가능').removeClass('label-inverse').addClass(OpenCloset.status["대여가능"].css)
-        error: (jqXHR, textStatus, errorThrown) ->
-          OpenCloset.alert('danger', "의류 상태변경에 실패했습니다: #{jqXHR.responseJSON.error.str}")
-        complete: ->
-          $this.prop('readonly',false)
+    $.ajax "/api/clothes/#{clothes_code}",
+      type: 'PUT'
+      data: { status_id: OpenCloset['status']['대여가능']['id'] }
+      dataType: 'json'
+      success: (data, textStatus, jqXHR) ->
+        OpenCloset.alert 'info', "#{clothes_code} 의류 상태가 대여가능으로 변경되었습니다"
+        $this.closest('td').nextAll().slice(2, 3).find('span').text('대여가능').removeClass('label-inverse').addClass(OpenCloset.status["대여가능"].css)
+        $this.data('clothes-code', clothes_code).prop('value', clothes_code).prop('name', 'clothes_code').prop('checked', true)
+        $('#action-buttons').show()
+      error: (jqXHR, textStatus, errorThrown) ->
+        OpenCloset.alert('danger', "의류 상태변경에 실패했습니다: #{jqXHR.responseJSON.error.str}")
+      complete: ->
+        $this.prop('readonly',false)
