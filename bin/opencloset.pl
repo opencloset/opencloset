@@ -3535,7 +3535,7 @@ group {
         my $donation = $DB->resultset('Donation')->find( { id => $params{id} } );
         die "donation not found\n" unless $donation;
 
-        $donation->message( $params{message} ) if $params{message};
+        $donation->message( $params{message} || '' );
         $donation->user_id( $params{user_id} ) if $params{user_id};
         $donation->update;
 

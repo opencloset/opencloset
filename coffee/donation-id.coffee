@@ -5,7 +5,6 @@ $ ->
     $this = $(@)
     url = $this.closest('form').prop('action')
     message = $this.closest('form').find('textarea').val()
-    return unless message
     $.ajax url,
       type: 'PUT'
       data: { message: message }
