@@ -136,6 +136,29 @@
   </script>
 
 :plain
+  <script id="tpl-row-checkbox-readonly-without-order" type="text/html">
+    <tr class="row-checkbox" data-clothes-code="<%= code %>">
+      <td class="center">
+        <label>
+          <input class="ace" type="checkbox" readonly="readonly">
+          <span class="lbl"></span>
+        </label>
+      </td>
+      <td> <%= count %> </td> <!-- 넘버링 -->
+      <td> <a href="/clothes/<%= code %>"> <%= code %> </a> </td> <!-- 옷 -->
+      <td> <span class="order-status label"><%= status %></span> </td> <!-- 상태 -->
+      <td>
+        <span><%= categoryStr %></span>
+      </td> <!-- 종류 -->
+      <td>
+        <span><%= OpenCloset.commify(price) %>원</span>
+      </td> <!-- 대여 가격 -->
+      <td>
+      </td> <!-- 기타 -->
+    </tr>
+  </script>
+
+:plain
   <script id="tpl-row-checkbox-enabled" type="text/html">
     <tr class="row-checkbox" data-clothes-code="<%= code %>">
       <td class="center">
