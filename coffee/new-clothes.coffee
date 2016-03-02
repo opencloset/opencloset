@@ -112,9 +112,9 @@ $ ->
       switch e.val
         when 'jacket'    then types = [ 'bust', 'arm', 'topbelly', 'belly'         ]
         when 'pants'     then types = [ 'waist', 'hip', 'thigh', 'length'          ]
-        when 'shirt'     then types = [ 'neck', 'bust', 'arm', 'topbelly', 'belly' ]
-        when 'waistcoat' then types = [ 'waist', 'topbelly', 'belly'               ]
-        when 'coat'      then types = [ 'bust', 'arm', 'length'                    ]
+        when 'shirt'     then types = [ 'neck', 'bust', 'arm'                      ]
+        when 'waistcoat' then types = [ 'topbelly'                                 ]
+        when 'coat'      then types = [ 'bust', 'arm'                              ]
         when 'onepiece'  then types = [ 'bust', 'waist', 'hip', 'arm', 'length'    ]
         when 'skirt'     then types = [ 'waist', 'hip', 'length'                   ]
         when 'blouse'    then types = [ 'bust', 'arm'                              ]
