@@ -285,7 +285,8 @@ $ ->
     type: 'GET'
     dataType: 'json'
     success: (data, textStatus, jqXHR) ->
-      autoSetByAdditionalDay(data)
+      day = parseInt $('#order-additional-day').data('value')
+      autoSetByAdditionalDay(if day then null else data)
     error: (jqXHR, textStatus, errorThrown) ->
     complete: (jqXHR, textStatus) ->
 
@@ -293,7 +294,6 @@ $ ->
     return if $('#order-additional-day').data('disabled')
 
     day = parseInt $('#order-additional-day').data('value')
-
     parent_id = parseInt $('#order').data('order-parent-id')
     if parent_id
       rental_date = $('#order-rental-date').editable 'getValue', true
@@ -311,13 +311,17 @@ $ ->
       $('#order-rental-date').editable 'setValue', moment().format('YYYY-MM-DD HH:mm:ss'), true
       $('#order-rental-date').editable 'submit'
 
-      targetDate = moment(target_dt?.ymd).format('YYYY-MM-DD HH:mm:ss')
       # 반납 예정일을 오늘을 기준으로 자동으로 계산
-      $('#order-target-date').editable 'setValue', targetDate, true
-      $('#order-target-date').editable 'submit'
-
       # 반납 희망일을 오늘을 기준으로 자동으로 계산
-      $('#order-user-target-date').editable 'setValue', targetDate, true
+      if target_dt
+        targetDate = moment(target_dt.ymd).format('YYYY-MM-DD HH:mm:ss')
+        $('#order-target-date').editable      'setValue', targetDate, true
+        $('#order-user-target-date').editable 'setValue', targetDate, true
+      else
+        $('#order-target-date').editable      'setValue', moment().add('days', day + 3).endOf('day').format('YYYY-MM-DD HH:mm:ss'), true
+        $('#order-user-target-date').editable 'setValue', moment().add('days', day + 3).endOf('day').format('YYYY-MM-DD HH:mm:ss'), true
+
+      $('#order-target-date').editable 'submit'
       $('#order-user-target-date').editable 'submit'
 
     # 주문표의 대여일을 자동 설정
