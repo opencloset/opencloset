@@ -42,6 +42,7 @@ $ ->
   # inline editable field
   #
   $('.editable').each (i, el) ->
+    $el = $(el)
     params =
       mode:        'inline'
       showbuttons: 'true'
@@ -172,9 +173,15 @@ $ ->
           $.ajax url,
             type: 'PUT'
             data: data
-      when 'user-height', 'user-weight', 'user-neck', 'user-bust', 'user-waist', 'user-topbelly', 'user-belly', 'user-arm', 'user-leg', 'user-knee', 'user-thigh', 'user-hip', 'user-foot'
+      when 'user-height', 'user-weight', 'user-neck', 'user-bust',
+      'user-waist', 'user-skirt', 'user-topbelly', 'user-belly',
+      'user-arm', 'user-leg', 'user-knee', 'user-thigh', 'user-hip',
+      'user-foot'
         params.success = (response, newValue) ->
           updateAverageDiff()
+          setTimeout ->
+            $el.closest('.profile-info-row').next().find('.editable').trigger('click')
+          , 500
       else
         params.type = 'text'
 
