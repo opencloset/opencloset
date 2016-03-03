@@ -1,5 +1,11 @@
 $ ->
   updateAverageDiff = ->
+    height = $('#user-height').text()
+    weight = $('#user-weight').text()
+    return unless height or weight
+    return if height is '0'
+    return if weight is '0'
+
     userID = $('#profile-user-info-data').data('pk')
 
     $.ajax "/api/gui/user/#{userID}/avg.json",
