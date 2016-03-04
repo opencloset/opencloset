@@ -322,7 +322,7 @@
                                       %i.icon-caret-right.green
                                     .col-sm-3.no-padding-left 이름:
                                     .col-sm-8
-                                      %a{ :href => "#{ url_for('/user/' . $order->user->id) }" }= $order->user->name
+                                      %a#user-name{ :href => "#{ url_for('/user/' . $order->user->id) }" }= $order->user->name
                                       - if ($history) {
                                         %span.label.label-danger
                                           %i.icon-warning-sign
@@ -380,7 +380,7 @@
                                     .col-sm-1
                                       %i.icon-caret-right.green
                                     .col-sm-3.no-padding-left 전화번호:
-                                    .col-sm-8=                $order->user->user_info->phone
+                                    #user-phone.col-sm-8=                $order->user->user_info->phone
                                   %li.row
                                     .col-sm-1
                                       %i.icon-caret-right.green
