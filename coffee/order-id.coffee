@@ -211,6 +211,7 @@ $ ->
 
   $('#order-desc').editable()
   $('#order-message').editable()
+  $('#order-return-memo').editable()
 
   $('.order-detail-final-price').editable
     display: (value, sourceData, response) -> $(this).html( OpenCloset.commify value )
@@ -679,5 +680,5 @@ $ ->
             success: (data, textStatus, jqXHR) ->
               $('#order-tracking-url').attr('href', data.tracking_url)
 
-  if location.search is '?alert=1' and $('#order-desc').data('value')
+  if location.search is '?alert=1' and $('#order-return-memo').data('value')
     $.facebox({ div: '#alert-desc' })

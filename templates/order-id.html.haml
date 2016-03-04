@@ -726,6 +726,32 @@
                     data-pk          = "#{ $order->id }"
                     data-name        = "message"
                   ></a>
+              .space-6
+              .hr.hr8.hr-double.hr-dotted
+              .space-6
+              .row
+                .col-xs-11.label.label-warning.arrowed-in.arrowed-in-right
+                  %strong 반납 메세지
+                .row
+                .space-6
+                :plain
+                  <a
+                    id               = "order-return-memo"
+                    class            = "editable editable-click"
+                    href             = "#"
+
+                    data-disabled    = "false"
+                    data-mode        = "inline"
+                    data-showbuttons = "true"
+                    data-type        = "textarea"
+                    data-emptytext   = "비어있음"
+
+                    data-value       = "#{ $order->return_memo || q{} }"
+
+                    data-url         = "/order/#{ $order->id }/update"
+                    data-pk          = "#{ $order->id }"
+                    data-name        = "return_memo"
+                  ></a>
 
 :plain
   <script id="tpl-late-fee" type="text/html">
@@ -824,4 +850,4 @@
   %p
     %strong 주문서 메모
   %p
-    %pre= $order->desc || '내용없음'
+    %pre= $order->return_memo || '내용없음'
