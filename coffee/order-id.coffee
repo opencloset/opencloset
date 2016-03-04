@@ -477,9 +477,9 @@ $ ->
           username = $('#user-name').text()
           phone    = $('#user-phone').text()
           OpenCloset.sendSMS phone, "[열린옷장] #{username}님이 반납하신 의류가 정상적으로 반납되었습니다. 감사합니다.", (data, textStatus, jqXHR) ->
-            window.location.href = redirect_url
+            location.search = '?alert=1'
         else
-          window.location.href = redirect_url
+          location.reload()
 
   returnOrder = (type, redirect_url) ->
     order_id              = $('#order').data('order-id')
@@ -678,3 +678,6 @@ $ ->
             type:    'GET'
             success: (data, textStatus, jqXHR) ->
               $('#order-tracking-url').attr('href', data.tracking_url)
+
+  if location.search is '?alert=1' and $('#order-desc').data('value')
+    $.facebox({ div: '#alert-desc' })
