@@ -60,7 +60,7 @@
                             <input name="service" type="checkbox" class="<%= $theme %>" />
                             <span class="lbl">
                               <a href="#modal-service" data-toggle="modal">
-                                <strong>정장 대여규정</strong>에 동의합니다.
+                                <strong>이용약관</strong>에 동의합니다.
                               </a>
                             </span>
                           </label>
