@@ -1,41 +1,24 @@
 @import url(//fonts.googleapis.com/earlyaccess/nanumgothic.css);
 
-$opencloset-yellow:        #ffc80f;
-$opencloset-darken-yellow: desaturate(darken($opencloset-yellow, 4%), 10%);
+@opencloset-yellow:        #ffc80f;
+@opencloset-darken-yellow: desaturate(darken(@opencloset-yellow, 4%), 10%);
 
 .navbar {
-    background: $opencloset-yellow;
+    background: @opencloset-yellow;
     .navbar-brand {
         color: #000000;
     }
 }
 
-.ace-nav {
-    > li {
-        $colorList:
-            "opencloset-yellow"        $opencloset-yellow,
-            "opencloset-darken-yellow" $opencloset-darken-yellow
-        ;
-        @each $i in $colorList {
-            &.#{ nth($i,1) } > a {
-                background-color: nth($i,2);
-                color: #000;
-                &:hover, &:focus {
-                    background-color: desaturate(darken(nth($i,2), 4%), 4%);
-                }
-                i {
-                    color: #000;
-                }
-            }
-            &.open.#{ nth($i,1) } > a {
-                background-color: desaturate(darken(nth($i,2), 4%), 4%) !important;
-            }
-        }
-        &.open > a {
-            color:#000 !important;
-        }
-    }
-}
+.ace-nav > li.opencloset-yellow > a { background-color: #ffc80f; color: #000; }
+.ace-nav > li.opencloset-yellow > a:hover, .ace-nav > li.opencloset-yellow > a:focus { background-color: #f5be05; }
+.ace-nav > li.opencloset-yellow > a i { color: #000; }
+.ace-nav > li.open.opencloset-yellow > a { background-color: #f5be05 !important; }
+.ace-nav > li.opencloset-darken-yellow > a { background-color: #edba0c; color: #000; }
+.ace-nav > li.opencloset-darken-yellow > a:hover, .ace-nav > li.opencloset-darken-yellow > a:focus { background-color: #d5a810; }
+.ace-nav > li.opencloset-darken-yellow > a i { color: #000; }
+.ace-nav > li.open.opencloset-darken-yellow > a { background-color: #d5a810 !important; }
+.ace-nav > li.open > a { color: #000 !important; }
 
 .clickable {
     cursor: pointer;
