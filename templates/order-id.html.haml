@@ -21,801 +21,833 @@
 - my %analyze = $order->analyze_order_status_logs;
 - my @process = (qw/대기 치수측정 의류준비 탈의 포장 수선 결제/);
 
-                .row#order{ 'data-order-id' => "#{ $order->id }", 'data-order-parent-id' => "#{ $order->parent_id // q{} } ", 'data-url' => "#{ url_for( '/api/order/' . $order->id ) }", 'data-today' => "#{ $today // q{} }" }
-                  .col-sm-10.col-sm-offset-1
-                    .widget-box.transparent.invoice-box
-                      /
-                      / body
-                      /
-                      .widget-body
-                        .widget-main
-                          .row
-                            /
-                            / 주문서 정보
-                            /
-                            .col-sm-6
-                              .row
-                                .col-xs-11.label.label-lg.label-info.arrowed-in.arrowed-right
-                                  %strong 주문서 정보
-                              .row
-                                %ul.list-unstyled.spaced
-                                  %li.row
-                                    .col-sm-1
-                                      %i.icon-caret-right.blue
-                                    .col-sm-3.no-padding-left 상위 주문서:
-                                    .col-sm-8
-                                      - if ( $order->parent_id ) {
-                                        %a{ :href => "#{ url_for('/order/' . $order->parent_id) }" }= $order->parent_id
-                                      - }
-                                      - else {
-                                        없음
-                                      - }
-                                  %li.row
-                                    .col-sm-1
-                                      %i.icon-caret-right.blue
-                                    .col-sm-3.no-padding-left 하위 주문서:
-                                    .col-sm-8
-                                      - my @children = $order->orders->all;
-                                      - if (@children) {
-                                      -   for my $child (@children) {
-                                        %a{ :href => "#{ url_for('/order/' . $child->id) }" }= $child->id
-                                      -   }
-                                      - }
-                                      - else {
-                                        없음
-                                      - }
-                                  %li.row
-                                    .col-sm-1
-                                      %i.icon-caret-right.blue
-                                    .col-sm-3.no-padding-left 담당자:
-                                    .col-sm-8
-                                      :plain
-                                        <a
-                                          id               = "order-staff-name"
-                                          class            = "editable editable-click"
-                                          href             = "#{ $order_status ne '결제대기' ? url_for('/user/' . $order->staff_id) : '#' }"
-
-                                          data-disabled    = "#{ $order_status ne '결제대기' ? 'true' : 'false' }"
-                                          data-mode        = "inline"
-                                          data-showbuttons = "true"
-                                          data-type        = "select"
-                                          data-emptytext   = "비어있음"
-
-                                          data-source      = "/api/gui/staff-list.json"
-                                          data-value       = "#{ $order->staff_id || q{} }"
-
-                                          data-url         = "/order/#{ $order->id }/update"
-                                          data-pk          = "#{ $order->id }"
-                                          data-name        = "staff_id"
-                                        ></a>
-                                  %li.row
-                                    .col-sm-1
-                                      %i.icon-caret-right.blue
-                                    .col-sm-3.no-padding-left 대여 기간:
-                                    .col-sm-8
-                                      :plain
-                                        <a
-                                          id               = "order-additional-day"
-                                          class            = "editable editable-click"
-                                          href             = "#"
-
-                                          data-disabled    = "#{ $order_status ne '결제대기' ? 'true' : 'false' }"
-                                          data-mode        = "inline"
-                                          data-showbuttons = "true"
-                                          data-type        = "select"
-                                          data-emptytext   = "비어있음"
-
-                                          data-value       = "#{ $order->additional_day }"
-
-                                          data-url         = "/order/#{ $order->id }/update"
-                                          data-pk          = "#{ $order->id }"
-                                          data-name        = "additional_day"
-                                        ></a>
-                                  %li.row
-                                    .col-sm-1
-                                      %i.icon-caret-right.blue
-                                    .col-sm-3.no-padding-left 대여일:
-                                    .col-sm-8
-                                      :plain
-                                        <a
-                                          id               = "order-rental-date"
-                                          class            = "editable editable-click"
-                                          href             = "#"
-
-                                          data-disabled    = "#{ $order_status ne '결제대기' ? 'true' : 'false' }"
-                                          data-value       = "#{ $order->rental_date ? $order->rental_date->ymd : q{} }"
-                                          data-name        = "rental_date"
-                                        ></a>
-                                  %li.row
-                                    .col-sm-1
-                                      %i.icon-caret-right.blue
-                                    .col-sm-3.no-padding-left 반납 예정일:
-                                    .col-sm-8
-                                      :plain
-                                        <a
-                                          id               = "order-target-date"
-                                          class            = "editable editable-click"
-                                          href             = "#"
-
-                                          data-disabled    = "#{ $order_status ne '결제대기' ? 'true' : 'false' }"
-
-                                          data-value       = "#{ $order->target_date ? $order->target_date->ymd : q{} }"
-                                          data-name        = "target_date"
-                                        ></a>
-                                  %li.row
-                                    .col-sm-1
-                                      %i.icon-caret-right.blue
-                                    .col-sm-3.no-padding-left 반납일:
-                                    .col-sm-8
-                                      = $order->return_date ? $order->return_date->ymd : q{}
-                                  %li.row
-                                    .col-sm-1
-                                      %i.icon-caret-right.blue
-                                    .col-sm-3.no-padding-left
-                                      반납방법:
-                                      %a#order-tracking-url{ :href => "#{ tracking_url($order) || '#' }", :target => '_blank' }
-                                        %span.glyphicon.glyphicon-link
-                                    .col-sm-8.return-method
-                                      :plain
-                                        <a
-                                          id               = "order-return-method"
-                                          class            = "editable editable-click"
-                                          href             = "#"
-
-                                          data-mode        = "inline"
-                                          data-showbuttons = "true"
-                                          data-type        = "returnmethod"
-                                          data-emptytext   = "방문/택배 반납 여부 선택"
-
-                                          data-name        = "return_method"
-                                          data-value       = "#{ $order->return_method || q{} }"
-                                        >#{ $order->return_method || q{} }</a>
-                                  %li.row
-                                    .col-sm-1
-                                      %i.icon-caret-right.blue
-                                    .col-sm-3.no-padding-left 대여비:
-                                    .col-sm-8
-                                      :plain
-                                        <a
-                                          id               = "order-price-pay-with"
-                                          class            = "editable editable-click"
-                                          href             = "#"
-
-                                          data-disabled    = "#{ $order_status ne '결제대기' ? 'true' : 'false' }"
-                                          data-mode        = "inline"
-                                          data-showbuttons = "true"
-                                          data-type        = "select"
-                                          data-emptytext   = "결제 방법 선택"
-
-                                          data-value       = "#{ $order->price_pay_with || q{} }"
-
-                                          data-url         = "/order/#{ $order->id }/update"
-                                          data-pk          = "#{ $order->id }"
-                                          data-name        = "price_pay_with"
-                                        ></a>
-                                      \/
-                                      %strong.order-stage0-price 0원
-                                  - if ( $order_status eq '대여중' ) {
-                                    %li.row
-                                      .col-sm-1
-                                        %i.icon-caret-right.blue
-                                      .col-sm-3.no-padding-left 연장료:
-                                      .col-sm-8
-                                        #late-fee
-                                    %li.row.return-process
-                                      .col-sm-1
-                                        %i.icon-caret-right.blue
-                                      .col-sm-3.no-padding-left 연장료 에누리:
-                                      .col-sm-8
-                                        #late-fee-discount
-                                  - }
-                                  %li.row
-                                    .col-sm-1
-                                      %i.icon-caret-right.blue
-                                    .col-sm-3.no-padding-left 최종 연장료:
-                                    .col-sm-8
-                                      :plain
-                                        <a
-                                          id               = "order-late-fee-pay-with"
-                                          class            = "editable editable-click"
-                                          href             = "#"
-
-                                          data-disabled    = "true"
-                                          data-mode        = "inline"
-                                          data-showbuttons = "true"
-                                          data-type        = "select"
-                                          data-emptytext   = "결제 방법 선택"
-
-                                          data-value       = "#{ $order->late_fee_pay_with || q{} }"
-                                        >#{ $order->late_fee_pay_with || q{결제 방법 선택} }</a>
-                                      \/
-                                      %strong.late-fee-final 0원
-                                  %li.row.return-process
-                                    .col-sm-1
-                                      %i.icon-caret-right.blue
-                                    .col-sm-3.no-padding-left 배상비:
-                                    .col-sm-8
-                                      :plain
-                                        <a
-                                          id               = "order-compensation"
-                                          class            = "editable editable-click"
-                                          href             = "#"
-
-                                          data-disabled    = "true"
-                                          data-mode        = "inline"
-                                          data-showbuttons = "true"
-                                          data-type        = "text"
-                                          data-emptytext   = "0"
-
-                                          data-value       = "0"
-                                        ></a>원
-                                  %li.row.return-process
-                                    .col-sm-1
-                                      %i.icon-caret-right.blue
-                                    .col-sm-3.no-padding-left 배상비 에누리:
-                                    .col-sm-8
-                                      :plain
-                                        <a
-                                          id               = "order-compensation-discount"
-                                          class            = "editable editable-click"
-                                          href             = "#"
-
-                                          data-disabled    = "true"
-                                          data-mode        = "inline"
-                                          data-showbuttons = "true"
-                                          data-type        = "text"
-                                          data-emptytext   = "0"
-
-                                          data-value       = "0"
-                                        ></a>원
-                                  %li.row
-                                    .col-sm-1
-                                      %i.icon-caret-right.blue
-                                    .col-sm-3.no-padding-left 최종 배상비:
-                                    .col-sm-8
-                                      :plain
-                                        <a
-                                          id               = "order-compensation-pay-with"
-                                          class            = "editable editable-click"
-                                          href             = "#"
-
-                                          data-disabled    = "true"
-                                          data-mode        = "inline"
-                                          data-showbuttons = "true"
-                                          data-type        = "select"
-                                          data-emptytext   = "결제 방법 선택"
-
-                                          data-value       = "#{ $order->compensation_pay_with || q{} }"
-                                        >#{ $order->compensation_pay_with || q{결제 방법 선택} }</a>
-                                      \/
-                                      %strong.compensation-final 0원
-                                  %li.row
-                                    .col-sm-1
-                                      %i.icon-caret-right.blue
-                                    .col-sm-3.no-padding-left 주문 신체 치수:
-                                    .col-sm-8
-                                      %span.label.label-success= $order->height   || '-'
-                                      %span.label.label-success= $order->weight   || '-'
-                                      %br
-                                      %span.label.label-info=    $order->bust     || '-'
-                                      %span.label.label-info=    $order->waist    || '-'
-                                      %span.label.label-info=    $order->hip      || '-'
-                                      %span.label.label-info=    $order->topbelly || '-'
-                                      %span.label.label-info=    $order->belly    || '-'
-                                      %br
-                                      %span.label.label-warning= $order->thigh    || '-'
-                                      %span.label.label-warning= $order->arm      || '-'
-                                      %span.label.label-warning= $order->leg      || '-'
-                                      %span.label.label-warning= $order->knee     || '-'
-                                      %span.label.label-warning= $order->foot     || '-'
-                            /
-                            / 대여자 정보
-                            /
-                            .col-sm-6
-                              .row
-                                .col-xs-11.label.label-lg.label-success.arrowed-in.arrowed-right
-                                  %strong 대여자 정보
-                              .row
-                                %ul.list-unstyled.spaced
-                                  %li.row
-                                    .col-sm-1
-                                      %i.icon-caret-right.green
-                                    .col-sm-3.no-padding-left 이름:
-                                    .col-sm-8
-                                      %a#user-name{ :href => "#{ url_for('/user/' . $order->user->id) }" }= $order->user->name
-                                      - if ($history) {
-                                        %span.label.label-danger
-                                          %i.icon-warning-sign
-                                          = $history
-                                      - }
-                                      - if ($nonpayment) {
-                                        %span.label.label-danger
-                                          %i.icon-warning-sign
-                                          불납
-                                      - }
-                                  %li.row
-                                    .col-sm-1
-                                      %i.icon-caret-right.green
-                                    .col-sm-3.no-padding-left 착용 날짜:
-                                    .col-sm-8=                $order->wearon_date ? $order->wearon_date->ymd : q{}
-                                  %li.row
-                                    .col-sm-1
-                                      %i.icon-caret-right.green
-                                    .col-sm-3.no-padding-left 대여 목적:
-                                    .col-sm-8=                $order->purpose
-                                  %li.row
-                                    .col-sm-1
-                                      %i.icon-caret-right.green
-                                    .col-sm-3.no-padding-left 상세 대여 목적:
-                                    .col-sm-8=                $order->purpose2
-                                  %li.row
-                                    .col-sm-1
-                                      %i.icon-caret-right.green
-                                    .col-sm-3.no-padding-left 방문 예약일:
-                                    .col-sm-8
-                                      - if ( $order->booking ) {
-                                        = $order->booking->date->strftime('%Y-%m-%d %H:%M');
-                                      - }
-                                  %li.row
-                                    .col-sm-1
-                                      %i.icon-caret-right.green
-                                    .col-sm-3.no-padding-left 반납 희망일:
-                                    .col-sm-8
-                                      :plain
-                                        <a
-                                          id               = "order-user-target-date"
-                                          class            = "editable editable-click"
-                                          href             = "#"
-
-                                          data-disabled    = "false"
-                                          data-value       = "#{ $order->user_target_date ? $order->user_target_date->ymd : q{} }"
-                                          data-name        = "user_target_date"
-                                        ></a>
-                                  %li.row
-                                    .col-sm-1
-                                      %i.icon-caret-right.green
-                                    .col-sm-3.no-padding-left 전자우편:
-                                    .col-sm-8=                $order->user->email
-                                  %li.row
-                                    .col-sm-1
-                                      %i.icon-caret-right.green
-                                    .col-sm-3.no-padding-left 전화번호:
-                                    #user-phone.col-sm-8=                $order->user->user_info->phone
-                                  %li.row
-                                    .col-sm-1
-                                      %i.icon-caret-right.green
-                                    .col-sm-3.no-padding-left 주소:
-                                    .col-sm-8=                $order->user->user_info->address2
-                                  %li.row
-                                    .col-sm-1
-                                      %i.icon-caret-right.green
-                                    .col-sm-3.no-padding-left 어울림:
-                                    .col-sm-8
-                                      :plain
-                                        <a
-                                          id               = "order-bestfit"
-                                          class            = "editable editable-click"
-                                          href             = "#"
-
-                                          data-disabled    = "false"
-                                          data-mode        = "inline"
-                                          data-showbuttons = "true"
-                                          data-type        = "select"
-                                          data-emptytext   = "보통"
-
-                                          data-value       = "#{ $order->bestfit }"
-
-                                          data-url         = "/order/#{ $order->id }/update"
-                                          data-pk          = "#{ $order->id }"
-                                          data-name        = "bestfit"
-                                        ></a>
-                                  %li.row
-                                    .col-sm-1
-                                      %i.icon-caret-right.green
-                                    .col-sm-3.no-padding-left 신체 치수:
-                                    .col-sm-8
-                                      %span.label.label-success= $order->user->user_info->height   || '-'
-                                      %span.label.label-success= $order->user->user_info->weight   || '-'
-                                      %br
-                                      %span.label.label-info=    $order->user->user_info->bust     || '-'
-                                      %span.label.label-info=    $order->user->user_info->waist    || '-'
-                                      %span.label.label-info=    $order->user->user_info->hip      || '-'
-                                      %span.label.label-info=    $order->user->user_info->topbelly || '-'
-                                      %span.label.label-info=    $order->user->user_info->belly    || '-'
-                                      %br
-                                      %span.label.label-warning= $order->user->user_info->thigh    || '-'
-                                      %span.label.label-warning= $order->user->user_info->arm      || '-'
-                                      %span.label.label-warning= $order->user->user_info->leg      || '-'
-                                      %span.label.label-warning= $order->user->user_info->knee     || '-'
-                                      %span.label.label-warning= $order->user->user_info->foot     || '-'
-
-                    .space
-
-                    .widget-box.collapsed.stat
-                      .widget-header.widget-header-flat.widget-header-small
-                        %h5.widget-title
-                          %i.ace-icon.icon-time
-                          %span 상태 별 시각
-                        .widget-toolbar.no-border
-                          %a{ :href => '#', 'data-action' => 'collapse' }
-                            %i.icon-chevron-down
-                      .widget-body
-                        .widget-main
-                          .row
-                            %table.table.table-striped.table-bordered.table-hover.status-time
-                              %thead
-                                %tr
-                                  %th.center #
-                                  %th 상태
-                                  %th 시점
-                                  %th 처리 시간
-                              %tbody
-                                - my $log_count = 0;
-                                - for my $log ( @{ $analyze{logs} } ) {
-                                  %tr
-                                    %td.center= ++$log_count
-                                    %td= $log->{status}
-                                    %td= $log->{timestamp}->strftime('%m월 %d일 %H시 %M분');
-                                    %td= convert_sec_to_locale($log->{delta}) if $log->{delta}
-                                - }
-
-                    .space-6
-
-                    .widget-box.collapsed.stat
-                      .widget-header.widget-header-flat.widget-header-small
-                        %h5.widget-title
-                          %i.ace-icon.icon-time
-                          %span 상태 별 소요 시간
-                        .widget-toolbar.no-border
-                          %a{ :href => '#', 'data-action' => 'collapse' }
-                            %i.icon-chevron-down
-                      .widget-body
-                        .widget-main
-                          .row
-                            %table.table.table-striped.table-bordered.table-hover.status-duration
-                              %thead
-                                %tr
-                                  %th 상태
-                                  %th 처리 시간
-                                  %th %
-                              %tbody
-                                - my $total = List::Util::sum @{$analyze{elapsed_time}}{@process};
-                                - foreach my $step (@process) {
-                                  - my $elapsed_time = $analyze{elapsed_time}{$step};
-                                  - next unless $elapsed_time;
-                                  %tr
-                                    %td= $step
-                                    %td= convert_sec_to_locale($elapsed_time);
-                                    %td= sprintf( '%.1f', $elapsed_time / $total * 100 );
-                                - }
-                                %tr
-                                  %td.center 총 처리시간
-                                  %td= convert_sec_to_locale($total)
-                                  %td= sprintf( '%.1f', 100 );
-
-                    .space
-
-                    .clearfix.form-actions
-                      - if ( $order->status ) {
-                        - if ( $order_status eq '대여중' || $order_status eq '반납' ) {
-                          - if ($order->pass) {
-                            %a#btn-interview-pass.btn.btn-success.pull-right{ :type => 'button' }
-                              합격
-                          - } else {
-                            %a#btn-interview-pass.btn.btn-default.pull-right{ :type => 'button' }
-                              합격하셨나요?
-                          - }
-                        - }
-                      -   if ( $order_status eq '대여중' ) {
-                        .search.pull-left.return-process
-                          .input-group
-                            %input#clothes-search.form-control{ :name => 'clothes-search' :type => 'text', :placeholder => '의류 품번', :style => 'ime-mode:disabled' }
-                            %span.input-group-btn
-                              %button#btn-clothes-search.btn.btn-default.btn-sm{ :type => 'submit' }
-                                %i.icon-search.bigger-110 검색
-                        %a#btn-return-process.btn.btn-info.pull-right.return-process-reverse{ :type => 'button' }
-                          %i.icon-reply.bigger-110
-                          반납 진행
-                        %a#btn-refund-process.btn.btn-danger.pull-right.return-process-reverse{ :type => 'button' }
-                          %i.icon-remove.bigger-110
-                          환불 진행
-                        %a#btn-return-all.btn.btn-success.disabled.pull-right.return-process{ :type => 'button', 'data-redirect-url' => "#{ url_for('/order/' . $order->id) }" }
-                          %i.icon-ok.bigger-110
-                          전체 반납
-                        %a#btn-return-part.btn.btn-warning.disabled.pull-right.return-process{ :type => 'button', 'data-redirect-url' => "#{ url_for('/order/' . $order->id) }" }
-                          부분 반납
-                        %a#btn-return-cancel.btn.btn-danger.pull-right.return-process{ :type => 'button' }
-                          %i.icon-remove.bigger-110
-                          반납 취소
-                      -   }
-                      -   elsif ( $order_status eq '결제대기' ) {
-                          %a#btn-order-confirm.btn.btn-info.pull-right{ :type => 'button', :href => "#", 'data-url' => "#{ url_for('/order/' . $order->id . '/update') }", 'data-redirect-url' => "#{ url_for('/order/' . $order->id) }", 'data-monitor-url' => "#{$monitor_uri}/events" }
-                            %i.icon-ok.bigger-110
-                            주문 확정
-                          - unless ( $order->parent_id ) {
-                            %a#btn-order-clear.btn.btn-danger.pull-right{ :type => 'button', :href => "#" }
-                              %i.icon-remove.bigger-110
-                              새로 주문
-                          - }
+.row#order{ 'data-order-id' => "#{ $order->id }", 'data-order-parent-id' => "#{ $order->parent_id // q{} } ", 'data-url' => "#{ url_for( '/api/order/' . $order->id ) }", 'data-today' => "#{ $today // q{} }" }
+  .col-sm-10.col-sm-offset-1
+    .widget-box.transparent.invoice-box
+      /
+      / body
+      /
+      .widget-body
+        .widget-main
+          .row
+            /
+            / 주문서 정보
+            /
+            .col-sm-6
+              .row
+                .col-xs-11.label.label-lg.label-info.arrowed-in.arrowed-right
+                  %strong 주문서 정보
+              .row
+                %ul.list-unstyled.spaced
+                  %li.row
+                    .col-sm-1
+                      %i.icon-caret-right.blue
+                    .col-sm-3.no-padding-left 상위 주문서:
+                    .col-sm-8
+                      - if ( $order->parent_id ) {
+                        %a{ :href => "#{ url_for('/order/' . $order->parent_id) }" }= $order->parent_id
+                      - }
+                      - else {
+                        없음
+                      - }
+                  %li.row
+                    .col-sm-1
+                      %i.icon-caret-right.blue
+                    .col-sm-3.no-padding-left 하위 주문서:
+                    .col-sm-8
+                      - my @children = $order->orders->all;
+                      - if (@children) {
+                      -   for my $child (@children) {
+                        %a{ :href => "#{ url_for('/order/' . $child->id) }" }= $child->id
                       -   }
                       - }
+                      - else {
+                        없음
+                      - }
+                  %li.row
+                    .col-sm-1
+                      %i.icon-caret-right.blue
+                    .col-sm-3.no-padding-left 담당자:
+                    .col-sm-8
+                      :plain
+                        <a
+                          id               = "order-staff-name"
+                          class            = "editable editable-click"
+                          href             = "#{ $order_status ne '결제대기' ? url_for('/user/' . $order->staff_id) : '#' }"
 
-                    .widget-box.invoice-box
-                      /
-                      / body
-                      /
-                      .widget-body
-                        .widget-main
-                          %div
-                            %table.table.table-striped.table-bordered.table-hover.order-detail-table
-                              %thead
-                                %tr
-                                  %th.center.return-process
-                                  %th.center #
-                                  %th 항목
-                                  %th 상태
-                                  %th.return-process-reverse 대여 가격
-                                  %th.return-process-reverse 기간
-                                  %th 소계
-                                  %th 기타
-                              %tbody
-                                - my $detail_count = 0;
-                                - for my $detail ( $order->order_details ) {
-                                  %tr
-                                    %td.center.return-process
-                                      - if ( $detail->clothes ) {
-                                        %label
-                                          %input.ace{ :type => 'checkbox', 'data-clothes-code' => "#{ trim_clothes_code($detail->clothes) }", 'data-id' => "#{ $detail->id }" }
-                                          %span.lbl
-                                      - }
-                                    %td.center= ++$detail_count
-                                    - if ( $detail->clothes ) {
-                                      %td
-                                        %span
-                                          %a{ :href => "/clothes/#{ trim_clothes_code($detail->clothes) }" }= $detail->name
-                                        %br
-                                        %span
-                                          %a{ :href => "/donation/#{ $detail->clothes->donation_id }" }= $detail->clothes->donation_id
-                                          = '-'
-                                          %a{ :href => "/user/#{ $detail->clothes->donation->user_id }" }= $detail->clothes->donation->user->name
-                                      %td
-                                        - if ( $order_status ne '결제대기' && $detail->status ) {
-                                          %span.order-status.label{ 'data-order-detail-status' => "#{ $detail->status->name }" }
-                                            = $detail->status->name
-                                        - }
-                                        - else {
-                                          %span.order-status.label{ 'data-order-detail-status' => "#{ $detail->clothes->status->name }" }
-                                            = $detail->clothes->status->name
-                                        - }
-                                    - }
-                                    - else {
-                                      %td= $detail->name
-                                      %td
-                                    - }
-                                    %td.return-process-reverse
-                                      :plain
-                                        <a
-                                          id               = "order-detail-price-#{ $detail->id }"
-                                          class            = "order-detail-price editable editable-click"
-                                          href             = "#"
+                          data-disabled    = "#{ $order_status ne '결제대기' ? 'true' : 'false' }"
+                          data-mode        = "inline"
+                          data-showbuttons = "true"
+                          data-type        = "select"
+                          data-emptytext   = "비어있음"
 
-                                          data-disabled    = "#{ $order_status ne '결제대기' ? 'true' : 'false' }"
-                                          data-mode        = "inline"
-                                          data-showbuttons = "true"
-                                          data-type        = "text"
-                                          data-emptytext   = "0"
+                          data-source      = "/api/gui/staff-list.json"
+                          data-value       = "#{ $order->staff_id || q{} }"
 
-                                          data-value       = "#{ $detail->price || 0 }"
+                          data-url         = "/order/#{ $order->id }/update"
+                          data-pk          = "#{ $order->id }"
+                          data-name        = "staff_id"
+                        ></a>
+                  %li.row
+                    .col-sm-1
+                      %i.icon-caret-right.blue
+                    .col-sm-3.no-padding-left 대여 기간:
+                    .col-sm-8
+                      :plain
+                        <a
+                          id               = "order-additional-day"
+                          class            = "editable editable-click"
+                          href             = "#"
 
-                                          data-url         = "/order/#{ $order->id }/update"
-                                          data-pk          = "#{ $detail->id }"
-                                          data-name        = "detail-price"
+                          data-disabled    = "#{ $order_status ne '결제대기' ? 'true' : 'false' }"
+                          data-mode        = "inline"
+                          data-showbuttons = "true"
+                          data-type        = "select"
+                          data-emptytext   = "비어있음"
 
-                                          data-is-clothes  = "#{ $detail->clothes ? 'true' : 'false' }"
-                                          data-is-pre-paid = "#{ $detail->name eq '이전 주문 납부' ? 'true' : 'false' }"
-                                        ></a>원
-                                    %td.return-process-reverse
-                                      - if ( $detail->stage ) {
-                                        %span= sprintf('%d일', calc_overdue($order))
-                                      - }
-                                      - else {
-                                        %span= sprintf('4+%d일', $order->additional_day)
-                                      - }
-                                    %td
-                                      :plain
-                                        <a
-                                          id               = "order-detail-final-price-#{ $detail->id }"
-                                          class            = "order-detail-final-price editable editable-click"
-                                          href             = "#"
+                          data-value       = "#{ $order->additional_day }"
 
-                                          data-disabled    = "#{ $order_status ne '결제대기' ? 'true' : 'false' }"
-                                          data-mode        = "inline"
-                                          data-showbuttons = "true"
-                                          data-type        = "text"
-                                          data-emptytext   = "0"
+                          data-url         = "/order/#{ $order->id }/update"
+                          data-pk          = "#{ $order->id }"
+                          data-name        = "additional_day"
+                        ></a>
+                  %li.row
+                    .col-sm-1
+                      %i.icon-caret-right.blue
+                    .col-sm-3.no-padding-left 대여일:
+                    .col-sm-8
+                      :plain
+                        <a
+                          id               = "order-rental-date"
+                          class            = "editable editable-click"
+                          href             = "#"
 
-                                          data-value       = "#{ $detail->final_price || 0 }"
+                          data-disabled    = "#{ $order_status ne '결제대기' ? 'true' : 'false' }"
+                          data-value       = "#{ $order->rental_date ? $order->rental_date->ymd : q{} }"
+                          data-name        = "rental_date"
+                        ></a>
+                  %li.row
+                    .col-sm-1
+                      %i.icon-caret-right.blue
+                    .col-sm-3.no-padding-left 반납 예정일:
+                    .col-sm-8
+                      :plain
+                        <a
+                          id               = "order-target-date"
+                          class            = "editable editable-click"
+                          href             = "#"
 
-                                          data-url         = "/order/#{ $order->id }/update"
-                                          data-pk          = "#{ $detail->id }"
-                                          data-name        = "detail-final_price"
-                                        ></a>원
-                                    %td
-                                      :plain
-                                        <a
-                                          id               = "order-detail-desc-#{ $detail->id }"
-                                          class            = "order-detail editable editable-click"
-                                          href             = "#"
+                          data-disabled    = "#{ $order_status ne '결제대기' ? 'true' : 'false' }"
 
-                                          data-mode        = "inline"
-                                          data-showbuttons = "true"
-                                          data-type        = "text"
-                                          data-emptytext   = "비어있음"
+                          data-value       = "#{ $order->target_date ? $order->target_date->ymd : q{} }"
+                          data-name        = "target_date"
+                        ></a>
+                  %li.row
+                    .col-sm-1
+                      %i.icon-caret-right.blue
+                    .col-sm-3.no-padding-left 반납일:
+                    .col-sm-8
+                      = $order->return_date ? $order->return_date->ymd : q{}
+                  %li.row
+                    .col-sm-1
+                      %i.icon-caret-right.blue
+                    .col-sm-3.no-padding-left
+                      반납방법:
+                      %a#order-tracking-url{ :href => "#{ tracking_url($order) || '#' }", :target => '_blank' }
+                        %span.glyphicon.glyphicon-link
+                    .col-sm-8.return-method
+                      :plain
+                        <a
+                          id               = "order-return-method"
+                          class            = "editable editable-click"
+                          href             = "#"
 
-                                          data-value       = "#{ $detail->desc || q{} }"
+                          data-mode        = "inline"
+                          data-showbuttons = "true"
+                          data-type        = "returnmethod"
+                          data-emptytext   = "방문/택배 반납 여부 선택"
 
-                                          data-url         = "/order/#{ $order->id }/update"
-                                          data-pk          = "#{ $detail->id }"
-                                          data-name        = "detail-desc"
-                                        ></a>
-                                - }
+                          data-name        = "return_method"
+                          data-value       = "#{ $order->return_method || q{} }"
+                        >#{ $order->return_method || q{} }</a>
+                  %li.row
+                    .col-sm-1
+                      %i.icon-caret-right.blue
+                    .col-sm-3.no-padding-left 대여비:
+                    .col-sm-8
+                      :plain
+                        <a
+                          id               = "order-price-pay-with"
+                          class            = "editable editable-click"
+                          href             = "#"
 
-                          .hr.hr8.hr-double.hr-dotted
+                          data-disabled    = "#{ $order_status ne '결제대기' ? 'true' : 'false' }"
+                          data-mode        = "inline"
+                          data-showbuttons = "true"
+                          data-type        = "select"
+                          data-emptytext   = "결제 방법 선택"
 
-                          .row
-                            .col-sm-3.pull-right
-                              %h4.pull-right
-                                총액:
-                                %span.red.order-price 0원
-                            .col-sm-9.pull-left
-                              %div
-                                %strong 연장료는 연장일 x 대여금액의 20%입니다.
-                              .space-6
-                              .space-6
-                          .space-6
+                          data-value       = "#{ $order->price_pay_with || q{} }"
 
-                          .row
-                              .space-6
-                              .space-6
-                              .row
-                                .col-xs-11.label.label-info.arrowed-in.arrowed-in-right
-                                  %strong 주문서 메모
-                                .row
-                                .space-6
-                                :plain
-                                  <a
-                                    id               = "order-desc"
-                                    class            = "editable editable-click"
-                                    href             = "#"
+                          data-url         = "/order/#{ $order->id }/update"
+                          data-pk          = "#{ $order->id }"
+                          data-name        = "price_pay_with"
+                        ></a>
+                      \/
+                      %strong.order-stage0-price 0원
+                  - if ( $order_status eq '대여중' ) {
+                    %li.row
+                      .col-sm-1
+                        %i.icon-caret-right.blue
+                      .col-sm-3.no-padding-left 연장료:
+                      .col-sm-8
+                        #late-fee
+                    %li.row.return-process
+                      .col-sm-1
+                        %i.icon-caret-right.blue
+                      .col-sm-3.no-padding-left 연장료 에누리:
+                      .col-sm-8
+                        #late-fee-discount
+                  - }
+                  %li.row
+                    .col-sm-1
+                      %i.icon-caret-right.blue
+                    .col-sm-3.no-padding-left 최종 연장료:
+                    .col-sm-8
+                      :plain
+                        <a
+                          id               = "order-late-fee-pay-with"
+                          class            = "editable editable-click"
+                          href             = "#"
 
-                                    data-disabled    = "false"
-                                    data-mode        = "inline"
-                                    data-showbuttons = "true"
-                                    data-type        = "textarea"
-                                    data-emptytext   = "비어있음"
+                          data-disabled    = "true"
+                          data-mode        = "inline"
+                          data-showbuttons = "true"
+                          data-type        = "select"
+                          data-emptytext   = "결제 방법 선택"
 
-                                    data-value       = "#{ $order->desc || q{} }"
+                          data-value       = "#{ $order->late_fee_pay_with || q{} }"
+                        >#{ $order->late_fee_pay_with || q{결제 방법 선택} }</a>
+                      \/
+                      %strong.late-fee-final 0원
+                  %li.row.return-process
+                    .col-sm-1
+                      %i.icon-caret-right.blue
+                    .col-sm-3.no-padding-left 배상비:
+                    .col-sm-8
+                      :plain
+                        <a
+                          id               = "order-compensation"
+                          class            = "editable editable-click"
+                          href             = "#"
 
-                                    data-url         = "/order/#{ $order->id }/update"
-                                    data-pk          = "#{ $order->id }"
-                                    data-name        = "desc"
-                                  ></a>
-                              .space-6
-                              .hr.hr8.hr-double.hr-dotted
-                              .space-6
-                              .row
-                                .col-xs-11.label.label-success.arrowed-in.arrowed-in-right
-                                  %strong 대여 메세지
-                                .row
-                                .space-6
-                                :plain
-                                  <a
-                                    id               = "order-message"
-                                    class            = "editable editable-click"
-                                    href             = "#"
+                          data-disabled    = "true"
+                          data-mode        = "inline"
+                          data-showbuttons = "true"
+                          data-type        = "text"
+                          data-emptytext   = "0"
 
-                                    data-disabled    = "false"
-                                    data-mode        = "inline"
-                                    data-showbuttons = "true"
-                                    data-type        = "textarea"
-                                    data-emptytext   = "비어있음"
+                          data-value       = "0"
+                        ></a>원
+                  %li.row.return-process
+                    .col-sm-1
+                      %i.icon-caret-right.blue
+                    .col-sm-3.no-padding-left 배상비 에누리:
+                    .col-sm-8
+                      :plain
+                        <a
+                          id               = "order-compensation-discount"
+                          class            = "editable editable-click"
+                          href             = "#"
 
-                                    data-value       = "#{ $order->message || q{} }"
+                          data-disabled    = "true"
+                          data-mode        = "inline"
+                          data-showbuttons = "true"
+                          data-type        = "text"
+                          data-emptytext   = "0"
 
-                                    data-url         = "/order/#{ $order->id }/update"
-                                    data-pk          = "#{ $order->id }"
-                                    data-name        = "message"
-                                  ></a>
+                          data-value       = "0"
+                        ></a>원
+                  %li.row
+                    .col-sm-1
+                      %i.icon-caret-right.blue
+                    .col-sm-3.no-padding-left 최종 배상비:
+                    .col-sm-8
+                      :plain
+                        <a
+                          id               = "order-compensation-pay-with"
+                          class            = "editable editable-click"
+                          href             = "#"
 
+                          data-disabled    = "true"
+                          data-mode        = "inline"
+                          data-showbuttons = "true"
+                          data-type        = "select"
+                          data-emptytext   = "결제 방법 선택"
+
+                          data-value       = "#{ $order->compensation_pay_with || q{} }"
+                        >#{ $order->compensation_pay_with || q{결제 방법 선택} }</a>
+                      \/
+                      %strong.compensation-final 0원
+                  %li.row
+                    .col-sm-1
+                      %i.icon-caret-right.blue
+                    .col-sm-3.no-padding-left 주문 신체 치수:
+                    .col-sm-8
+                      %span.label.label-success= $order->height   || '-'
+                      %span.label.label-success= $order->weight   || '-'
+                      %br
+                      %span.label.label-info=    $order->bust     || '-'
+                      %span.label.label-info=    $order->waist    || '-'
+                      %span.label.label-info=    $order->hip      || '-'
+                      %span.label.label-info=    $order->topbelly || '-'
+                      %span.label.label-info=    $order->belly    || '-'
+                      %br
+                      %span.label.label-warning= $order->thigh    || '-'
+                      %span.label.label-warning= $order->arm      || '-'
+                      %span.label.label-warning= $order->leg      || '-'
+                      %span.label.label-warning= $order->knee     || '-'
+                      %span.label.label-warning= $order->foot     || '-'
+            /
+            / 대여자 정보
+            /
+            .col-sm-6
+              .row
+                .col-xs-11.label.label-lg.label-success.arrowed-in.arrowed-right
+                  %strong 대여자 정보
+              .row
+                %ul.list-unstyled.spaced
+                  %li.row
+                    .col-sm-1
+                      %i.icon-caret-right.green
+                    .col-sm-3.no-padding-left 이름:
+                    .col-sm-8
+                      %a#user-name{ :href => "#{ url_for('/user/' . $order->user->id) }" }= $order->user->name
+                      - if ($history) {
+                        %span.label.label-danger
+                          %i.icon-warning-sign
+                          = $history
+                      - }
+                      - if ($nonpayment) {
+                        %span.label.label-danger
+                          %i.icon-warning-sign
+                          불납
+                      - }
+                  %li.row
+                    .col-sm-1
+                      %i.icon-caret-right.green
+                    .col-sm-3.no-padding-left 착용 날짜:
+                    .col-sm-8=                $order->wearon_date ? $order->wearon_date->ymd : q{}
+                  %li.row
+                    .col-sm-1
+                      %i.icon-caret-right.green
+                    .col-sm-3.no-padding-left 대여 목적:
+                    .col-sm-8=                $order->purpose
+                  %li.row
+                    .col-sm-1
+                      %i.icon-caret-right.green
+                    .col-sm-3.no-padding-left 상세 대여 목적:
+                    .col-sm-8=                $order->purpose2
+                  %li.row
+                    .col-sm-1
+                      %i.icon-caret-right.green
+                    .col-sm-3.no-padding-left 방문 예약일:
+                    .col-sm-8
+                      - if ( $order->booking ) {
+                        = $order->booking->date->strftime('%Y-%m-%d %H:%M');
+                      - }
+                  %li.row
+                    .col-sm-1
+                      %i.icon-caret-right.green
+                    .col-sm-3.no-padding-left 반납 희망일:
+                    .col-sm-8
+                      :plain
+                        <a
+                          id               = "order-user-target-date"
+                          class            = "editable editable-click"
+                          href             = "#"
+
+                          data-disabled    = "false"
+                          data-value       = "#{ $order->user_target_date ? $order->user_target_date->ymd : q{} }"
+                          data-name        = "user_target_date"
+                        ></a>
+                  %li.row
+                    .col-sm-1
+                      %i.icon-caret-right.green
+                    .col-sm-3.no-padding-left 전자우편:
+                    .col-sm-8=                $order->user->email
+                  %li.row
+                    .col-sm-1
+                      %i.icon-caret-right.green
+                    .col-sm-3.no-padding-left 전화번호:
+                    #user-phone.col-sm-8=                $order->user->user_info->phone
+                  %li.row
+                    .col-sm-1
+                      %i.icon-caret-right.green
+                    .col-sm-3.no-padding-left 주소:
+                    .col-sm-8=                $order->user->user_info->address2
+                  %li.row
+                    .col-sm-1
+                      %i.icon-caret-right.green
+                    .col-sm-3.no-padding-left 어울림:
+                    .col-sm-8
+                      :plain
+                        <a
+                          id               = "order-bestfit"
+                          class            = "editable editable-click"
+                          href             = "#"
+
+                          data-disabled    = "false"
+                          data-mode        = "inline"
+                          data-showbuttons = "true"
+                          data-type        = "select"
+                          data-emptytext   = "보통"
+
+                          data-value       = "#{ $order->bestfit }"
+
+                          data-url         = "/order/#{ $order->id }/update"
+                          data-pk          = "#{ $order->id }"
+                          data-name        = "bestfit"
+                        ></a>
+                  %li.row
+                    .col-sm-1
+                      %i.icon-caret-right.green
+                    .col-sm-3.no-padding-left 신체 치수:
+                    .col-sm-8
+                      %span.label.label-success= $order->user->user_info->height   || '-'
+                      %span.label.label-success= $order->user->user_info->weight   || '-'
+                      %br
+                      %span.label.label-info=    $order->user->user_info->bust     || '-'
+                      %span.label.label-info=    $order->user->user_info->waist    || '-'
+                      %span.label.label-info=    $order->user->user_info->hip      || '-'
+                      %span.label.label-info=    $order->user->user_info->topbelly || '-'
+                      %span.label.label-info=    $order->user->user_info->belly    || '-'
+                      %br
+                      %span.label.label-warning= $order->user->user_info->thigh    || '-'
+                      %span.label.label-warning= $order->user->user_info->arm      || '-'
+                      %span.label.label-warning= $order->user->user_info->leg      || '-'
+                      %span.label.label-warning= $order->user->user_info->knee     || '-'
+                      %span.label.label-warning= $order->user->user_info->foot     || '-'
+
+    .space
+
+    .widget-box.collapsed.stat
+      .widget-header.widget-header-flat.widget-header-small
+        %h5.widget-title
+          %i.ace-icon.icon-time
+          %span 상태 별 시각
+        .widget-toolbar.no-border
+          %a{ :href => '#', 'data-action' => 'collapse' }
+            %i.icon-chevron-down
+      .widget-body
+        .widget-main
+          .row
+            %table.table.table-striped.table-bordered.table-hover.status-time
+              %thead
+                %tr
+                  %th.center #
+                  %th 상태
+                  %th 시점
+                  %th 처리 시간
+              %tbody
+                - my $log_count = 0;
+                - for my $log ( @{ $analyze{logs} } ) {
+                  %tr
+                    %td.center= ++$log_count
+                    %td= $log->{status}
+                    %td= $log->{timestamp}->strftime('%m월 %d일 %H시 %M분');
+                    %td= convert_sec_to_locale($log->{delta}) if $log->{delta}
+                - }
+
+    .space-6
+
+    .widget-box.collapsed.stat
+      .widget-header.widget-header-flat.widget-header-small
+        %h5.widget-title
+          %i.ace-icon.icon-time
+          %span 상태 별 소요 시간
+        .widget-toolbar.no-border
+          %a{ :href => '#', 'data-action' => 'collapse' }
+            %i.icon-chevron-down
+      .widget-body
+        .widget-main
+          .row
+            %table.table.table-striped.table-bordered.table-hover.status-duration
+              %thead
+                %tr
+                  %th 상태
+                  %th 처리 시간
+                  %th %
+              %tbody
+                - my $total = List::Util::sum @{$analyze{elapsed_time}}{@process};
+                - foreach my $step (@process) {
+                  - my $elapsed_time = $analyze{elapsed_time}{$step};
+                  - next unless $elapsed_time;
+                  %tr
+                    %td= $step
+                    %td= convert_sec_to_locale($elapsed_time);
+                    %td= sprintf( '%.1f', $elapsed_time / $total * 100 );
+                - }
+                %tr
+                  %td.center 총 처리시간
+                  %td= convert_sec_to_locale($total)
+                  %td= sprintf( '%.1f', 100 );
+
+    .space
+
+    .clearfix.form-actions
+      - if ( $order->status ) {
+        - if ( $order_status eq '대여중' || $order_status eq '반납' ) {
+          - if ($order->pass) {
+            %a#btn-interview-pass.btn.btn-success.pull-right{ :type => 'button' }
+              합격
+          - } else {
+            %a#btn-interview-pass.btn.btn-default.pull-right{ :type => 'button' }
+              합격하셨나요?
+          - }
+        - }
+      -   if ( $order_status eq '대여중' ) {
+        .search.pull-left.return-process
+          .input-group
+            %input#clothes-search.form-control{ :name => 'clothes-search' :type => 'text', :placeholder => '의류 품번', :style => 'ime-mode:disabled' }
+            %span.input-group-btn
+              %button#btn-clothes-search.btn.btn-default.btn-sm{ :type => 'submit' }
+                %i.icon-search.bigger-110 검색
+        %a#btn-return-process.btn.btn-info.pull-right.return-process-reverse{ :type => 'button' }
+          %i.icon-reply.bigger-110
+          반납 진행
+        %a#btn-refund-process.btn.btn-danger.pull-right.return-process-reverse{ :type => 'button' }
+          %i.icon-remove.bigger-110
+          환불 진행
+        %a#btn-return-all.btn.btn-success.disabled.pull-right.return-process{ :type => 'button', 'data-redirect-url' => "#{ url_for('/order/' . $order->id) }" }
+          %i.icon-ok.bigger-110
+          전체 반납
+        %a#btn-return-part.btn.btn-warning.disabled.pull-right.return-process{ :type => 'button', 'data-redirect-url' => "#{ url_for('/order/' . $order->id) }" }
+          부분 반납
+        %a#btn-return-cancel.btn.btn-danger.pull-right.return-process{ :type => 'button' }
+          %i.icon-remove.bigger-110
+          반납 취소
+      -   }
+      -   elsif ( $order_status eq '결제대기' ) {
+          %a#btn-order-confirm.btn.btn-info.pull-right{ :type => 'button', :href => "#", 'data-url' => "#{ url_for('/order/' . $order->id . '/update') }", 'data-redirect-url' => "#{ url_for('/order/' . $order->id) }", 'data-monitor-url' => "#{$monitor_uri}/events" }
+            %i.icon-ok.bigger-110
+            주문 확정
+          - unless ( $order->parent_id ) {
+            %a#btn-order-clear.btn.btn-danger.pull-right{ :type => 'button', :href => "#" }
+              %i.icon-remove.bigger-110
+              새로 주문
+          - }
+      -   }
+      - }
+
+    .widget-box.invoice-box
+      /
+      / body
+      /
+      .widget-body
+        .widget-main
+          %div
+            %table.table.table-striped.table-bordered.table-hover.order-detail-table
+              %thead
+                %tr
+                  %th.center.return-process
+                  %th.center #
+                  %th 항목
+                  %th 상태
+                  %th.return-process-reverse 대여 가격
+                  %th.return-process-reverse 기간
+                  %th 소계
+                  %th 기타
+              %tbody
+                - my $detail_count = 0;
+                - for my $detail ( $order->order_details ) {
+                  %tr
+                    %td.center.return-process
+                      - if ( $detail->clothes ) {
+                        %label
+                          %input.ace{ :type => 'checkbox', 'data-clothes-code' => "#{ trim_clothes_code($detail->clothes) }", 'data-id' => "#{ $detail->id }" }
+                          %span.lbl
+                      - }
+                    %td.center= ++$detail_count
+                    - if ( $detail->clothes ) {
+                      %td
+                        %span
+                          %a{ :href => "/clothes/#{ trim_clothes_code($detail->clothes) }" }= $detail->name
+                        %br
+                        %span
+                          %a{ :href => "/donation/#{ $detail->clothes->donation_id }" }= $detail->clothes->donation_id
+                          = '-'
+                          %a{ :href => "/user/#{ $detail->clothes->donation->user_id }" }= $detail->clothes->donation->user->name
+                      %td
+                        - if ( $order_status ne '결제대기' && $detail->status ) {
+                          %span.order-status.label{ 'data-order-detail-status' => "#{ $detail->status->name }" }
+                            = $detail->status->name
+                        - }
+                        - else {
+                          %span.order-status.label{ 'data-order-detail-status' => "#{ $detail->clothes->status->name }" }
+                            = $detail->clothes->status->name
+                        - }
+                    - }
+                    - else {
+                      %td= $detail->name
+                      %td
+                    - }
+                    %td.return-process-reverse
+                      :plain
+                        <a
+                          id               = "order-detail-price-#{ $detail->id }"
+                          class            = "order-detail-price editable editable-click"
+                          href             = "#"
+
+                          data-disabled    = "#{ $order_status ne '결제대기' ? 'true' : 'false' }"
+                          data-mode        = "inline"
+                          data-showbuttons = "true"
+                          data-type        = "text"
+                          data-emptytext   = "0"
+
+                          data-value       = "#{ $detail->price || 0 }"
+
+                          data-url         = "/order/#{ $order->id }/update"
+                          data-pk          = "#{ $detail->id }"
+                          data-name        = "detail-price"
+
+                          data-is-clothes  = "#{ $detail->clothes ? 'true' : 'false' }"
+                          data-is-pre-paid = "#{ $detail->name eq '이전 주문 납부' ? 'true' : 'false' }"
+                        ></a>원
+                    %td.return-process-reverse
+                      - if ( $detail->stage ) {
+                        %span= sprintf('%d일', calc_overdue($order))
+                      - }
+                      - else {
+                        %span= sprintf('4+%d일', $order->additional_day)
+                      - }
+                    %td
+                      :plain
+                        <a
+                          id               = "order-detail-final-price-#{ $detail->id }"
+                          class            = "order-detail-final-price editable editable-click"
+                          href             = "#"
+
+                          data-disabled    = "#{ $order_status ne '결제대기' ? 'true' : 'false' }"
+                          data-mode        = "inline"
+                          data-showbuttons = "true"
+                          data-type        = "text"
+                          data-emptytext   = "0"
+
+                          data-value       = "#{ $detail->final_price || 0 }"
+
+                          data-url         = "/order/#{ $order->id }/update"
+                          data-pk          = "#{ $detail->id }"
+                          data-name        = "detail-final_price"
+                        ></a>원
+                    %td
+                      :plain
+                        <a
+                          id               = "order-detail-desc-#{ $detail->id }"
+                          class            = "order-detail editable editable-click"
+                          href             = "#"
+
+                          data-mode        = "inline"
+                          data-showbuttons = "true"
+                          data-type        = "text"
+                          data-emptytext   = "비어있음"
+
+                          data-value       = "#{ $detail->desc || q{} }"
+
+                          data-url         = "/order/#{ $order->id }/update"
+                          data-pk          = "#{ $detail->id }"
+                          data-name        = "detail-desc"
+                        ></a>
+                - }
+
+          .hr.hr8.hr-double.hr-dotted
+
+          .row
+            .col-sm-3.pull-right
+              %h4.pull-right
+                총액:
+                %span.red.order-price 0원
+            .col-sm-9.pull-left
+              %div
+                %strong 연장료는 연장일 x 대여금액의 20%입니다.
+              .space-6
+              .space-6
+          .space-6
+
+          .row
+              .space-6
+              .space-6
+              .row
+                .col-xs-11.label.label-info.arrowed-in.arrowed-in-right
+                  %strong 주문서 메모
+                .row
+                .space-6
                 :plain
-                  <script id="tpl-late-fee" type="text/html">
-                    <% if (late_fee) { %>
-                      <strong> <%= OpenCloset.commify(late_fee) %>원 </strong>
-                      <span> ( = <%= overdue %>일 x <%= OpenCloset.commify(clothes_price) %>원 x 20% ) </span>
-                    <% } else { %>
-                      <strong> 해당사항 없음 </strong>
-                    <% } %>
-                  </script>
+                  <a
+                    id               = "order-desc"
+                    class            = "editable editable-click"
+                    href             = "#"
+
+                    data-disabled    = "false"
+                    data-mode        = "inline"
+                    data-showbuttons = "true"
+                    data-type        = "textarea"
+                    data-emptytext   = "비어있음"
+
+                    data-value       = "#{ $order->desc || q{} }"
+
+                    data-url         = "/order/#{ $order->id }/update"
+                    data-pk          = "#{ $order->id }"
+                    data-name        = "desc"
+                  ></a>
+              .space-6
+              .hr.hr8.hr-double.hr-dotted
+              .space-6
+              .row
+                .col-xs-11.label.label-success.arrowed-in.arrowed-in-right
+                  %strong 대여 메세지
+                .row
+                .space-6
                 :plain
-                  <script id="tpl-late-fee-discount" type="text/html">
-                    <% if (late_fee) { %>
-                      <strong>
-                      <a
-                        id               = "order-late-fee-discount"
-                        class            = "editable editable-click"
-                        href             = "#"
+                  <a
+                    id               = "order-message"
+                    class            = "editable editable-click"
+                    href             = "#"
 
-                        data-disabled    = "<%= status_id === 2 ? 'true' : 'false' %>"
-                        data-mode        = "inline"
-                        data-showbuttons = "true"
-                        data-type        = "text"
-                        data-emptytext   = "0"
+                    data-disabled    = "false"
+                    data-mode        = "inline"
+                    data-showbuttons = "true"
+                    data-type        = "textarea"
+                    data-emptytext   = "비어있음"
 
-                        data-value       = "0"
-                      ></a>원
-                      </strong>
-                      <button class="btn btn-default btn-xs" id="order-late-fee-discount-all">전체 에누리</button>
-                    <% } else { %>
-                      <strong> 해당사항 없음 </strong>
-                    <% } %>
-                  </script>
+                    data-value       = "#{ $order->message || q{} }"
+
+                    data-url         = "/order/#{ $order->id }/update"
+                    data-pk          = "#{ $order->id }"
+                    data-name        = "message"
+                  ></a>
+              .space-6
+              .hr.hr8.hr-double.hr-dotted
+              .space-6
+              .row
+                .col-xs-11.label.label-warning.arrowed-in.arrowed-in-right
+                  %strong 반납 메세지
+                .row
+                .space-6
                 :plain
-                  <div id="modal-refund" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="refundModalLabel" aria-hidden="true">
-                    <div class="modal-dialog">
-                      <div class="modal-content">
-                        <div class="modal-header">
-                          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                          <h4 class="modal-title" id="refundModalLabel">
-                            환불을 진행하시겠습니까?
-                          </h4>
-                        </div>
-                        <div class="modal-body" style="height: 300px; overflow-y: auto;">
-                          <div>
-                            환불 금액과 환불 수수료 금액의 합이 주문서 총액과 일치해야 합니다.
-                            보통 환불 금액은 주문서 총액과 동일하며 환불 수수료 금액은 0원입니다.
-                            환불 수수료가 있을 경우 총액에서 수수료 금액을 제외한 금액을 고객에게 환불합니다.
-                          </div>
-                          <div class="space-4"></div>
-                          <div>
-                            <strong>환불을 진행한 이후에는 되돌릴 수 없습니다. 주의해서 확인한 후 진행해주세요.</strong>
-                          </div>
-                          <div class="space-12"></div>
-                          <form role="form" class="form-horizontal">
-                            <div class="form-group">
-                              <label for="order-refund-total" class="col-sm-3 control-label no-padding-right"> 주문서 총액 </label>
+                  <a
+                    id               = "order-return-memo"
+                    class            = "editable editable-click"
+                    href             = "#"
 
-                              <div class="col-sm-9">
-                                <input type="text" class="col-xs-10 col-sm-5 order-price-input" placeholder="주문서 총액" id="order-refund-total" readonly>
-                              </div>
-                            </div>
+                    data-disabled    = "false"
+                    data-mode        = "inline"
+                    data-showbuttons = "true"
+                    data-type        = "textarea"
+                    data-emptytext   = "비어있음"
 
-                            <div class="space-4"></div>
+                    data-value       = "#{ $order->return_memo || q{} }"
 
-                            <div class="form-group">
-                              <label for="order-refund-charge" class="col-sm-3 control-label no-padding-right"> 환불 수수료 </label>
+                    data-url         = "/order/#{ $order->id }/update"
+                    data-pk          = "#{ $order->id }"
+                    data-name        = "return_memo"
+                  ></a>
 
-                              <div class="col-sm-9">
-                                <input type="text" class="col-xs-10 col-sm-5" placeholder="환불 수수료" id="order-refund-charge" value="0">
-                              </div>
-                            </div>
+:plain
+  <script id="tpl-late-fee" type="text/html">
+    <% if (late_fee) { %>
+      <strong> <%= OpenCloset.commify(late_fee) %>원 </strong>
+      <span> ( = <%= overdue %>일 x <%= OpenCloset.commify(clothes_price) %>원 x 20% ) </span>
+    <% } else { %>
+      <strong> 해당사항 없음 </strong>
+    <% } %>
+  </script>
+:plain
+  <script id="tpl-late-fee-discount" type="text/html">
+    <% if (late_fee) { %>
+      <strong>
+      <a
+        id               = "order-late-fee-discount"
+        class            = "editable editable-click"
+        href             = "#"
 
-                            <div class="space-4"></div>
+        data-disabled    = "<%= status_id === 2 ? 'true' : 'false' %>"
+        data-mode        = "inline"
+        data-showbuttons = "true"
+        data-type        = "text"
+        data-emptytext   = "0"
 
-                            <div class="form-group">
-                              <label for="order-refund-real" class="col-sm-3 control-label no-padding-right"> 환불 금액 </label>
+        data-value       = "0"
+      ></a>원
+      </strong>
+      <button class="btn btn-default btn-xs" id="order-late-fee-discount-all">전체 에누리</button>
+    <% } else { %>
+      <strong> 해당사항 없음 </strong>
+    <% } %>
+  </script>
+:plain
+  <div id="modal-refund" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="refundModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h4 class="modal-title" id="refundModalLabel">
+            환불을 진행하시겠습니까?
+          </h4>
+        </div>
+        <div class="modal-body" style="height: 300px; overflow-y: auto;">
+          <div>
+            환불 금액과 환불 수수료 금액의 합이 주문서 총액과 일치해야 합니다.
+            보통 환불 금액은 주문서 총액과 동일하며 환불 수수료 금액은 0원입니다.
+            환불 수수료가 있을 경우 총액에서 수수료 금액을 제외한 금액을 고객에게 환불합니다.
+          </div>
+          <div class="space-4"></div>
+          <div>
+            <strong>환불을 진행한 이후에는 되돌릴 수 없습니다. 주의해서 확인한 후 진행해주세요.</strong>
+          </div>
+          <div class="space-12"></div>
+          <form role="form" class="form-horizontal">
+            <div class="form-group">
+              <label for="order-refund-total" class="col-sm-3 control-label no-padding-right"> 주문서 총액 </label>
 
-                              <div class="col-sm-9">
-                                <input type="text" class="col-xs-10 col-sm-5" placeholder="환불 금액" id="order-refund-real" value="0">
-                              </div>
-                            </div>
-                          </form>
+              <div class="col-sm-9">
+                <input type="text" class="col-xs-10 col-sm-5 order-price-input" placeholder="주문서 총액" id="order-refund-total" readonly>
+              </div>
+            </div>
 
-                          <div id="order-refund-error"></div>
-                        </div>
-                        <div class="modal-footer">
-                          <button id="btn-refund-modal-cancel" type="button" class="btn btn-danger" >취소</button>
-                          <button id="btn-refund-modal-ok"     type="button" class="btn btn-primary">확인</button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+            <div class="space-4"></div>
+
+            <div class="form-group">
+              <label for="order-refund-charge" class="col-sm-3 control-label no-padding-right"> 환불 수수료 </label>
+
+              <div class="col-sm-9">
+                <input type="text" class="col-xs-10 col-sm-5" placeholder="환불 수수료" id="order-refund-charge" value="0">
+              </div>
+            </div>
+
+            <div class="space-4"></div>
+
+            <div class="form-group">
+              <label for="order-refund-real" class="col-sm-3 control-label no-padding-right"> 환불 금액 </label>
+
+              <div class="col-sm-9">
+                <input type="text" class="col-xs-10 col-sm-5" placeholder="환불 금액" id="order-refund-real" value="0">
+              </div>
+            </div>
+          </form>
+
+          <div id="order-refund-error"></div>
+        </div>
+        <div class="modal-footer">
+          <button id="btn-refund-modal-cancel" type="button" class="btn btn-danger" >취소</button>
+          <button id="btn-refund-modal-ok"     type="button" class="btn btn-primary">확인</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+#alert-desc.hidden{:rel => 'facebox'}
+  %p
+    %strong 주문서 메모
+  %p
+    %pre= $order->return_memo || '내용없음'

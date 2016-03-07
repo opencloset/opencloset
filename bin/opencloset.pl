@@ -2108,6 +2108,7 @@ group {
                 rental_date
                 return_date
                 return_method
+                return_memo
                 staff_id
                 status_id
                 target_date
@@ -2208,6 +2209,7 @@ group {
                 rental_date
                 return_date
                 return_method
+                return_memo
                 staff_id
                 status_id
                 target_date
@@ -2494,6 +2496,7 @@ group {
                 rental_date
                 return_date
                 return_method
+                return_memo
                 staff_id
                 status_id
                 target_date
