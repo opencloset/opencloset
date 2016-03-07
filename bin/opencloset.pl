@@ -6705,6 +6705,7 @@ any '/size/guess' => sub {
     my $bestfit_3x3_order_rs = $DB->resultset('Order')->search(
         {
             bestfit => 1,
+            gender  => $gender,
             height  => { -between => [ $height - 1, $height + 1, ], },
             weight  => { -between => [ $weight - 1, $weight + 1, ], },
         },
