@@ -3901,7 +3901,7 @@ group {
 
         my $password = String::Random->new->randregex('\d\d\d\d\d\d');
         my $expires =
-            DateTime->now( time_zone => app->config->{timezone} )->add( minutes => 10 );
+            DateTime->now( time_zone => app->config->{timezone} )->add( minutes => 20 );
         $user->update( { password => $password, expires => $expires->epoch, } )
             or return $self->error( 500, { str => 'failed to update a user', data => {}, } );
         app->log->debug("sent temporary password: to($params{to}) password($password)");
