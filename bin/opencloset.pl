@@ -59,7 +59,7 @@ use Postcodify;
 use OpenCloset::Schema;
 use OpenCloset::Size::Guess;
 
-use version; our $VERSION = version->declare("v1.0.7");
+use version; our $VERSION = version->declare("v1.0.8");
 
 app->defaults(
     %{ plugin 'Config' => {
@@ -2108,6 +2108,7 @@ group {
                 rental_date
                 return_date
                 return_method
+                return_memo
                 staff_id
                 status_id
                 target_date
@@ -2208,6 +2209,7 @@ group {
                 rental_date
                 return_date
                 return_method
+                return_memo
                 staff_id
                 status_id
                 target_date
@@ -2494,6 +2496,7 @@ group {
                 rental_date
                 return_date
                 return_method
+                return_memo
                 staff_id
                 status_id
                 target_date
@@ -3898,7 +3901,7 @@ group {
 
         my $password = String::Random->new->randregex('\d\d\d\d\d\d');
         my $expires =
-            DateTime->now( time_zone => app->config->{timezone} )->add( minutes => 10 );
+            DateTime->now( time_zone => app->config->{timezone} )->add( minutes => 20 );
         $user->update( { password => $password, expires => $expires->epoch, } )
             or return $self->error( 500, { str => 'failed to update a user', data => {}, } );
         app->log->debug("sent temporary password: to($params{to}) password($password)");
@@ -6702,6 +6705,7 @@ any '/size/guess' => sub {
     my $bestfit_3x3_order_rs = $DB->resultset('Order')->search(
         {
             bestfit => 1,
+            gender  => $gender,
             height  => { -between => [ $height - 1, $height + 1, ], },
             weight  => { -between => [ $weight - 1, $weight + 1, ], },
         },

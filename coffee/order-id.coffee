@@ -211,6 +211,7 @@ $ ->
 
   $('#order-desc').editable()
   $('#order-message').editable()
+  $('#order-return-memo').editable()
 
   $('.order-detail-final-price').editable
     display: (value, sourceData, response) -> $(this).html( OpenCloset.commify value )
@@ -465,6 +466,7 @@ $ ->
         compensation_pay_with:  compensation_pay_with
         order_detail_id:        order_detail_id
         order_detail_status_id: order_detail_status_id
+
     $.ajax url,
       type:    'PUT'
       data:    $.param(data, 1)
@@ -472,7 +474,13 @@ $ ->
         #
         # 주문서 페이지 리로드
         #
-        window.location.href = redirect_url
+        if type is 'all'
+          username = $('#user-name').text()
+          phone    = $('#user-phone').text()
+          OpenCloset.sendSMS phone, "[열린옷장] #{username}님이 반납하신 의류가 정상적으로 반납되었습니다. 감사합니다.", (data, textStatus, jqXHR) ->
+            location.search = '?alert=1'
+        else
+          location.reload()
 
   returnOrder = (type, redirect_url) ->
     order_id              = $('#order').data('order-id')
@@ -671,3 +679,6 @@ $ ->
             type:    'GET'
             success: (data, textStatus, jqXHR) ->
               $('#order-tracking-url').attr('href', data.tracking_url)
+
+  if location.search is '?alert=1' and $('#order-return-memo').data('value')
+    $.facebox({ div: '#alert-desc' })

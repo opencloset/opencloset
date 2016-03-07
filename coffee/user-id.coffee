@@ -1,5 +1,11 @@
 $ ->
   updateAverageDiff = ->
+    height = $('#user-height').text()
+    weight = $('#user-weight').text()
+    return unless height or weight
+    return if height is '0'
+    return if weight is '0'
+
     userID = $('#profile-user-info-data').data('pk')
 
     $.ajax "/api/gui/user/#{userID}/avg.json",
@@ -173,10 +179,7 @@ $ ->
           $.ajax url,
             type: 'PUT'
             data: data
-      when 'user-height', 'user-weight', 'user-neck', 'user-bust',
-      'user-waist', 'user-skirt', 'user-topbelly', 'user-belly',
-      'user-arm', 'user-leg', 'user-knee', 'user-thigh', 'user-hip',
-      'user-foot'
+      when 'user-height', 'user-weight', 'user-neck', 'user-bust', 'user-waist', 'user-skirt', 'user-topbelly', 'user-belly', 'user-arm', 'user-leg', 'user-knee', 'user-thigh', 'user-hip', 'user-foot'
         params.success = (response, newValue) ->
           updateAverageDiff()
           setTimeout ->
@@ -187,35 +190,17 @@ $ ->
 
     $(el).editable params
 
-  $('#user-address').click (e) ->
-    e.preventDefault()
-    $.facebox
-      ajax: '/html/postcodify.html'
-
-  $(document).bind 'reveal.facebox', ->
-    $('#facebox #postcodify').postcodify
-      api: '/api/postcode/search'
-      timeout: 10000    # 10 seconds
-      hideOldAddresses: false
-      insertDbid: '.postcodify_dbid'
-      insertAddress: '.postcodify_address'
-      insertJibeonAddress: '.postcodify_jibeonaddress'
-      searchButtonContent: '주소검색'
-      onReady: ->
-        $('#postcodify').find('.postcodify_search_controls.postcode_search_controls')
-          .addClass('input-group').find('input[type=text]')
-          .addClass('form-control').val($('.postcodify_address').val())
-          .focus().end().find('button').addClass('btn btn-default btn-sm')
-          .wrap('<span class="input-group-btn"></span>')
-      afterSelect: (selectedEntry) ->
-        $.ajax $('#profile-user-info-data').data('url'),
-          type: 'PUT'
-          data:
-            address1: $('.postcodify_dbid').val()
-            address2: $('.postcodify_address').val()
-            address3: $('.postcodify_jibeonaddress').val()
-          success:
-            $('#user-address').text($('.postcodify_address').val())
-        $(document).trigger('close.facebox')
-      afterSearch: (keywords, results, lang, sort) ->
-        $('summary.postcodify_search_status.postcode_search_status').hide()
+  $('#user-address').postcodifyPopUp
+    api: "/api/postcode/search.json"
+    afterSelect: (selectedEntry) ->
+      $.ajax $('#profile-user-info-data').data('url'),
+        type: 'PUT'
+        data:
+          address1: $('.postcodify_building_id').val()
+          address2: $('.postcodify_address').val()
+          address3: $('.postcodify_jibeon_address').val()
+        success: ->
+          $('#user-address').text($('.postcodify_address').val())
+        complete: ->
+          $('.postcodify_popup_background').hide()
+          $('.postcodify_popup_layer').hide()
