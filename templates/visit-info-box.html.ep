@@ -78,10 +78,15 @@
                             </span>
                           </label>
 
-                          <label id="postcodify" class="block clearfix"></label>
-                          <p class="help-block help-block-postcodify">예시) 서울시 광진구 화양동 48-3</p>
-                          <input type="hidden" class="postcodify_dbid"          name="address1" value="<%= $user->user_info->address1 %>" />
-                          <input type="hidden" class="postcodify_jibeonaddress" name="address3" value="<%= $user->user_info->address3 %>" />
+                          <p>
+                            <button id="address-search" class="btn btn-primary btn-sm" type="button">
+                              <i class="icon-search"></i>
+                              주소검색
+                            </button>
+                          </p>
+
+                          <input type="hidden" class="postcodify_building_id" name="address1" value="<%= $user->user_info->address1 %>" />
+                          <input type="hidden" class="postcodify_jibeon_address" name="address3" value="<%= $user->user_info->address3 %>" />
                           <label class="block clearfix">
                             <span class="block input-icon input-icon-right">
                               <input name="address2" type="text" class="form-control postcodify_address" readonly="readonly" placeholder="주소 검색을 이용해주세요." value="<%= $user->user_info->address2 %>" />

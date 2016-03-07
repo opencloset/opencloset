@@ -14,7 +14,6 @@
 -   ],
 -   csses => [ 
 -     '/lib/bootstrap3-editable/css/bootstrap-editable.css',
--     '//cdn.poesis.kr/post/search.css',
 -   ],
 -   ;
 - title meta_text($_id) . q{: } . $user->name . q{님};
@@ -111,9 +110,9 @@
                                 .profile-info-value
                                   %i.icon-map-marker.light-orange.bigger-110
                                   %span.editable#user-address{ 'data-name' => 'address' }= $user->user_info->address2
-                                %input.postcodify_dbid{:name => 'address1' :type => 'hidden', :value => "#{$user->user_info->address1}"}
+                                %input.postcodify_building_id{:name => 'address1' :type => 'hidden', :value => "#{$user->user_info->address1}"}
                                 %input.postcodify_address{:name => 'address2' :type => 'hidden', :value => "#{$user->user_info->address2}"}
-                                %input.postcodify_jibeonaddress{:name => 'address3' :type => 'hidden', :value => "#{$user->user_info->address3}"}
+                                %input.postcodify_jibeon_address{:name => 'address3' :type => 'hidden', :value => "#{$user->user_info->address3}"}
 
                               .profile-info-row
                                 .profile-info-name 상세주소
