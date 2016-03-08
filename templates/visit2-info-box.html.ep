@@ -78,7 +78,7 @@
                           </label>
 
                           <p>
-                            <button id="address-search" class="btn btn-primary btn-sm" type="button">
+                            <button id="address-search" class="width-100 btn btn-primary btn-sm" type="button">
                               <i class="icon-search"></i>
                               주소검색
                             </button>
