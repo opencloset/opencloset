@@ -39,7 +39,7 @@
     %a{ :href => "#{ url_with->query([ p => 1, status => 'all' ]) }" } 전체보기
   %span= '|'
   %span
-    %a{ :href => "#{ url_with->query([ p => 1, status => 'late' ]) }" } 연장중
+    %a{ :href => "#{ url_with->query([ booking_ymd => 'all', status => 'late' ]) }" } 연장중
   %span= '|'
   %span
     %a{ :href => "#{ url_with->query([ p => 1, status => 'rental-late' ]) }" } 대여중(연장아님)
