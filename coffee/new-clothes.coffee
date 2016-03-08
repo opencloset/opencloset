@@ -119,7 +119,7 @@ $ ->
         when 'skirt'     then types = [ 'waist', 'hip', 'length'                   ]
         when 'blouse'    then types = [ 'bust', 'arm'                              ]
         when 'belt'      then types = [ 'length'                                   ]
-        when 'shoes'     then types = [ 'foot'                                     ]
+        when 'shoes'     then types = [ 'length'                                   ]
         else                  types = [                                            ]
       for type in types
         $("#display-clothes-#{type}").show()
