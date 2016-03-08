@@ -73,13 +73,13 @@
 
                           <label class="block clearfix">
                             <span class="block input-icon input-icon-right">
-                              <input name="email" type="email" class="form-control" placeholder="이메일을 입력해주세요" value="<%= $user->email %>" />
+                              <input name="email" type="email" class="form-control" placeholder="이메일을 입력해주세요" value="<%= $user->email %>"<%= $user->email ? ' readonly' : '' %>>
                               <i class="icon-envelope"></i>
                             </span>
                           </label>
 
                           <p>
-                            <button id="address-search" class="btn btn-primary btn-sm" type="button">
+                            <button id="address-search" class="width-100 btn btn-primary btn-sm" type="button">
                               <i class="icon-search"></i>
                               주소검색
                             </button>
