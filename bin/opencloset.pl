@@ -5366,7 +5366,7 @@ get '/rental/:ymd' => sub {
             },
             'status.name' => '포장',
         },
-        { join => [qw/ booking status /], order_by => { -asc => 'booking.date' }, },
+        { join => [qw/ booking status /], order_by => { -asc => 'update_date' }, },
     );
 
     $self->stash( order_rs => $order_rs, dt_start => $dt_start, dt_end => $dt_end, );
