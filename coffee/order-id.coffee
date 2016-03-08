@@ -252,8 +252,9 @@ $ ->
           OpenCloset.alert 'danger', '반납 예정일을 입력하세요.'
           return
         unless data.price_pay_with
-          OpenCloset.alert 'danger', '대여비 납부 여부를 확인하세요.'
-          return
+          if data.price and parseInt(data.price) isnt 0
+            OpenCloset.alert 'danger', '대여비 납부 여부를 확인하세요.'
+            return
 
         $.ajax url,
           type: 'POST'
