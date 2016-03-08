@@ -59,7 +59,7 @@ use Postcodify;
 use OpenCloset::Schema;
 use OpenCloset::Size::Guess;
 
-use version; our $VERSION = version->declare("v1.0.9");
+use version; our $VERSION = version->declare("v1.0.10");
 
 app->defaults(
     %{ plugin 'Config' => {
@@ -5366,7 +5366,7 @@ get '/rental/:ymd' => sub {
             },
             'status.name' => '포장',
         },
-        { join => [qw/ booking status /], order_by => { -asc => 'booking.date' }, },
+        { join => [qw/ booking status /], order_by => { -asc => 'update_date' }, },
     );
 
     $self->stash( order_rs => $order_rs, dt_start => $dt_start, dt_end => $dt_end, );
@@ -5381,6 +5381,7 @@ get '/order' => sub {
     my %params        = $self->get_params(qw/ id /);
     my %search_params = $self->get_params(qw/ booking_ymd status /);
 
+    my $q = $self->param('q') || '';
     my $p = $self->param('p') || 1;
     my $s = $self->param('s') || app->config->{entries_per_page};
 
@@ -5523,6 +5524,7 @@ get '/order' => sub {
     }
 
     $rs = $rs->search( undef, { page => $p, rows => $s } );
+    $rs = $rs->search( { 'user.name' => "$q" }, { join => 'user' } ) if $q;
     my $pageset = Data::Pageset->new(
         {
             total_entries    => $rs->pager->total_entries,
