@@ -5381,6 +5381,7 @@ get '/order' => sub {
     my %params        = $self->get_params(qw/ id /);
     my %search_params = $self->get_params(qw/ booking_ymd status /);
 
+    my $q = $self->param('q') || '';
     my $p = $self->param('p') || 1;
     my $s = $self->param('s') || app->config->{entries_per_page};
 
@@ -5523,6 +5524,7 @@ get '/order' => sub {
     }
 
     $rs = $rs->search( undef, { page => $p, rows => $s } );
+    $rs = $rs->search( { 'user.name' => "$q" }, { join => 'user' } ) if $q;
     my $pageset = Data::Pageset->new(
         {
             total_entries    => $rs->pager->total_entries,
