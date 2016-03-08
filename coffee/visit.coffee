@@ -533,3 +533,25 @@ $ ->
         <samp>#{OpenCloset.commify(expectedCost)}원</samp>
         <small class="text-muted">총대여비</small>
       """
+
+  #
+  # 이메일 중복체크
+  #
+  $('input[name=email]:not([readonly]').on 'focusout', ->
+    $this = $(@)
+    email = $this.val()
+    return unless email
+
+    $.ajax "/api/search/user?q=#{email}",
+      type: 'GET'
+      dataType: 'json'
+      success: (data, textStatus, jqXHR) ->
+        OpenCloset.alert 'danger', '동일한 이메일이 이미
+      존재합니다. 타인의 이메일을 사용하실 경우 예약이 불가능
+      합니다. 지난 번 대여하실 때 입력 하셨던 휴대전화 번호와 현재
+      입력하신 휴대전화 번호가 다른 경우 열린옷장으로 전화 문의
+      바랍니다.', '#visit-alert'
+        $this.val('').focus()
+      error: (jqXHR, textStatus, errorThrown) ->
+        # user not found(404) is fine
+      complete: (jqXHR, textStatus) ->
