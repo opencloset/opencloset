@@ -355,7 +355,12 @@ sub auth {
     $self->respond_to(
         json => { json => { error => 'invalid_access' }, status => 400 },
         html => sub {
-            $self->redirect_to( $self->url_for('/login') );
+            my $site_type = $self->config->{site_type};
+            if ($site_type eq 'visit') {
+                $self->redirect_to( $self->url_for('/visit') );
+            } else {
+                $self->redirect_to( $self->url_for('/login') );
+            }
         }
     );
 
