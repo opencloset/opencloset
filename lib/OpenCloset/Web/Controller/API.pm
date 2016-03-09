@@ -2,6 +2,7 @@ package OpenCloset::Web::Controller::API;
 use Mojo::Base 'Mojolicious::Controller';
 
 use DateTime;
+use Encode qw/decode_utf8/;
 use Postcodify;
 use String::Random;
 use Try::Tiny;

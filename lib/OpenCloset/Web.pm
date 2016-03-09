@@ -2,6 +2,8 @@ package OpenCloset::Web;
 use Mojo::Base 'Mojolicious';
 
 use CHI;
+use DateTime;
+
 use OpenCloset::Schema;
 
 has CACHE => sub {

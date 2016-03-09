@@ -1,6 +1,7 @@
 package OpenCloset::Web::Controller::Clothes;
 use Mojo::Base 'Mojolicious::Controller';
 
+use Data::Pageset;
 use List::Util qw( sum );
 
 has DB => sub { shift->app->DB };
