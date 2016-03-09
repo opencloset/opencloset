@@ -12,7 +12,7 @@ has DB => sub { shift->app->DB };
 
 =head2 create_user
 
-    POST /api
+    POST /api/user
 
 =cut
 
