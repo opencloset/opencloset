@@ -55,15 +55,15 @@ sub startup {
     $self->plugin('haml_renderer');
     $self->plugin('FillInFormLite');
     $self->plugin('OpenCloset::Web::Plugin::Helpers');
+
     $self->_authentication;
+    $self->_public_routes;
+    $self->_private_routes;
 
     $self->secrets( $self->defaults->{secrets} );
     $self->sessions->cookie_domain( $self->defaults->{cookie_domain} );
     $self->sessions->cookie_name('opencloset');
     $self->sessions->default_expiration(86400);
-
-    $self->_public_routes;
-    $self->_private_routes;
 }
 
 =head2 _authentication
