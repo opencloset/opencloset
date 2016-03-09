@@ -80,7 +80,7 @@ sub register {
 sub error {
     my ( $self, $status, $error ) = @_;
 
-    app->log->error( $error->{str} );
+    $self->app->log->error( $error->{str} );
 
     no warnings 'experimental';
     my $template;
@@ -106,7 +106,7 @@ sub error {
 sub meta_link {
     my ( $self, $id ) = @_;
 
-    my $meta = $self->app->config->{sidebar}{meta};
+    my $meta = $self->config->{sidebar}{meta};
 
     return $meta->{$id}{link} || $id;
 }
@@ -118,7 +118,7 @@ sub meta_link {
 sub meta_text {
     my ( $self, $id ) = @_;
 
-    my $meta = $self->app->config->{sidebar}{meta};
+    my $meta = $self->config->{sidebar}{meta};
 
     return $meta->{$id}{text};
 }
@@ -130,7 +130,7 @@ sub meta_text {
 sub get_gravatar {
     my ( $self, $user, $size, %opts ) = @_;
 
-    $opts{default} ||= $self->app->config->{avatar_icon};
+    $opts{default} ||= $self->config->{avatar_icon};
     $opts{email}   ||= $user->email;
     $opts{size}    ||= $size;
 
@@ -184,11 +184,11 @@ sub calc_overdue {
 
     return 0 unless $target_dt;
 
-    my $now = DateTime->now( time_zone => $self->app->config->{timezone} );
+    my $now = DateTime->now( time_zone => $self->config->{timezone} );
     if ( $today && $today =~ m/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/ ) {
         my $strp = DateTime::Format::Strptime->new(
             pattern   => q{%F %T},
-            time_zone => $self->app->config->{timezone},
+            time_zone => $self->config->{timezone},
             on_error  => 'undef',
         );
 
@@ -578,13 +578,13 @@ sub update_user {
         if ( $_user_params{create_date} ) {
             $_user_params{create_date} = DateTime->from_epoch(
                 epoch     => $_user_params{create_date},
-                time_zone => $self->app->config->{timezone},
+                time_zone => $self->config->{timezone},
             );
         }
         if ( $_user_params{update_date} ) {
             $_user_params{update_date} = DateTime->from_epoch(
                 epoch     => $_user_params{update_date},
-                time_zone => $self->app->config->{timezone},
+                time_zone => $self->config->{timezone},
             );
         }
 
@@ -603,7 +603,7 @@ sub update_user {
         # event posting to opencloset/monitor
         #
         my $res = HTTP::Tiny->new( timeout => 1 )->post_form(
-            $self->app->config->{monitor_uri} . '/events',
+            $self->config->{monitor_uri} . '/events',
             { sender => 'user', user_id => $user->id }
         );
 
@@ -744,7 +744,7 @@ sub create_order {
             next if defined $order_params->{$_};
             next unless defined $user->user_info->$_;
 
-            app->log->debug("overriding $_ from user for order creation");
+            $self->app->log->debug("overriding $_ from user for order creation");
             $order_params->{$_} = $user->user_info->$_;
         }
     }
@@ -794,7 +794,7 @@ sub create_order {
                         my $name = $params{name} // join(
                             q{ - },
                             $self->trim_clothes_code($clothes),
-                            $self->app->config->{category}{ $clothes->category }{str},
+                            $self->config->{category}{ $clothes->category }{str},
                         );
                         my $price       = $params{price}       // $clothes->price;
                         my $final_price = $params{final_price} // (
@@ -830,8 +830,8 @@ sub create_order {
         }
         catch {
             chomp;
-            app->log->error("failed to create a new order & a new order_clothes");
-            app->log->error($_);
+            $self->app->log->error("failed to create a new order & a new order_clothes");
+            $self->app->log->error($_);
 
             return ( undef, $_ );
         };
@@ -1029,7 +1029,7 @@ sub update_order {
             return $order if $to == $from;
 
             my $res = HTTP::Tiny->new( timeout => 1 )->post_form(
-                $self->app->config->{monitor_uri} . '/events',
+                $self->config->{monitor_uri} . '/events',
                 { sender => 'order', order_id => $order->id, from => $from, to => $to }
             );
 
@@ -1040,8 +1040,8 @@ sub update_order {
         }
         catch {
             chomp;
-            app->log->error("failed to update a new order & a new order_clothes");
-            app->log->error($_);
+            $self->app->log->error("failed to update a new order & a new order_clothes");
+            $self->app->log->error($_);
 
             no warnings 'experimental';
 
@@ -1249,7 +1249,7 @@ sub get_clothes {
 sub get_nearest_booked_order {
     my ( $self, $user ) = @_;
 
-    my $dt_now = DateTime->now( time_zone => $self->app->config->{timezone} );
+    my $dt_now = DateTime->now( time_zone => $self->config->{timezone} );
     my $dtf = $self->app->DB->storage->datetime_parser;
 
     my $rs = $user->search_related(
@@ -1340,7 +1340,7 @@ sub user_avg_diff {
     }
 
     my $osg_db = OpenCloset::Size::Guess->new(
-        'DB', _time_zone => $self->app->config->{timezone},
+        'DB', _time_zone => $self->config->{timezone},
         _schema => $self->app->DB, _range => 0,
     );
     $osg_db->gender( $user->user_info->gender );
@@ -1386,7 +1386,7 @@ sub user_avg2 {
     do {
         my $dt_base = try {
             DateTime->new(
-                time_zone => $self->app->config->{timezone}, year => 2015, month => 5,
+                time_zone => $self->config->{timezone}, year => 2015, month => 5,
                 day       => 29,
             );
         };
