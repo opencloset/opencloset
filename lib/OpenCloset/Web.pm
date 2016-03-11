@@ -6,7 +6,7 @@ use DateTime;
 
 use OpenCloset::Schema;
 
-use version; our $VERSION = qv("v1.1.1");
+use version; our $VERSION = qv("v1.1.2");
 
 has CACHE => sub {
     my $self  = shift;
@@ -161,6 +161,13 @@ sub _public_routes_staff {
     $r->get('/login')->to('user#login_form');
     $r->post('/login')->to('user#login');
     $r->get('/logout')->to('user#signout');
+
+    $r->get('/order/:order_id/return')->to('order#order_return');
+    $r->post('/order/:order_id/return')->to('order#create_order_return');
+    $r->get('/order/:order_id/return/success')->to('order#order_return_success');
+    $r->get('/order/:order_id/extension')->to('order#order_extension');
+    $r->post('/order/:order_id/extension')->to('order#create_order_extension');
+    $r->get('/order/:order_id/extension/success')->to('order#order_extension_success');
 }
 
 =head2 _public_routes_visit
@@ -266,12 +273,6 @@ sub _private_routes {
     $r->post('/order')->to('order#create');
     $r->get('/order/:id')->to('order#order');
     $r->post('/order/:id/update')->to('order#update');
-    $r->get('/order/:order_id/return')->to('order#order_return');
-    $r->post('/order/:order_id/return')->to('order#create_order_return');
-    $r->get('/order/:order_id/return/success')->to('order#order_return_success');
-    $r->get('/order/:order_id/extension')->to('order#order_extension');
-    $r->post('/order/:order_id/extension')->to('order#create_order_extension');
-    $r->get('/order/:order_id/extension/success')->to('order#order_extension_success');
 
     $r->get('/booking')->to('booking#index');
     $r->get('/booking/:ymd')->to('booking#ymd');
