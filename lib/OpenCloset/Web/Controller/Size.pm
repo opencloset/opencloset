@@ -37,7 +37,7 @@ sub guess {
     );
 
     my $bestfit_1_order_rs = $self->DB->resultset('Order')->search(
-        { bestfit => 1, height => $height, weight => $weight, },
+        { bestfit => 1, gender => $gender, height => $height, weight => $weight, },
         {
             order_by => [ { -asc => 'me.height' }, { -asc => 'me.weight' }, ],
             prefetch => { 'order_details' => 'clothes', },
