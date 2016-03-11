@@ -33,6 +33,7 @@ OpenCloset::Web::Plugin::Helpers - opencloset web mojo helper
 sub register {
     my ( $self, $app, $conf ) = @_;
 
+    $app->helper( log => sub { shift->app->log } );
     $app->helper( error                     => \&error );
     $app->helper( meta_link                 => \&meta_link );
     $app->helper( meta_text                 => \&meta_text );
