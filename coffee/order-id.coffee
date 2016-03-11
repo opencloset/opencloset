@@ -475,7 +475,7 @@ $ ->
         #
         # 주문서 페이지 리로드
         #
-        if type is 'all'
+        if _.contains(['all', 'part'], type)
           username = $('#user-name').text()
           phone    = $('#user-phone').text()
           OpenCloset.sendSMS phone, "[열린옷장] #{username}님이 반납하신 의류가 정상적으로 반납되었습니다. 감사합니다.", (data, textStatus, jqXHR) ->

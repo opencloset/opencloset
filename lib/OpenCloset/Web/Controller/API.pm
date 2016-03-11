@@ -806,6 +806,7 @@ sub api_order_return_part {
     $order_params{user_id}          = $order->user_id;
     $order_params{user_target_date} = $order->user_target_date;
     $order_params{booking_id}       = $order->booking_id;
+    $order_params{return_memo}      = $order->return_memo;
     $order_params{status_id}        = 19;                      # 결제대기
 
     delete $order_params{id};
