@@ -10,6 +10,7 @@ use Gravatar::URL;
 use HTTP::Tiny;
 use List::MoreUtils qw( zip );
 use Parcel::Track;
+use Statistics::Basic;
 use Try::Tiny;
 
 use OpenCloset::Size::Guess;
