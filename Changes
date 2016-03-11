@@ -1,3 +1,6 @@
+v1.1.1    Fri, 11 Mar 2016 13:48:59 +0900
+  - Add `log` helper for shortcut `app->log`
+
 v1.1.0    Fri, 11 Mar 2016 12:29:35 +0900
   - Mojolicious::Lite 대신에 Mojolicious 를 사용 (#733)
   - 부분반납후에도 반납 메세지를 알림 (#611)
