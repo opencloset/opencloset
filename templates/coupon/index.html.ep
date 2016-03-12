@@ -7,16 +7,16 @@
 </div>
 
 <div class="text-center">
-  <form>
+  <form method="POST" action="<%= url_for('/coupon/validate') %>">
     <div class="row">
       <div class="col-md-4">
-        <input type="text" class="form-control input-lg" placeholder="GJ8U">
+        <input type="text" name="code" class="form-control input-lg" placeholder="GJ8U">
       </div>
       <div class="col-md-4">
-        <input type="text" class="form-control input-lg" placeholder="QY87">
+        <input type="text" name="code" class="form-control input-lg" placeholder="QY87">
       </div>
       <div class="col-md-4">
-        <input type="text" class="form-control input-lg" placeholder="JY9L">
+        <input type="text" name="code" class="form-control input-lg" placeholder="JY9L">
       </div>
 
       <div class="col-md-12 btn-submit">
@@ -24,4 +24,8 @@
       </div>
     </div>
   </form>
+
+  % if (my $error = flash('error')) {
+  <div class="alert alert-danger" role="alert"><%= $error %></div>
+  % }
 </div>

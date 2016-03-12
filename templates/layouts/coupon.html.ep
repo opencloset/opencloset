@@ -13,6 +13,13 @@
 
     <script src="/components/jquery/dist/jquery.min.js"></script>
     <script src="/components/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script src="/components/jquery-mask-plugin/dist/jquery.mask.js"></script>
+
+    <script>
+      $(function() {
+        return $('input[name=code]').mask('AAAA');
+      });
+    </script>
 
     <title><%= title %> - 열린옷장</title>
   </head>
