@@ -195,6 +195,7 @@
                         ></a>
                       \/
                       %strong.order-stage0-price 0원
+                      = coupon2label($order->coupon)
                   - if ( $order_status eq '대여중' ) {
                     %li.row
                       .col-sm-1
