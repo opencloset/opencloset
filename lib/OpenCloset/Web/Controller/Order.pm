@@ -357,31 +357,32 @@ sub order {
     # 결제 대기 상태이면 사용자의 정보를 주문서에 동기화 시킴
     #
     if ( $order->status_id == 19 ) {
-        my $user    = $order->user;
-        my $comment = $user->user_info->comment ? $user->user_info->comment . "\n" : q{};
-        my $desc    = $order->desc ? $order->desc . "\n" : q{};
+        my $user      = $order->user;
+        my $user_info = $user->user_info;
+        my $comment   = $user_info->comment ? $user_info->comment . "\n" : q{};
+        my $desc      = $order->desc ? $order->desc . "\n" : q{};
         $order->update(
             {
-                wearon_date  => $user->user_info->wearon_date,
-                purpose      => $user->user_info->purpose,
-                purpose2     => $user->user_info->purpose2,
-                pre_category => $user->user_info->pre_category,
-                pre_color    => $user->user_info->pre_color,
-                height       => $user->user_info->height,
-                weight       => $user->user_info->weight,
-                neck         => $user->user_info->neck,
-                bust         => $user->user_info->bust,
-                waist        => $user->user_info->waist,
-                hip          => $user->user_info->hip,
-                topbelly     => $user->user_info->topbelly,
-                belly        => $user->user_info->belly,
-                thigh        => $user->user_info->thigh,
-                arm          => $user->user_info->arm,
-                leg          => $user->user_info->leg,
-                knee         => $user->user_info->knee,
-                foot         => $user->user_info->foot,
-                pants        => $user->user_info->pants,
-                skirt        => $user->user_info->skirt,
+                wearon_date  => $user_info->wearon_date,
+                purpose      => $user_info->purpose,
+                purpose2     => $user_info->purpose2,
+                pre_category => $user_info->pre_category,
+                pre_color    => $user_info->pre_color,
+                height       => $user_info->height,
+                weight       => $user_info->weight,
+                neck         => $user_info->neck,
+                bust         => $user_info->bust,
+                waist        => $user_info->waist,
+                hip          => $user_info->hip,
+                topbelly     => $user_info->topbelly,
+                belly        => $user_info->belly,
+                thigh        => $user_info->thigh,
+                arm          => $user_info->arm,
+                leg          => $user_info->leg,
+                knee         => $user_info->knee,
+                foot         => $user_info->foot,
+                pants        => $user_info->pants,
+                skirt        => $user_info->skirt,
                 desc         => $comment . $desc,
             }
         );
