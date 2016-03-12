@@ -495,6 +495,17 @@ sub update {
 
                         $self->app->log->error("Failed to create a new SMS: $msg") unless $sms;
                     }
+
+                    #
+                    # 쿠폰의 상태를 변경
+                    #
+                    #   결제방식이 쿠폰(+현금|+카드)?
+                    #
+                    if ( my $coupon = $order->coupon ) {
+                        if ( $order->price_pay_with =~ m/쿠폰/ ) {
+                            $coupon->update( { status => 'used' } );
+                        }
+                    }
                 }
 
                 #
