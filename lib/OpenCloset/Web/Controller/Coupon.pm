@@ -43,7 +43,7 @@ sub validate {
     my $codes = $v->every_param('code');
     my $code = join( '-', @$codes );
 
-    my ( $valid_code, $err_code ) = $self->_validate($code);
+    my ( $valid_code, $err_code ) = $self->_validate_code($code);
     if ($valid_code) {
         $self->session( coupon_code => $valid_code );
         $self->redirect_to('/visit');
@@ -54,7 +54,7 @@ sub validate {
     }
 }
 
-sub _validate {
+sub _validate_code {
     my ( $self, $code ) = @_;
 
     my $valid_code = cc_validate( code => $code, parts => 3 );
