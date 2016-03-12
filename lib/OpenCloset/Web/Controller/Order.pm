@@ -294,6 +294,16 @@ sub create {
                 { name => '에누리', price => 0, final_price => 0, } )
                 or die "failed to create a new order_detail for discount\n";
 
+            #
+            # 쿠폰을 사용했다면 결제방법을 입력
+            #
+            if ( my $coupon = $order->coupon ) {
+                my $type           = $coupon->type;
+                my $price_pay_with = '쿠폰';
+                $price_pay_with .= '+현금' if $type eq 'default';
+                $order->update( { price_pay_with => $price_pay_with } );
+            }
+
             $guard->commit;
 
             return $order;
