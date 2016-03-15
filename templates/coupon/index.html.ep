@@ -1,0 +1,31 @@
+% title '열린옷장 쿠폰';
+% layout 'coupon';
+
+<div class="text-center">
+  <h1>열린옷장 쿠폰</h1>
+  <p>쿠폰번호를 입력하시고 방문예약하시면 의류 한셋트를 대여해드립니다</p>
+</div>
+
+<div class="text-center">
+  <form method="POST" action="<%= url_for('/coupon/validate') %>">
+    <div class="row">
+      <div class="col-md-4">
+        <input type="text" name="code" class="form-control input-lg" placeholder="GJ8U">
+      </div>
+      <div class="col-md-4">
+        <input type="text" name="code" class="form-control input-lg" placeholder="QY87">
+      </div>
+      <div class="col-md-4">
+        <input type="text" name="code" class="form-control input-lg" placeholder="JY9L">
+      </div>
+
+      <div class="col-md-12 btn-submit">
+        <button type="submit" class="btn btn-success btn-lg btn-block">입력</button>
+      </div>
+    </div>
+  </form>
+
+  % if (my $error = flash('error')) {
+  <div class="alert alert-danger" role="alert"><%= $error %></div>
+  % }
+</div>

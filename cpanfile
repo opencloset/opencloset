@@ -1,3 +1,4 @@
+requires 'Algorithm::CouponCode';
 requires 'CHI';
 requires 'Data::Pageset';
 requires 'DateTime';

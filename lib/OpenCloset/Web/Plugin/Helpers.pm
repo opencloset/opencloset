@@ -9,6 +9,8 @@ use DateTime;
 use Gravatar::URL;
 use HTTP::Tiny;
 use List::MoreUtils qw( zip );
+use Mojo::ByteStream;
+use Mojo::DOM::HTML;
 use Parcel::Track;
 use Statistics::Basic;
 use Try::Tiny;
@@ -71,6 +73,7 @@ sub register {
     $app->helper( count_visitor             => \&count_visitor );
     $app->helper( get_dbic_cond_attr_unpaid => \&get_dbic_cond_attr_unpaid );
     $app->helper( is_nonpayment             => \&is_nonpayment );
+    $app->helper( coupon2label              => \&coupon2label );
 }
 
 =head1 HELPERS
@@ -1634,6 +1637,44 @@ sub is_nonpayment {
 
     return $self->app->DB->resultset('OrderDetail')
         ->search( { order_id => $order_id, stage => 4 } )->next;
+}
+
+=head2 coupon2label( $coupon )
+
+    %= coupon2label($order->coupon);
+    # <span class="label label-info">사용가능 쿠폰</span>
+    # <span class="label label-info">사용가능 쿠폰 10,000</span>
+    # <span class="label label-danger">사용된 쿠폰</span>
+
+=cut
+
+our %COUPON_STATUS_MAP = (
+    ''        => '사용가능',
+    used      => '사용된',
+    provided  => '지급된',
+    discarded => '폐기된'
+);
+
+sub coupon2label {
+    my ( $self, $coupon ) = @_;
+    return '' unless $coupon;
+
+    my $type   = $coupon->type;
+    my $status = $coupon->status || '';
+    my $price  = $coupon->price;
+
+    my $klass = 'label-info';
+    $klass = 'label-danger' if $status =~ /(us|discard)ed/;
+
+    my $extra = '';
+    $extra = ' ' . $self->commify($price) if $type eq 'default';
+
+    my $html = Mojo::DOM::HTML->new;
+    $html->parse(
+        qq{<span class="label $klass">$COUPON_STATUS_MAP{$status} 쿠폰$extra</span>});
+
+    my $tree = $html->tree;
+    return Mojo::ByteStream->new( Mojo::DOM::HTML::_render($tree) );
 }
 
 1;
