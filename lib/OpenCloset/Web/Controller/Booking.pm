@@ -221,11 +221,18 @@ sub visit {
                     #
                     # 예약 정보가 없는 경우 - 신규 예약 신청 상황
                     #
+                    my $coupon_id;
+                    if ( my $code = delete $self->session->{coupon_code} ) {
+                        my $coupon = $self->DB->resultset('Coupon')->find( { code => $code } );
+                        $coupon_id = $coupon->id;
+                    }
+
                     my $order_obj = $user->create_related(
                         'orders',
                         {
-                            status_id  => 14,      # 방문예약: status 테이블 참조
+                            status_id  => 14,        # 방문예약: status 테이블 참조
                             booking_id => $booking,
+                            coupon_id  => $coupon_id,
                         }
                     );
                     if ($order_obj) {

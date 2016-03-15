@@ -179,6 +179,9 @@ sub _public_routes_visit {
     my $r    = $self->routes;
 
     $r->any('/visit')->to('booking#visit');
+
+    $r->get('/coupon')->to('coupon#index');
+    $r->post('/coupon/validate')->to('coupon#validate');
 }
 
 =head2 _private_routes
