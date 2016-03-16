@@ -122,49 +122,26 @@ sub user {
 sub search_clothes {
     my $self = shift;
 
-    #
-    # fetch user
-    #
-    my %params = $self->get_params(
-        qw/ id gender height weight bust waist topbelly thigh arm leg /);
-
-    my $user = $self->get_user( { id => $params{id} } );
+    my $id = $self->param('id');
+    my $user = $self->get_user( { id => $id } );
     return unless $user;
 
-    #
-    # validate params
-    #
+    my $user_info = $user->user_info;
 
-    my $v = $self->create_validator;
-    $v->field('gender')->in(qw/ male female /);
-    $v->field('height')->regexp(qr/^\d+$/);
-    $v->field('weight')->regexp(qr/^\d+$/);
-    $v->field('bust')->regexp(qr/^\d+$/);
-    $v->field('waist')->regexp(qr/^\d+$/);
-    $v->field('topbelly')->regexp(qr/^\d+$/);
-    $v->field('thigh')->regexp(qr/^\d+$/);
-    $v->field('arm')->regexp(qr/^\d+$/);
-    $v->field('leg')->regexp(qr/^\d+$/);
+    return $self->error( 400, { str => 'Height is reuired' } ) unless $user_info->height;
+    return $self->error( 400, { str => 'Weight is required' } )
+        unless $user_info->weight;
 
-    unless ( $self->validate( $v, \%params ) ) {
-        my @error_str;
-        while ( my ( $k, $v ) = each %{ $v->errors } ) {
-            push @error_str, "$k:$v";
-        }
-        return $self->error( 400, { str => join( ',', @error_str ), data => $v->errors, } );
-    }
-
-    %params = (
-        gender   => $user->user_info->gender,
-        height   => $user->user_info->height,
-        weight   => $user->user_info->weight,
-        bust     => $user->user_info->bust,
-        waist    => $user->user_info->waist,
-        topbelly => $user->user_info->waist,
-        thigh    => $user->user_info->thigh,
-        arm      => $user->user_info->arm,
-        leg      => $user->user_info->leg,
-        %params
+    my %params = (
+        gender   => $user_info->gender,
+        height   => $user_info->height,
+        weight   => $user_info->weight,
+        bust     => $user_info->bust || 0,
+        waist    => $user_info->waist || 0,
+        topbelly => $user_info->waist || 0,
+        thigh    => $user_info->thigh || 0,
+        arm      => $user_info->arm || 0,
+        leg      => $user_info->leg || 0,
     );
 
     #
@@ -184,6 +161,10 @@ sub search_clothes {
     );
 
     my $result = $guesser->guess;
+
+    return $self->error( 500, { str => "Guess failed: $result->{reason}" } )
+        unless $result->{success};
+
     my %guess = map { $_ => $result->{$_} } grep { $result->{$_} } keys %{$result};
 
     #
@@ -356,9 +337,10 @@ sub auth {
         json => { json => { error => 'invalid_access' }, status => 400 },
         html => sub {
             my $site_type = $self->config->{site_type};
-            if ($site_type eq 'visit') {
+            if ( $site_type eq 'visit' ) {
                 $self->redirect_to( $self->url_for('/visit') );
-            } else {
+            }
+            else {
                 $self->redirect_to( $self->url_for('/login') );
             }
         }
