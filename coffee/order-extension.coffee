@@ -5,4 +5,4 @@ $ ->
     startDate: new Date()
     todayHighlight: true
     autoclose: true
-    daysOfWeekDisabled: '0'    # sunday
+    language: 'kr'
