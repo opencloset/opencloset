@@ -119,7 +119,7 @@ $ ->
         when 'skirt'     then types = [ 'waist', 'hip', 'length'                   ]
         when 'blouse'    then types = [ 'bust', 'arm'                              ]
         when 'belt'      then types = [ 'length'                                   ]
-        when 'shoes'     then types = [ 'length'                                   ]
+        when 'shoes'     then types = [ 'foot'                                     ]
         else                  types = [                                            ]
       for type in types
         $("#display-clothes-#{type}").show()
@@ -160,7 +160,7 @@ $ ->
       clothes_belly:        $('#clothes-belly').val()
       clothes_thigh:        $('#clothes-thigh').val()
       clothes_arm:          $('#clothes-arm').val()
-      clothes_length:       $('#clothes-length').val()
+      clothes_length:       $('#clothes-length').val() or $('#clothes-foot').val()
       clothes_foot:         $('#clothes-foot').val()
 
     return unless data.clothes_category
