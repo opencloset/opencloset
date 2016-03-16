@@ -25,11 +25,12 @@ sub index {
 
     my ( $cond, $attr ) = $self->_search_cond_attr( $q, $p, $s );
     my $rs = $self->DB->resultset('Donation')->search( $cond, $attr );
-    my $bucket = $self->DB->resultset('Clothes')->search( { donation_id => undef } );
+    my $bucket  = $self->DB->resultset('Clothes')->search( { donation_id => undef } );
+    my $pager   = $rs->pager;
     my $pageset = Data::Pageset->new(
         {
-            total_entries    => $rs->pager->total_entries,
-            entries_per_page => $rs->pager->entries_per_page,
+            total_entries    => $pager->total_entries,
+            entries_per_page => $pager->entries_per_page,
             pages_per_set    => 5,
             current_page     => $p,
         }
@@ -70,7 +71,13 @@ sub donation {
 
 sub _search_cond_attr {
     my ( $self, $q, $page, $entries_per_page ) = @_;
-    return ( undef, undef ) unless length $q > 1;
+
+    my $attr = {
+        order_by => { -asc => 'id' }, page => $page,
+        rows     => $entries_per_page
+    };
+
+    return ( undef, $attr ) unless length $q > 1;
 
     my @or;
     my $join = { user => 'user_info' };
@@ -96,11 +103,7 @@ sub _search_cond_attr {
         push @or, { name => { like => "%$q%" } };
     }
 
-    my $attr = {
-        join => $join, order_by => { -asc => 'id' }, page => $page,
-        rows => $entries_per_page
-    };
-
+    $attr->{join} = $join;
     return ( { -or => [@or] }, $attr );
 }
 
