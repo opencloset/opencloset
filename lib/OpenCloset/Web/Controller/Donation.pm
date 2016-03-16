@@ -23,32 +23,9 @@ sub index {
     my $s = $self->param('s') || $self->config->{entries_per_page};
     my $q = $self->param('q');
 
-    my $cond;
-    my $join = [ { 'user' => 'user_info' } ];
-    if ($q) {
-        $cond = [
-            { 'name'            => { like => "%$q%" } }, { 'email' => { like => "%$q%" } },
-            { 'user_info.phone' => { like => "%$q%" } },
-            { 'user_info.address4' => { like => "%$q%" } }, # 상세주소만 검색
-            { 'user_info.birth' => { like => "%$q%" } }, { 'user_info.gender' => $q },
-        ];
-
-        if ( $q =~ m/^\w{4,5}$/ ) {
-            push @$cond, { 'clothes.code' => sprintf( '%05s', uc($q) ) };
-            $join = [ 'clothes', { 'user' => 'user_info' } ];
-        }
-    }
-    else {
-        $cond = {};
-    }
-
-    my $rs = $self->DB->resultset('Donation')->search(
-        $cond,
-        { join => $join, order_by => { -asc => 'id' }, page => $p, rows => $s },
-    );
-
+    my ( $cond, $attr ) = $self->_search_cond_attr( $q, $p, $s );
+    my $rs = $self->DB->resultset('Donation')->search( $cond, $attr );
     my $bucket = $self->DB->resultset('Clothes')->search( { donation_id => undef } );
-
     my $pageset = Data::Pageset->new(
         {
             total_entries    => $rs->pager->total_entries,
@@ -85,6 +62,46 @@ sub donation {
         donation     => $donation, bucket => $bucket,
         clothes_list => [ $donation->clothes ]
     );
+}
+
+=head2 _search_cond_attr($q, $page, $entries_per_page)
+
+=cut
+
+sub _search_cond_attr {
+    my ( $self, $q, $page, $entries_per_page ) = @_;
+    return ( undef, undef ) unless length $q > 1;
+
+    my @or;
+    my $join = { user => 'user_info' };
+    if ( $q =~ /^[0-9\-]+$/ ) {
+        $q =~ s/-//g;
+        push @or, { 'user_info.phone' => { like => "%$q%" } };
+        push @or, { email             => { like => "%$q%" } };
+    }
+    elsif ( $q =~ m/^0?[EBCJOPSAKTW][A-Z0-9]{3}$/ ) {
+        push @or, { 'clothes.code' => sprintf( '%05s', uc($q) ) };
+        $join = 'clothes';
+    }
+    elsif ( $q =~ /^[a-zA-Z0-9_\-]+/ ) {
+        if ( $q =~ /\@/ ) {
+            push @or, { email => { like => "%$q%" } };
+        }
+        else {
+            push @or, { email => { like => "%$q%" } };
+            push @or, { name  => { like => "%$q%" } };
+        }
+    }
+    elsif ( $q =~ m/^[ㄱ-힣]+$/ ) {
+        push @or, { name => { like => "%$q%" } };
+    }
+
+    my $attr = {
+        join => $join, order_by => { -asc => 'id' }, page => $page,
+        rows => $entries_per_page
+    };
+
+    return ( { -or => [@or] }, $attr );
 }
 
 1;
