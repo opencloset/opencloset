@@ -24,7 +24,7 @@
 - if (my $memo = $order->return_memo) {
   %div
     %p
-      %span.label.label-warning 반납 메세지
+      %span.label.label-warning 반납 확인 메모
       = $memo
   %hr
 - }
@@ -688,7 +688,7 @@
               .space-6
               .row
                 .col-xs-11.label.label-info.arrowed-in.arrowed-in-right
-                  %strong 주문서 메모
+                  %strong 주문서 메모 5F
                 .row
                 .space-6
                 :plain
@@ -740,7 +740,7 @@
               .space-6
               .row
                 .col-xs-11.label.label-warning.arrowed-in.arrowed-in-right
-                  %strong 반납 메세지
+                  %strong 반납 확인 메모 4F
                 .row
                 .space-6
                 :plain
