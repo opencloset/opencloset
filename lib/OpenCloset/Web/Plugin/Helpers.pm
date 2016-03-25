@@ -548,7 +548,7 @@ sub update_user {
     $v->field('gender')->in(qw/ male female /);
     $v->field('birth')->regexp(qr/^(0|((19|20)\d{2}))$/);
     $v->field(
-        qw/ height weight neck bust waist hip topbelly belly thigh arm leg knee foot pants skirt /
+        qw/ height weight neck bust waist hip topbelly belly thigh arm leg knee foot pants /
         )->each(
         sub {
             shift->regexp(qr/^\d{1,3}$/);
@@ -686,7 +686,7 @@ sub create_order {
         );
         $v->field('additional_day')->regexp(qr/^\d+$/);
         $v->field(
-            qw/ height weight neck bust waist hip topbelly belly thigh arm leg knee foot pants skirt /
+            qw/ height weight neck bust waist hip topbelly belly thigh arm leg knee foot pants /
             )->each(
             sub {
                 shift->regexp(qr/^\d{1,3}$/);
@@ -743,7 +743,7 @@ sub create_order {
         # we believe user is exist since parameter validator
         #
         for (
-            qw/ height weight neck bust waist hip topbelly belly thigh arm leg knee foot pants skirt /
+            qw/ height weight neck bust waist hip topbelly belly thigh arm leg knee foot pants /
             )
         {
             next if defined $order_params->{$_};
@@ -902,7 +902,7 @@ sub update_order {
         );
         $v->field('additional_day')->regexp(qr/^\d+$/);
         $v->field(
-            qw/ height weight neck bust waist hip topbelly belly thigh arm leg knee foot pants skirt /
+            qw/ height weight neck bust waist hip topbelly belly thigh arm leg knee foot pants /
             )->each(
             sub {
                 shift->regexp(qr/^\d{1,3}$/);

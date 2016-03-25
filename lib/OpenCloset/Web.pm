@@ -6,7 +6,7 @@ use DateTime;
 
 use OpenCloset::Schema;
 
-use version; our $VERSION = qv("v1.1.5");
+use version; our $VERSION = qv("v1.1.6");
 
 has CACHE => sub {
     my $self  = shift;

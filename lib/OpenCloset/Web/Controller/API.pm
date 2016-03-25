@@ -51,7 +51,6 @@ sub api_create_user {
             leg
             neck
             pants
-            skirt
             phone
             purpose
             purpose2
@@ -73,7 +72,7 @@ sub api_create_user {
     $v->field('gender')->in(qw/ male female /);
     $v->field('birth')->regexp(qr/^(19|20)\d{2}$/);
     $v->field(
-        qw/ height weight neck bust waist hip topbelly belly thigh arm leg knee foot pants skirt /
+        qw/ height weight neck bust waist hip topbelly belly thigh arm leg knee foot pants /
         )->each(
         sub {
             shift->regexp(qr/^\d{1,3}$/);
@@ -199,7 +198,6 @@ sub api_update_user {
             leg
             neck
             pants
-            skirt
             phone
             pre_category
             pre_color
@@ -334,7 +332,6 @@ sub api_create_order {
             message
             neck
             pants
-            skirt
             parent_id
             price_pay_with
             purpose
@@ -446,7 +443,6 @@ sub api_update_order {
             message
             neck
             pants
-            skirt
             parent_id
             pass
             price_pay_with
@@ -753,7 +749,6 @@ sub api_order_return_part {
             message
             neck
             pants
-            skirt
             parent_id
             price_pay_with
             purpose

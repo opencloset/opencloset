@@ -138,17 +138,17 @@
                               .profile-info-row
                                 .profile-info-name 대여 목적
                                 .profile-info-value
-                                  %span.editable#user-purpose{ 'data-name' => 'purpose', 'data-value' => "#{ $user->user_info->purpose}" }
+                                  %span.editable#user-purpose{ 'data-name' => 'purpose', 'data-value' => "#{ $user->user_info->purpose }" }
 
                               .profile-info-row
                                 .profile-info-name 상세 대여 목적
                                 .profile-info-value
-                                  %span.editable#user-purpose2{ 'data-name' => 'purpose2', 'data-value' => "#{ $user->user_info->purpose2}" }
+                                  %span.editable#user-purpose2{ 'data-name' => 'purpose2', 'data-value' => "#{ $user->user_info->purpose2 }" }
 
                               .profile-info-row
                                 .profile-info-name 설명
                                 .profile-info-value
-                                  %span.editable#user-comment{ 'data-name' => 'comment' }= $user->user_info->comment
+                                  %span.editable#user-comment{ 'data-name' => 'comment' }= $user->user_info->comment || ''
 
                               .profile-info-row
                                 .profile-info-name 대여 희망 품목
@@ -183,7 +183,7 @@
                                   %span.editable#user-bust{ 'data-name' => 'bust' }= $user->user_info->bust
                                   %span.diff= $diff->{bust}
                                   %span.avg= $avg->{bust}
-                                  %span.avg2= $avg2->{bust}
+                                  %span.avg2= $avg2->{bust} || ''
 
                               .profile-info-row.waist
                                 .profile-info-name 허리 둘레
@@ -191,12 +191,7 @@
                                   %span.editable#user-waist{ 'data-name' => 'waist' }= $user->user_info->waist
                                   %span.diff= $diff->{waist}
                                   %span.avg= $avg->{waist}
-                                  %span.avg2= $avg2->{waist}
-
-                              .profile-info-row
-                                .profile-info-name 스커트 둘레
-                                .profile-info-value
-                                  %span.editable#user-skirt{ 'data-name' => 'skirt' }= $user->user_info->skirt
+                                  %span.avg2= $avg2->{waist} || ''
 
                               .profile-info-row.topbelly
                                 .profile-info-name 윗배 둘레
@@ -204,7 +199,7 @@
                                   %span.editable#user-topbelly{ 'data-name' => 'topbelly' }= $user->user_info->topbelly
                                   %span.diff= $diff->{topbelly}
                                   %span.avg= $avg->{topbelly}
-                                  %span.avg2= $avg2->{topbelly}
+                                  %span.avg2= $avg2->{topbelly} || ''
 
                               .profile-info-row.belly
                                 .profile-info-name 배꼽 둘레
@@ -212,7 +207,7 @@
                                   %span.editable#user-belly{ 'data-name' => 'belly' }= $user->user_info->belly
                                   %span.diff= $diff->{belly}
                                   %span.avg= $avg->{belly}
-                                  %span.avg2= $avg2->{belly}
+                                  %span.avg2= $avg2->{belly} || ''
 
                               .profile-info-row.arm
                                 .profile-info-name 팔 길이
@@ -241,7 +236,7 @@
                                   %span.editable#user-thigh{ 'data-name' => 'thigh' }= $user->user_info->thigh
                                   %span.diff= $diff->{thigh}
                                   %span.avg= $avg->{thigh}
-                                  %span.avg2= $avg2->{thigh}
+                                  %span.avg2= $avg2->{thigh} || ''
 
                               .profile-info-row.hip
                                 .profile-info-name 엉덩이 둘레
@@ -249,7 +244,7 @@
                                   %span.editable#user-hip{ 'data-name' => 'hip' }= $user->user_info->hip
                                   %span.diff= $diff->{hip}
                                   %span.avg= $avg->{hip}
-                                  %span.avg2= $avg2->{hip}
+                                  %span.avg2= $avg2->{hip} || ''
 
                               .profile-info-row.foot
                                 .profile-info-name 발 크기
