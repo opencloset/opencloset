@@ -382,7 +382,6 @@ sub order {
                 knee         => $user_info->knee,
                 foot         => $user_info->foot,
                 pants        => $user_info->pants,
-                skirt        => $user_info->skirt,
                 desc         => $comment . $desc,
             }
         );

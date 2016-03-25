@@ -102,7 +102,6 @@ $ ->
       knee:     '무릎 길이'
       foot:     '발 크기'
       pants:    '바지 길이'
-      skirt:    '스커트 둘레'
     color:
       black:        '블랙'
       navy:         '네이비'
