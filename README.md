@@ -39,15 +39,6 @@ bower를 통해 front-end 패키지를 설치합니다.
 
     $ bower install
 
-### ruby ###
-
-[rbenv](https://github.com/sstephenson/rbenv) 또는 [rvm](https://rvm.io/) 의 사용을 추천합니다.
-
-`scss` 파일의 컴파일을 위한 도구를 설치해야 합니다.
-
-    $ gem install bundler
-    $ bundle install
-
 ### 데이터베이스 초기화
 
 MySQL을 사용해서 데이터베이스를 `opencloset`, 사용자 이름 `opencloset`,
@@ -121,7 +112,7 @@ MySQL 데이터베이스에 접속하며 `opencloset` 데이터베이스에
 
 ## front-end 파일의 수정 ##
 
-scss 파일이나 coffeescript 파일이 추가 되었거나 변경되었다면, `grunt`
+less 파일이나 coffeescript 파일이 추가 되었거나 변경되었다면, `grunt`
 명령어를 이용해서 각각의 파일을 js, css 파일로 컴파일합니다.
 
     $ grunt
@@ -139,16 +130,16 @@ scss 파일이나 coffeescript 파일이 추가 되었거나 변경되었다면,
 `grunt` 명령어를 이용해서 coffeescript 파일을 javascript 파일로
 컴파일합니다.
 
-    $ grunt coffee uglify
+    $ grunt dist-js
 
 ### 스타일시트 수정
 
-열린옷장 프로젝트의 스타일시트는 SASS를 이용해서 작성합니다.
-스타일시트를 수정해야 하면 `public/sass/*.sass` 파일을 수정해주세요.
+열린옷장 프로젝트의 스타일시트는 LESS를 이용해서 작성합니다.
+스타일시트를 수정해야 하면 `less/*.less` 파일을 수정해주세요.
 
-`grunt` 명령어를 이용해서 scss 파일을 css 파일로 컴파일합니다.
+`grunt` 명령어를 이용해서 less 파일을 css 파일로 컴파일합니다.
 
-    $ grunt compass
+    $ grunt dist-css
 
 ### 이슈, 제안이나 의견
 
