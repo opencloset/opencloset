@@ -93,9 +93,6 @@ $ ->
     unless /^\d+$/.test( phone )
       OpenCloset.alert 'danger', '유효하지 않은 휴대전화입니다.', '#visit-alert'
       return
-    if /^999/.test( phone )
-      OpenCloset.alert 'danger', '전송 불가능한 휴대전화입니다.', '#visit-alert'
-      return
 
     #
     # 저장된 예약 아이디 점검
@@ -136,9 +133,6 @@ $ ->
       return
     unless /^\d+$/.test( phone )
       OpenCloset.alert 'danger', '유효하지 않은 휴대전화입니다.', '#visit-alert'
-      return
-    if /^999/.test( phone )
-      OpenCloset.alert 'danger', '전송 불가능한 휴대전화입니다.', '#visit-alert'
       return
 
     #
