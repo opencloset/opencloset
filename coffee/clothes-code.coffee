@@ -101,3 +101,12 @@ $ ->
         OpenCloset.alert 'error', textStatus
       complete: (jqXHR, textStatus) ->
         $this.removeClass('disabled')
+
+  $('#btn-delete').click ->
+    return unless confirm "의류가 삭제 될 것입니다. 동의하십니까?"
+    $.ajax "/api#{location.pathname}",
+      type: 'DELETE'
+      success: (data, textStatus, jqXHR) ->
+        location.href = '/clothes'
+      error: (jqXHR, textStatus, errorThrown) ->
+      complete: (jqXHR, textStatus) ->
