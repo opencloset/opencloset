@@ -8,8 +8,6 @@
 -   ];
 - title meta_text($_id);
 
-- my $param_status = param('status') || '';
-
 #unpaid-done-pay-with{:style => 'display: none'}
   %h3
     미납금 - 완납
@@ -190,8 +188,7 @@
                 %a.clothes-category{ :href => '/clothes/#{ trim_clothes_code($detail->clothes) }' }= $detail->clothes->category
             - }
           %td
-            - my $msg = $param_status eq 'unpaid' ? $order->return_memo : $order->desc;
-            = $msg || ''
+            = $order->return_memo || ''
       - }
 
   = include 'partials/pagination'
