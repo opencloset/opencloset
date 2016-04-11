@@ -46,8 +46,8 @@
           </button>
         </p>
       % }
-      % my $nth = $schema->resultset('VolunteerWork')->count({ volunteer_id => $work->volunteer_id });
-      % if ($nth != 1) {
+      % my $nth = $schema->resultset('VolunteerWork')->count({ volunteer_id => $work->volunteer_id, status => 'done' });
+      % if ($nth && $nth != 1) {
         <p><small><%= $nth %>번째 방문</small></p>
       % }
     </h4>
