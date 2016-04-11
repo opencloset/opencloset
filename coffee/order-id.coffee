@@ -476,6 +476,9 @@ $ ->
         # 주문서 페이지 리로드
         #
         if _.contains(['all', 'part'], type)
+          unless $('#checkbox-send-sms').prop('checked')
+            return location.search = '?alert=1'
+
           username = $('#user-name').text()
           phone    = $('#user-phone').text()
           OpenCloset.sendSMS phone, "[열린옷장] #{username}님의 의류가 정상적으로 반납되었습니다. 감사합니다.", (data, textStatus, jqXHR) ->
