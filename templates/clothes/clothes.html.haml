@@ -378,6 +378,11 @@
                                   %span.editable#clothes-length{ 'data-name' => 'length', 'data-value' => "#{ $clothes->length }" }
 
                               .profile-info-row
+                                .profile-info-name 밑단 둘레
+                                .profile-info-value
+                                  %span.editable#clothes-cuff{ 'data-name' => 'cuff', 'data-value' => "#{ $clothes->cuff }" }
+
+                              .profile-info-row
                                 .profile-info-name 태그
                                 .profile-info-value
                                   %select.chosen-select.tag-input-style#clothes-tag{ 'data-placeholder' => '태그를 선택하세요' :multiple => '', 'data-clothes-code' => "#{ trim_clothes_code($clothes) }", 'data-base-url' => "#{ url_for('/api') }" }
