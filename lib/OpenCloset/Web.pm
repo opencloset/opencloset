@@ -306,6 +306,8 @@ sub _private_routes {
     $r->get('/volunteers')->to('volunteer#index');
 
     $r->any('/size/guess')->to('size#guess');
+
+    $r->get('/income/:ymd')->to('Income#ymd');
 }
 
 1;
