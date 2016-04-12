@@ -74,7 +74,10 @@
 
 <hr>
 
-<h4>대여 주문서</h4>
+<h4>
+  대여 주문서
+  <small><%= $rental_orders->count %> 개</small>
+</h4>
 <ul class="list-inline">
   % while (my $order = $rental_orders->next) {
   <li>
@@ -84,7 +87,10 @@
   % }
 </ul>
 
-<h4>반납 주문서</h4>
+<h4>
+  반납 주문서
+  <small><%= $return_orders->count %> 개</small>
+</h4>
 <ul class="list-inline">
   % while (my $order = $return_orders->next) {
   <li>
