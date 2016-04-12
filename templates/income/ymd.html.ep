@@ -1,0 +1,102 @@
+% layout 'extension';
+% title '정산';
+<h1>
+  <%= $ymd %>
+  <small>정산내역</small>
+</h1>
+
+<table class="table table-condensed">
+  <tbody>
+    % my $rental_fee_total = 0;
+    % for my $key (sort keys %$rental_fee) {
+    % my $fee = $rental_fee->{$key};
+    % $rental_fee_total += $fee;
+    <tr>
+      <td>
+        <%= $key %>
+      </td>
+      <td class="text-right">
+        <samp>
+          %= commify($fee)
+        </samp>
+      </td>
+    </tr>
+    % }
+    <tr class="info">
+      <td>
+        대여비
+      </td>
+      <td class="text-right">
+        <samp>
+          %= commify($rental_fee_total)
+        </samp>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<table class="table table-condensed">
+  <tbody>
+    % my $late_fee_total = 0;
+    % for my $key (sort keys %$late_fee) {
+    % my $fee = $late_fee->{$key};
+    % $late_fee_total += $fee;
+    <tr>
+      <td>
+        <%= $key %>
+      </td>
+      <td class="text-right">
+        <samp>
+          %= commify($fee)
+        </samp>
+      </td>
+    </tr>
+    % }
+    <tr class="info">
+      <td>
+        연체비
+      </td>
+      <td class="text-right">
+        <samp>
+          %= commify($late_fee_total)
+        </samp>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 class="text-right">
+  <small>합계</small>
+  <samp>
+    %= commify($total_fee)
+  </samp>
+</h2>
+
+<hr>
+
+<h4>대여 주문서</h4>
+<ul class="list-inline">
+  % while (my $order = $rental_orders->next) {
+  <li>
+    % my $id = $order->id;
+    <a href="<%= url_for('/order/' . $id) %>"><%= $id %></a>
+  </li>
+  % }
+</ul>
+
+<h4>반납 주문서</h4>
+<ul class="list-inline">
+  % while (my $order = $return_orders->next) {
+  <li>
+    % my $id = $order->id;
+    % my $is_late = $order->return_date > $order->target_date;
+    % if ($is_late) {
+    <strong>
+      <a href="<%= url_for('/order/' . $id) %>"><%= $id %></a>
+    </strong>
+    % } else {
+    <a href="<%= url_for('/order/' . $id) %>"><%= $id %></a>
+    % }
+  </li>
+  % }
+</ul>
