@@ -122,6 +122,26 @@ $ ->
         params.combodate =
           minYear: 2013
           maxYear: moment().year() + 1
+      when 'order-does_wear'
+        params.type   = 'select'
+        params.source = [
+          { value: '0', text: '안입고감' },
+          { value: '1', text: '입고감' }
+        ]
+        params.display = (value) ->
+          if typeof value == 'number'
+            value = value.toString()
+          switch value
+            when '0' then value_str = '안입고감'
+            when '1' then value_str = '입고감'
+            else          value_str = ''
+          $(this).html value_str
+        params.url = (params) ->
+          order_id = $('#order-does_wear').data('order-id')
+          url = "/api/order/#{order_id}.json"
+          $.ajax url,
+            type: 'PUT'
+            data: { id: order_id, does_wear: params.value }
       when 'user-purpose2'
         params.type = 'textarea'
       when 'user-pre_category'

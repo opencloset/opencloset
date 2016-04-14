@@ -2,6 +2,7 @@ package OpenCloset::Web::Controller::User;
 use Mojo::Base 'Mojolicious::Controller';
 
 use Data::Pageset;
+use DateTime;
 
 use OpenCloset::Size::Guess;
 
@@ -100,6 +101,24 @@ sub user {
     my $data  = $self->user_avg_diff($user);
     my $data2 = $self->user_avg2($user);
 
+    ## 당일 주문서의 does_wear
+    my $now = DateTime->now( time_zone => $self->config->{timezone} );
+    my $dt_start = DateTime->new(
+        time_zone => $self->config->{timezone}, year => $now->year, month => $now->month,
+        day       => $now->day,
+    );
+    my $dt_end = $dt_start->clone->add( hours => 24, seconds => -1 );
+    my $dtf    = $self->app->DB->storage->datetime_parser;
+    my $order  = $self->DB->resultset('Order')->search(
+        {
+            user_id        => $user->id,
+            'booking.date' => {
+                -between => [ $dtf->format_datetime($dt_start), $dtf->format_datetime($dt_end) ],
+            }
+        },
+        { join => 'booking' }
+    )->next;
+
     #
     # response
     #
@@ -110,6 +129,7 @@ sub user {
         avg                   => $data->{avg},
         diff                  => $data->{diff},
         avg2                  => $data2->{avg2},
+        does_wear             => $order
     );
 }
 
