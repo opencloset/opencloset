@@ -1,22 +1,62 @@
-body {
-    width: 100%;
-    height: 100%;
-    min-height: 100%;
-    background-color: #fedc00;
-    padding-top: 10px;
-}
-.btn-submit, .alert {
-    margin-top: 20px;
-}
-h1 {
-    color: #000;
-}
-input[type=text] {
-    text-transform: uppercase;
+body{width:100%;height:100%;min-height:100%;padding-top:25px; /*background-color:#fedc00 */}
+.alert, .btn-submit{margin-top:20px}h1{color:#000}input[type=text]{text-transform:uppercase}
+
+.top_des{font-size:16px}
+
+/* middle_area */
+.middle_area .row{/* word-break:keep-all */}
+.middle_area .jumbotron{padding:0px 1em 1em}
+.middle_area .jumbotron.col-md-4{width:32.3333%;margin-left:10px}
+.middle_area .jumbotron.col-md-4:first-child{margin-left:0}
+.col-md-4.jumbotron h3:before{display:inline-block;width:25px;height:25px;content:"";vertical-align: middle;}
+.col-md-4.jumbotron.conBox01 h3{background:url(../imgs/coupon/img_con_box01.png) no-repeat 0 0}
+.col-md-4.jumbotron.conBox02 h3{background:url(../imgs/coupon/img_con_box02.png) no-repeat 0 0} 
+.col-md-4.jumbotron.conBox03 h3{background:url(../imgs/coupon/img_con_box03.png) no-repeat 0 0} 
+.middle_area .jumbotron h3{padding: 0 0 0 5px;font-size:20px}
+.middle_area .jumbotron p{font-size:14px;font-weight:500}
+.middle_area .col-md-3 p.lead {margin:5px 0;font-size:1em;color:#d4a940/* ;font-weight:600 */}
+.middle_area .col-md-3 p{color:#746347;font-size:13px}
+.middle_area .mtitle{max-width:200px;padding:5px 10px;font-size:1.1em;font-weight:normal;background-color:#fedc00;border-radius:25px;text-align:center}
+
+.middle_area .mtitle:after{display:block;content:"";clear:both}
+.middle_area .col-md-3:after {display:inline-block;position:absolute;top:1em;right:-12px;height:23px;width:40px;content:" ";background:url("../imgs/coupon/icon_arrow.png") no-repeat 0 0;}
+.middle_area .col-md-3.conBox04:after{display:none}
+.middle_area .col-md-3{width:23.333%;padding-right:5%;margin-left:1em}
+.middle_area .col-md-3.conBox01{margin-left:0}
+
+
+/* bottom_area */
+
+div.bottom_area{margin-top:30px;padding:20px 64px 60px;background:#fedc00}
+
+div.bottom_area h1:before{display:inline-block;height:27px;width:27px;content:"";background:url(../imgs/coupon/icon_flogo.png) no-repeat 0 0;vertical-align:middle}
+div.bottom_area h1{font-size:32px;}
+
+
+
+/* .bg_color{background-color:#fedc00} */
+@media (min-width:768px){
+	/* body{padding-top:300px} */
+	 
+
+} 
+
+@media (max-width:800px){ 
+.middle_area .row{word-break: break-all;}
+.middle_area .jumbotron.col-md-4{width:100%;min-height:auto;margin:0 auto 10px}	
+.middle_area .col-md-3:after {display:none}
+.middle_area .col-md-3{width:100%;margin:0 auto;padding-right:0;padding-bottom:20px}
+.middle_area .col-md-3 > img {max-width:100px;float:left;margin-right:2em}
+.middle_area .col-md-3 p{margin-bottom:5px}
+.middle_area .col-md-3 p.lead{margin:0px 0px 5px;}
+div.bottom_area h1{font-size:24px}
 }
 
-@media (min-width: 768px) {
-    body {
-        padding-top: 300px;
-    }
+
+@media (max-width:460px){ 
+.middle_area .col-md-3 > img{margin-right:1em}
+.middle_area .col-md-3 p.lead{margin:5px 0px 15px;min-height:40px}
+div.bottom_area{padding:1.1em}
+div.bottom_area h1{font-size:18px}
+div.bottom_area .text-center br{display:none}
 }
