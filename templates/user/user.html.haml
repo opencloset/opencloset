@@ -135,6 +135,13 @@
                                 .profile-info-value
                                   %span.editable#user-wearon_date{ 'data-name' => 'wearon_date', 'data-value' => "#{ $user->user_info->wearon_date ? $user->user_info->wearon_date->ymd : q{} }" }
 
+                              - if ($does_wear) {
+                                .profile-info-row
+                                  .profile-info-name 착용 여부
+                                  .profile-info-value
+                                    %span.editable#order-does_wear{ 'data-name' => 'does_wear', 'data-type' => 'select', 'data-value' => "#{ $does_wear->does_wear }", 'data-order-id' => "#{ $does_wear->id }" }
+                              - }
+
                               .profile-info-row
                                 .profile-info-name 대여 목적
                                 .profile-info-value
