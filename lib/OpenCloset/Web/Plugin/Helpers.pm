@@ -16,6 +16,7 @@ use Statistics::Basic;
 use Try::Tiny;
 
 use OpenCloset::Size::Guess;
+use OpenCloset::Web::Constants::Measurement;
 
 =encoding utf8
 
@@ -74,6 +75,7 @@ sub register {
     $app->helper( get_dbic_cond_attr_unpaid => \&get_dbic_cond_attr_unpaid );
     $app->helper( is_nonpayment             => \&is_nonpayment );
     $app->helper( coupon2label              => \&coupon2label );
+    $app->helper( measurement2text          => \&measurement2text );
 }
 
 =head1 HELPERS
@@ -1675,6 +1677,39 @@ sub coupon2label {
 
     my $tree = $html->tree;
     return Mojo::ByteStream->new( Mojo::DOM::HTML::_render($tree) );
+}
+
+=head2 measurement2text( $user )
+
+    my $text = $self->measurement2text($user);
+
+    키 180cm
+    몸무게 70kg
+    가슴둘레 95cm
+    ..
+    ...
+    발크기 270mm
+
+=cut
+
+sub measurement2text {
+    my ( $self, $user ) = @_;
+    return '' unless $user;
+
+    my $user_info = $user->user_info;
+    return '' unless $user_info;
+
+    my @sizes;
+    for my $part (@OpenCloset::Web::Constants::Measurement::PRIMARY) {
+        my $size = $user_info->get_column($part);
+        push @sizes,
+            sprintf(
+            '%s: %s%s', $OpenCloset::Web::Constants::Measurement::LABEL_MAP{$part},
+            $size,      $OpenCloset::Web::Constants::Measurement::UNIT_MAP{$part}
+            ) if $size;
+    }
+
+    return join( "\n", @sizes );
 }
 
 1;
