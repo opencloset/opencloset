@@ -39,9 +39,9 @@
                           %a.btn.btn-link{ :href => "#{ url_for('/sms')->query( to => $user->user_info->phone ) }" }
                             %i.icon-phone.bigger-120.green
                             SMS 보내기
-                          %a.btn.btn-link{ :href => 'mailto:#{ $user->email }' }
+                          %a.btn.btn-link{ :href => "#{ url_for('/sms')->query( to => $user->user_info->phone, msg => measurement2text($user) ) }" }
                             %i.icon-envelope.bigger-120.green
-                            메일 보내기
+                            신체 사이즈 전송
                           %a.btn.btn-link{ :href => "#{ url_for('/user/' . $user->id . '/search/clothes/') }" }
                             %i.icon-search.bigger-120.green
                             의류검색
