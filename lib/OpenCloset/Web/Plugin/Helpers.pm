@@ -2,6 +2,7 @@ package OpenCloset::Web::Plugin::Helpers;
 
 use Mojo::Base 'Mojolicious::Plugin';
 
+use Crypt::Mode::ECB;
 use DateTime::Format::Duration;
 use DateTime::Format::Human::Duration;
 use DateTime::Format::Strptime;
@@ -76,6 +77,7 @@ sub register {
     $app->helper( is_nonpayment             => \&is_nonpayment );
     $app->helper( coupon2label              => \&coupon2label );
     $app->helper( measurement2text          => \&measurement2text );
+    $app->helper( decrypt_mbersn            => \&decrypt_mbersn );
 }
 
 =head1 HELPERS
@@ -1710,6 +1712,31 @@ sub measurement2text {
     }
 
     return join( "\n", @sizes );
+}
+
+=head2 decrypt_mbersn( $ciphertext_hex )
+
+    my $plaintext = $self->decrypt_mbersn('a81f368a9771ce2e8db7d98a50b52068');
+
+=cut
+
+sub decrypt_mbersn {
+    my ( $self, $ciphertext_hex ) = @_;
+    return '' unless $ciphertext_hex;
+
+    my $hex_key    = $self->config->{events}{seoul}{key};
+    my $ciphertext = pack( 'H*', $ciphertext_hex );
+    my $key        = pack( 'H*', $hex_key );
+    my $m          = Crypt::Mode::ECB->new('AES');
+    my $plaintext  = try {
+        $m->decrypt( $ciphertext, $key );
+    }
+    catch {
+        warn $_;
+        return '';
+    };
+
+    return $plaintext;
 }
 
 1;

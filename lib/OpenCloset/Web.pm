@@ -182,6 +182,8 @@ sub _public_routes_visit {
 
     $r->get('/coupon')->to('coupon#index');
     $r->post('/coupon/validate')->to('coupon#validate');
+
+    $r->get('/events/seoul')->to('event#seoul');
 }
 
 =head2 _private_routes
