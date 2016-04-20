@@ -30,6 +30,11 @@ sub seoul {
     my $mbersn = lc( $self->param('MberSn') || '' );
     $self->stash( error => '' ); # prevent template error
 
+    unless ($mbersn) {
+        return $self->render(
+            error => '잘못된 요청입니다 - MberSn 이 없습니다' );
+    }
+
     my $endDate = DateTime->new(
         year   => 2016, month => 12, day => 30, hour => 23, minute => 59,
         second => 59
@@ -49,7 +54,10 @@ sub seoul {
     }
 
     $mbersn = $self->decrypt_mbersn($mbersn);
-    return unless $mbersn;
+    unless ($mbersn) {
+        return $self->render(
+            error => '잘못된 요청입니다 - MberSn 이 유효하지 않습니다' );
+    }
 
     my %status;
     my $given = $rs->search( { desc => "seoul|$mbersn" } );
