@@ -180,7 +180,11 @@
                               <option value="blouse"> 블라우스 </option>
                             </select>
                             <p> 대여를 원하는 옷의 종류를 모두 선택해주세요. </p>
+                            % if (my $code = session('coupon_code')) {
+                            <p id="expected-fee" class="hidden"></p>
+                            % } else {
                             <p id="expected-fee"></p>
+                            % }
                             <p id="latefee-help" class="help-block">
                               <small>대여기간은 3박4일 입니다. 너무 일찍 대여하시면 대여기간에 따른 연장 비용이 발생합니다.</small>
                               <br>
