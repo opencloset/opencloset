@@ -444,4 +444,9 @@ $db_opts->{AutoCommit} //= 1;
             },
         },
     },
+    events => {
+        seoul => {
+            key => $ENV{OPENCLOSET_EVENT_SEOUL_KEY},
+        },
+    },
 };
