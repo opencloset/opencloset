@@ -6,7 +6,7 @@ use DateTime;
 
 use OpenCloset::Schema;
 
-use version; our $VERSION = qv("v1.4.1");
+use version; our $VERSION = qv("v1.4.2");
 
 has CACHE => sub {
     my $self  = shift;
@@ -182,6 +182,8 @@ sub _public_routes_visit {
 
     $r->get('/coupon')->to('coupon#index');
     $r->post('/coupon/validate')->to('coupon#validate');
+
+    $r->get('/events/seoul')->to('event#seoul');
 }
 
 =head2 _private_routes

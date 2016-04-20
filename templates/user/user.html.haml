@@ -52,7 +52,8 @@
                         .grid2
                           %span.bigger-175.blue= $donated_clothes_count
                           %br
-                          기증한 옷
+                          %a.btn.btn-link{ :href => "#{ url_for('/donation')->query(q => $user->email) }" }
+                            기증한 옷
                         .grid2
                           %span.bigger-175.blue= $rented_clothes_count
                           %br

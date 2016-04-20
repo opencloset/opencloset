@@ -3,6 +3,7 @@ use Mojo::Base 'Mojolicious::Controller';
 
 use Data::Pageset;
 use DateTime;
+use JSON qw/encode_json/;
 
 use OpenCloset::Size::Guess;
 
@@ -179,6 +180,12 @@ sub search_clothes {
         _arm      => $params{arm},
         _leg      => $params{leg},
     );
+    $self->app->log->info(
+        "guess parameter : "
+            . encode_json(
+            { %{params}{qw/gender height weight bust waist topbelly thigh arm leg/} }
+            )
+    );
 
     my $result = $guesser->guess;
 
@@ -187,6 +194,7 @@ sub search_clothes {
 
     my %guess = map { $_ => $result->{$_} } grep { $result->{$_} } keys %{$result};
 
+    $self->app->log->info( "guess result : " . encode_json( \%guess ) );
     #
     # fetch clothes
     #
@@ -201,6 +209,7 @@ sub search_clothes {
         next unless exists $config->{range_rules}{$k};
         $guess_range{$k} = [ &{ $config->{range_rules}{$k} }( $guess{$k} ) ];
     }
+    $self->app->log->info( "guess range : " . encode_json( \%guess_range ) );
 
     my $rent_pair = $self->DB->resultset('Clothes')->search(
         {
@@ -284,9 +293,13 @@ sub search_clothes {
             $pair_count
             ];
     }
+    @result = sort { $b->[4] <=> $a->[4] } @result;
+
+    $self->app->log->info(
+        "guess result : " . encode_json( [ map { [ @{$_}[ 0, 1, 4 ] ] } @result ] ) );
 
     $self->render(
-        result => [ sort { $b->[4] <=> $a->[4] } @result ],
+        result => \@result,
     );
 }
 

@@ -1,5 +1,6 @@
 requires 'Algorithm::CouponCode';
 requires 'CHI';
+requires 'Crypt::Mode::ECB';
 requires 'Data::Pageset';
 requires 'DateTime';
 requires 'DateTime::Format::Duration';

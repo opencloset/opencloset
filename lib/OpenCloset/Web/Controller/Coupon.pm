@@ -43,9 +43,10 @@ sub validate {
     my $codes = $v->every_param('code');
     my $code = join( '-', @$codes );
 
-    my ( $valid_code, $err_code ) = $self->_validate_code($code);
-    if ($valid_code) {
-        $self->session( coupon_code => $valid_code );
+    my ( $coupon, $err_code ) = $self->_validate_code($code);
+    if ($coupon) {
+        $coupon->update( { status => 'used' } );
+        $self->session( coupon_code => $coupon->code );
         $self->redirect_to('/visit');
     }
     else {
@@ -64,11 +65,14 @@ sub _validate_code {
     return ( undef, 2 ) unless $coupon;
 
     if ( my $coupon_status = $coupon->status ) {
-        return ( undef, 3 ) if $coupon_status =~ m/(us|discard)ed/;
+        return ( undef, 3 ) if $coupon_status =~ m/(us|discard|expir)ed/;
     }
 
     if ( my $expires = $coupon->expires_date ) {
-        return ( undef, 4 ) if $expires->epoch < DateTime->now->epoch;
+        if ( $expires->epoch < DateTime->now->epoch ) {
+            $coupon->update( { status => 'expired' } );
+            return ( undef, 4 );
+        }
     }
 
     return $valid_code;

@@ -1,3 +1,8 @@
+v1.4.2    Wed, 20 Apr 2016 15:14:52 +0900
+  - Add helper decrypt_mbersn
+  - 이벤트 페이지 추가 /events/seoul
+  - 쿠폰 사용자에게는 방문예약화면에서 예상금액을 표시하지 않음
+
 v1.4.1    Fri, 15 Apr 2016 18:59:45 +0900
   - Add helper measurement2text (#773)
   - 사용자 이메일 보내기를 신체 사이즈 전송 버튼으로 교체 (#773)
