@@ -183,7 +183,7 @@ sub search_clothes {
     $self->app->log->info(
         "guess parameter : "
             . encode_json(
-            { %{params}{qw/gender height weight bust waist topbelly thigh arm leg/} }
+            { %params{qw/gender height weight bust waist topbelly thigh arm leg/} }
             )
     );
 
