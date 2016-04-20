@@ -1,4 +1,5 @@
   - Add helper decrypt_mbersn
+  - 이벤트 페이지 추가 /events/seoul
 
 v1.4.1    Fri, 15 Apr 2016 18:59:45 +0900
   - Add helper measurement2text (#773)
