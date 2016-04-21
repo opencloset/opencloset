@@ -1145,6 +1145,7 @@ sub api_update_clothes {
             thigh
             topbelly
             waist
+            cuff
             /
     );
 
@@ -1161,6 +1162,7 @@ sub api_update_clothes {
             shift->regexp(qr/^\d{1,3}$/);
         }
     );
+    $v->field('cuff')->regexp(qr/^\d{1,3}(\.)?(\d{1,2})?$/);
     $v->field('donation_id')->regexp(qr/^\d*$/)->callback(
         sub {
             my $val = shift;
@@ -1201,6 +1203,10 @@ sub api_update_clothes {
     $params{code} = sprintf( '%05s', $params{code} ) if length( $params{code} ) == 4;
     if ( exists $params{donation_id} && !$params{donation_id} ) {
         $params{donation_id} = undef;
+    }
+
+    if ( exists $params{cuff} ) {
+        $params{cuff} = $self->inch2cm( $params{cuff} );
     }
 
     #

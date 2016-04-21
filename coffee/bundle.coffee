@@ -87,6 +87,7 @@ $ ->
       waistcoat: { str: '조끼',     price: 5000  }
       belt:      { str: '벨트',     price: 2000  }
       bag:       { str: '가방',     price: 5000  }
+      misc:      { str: '기타',     price: 0     }
     measurement:
       height:   '키'
       weight:   '몸무게'

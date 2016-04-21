@@ -78,6 +78,8 @@ sub register {
     $app->helper( coupon2label              => \&coupon2label );
     $app->helper( measurement2text          => \&measurement2text );
     $app->helper( decrypt_mbersn            => \&decrypt_mbersn );
+    $app->helper( inch2cm                   => \&inch2cm );
+    $app->helper( cm2inch                   => \&cm2inch );
 }
 
 =head1 HELPERS
@@ -1737,6 +1739,32 @@ sub decrypt_mbersn {
     };
 
     return $plaintext;
+}
+
+=head2 inch2cm
+
+1 inch == 2.54 cm
+
+    my $cm = $self->inch2cm(1.00);    # 2.54
+
+=cut
+
+sub inch2cm {
+    my ( $self, $inch ) = @_;
+    return 0.00 unless $inch;
+    return sprintf( '%.2f', $inch * 2.54 );
+}
+
+=head2 cm2inch
+
+    my $inch = $self->cm2inch(2.54);    # 1
+
+=cut
+
+sub cm2inch {
+    my ( $self, $cm ) = @_;
+    return 0.00 unless $cm;
+    return sprintf( '%.2f', $cm * 100 / 254 );
 }
 
 1;
