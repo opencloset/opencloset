@@ -1,3 +1,5 @@
+v1.5.0    Fri, 22 Apr 2016 15:52:26 +0900
+  - nothing changed (bumpup version)
 v1.4.4    Thu, 21 Apr 2016 18:58:16 +0900
   - 새로운 의류종류 추가: "misc(기타)" (#787)
   - 밑단둘레의 단위를 inch 로 사용 (#789)
