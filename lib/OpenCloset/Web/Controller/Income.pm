@@ -14,8 +14,11 @@ has DB => sub { shift->app->DB };
 
 =cut
 
-our $STAGE_RENTAL_FEE = 0;
-our $STAGE_LATE_FEE   = 1;
+our $STAGE_RENTAL_FEE  = 0;
+our $STAGE_LATE_FEE    = 1;
+our $STAGE_UNPAID_DENY = 4;
+our $STAGE_UNPAID_DONE = 5;
+our $STAGE_UNPAID_PART = 6;
 
 sub ymd {
     my $self = shift;
@@ -53,10 +56,27 @@ sub ymd {
         $total_fee += $fee;
     }
 
+    my $unpaid_rs =
+        $self->DB->resultset('OrderDetail')
+        ->search(
+        { name => { -in => [qw/완납 부분완납 불납/] }, create_date => $between } );
+    my $unpaid_fee = {};
+    while ( my $od = $unpaid_rs->next ) {
+        my $pay_with = $od->pay_with || 'Unknown';
+        my $fee = $od->final_price;
+        $unpaid_fee->{$pay_with} += $fee;
+        $total_fee += $fee;
+    }
+
     $self->render(
-        ymd       => $ymd, rental_fee => $rental_fee, late_fee => $late_fee,
-        total_fee => $total_fee,
-        rental_orders => $rental_rs->reset, return_orders => $return_rs->reset
+        ymd           => $ymd,
+        rental_fee    => $rental_fee,
+        late_fee      => $late_fee,
+        unpaid_fee    => $unpaid_fee,
+        total_fee     => $total_fee,
+        rental_orders => $rental_rs->reset,
+        return_orders => $return_rs->reset,
+        unpaid_od     => $unpaid_rs->reset,
     );
 }
 

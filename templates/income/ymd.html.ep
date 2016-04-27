@@ -67,6 +67,37 @@
   </tbody>
 </table>
 
+<table class="table table-condensed">
+  <tbody>
+    % my $unpaid_fee_total = 0;
+    % for my $key (sort keys %$unpaid_fee) {
+    % my $fee = $unpaid_fee->{$key};
+    % $unpaid_fee_total += $fee;
+    % next if $fee == 0;
+    <tr>
+      <td>
+        <%= $key %>
+      </td>
+      <td class="text-right">
+        <samp>
+          %= commify($fee)
+        </samp>
+      </td>
+    </tr>
+    % }
+    <tr class="info">
+      <td>
+        미납금
+      </td>
+      <td class="text-right">
+        <samp>
+          %= commify($unpaid_fee_total)
+        </samp>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
 <h2 class="text-right">
   <small>합계</small>
   <samp>
@@ -105,6 +136,20 @@
     % } else {
     <a href="<%= url_for('/order/' . $id) %>"><%= $id %></a>
     % }
+  </li>
+  % }
+</ul>
+
+<h4>
+  미납금 주문서
+  <small><%= $unpaid_od->count %> 개</small>
+</h4>
+<ul class="list-inline">
+  % while (my $od = $unpaid_od->next) {
+  <li>
+    % my $order = $od->order;
+    % my $id = $order->id;
+    <a href="<%= url_for('/order/' . $id) %>"><%= $id %></a>
   </li>
   % }
 </ul>
