@@ -11,6 +11,7 @@
     % for my $key (sort keys %$rental_fee) {
     % my $fee = $rental_fee->{$key};
     % $rental_fee_total += $fee;
+    % next if $fee == 0;
     <tr>
       <td>
         <%= $key %>
@@ -41,6 +42,7 @@
     % for my $key (sort keys %$late_fee) {
     % my $fee = $late_fee->{$key};
     % $late_fee_total += $fee;
+    % next if $fee == 0;
     <tr>
       <td>
         <%= $key %>

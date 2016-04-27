@@ -46,7 +46,7 @@ sub ymd {
     my $return_rs = $self->DB->resultset('Order')->search( { return_date => $between } );
     my $late_fee = {};
     while ( my $order = $return_rs->next ) {
-        my $pay_with = $order->price_pay_with || 'Unknown';
+        my $pay_with = $order->late_fee_pay_with || 'Unknown';
         my ( undef, $price ) = $self->order_price($order);
         my $fee = $price->{$STAGE_LATE_FEE} || 0;
         $late_fee->{$pay_with} += $fee;
