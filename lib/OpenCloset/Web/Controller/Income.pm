@@ -6,19 +6,33 @@ use DateTime::Format::Strptime;
 
 has DB => sub { shift->app->DB };
 
-=head1 METHODS
-
-=head2 ymd
-
-    GET /income/:ymd
-
-=cut
-
 our $STAGE_RENTAL_FEE  = 0;
 our $STAGE_LATE_FEE    = 1;
 our $STAGE_UNPAID_DENY = 4;
 our $STAGE_UNPAID_DONE = 5;
 our $STAGE_UNPAID_PART = 6;
+
+=head1 METHODS
+
+=head2 today
+
+    GET /income
+
+=cut
+
+sub today {
+    my $self = shift;
+
+    my $today = DateTime->now( time_zone => 'Asia/Seoul' );
+    $self->redirect_to( 'income.ymd', ymd => $today->ymd );
+}
+
+=head2 ymd
+
+    # income.ymd
+    GET /income/:ymd
+
+=cut
 
 sub ymd {
     my $self = shift;

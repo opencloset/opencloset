@@ -307,7 +307,8 @@ sub _private_routes {
 
     $r->any('/size/guess')->to('size#guess');
 
-    $r->get('/income/:ymd')->to('Income#ymd');
+    $r->get('/income')->to('Income#today');
+    $r->get('/income/:ymd')->to('Income#ymd')->name('income.ymd');
 }
 
 1;
