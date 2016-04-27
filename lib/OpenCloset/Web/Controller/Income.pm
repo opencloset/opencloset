@@ -14,6 +14,20 @@ our $STAGE_UNPAID_PART = 6;
 
 =head1 METHODS
 
+=head2 auth
+
+    any /income
+
+=cut
+
+sub auth {
+    my $self = shift;
+
+    # 여기서 basic auth 처럼 여차저차
+    $self->redirect_to( $self->url_for('/') );
+    return;
+}
+
 =head2 today
 
     GET /income

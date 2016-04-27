@@ -63,6 +63,7 @@ sub startup {
     $self->_authentication;
     $self->_public_routes;
     $self->_private_routes;
+    $self->_2depth_private_routes;
 
     $self->secrets( $self->defaults->{secrets} );
     $self->sessions->cookie_domain( $self->defaults->{cookie_domain} );
@@ -306,6 +307,15 @@ sub _private_routes {
     $r->get('/volunteers')->to('volunteer#index');
 
     $r->any('/size/guess')->to('size#guess');
+}
+
+=head2 _2depth_private_routes
+
+=cut
+
+sub _2depth_private_routes {
+    my $self = shift;
+    my $r    = $self->routes->under('/')->to('user#auth')->to('income#auth');
 
     $r->get('/income')->to('Income#today');
     $r->get('/income/:ymd')->to('Income#ymd')->name('income.ymd');
