@@ -8,7 +8,6 @@
 
     <link rel="stylesheet" href="/components/bootstrap/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="/components/font-awesome/css/font-awesome.min.css">
-    <link rel="stylesheet" href="/components/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css">
     <link rel="stylesheet" href="/components/opencloset.css/dist/css/opencloset.min.css">
     <link rel="stylesheet" href="/css/screen.min.css">
   </head>
@@ -20,7 +19,6 @@
     </div>
     <script src="/components/jquery/dist/jquery.min.js"></script>
     <script src="/components/bootstrap/dist/js/bootstrap.min.js"></script>
-    <script src="/components/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js "></script>
-    <script src="/components/bootstrap-datepicker/dist/locales/bootstrap-datepicker.kr.min.js"></script>
+    <script src="/js/income.js"></script>
   </body>
 </html>
