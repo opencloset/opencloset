@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="/components/font-awesome/css/font-awesome.min.css">
     <link rel="stylesheet" href="/components/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css">
     <link rel="stylesheet" href="/components/opencloset.css/dist/css/opencloset.min.css">
-    <link rel="stylesheet" href="/css/screen.css">
+    <link rel="stylesheet" href="/css/screen.min.css">
   </head>
   <body>
     <div class="container">
