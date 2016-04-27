@@ -83,7 +83,10 @@ sub ymd {
     }
 
     $self->render(
-        ymd           => $ymd,
+        ymd   => $ymd,
+        today => DateTime->now,
+        prev_date     => $dt->clone->add( days => -1 ),
+        next_date     => $dt->clone->add( days => 1 ),
         rental_fee    => $rental_fee,
         late_fee      => $late_fee,
         unpaid_fee    => $unpaid_fee,

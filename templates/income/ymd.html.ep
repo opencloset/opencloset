@@ -1,7 +1,18 @@
 % layout 'income';
 % title '정산';
+
 <h1>
+  <a href="<%= url_for('income.ymd', ymd => $prev_date->ymd)%>" aria-label="Previous">
+    <span aria-hidden="true">&laquo;</span>
+  </a>
   <%= $ymd %>
+  % if ($today->epoch > $next_date->epoch) {
+  <a href="<%= url_for('income.ymd', ymd => $next_date->ymd)%>" aria-label="Next">
+    <span aria-hidden="true">&raquo;</span>
+  </a>
+  % } else {
+  <span aria-hidden="true" class="text-muted">&raquo;</span>
+  % }
   <small>정산내역</small>
 </h1>
 
