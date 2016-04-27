@@ -1,12 +1,16 @@
 % layout 'income';
 % title '정산';
 
+<p class="pull-right">
+  <a href="<%= url_for('/income/logout') %>">logout</a>
+</p>
+
 <h1>
   <a href="<%= url_for('income.ymd', ymd => $prev_date->ymd)%>" aria-label="Previous">
     <span aria-hidden="true">&laquo;</span>
   </a>
   <%= $ymd %>
-  % if ($today->epoch > $next_date->epoch) {
+  % if ($now->epoch > $next_date->epoch) {
   <a href="<%= url_for('income.ymd', ymd => $next_date->ymd)%>" aria-label="Next">
     <span aria-hidden="true">&raquo;</span>
   </a>

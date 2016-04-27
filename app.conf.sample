@@ -449,4 +449,8 @@ $db_opts->{AutoCommit} //= 1;
             key => $ENV{OPENCLOSET_EVENT_SEOUL_KEY},
         },
     },
+    income => {
+        username => $ENV{OPENCLOSET_INCOME_USERNAME} || 'admin',
+        password => $ENV{OPENCLOSET_INCOME_PASSWORD} || 's3cr3t',
+    },
 };

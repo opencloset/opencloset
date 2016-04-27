@@ -12,20 +12,62 @@ our $STAGE_UNPAID_DENY = 4;
 our $STAGE_UNPAID_DONE = 5;
 our $STAGE_UNPAID_PART = 6;
 
+our $REALM    = 'income';
+our $TIMEZONE = 'Asia/Seoul';
+
 =head1 METHODS
 
 =head2 auth
 
-    any /income
+    under /income
 
 =cut
 
 sub auth {
-    my $self = shift;
+    my $self    = shift;
+    my $session = $self->session;
 
-    # 여기서 basic auth 처럼 여차저차
-    $self->redirect_to( $self->url_for('/') );
-    return;
+    if ( my $expires = $session->{$REALM} ) {
+        if ( $expires > time ) {
+            $session->{$REALM} = time + 60 * 5;
+            return 1;
+        }
+        else {
+            delete $session->{$REALM};
+        }
+    }
+
+    my $auth = $self->req->url->to_abs->userinfo || '';
+    return $self->_password_prompt($REALM) unless $auth;
+
+    my $conf = $self->config->{income};
+    my ( $username, $password ) = split /:/, $auth;
+    if ( $username eq $conf->{username} && $password eq $conf->{password} ) {
+        $session->{$REALM} = time + 60 * 5;
+        return 1;
+    }
+
+    return $self->_password_prompt($REALM);
+}
+
+=head2 logout
+
+    GET /income/logout
+
+=cut
+
+sub logout {
+    my $self    = shift;
+    my $session = $self->session;
+
+    delete $session->{$REALM};
+
+    ## override browser userinfo
+    ## http://stackoverflow.com/a/28591712
+    my $url = $self->url_for('/')->to_abs;
+    $url->userinfo('wrong-username:wrong-password');
+
+    return $self->redirect_to($url);
 }
 
 =head2 today
@@ -37,7 +79,7 @@ sub auth {
 sub today {
     my $self = shift;
 
-    my $today = DateTime->now( time_zone => 'Asia/Seoul' );
+    my $today = DateTime->now( time_zone => $TIMEZONE );
     $self->redirect_to( 'income.ymd', ymd => $today->ymd );
 }
 
@@ -52,7 +94,10 @@ sub ymd {
     my $self = shift;
     my $ymd  = $self->param('ymd');
 
-    my $strp    = DateTime::Format::Strptime->new( pattern => '%Y-%m-%d' );
+    my $strp = DateTime::Format::Strptime->new(
+        pattern   => '%Y-%m-%d',
+        time_zone => $TIMEZONE,
+    );
     my $dt      = $strp->parse_datetime($ymd);
     my $parser  = $self->DB->storage->datetime_parser;
     my $between = {
@@ -97,10 +142,10 @@ sub ymd {
     }
 
     $self->render(
-        ymd   => $ymd,
-        today => DateTime->now,
-        prev_date     => $dt->clone->add( days => -1 ),
-        next_date     => $dt->clone->add( days => 1 ),
+        ymd => $ymd,
+        now           => DateTime->now( time_zone => $TIMEZONE ),
+        prev_date     => $dt->clone->add( days    => -1 ),
+        next_date     => $dt->clone->add( days    => 1 ),
         rental_fee    => $rental_fee,
         late_fee      => $late_fee,
         unpaid_fee    => $unpaid_fee,
@@ -109,6 +154,18 @@ sub ymd {
         return_orders => $return_rs->reset,
         unpaid_od     => $unpaid_rs->reset,
     );
+}
+
+=head2 _password_prompt
+
+=cut
+
+sub _password_prompt {
+    my ( $self, $realm ) = @_;
+
+    $self->res->headers->www_authenticate("Basic realm=$realm");
+    $self->render( text => '401 Unauthorized', status => 401 );
+    return;
 }
 
 1;

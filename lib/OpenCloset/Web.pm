@@ -315,10 +315,13 @@ sub _private_routes {
 
 sub _2depth_private_routes {
     my $self = shift;
-    my $r    = $self->routes->under('/')->to('user#auth')->to('income#auth');
+    my $r    = $self->routes->under('/')->to('user#auth');
 
-    $r->get('/income')->to('Income#today');
-    $r->get('/income/:ymd')->to('Income#ymd')->name('income.ymd');
+    my $income = $r->under('/income')->to('income#auth');
+
+    $income->get('/')->to('Income#today');
+    $income->get('/logout')->to('Income#logout');
+    $income->get('/:ymd')->to('Income#ymd')->name('income.ymd');
 }
 
 1;
