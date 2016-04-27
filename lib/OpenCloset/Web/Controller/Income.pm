@@ -33,7 +33,8 @@ sub auth {
             return 1;
         }
         else {
-            delete $session->{$REALM};
+            $self->logout;
+            return;
         }
     }
 
