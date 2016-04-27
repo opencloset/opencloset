@@ -31,10 +31,11 @@
       <td>
         <%= $key %>
       </td>
-      <td class="text-right">
+      <td class="text-right form-group-sm">
         <samp>
           %= commify($fee)
         </samp>
+        <input class="form-control income-xs" type="text">
       </td>
     </tr>
     % }
@@ -46,6 +47,7 @@
         <samp>
           %= commify($rental_fee_total)
         </samp>
+        <samp class="income-xs sum">0</samp>
       </td>
     </tr>
   </tbody>
@@ -62,10 +64,11 @@
       <td>
         <%= $key %>
       </td>
-      <td class="text-right">
+      <td class="text-right form-group-sm">
         <samp>
           %= commify($fee)
         </samp>
+        <input class="form-control income-xs" type="text">
       </td>
     </tr>
     % }
@@ -77,6 +80,7 @@
         <samp>
           %= commify($late_fee_total)
         </samp>
+        <samp class="income-xs sum">0</samp>
       </td>
     </tr>
   </tbody>
@@ -93,9 +97,10 @@
       <td>
         <%= $key %>
       </td>
-      <td class="text-right">
+      <td class="text-right form-group-sm">
         <samp>
           %= commify($fee)
+          <input class="form-control income-xs" type="text">
         </samp>
       </td>
     </tr>
@@ -108,6 +113,7 @@
         <samp>
           %= commify($unpaid_fee_total)
         </samp>
+        <samp class="income-xs sum">0</samp>
       </td>
     </tr>
   </tbody>
