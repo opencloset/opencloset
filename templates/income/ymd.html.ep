@@ -1,4 +1,4 @@
-% layout 'extension';
+% layout 'income';
 % title '정산';
 <h1>
   <%= $ymd %>
@@ -87,7 +87,7 @@
     % }
     <tr class="info">
       <td>
-        미납금
+        미납정산금
       </td>
       <td class="text-right">
         <samp>
@@ -141,7 +141,7 @@
 </ul>
 
 <h4>
-  미납금 주문서
+  미납정산금 주문서
   <small><%= $unpaid_od->count %> 개</small>
 </h4>
 <ul class="list-inline">
