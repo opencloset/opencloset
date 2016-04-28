@@ -68,6 +68,7 @@ sub logout {
     ## override browser userinfo
     ## http://stackoverflow.com/a/28591712
     my $url = $self->url_for('/')->to_abs;
+    $url->scheme('https') if $self->req->headers->header('X-Forwarded-Proto');
     $url->userinfo('wrong-username:wrong-password');
 
     return $self->redirect_to($url);
