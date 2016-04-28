@@ -45,7 +45,7 @@ sub auth {
     my ( $username, $password ) = split /:/, $auth;
 
     my $sha1sum = $self->config->{income}{$username} || '';
-    if ($sha1sum eq sha1_hex($password)) {
+    if ( $sha1sum eq sha1_hex($password) ) {
         $session->{$REALM} = time + 60 * 5;
         return 1;
     }
@@ -114,10 +114,17 @@ sub ymd {
 
     my $total_fee  = 0;
     my $rental_fee = {};
+    my $coupon_fee = {};
     while ( my $order = $rental_rs->next ) {
         my $pay_with = $order->price_pay_with || 'Unknown';
         my ( undef, $price ) = $self->order_price($order);
         my $fee = $price->{$STAGE_RENTAL_FEE} || 0;
+
+        if ( $pay_with =~ /^쿠폰/ ) {
+            $coupon_fee->{$pay_with} += $fee;
+            next;
+        }
+
         $rental_fee->{$pay_with} += $fee;
         $total_fee += $fee;
     }
@@ -150,6 +157,7 @@ sub ymd {
         prev_date     => $dt->clone->add( days    => -1 ),
         next_date     => $dt->clone->add( days    => 1 ),
         rental_fee    => $rental_fee,
+        coupon_fee    => $coupon_fee,
         late_fee      => $late_fee,
         unpaid_fee    => $unpaid_fee,
         total_fee     => $total_fee,

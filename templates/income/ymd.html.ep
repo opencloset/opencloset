@@ -22,6 +22,37 @@
 
 <table class="table table-condensed">
   <tbody>
+    % my $coupon_fee_total = 0;
+    % for my $key (sort keys %$coupon_fee) {
+    % my $fee = $coupon_fee->{$key};
+    % $coupon_fee_total += $fee;
+    % next if $fee == 0;
+    <tr>
+      <td>
+        <%= $key %>
+      </td>
+      <td class="text-right form-group-sm">
+        <samp>
+          %= commify($fee)
+        </samp>
+      </td>
+    </tr>
+    % }
+    <tr class="info">
+      <td>
+        쿠폰
+      </td>
+      <td class="text-right">
+        <samp>
+          %= commify($coupon_fee_total)
+        </samp>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<table class="table table-condensed">
+  <tbody>
     % my $rental_fee_total = 0;
     % for my $key (sort keys %$rental_fee) {
     % my $fee = $rental_fee->{$key};
