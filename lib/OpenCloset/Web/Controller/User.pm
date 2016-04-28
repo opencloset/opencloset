@@ -305,8 +305,8 @@ sub search_clothes {
 
 =head2 auth
 
-    under /csv
-    under /api
+    # except public routes
+    under /
 
 =cut
 

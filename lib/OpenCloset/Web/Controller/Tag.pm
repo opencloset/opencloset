@@ -7,7 +7,7 @@ has DB => sub { shift->app->DB };
 
 =head2 index
 
-    GET /
+    GET /tag
 
 =cut
 
