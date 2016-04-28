@@ -3,6 +3,7 @@ use Mojo::Base 'Mojolicious::Controller';
 
 use DateTime;
 use DateTime::Format::Strptime;
+use Digest::SHA1 qw/sha1_hex/;
 
 has DB => sub { shift->app->DB };
 
@@ -41,9 +42,10 @@ sub auth {
     my $auth = $self->req->url->to_abs->userinfo || '';
     return $self->_password_prompt($REALM) unless $auth;
 
-    my $conf = $self->config->{income};
     my ( $username, $password ) = split /:/, $auth;
-    if ( $username eq $conf->{username} && $password eq $conf->{password} ) {
+
+    my $sha1sum = $self->config->{income}{$username} || '';
+    if ($sha1sum eq sha1_hex($password)) {
         $session->{$REALM} = time + 60 * 5;
         return 1;
     }
