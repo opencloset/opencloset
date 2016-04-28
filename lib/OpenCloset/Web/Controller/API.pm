@@ -671,6 +671,7 @@ sub api_update_order_unpaid {
                             "결제방식(%s), 포기금액(%s), 미납금 중 대여자로부터 받은 최종 금액",
                             $pay_with, $self->commify( $unpaid - $price ),
                         ),
+                        pay_with => $pay_with,
                     }
                 );
                 die "failed to create a new order_detail: final user paid\n" unless $od;

@@ -6,6 +6,7 @@ requires 'DateTime';
 requires 'DateTime::Format::Duration';
 requires 'DateTime::Format::Human::Duration', '0.62';
 requires 'DateTime::Format::Strptime';
+requires 'Digest::SHA1';
 requires 'FindBin';
 requires 'Getopt::Long::Descriptive';
 requires 'Gravatar::URL';
