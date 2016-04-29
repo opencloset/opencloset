@@ -60,6 +60,9 @@
                           %br
                           대여율
                       .hr.hr16.dotted
+                      %div
+                        %a{ :href => "/clothes/#{ $clothes_code }/pdf" } 의류 태그 출력
+                      .hr.hr16.dotted
                       - if (my ($first) = $clothes_code =~ /^(J|P|K)/) {
                         %h2 상하의 셋트
                         - if ($suit) {
