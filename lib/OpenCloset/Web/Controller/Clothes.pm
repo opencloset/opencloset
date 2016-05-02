@@ -327,17 +327,17 @@ sub clothes_pdf {
     $length_bottom ||= "-";
     $cuff          ||= "-";
 
-    my @tags = $clothes->tags;
+    my @tags = map { $_->name } $clothes->tags;
 
     my $background_type;
-    if ( $clothes->gender eq "male" ) {
+    if ( "온라인" ~~ @tags ) {
+        $background_type = "online";
+    }
+    elsif ( $clothes->gender eq "male" ) {
         $background_type = "male";
     }
     elsif ( $clothes->gender eq "female" ) {
         $background_type = "female";
-    }
-    elsif ( @tags ~~ "온라인" ) {
-        $background_type = "online";
     }
 
     #

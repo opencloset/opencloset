@@ -4,8 +4,8 @@
 % my $background = do {
 %   use experimental qw( smartmatch );
 %   given ($background_type) {
-%     "blue-white.png" when "male";
-%     "red-white.png" when "female";
+%     "blue-white.png"   when "male";
+%     "red-white.png"    when "female";
 %     "yellow-white.png" when "online";
 %     default { "blank.png" }
 %   }
