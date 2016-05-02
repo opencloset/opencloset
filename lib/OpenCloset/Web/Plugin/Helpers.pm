@@ -17,7 +17,7 @@ use Statistics::Basic;
 use Try::Tiny;
 
 use OpenCloset::Size::Guess;
-use OpenCloset::Web::Constants::Measurement;
+use OpenCloset::Constants::Measurement;
 
 =encoding utf8
 
@@ -1704,12 +1704,12 @@ sub measurement2text {
     return '' unless $user_info;
 
     my @sizes;
-    for my $part (@OpenCloset::Web::Constants::Measurement::PRIMARY) {
+    for my $part (@OpenCloset::Constants::Measurement::PRIMARY) {
         my $size = $user_info->get_column($part);
         push @sizes,
             sprintf(
-            '%s: %s%s', $OpenCloset::Web::Constants::Measurement::LABEL_MAP{$part},
-            $size,      $OpenCloset::Web::Constants::Measurement::UNIT_MAP{$part}
+            '%s: %s%s', $OpenCloset::Constants::Measurement::LABEL_MAP{$part},
+            $size,      $OpenCloset::Constants::Measurement::UNIT_MAP{$part}
             ) if $size;
     }
 
