@@ -325,7 +325,7 @@ sub clothes_pdf {
     $hip           ||= "-";
     $thigh         ||= "-";
     $length_bottom ||= "-";
-    $cuff          ||= "-";
+    $cuff = $cuff ? sprintf( "%.2f", $cuff * 100 / 254 ) : "-";
 
     my @tags = map { $_->name } $clothes->tags;
 
