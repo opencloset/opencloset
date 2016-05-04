@@ -4,9 +4,10 @@
 % my $background = do {
 %   use experimental qw( smartmatch );
 %   given ($background_type) {
-%     "blue-white.png"   when "male";
-%     "red-white.png"    when "female";
-%     "yellow-white.png" when "online";
+%     "blue-white.png"   when "offline-male";
+%     "red-white.png"    when "offline-female";
+%     "green-white.png"  when "online-male";
+%     "orange-white.png" when "online-female";
 %     default { "blank.png" }
 %   }
 % };
@@ -147,6 +148,11 @@
           font: "D2Coding",
           fontSize: 12
         },
+        tableBodyCode: {
+          font: "D2Coding",
+          fontSize: 12,
+          bold: true
+        }
       },
       content: [
         {
@@ -166,19 +172,11 @@
               ],
               [
                 { style: "tableBody", alignment: "center", text: "상의" },
-                { style: "tableBody", alignment: "center", text: "<%= $code_top %>" }
+                { style: "tableBodyCode", alignment: "center", text: "<%= $code_top %>" }
               ],
               [
                 { style: "tableBody", alignment: "center", text: "하의" },
-                { style: "tableBody", alignment: "center", text: "<%= $code_bottom %>" }
-              ],
-              [
-                { style: "tableBody", alignment: "center", text: "키"  },
-                { style: "tableBody", alignment: "center", text: ""    }
-              ],
-              [
-                { style: "tableBody", alignment: "center", text: "몸무게" },
-                { style: "tableBody", alignment: "center", text: ""       }
+                { style: "tableBodyCode", alignment: "center", text: "<%= $code_bottom %>" }
               ],
               [
                 { style: "tableBody", alignment: "center", text: "색상"   },

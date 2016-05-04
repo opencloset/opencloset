@@ -330,14 +330,26 @@ sub clothes_pdf {
     my @tags = map { $_->name } $clothes->tags;
 
     my $background_type;
+    my $type_str = q{};
     if ( "온라인" ~~ @tags ) {
-        $background_type = "online";
+        if ( $clothes->gender eq "male" ) {
+            $background_type = "online-male";
+            $type_str        = "온라인 - 남성";
+        }
+        elsif ( $clothes->gender eq "female" ) {
+            $background_type = "online-female";
+            $type_str        = "온라인 - 여성";
+        }
     }
-    elsif ( $clothes->gender eq "male" ) {
-        $background_type = "male";
-    }
-    elsif ( $clothes->gender eq "female" ) {
-        $background_type = "female";
+    else {
+        if ( $clothes->gender eq "male" ) {
+            $background_type = "offline-male";
+            $type_str        = "오프라인 - 남성";
+        }
+        elsif ( $clothes->gender eq "female" ) {
+            $background_type = "offline-female";
+            $type_str        = "오프라인 - 여성";
+        }
     }
 
     #
@@ -358,6 +370,7 @@ sub clothes_pdf {
         length_bottom   => $length_bottom,
         cuff            => $cuff,
         background_type => $background_type,
+        type_str        => $type_str,
     );
 }
 
