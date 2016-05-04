@@ -41,6 +41,7 @@ requires 'experimental';
 requires 'git://github.com/aanoaa/p5-postcodify.git@v0.2.6';
 
 # from opencloset cpan
+requires 'OpenCloset::Common';
 requires 'OpenCloset::Config',               '0.002';
 requires 'OpenCloset::Schema',               '0.016';
 requires 'OpenCloset::Size::Guess',          '0.003';
