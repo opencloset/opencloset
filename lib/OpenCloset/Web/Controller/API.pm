@@ -1206,10 +1206,6 @@ sub api_update_clothes {
         $params{donation_id} = undef;
     }
 
-    if ( exists $params{cuff} ) {
-        $params{cuff} = $self->inch2cm( $params{cuff} );
-    }
-
     #
     # find clothes
     #
