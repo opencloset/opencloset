@@ -238,8 +238,27 @@
     };
 
     pdfMake.fonts = fontDefinition;
-    pdfMake.createPdf(docDefinition).open();
-    window.location.assign("<%= url_for("/clothes/$code") %>");
+
+    /**
+     *
+     * Javascript: open new page in same window
+     *   http://stackoverflow.com/a/267712
+     *
+     * Is there any way to specify a suggested filename when using data: URI?
+     *   http://stackoverflow.com/a/6171323
+     *
+     * Re: data URIs - filename and content-disposition
+     *   http://lists.w3.org/Archives/Public/uri/2010Feb/0069.html
+     *
+     */
+    pdfMake.createPdf(docDefinition).getBase64(function(outDoc) {
+      var link = document.createElement('a');
+      document.body.appendChild(link); // Firefox requires the link to be in the body
+      link.href = "javascript:q=(document.location.href);void(open('" + "data:application/pdf;headers=Content-Disposition%3A%20attachment%3Bfilename%3Dopencloset%2Dclothes%2Dtag%2D<%= $code %>.pdf%3B;base64," + outDoc + "','_self','resizable,location,menubar,toolbar,scrollbars,status'));";
+      link.click();
+      document.body.removeChild(link); // remove the link when done
+    });
+
   % end
 
 </body>
