@@ -122,10 +122,10 @@
         height: 595
       },
       pageMargins: [
-        20, // left
-        80, // top
-        20, // right
-        80  // bottom
+        11, // left
+        60, // top
+        11, // right
+        60  // bottom
       ],
       background: { image: "<%= $background %>" },
       defaultStyle: {
@@ -138,20 +138,28 @@
         },
         tableHeader: {
           font: "Roboto",
-          fontSize: 16
+          fontSize: 22
         },
         tableFooter: {
           font: "D2Coding",
-          fontSize: 16
+          fontSize: 20
         },
         tableBody: {
           font: "D2Coding",
-          fontSize: 12
+          fontSize: 16
         },
         tableBodyCode: {
           font: "D2Coding",
-          fontSize: 12,
+          fontSize: 16,
           bold: true
+        },
+        tableBodyLength: {
+          font: "D2Coding",
+          fontSize: 14,
+        },
+        tableBodyColor: {
+          font: "D2Coding",
+          fontSize: 15
         }
       },
       content: [
@@ -180,7 +188,7 @@
               ],
               [
                 { style: "tableBody", alignment: "center", text: "색상"   },
-                { style: "tableBody", alignment: "center", text: colorToStr("<%= $color %>") }
+                { style: "tableBodyColor", alignment: "center", text: colorToStr("<%= $color %>") }
               ],
               [
                 { style: "tableBody", alignment: "center", text: "가슴" },
@@ -191,11 +199,11 @@
                 { style: "tableBody", alignment: "center", text: "<%= $topbelly %>" }
               ],
               [
-                { style: "tableBody", alignment: "center", text: "상의 길이" },
+                { style: "tableBodyLength", alignment: "center", text: "상의 길이" },
                 { style: "tableBody", alignment: "center", text: "<%= $length_top %>" }
               ],
               [
-                { style: "tableBody", alignment: "center", text: "팔길이" },
+                { style: "tableBody", alignment: "center", text: "팔 길이" },
                 { style: "tableBody", alignment: "center", text: "<%= $arm %>" }
               ],
               [
@@ -211,7 +219,7 @@
                 { style: "tableBody", alignment: "center", text: "<%= $thigh %>" }
               ],
               [
-                { style: "tableBody", alignment: "center", text: "하의 길이" },
+                { style: "tableBodyLength", alignment: "center", text: "하의 길이" },
                 { style: "tableBody", alignment: "center", text: "<%= $length_bottom %>" }
               ],
               [
