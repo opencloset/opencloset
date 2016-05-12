@@ -1,3 +1,4 @@
+v1.5.3    Thu, 12 May 2016 12:41:44 +0900
   - Remove helpers inch2cm and cm2inch (#789)
   - Use auto inflating clothes.cuff (#789)
 
