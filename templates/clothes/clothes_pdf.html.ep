@@ -177,7 +177,22 @@
             paddingTop:    function(i, node) { return 6;  },
             paddingBottom: function(i, node) { return 4;  },
             paddingLeft:   function(i, node) { return 14; },
-            paddingRight:  function(i, node) { return 14; }
+            paddingRight:  function(i, node) { return 14; },
+            hLineWidth: function(i, node) {
+              var border;
+              switch (i) {
+                case 1:
+                case 4:
+                case 8:
+                case 13:
+                  border = 2;
+                  break;
+                default:
+                  border = 1;
+                  break;
+              }
+              return border;
+            }
           },
           table: {
             headerRows: 1,
