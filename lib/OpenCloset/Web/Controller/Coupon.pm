@@ -45,7 +45,6 @@ sub validate {
 
     my ( $coupon, $err_code ) = $self->_validate_code($code);
     if ($coupon) {
-        $coupon->update( { status => 'used' } );
         $self->session( coupon_code => $coupon->code );
         $self->redirect_to('/visit');
     }
