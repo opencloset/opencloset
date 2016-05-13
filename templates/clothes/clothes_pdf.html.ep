@@ -162,10 +162,6 @@
           fontSize: 16,
           bold: true
         },
-        tableBodyLength: {
-          font: "D2Coding",
-          fontSize: 14,
-        },
         tableBodyColor: {
           font: "D2Coding",
           fontSize: 15
@@ -223,7 +219,7 @@
                 { style: "tableBody", alignment: "center", text: "<%= $topbelly %>" }
               ],
               [
-                { style: "tableBodyLength", alignment: "center", text: "상의길이" },
+                { style: "tableBody", alignment: "center", text: "상의길이" },
                 { style: "tableBody", alignment: "center", text: "<%= $length_top %>" }
               ],
               [
@@ -243,7 +239,7 @@
                 { style: "tableBody", alignment: "center", text: "<%= $thigh %>" }
               ],
               [
-                { style: "tableBodyLength", alignment: "center", text: "하의길이" },
+                { style: "tableBody", alignment: "center", text: "하의길이" },
                 { style: "tableBody", alignment: "center", text: "<%= $length_bottom %>" }
               ],
               [
