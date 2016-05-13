@@ -142,6 +142,10 @@
         },
         tableFooter: {
           font: "D2Coding",
+          fontSize: 14
+        },
+        tableFooterName: {
+          font: "D2Coding",
           fontSize: 20
         },
         tableBody: {
@@ -227,7 +231,14 @@
                 { style: "tableBody", alignment: "center", text: "<%= $cuff %>" }
               ],
               [
-                { text: "기증자: <%= $clothes->donation->user->name %>", style: "tableFooter", colSpan: 2, alignment: "center" },
+                {
+                  text: [
+                    { text: "기증자\n", style: "tableFooter" },
+                    { text: "<%= $clothes->donation->user->name %>", style: "tableFooterName" }
+                  ],
+                  colSpan: 2,
+                  alignment: "center"
+                },
                 {}
               ]
             ]
