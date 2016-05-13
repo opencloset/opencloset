@@ -144,6 +144,11 @@
           font: "D2Coding",
           fontSize: 14
         },
+        tableFooterSpace: {
+          font: "D2Coding",
+          fontSize: 5,
+          color: "white"
+        },
         tableFooterName: {
           font: "D2Coding",
           fontSize: 20
@@ -234,6 +239,7 @@
                 {
                   text: [
                     { text: "기증자\n", style: "tableFooter" },
+                    { text: " \n", style: "tableFooterSpace" },
                     { text: "<%= $clothes->donation->user->name %>", style: "tableFooterName" }
                   ],
                   colSpan: 2,
