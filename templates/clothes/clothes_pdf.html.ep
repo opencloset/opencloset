@@ -203,11 +203,11 @@
                 { style: "tableBody", alignment: "center", text: "<%= $topbelly %>" }
               ],
               [
-                { style: "tableBodyLength", alignment: "center", text: "상의 길이" },
+                { style: "tableBodyLength", alignment: "center", text: "상의길이" },
                 { style: "tableBody", alignment: "center", text: "<%= $length_top %>" }
               ],
               [
-                { style: "tableBody", alignment: "center", text: "팔 길이" },
+                { style: "tableBody", alignment: "center", text: "팔길이" },
                 { style: "tableBody", alignment: "center", text: "<%= $arm %>" }
               ],
               [
@@ -223,7 +223,7 @@
                 { style: "tableBody", alignment: "center", text: "<%= $thigh %>" }
               ],
               [
-                { style: "tableBodyLength", alignment: "center", text: "하의 길이" },
+                { style: "tableBodyLength", alignment: "center", text: "하의길이" },
                 { style: "tableBody", alignment: "center", text: "<%= $length_bottom %>" }
               ],
               [
