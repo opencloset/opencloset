@@ -75,7 +75,7 @@ sub _validate_code {
         }
     }
 
-    return $valid_code;
+    return $coupon;
 }
 
 1;
