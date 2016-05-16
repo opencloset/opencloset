@@ -57,7 +57,6 @@ sub startup {
 
     $self->plugin('validator');
     $self->plugin('haml_renderer');
-    $self->plugin('FillInFormLite');
     $self->plugin('OpenCloset::Web::Plugin::Helpers');
 
     $self->_authentication;
