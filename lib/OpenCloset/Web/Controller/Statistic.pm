@@ -543,11 +543,12 @@ sub visitor_ymd {
     }
     $today->truncate( to => 'day' );
 
-    # -2 ~ +2 days from now
+    # -$day_range ~ +$day_range days from now
+    my $day_range = 2;
     my %count;
     my $today_data;
-    my $from = $dt->clone->truncate( to => 'day' )->add( days => -2 );
-    my $to   = $dt->clone->truncate( to => 'day' )->add( days => 2 );
+    my $from = $dt->clone->truncate( to => 'day' )->add( days => -$day_range );
+    my $to   = $dt->clone->truncate( to => 'day' )->add( days => $day_range );
     for ( ; $from <= $to; $from->add( days => 1 ) ) {
         my $f = $from->clone->truncate( to => 'day' );
         my $t = $from->clone->truncate( to => 'day' )->add( days => 1, seconds => -1 );
