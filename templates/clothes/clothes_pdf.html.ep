@@ -1,0 +1,293 @@
+% my $code        = $clothes        ? trim_clothes_code($clothes)        : "-";
+% my $code_top    = $clothes_top    ? trim_clothes_code($clothes_top)    : "-";
+% my $code_bottom = $clothes_bottom ? trim_clothes_code($clothes_bottom) : "-";
+% my $background = do {
+%   use experimental qw( smartmatch );
+%   given ($background_type) {
+%     "blue-white.png"   when "offline-male";
+%     "red-white.png"    when "offline-female";
+%     "green-white.png"  when "online-male";
+%     "orange-white.png" when "online-female";
+%     default { "blank.png" }
+%   }
+% };
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  %= tag title => "의류 태그: $code - $site->{name}"
+  %= tag "meta", charset => "utf-8"
+  %= tag "meta", "http-equiv" => "Content-Type", content => "text/html; charset=UTF-8"
+  %= tag "link", rel => "icon", type => "image/png", href => url_for("/img/icon.png")
+  %= javascript url_for("/components/pdfmake/build/pdfmake.min.js")
+  %= javascript url_for("/components/pdfmake/build/vfs_fonts_custom.js")
+</head>
+<body>
+
+  %= javascript begin
+    colorToStr = function(color) {
+      var colorMap = {
+        black: "블랙",
+        navy: "네이비",
+        gray: "그레이",
+        white: "화이트",
+        brown: "브라운",
+        blue: "블루",
+        red: "레드",
+        orange: "오렌지",
+        yellow: "옐로우",
+        green: "그린",
+        purple: "퍼플",
+        pink: "핑크",
+        charcoalgray: "차콜그레이",
+        dark: "어두운계열",
+        etc: "기타",
+        staff: "직원추천"
+      };
+
+      var result = colorMap[color] || "-";
+
+      return result;
+    };
+
+    convertCharToDecimal = function(c) {
+      var result;
+      switch (c) {
+        case "0": result = "00"; break;
+        case "1": result = "01"; break;
+        case "2": result = "02"; break;
+        case "3": result = "03"; break;
+        case "4": result = "04"; break;
+        case "5": result = "05"; break;
+        case "6": result = "06"; break;
+        case "7": result = "07"; break;
+        case "8": result = "08"; break;
+        case "9": result = "09"; break;
+        case "A": result = "10"; break;
+        case "B": result = "11"; break;
+        case "C": result = "12"; break;
+        case "D": result = "13"; break;
+        case "E": result = "14"; break;
+        case "F": result = "15"; break;
+        case "G": result = "16"; break;
+        case "H": result = "17"; break;
+        case "I": result = "18"; break;
+        case "J": result = "19"; break;
+        case "K": result = "20"; break;
+        case "L": result = "21"; break;
+        case "M": result = "22"; break;
+        case "N": result = "23"; break;
+        case "O": result = "24"; break;
+        case "P": result = "25"; break;
+        case "Q": result = "26"; break;
+        case "R": result = "27"; break;
+        case "S": result = "28"; break;
+        case "T": result = "29"; break;
+        case "U": result = "30"; break;
+        case "V": result = "31"; break;
+        case "W": result = "32"; break;
+        case "X": result = "33"; break;
+        case "Y": result = "34"; break;
+        case "Z": result = "35"; break;
+      }
+      return result;
+    };
+
+    convertCodeToDecimal = function(code) {
+      var chars = code.split("");
+      for ( var i = 0, len = chars.length; i < len; i++) {
+        chars[i] = convertCharToDecimal( chars[i] );
+      }
+      var result = chars[0] + chars[1] + " - " + chars[2] + chars[3];
+      return result;
+    };
+  % end
+
+  %= javascript begin
+    var fontDefinition = {
+      D2Coding: {
+        normal: "D2Coding.ttf",
+        bold: "D2CodingBold.ttf"
+      },
+      Roboto: {
+        normal: "Roboto-Regular.ttf",
+        bold: "Roboto-Medium.ttf",
+        italics: "Roboto-Italic.ttf",
+        bolditalics: "Roboto-Italic.ttf"
+      }
+    };
+
+    var docDefinition = {
+      pageSize: {
+        width: 210,
+        height: 595
+      },
+      pageMargins: [
+        11, // left
+        94, // top
+        11, // right
+        60  // bottom
+      ],
+      background: { image: "<%= $background %>" },
+      defaultStyle: {
+        font: "Roboto"
+      },
+      styles: {
+        headerk: {
+          font: "D2Coding",
+          fontSize: 15
+        },
+        tableHeader: {
+          font: "Roboto",
+          fontSize: 22
+        },
+        tableFooter: {
+          font: "D2Coding",
+          fontSize: 14
+        },
+        tableFooterSpace: {
+          font: "D2Coding",
+          fontSize: 5,
+          color: "white"
+        },
+        tableFooterName: {
+          font: "D2Coding",
+          fontSize: 20
+        },
+        tableBody: {
+          font: "D2Coding",
+          fontSize: 16
+        },
+        tableBodyCode: {
+          font: "D2Coding",
+          fontSize: 16,
+          bold: true
+        },
+        tableBodyColor: {
+          font: "D2Coding",
+          fontSize: 15
+        }
+      },
+      content: [
+        {
+          layout: {
+            paddingTop:    function(i, node) { return 6;  },
+            paddingBottom: function(i, node) { return 4;  },
+            paddingLeft:   function(i, node) { return 14; },
+            paddingRight:  function(i, node) { return 14; },
+            hLineWidth: function(i, node) {
+              var border;
+              switch (i) {
+                case 1:
+                case 4:
+                case 8:
+                case 13:
+                  border = 2;
+                  break;
+                default:
+                  border = 1;
+                  break;
+              }
+              return border;
+            }
+          },
+          table: {
+            headerRows: 1,
+            widths: [ "*", "*" ],
+            body: [
+              [
+                { text: convertCodeToDecimal("<%= $code %>"), style: "tableHeader", colSpan: 2, alignment: "center" },
+                {}
+              ],
+              [
+                { style: "tableBody", alignment: "center", text: "상의" },
+                { style: "tableBodyCode", alignment: "center", text: "<%= $code_top %>" }
+              ],
+              [
+                { style: "tableBody", alignment: "center", text: "하의" },
+                { style: "tableBodyCode", alignment: "center", text: "<%= $code_bottom %>" }
+              ],
+              [
+                { style: "tableBody", alignment: "center", text: "색상"   },
+                { style: "tableBodyColor", alignment: "center", text: colorToStr("<%= $color %>") }
+              ],
+              [
+                { style: "tableBody", alignment: "center", text: "가슴" },
+                { style: "tableBody", alignment: "center", text: "<%= $bust %>" }
+              ],
+              [
+                { style: "tableBody", alignment: "center", text: "윗배" },
+                { style: "tableBody", alignment: "center", text: "<%= $topbelly %>" }
+              ],
+              [
+                { style: "tableBody", alignment: "center", text: "상의길이" },
+                { style: "tableBody", alignment: "center", text: "<%= $length_top %>" }
+              ],
+              [
+                { style: "tableBody", alignment: "center", text: "팔길이" },
+                { style: "tableBody", alignment: "center", text: "<%= $arm %>" }
+              ],
+              [
+                { style: "tableBody", alignment: "center", text: "허리" },
+                { style: "tableBody", alignment: "center", text: "<%= $waist %>" }
+              ],
+              [
+                { style: "tableBody", alignment: "center", text: "엉덩이" },
+                { style: "tableBody", alignment: "center", text: "<%= $hip %>" }
+              ],
+              [
+                { style: "tableBody", alignment: "center", text: "허벅지" },
+                { style: "tableBody", alignment: "center", text: "<%= $thigh %>" }
+              ],
+              [
+                { style: "tableBody", alignment: "center", text: "하의길이" },
+                { style: "tableBody", alignment: "center", text: "<%= $length_bottom %>" }
+              ],
+              [
+                { style: "tableBody", alignment: "center", text: "밑단" },
+                { style: "tableBody", alignment: "center", text: "<%= $cuff %>" }
+              ],
+              [
+                {
+                  text: [
+                    { text: "기증자\n", style: "tableFooter" },
+                    { text: " \n", style: "tableFooterSpace" },
+                    { text: "<%= $clothes->donation->user->name %>", style: "tableFooterName" }
+                  ],
+                  colSpan: 2,
+                  alignment: "center"
+                },
+                {}
+              ]
+            ]
+          }
+        }
+
+      ]
+    };
+
+    pdfMake.fonts = fontDefinition;
+
+    /**
+     *
+     * Javascript: open new page in same window
+     *   http://stackoverflow.com/a/267712
+     *
+     * Is there any way to specify a suggested filename when using data: URI?
+     *   http://stackoverflow.com/a/6171323
+     *
+     * Re: data URIs - filename and content-disposition
+     *   http://lists.w3.org/Archives/Public/uri/2010Feb/0069.html
+     *
+     */
+    pdfMake.createPdf(docDefinition).getBase64(function(outDoc) {
+      var link = document.createElement('a');
+      document.body.appendChild(link); // Firefox requires the link to be in the body
+      link.href = "javascript:q=(document.location.href);void(open('" + "data:application/pdf;headers=Content-Disposition%3A%20attachment%3Bfilename%3Dopencloset%2Dclothes%2Dtag%2D<%= $code %>.pdf%3B;base64," + outDoc + "','_self','resizable,location,menubar,toolbar,scrollbars,status'));";
+      link.click();
+      document.body.removeChild(link); // remove the link when done
+    });
+
+  % end
+
+</body>
+</html>

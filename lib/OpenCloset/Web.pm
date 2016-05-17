@@ -270,6 +270,7 @@ sub _private_routes {
     $r->get('/new-clothes')->to('clothes#add');
     $r->get('/clothes')->to('clothes#index');
     $r->get('/clothes/:code')->to('clothes#clothes');
+    $r->get('/clothes/:code/pdf')->to('clothes#clothes_pdf');
 
     $r->get('/rental')->to('rental#index');
     $r->get('/rental/:ymd')->to('rental#ymd');

@@ -16,6 +16,14 @@ module.exports = (grunt) ->
         dest: 'coffee/js'
         ext: '.js'
 
+    dump_dir:
+      options:
+        pre: 'window.pdfMake = window.pdfMake || {}; window.pdfMake.vfs = '
+        rootPath: 'pdfmake/'
+      dist:
+        files:
+          'public/components/pdfmake/build/vfs_fonts_custom.js': [ 'pdfmake/*' ]
+
     uglify:
       options:
         mangle: true
@@ -71,7 +79,7 @@ module.exports = (grunt) ->
   require('load-grunt-tasks')(grunt, { scope: 'devDependencies' })
   require('time-grunt')(grunt)
 
-  grunt.registerTask('dist-js', ['coffee:dist', 'uglify:dist'])
+  grunt.registerTask('dist-js', ['coffee:dist', 'dump_dir:dist', 'uglify:dist'])
   grunt.registerTask('dist-css', ['less:dist', 'csscomb:dist', 'cssmin:dist'])
   grunt.registerTask('dist', ['clean', 'dist-js', 'dist-css'])
 
