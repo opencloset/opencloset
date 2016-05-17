@@ -78,14 +78,10 @@
         %th BestFit
         %th 대여자
     %tbody
-      - my $week = $dt->clone->truncate( to => 'year' );
       - for ( my $i = 0 ; $i <  @{ $count->{week} } ; $i++ ) {
         %tr
-          %td
-            - my $from = $week->clone->truncate( to => 'week' )->add( weeks => $i )->strftime('%m/%d');
-            - my $to   = $week->clone->truncate( to => 'week' )->add( weeks => $i + 1 )->strftime('%m/%d');
-            = sprintf("%02d : %s ~ %s", $i + 1, $from, $to)
           - if ( $count->{week}[$i] ) {
+            %td= $count->{week}[$i]{label}
             %td= $count->{week}[$i]{all}{total}
             %td= $count->{week}[$i]{visited}{total}
             %td= $count->{week}[$i]{notvisited}{total}
@@ -93,6 +89,7 @@
             %td= $count->{week}[$i]{loanee}{total}
           - }
           - else {
+            %td -
             %td N/A
             %td N/A
             %td N/A

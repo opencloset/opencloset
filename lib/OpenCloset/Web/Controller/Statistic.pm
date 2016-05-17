@@ -573,8 +573,8 @@ sub visitor_ymd {
     my $current_week_start_dt;
     my $current_week_end_dt;
     for (
-        my $i = $today->clone->truncate( to => 'year' );
-        $i <= $today;
+        my $i = $dt->clone->subtract( years => 1 );
+        $i <= $dt;
         $i->add( weeks => 1 )
         )
     {
@@ -591,6 +591,12 @@ sub visitor_ymd {
         my $data;
         if ( $f < $today && $t < $today ) {
             $data = $self->CACHE->get($name);
+            $data->{label} = sprintf(
+                "%04d %02d : %s ~ %s",
+                ( $f->week ), # week_year, week_number
+                $f->strftime('%m/%d'),
+                $t->strftime('%m/%d'),
+            );
         }
 
         push @{ $count{week} }, $data;
@@ -631,6 +637,12 @@ sub visitor_ymd {
 
     # current data with and without cache
     my %current_week = (
+        label      => sprintf(
+            "%04d %02d : %s ~ %s",
+            ( $dt->week ), # week_year, week_number
+            $dt->clone->truncate( to => 'week' )->strftime('%m/%d'),
+            $dt->clone->truncate( to => 'week' )->add( weeks => 1, seconds => -1 )->strftime('%m/%d'),
+        ),
         all        => { total => 0, male => 0, female => 0 },
         visited    => { total => 0, male => 0, female => 0 },
         notvisited => { total => 0, male => 0, female => 0 },
