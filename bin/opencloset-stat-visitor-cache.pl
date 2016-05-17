@@ -103,8 +103,8 @@ die "$config_file: cannot load config\n" unless $CONF;
         push @{ $count{day} }, $count;
     }
 
-    # from first to current week of this year
-    for ( my $i = $today->clone->truncate( to => 'year'); $i <= $today; $i->add( weeks => 1 ) ) {
+    # from first to current week of specified year
+    for ( my $i = $dt->clone->truncate( to => 'year'); $i <= $today; $i->add( weeks => 1 ) ) {
         my $f = $i->clone->truncate( to => 'week' );
         my $t = $i->clone->truncate( to => 'week' )->add( weeks => 1, seconds => -1 );
 
@@ -127,7 +127,7 @@ die "$config_file: cannot load config\n" unless $CONF;
     }
 
     # from january to current months of this year
-    for ( my $i = $today->clone->truncate( to => 'year'); $i <= $today; $i->add( months => 1 ) ) {
+    for ( my $i = $dt->clone->truncate( to => 'year'); $i <= $today; $i->add( months => 1 ) ) {
         my $f = $i->clone->truncate( to => 'month' );
         my $t = $i->clone->truncate( to => 'month' )->add( months => 1, seconds => -1 );
 
