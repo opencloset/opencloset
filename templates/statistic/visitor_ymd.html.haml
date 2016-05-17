@@ -109,7 +109,7 @@
   %table.table.table-striped.table-bordered.table-hover
     %thead
       %tr
-        %th{ :rowspan => "2" } 월 
+        %th{ :rowspan => "2" } 연월
         %th.center{ :colspan => "5" } 방문자
       %tr
         %th 예약자
@@ -120,9 +120,8 @@
     %tbody
       - for ( my $i = 0 ; $i <  @{ $count->{month} } ; $i++ ) {
         %tr
-          %td
-            = $i + 1
           - if ( $count->{month}[$i] ) {
+            %td= $count->{month}[$i]{label}
             %td= $count->{month}[$i]{all}{total}
             %td= $count->{month}[$i]{visited}{total}
             %td= $count->{month}[$i]{notvisited}{total}
@@ -130,6 +129,7 @@
             %td= $count->{month}[$i]{loanee}{total}
           - }
           - else {
+            %td -
             %td N/A
             %td N/A
             %td N/A

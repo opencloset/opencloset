@@ -600,8 +600,8 @@ sub visitor_ymd {
     my $current_month_start_dt;
     my $current_month_end_dt;
     for (
-        my $i = $today->clone->truncate( to => 'year' );
-        $i <= $today;
+        my $i = $dt->clone->subtract( years => 1 );
+        $i <= $dt;
         $i->add( months => 1 )
         )
     {
@@ -618,10 +618,16 @@ sub visitor_ymd {
         my $data;
         if ( $f < $today && $t < $today ) {
             $data = $self->CACHE->get($name);
+            $data->{label} = $f->strftime('%Y-%m');
         }
 
         push @{ $count{month} }, $data;
     }
+
+    my $no_cache_week;
+    my $no_cache_month;
+    ++$no_cache_week  if $today->clone->truncate( to => 'week' ) <= $dt;
+    ++$no_cache_month if $today->clone->truncate( to => 'month' ) <= $dt;
 
     # current data with and without cache
     my %current_week = (
@@ -632,6 +638,7 @@ sub visitor_ymd {
         loanee     => { total => 0, male => 0, female => 0 },
     );
     my %current_month = (
+        label      => $dt->strftime('%Y-%m'),
         all        => { total => 0, male => 0, female => 0 },
         visited    => { total => 0, male => 0, female => 0 },
         notvisited => { total => 0, male => 0, female => 0 },
@@ -697,8 +704,8 @@ sub visitor_ymd {
             $current_month{loanee}{female}     += $data->{loanee}{female};
         }
     }
-    $count{week}[-1]  = \%current_week;
-    $count{month}[-1] = \%current_month;
+    $count{week}[-1]  = \%current_week  if $no_cache_week;
+    $count{month}[-1] = \%current_month if $no_cache_month;
 
     $self->render( count => \%count, dt => $dt, );
 }
