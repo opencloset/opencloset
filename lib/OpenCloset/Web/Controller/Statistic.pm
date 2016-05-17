@@ -565,6 +565,7 @@ sub visitor_ymd {
             $data = $self->count_visitor( $f, $t );
             $today_data = $data;
         }
+        $data->{label} = $f->ymd;
 
         push @{ $count{day} }, $data;
     }

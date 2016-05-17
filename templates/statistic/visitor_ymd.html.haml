@@ -31,18 +31,17 @@
         %th BestFit
         %th 대여자
     %tbody
-      - my $day = $dt->clone->truncate( to => 'day' )->subtract( days => 2 );
       - for ( my $i = 0 ; $i <  @{ $count->{day} } ; $i++ ) {
+      -   my $label = $count->{day}[$i]{label};
         %tr
           %td
-            - my $date = $day->clone->truncate( to => 'day' )->add( days => $i)->ymd;
-            - if ( $dt->ymd eq $date ) {
+            - if ( $dt->ymd eq $label ) {
               %span.date
-                %a{ :href => "#{ url_for( '/order' )->query('booking_ymd' => $date ) }" }= $date
+                %a{ :href => "#{ url_for( '/order' )->query( 'booking_ymd' => $label ) }" }= $label
             - }
             - else {
               %span
-                %a{ :href => "#{ url_for( '/order' )->query('booking_ymd' => $date ) }" }= $date
+                %a{ :href => "#{ url_for( '/order' )->query( 'booking_ymd' => $label ) }" }= $label
             - }
 
           - if ( $count->{day}[$i] ) {
