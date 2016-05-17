@@ -33,9 +33,10 @@
     %tbody
       - for ( my $i = 0 ; $i <  @{ $count->{day} } ; $i++ ) {
       -   my $label = $count->{day}[$i]{label};
+      -   my $ymd   = $dt->ymd;
         %tr
           %td
-            - if ( $dt->ymd eq $label ) {
+            - if ( $label =~ m/^$ymd/ ) {
               %span.date
                 %a{ :href => "#{ url_for( '/order' )->query( 'booking_ymd' => $label ) }" }= $label
             - }

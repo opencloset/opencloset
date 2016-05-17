@@ -544,7 +544,7 @@ sub visitor_ymd {
     $today->truncate( to => 'day' );
 
     # -$day_range ~ +$day_range days from now
-    my $day_range = 2;
+    my $day_range = 7;
     my %count;
     my $today_data;
     my $from = $dt->clone->truncate( to => 'day' )->add( days => -$day_range );
@@ -566,7 +566,20 @@ sub visitor_ymd {
             $data = $self->count_visitor( $f, $t );
             $today_data = $data;
         }
-        $data->{label} = $f->ymd;
+        my $dow = do {
+            use experimental qw( smartmatch );
+            given ( $f->day_of_week ) {
+                "월" when 1;
+                "화" when 2;
+                "수" when 3;
+                "목" when 4;
+                "금" when 5;
+                "토" when 6;
+                "일" when 7;
+                default { q{} };
+            }
+        };
+        $data->{label} = $f->ymd . " ($dow)";
 
         push @{ $count{day} }, $data;
     }
