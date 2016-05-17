@@ -1,4 +1,5 @@
   - 사용자의 신체치수입력 순서조정 (#728)
+  - pdf 를 통한 의류 태그 출력 (#778)
 
 v1.5.3    Thu, 12 May 2016 12:41:44 +0900
   - Remove helpers inch2cm and cm2inch (#789)
