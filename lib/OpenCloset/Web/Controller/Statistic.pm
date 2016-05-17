@@ -703,4 +703,94 @@ sub visitor_ymd {
     $self->render( count => \%count, dt => $dt, );
 }
 
+=head2 events_seoul
+
+    GET /stat/events/seoul
+
+=cut
+
+our $DEFAULT_BETWEEN_DAYS = 10;
+
+sub events_seoul {
+    my $self = shift;
+    my $ymd  = $self->param('ymd');
+
+    my $to;
+    if ($ymd) {
+        my ( $year, $month, $day ) = split /-/, $ymd;
+        $to = DateTime->new( year => $year, month => $month, day => $day );
+    }
+    else {
+        $to = DateTime->now;
+    }
+
+    my $timezone = $self->config->{timezone} or die "Config timezone is not set";
+    $to->set_time_zone($timezone);
+    my $from = $to->clone->subtract( days => $DEFAULT_BETWEEN_DAYS );
+
+    my %counts;
+    my %dates;
+    my $storage = $self->DB->storage;
+    # visited
+    my $visited = $storage->dbh_do(
+        sub {
+            my ( $storage, $dbh, @args ) = @_;
+            $dbh->selectall_arrayref(
+                qq{SELECT DATE_FORMAT(b.date, '%Y-%m-%d') AS ymd, count(*) AS visited
+FROM `order` o JOIN booking b ON o.booking_id = b.id
+WHERE o.status_id NOT IN (12, 14) AND b.date BETWEEN '$from->ymd' AND '$to->ymd' GROUP BY DATE_FORMAT(b.date, '%Y-%m-%d')}
+            );
+        }
+    );
+
+    for my $row (@$visited) {
+        my ( $ymd, $c ) = @$row;
+        $dates{$ymd}++;
+        $counts{visited}{$ymd}  = $c;
+        $counts{reserved}{$ymd} = $c;
+    }
+
+    # not visited
+    my $not_visited = $storage->dbh_do(
+        sub {
+            my ( $storage, $dbh, @args ) = @_;
+            $dbh->selectall_arrayref(
+                qq{SELECT DATE_FORMAT(b.date, '%Y-%m-%d') AS ymd, count(*) AS visited
+FROM `order` o JOIN booking b ON o.booking_id = b.id
+WHERE o.status_id IN (12, 14) AND b.date BETWEEN '$from->ymd' AND '$to->ymd' GROUP BY DATE_FORMAT(b.date, '%Y-%m-%d')}
+            );
+        }
+    );
+
+    for my $row (@$not_visited) {
+        my ( $ymd, $c ) = @$row;
+        $dates{$ymd}++;
+        $counts{not_visited}{$ymd} = $c;
+        $counts{reserved}{$ymd} += $c;
+    }
+
+    # events
+    my $events = $self->DB->storage->dbh_do(
+        sub {
+            my ( $storage, $dbh, @args ) = @_;
+            $dbh->selectall_arrayref(
+                qq{SELECT DATE_FORMAT(b.date, '%Y-%m-%d'), status, COUNT(status)
+FROM `order` o JOIN booking b ON o.booking_id = b.id JOIN coupon c ON o.coupon_id = c.id
+WHERE coupon_id IS NOT NULL AND b.date BETWEEN '$from->ymd' AND '$to->ymd' GROUP BY DATE_FORMAT(b.date, '%Y-%m-%d'), status}
+            );
+        },
+    );
+
+    for my $row (@$events) {
+        my ( $ymd, $status, $c ) = @$row;
+
+        $dates{$ymd}++;
+        $counts{events}{visited}{$ymd}     = $c if $status eq 'used';
+        $counts{events}{not_visited}{$ymd} = $c if $status eq 'provided';
+        $counts{events}{reserved}{$ymd} += $c;
+    }
+
+    $self->render( from => $from, $to => $to, counts => \%counts, dates => \%dates );
+}
+
 1;

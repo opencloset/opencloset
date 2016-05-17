@@ -303,6 +303,7 @@ sub _private_routes {
     $r->get('/stat/status/:ymd')->to('statistic#status_ymd');
     $r->get('/stat/visitor')->to('statistic#visitor');
     $r->get('/stat/visitor/:ymd')->to('statistic#visitor_ymd');
+    $r->get('/stat/events/seoul')->to('statistic#events_seoul');
 
     $r->get('/volunteers')->to('volunteer#index');
 
