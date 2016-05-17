@@ -1,0 +1,42 @@
+% my $_id = 'stat-events-seoul';
+% layout 'default',
+%   page_id     => $_id,
+%   active_id   => $_id,
+%   breadcrumbs => [
+%     { text => meta_text('stat') },
+%     { text => meta_text($_id)   },
+%   ];
+% title meta_text($_id);
+
+<div class="search">
+  <form id="search-form" action="">
+    <div class="input-group">
+      <input id="query" class="form-control" name="" type="text" value="" placeholder="날짜를 고르세요", data-date-format="yyyy-mm-dd" data-date-end-date="0d">
+    </div>
+  </form>
+</div>
+
+<div class="space-8"></div>
+
+<table class="table table-striped table-bordered table-hover">
+  <thead>
+    <tr>
+      <th>연월일</th>
+      <th>열린옷장 예약인원</th>
+      <th>열린옷장 방문인원</th>
+      <th>취업날개 예약인원</th>
+      <th>취업날개 방문인원</th>
+    </tr>
+  </thead>
+  <tbody>
+    % for my $ymd (reverse sort keys %$dates) {
+    <tr>
+      <td><%= $ymd %></td>
+      <td><%= $counts->{reserved}{$ymd} || 0 %></td>
+      <td><%= $counts->{visited}{$ymd} || 0 %></td>
+      <td><%= $counts->{events}{reserved}{$ymd} || 0 %></td>
+      <td><%= $counts->{events}{visited}{$ymd} || 0 %></td>
+    </tr>
+    % }
+  </tbody>
+</table>
