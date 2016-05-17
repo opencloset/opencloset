@@ -16,7 +16,6 @@ requires 'List::MoreUtils';
 requires 'List::Util';
 requires 'Mojolicious','5.48';
 requires 'Mojolicious::Plugin::Authentication';
-requires 'Mojolicious::Plugin::FillInFormLite';
 requires 'Mojolicious::Plugin::HamlRenderer';
 requires 'Mojolicious::Plugin::Validator';
 requires 'Parcel::Track', '0.005';

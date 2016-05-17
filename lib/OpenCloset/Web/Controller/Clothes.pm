@@ -252,6 +252,128 @@ sub clothes {
     );
 }
 
+=head2 clothes_pdf
+
+    GET /clothes/:code/pdf
+
+=cut
+
+sub clothes_pdf {
+    my $self = shift;
+
+    #
+    # fetch params
+    #
+    my %params = $self->get_params(qw/ code /);
+
+    my $clothes = $self->get_clothes( \%params );
+    return unless $clothes;
+
+    my $clothes_top;
+    my $clothes_bottom;
+
+    my $code = $self->trim_clothes_code($clothes);
+    my $set_clothes;
+    if ( my ($first) = $code =~ /^(J|P|K)/ ) { # Jacket, Pants, sKirt
+        if ( $first eq 'J' ) {
+            my $suit = $clothes->suit_code_top;
+            $set_clothes = $suit->code_bottom if $suit;
+
+            $clothes_top    = $clothes;
+            $clothes_bottom = $set_clothes;
+        }
+        else {
+            my $suit = $clothes->suit_code_bottom;
+            $set_clothes = $suit->code_top if $suit;
+
+            $clothes_top    = $set_clothes;
+            $clothes_bottom = $clothes;
+        }
+    }
+
+    my $color = $clothes->color;
+    my $bust;
+    my $topbelly;
+    my $length_top;
+    my $arm;
+    my $waist;
+    my $hip;
+    my $thigh;
+    my $length_bottom;
+    my $cuff;
+
+    if ($clothes_top) {
+        $bust       = $clothes_top->bust;
+        $topbelly   = $clothes_top->topbelly;
+        $length_top = $clothes_top->length;
+        $arm        = $clothes_top->arm;
+    }
+
+    if ($clothes_bottom) {
+        $waist         = $clothes_bottom->waist;
+        $hip           = $clothes_bottom->hip;
+        $thigh         = $clothes_bottom->thigh;
+        $length_bottom = $clothes_bottom->length;
+        $cuff          = $clothes_bottom->cuff;
+    }
+
+    $bust          ||= "-";
+    $topbelly      ||= "-";
+    $length_top    ||= "-";
+    $arm           ||= "-";
+    $waist         ||= "-";
+    $hip           ||= "-";
+    $thigh         ||= "-";
+    $length_bottom ||= "-";
+    $cuff = $cuff ? sprintf( "%.2f", $cuff * 100 / 254 ) : "-";
+
+    my @tags = map { $_->name } $clothes->tags;
+
+    my $background_type;
+    my $type_str = q{};
+    if ( "온라인" ~~ @tags ) {
+        if ( $clothes->gender eq "male" ) {
+            $background_type = "online-male";
+            $type_str        = "온라인 - 남성";
+        }
+        elsif ( $clothes->gender eq "female" ) {
+            $background_type = "online-female";
+            $type_str        = "온라인 - 여성";
+        }
+    }
+    else {
+        if ( $clothes->gender eq "male" ) {
+            $background_type = "offline-male";
+            $type_str        = "오프라인 - 남성";
+        }
+        elsif ( $clothes->gender eq "female" ) {
+            $background_type = "offline-female";
+            $type_str        = "오프라인 - 여성";
+        }
+    }
+
+    #
+    # response
+    #
+    $self->stash(
+        clothes         => $clothes,
+        clothes_top     => $clothes_top,
+        clothes_bottom  => $clothes_bottom,
+        color           => $color,
+        bust            => $bust,
+        topbelly        => $topbelly,
+        length_top      => $length_top,
+        arm             => $arm,
+        waist           => $waist,
+        hip             => $hip,
+        thigh           => $thigh,
+        length_bottom   => $length_bottom,
+        cuff            => $cuff,
+        background_type => $background_type,
+        type_str        => $type_str,
+    );
+}
+
 =head2 add
 
     GET /new-clothes

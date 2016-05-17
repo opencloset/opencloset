@@ -6,7 +6,7 @@ use DateTime;
 
 use OpenCloset::Schema;
 
-use version; our $VERSION = qv("v1.5.3");
+use version; our $VERSION = qv("v1.5.4");
 
 has CACHE => sub {
     my $self  = shift;
@@ -57,7 +57,6 @@ sub startup {
 
     $self->plugin('validator');
     $self->plugin('haml_renderer');
-    $self->plugin('FillInFormLite');
     $self->plugin('OpenCloset::Web::Plugin::Helpers');
 
     $self->_authentication;
@@ -271,6 +270,7 @@ sub _private_routes {
     $r->get('/new-clothes')->to('clothes#add');
     $r->get('/clothes')->to('clothes#index');
     $r->get('/clothes/:code')->to('clothes#clothes');
+    $r->get('/clothes/:code/pdf')->to('clothes#clothes_pdf');
 
     $r->get('/rental')->to('rental#index');
     $r->get('/rental/:ymd')->to('rental#ymd');
@@ -303,6 +303,7 @@ sub _private_routes {
     $r->get('/stat/status/:ymd')->to('statistic#status_ymd');
     $r->get('/stat/visitor')->to('statistic#visitor');
     $r->get('/stat/visitor/:ymd')->to('statistic#visitor_ymd');
+    $r->get('/stat/events/seoul')->to('statistic#events_seoul');
 
     $r->get('/volunteers')->to('volunteer#index');
 

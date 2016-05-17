@@ -132,18 +132,6 @@
                                   %span.editable#user-birth{ 'data-name' => 'birth' }= $user->user_info->birth
 
                               .profile-info-row
-                                .profile-info-name 착용 날짜
-                                .profile-info-value
-                                  %span.editable#user-wearon_date{ 'data-name' => 'wearon_date', 'data-value' => "#{ $user->user_info->wearon_date ? $user->user_info->wearon_date->ymd : q{} }" }
-
-                              - if ($does_wear) {
-                                .profile-info-row
-                                  .profile-info-name 착용 여부
-                                  .profile-info-value
-                                    %span.editable#order-does_wear{ 'data-name' => 'does_wear', 'data-type' => 'select', 'data-value' => "#{ $does_wear->does_wear }", 'data-order-id' => "#{ $does_wear->id }" }
-                              - }
-
-                              .profile-info-row
                                 .profile-info-name 대여 목적
                                 .profile-info-value
                                   %span.editable#user-purpose{ 'data-name' => 'purpose', 'data-value' => "#{ $user->user_info->purpose }" }
@@ -154,19 +142,31 @@
                                   %span.editable#user-purpose2{ 'data-name' => 'purpose2', 'data-value' => "#{ $user->user_info->purpose2 }" }
 
                               .profile-info-row
-                                .profile-info-name 설명
+                                .profile-info-name 대여 희망 색상
                                 .profile-info-value
-                                  %span.editable#user-comment{ 'data-name' => 'comment' }= $user->user_info->comment || ''
+                                  %span.editable#user-pre_color{ 'data-name' => 'pre_color', 'data-value' => "#{ $user->user_info->pre_color }" }
+
+                              .profile-info-row
+                                .profile-info-name 착용 날짜
+                                .profile-info-value
+                                  %span.editable#user-wearon_date{ 'data-name' => 'wearon_date', 'data-value' => "#{ $user->user_info->wearon_date ? $user->user_info->wearon_date->ymd : q{} }" }
 
                               .profile-info-row
                                 .profile-info-name 대여 희망 품목
                                 .profile-info-value
                                   %span.editable#user-pre_category{ 'data-name' => 'pre_category', 'data-value' => "#{ $user->user_info->pre_category}" }
 
+                              - if ($does_wear) {
+                                .profile-info-row
+                                  .profile-info-name 착용 여부
+                                  .profile-info-value
+                                    %span.editable#order-does_wear{ 'data-name' => 'does_wear', 'data-type' => 'select', 'data-value' => "#{ $does_wear->does_wear }", 'data-order-id' => "#{ $does_wear->id }" }
+                              - }
+
                               .profile-info-row
-                                .profile-info-name 대여 희망 색상
+                                .profile-info-name 설명
                                 .profile-info-value
-                                  %span.editable#user-pre_color{ 'data-name' => 'pre_color', 'data-value' => "#{ $user->user_info->pre_color }" }
+                                  %span.editable#user-comment{ 'data-name' => 'comment' }= $user->user_info->comment || ''
 
                               .profile-info-row
                                 .profile-info-name 키
