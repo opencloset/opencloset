@@ -83,6 +83,35 @@
   </tbody>
 </table>
 
+<table class="table table-condensed">
+  <tbody>
+    % for my $key (sort keys %$online_rental_fee) {
+    % my $fee = $online_rental_fee->{$key};
+    % next if $fee == 0;
+    <tr>
+      <td>
+        <%= $key %>
+      </td>
+      <td class="text-right form-group-sm">
+        <samp>
+          %= commify($fee)
+        </samp>
+      </td>
+    </tr>
+    % }
+    <tr class="warning">
+      <td>
+        온라인 대여비
+      </td>
+      <td class="text-right">
+        <samp>
+          %= commify($online_total_fee)
+        </samp>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
 <hr>
 
 <table class="table table-condensed">

@@ -13,8 +13,7 @@ our $STAGE_UNPAID_DENY = 4;
 our $STAGE_UNPAID_DONE = 5;
 our $STAGE_UNPAID_PART = 6;
 
-our $REALM    = 'income';
-our $TIMEZONE = 'Asia/Seoul';
+our $REALM = 'income';
 
 =head1 METHODS
 
@@ -83,7 +82,7 @@ sub logout {
 sub today {
     my $self = shift;
 
-    my $today = DateTime->now( time_zone => $TIMEZONE );
+    my $today = DateTime->now( time_zone => $self->config->{timezone} );
     $self->redirect_to( 'income.ymd', ymd => $today->ymd );
 }
 
@@ -98,9 +97,11 @@ sub ymd {
     my $self = shift;
     my $ymd  = $self->param('ymd');
 
+    my $timezone = $self->config->{timezone} or die 'Not found timezone configure';
+
     my $strp = DateTime::Format::Strptime->new(
         pattern   => '%Y-%m-%d',
-        time_zone => $TIMEZONE,
+        time_zone => $timezone,
     );
     my $dt      = $strp->parse_datetime($ymd);
     my $parser  = $self->DB->storage->datetime_parser;
@@ -113,13 +114,26 @@ sub ymd {
 
     my $rental_rs = $self->DB->resultset('Order')->search( { rental_date => $between } );
 
-    my $total_fee  = 0;
-    my $rental_fee = {};
-    my $coupon_fee = {};
+    my $total_fee         = 0;
+    my $rental_fee        = {};
+    my $coupon_fee        = {};
+    my $online_rental_fee = {};
+    my $online_total_fee  = 0;
     while ( my $order = $rental_rs->next ) {
         my $pay_with = $order->price_pay_with || 'Unknown';
         my ( undef, $price ) = $self->order_price($order);
         my $fee = $price->{$STAGE_RENTAL_FEE} || 0;
+
+        my $booking = $order->booking;
+        if ($booking) {
+            my $dt   = $booking->date;
+            my $hour = $dt->hour;
+            if ( $hour == 22 ) {
+                $online_rental_fee->{$pay_with} += $fee;
+                $online_total_fee += $fee;
+                next;
+            }
+        }
 
         if ( $pay_with =~ /^쿠폰/ ) {
             $coupon_fee->{$pay_with} += $fee;
@@ -154,17 +168,19 @@ sub ymd {
 
     $self->render(
         ymd => $ymd,
-        now           => DateTime->now( time_zone => $TIMEZONE ),
-        prev_date     => $dt->clone->add( days    => -1 ),
-        next_date     => $dt->clone->add( days    => 1 ),
-        rental_fee    => $rental_fee,
-        coupon_fee    => $coupon_fee,
-        late_fee      => $late_fee,
-        unpaid_fee    => $unpaid_fee,
-        total_fee     => $total_fee,
-        rental_orders => $rental_rs->reset,
-        return_orders => $return_rs->reset,
-        unpaid_od     => $unpaid_rs->reset,
+        now               => DateTime->now( time_zone   => $timezone ),
+        prev_date         => $dt->clone->subtract( days => 1 ),
+        next_date         => $dt->clone->add( days      => 1 ),
+        rental_fee        => $rental_fee,
+        coupon_fee        => $coupon_fee,
+        online_rental_fee => $online_rental_fee,
+        online_total_fee  => $online_total_fee,
+        late_fee          => $late_fee,
+        unpaid_fee        => $unpaid_fee,
+        total_fee         => $total_fee,
+        rental_orders     => $rental_rs->reset,
+        return_orders     => $return_rs->reset,
+        unpaid_od         => $unpaid_rs->reset,
     );
 }
 
