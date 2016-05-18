@@ -543,11 +543,12 @@ sub visitor_ymd {
     }
     $today->truncate( to => 'day' );
 
-    # -2 ~ +2 days from now
+    # -$day_range ~ +$day_range days from now
+    my $day_range = 7;
     my %count;
     my $today_data;
-    my $from = $dt->clone->truncate( to => 'day' )->add( days => -2 );
-    my $to   = $dt->clone->truncate( to => 'day' )->add( days => 2 );
+    my $from = $dt->clone->truncate( to => 'day' )->add( days => -$day_range );
+    my $to   = $dt->clone->truncate( to => 'day' )->add( days => $day_range );
     for ( ; $from <= $to; $from->add( days => 1 ) ) {
         my $f = $from->clone->truncate( to => 'day' );
         my $t = $from->clone->truncate( to => 'day' )->add( days => 1, seconds => -1 );
@@ -565,6 +566,20 @@ sub visitor_ymd {
             $data = $self->count_visitor( $f, $t );
             $today_data = $data;
         }
+        my $dow = do {
+            use experimental qw( smartmatch );
+            given ( $f->day_of_week ) {
+                "월" when 1;
+                "화" when 2;
+                "수" when 3;
+                "목" when 4;
+                "금" when 5;
+                "토" when 6;
+                "일" when 7;
+                default { q{} };
+            }
+        };
+        $data->{label} = $f->ymd . " ($dow)";
 
         push @{ $count{day} }, $data;
     }
@@ -573,8 +588,8 @@ sub visitor_ymd {
     my $current_week_start_dt;
     my $current_week_end_dt;
     for (
-        my $i = $today->clone->truncate( to => 'year' );
-        $i <= $today;
+        my $i = $dt->clone->subtract( years => 1 );
+        $i <= $dt;
         $i->add( weeks => 1 )
         )
     {
@@ -591,6 +606,12 @@ sub visitor_ymd {
         my $data;
         if ( $f < $today && $t < $today ) {
             $data = $self->CACHE->get($name);
+            $data->{label} = sprintf(
+                "%04d %02d : %s ~ %s",
+                ( $f->week ), # week_year, week_number
+                $f->strftime('%m/%d'),
+                $t->strftime('%m/%d'),
+            );
         }
 
         push @{ $count{week} }, $data;
@@ -600,8 +621,8 @@ sub visitor_ymd {
     my $current_month_start_dt;
     my $current_month_end_dt;
     for (
-        my $i = $today->clone->truncate( to => 'year' );
-        $i <= $today;
+        my $i = $dt->clone->subtract( years => 1 );
+        $i <= $dt;
         $i->add( months => 1 )
         )
     {
@@ -618,13 +639,25 @@ sub visitor_ymd {
         my $data;
         if ( $f < $today && $t < $today ) {
             $data = $self->CACHE->get($name);
+            $data->{label} = $f->strftime('%Y-%m');
         }
 
         push @{ $count{month} }, $data;
     }
 
+    my $no_cache_week;
+    my $no_cache_month;
+    ++$no_cache_week  if $today->clone->truncate( to => 'week' ) <= $dt;
+    ++$no_cache_month if $today->clone->truncate( to => 'month' ) <= $dt;
+
     # current data with and without cache
     my %current_week = (
+        label      => sprintf(
+            "%04d %02d : %s ~ %s",
+            ( $dt->week ), # week_year, week_number
+            $dt->clone->truncate( to => 'week' )->strftime('%m/%d'),
+            $dt->clone->truncate( to => 'week' )->add( weeks => 1, seconds => -1 )->strftime('%m/%d'),
+        ),
         all        => { total => 0, male => 0, female => 0 },
         visited    => { total => 0, male => 0, female => 0 },
         notvisited => { total => 0, male => 0, female => 0 },
@@ -632,6 +665,7 @@ sub visitor_ymd {
         loanee     => { total => 0, male => 0, female => 0 },
     );
     my %current_month = (
+        label      => $dt->strftime('%Y-%m'),
         all        => { total => 0, male => 0, female => 0 },
         visited    => { total => 0, male => 0, female => 0 },
         notvisited => { total => 0, male => 0, female => 0 },
@@ -697,8 +731,8 @@ sub visitor_ymd {
             $current_month{loanee}{female}     += $data->{loanee}{female};
         }
     }
-    $count{week}[-1]  = \%current_week;
-    $count{month}[-1] = \%current_month;
+    $count{week}[-1]  = \%current_week  if $no_cache_week;
+    $count{month}[-1] = \%current_month if $no_cache_month;
 
     $self->render( count => \%count, dt => $dt, );
 }
