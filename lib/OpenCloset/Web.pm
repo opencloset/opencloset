@@ -5,9 +5,7 @@ use CHI;
 use DateTime;
 
 use OpenCloset::Schema;
-
 use version; our $VERSION = qv("v1.5.4");
-
 has CACHE => sub {
     my $self  = shift;
     my $cache = CHI->new(
@@ -225,6 +223,8 @@ sub _private_routes {
     $api->put('/clothes/:code')->to('API#api_update_clothes');
     $api->delete('/clothes/:code')->to('API#api_delete_clothes');
     $api->put('/clothes/:code/tag')->to('API#api_update_clothes_tag');
+    $api->any( [ 'POST', 'PUT' ] => '/clothes/:code/discard' )
+        ->to('API#api_update_clothes_discard');
     $api->get('/clothes-list')->to('API#api_clothes_list');
     $api->put('/clothes-list')->to('API#api_update_clothes_list');
 

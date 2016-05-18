@@ -58,6 +58,25 @@ $ ->
         params.source.push { value: color, text: color_str } for color, color_str of OpenCloset.color
       when 'clothes-comment'
         params.type = 'textarea'
+      when 'clothes-discard-to'
+        params.url = (params) ->
+          code = $(@).data('clothes-code')
+          url = "/api/clothes/#{code}/discard"
+          data = {}
+          data[params.name] = params.value
+          $.ajax url,
+            type: 'PUT'
+            data: data
+      when 'clothes-discard-comment'
+        params.type = 'textarea'
+        params.url = (params) ->
+          code = $(@).data('clothes-code')
+          url = "/api/clothes/#{code}/discard"
+          data = {}
+          data[params.name] = params.value
+          $.ajax url,
+            type: 'PUT'
+            data: data
       else
         params.type = 'text'
 
