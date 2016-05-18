@@ -120,7 +120,7 @@
 
 <table class="table table-condensed">
   <tbody>
-    % my $late_fee_total = 0;
+    % $late_fee_total = 0;
     % for my $key (sort keys %$late_fee) {
     % next if $key eq '미납';
     % my $fee = $late_fee->{$key};
