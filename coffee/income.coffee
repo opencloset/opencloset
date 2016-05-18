@@ -27,3 +27,9 @@ $ ->
       fee = $(el).val() or 0
       total += parseInt(fee)
     $table.find('.income-xs.sum').text(commify(total))
+
+    total = 0
+    $('input.income-xs').each (i, el) ->
+      fee = $(el).val() or 0
+      total += parseInt(fee)
+    $('#input-income-sum').text(commify(total))
