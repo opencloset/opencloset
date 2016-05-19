@@ -1,7 +1,9 @@
 - use utf8;
+- use OpenCloset::Constants::Status qw/$DISCARD/;
 - my $clothes_code = trim_clothes_code($clothes);
 - my $order = $clothes->orders->find({ status_id => 2 });
 - my $late_fee = $order ? calc_late_fee($order) : 0;
+- my $status_id = $clothes->status->id;
 %tr
   %td
     %a{ :href => "#{url_for('/clothes/' . $clothes_code)}" }= $clothes_code
@@ -14,6 +16,13 @@
   %td
     %span.category{ 'data-category' => "#{ $clothes->category }" }= $clothes->category
   %td
+    - if ($status_id == $DISCARD) {
+      - my $dc = $clothes->discard_clothes;
+      - my $discard_to = $dc ? $dc->discard_to : '';
+      - my $comment = $dc ? $dc->comment : '';
+      %small= $discard_to
+      %small.text-muted= $comment
+    - }
     - if ($order) {
     -   my $rental_date = $order->rental_date;
     -   my $target_date = $order->target_date;

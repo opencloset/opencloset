@@ -543,11 +543,12 @@ sub visitor_ymd {
     }
     $today->truncate( to => 'day' );
 
-    # -2 ~ +2 days from now
+    # -$day_range ~ +$day_range days from now
+    my $day_range = 7;
     my %count;
     my $today_data;
-    my $from = $dt->clone->truncate( to => 'day' )->add( days => -2 );
-    my $to   = $dt->clone->truncate( to => 'day' )->add( days => 2 );
+    my $from = $dt->clone->truncate( to => 'day' )->add( days => -$day_range );
+    my $to   = $dt->clone->truncate( to => 'day' )->add( days => $day_range );
     for ( ; $from <= $to; $from->add( days => 1 ) ) {
         my $f = $from->clone->truncate( to => 'day' );
         my $t = $from->clone->truncate( to => 'day' )->add( days => 1, seconds => -1 );
@@ -565,6 +566,20 @@ sub visitor_ymd {
             $data = $self->count_visitor( $f, $t );
             $today_data = $data;
         }
+        my $dow = do {
+            use experimental qw( smartmatch );
+            given ( $f->day_of_week ) {
+                "월" when 1;
+                "화" when 2;
+                "수" when 3;
+                "목" when 4;
+                "금" when 5;
+                "토" when 6;
+                "일" when 7;
+                default { q{} }
+            }
+        };
+        $data->{label} = $f->ymd . " ($dow)";
 
         push @{ $count{day} }, $data;
     }
@@ -572,11 +587,7 @@ sub visitor_ymd {
     # from first to current week of this year
     my $current_week_start_dt;
     my $current_week_end_dt;
-    for (
-        my $i = $today->clone->truncate( to => 'year' );
-        $i <= $today;
-        $i->add( weeks => 1 )
-        )
+    for ( my $i = $dt->clone->subtract( years => 1 ); $i <= $dt; $i->add( weeks => 1 ) )
     {
         my $f = $i->clone->truncate( to => 'week' );
         my $t = $i->clone->truncate( to => 'week' )->add( weeks => 1, seconds => -1 );
@@ -591,6 +602,12 @@ sub visitor_ymd {
         my $data;
         if ( $f < $today && $t < $today ) {
             $data = $self->CACHE->get($name);
+            $data->{label} = sprintf(
+                "%04d %02d : %s ~ %s",
+                ( $f->week ), # week_year, week_number
+                $f->strftime('%m/%d'),
+                $t->strftime('%m/%d'),
+            );
         }
 
         push @{ $count{week} }, $data;
@@ -600,8 +617,8 @@ sub visitor_ymd {
     my $current_month_start_dt;
     my $current_month_end_dt;
     for (
-        my $i = $today->clone->truncate( to => 'year' );
-        $i <= $today;
+        my $i = $dt->clone->subtract( years => 1 );
+        $i <= $dt;
         $i->add( months => 1 )
         )
     {
@@ -618,13 +635,26 @@ sub visitor_ymd {
         my $data;
         if ( $f < $today && $t < $today ) {
             $data = $self->CACHE->get($name);
+            $data->{label} = $f->strftime('%Y-%m');
         }
 
         push @{ $count{month} }, $data;
     }
 
+    my $no_cache_week;
+    my $no_cache_month;
+    ++$no_cache_week  if $today->clone->truncate( to => 'week' ) <= $dt;
+    ++$no_cache_month if $today->clone->truncate( to => 'month' ) <= $dt;
+
     # current data with and without cache
     my %current_week = (
+        label => sprintf(
+            "%04d %02d : %s ~ %s",
+            ( $dt->week ), # week_year, week_number
+            $dt->clone->truncate( to => 'week' )->strftime('%m/%d'),
+            $dt->clone->truncate( to => 'week' )->add( weeks => 1, seconds => -1 )
+                ->strftime('%m/%d'),
+        ),
         all        => { total => 0, male => 0, female => 0 },
         visited    => { total => 0, male => 0, female => 0 },
         notvisited => { total => 0, male => 0, female => 0 },
@@ -632,11 +662,12 @@ sub visitor_ymd {
         loanee     => { total => 0, male => 0, female => 0 },
     );
     my %current_month = (
+        label      => $dt->strftime('%Y-%m'),
         all        => { total => 0, male => 0, female => 0 },
         visited    => { total => 0, male => 0, female => 0 },
         notvisited => { total => 0, male => 0, female => 0 },
-        bestfit    => { total => 0, male => 0, female => 0 },
-        loanee     => { total => 0, male => 0, female => 0 },
+        bestfit => { total => 0, male => 0, female => 0 },
+        loanee  => { total => 0, male => 0, female => 0 },
     );
     for (
         my $i = $today->clone->add( months => -1 )->truncate( to => 'month' );
@@ -697,8 +728,8 @@ sub visitor_ymd {
             $current_month{loanee}{female}     += $data->{loanee}{female};
         }
     }
-    $count{week}[-1]  = \%current_week;
-    $count{month}[-1] = \%current_month;
+    $count{week}[-1]  = \%current_week  if $no_cache_week;
+    $count{month}[-1] = \%current_month if $no_cache_month;
 
     $self->render( count => \%count, dt => $dt, );
 }
@@ -731,7 +762,7 @@ sub events_seoul {
     my %counts;
     my %dates;
     my $storage = $self->DB->storage;
-    # visited
+    ## 일별 열린옷장 방문
     my $visited = $storage->dbh_do(
         sub {
             my ( $storage, $dbh, @args ) = @_;
@@ -750,7 +781,7 @@ WHERE o.status_id NOT IN (12, 14) AND b.date BETWEEN '$from->ymd' AND '$to->ymd'
         $counts{reserved}{$ymd} = $c;
     }
 
-    # not visited
+    ## 일별 열린옷장 미방문
     my $not_visited = $storage->dbh_do(
         sub {
             my ( $storage, $dbh, @args ) = @_;
@@ -769,14 +800,14 @@ WHERE o.status_id IN (12, 14) AND b.date BETWEEN '$from->ymd' AND '$to->ymd' GRO
         $counts{reserved}{$ymd} += $c;
     }
 
-    # events
+    ## 일별 취업날개 예약/방문
     my $events = $self->DB->storage->dbh_do(
         sub {
             my ( $storage, $dbh, @args ) = @_;
             $dbh->selectall_arrayref(
                 qq{SELECT DATE_FORMAT(b.date, '%Y-%m-%d'), status, COUNT(status)
 FROM `order` o JOIN booking b ON o.booking_id = b.id JOIN coupon c ON o.coupon_id = c.id
-WHERE coupon_id IS NOT NULL AND b.date BETWEEN '$from->ymd' AND '$to->ymd' GROUP BY DATE_FORMAT(b.date, '%Y-%m-%d'), status}
+WHERE c.desc LIKE 'seoul%' AND o.coupon_id IS NOT NULL AND b.date BETWEEN '$from->ymd' AND '$to->ymd' GROUP BY DATE_FORMAT(b.date, '%Y-%m-%d'), status}
             );
         },
     );
@@ -788,6 +819,56 @@ WHERE coupon_id IS NOT NULL AND b.date BETWEEN '$from->ymd' AND '$to->ymd' GROUP
         $counts{events}{visited}{$ymd}     = $c if $status eq 'used';
         $counts{events}{not_visited}{$ymd} = $c if $status eq 'provided';
         $counts{events}{reserved}{$ymd} += $c;
+    }
+
+    ## 연령대별 누적
+
+    ## 성별 누적
+    my $gender = $self->DB->storage->dbh_do(
+        sub {
+            my ( $storage, $dbh, @args ) = @_;
+            $dbh->selectall_arrayref(
+                qq{SELECT ui.gender, COUNT(ui.gender) AS accumulation
+FROM (SELECT DISTINCT(coupon_id), user_id
+FROM `order`
+WHERE coupon_id IS NOT NULL) o
+JOIN user_info ui ON o.user_id = ui.user_id
+JOIN coupon c ON o.coupon_id = c.id
+WHERE c.desc LIKE 'seoul%' AND o.coupon_id IS NOT NULL AND c.status = 'used' GROUP BY ui.gender}
+            );
+        },
+    );
+
+    my %GENDER_MAP = ( male => '남성', female => '여성' );
+    for my $row (@$gender) {
+        my ( $gender, $c ) = @$row;
+
+        $counts{gender}{ $GENDER_MAP{$gender} } = $c;
+    }
+
+    ## 연령대별 누적
+    my $birth = $self->DB->storage->dbh_do(
+        sub {
+            my ( $storage, $dbh, @args ) = @_;
+            $dbh->selectall_arrayref(
+                qq{SELECT ui.birth, COUNT(ui.birth) AS accumulation
+FROM (SELECT DISTINCT(coupon_id), user_id
+FROM `order`
+WHERE coupon_id IS NOT NULL) o
+JOIN user_info ui ON o.user_id = ui.user_id
+JOIN coupon c ON o.coupon_id = c.id
+WHERE c.desc LIKE 'seoul%' AND o.coupon_id IS NOT NULL AND c.status = 'used' GROUP BY ui.birth}
+            );
+        },
+    );
+
+    my $now  = DateTime->now;
+    my $year = $now->year;
+    for my $row (@$birth) {
+        my ( $birth, $c ) = @$row;
+
+        my $age_group = int( ( $year - $birth ) / 10 ) * 10;
+        $counts{age_group}{$age_group} += $c;
     }
 
     $self->render( from => $from, $to => $to, counts => \%counts, dates => \%dates );

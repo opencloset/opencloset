@@ -1384,6 +1384,45 @@ sub api_update_clothes_tag {
     $self->respond_to( json => { status => 200, json => $data } );
 }
 
+=head2 update_clothes_discard
+
+    PUT  /api/clothes/:code/discard
+    POST /api/clothes/:code/discard
+
+=cut
+
+sub api_update_clothes_discard {
+    my $self = shift;
+    my $code = $self->param('code');
+
+    $code = sprintf( '%05s', $code );
+
+    my $clothes = $self->DB->resultset('Clothes')->find( { code => $code } );
+    return $self->error( 404, { str => "Not found clothes: $code" } ) unless $clothes;
+
+    my $discard_clothes = $self->DB->resultset('DiscardClothes')
+        ->find_or_create( { clothes_code => $code } );
+
+    return $self->error( 500, { str => "Couldn't create a discard_clothes" } )
+        unless $discard_clothes;
+
+    my $v = $self->validation;
+    $v->optional('discard_to');
+    $v->optional('comment');
+
+    if ( $v->has_error ) {
+        my $failed = $v->failed;
+        return $self->error(
+            400,
+            { str => 'Parameter Validation Failed: ' . join( ', ', @$failed ) }
+        );
+    }
+
+    my $input = $v->input;
+    $discard_clothes->update($input);
+    $self->render( json => { $discard_clothes->get_columns } );
+}
+
 =head2 clothes_list
 
     GET /api/clothes-list

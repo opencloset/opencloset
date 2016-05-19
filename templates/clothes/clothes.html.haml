@@ -18,6 +18,8 @@
 -   ;
 - my $clothes_code = trim_clothes_code($clothes);
 - title meta_text($_id) . qq{: $clothes_code};
+- use OpenCloset::Constants::Status qw/$DISCARD/;
+- my $status_id = $clothes->status->id;
 
                 %div
                   #user-profile-1.user-profile.row
@@ -314,6 +316,21 @@
                                 .profile-info-name 상태
                                 .profile-info-value
                                   %span#clothes-status_id= $clothes->status->name
+
+                              - if ($status_id == $DISCARD) {
+                                - my $dc = $clothes->discard_clothes;
+                                - my $discard_to = $dc ? $dc->discard_to : '';
+                                - my $comment    = $dc ? $dc->comment : '';
+                                .profile-info-row
+                                  .profile-info-name 폐기장소
+                                  .profile-info-value
+                                    %span.editable#clothes-discard-to{ 'data-name' => 'discard_to', 'data-value' => "#{ $discard_to }", 'data-clothes-code' => "#{ $clothes_code }" }
+
+                                .profile-info-row
+                                  .profile-info-name 폐기사유
+                                  .profile-info-value
+                                    %span.editable#clothes-discard-comment{ 'data-name' => 'comment', 'data-value' => "#{ $comment }", 'data-clothes-code' => "#{ $clothes_code }" }
+                              - }
 
                               .profile-info-row
                                 .profile-info-name 종류
