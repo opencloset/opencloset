@@ -868,7 +868,6 @@ WHERE c.desc LIKE 'seoul%' AND o.coupon_id IS NOT NULL AND c.status = 'used' GRO
         my ( $birth, $c ) = @$row;
 
         my $age_group = int( ( $year - $birth ) / 10 ) * 10;
-        $self->log->debug("$age_group: $c");
         $counts{age_group}{$age_group} += $c;
     }
 
