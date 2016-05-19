@@ -576,7 +576,7 @@ sub visitor_ymd {
                 "금" when 5;
                 "토" when 6;
                 "일" when 7;
-                default { q{} };
+                default { q{} }
             }
         };
         $data->{label} = $f->ymd . " ($dow)";
@@ -587,11 +587,7 @@ sub visitor_ymd {
     # from first to current week of this year
     my $current_week_start_dt;
     my $current_week_end_dt;
-    for (
-        my $i = $dt->clone->subtract( years => 1 );
-        $i <= $dt;
-        $i->add( weeks => 1 )
-        )
+    for ( my $i = $dt->clone->subtract( years => 1 ); $i <= $dt; $i->add( weeks => 1 ) )
     {
         my $f = $i->clone->truncate( to => 'week' );
         my $t = $i->clone->truncate( to => 'week' )->add( weeks => 1, seconds => -1 );
@@ -652,11 +648,12 @@ sub visitor_ymd {
 
     # current data with and without cache
     my %current_week = (
-        label      => sprintf(
+        label => sprintf(
             "%04d %02d : %s ~ %s",
             ( $dt->week ), # week_year, week_number
             $dt->clone->truncate( to => 'week' )->strftime('%m/%d'),
-            $dt->clone->truncate( to => 'week' )->add( weeks => 1, seconds => -1 )->strftime('%m/%d'),
+            $dt->clone->truncate( to => 'week' )->add( weeks => 1, seconds => -1 )
+                ->strftime('%m/%d'),
         ),
         all        => { total => 0, male => 0, female => 0 },
         visited    => { total => 0, male => 0, female => 0 },
@@ -669,8 +666,8 @@ sub visitor_ymd {
         all        => { total => 0, male => 0, female => 0 },
         visited    => { total => 0, male => 0, female => 0 },
         notvisited => { total => 0, male => 0, female => 0 },
-        bestfit    => { total => 0, male => 0, female => 0 },
-        loanee     => { total => 0, male => 0, female => 0 },
+        bestfit => { total => 0, male => 0, female => 0 },
+        loanee  => { total => 0, male => 0, female => 0 },
     );
     for (
         my $i = $today->clone->add( months => -1 )->truncate( to => 'month' );
@@ -765,7 +762,7 @@ sub events_seoul {
     my %counts;
     my %dates;
     my $storage = $self->DB->storage;
-    # visited
+    ## 일별 열린옷장 방문
     my $visited = $storage->dbh_do(
         sub {
             my ( $storage, $dbh, @args ) = @_;
@@ -784,7 +781,7 @@ WHERE o.status_id NOT IN (12, 14) AND b.date BETWEEN '$from->ymd' AND '$to->ymd'
         $counts{reserved}{$ymd} = $c;
     }
 
-    # not visited
+    ## 일별 열린옷장 미방문
     my $not_visited = $storage->dbh_do(
         sub {
             my ( $storage, $dbh, @args ) = @_;
@@ -803,14 +800,14 @@ WHERE o.status_id IN (12, 14) AND b.date BETWEEN '$from->ymd' AND '$to->ymd' GRO
         $counts{reserved}{$ymd} += $c;
     }
 
-    # events
+    ## 일별 취업날개 예약/방문
     my $events = $self->DB->storage->dbh_do(
         sub {
             my ( $storage, $dbh, @args ) = @_;
             $dbh->selectall_arrayref(
                 qq{SELECT DATE_FORMAT(b.date, '%Y-%m-%d'), status, COUNT(status)
 FROM `order` o JOIN booking b ON o.booking_id = b.id JOIN coupon c ON o.coupon_id = c.id
-WHERE coupon_id IS NOT NULL AND b.date BETWEEN '$from->ymd' AND '$to->ymd' GROUP BY DATE_FORMAT(b.date, '%Y-%m-%d'), status}
+WHERE c.desc LIKE 'seoul%' AND o.coupon_id IS NOT NULL AND b.date BETWEEN '$from->ymd' AND '$to->ymd' GROUP BY DATE_FORMAT(b.date, '%Y-%m-%d'), status}
             );
         },
     );
@@ -822,6 +819,57 @@ WHERE coupon_id IS NOT NULL AND b.date BETWEEN '$from->ymd' AND '$to->ymd' GROUP
         $counts{events}{visited}{$ymd}     = $c if $status eq 'used';
         $counts{events}{not_visited}{$ymd} = $c if $status eq 'provided';
         $counts{events}{reserved}{$ymd} += $c;
+    }
+
+    ## 연령대별 누적
+
+    ## 성별 누적
+    my $gender = $self->DB->storage->dbh_do(
+        sub {
+            my ( $storage, $dbh, @args ) = @_;
+            $dbh->selectall_arrayref(
+                qq{SELECT ui.gender, COUNT(ui.gender) AS accumulation
+FROM (SELECT DISTINCT(coupon_id), user_id
+FROM `order`
+WHERE coupon_id IS NOT NULL) o
+JOIN user_info ui ON o.user_id = ui.user_id
+JOIN coupon c ON o.coupon_id = c.id
+WHERE c.desc LIKE 'seoul%' AND o.coupon_id IS NOT NULL AND c.status = 'used' GROUP BY ui.gender}
+            );
+        },
+    );
+
+    my %GENDER_MAP = ( male => '남성', female => '여성' );
+    for my $row (@$gender) {
+        my ( $gender, $c ) = @$row;
+
+        $counts{gender}{ $GENDER_MAP{$gender} } = $c;
+    }
+
+    ## 연령대별 누적
+    my $birth = $self->DB->storage->dbh_do(
+        sub {
+            my ( $storage, $dbh, @args ) = @_;
+            $dbh->selectall_arrayref(
+                qq{SELECT ui.birth, COUNT(ui.birth) AS accumulation
+FROM (SELECT DISTINCT(coupon_id), user_id
+FROM `order`
+WHERE coupon_id IS NOT NULL) o
+JOIN user_info ui ON o.user_id = ui.user_id
+JOIN coupon c ON o.coupon_id = c.id
+WHERE c.desc LIKE 'seoul%' AND o.coupon_id IS NOT NULL AND c.status = 'used' GROUP BY ui.birth}
+            );
+        },
+    );
+
+    my $now  = DateTime->now;
+    my $year = $now->year;
+    for my $row (@$birth) {
+        my ( $birth, $c ) = @$row;
+
+        my $age_group = int( ( $year - $birth ) / 10 ) * 10;
+        $self->log->debug("$age_group: $c");
+        $counts{age_group}{$age_group} += $c;
     }
 
     $self->render( from => $from, $to => $to, counts => \%counts, dates => \%dates );

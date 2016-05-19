@@ -32,11 +32,57 @@
     % for my $ymd (reverse sort keys %$dates) {
     <tr>
       <td><%= $ymd %></td>
-      <td><%= $counts->{reserved}{$ymd} || 0 %></td>
-      <td><%= $counts->{visited}{$ymd} || 0 %></td>
-      <td><%= $counts->{events}{reserved}{$ymd} || 0 %></td>
-      <td><%= $counts->{events}{visited}{$ymd} || 0 %></td>
+      <td><samp><%= $counts->{reserved}{$ymd} || 0 %></samp></td>
+      <td><samp><%= $counts->{visited}{$ymd} || 0 %></samp></td>
+      <td><samp><%= $counts->{events}{reserved}{$ymd} || 0 %></samp></td>
+      <td><samp><%= $counts->{events}{visited}{$ymd} || 0 %></samp></td>
     </tr>
     % }
+  </tbody>
+</table>
+
+<table class="table table-striped table-bordered table-hover">
+  <thead>
+    <tr>
+      <th>성별</th>
+      <th>누적</th>
+    </tr>
+  </thead>
+  <tbody>
+    % my $sum = 0;
+    % for my $gender (sort keys %{ $counts->{gender} }) {
+    % $sum += $counts->{gender}{$gender};
+    <tr>
+      <td><%= $gender %></td>
+      <td><samp><%= $counts->{gender}{$gender} %></samp></td>
+    </tr>
+    % }
+    <tr>
+      <td>합계</td>
+      <td><samp><%= $sum %></samp></td>
+    </tr>
+  </tbody>
+</table>
+
+<table class="table table-striped table-bordered table-hover">
+  <thead>
+    <tr>
+      <th>연령대</th>
+      <th>누적</th>
+    </tr>
+  </thead>
+  <tbody>
+    % $sum = 0;
+    % for my $age_group (sort keys %{ $counts->{age_group} }) {
+    % $sum += $counts->{age_group}{$age_group};
+    <tr>
+      <td><%= $age_group %>대</td>
+      <td><samp><%= $counts->{age_group}{$age_group} %></samp></td>
+    </tr>
+    % }
+    <tr>
+      <td>합계</td>
+      <td><samp><%= $sum %></samp></td>
+    </tr>
   </tbody>
 </table>
