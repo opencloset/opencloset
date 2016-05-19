@@ -227,6 +227,8 @@ $ ->
 
   $(".profile-info-user-comment .btn").on "click", (e) ->
     additional_comment = $(this).data("name")
+    if additional_comment is "today"
+      additional_comment = "---- " + moment().format("YYYY-MM-DD")
     comment = $("#user-comment").editable "getValue", true
     comment = if comment then "#{comment}\n#{additional_comment}" else additional_comment
     $("#user-comment").editable "setValue", comment
