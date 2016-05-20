@@ -12,6 +12,7 @@ use HTTP::Tiny;
 use List::MoreUtils qw( zip );
 use Mojo::ByteStream;
 use Mojo::DOM::HTML;
+use Mojo::Redis2;
 use Parcel::Track;
 use Statistics::Basic;
 use Try::Tiny;
@@ -78,6 +79,7 @@ sub register {
     $app->helper( coupon2label              => \&coupon2label );
     $app->helper( measurement2text          => \&measurement2text );
     $app->helper( decrypt_mbersn            => \&decrypt_mbersn );
+    $app->helper( redis                     => \&redis );
 }
 
 =head1 HELPERS
@@ -1737,6 +1739,28 @@ sub decrypt_mbersn {
     };
 
     return $plaintext;
+}
+
+=head2 redis
+
+    my $json = $self->redis->get('opencloset:storage');
+
+=cut
+
+sub redis {
+    my $self = shift;
+
+    $self->stash->{redis} ||= do {
+        my $log   = $self->app->log;
+        my $redis = Mojo::Redis2->new; # just use `redis://localhost:6379`
+        $redis->on(
+            error => sub {
+                $log->error("[REDIS ERROR] $_[1]");
+            }
+        );
+
+        $redis;
+    };
 }
 
 1;
