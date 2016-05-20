@@ -55,6 +55,7 @@
       %tbody
         - for my $order ( $order_rs->all ) {
         -   my $user = $order->user;
+        -   my $order_id = $order->id;
           %tr{ 'data-order-id' => "#{ $order->id }" }
             %td.center
               %label
@@ -62,6 +63,9 @@
                 %span.lbl
             %td
               %a{ :href => "/user/#{ $user->id }" }= $user->name
+              - if ("@$repairs" =~ m/\b$order_id\b/) {
+                %span.label.label-info 수선됨
+              - }
             %td
               %i.icon-envelope
               %a{ :href => "mailto:#{ $user->email}" }= $user->email
@@ -70,9 +74,9 @@
               = $user->user_info->phone
             %td
               - if ($order->does_wear) {
-                %button.btn.btn-success.btn-wearing{:type => 'button'} 입고감
+                %button.btn.btn-success.btn-wearing.btn-sm{:type => 'button'} 입고감
               - } else {
-                %button.btn.btn-default.btn-wearing{:type => 'button'} 안입고감
+                %button.btn.btn-default.btn-wearing.btn-sm{:type => 'button'} 안입고감
               - }
             %td
               %span.pre_category= $user->user_info->pre_category  || ''
