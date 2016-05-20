@@ -167,6 +167,7 @@ sub _public_routes_staff {
     $r->get('/order/:order_id/extension')->to('order#order_extension');
     $r->post('/order/:order_id/extension')->to('order#create_order_extension');
     $r->get('/order/:order_id/extension/success')->to('order#order_extension_success');
+    $r->get('/stat/events/seoul')->to('statistic#events_seoul');
 }
 
 =head2 _public_routes_visit
@@ -304,7 +305,6 @@ sub _private_routes {
     $r->get('/stat/status/:ymd')->to('statistic#status_ymd');
     $r->get('/stat/visitor')->to('statistic#visitor');
     $r->get('/stat/visitor/:ymd')->to('statistic#visitor_ymd');
-    $r->get('/stat/events/seoul')->to('statistic#events_seoul');
 
     $r->get('/volunteers')->to('volunteer#index');
 
