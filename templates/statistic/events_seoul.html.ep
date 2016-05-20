@@ -1,88 +1,111 @@
 % my $_id = 'stat-events-seoul';
-% layout 'default',
-%   page_id     => $_id,
-%   active_id   => $_id,
-%   breadcrumbs => [
-%     { text => meta_text('stat') },
-%     { text => meta_text($_id)   },
-%   ];
 % title meta_text($_id);
 
-<div class="search">
-  <form id="search-form" action="">
-    <div class="input-group">
-      <input id="query" class="form-control" name="" type="text" value="" placeholder="날짜를 고르세요", data-date-format="yyyy-mm-dd" data-date-end-date="0d">
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title><%= title %></title>
+
+    <link rel="stylesheet" href="/components/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/components/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/components/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css">
+    <link rel="stylesheet" href="/components/opencloset.css/dist/css/opencloset.min.css">
+    <link rel="stylesheet" href="/css/screen.css">
+  </head>
+  <body>
+    <div class="container">
+      <div id="content">
+
+        <h1><%= title %></h1>
+
+        <div class="search">
+          <form id="search-form" action="">
+            <div class="input-group">
+              <input id="query" class="form-control" name="" type="text" value="" placeholder="날짜를 고르세요", data-date-format="yyyy-mm-dd" data-date-end-date="0d">
+            </div>
+          </form>
+        </div>
+        <hr>
+        <table class="table table-striped table-bordered table-hover">
+          <thead>
+            <tr>
+              <th>연월일</th>
+              <th>열린옷장 예약인원</th>
+              <th>열린옷장 방문인원</th>
+              <th>취업날개 예약인원</th>
+              <th>취업날개 방문인원</th>
+            </tr>
+          </thead>
+          <tbody>
+            % for my $ymd (reverse sort keys %$dates) {
+            <tr>
+              <td><%= $ymd %></td>
+              <td><samp><%= $counts->{reserved}{$ymd} || 0 %></samp></td>
+              <td><samp><%= $counts->{visited}{$ymd} || 0 %></samp></td>
+              <td><samp><%= $counts->{events}{reserved}{$ymd} || 0 %></samp></td>
+              <td><samp><%= $counts->{events}{visited}{$ymd} || 0 %></samp></td>
+            </tr>
+            % }
+          </tbody>
+        </table>
+
+        <table class="table table-striped table-bordered table-hover">
+          <thead>
+            <tr>
+              <th>성별</th>
+              <th>누적</th>
+            </tr>
+          </thead>
+          <tbody>
+            % my $sum = 0;
+            % for my $gender (sort keys %{ $counts->{gender} }) {
+            % $sum += $counts->{gender}{$gender};
+            <tr>
+              <td><%= $gender %></td>
+              <td><samp><%= $counts->{gender}{$gender} %></samp></td>
+            </tr>
+            % }
+            <tr>
+              <td>합계</td>
+              <td><samp><%= $sum %></samp></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <table class="table table-striped table-bordered table-hover">
+          <thead>
+            <tr>
+              <th>연령대</th>
+              <th>누적</th>
+            </tr>
+          </thead>
+          <tbody>
+            % $sum = 0;
+            % for my $age_group (sort keys %{ $counts->{age_group} }) {
+            % $sum += $counts->{age_group}{$age_group};
+            <tr>
+              <td><%= $age_group %>대</td>
+              <td><samp><%= $counts->{age_group}{$age_group} %></samp></td>
+            </tr>
+            % }
+            <tr>
+              <td>합계</td>
+              <td><samp><%= $sum %></samp></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
-  </form>
-</div>
+    <script src="/components/jquery/dist/jquery.min.js"></script>
+    <script src="/components/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script src="/components/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js "></script>
+    <script src="/components/bootstrap-datepicker/dist/locales/bootstrap-datepicker.kr.min.js"></script>
+    <script src="/js/stat-events-seoul.js"></script>
+  </body>
+</html>
 
-<div class="space-8"></div>
 
-<table class="table table-striped table-bordered table-hover">
-  <thead>
-    <tr>
-      <th>연월일</th>
-      <th>열린옷장 예약인원</th>
-      <th>열린옷장 방문인원</th>
-      <th>취업날개 예약인원</th>
-      <th>취업날개 방문인원</th>
-    </tr>
-  </thead>
-  <tbody>
-    % for my $ymd (reverse sort keys %$dates) {
-    <tr>
-      <td><%= $ymd %></td>
-      <td><samp><%= $counts->{reserved}{$ymd} || 0 %></samp></td>
-      <td><samp><%= $counts->{visited}{$ymd} || 0 %></samp></td>
-      <td><samp><%= $counts->{events}{reserved}{$ymd} || 0 %></samp></td>
-      <td><samp><%= $counts->{events}{visited}{$ymd} || 0 %></samp></td>
-    </tr>
-    % }
-  </tbody>
-</table>
 
-<table class="table table-striped table-bordered table-hover">
-  <thead>
-    <tr>
-      <th>성별</th>
-      <th>누적</th>
-    </tr>
-  </thead>
-  <tbody>
-    % my $sum = 0;
-    % for my $gender (sort keys %{ $counts->{gender} }) {
-    % $sum += $counts->{gender}{$gender};
-    <tr>
-      <td><%= $gender %></td>
-      <td><samp><%= $counts->{gender}{$gender} %></samp></td>
-    </tr>
-    % }
-    <tr>
-      <td>합계</td>
-      <td><samp><%= $sum %></samp></td>
-    </tr>
-  </tbody>
-</table>
-
-<table class="table table-striped table-bordered table-hover">
-  <thead>
-    <tr>
-      <th>연령대</th>
-      <th>누적</th>
-    </tr>
-  </thead>
-  <tbody>
-    % $sum = 0;
-    % for my $age_group (sort keys %{ $counts->{age_group} }) {
-    % $sum += $counts->{age_group}{$age_group};
-    <tr>
-      <td><%= $age_group %>대</td>
-      <td><samp><%= $counts->{age_group}{$age_group} %></samp></td>
-    </tr>
-    % }
-    <tr>
-      <td>합계</td>
-      <td><samp><%= $sum %></samp></td>
-    </tr>
-  </tbody>
-</table>
