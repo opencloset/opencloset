@@ -1,4 +1,30 @@
 $ ->
+  updateLateFee = (e, extra) ->
+    # 연체: overdue, 연장: extension
+    # overdue: today - 반납희망일
+    # extension: 반납희망일 - 반납예정일
+    # user_target_date: 반납희망일
+    # target_date: 반납예정일
+
+    # overdue-days = today - user_target_date
+    # extension-days = user_target_date - target_date
+    # a.diff(b, 'days') // 1
+    # overdue-fee: overdue * 30% * overdue-days
+    # extension-fee: overdue * 20% * extension-days
+
+    parcel_date      = moment(e.currentTarget.value, 'YYYY-MM-DD')
+    return_date      = parcel_date
+    user_target_date = moment(extra.user_target_date, 'YYYY-MM-DD')
+    target_date      = moment(extra.target_date, 'YYYY-MM-DD')
+    overdue_days     = return_date.diff(user_target_date, 'days')
+    extension_days   = user_target_date.diff(target_date, 'days')
+
+    overdue_days   = 0 if overdue_days   < 0
+    extension_days = 0 if extension_days < 0
+
+    console.log '연체료 ' + extra.clothes_price * 0.3 * overdue_days
+    console.log '연장료 ' + extra.clothes_price * 0.2 * extension_days
+
   updateOrder = ->
     order_id = $('#order').data('order-id')
     $.ajax "/api/order/#{ order_id }.json",
@@ -6,12 +32,17 @@ $ ->
       data: { today: $('#order').data('today') }
       success: (data, textStatus, jqXHR) ->
         $('#order').data('order-clothes-price',     data.clothes_price)
-        $('#order').data('order-late-fee',          data.late_fee)
+        $('#order').data('order-extension-fee',     data.extension_fee)
+        $('#order').data('order-extension-days',    data.extension_days)
+        $('#order').data('order-overdue-fee',       data.overdue_fee)
+        $('#order').data('order-overdue-days',      data.overdue_days)
         $('#order').data('order-late-fee-discount', 0)
         $('#order').data('order-late-fee-final',    data.late_fee)
         $('#order').data('order-late-fee-pay-with', data.late_fee_pay_with)
-        $('#order').data('order-overdue',           data.overdue)
         $('#order').data('order-parent-id',         data.parent_id)
+
+        $('#order').data('order-target-date',      data.target_date.ymd)
+        $('#order').data('order-user-target-date', data.user_target_date.ymd)
 
         #
         # update price
@@ -23,8 +54,11 @@ $ ->
         #
         # update late_fee
         #
-        compiled = _.template( $('#tpl-late-fee').html() )
-        $("#late-fee").html( $(compiled(data)) )
+        compiled = _.template( $('#tpl-extension-fee').html() )
+        $("#extension-fee").html( $(compiled(data)) )
+
+        compiled = _.template( $('#tpl-overdue-fee').html() )
+        $("#overdue-fee").html( $(compiled(data)) )
 
         #
         # update late_fee discount
@@ -686,3 +720,18 @@ $ ->
 
   if location.search is '?alert=1' and $('#order-return-memo').data('value')
     $.facebox({ div: '#alert-desc' })
+
+  $('#late-fee-calculation .datepicker').datepicker
+    language: 'kr'
+    autoclose: true
+    todayHighlight: true
+  .on 'changeDate', (e) ->
+
+    clothes_price    = $('#order').data('order-clothes-price')
+    target_date      = $('#order').data('order-target-date')
+    user_target_date = $('#order').data('order-user-target-date')
+
+    updateLateFee e,
+      target_date: target_date
+      user_target_date: user_target_date
+      clothes_price: clothes_price
