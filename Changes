@@ -1,3 +1,6 @@
+v1.6.0    Wed, 25 May 2016 13:28:47 +0900
+  - nothing changed (bumpup version)
+
 v1.5.6    Fri, 20 May 2016 18:52:15 +0900
   - Add helper redis
   - 수선완료 라벨을 대여 화면에서 나타냄 (#816)
