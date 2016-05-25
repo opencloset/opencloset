@@ -1,29 +1,60 @@
 $ ->
+  updateLateFeeDiscountAndLateFeeFinal = ( late_fee, discount ) ->
+    discount          = $('#order').data('order-late-fee-discount') unless discount
+    late_fee_discount = parseInt(discount)
+    late_fee_final    = late_fee + late_fee_discount
+    $('.late-fee-final').html OpenCloset.commify(late_fee_final) + '원'
+    $('#order').data('order-late-fee-discount', late_fee_discount)
+    $('#order').data('order-late-fee-final',    late_fee_final)
+
   updateLateFee = (e, extra) ->
-    # 연체: overdue, 연장: extension
-    # overdue: today - 반납희망일
-    # extension: 반납희망일 - 반납예정일
-    # user_target_date: 반납희망일
-    # target_date: 반납예정일
+    ## 연체            : overdue
+    ## 연장            : extension
+    ## target_date     : 반납예정일
+    ## user_target_date: 반납희망일
+    ## overdue-days    : today - 반납희망일
+    ## extension-days  : 반납희망일 - 반납예정일
+    ## overdue-fee     : overdue * 30% * overdue-days
+    ## extension-fee   : overdue * 20% * extension-days
 
-    # overdue-days = today - user_target_date
-    # extension-days = user_target_date - target_date
-    # a.diff(b, 'days') // 1
-    # overdue-fee: overdue * 30% * overdue-days
-    # extension-fee: overdue * 20% * extension-days
-
-    parcel_date      = moment(e.currentTarget.value, 'YYYY-MM-DD')
-    return_date      = parcel_date
+    return_date      = moment(e.currentTarget.value,  'YYYY-MM-DD')
     user_target_date = moment(extra.user_target_date, 'YYYY-MM-DD')
-    target_date      = moment(extra.target_date, 'YYYY-MM-DD')
-    overdue_days     = return_date.diff(user_target_date, 'days')
-    extension_days   = user_target_date.diff(target_date, 'days')
+    target_date      = moment(extra.target_date,      'YYYY-MM-DD')
 
-    overdue_days   = 0 if overdue_days   < 0
+    extension_days =
+      if user_target_date.diff(return_date) > 0 then return_date.diff(target_date, 'days') else user_target_date.diff(target_date, 'days')
+    overdue_days =
+      if return_date.diff(user_target_date) > 0 then return_date.diff(user_target_date, 'days') else 0
+
     extension_days = 0 if extension_days < 0
+    overdue_days   = 0 if overdue_days   < 0
 
-    console.log '연체료 ' + extra.clothes_price * 0.3 * overdue_days
-    console.log '연장료 ' + extra.clothes_price * 0.2 * extension_days
+    extension_fee = extra.clothes_price * 0.2 * extension_days
+    overdue_fee   = extra.clothes_price * 0.3 * overdue_days
+    late_fee      = extension_fee + overdue_fee
+
+    console.log "extension_fee   : #{extra.clothes_price} * #{extension_days} * 0.2 = #{extension_fee}"
+    console.log "overdue_fee     : #{extra.clothes_price} * #{overdue_days} * 0.3 = #{overdue_fee}"
+    console.log "late_fee        : #{late_fee}"
+
+    data =
+      extension_days: extension_days
+      overdue_days  : overdue_days
+      extension_fee : extension_fee
+      overdue_fee   : overdue_fee
+      late_fee      : late_fee
+      clothes_price : extra.clothes_price
+
+    compiled = _.template( $('#tpl-extension-fee').html() )
+    $("#extension-fee").html( $(compiled(data)) )
+
+    compiled = _.template( $('#tpl-overdue-fee').html() )
+    $("#overdue-fee").html( $(compiled(data)) )
+
+    compiled = _.template( $('#tpl-late-fee').html() )
+    $("#late-fee").html( $(compiled(data)) )
+
+    updateLateFeeDiscountAndLateFeeFinal(late_fee)
 
   updateOrder = ->
     order_id = $('#order').data('order-id')
@@ -68,12 +99,7 @@ $ ->
         #
         compiled = _.template( $('#tpl-late-fee-discount').html() )
         $("#late-fee-discount").html( $(compiled(data)) )
-        updateLateFeeDiscountAndLateFeeFinal = ( late_fee, discount ) ->
-          late_fee_discount = parseInt discount
-          late_fee_final    = late_fee + late_fee_discount
-          $('.late-fee-final').html OpenCloset.commify(late_fee_final) + '원'
-          $('#order').data('order-late-fee-discount', late_fee_discount)
-          $('#order').data('order-late-fee-final',    late_fee_final)
+        updateLateFeeDiscountAndLateFeeFinal(data.late_fee, 0)
         $('#order-late-fee-discount').editable
           savenochange: true
           display: (value, sourceData, response) ->
@@ -81,7 +107,8 @@ $ ->
           success: (response, newValue) ->
             updateLateFeeDiscountAndLateFeeFinal( data.late_fee, newValue )
         $('#order-late-fee-discount-all').click (e) ->
-          discount = data.late_fee * -1
+          late_fee = $('#order').data('order-late-fee-final')
+          discount = parseInt(late_fee) * -1
           $('#order-late-fee-discount').editable 'setValue', discount
 
           #
@@ -89,7 +116,7 @@ $ ->
           # activate이 제대로 동작하지 않는 버그로 인해
           # 별도로 버튼을 클릭한 경우에 강제로 에누리 결과를 갱신하도록 합니다.
           #
-          updateLateFeeDiscountAndLateFeeFinal( data.late_fee, discount )
+          updateLateFeeDiscountAndLateFeeFinal( late_fee, discount )
 
         #
         # update late_fee final
@@ -735,6 +762,6 @@ $ ->
     user_target_date = $('#order').data('order-user-target-date')
 
     updateLateFee e,
-      target_date: target_date
+      target_date     : target_date
       user_target_date: user_target_date
-      clothes_price: clothes_price
+      clothes_price   : clothes_price
