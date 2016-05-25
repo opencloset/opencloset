@@ -208,35 +208,39 @@
                     %li.row
                       .col-sm-1
                         %i.icon-caret-right.blue
-                      .col-sm-3.no-padding-left 택배발송일:
-                      .col-sm-8
-                        #late-fee-calculation
-                          %input.datepicker{:type => 'text', :placeholder => '택배발송일', :data-provide => 'datepicker', :data-date-format => 'yyyy-mm-dd', :data-date-end-date => "0d"}
-
-                    %li.row
-                      .col-sm-1
-                        %i.icon-caret-right.blue
                       .col-sm-3.no-padding-left 연장료:
                       .col-sm-8
                         #extension-fee
-                    %li.row.return-process
-                      .col-sm-1
-                        %i.icon-caret-right.blue
-                      .col-sm-3.no-padding-left 연장료 에누리:
-                      .col-sm-8
-                        #extension-fee-discount
+
                     %li.row
                       .col-sm-1
                         %i.icon-caret-right.blue
                       .col-sm-3.no-padding-left 연체료:
                       .col-sm-8
                         #overdue-fee
+
+                    %li.row
+                      .col-sm-1
+                        %i.icon-caret-right.blue
+                      .col-sm-3.no-padding-left 연장료+연체료:
+                      .col-sm-8
+                        #late-fee
+
                     %li.row.return-process
                       .col-sm-1
                         %i.icon-caret-right.blue
-                      .col-sm-3.no-padding-left 연체료 에누리:
+                      .col-sm-3.no-padding-left 연장료/연체료 에누리:
                       .col-sm-8
-                        #overdue-fee-discount
+                        #late-fee-discount
+
+                    %li.row
+                      .col-sm-1
+                        %i.icon-caret-right.blue
+                      .col-sm-3.no-padding-left 택배발송/반납일:
+                      .col-sm-8
+                        #late-fee-calculation
+                          %input.datepicker{:type => 'text', :placeholder => '택배발송/반납일', :data-provide => 'datepicker', :data-date-format => 'yyyy-mm-dd', :data-date-end-date => "0d"}
+
                   - }
                   %li.row
                     .col-sm-1
@@ -798,6 +802,23 @@
     <% } %>
   </script>
 :plain
+  <script id="tpl-overdue-fee" type="text/html">
+    <% if (overdue_fee) { %>
+      <strong> <%= OpenCloset.commify(overdue_fee) %>원 </strong>
+      <span> ( = <%= overdue_days %>일 x <%= OpenCloset.commify(clothes_price) %>원 x 30% ) </span>
+    <% } else { %>
+      <strong> 해당사항 없음 </strong>
+    <% } %>
+  </script>
+:plain
+  <script id="tpl-late-fee" type="text/html">
+    <% if (late_fee) { %>
+      <strong> <%= OpenCloset.commify(late_fee) %>원 </strong>
+    <% } else { %>
+      <strong> 해당사항 없음 </strong>
+    <% } %>
+  </script>
+:plain
   <script id="tpl-late-fee-discount" type="text/html">
     <% if (late_fee) { %>
       <strong>
@@ -816,15 +837,6 @@
       ></a>원
       </strong>
       <button class="btn btn-default btn-xs" id="order-late-fee-discount-all">전체 에누리</button>
-    <% } else { %>
-      <strong> 해당사항 없음 </strong>
-    <% } %>
-  </script>
-:plain
-  <script id="tpl-overdue-fee" type="text/html">
-    <% if (overdue_fee) { %>
-      <strong> <%= OpenCloset.commify(overdue_fee) %>원 </strong>
-      <span> ( = <%= overdue_days %>일 x <%= OpenCloset.commify(clothes_price) %>원 x 30% ) </span>
     <% } else { %>
       <strong> 해당사항 없음 </strong>
     <% } %>

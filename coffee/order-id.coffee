@@ -60,6 +60,9 @@ $ ->
         compiled = _.template( $('#tpl-overdue-fee').html() )
         $("#overdue-fee").html( $(compiled(data)) )
 
+        compiled = _.template( $('#tpl-late-fee').html() )
+        $("#late-fee").html( $(compiled(data)) )
+
         #
         # update late_fee discount
         #
