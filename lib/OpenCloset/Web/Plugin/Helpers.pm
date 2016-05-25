@@ -611,12 +611,13 @@ sub update_user {
         #
         # event posting to opencloset/monitor
         #
+        my $monitor_uri_full = $self->config->{monitor_uri} . "/events";
         my $res = HTTP::Tiny->new( timeout => 1 )->post_form(
-            $self->config->{monitor_uri} . '/events',
-            { sender => 'user', user_id => $user->id }
+            $monitor_uri_full,
+            { sender => 'user', user_id => $user->id },
         );
-
-        $self->app->log->error("Failed to posting event: $res->{reason}")
+        $self->app->log->warn(
+            "Failed to post event to monitor: $monitor_uri_full: $res->{reason}")
             unless $res->{success};
     }
 
@@ -1037,12 +1038,13 @@ sub update_order {
             return $order unless $to;
             return $order if $to == $from;
 
+            my $monitor_uri_full = $self->config->{monitor_uri} . "/events";
             my $res = HTTP::Tiny->new( timeout => 1 )->post_form(
-                $self->config->{monitor_uri} . '/events',
-                { sender => 'order', order_id => $order->id, from => $from, to => $to }
+                $monitor_uri_full,
+                { sender => 'order', order_id => $order->id, from => $from, to => $to },
             );
-
-            $self->app->log->error("Failed to posting event: $res->{reason}")
+            $self->app->log->warn(
+                "Failed to post event to monitor: $monitor_uri_full: $res->{reason}")
                 unless $res->{success};
 
             return $order;
