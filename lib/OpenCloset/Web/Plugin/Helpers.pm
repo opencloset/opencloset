@@ -243,9 +243,11 @@ sub calc_overdue_days {
     return 0 unless $target_dt;
     return 0 unless $user_target_dt;
 
-    $user_target_dt->set_hour(0);
-    $user_target_dt->set_minute(0);
-    $user_target_dt->set_second(0);
+    my $utd = $user_target_dt->clone;
+
+    $utd->set_hour(0);
+    $utd->set_minute(0);
+    $utd->set_second(0);
 
     my $now = DateTime->now( time_zone => $self->config->{timezone} );
     if ( $today && $today =~ m/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/ ) {
@@ -265,7 +267,7 @@ sub calc_overdue_days {
 
     my $epoch1 = $target_dt->epoch;
     my $epoch2 = $return_dt->epoch;
-    my $epoch3 = $user_target_dt->epoch;
+    my $epoch3 = $utd->epoch;
 
     my $dur = $epoch2 - $epoch3;
 
@@ -363,11 +365,10 @@ sub calc_overdue_fee {
 sub calc_late_fee {
     my ( $self, $order, $today ) = @_;
 
-    my $price = $self->order_clothes_price($order);
-    my $overdue = $self->calc_overdue( $order, $today );
-    return 0 unless $overdue;
+    my $extension_fee = $self->calc_extension_fee( $order, $today );
+    my $overdue_fee = $self->calc_overdue_fee( $order, $today );
 
-    my $late_fee = $price * 0.2 * $overdue;
+    my $late_fee = $extension_fee + $overdue_fee;
 
     return $late_fee;
 }
@@ -455,6 +456,9 @@ sub flatten_order {
 
     my ( $order_price, $order_stage_price ) = $self->order_price($order);
 
+    my $extension_fee = $self->calc_extension_fee( $order, $today );
+    my $overdue_fee = $self->calc_overdue_fee( $order, $today );
+
     my %data = (
         $order->get_columns,
         status_name => $order->status ? $order->status->name : q{},
@@ -473,15 +477,15 @@ sub flatten_order {
         ## 연장료와 연체료를 구분해야한다
         ## 연장료: extension-fee
         ## 연체료: overdue-fee
-        ## 둘의합: late-fee
-        extension_fee  => $self->calc_extension_fee( $order,  $today ),
+        ## 둘의합: late-fee = extension-fee + overdue-fee
+        extension_fee  => $extension_fee,
         extension_days => $self->calc_extension_days( $order, $today ),
-        overdue_fee    => $self->calc_overdue_fee( $order,    $today ),
-        overdue_days   => $self->calc_overdue_days( $order,   $today ),
-        late_fee       => $self->calc_late_fee( $order,       $today ),
-        overdue        => $self->calc_overdue( $order,        $today ),
-        return_method => $order->return_method       || q{},
-        tracking_url  => $self->tracking_url($order) || q{},
+        overdue_fee    => $overdue_fee,
+        overdue_days   => $self->calc_overdue_days( $order, $today ),
+        late_fee       => $extension_fee + $overdue_fee,
+        overdue        => $self->calc_overdue( $order, $today ),
+        return_method  => $order->return_method || q{},
+        tracking_url => $self->tracking_url($order) || q{},
     );
 
     if ( $order->rental_date ) {
