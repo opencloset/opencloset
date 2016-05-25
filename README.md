@@ -3,7 +3,7 @@ opencloset
 
 ## Version ##
 
-v1.5.6
+v1.6.0
 
 ## Requirements ##
 
@@ -82,6 +82,8 @@ MySQL 데이터베이스에 접속하며 `opencloset` 데이터베이스에
 
 ### 우편번호검색 DB 파일 설치 ###
 
+**dump 파일의 링크가 더이상 유효하지 않습니다.**
+
 상황에 맞게 설정파일에서 `postcodify` 의 값을 수정합니다.
 기본값은 SQLite 를 사용합니다.
 
@@ -99,9 +101,15 @@ MySQL 데이터베이스에 접속하며 `opencloset` 데이터베이스에
 
 `wget` 이 없으면, `curl` 로..
 
-    $ curl https://raw.githubusercontent.com/aanoaa/p5-postcodify/develop/installer.sh | sh
+    $ curl
+    https://raw.githubusercontent.com/aanoaa/p5-postcodify/develop/installer.sh
+    | sh
 
-### RUN
+### Redis ###
+
+    $ sudo apt-get install redis-server
+
+## RUN
 
     $ plackup                         # or
     $ DBIC_TRACE=1 plackup -R bin/    # for development
