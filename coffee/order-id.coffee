@@ -33,10 +33,6 @@ $ ->
     overdue_fee   = extra.clothes_price * 0.3 * overdue_days
     late_fee      = extension_fee + overdue_fee
 
-    console.log "extension_fee   : #{extra.clothes_price} * #{extension_days} * 0.2 = #{extension_fee}"
-    console.log "overdue_fee     : #{extra.clothes_price} * #{overdue_days} * 0.3 = #{overdue_fee}"
-    console.log "late_fee        : #{late_fee}"
-
     data =
       extension_days: extension_days
       overdue_days  : overdue_days
