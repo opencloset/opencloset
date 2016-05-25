@@ -55,6 +55,10 @@ $ ->
     $("#late-fee").html( $(compiled(data)) )
 
     updateLateFeeDiscountAndLateFeeFinal(late_fee)
+    $('#order').data('order-extension-fee',  extension_fee)
+    $('#order').data('order-extension-days', extension_days)
+    $('#order').data('order-overdue-fee',    overdue_fee)
+    $('#order').data('order-overdue-days',   overdue_days)
 
   updateOrder = ->
     order_id = $('#order').data('order-id')
@@ -63,6 +67,7 @@ $ ->
       data: { today: $('#order').data('today') }
       success: (data, textStatus, jqXHR) ->
         $('#order').data('order-clothes-price',     data.clothes_price)
+        $('#order').data('order-overdue',           data.overdue)
         $('#order').data('order-extension-fee',     data.extension_fee)
         $('#order').data('order-extension-days',    data.extension_days)
         $('#order').data('order-overdue-fee',       data.overdue_fee)
@@ -562,6 +567,10 @@ $ ->
     compensation_final    = $('#order').data('order-compensation-final')    || 0
     compensation_pay_with = $('#order').data('order-compensation-pay-with')
     overdue               = $('#order').data('order-overdue')
+    extension_fee         = $('#order').data('order-extension-fee')
+    extension_days        = $('#order').data('order-extension-days')
+    overdue_fee           = $('#order').data('order-overdue-fee')
+    overdue_days          = $('#order').data('order-overdue-days')
 
     if late_fee_final != 0 and not late_fee_pay_with
       OpenCloset.alert 'danger', '연장료를 납부받지 않았습니다.'
@@ -578,30 +587,50 @@ $ ->
     #
     # 연장료 항목 추가
     #
-    $.ajax "/api/order_detail.json",
-      type: 'POST'
-      data: {
-        order_id:    order_id
-        name:        '연장료'
-        price:       clothes_price * 0.2
-        final_price: late_fee
-        stage:       1
-        desc:        "#{OpenCloset.commify clothes_price}원 x 20% x #{overdue}일"
-      }
-      complete: (jqXHR, textStatus) ->
-        #
-        # 연장료 에누리 항목 추가
-        #
-        if late_fee_discount != 0
-          $.ajax "/api/order_detail.json",
-            type: 'POST'
-            data: {
-              order_id:    order_id
-              name:        '연장료 에누리'
-              price:       Math.round( late_fee_discount / overdue )
-              final_price: late_fee_discount
-              stage:       1
-            }
+    if extension_fee
+      $.ajax "/api/order_detail.json",
+        type: 'POST'
+        data: {
+          order_id:    order_id
+          name:        '연장료'
+          price:       clothes_price * 0.2
+          final_price: extension_fee
+          stage:       1
+          desc:        "#{OpenCloset.commify clothes_price}원 x 20% x #{extension_days}일"
+        }
+
+    #
+    # 연체료 항목 추가
+    #
+    if overdue_fee
+      $.ajax "/api/order_detail.json",
+        type: 'POST'
+        data: {
+          order_id:    order_id
+          name:        '연체료'
+          price:       clothes_price * 0.3
+          final_price: overdue_fee
+          stage:       1
+          desc:        "#{OpenCloset.commify clothes_price}원 x 30% x #{overdue_days}일"
+        }
+
+    #
+    # 연체/연장료 에누리 항목 추가
+    #
+    if late_fee_discount != 0
+      ## 연장료, 연체료보다 연체/연장료 에누리 가 먼저 처리되어버리는 것을 방지
+      ## 왜 complete callback 을 안쓰는고하니, 연장료 & 연체료 모두에 등록하기 적절하지 않아서
+      setTimeout ->
+        $.ajax "/api/order_detail.json",
+          type: 'POST'
+          data: {
+            order_id:    order_id
+            name:        '연체/연장료 에누리'
+            price:       Math.round( late_fee_discount / overdue )
+            final_price: late_fee_discount
+            stage:       1
+          }
+      , 100
 
     #
     # 배상비 항목 추가
