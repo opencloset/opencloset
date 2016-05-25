@@ -201,6 +201,17 @@ sub calc_extension_days {
     return 0 unless $target_dt;
     return 0 unless $user_target_dt;
 
+    $target_dt      = $target_dt->clone;
+    $user_target_dt = $user_target_dt->clone;
+
+    $target_dt->set_hour(0);
+    $target_dt->set_minute(0);
+    $target_dt->set_second(0);
+
+    $user_target_dt->set_hour(0);
+    $user_target_dt->set_minute(0);
+    $user_target_dt->set_second(0);
+
     my $now = DateTime->now( time_zone => $self->config->{timezone} );
     if ( $today && $today =~ m/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/ ) {
         my $strp = DateTime::Format::Strptime->new(
@@ -221,7 +232,15 @@ sub calc_extension_days {
     my $epoch2 = $return_dt->epoch;
     my $epoch3 = $user_target_dt->epoch;
 
-    my $dur = $epoch3 - $epoch1;
+    my $dur;
+    if ( $epoch3 - $epoch2 > 0 ) {
+        $dur = $epoch2 - $epoch1;
+    }
+    else {
+        $dur = $epoch3 - $epoch1;
+    }
+
+    # $dur = $epoch3 - $epoch1;
 
     return 0 if $dur <= 0;
     return int( $dur / $DAY_AS_SECONDS );
@@ -243,11 +262,16 @@ sub calc_overdue_days {
     return 0 unless $target_dt;
     return 0 unless $user_target_dt;
 
-    my $utd = $user_target_dt->clone;
+    $target_dt      = $target_dt->clone;
+    $user_target_dt = $user_target_dt->clone;
 
-    $utd->set_hour(0);
-    $utd->set_minute(0);
-    $utd->set_second(0);
+    $target_dt->set_hour(0);
+    $target_dt->set_minute(0);
+    $target_dt->set_second(0);
+
+    $user_target_dt->set_hour(0);
+    $user_target_dt->set_minute(0);
+    $user_target_dt->set_second(0);
 
     my $now = DateTime->now( time_zone => $self->config->{timezone} );
     if ( $today && $today =~ m/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/ ) {
@@ -267,7 +291,9 @@ sub calc_overdue_days {
 
     my $epoch1 = $target_dt->epoch;
     my $epoch2 = $return_dt->epoch;
-    my $epoch3 = $utd->epoch;
+    my $epoch3 = $user_target_dt->epoch;
+
+    return 0 if $epoch2 - $epoch3 <= 0;
 
     my $dur = $epoch2 - $epoch3;
 
