@@ -203,20 +203,9 @@ sub calc_extension_days {
     return 0 unless $target_dt;
     return 0 unless $user_target_dt;
 
-    $target_dt      = $target_dt->clone;
-    $user_target_dt = $user_target_dt->clone;
-        my $pattern = $today =~ /T/ ? q{%FT%T} : q{%F %T};
-
-    $target_dt->set_hour(0);
-    $target_dt->set_minute(0);
-    $target_dt->set_second(0);
-
-    $user_target_dt->set_hour(0);
-    $user_target_dt->set_minute(0);
-    $user_target_dt->set_second(0);
-
     my $now = DateTime->now( time_zone => $self->config->{timezone} );
     if ( $today && $today =~ m/^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}:\d{2}$/ ) {
+        my $pattern = $today =~ /T/ ? q{%FT%T} : q{%F %T};
         my $strp = DateTime::Format::Strptime->new(
             pattern   => $pattern,
             time_zone => $self->config->{timezone},
@@ -229,21 +218,37 @@ sub calc_extension_days {
 
     $return_dt ||= $now;
 
+    $target_dt      = $target_dt->clone;
+    $user_target_dt = $user_target_dt->clone;
+    $return_dt      = $return_dt->clone;
+
+    $target_dt->set_hour(0);
+    $target_dt->set_minute(0);
+    $target_dt->set_second(0);
+
+    $user_target_dt->set_hour(0);
+    $user_target_dt->set_minute(0);
+    $user_target_dt->set_second(0);
+
+    $return_dt->set_hour(0);
+    $return_dt->set_minute(0);
+    $return_dt->set_second(0);
+
     my $DAY_AS_SECONDS = 60 * 60 * 24;
 
-    my $epoch1 = $target_dt->epoch;
-    my $epoch2 = $return_dt->epoch;
-    my $epoch3 = $user_target_dt->epoch;
+    my $target_epoch      = $target_dt->epoch;
+    my $return_epoch      = $return_dt->epoch;
+    my $user_target_epoch = $user_target_dt->epoch;
+
+    return 0 if $target_epoch >= $return_epoch;
 
     my $dur;
-    if ( $epoch3 - $epoch2 > 0 ) {
-        $dur = $epoch2 - $epoch1;
+    if ( $user_target_epoch - $return_epoch > 0 ) {
+        $dur = $return_epoch - $target_epoch;
     }
     else {
-        $dur = $epoch3 - $epoch1;
+        $dur = $user_target_epoch - $target_epoch;
     }
-
-    # $dur = $epoch3 - $epoch1;
 
     return 0 if $dur <= 0;
     return int( $dur / $DAY_AS_SECONDS );
@@ -265,20 +270,9 @@ sub calc_overdue_days {
     return 0 unless $target_dt;
     return 0 unless $user_target_dt;
 
-    $target_dt      = $target_dt->clone;
-    $user_target_dt = $user_target_dt->clone;
-
-    $target_dt->set_hour(0);
-    $target_dt->set_minute(0);
-    $target_dt->set_second(0);
-
-        my $pattern = $today =~ /T/ ? q{%FT%T} : q{%F %T};
-    $user_target_dt->set_hour(0);
-    $user_target_dt->set_minute(0);
-    $user_target_dt->set_second(0);
-
     my $now = DateTime->now( time_zone => $self->config->{timezone} );
     if ( $today && $today =~ m/^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}:\d{2}$/ ) {
+        my $pattern = $today =~ /T/ ? q{%FT%T} : q{%F %T};
         my $strp = DateTime::Format::Strptime->new(
             pattern   => $pattern,
             time_zone => $self->config->{timezone},
@@ -291,15 +285,32 @@ sub calc_overdue_days {
 
     $return_dt ||= $now;
 
+    $target_dt      = $target_dt->clone;
+    $user_target_dt = $user_target_dt->clone;
+    $return_dt      = $return_dt->clone;
+
+    $target_dt->set_hour(0);
+    $target_dt->set_minute(0);
+    $target_dt->set_second(0);
+
+    $user_target_dt->set_hour(0);
+    $user_target_dt->set_minute(0);
+    $user_target_dt->set_second(0);
+
+    $return_dt->set_hour(0);
+    $return_dt->set_minute(0);
+    $return_dt->set_second(0);
+
     my $DAY_AS_SECONDS = 60 * 60 * 24;
 
-    my $epoch1 = $target_dt->epoch;
-    my $epoch2 = $return_dt->epoch;
-    my $epoch3 = $user_target_dt->epoch;
+    my $target_epoch      = $target_dt->epoch;
+    my $return_epoch      = $return_dt->epoch;
+    my $user_target_epoch = $user_target_dt->epoch;
 
-    return 0 if $epoch2 - $epoch3 <= 0;
+    return 0 if $target_epoch >= $return_epoch;
+    return 0 if $user_target_epoch >= $return_epoch;
 
-    my $dur = $epoch2 - $epoch3;
+    my $dur = $return_epoch - $user_target_epoch;
 
     return 0 if $dur < 0;
     return int( $dur / $DAY_AS_SECONDS );
