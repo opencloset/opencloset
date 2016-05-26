@@ -224,3 +224,10 @@ $ ->
         complete: ->
           $('.postcodify_popup_background').hide()
           $('.postcodify_popup_layer').hide()
+
+  $(".profile-info-user-comment .btn").on "click", (e) ->
+    additional_comment = $(this).data("name")
+    comment = $("#user-comment").editable "getValue", true
+    comment = if comment then "#{comment}\n#{additional_comment}" else additional_comment
+    $("#user-comment").editable "setValue", comment
+    $("#user-comment").editable "submit"

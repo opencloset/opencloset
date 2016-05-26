@@ -210,18 +210,42 @@
                         %i.icon-caret-right.blue
                       .col-sm-3.no-padding-left 연장료:
                       .col-sm-8
+                        #extension-fee
+
+                    %li.row
+                      .col-sm-1
+                        %i.icon-caret-right.blue
+                      .col-sm-3.no-padding-left 연체료:
+                      .col-sm-8
+                        #overdue-fee
+
+                    %li.row
+                      .col-sm-1
+                        %i.icon-caret-right.blue
+                      .col-sm-3.no-padding-left 연장료+연체료:
+                      .col-sm-8
                         #late-fee
+
                     %li.row.return-process
                       .col-sm-1
                         %i.icon-caret-right.blue
-                      .col-sm-3.no-padding-left 연장료 에누리:
+                      .col-sm-3.no-padding-left 연장료/연체료 에누리:
                       .col-sm-8
                         #late-fee-discount
+
+                    %li.row
+                      .col-sm-1
+                        %i.icon-caret-right.blue
+                      .col-sm-3.no-padding-left 택배발송/반납일:
+                      .col-sm-8
+                        #late-fee-calculation
+                          %input.datepicker{:type => 'text', :placeholder => '택배발송/반납일', :data-provide => 'datepicker', :data-date-format => 'yyyy-mm-dd', :data-date-end-date => "0d"}
+
                   - }
                   %li.row
                     .col-sm-1
                       %i.icon-caret-right.blue
-                    .col-sm-3.no-padding-left 최종 연장료:
+                    .col-sm-3.no-padding-left 최종 연체/연장료:
                     .col-sm-8
                       :plain
                         <a
@@ -768,11 +792,39 @@
                     data-name        = "return_memo"
                   ></a>
 
+    .row
+      %hr
+      %div.pull-right.text-right
+        - my $ignore = $order->ignore || 0;
+        - my $klass  = $ignore ? 'btn-success' : 'btn-default';
+        %button#btn-ignore.btn.btn-xs{:class => $klass, :data-ignore => $ignore} 검색결과에 포함됩니다
+        %small.help-block
+          대리을 통한 대여 또는 단체대여 혹은 부정확한 치수
+          %br
+          측정이거나 그외 검색에 좋지않은 영향을 줍니다.
+
+:plain
+  <script id="tpl-extension-fee" type="text/html">
+    <% if (extension_fee) { %>
+      <strong> <%= OpenCloset.commify(extension_fee) %>원 </strong>
+      <span> ( = <%= extension_days %>일 x <%= OpenCloset.commify(clothes_price) %>원 x 20% ) </span>
+    <% } else { %>
+      <strong> 해당사항 없음 </strong>
+    <% } %>
+  </script>
+:plain
+  <script id="tpl-overdue-fee" type="text/html">
+    <% if (overdue_fee) { %>
+      <strong> <%= OpenCloset.commify(overdue_fee) %>원 </strong>
+      <span> ( = <%= overdue_days %>일 x <%= OpenCloset.commify(clothes_price) %>원 x 30% ) </span>
+    <% } else { %>
+      <strong> 해당사항 없음 </strong>
+    <% } %>
+  </script>
 :plain
   <script id="tpl-late-fee" type="text/html">
     <% if (late_fee) { %>
       <strong> <%= OpenCloset.commify(late_fee) %>원 </strong>
-      <span> ( = <%= overdue %>일 x <%= OpenCloset.commify(clothes_price) %>원 x 20% ) </span>
     <% } else { %>
       <strong> 해당사항 없음 </strong>
     <% } %>

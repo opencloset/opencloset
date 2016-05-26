@@ -250,12 +250,17 @@ sub create {
             # 주문서를 포장완료(44) 상태로 변경
             #
             $order->update( { status_id => 44 } );
-            my $res = HTTP::Tiny->new( timeout => 1 )->post_form(
-                $self->config->{monitor_uri} . '/events',
-                { sender => 'order', order_id => $order_params{id}, from => 18, to => 44 }
-            );
 
-            $self->app->log->error("Failed to posting event: $res->{reason}")
+            #
+            # event posting to opencloset/monitor
+            #
+            my $monitor_uri_full = $self->config->{monitor_uri} . "/events";
+            my $res = HTTP::Tiny->new( timeout => 1 )->post_form(
+                $monitor_uri_full,
+                { sender => 'order', order_id => $order_params{id}, from => 18, to => 44 },
+            );
+            $self->app->log->warn(
+                "Failed to post event to monitor: $monitor_uri_full: $res->{reason}")
                 unless $res->{success};
 
             for ( my $i = 0; $i < @{ $order_detail_params{clothes_code} }; ++$i ) {

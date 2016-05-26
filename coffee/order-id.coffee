@@ -1,4 +1,61 @@
 $ ->
+  updateLateFeeDiscountAndLateFeeFinal = ( late_fee, discount ) ->
+    discount          = $('#order').data('order-late-fee-discount') unless discount
+    late_fee_discount = parseInt(discount)
+    late_fee_final    = late_fee + late_fee_discount
+    $('.late-fee-final').html OpenCloset.commify(late_fee_final) + '원'
+    $('#order').data('order-late-fee-discount', late_fee_discount)
+    $('#order').data('order-late-fee-final',    late_fee_final)
+
+  updateLateFee = (e, extra) ->
+    ## 연체            : overdue
+    ## 연장            : extension
+    ## target_date     : 반납예정일
+    ## user_target_date: 반납희망일
+    ## overdue-days    : today - 반납희망일
+    ## extension-days  : 반납희망일 - 반납예정일
+    ## overdue-fee     : overdue * 30% * overdue-days
+    ## extension-fee   : overdue * 20% * extension-days
+
+    return_date      = moment(e.currentTarget.value,  'YYYY-MM-DD')
+    user_target_date = moment(extra.user_target_date, 'YYYY-MM-DD')
+    target_date      = moment(extra.target_date,      'YYYY-MM-DD')
+
+    extension_days =
+      if user_target_date.diff(return_date) > 0 then return_date.diff(target_date, 'days') else user_target_date.diff(target_date, 'days')
+    overdue_days =
+      if return_date.diff(user_target_date) > 0 then return_date.diff(user_target_date, 'days') else 0
+
+    extension_days = 0 if extension_days < 0
+    overdue_days   = 0 if overdue_days   < 0
+
+    extension_fee = extra.clothes_price * 0.2 * extension_days
+    overdue_fee   = extra.clothes_price * 0.3 * overdue_days
+    late_fee      = extension_fee + overdue_fee
+
+    data =
+      extension_days: extension_days
+      overdue_days  : overdue_days
+      extension_fee : extension_fee
+      overdue_fee   : overdue_fee
+      late_fee      : late_fee
+      clothes_price : extra.clothes_price
+
+    compiled = _.template( $('#tpl-extension-fee').html() )
+    $("#extension-fee").html( $(compiled(data)) )
+
+    compiled = _.template( $('#tpl-overdue-fee').html() )
+    $("#overdue-fee").html( $(compiled(data)) )
+
+    compiled = _.template( $('#tpl-late-fee').html() )
+    $("#late-fee").html( $(compiled(data)) )
+
+    updateLateFeeDiscountAndLateFeeFinal(late_fee)
+    $('#order').data('order-extension-fee',  extension_fee)
+    $('#order').data('order-extension-days', extension_days)
+    $('#order').data('order-overdue-fee',    overdue_fee)
+    $('#order').data('order-overdue-days',   overdue_days)
+
   updateOrder = ->
     order_id = $('#order').data('order-id')
     $.ajax "/api/order/#{ order_id }.json",
@@ -6,12 +63,18 @@ $ ->
       data: { today: $('#order').data('today') }
       success: (data, textStatus, jqXHR) ->
         $('#order').data('order-clothes-price',     data.clothes_price)
-        $('#order').data('order-late-fee',          data.late_fee)
+        $('#order').data('order-overdue',           data.overdue)
+        $('#order').data('order-extension-fee',     data.extension_fee)
+        $('#order').data('order-extension-days',    data.extension_days)
+        $('#order').data('order-overdue-fee',       data.overdue_fee)
+        $('#order').data('order-overdue-days',      data.overdue_days)
         $('#order').data('order-late-fee-discount', 0)
         $('#order').data('order-late-fee-final',    data.late_fee)
         $('#order').data('order-late-fee-pay-with', data.late_fee_pay_with)
-        $('#order').data('order-overdue',           data.overdue)
         $('#order').data('order-parent-id',         data.parent_id)
+
+        $('#order').data('order-target-date',      data.target_date?.ymd)
+        $('#order').data('order-user-target-date', data.user_target_date?.ymd)
 
         #
         # update price
@@ -23,6 +86,12 @@ $ ->
         #
         # update late_fee
         #
+        compiled = _.template( $('#tpl-extension-fee').html() )
+        $("#extension-fee").html( $(compiled(data)) )
+
+        compiled = _.template( $('#tpl-overdue-fee').html() )
+        $("#overdue-fee").html( $(compiled(data)) )
+
         compiled = _.template( $('#tpl-late-fee').html() )
         $("#late-fee").html( $(compiled(data)) )
 
@@ -31,12 +100,7 @@ $ ->
         #
         compiled = _.template( $('#tpl-late-fee-discount').html() )
         $("#late-fee-discount").html( $(compiled(data)) )
-        updateLateFeeDiscountAndLateFeeFinal = ( late_fee, discount ) ->
-          late_fee_discount = parseInt discount
-          late_fee_final    = late_fee + late_fee_discount
-          $('.late-fee-final').html OpenCloset.commify(late_fee_final) + '원'
-          $('#order').data('order-late-fee-discount', late_fee_discount)
-          $('#order').data('order-late-fee-final',    late_fee_final)
+        updateLateFeeDiscountAndLateFeeFinal(data.late_fee, 0)
         $('#order-late-fee-discount').editable
           savenochange: true
           display: (value, sourceData, response) ->
@@ -44,7 +108,8 @@ $ ->
           success: (response, newValue) ->
             updateLateFeeDiscountAndLateFeeFinal( data.late_fee, newValue )
         $('#order-late-fee-discount-all').click (e) ->
-          discount = data.late_fee * -1
+          late_fee = $('#order').data('order-late-fee-final')
+          discount = parseInt(late_fee) * -1
           $('#order-late-fee-discount').editable 'setValue', discount
 
           #
@@ -52,7 +117,7 @@ $ ->
           # activate이 제대로 동작하지 않는 버그로 인해
           # 별도로 버튼을 클릭한 경우에 강제로 에누리 결과를 갱신하도록 합니다.
           #
-          updateLateFeeDiscountAndLateFeeFinal( data.late_fee, discount )
+          updateLateFeeDiscountAndLateFeeFinal( late_fee, discount )
 
         #
         # update late_fee final
@@ -498,6 +563,10 @@ $ ->
     compensation_final    = $('#order').data('order-compensation-final')    || 0
     compensation_pay_with = $('#order').data('order-compensation-pay-with')
     overdue               = $('#order').data('order-overdue')
+    extension_fee         = $('#order').data('order-extension-fee')
+    extension_days        = $('#order').data('order-extension-days')
+    overdue_fee           = $('#order').data('order-overdue-fee')
+    overdue_days          = $('#order').data('order-overdue-days')
 
     if late_fee_final != 0 and not late_fee_pay_with
       OpenCloset.alert 'danger', '연장료를 납부받지 않았습니다.'
@@ -514,30 +583,50 @@ $ ->
     #
     # 연장료 항목 추가
     #
-    $.ajax "/api/order_detail.json",
-      type: 'POST'
-      data: {
-        order_id:    order_id
-        name:        '연장료'
-        price:       clothes_price * 0.2
-        final_price: late_fee
-        stage:       1
-        desc:        "#{OpenCloset.commify clothes_price}원 x 20% x #{overdue}일"
-      }
-      complete: (jqXHR, textStatus) ->
-        #
-        # 연장료 에누리 항목 추가
-        #
-        if late_fee_discount != 0
-          $.ajax "/api/order_detail.json",
-            type: 'POST'
-            data: {
-              order_id:    order_id
-              name:        '연장료 에누리'
-              price:       Math.round( late_fee_discount / overdue )
-              final_price: late_fee_discount
-              stage:       1
-            }
+    if extension_fee
+      $.ajax "/api/order_detail.json",
+        type: 'POST'
+        data: {
+          order_id:    order_id
+          name:        '연장료'
+          price:       clothes_price * 0.2
+          final_price: extension_fee
+          stage:       1
+          desc:        "#{OpenCloset.commify clothes_price}원 x 20% x #{extension_days}일"
+        }
+
+    #
+    # 연체료 항목 추가
+    #
+    if overdue_fee
+      $.ajax "/api/order_detail.json",
+        type: 'POST'
+        data: {
+          order_id:    order_id
+          name:        '연체료'
+          price:       clothes_price * 0.3
+          final_price: overdue_fee
+          stage:       1
+          desc:        "#{OpenCloset.commify clothes_price}원 x 30% x #{overdue_days}일"
+        }
+
+    #
+    # 연체/연장료 에누리 항목 추가
+    #
+    if late_fee_discount != 0
+      ## 연장료, 연체료보다 연체/연장료 에누리 가 먼저 처리되어버리는 것을 방지
+      ## 왜 complete callback 을 안쓰는고하니, 연장료 & 연체료 모두에 등록하기 적절하지 않아서
+      setTimeout ->
+        $.ajax "/api/order_detail.json",
+          type: 'POST'
+          data: {
+            order_id:    order_id
+            name:        '연체/연장료 에누리'
+            price:       Math.round( late_fee_discount / overdue )
+            final_price: late_fee_discount
+            stage:       1
+          }
+      , 100
 
     #
     # 배상비 항목 추가
@@ -686,3 +775,36 @@ $ ->
 
   if location.search is '?alert=1' and $('#order-return-memo').data('value')
     $.facebox({ div: '#alert-desc' })
+
+  $('#late-fee-calculation .datepicker').datepicker
+    language: 'kr'
+    autoclose: true
+    todayHighlight: true
+  .on 'changeDate', (e) ->
+
+    clothes_price    = $('#order').data('order-clothes-price')
+    target_date      = $('#order').data('order-target-date')
+    user_target_date = $('#order').data('order-user-target-date')
+
+    updateLateFee e,
+      target_date     : target_date
+      user_target_date: user_target_date
+      clothes_price   : clothes_price
+
+  ## TODO: css 로 그냥 스슥 할 수 있을 거 같은데..
+  IGNOREMAP      = { 0: 1, 1: 0 }
+  IGNOREKLASSMAP = { 0: 'btn-default', 1: 'btn-success' }
+  IGNORETEXTMAP  = { 0: '검색결과에 포함됩니다', 1: '검색에 무시됩니다' }
+  $('#btn-ignore').click ->
+    $this    = $(@)
+    order_id = $('#order').data('order-id')
+    ignore   = $this.data('ignore')
+    tobe     = IGNOREMAP[ignore]
+    $.ajax "/api/order/#{ order_id }.json",
+      type: 'PUT'
+      data: { ignore: tobe }
+      success: (data, textStatus, jqXHR) ->
+        $this.data('ignore', tobe)
+        $this.removeClass(IGNOREKLASSMAP[ignore])
+        $this.addClass(IGNOREKLASSMAP[tobe])
+        $this.text(IGNORETEXTMAP[tobe])

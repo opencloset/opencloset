@@ -166,6 +166,19 @@
                               .profile-info-row
                                 .profile-info-name 설명
                                 .profile-info-value
+                                  .profile-info-user-comment
+                                    - my @additional_comments = (
+                                    -     { class => "primary", value => "라운드 반팔 블라우스", },
+                                    -     { class => "info",    value => "라운드 민소매 블라우스", },
+                                    -     { class => "success", value => "탑 블라우스", },
+                                    -     { class => "warning", value => "셔츠 블라우스", },
+                                    -     { class => "danger",  value => "승무원 블라우스", },
+                                    - );
+                                    - for my $ac (@additional_comments) {
+                                    -   my $class = $ac->{class};
+                                    -   my $value = $ac->{value};
+                                      %button.btn.btn-xs{ :class => "btn-#{$class}", "data-name" => $value }= $value
+                                    - }
                                   %span.editable#user-comment{ 'data-name' => 'comment' }= $user->user_info->comment || ''
 
                               .profile-info-row

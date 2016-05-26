@@ -17,7 +17,13 @@
                             #profile-feed-1.profile-feed
                               - for my $order ( @$orders ) {
                               -   next unless $order->status;
-                              -   my $late_fee = calc_late_fee($order);
+                              -   my $late_fee    = calc_late_fee($order);
+                              -   my $desc        = $order->desc        || q{};
+                              -   my $return_memo = $order->return_memo || q{};
+                              -   for my $child ($order->orders->all) {
+                              -     $desc        .= $child->desc        if $child->desc;
+                              -     $return_memo .= $child->return_memo if $child->return_memo;
+                              -   }
                                 .profile-activity.clearfix
                                   %div
                                     %img.pull-left{ :alt => "#{ $order->user->name }'s avatar", :src => '#{ get_gravatar( $order->user, 36, https => 1 ) }' }
@@ -57,4 +63,12 @@
                                       %a{:href => '#{url_for("/timetable/" . $booking_ymd)->fragment("timetable-$booking_hhmm")}', :title => '시간표'}
                                         = $booking_ymd
                                         = $booking_date->hms
+                                    .desc
+                                      %p
+                                        %span.label.label-info 주문서 메모 5F
+                                      %pre= $desc || "없음"
+                                    .return-memo
+                                      %p
+                                        %span.label.label-warning 반납 확인 메모 4F
+                                      %pre= $return_memo || "없음"
                               - }

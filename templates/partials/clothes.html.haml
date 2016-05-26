@@ -3,6 +3,8 @@
 - my $clothes_code = trim_clothes_code($clothes);
 - my $order = $clothes->orders->find({ status_id => 2 });
 - my $late_fee = $order ? calc_late_fee($order) : 0;
+- my $extension_fee = $order ? calc_extension_fee($order) : 0;
+- my $overdue_fee = $order ? calc_overdue_fee($order) : 0;
 - my $status_id = $clothes->status->id;
 %tr
   %td
@@ -35,8 +37,20 @@
         </span></a>
       - if ($late_fee) {
         :plain
-          <span>
-            연장료 #{ commify($late_fee) }원 = #{ commify($clothes->price) }원 x #{ calc_overdue($order) }일 x 20%
-          </span>
+          <strong>
+            #{ commify($late_fee) }원
+          </strong>
+        - if ($extension_fee) {
+          :plain
+            <small>
+              연장료 #{ commify($extension_fee) }원 = #{ commify($clothes->price) }원 x #{ calc_extension_days($order) }일 x 20%
+            </small>
+        - }
+        - if ($overdue_fee) {
+          :plain
+            <small>
+              연체료 #{ commify($overdue_fee) }원 = #{ commify($clothes->price) }원 x #{ calc_overdue_days($order) }일 x 30%
+            </small>
+        - }
       - }
     - }
