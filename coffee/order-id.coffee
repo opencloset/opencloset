@@ -73,8 +73,8 @@ $ ->
         $('#order').data('order-late-fee-pay-with', data.late_fee_pay_with)
         $('#order').data('order-parent-id',         data.parent_id)
 
-        $('#order').data('order-target-date',      data.target_date.ymd)
-        $('#order').data('order-user-target-date', data.user_target_date.ymd)
+        $('#order').data('order-target-date',      data.target_date?.ymd)
+        $('#order').data('order-user-target-date', data.user_target_date?.ymd)
 
         #
         # update price
