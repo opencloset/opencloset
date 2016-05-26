@@ -259,6 +259,8 @@ sub calc_extension_days {
 
 =head2 calc_overdue_days( $order, $today )
 
+연체일
+
 =cut
 
 sub calc_overdue_days {
@@ -324,6 +326,8 @@ sub calc_overdue_days {
 
 =head2 calc_overdue( $order, $today )
 
+연체일 + 연장일
+
 =cut
 
 sub calc_overdue {
@@ -375,6 +379,8 @@ sub commify {
 
 =head2 calc_extension_fee( $order, $today )
 
+연장비
+
 =cut
 
 sub calc_extension_fee {
@@ -391,6 +397,8 @@ sub calc_extension_fee {
 
 =head2 calc_overdue_fee( $order, $today )
 
+연체비
+
 =cut
 
 sub calc_overdue_fee {
@@ -406,6 +414,8 @@ sub calc_overdue_fee {
 }
 
 =head2 calc_late_fee( $order, $today )
+
+연체비 + 연장비
 
 =cut
 
