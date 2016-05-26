@@ -205,6 +205,7 @@ sub calc_extension_days {
 
     $target_dt      = $target_dt->clone;
     $user_target_dt = $user_target_dt->clone;
+        my $pattern = $today =~ /T/ ? q{%FT%T} : q{%F %T};
 
     $target_dt->set_hour(0);
     $target_dt->set_minute(0);
@@ -217,7 +218,7 @@ sub calc_extension_days {
     my $now = DateTime->now( time_zone => $self->config->{timezone} );
     if ( $today && $today =~ m/^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}:\d{2}$/ ) {
         my $strp = DateTime::Format::Strptime->new(
-            pattern   => q{%F %T},
+            pattern   => $pattern,
             time_zone => $self->config->{timezone},
             on_error  => 'undef',
         );
@@ -271,6 +272,7 @@ sub calc_overdue_days {
     $target_dt->set_minute(0);
     $target_dt->set_second(0);
 
+        my $pattern = $today =~ /T/ ? q{%FT%T} : q{%F %T};
     $user_target_dt->set_hour(0);
     $user_target_dt->set_minute(0);
     $user_target_dt->set_second(0);
@@ -278,7 +280,7 @@ sub calc_overdue_days {
     my $now = DateTime->now( time_zone => $self->config->{timezone} );
     if ( $today && $today =~ m/^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}:\d{2}$/ ) {
         my $strp = DateTime::Format::Strptime->new(
-            pattern   => q{%F %T},
+            pattern   => $pattern,
             time_zone => $self->config->{timezone},
             on_error  => 'undef',
         );
