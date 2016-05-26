@@ -218,6 +218,9 @@ sub calc_extension_days {
 
     $return_dt ||= $now;
 
+    $target_dt->set_time_zone( $self->config->{timezone} );
+    $user_target_dt->set_time_zone( $self->config->{timezone} );
+
     $target_dt      = $target_dt->clone;
     $user_target_dt = $user_target_dt->clone;
     $return_dt      = $return_dt->clone;
@@ -285,6 +288,9 @@ sub calc_overdue_days {
 
     $return_dt ||= $now;
 
+    $target_dt->set_time_zone( $self->config->{timezone} );
+    $user_target_dt->set_time_zone( $self->config->{timezone} );
+
     $target_dt      = $target_dt->clone;
     $user_target_dt = $user_target_dt->clone;
     $return_dt      = $return_dt->clone;
@@ -312,7 +318,7 @@ sub calc_overdue_days {
 
     my $dur = $return_epoch - $user_target_epoch;
 
-    return 0 if $dur < 0;
+    return 0 if $dur <= 0;
     return int( $dur / $DAY_AS_SECONDS );
 }
 
