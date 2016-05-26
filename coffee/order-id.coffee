@@ -790,3 +790,19 @@ $ ->
       target_date     : target_date
       user_target_date: user_target_date
       clothes_price   : clothes_price
+
+  ## TODO: css 로 그냥 스슥 할 수 있을 거 같은데..
+  IGNOREMAP      = { 0: 1, 1: 0 }
+  IGNOREKLASSMAP = { 0: 'btn-default', 1: 'btn-success' }
+  $('#btn-ignore').click ->
+    $this    = $(@)
+    order_id = $('#order').data('order-id')
+    ignore   = $this.data('ignore')
+    tobe     = IGNOREMAP[ignore]
+    $.ajax "/api/order/#{ order_id }.json",
+      type: 'PUT'
+      data: { ignore: tobe }
+      success: (data, textStatus, jqXHR) ->
+        $this.data('ignore', tobe)
+        $this.removeClass(IGNOREKLASSMAP[ignore])
+        $this.addClass(IGNOREKLASSMAP[tobe])

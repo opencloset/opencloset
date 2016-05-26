@@ -792,6 +792,17 @@
                     data-name        = "return_memo"
                   ></a>
 
+    .row
+      %hr
+      %div.pull-right.text-right
+        - my $ignore = $order->ignore || 0;
+        - my $klass  = $ignore ? 'btn-success' : 'btn-default';
+        %button#btn-ignore.btn.btn-xs{:class => $klass, :data-ignore => $ignore} 검색에 무시됨
+        %small.help-block
+          대리을 통한 대여 또는 단체대여 혹은 부정확한 치수
+          %br
+          측정이거나 그외 검색에 좋지않은 영향을 줍니다.
+
 :plain
   <script id="tpl-extension-fee" type="text/html">
     <% if (extension_fee) { %>
