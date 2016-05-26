@@ -46,9 +46,7 @@ sub register {
     $app->helper( get_gravatar              => \&get_gravatar );
     $app->helper( trim_clothes_code         => \&trim_clothes_code );
     $app->helper( order_clothes_price       => \&order_clothes_price );
-    $app->helper( calc_overdue              => \&calc_overdue );
     $app->helper( commify                   => \&commify );
-    $app->helper( calc_late_fee             => \&calc_late_fee );
     $app->helper( flatten_user              => \&flatten_user );
     $app->helper( tracking_url              => \&tracking_url );
     $app->helper( order_price               => \&order_price );
@@ -80,6 +78,12 @@ sub register {
     $app->helper( measurement2text          => \&measurement2text );
     $app->helper( decrypt_mbersn            => \&decrypt_mbersn );
     $app->helper( redis                     => \&redis );
+    $app->helper( calc_late_fee             => \&calc_late_fee );
+    $app->helper( calc_overdue              => \&calc_overdue );
+    $app->helper( calc_extension_fee        => \&calc_extension_fee );
+    $app->helper( calc_extension_days       => \&calc_extension_days );
+    $app->helper( calc_overdue_fee          => \&calc_overdue_fee );
+    $app->helper( calc_overdue_days         => \&calc_overdue_days );
 }
 
 =head1 HELPERS
@@ -181,7 +185,148 @@ sub order_clothes_price {
     return $price;
 }
 
+=head2 calc_extension_days( $order, $today )
+
+연장일
+
+=cut
+
+sub calc_extension_days {
+    my ( $self, $order, $today ) = @_;
+
+    return 0 unless $order;
+
+    my $target_dt      = $order->target_date;
+    my $return_dt      = $order->return_date;
+    my $user_target_dt = $order->user_target_date;
+
+    return 0 unless $target_dt;
+    return 0 unless $user_target_dt;
+
+    my $now = DateTime->now( time_zone => $self->config->{timezone} );
+    if ( $today && $today =~ m/^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}:\d{2}$/ ) {
+        my $pattern = $today =~ /T/ ? q{%FT%T} : q{%F %T};
+        my $strp = DateTime::Format::Strptime->new(
+            pattern   => $pattern,
+            time_zone => $self->config->{timezone},
+            on_error  => 'undef',
+        );
+
+        my $dt = $strp->parse_datetime($today);
+        $now = $dt if $dt;
+    }
+
+    $return_dt ||= $now;
+
+    $target_dt->set_time_zone( $self->config->{timezone} );
+    $user_target_dt->set_time_zone( $self->config->{timezone} );
+
+    $target_dt      = $target_dt->clone;
+    $user_target_dt = $user_target_dt->clone;
+    $return_dt      = $return_dt->clone;
+
+    $target_dt->set_hour(0);
+    $target_dt->set_minute(0);
+    $target_dt->set_second(0);
+
+    $user_target_dt->set_hour(0);
+    $user_target_dt->set_minute(0);
+    $user_target_dt->set_second(0);
+
+    $return_dt->set_hour(0);
+    $return_dt->set_minute(0);
+    $return_dt->set_second(0);
+
+    my $DAY_AS_SECONDS = 60 * 60 * 24;
+
+    my $target_epoch      = $target_dt->epoch;
+    my $return_epoch      = $return_dt->epoch;
+    my $user_target_epoch = $user_target_dt->epoch;
+
+    return 0 if $target_epoch >= $return_epoch;
+
+    my $dur;
+    if ( $user_target_epoch - $return_epoch > 0 ) {
+        $dur = $return_epoch - $target_epoch;
+    }
+    else {
+        $dur = $user_target_epoch - $target_epoch;
+    }
+
+    return 0 if $dur <= 0;
+    return int( $dur / $DAY_AS_SECONDS );
+}
+
+=head2 calc_overdue_days( $order, $today )
+
+연체일
+
+=cut
+
+sub calc_overdue_days {
+    my ( $self, $order, $today ) = @_;
+
+    return 0 unless $order;
+
+    my $target_dt      = $order->target_date;
+    my $return_dt      = $order->return_date;
+    my $user_target_dt = $order->user_target_date;
+
+    return 0 unless $target_dt;
+    return 0 unless $user_target_dt;
+
+    my $now = DateTime->now( time_zone => $self->config->{timezone} );
+    if ( $today && $today =~ m/^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}:\d{2}$/ ) {
+        my $pattern = $today =~ /T/ ? q{%FT%T} : q{%F %T};
+        my $strp = DateTime::Format::Strptime->new(
+            pattern   => $pattern,
+            time_zone => $self->config->{timezone},
+            on_error  => 'undef',
+        );
+
+        my $dt = $strp->parse_datetime($today);
+        $now = $dt if $dt;
+    }
+
+    $return_dt ||= $now;
+
+    $target_dt->set_time_zone( $self->config->{timezone} );
+    $user_target_dt->set_time_zone( $self->config->{timezone} );
+
+    $target_dt      = $target_dt->clone;
+    $user_target_dt = $user_target_dt->clone;
+    $return_dt      = $return_dt->clone;
+
+    $target_dt->set_hour(0);
+    $target_dt->set_minute(0);
+    $target_dt->set_second(0);
+
+    $user_target_dt->set_hour(0);
+    $user_target_dt->set_minute(0);
+    $user_target_dt->set_second(0);
+
+    $return_dt->set_hour(0);
+    $return_dt->set_minute(0);
+    $return_dt->set_second(0);
+
+    my $DAY_AS_SECONDS = 60 * 60 * 24;
+
+    my $target_epoch      = $target_dt->epoch;
+    my $return_epoch      = $return_dt->epoch;
+    my $user_target_epoch = $user_target_dt->epoch;
+
+    return 0 if $target_epoch >= $return_epoch;
+    return 0 if $user_target_epoch >= $return_epoch;
+
+    my $dur = $return_epoch - $user_target_epoch;
+
+    return 0 if $dur <= 0;
+    return int( $dur / $DAY_AS_SECONDS );
+}
+
 =head2 calc_overdue( $order, $today )
+
+연체일 + 연장일
 
 =cut
 
@@ -232,18 +377,55 @@ sub commify {
     return $_;
 }
 
+=head2 calc_extension_fee( $order, $today )
+
+연장비
+
+=cut
+
+sub calc_extension_fee {
+    my ( $self, $order, $today ) = @_;
+
+    my $price = $self->order_clothes_price($order);
+    my $days = $self->calc_extension_days( $order, $today );
+    return 0 unless $days;
+
+    my $extension_fee = $price * 0.2 * $days;
+
+    return $extension_fee;
+}
+
+=head2 calc_overdue_fee( $order, $today )
+
+연체비
+
+=cut
+
+sub calc_overdue_fee {
+    my ( $self, $order, $today ) = @_;
+
+    my $price = $self->order_clothes_price($order);
+    my $days = $self->calc_overdue_days( $order, $today );
+    return 0 unless $days;
+
+    my $overdue_fee = $price * 0.3 * $days;
+
+    return $overdue_fee;
+}
+
 =head2 calc_late_fee( $order, $today )
+
+연체비 + 연장비
 
 =cut
 
 sub calc_late_fee {
     my ( $self, $order, $today ) = @_;
 
-    my $price = $self->order_clothes_price($order);
-    my $overdue = $self->calc_overdue( $order, $today );
-    return 0 unless $overdue;
+    my $extension_fee = $self->calc_extension_fee( $order, $today );
+    my $overdue_fee = $self->calc_overdue_fee( $order, $today );
 
-    my $late_fee = $price * 0.2 * $overdue;
+    my $late_fee = $extension_fee + $overdue_fee;
 
     return $late_fee;
 }
@@ -331,6 +513,9 @@ sub flatten_order {
 
     my ( $order_price, $order_stage_price ) = $self->order_price($order);
 
+    my $extension_fee = $self->calc_extension_fee( $order, $today );
+    my $overdue_fee = $self->calc_overdue_fee( $order, $today );
+
     my %data = (
         $order->get_columns,
         status_name => $order->status ? $order->status->name : q{},
@@ -345,10 +530,19 @@ sub flatten_order {
             $order->order_details( { clothes_code => { '!=' => undef } } )
                 ->get_column('clothes_code')->all
         ],
-        late_fee => $self->calc_late_fee( $order, $today ),
-        overdue  => $self->calc_overdue( $order,  $today ),
-        return_method => $order->return_method       || q{},
-        tracking_url  => $self->tracking_url($order) || q{},
+
+        ## 연장료와 연체료를 구분해야한다
+        ## 연장료: extension-fee
+        ## 연체료: overdue-fee
+        ## 둘의합: late-fee = extension-fee + overdue-fee
+        extension_fee  => $extension_fee,
+        extension_days => $self->calc_extension_days( $order, $today ),
+        overdue_fee    => $overdue_fee,
+        overdue_days   => $self->calc_overdue_days( $order, $today ),
+        late_fee       => $extension_fee + $overdue_fee,
+        overdue        => $self->calc_overdue( $order, $today ),
+        return_method  => $order->return_method || q{},
+        tracking_url => $self->tracking_url($order) || q{},
     );
 
     if ( $order->rental_date ) {
