@@ -187,6 +187,8 @@ sub order_clothes_price {
 
 =head2 calc_extension_days( $order, $today )
 
+연장일
+
 =cut
 
 sub calc_extension_days {
@@ -213,7 +215,7 @@ sub calc_extension_days {
     $user_target_dt->set_second(0);
 
     my $now = DateTime->now( time_zone => $self->config->{timezone} );
-    if ( $today && $today =~ m/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/ ) {
+    if ( $today && $today =~ m/^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}:\d{2}$/ ) {
         my $strp = DateTime::Format::Strptime->new(
             pattern   => q{%F %T},
             time_zone => $self->config->{timezone},
@@ -274,7 +276,7 @@ sub calc_overdue_days {
     $user_target_dt->set_second(0);
 
     my $now = DateTime->now( time_zone => $self->config->{timezone} );
-    if ( $today && $today =~ m/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/ ) {
+    if ( $today && $today =~ m/^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}:\d{2}$/ ) {
         my $strp = DateTime::Format::Strptime->new(
             pattern   => q{%F %T},
             time_zone => $self->config->{timezone},
