@@ -794,6 +794,7 @@ $ ->
   ## TODO: css 로 그냥 스슥 할 수 있을 거 같은데..
   IGNOREMAP      = { 0: 1, 1: 0 }
   IGNOREKLASSMAP = { 0: 'btn-default', 1: 'btn-success' }
+  IGNORETEXTMAP  = { 0: '검색결과에 포함됩니다', 1: '검색에 무시됩니다' }
   $('#btn-ignore').click ->
     $this    = $(@)
     order_id = $('#order').data('order-id')
@@ -806,3 +807,4 @@ $ ->
         $this.data('ignore', tobe)
         $this.removeClass(IGNOREKLASSMAP[ignore])
         $this.addClass(IGNOREKLASSMAP[tobe])
+        $this.text(IGNORETEXTMAP[tobe])
