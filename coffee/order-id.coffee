@@ -73,8 +73,8 @@ $ ->
         $('#order').data('order-late-fee-pay-with', data.late_fee_pay_with)
         $('#order').data('order-parent-id',         data.parent_id)
 
-        $('#order').data('order-target-date',      data.target_date.ymd)
-        $('#order').data('order-user-target-date', data.user_target_date.ymd)
+        $('#order').data('order-target-date',      data.target_date?.ymd)
+        $('#order').data('order-user-target-date', data.user_target_date?.ymd)
 
         #
         # update price
@@ -790,3 +790,21 @@ $ ->
       target_date     : target_date
       user_target_date: user_target_date
       clothes_price   : clothes_price
+
+  ## TODO: css 로 그냥 스슥 할 수 있을 거 같은데..
+  IGNOREMAP      = { 0: 1, 1: 0 }
+  IGNOREKLASSMAP = { 0: 'btn-default', 1: 'btn-success' }
+  IGNORETEXTMAP  = { 0: '검색결과에 포함됩니다', 1: '검색에 무시됩니다' }
+  $('#btn-ignore').click ->
+    $this    = $(@)
+    order_id = $('#order').data('order-id')
+    ignore   = $this.data('ignore')
+    tobe     = IGNOREMAP[ignore]
+    $.ajax "/api/order/#{ order_id }.json",
+      type: 'PUT'
+      data: { ignore: tobe }
+      success: (data, textStatus, jqXHR) ->
+        $this.data('ignore', tobe)
+        $this.removeClass(IGNOREKLASSMAP[ignore])
+        $this.addClass(IGNOREKLASSMAP[tobe])
+        $this.text(IGNORETEXTMAP[tobe])

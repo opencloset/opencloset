@@ -437,6 +437,7 @@ sub api_update_order {
             height
             hip
             id
+            ignore
             knee
             late_fee_pay_with
             leg
@@ -450,8 +451,8 @@ sub api_update_order {
             purpose2
             rental_date
             return_date
-            return_method
             return_memo
+            return_method
             staff_id
             status_id
             target_date
