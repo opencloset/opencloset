@@ -148,7 +148,12 @@
 
 :plain
   <script id="tpl-overdue-paragraph" type="text/html">
-    <span>
-      연장료 <%= OpenCloset.commify(order.late_fee) %>원 = <%= OpenCloset.commify(order.clothes_price) %>원 x <%= order.overdue %>일 x 20%
-    </span>
+    <strong>
+      <%= OpenCloset.commify(order.late_fee) %>원
+    </strong>
+    <small>
+      연장료 <%= OpenCloset.commify(order.extension_fee) %>원 = <%= OpenCloset.commify(order.clothes_price) %>원 x <%= order.extension_days %>일 x 20%
+      ,
+      연체료 <%= OpenCloset.commify(order.overdue_fee) %>원 = <%= OpenCloset.commify(order.clothes_price) %>원 x <%= order.overdue_days %>일 x 30%
+    </small>
   </script>
