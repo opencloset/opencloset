@@ -221,21 +221,9 @@ sub calc_extension_days {
     $target_dt->set_time_zone( $self->config->{timezone} );
     $user_target_dt->set_time_zone( $self->config->{timezone} );
 
-    $target_dt      = $target_dt->clone;
-    $user_target_dt = $user_target_dt->clone;
-    $return_dt      = $return_dt->clone;
-
-    $target_dt->set_hour(0);
-    $target_dt->set_minute(0);
-    $target_dt->set_second(0);
-
-    $user_target_dt->set_hour(0);
-    $user_target_dt->set_minute(0);
-    $user_target_dt->set_second(0);
-
-    $return_dt->set_hour(0);
-    $return_dt->set_minute(0);
-    $return_dt->set_second(0);
+    $target_dt = $target_dt->clone->truncate( to => 'day' );
+    $user_target_dt = $user_target_dt->clone->truncate( to => 'day' );
+    $return_dt = $return_dt->clone->truncate( to => 'day' );
 
     my $DAY_AS_SECONDS = 60 * 60 * 24;
 
@@ -293,21 +281,9 @@ sub calc_overdue_days {
     $target_dt->set_time_zone( $self->config->{timezone} );
     $user_target_dt->set_time_zone( $self->config->{timezone} );
 
-    $target_dt      = $target_dt->clone;
-    $user_target_dt = $user_target_dt->clone;
-    $return_dt      = $return_dt->clone;
-
-    $target_dt->set_hour(0);
-    $target_dt->set_minute(0);
-    $target_dt->set_second(0);
-
-    $user_target_dt->set_hour(0);
-    $user_target_dt->set_minute(0);
-    $user_target_dt->set_second(0);
-
-    $return_dt->set_hour(0);
-    $return_dt->set_minute(0);
-    $return_dt->set_second(0);
+    $target_dt = $target_dt->clone->truncate( to => 'day' );
+    $user_target_dt = $user_target_dt->clone->truncate( to => 'day' );
+    $return_dt = $return_dt->clone->truncate( to => 'day' );
 
     my $DAY_AS_SECONDS = 60 * 60 * 24;
 
