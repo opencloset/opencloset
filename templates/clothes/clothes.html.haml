@@ -50,7 +50,7 @@
                           %br
                           빌린 횟수
                         .grid2
-                          %span.bigger-175.blue= $clothes->rentable_duration()
+                          %span.bigger-175.blue= $clothes->rentable_duration($config->{start_date}, $config->{timezone})
                           %br
                           대여가능 일
                         .grid2
@@ -58,7 +58,7 @@
                           %br
                           대여일
                         .grid2
-                          %span.bigger-175.blue= sprintf("%.1f%%",$clothes->rent_ratio() * 100);
+                          %span.bigger-175.blue= sprintf("%.1f%%",$clothes->rent_ratio($config->{start_date},$config->{timezone}) * 100);
                           %br
                           대여율
                       .hr.hr16.dotted
