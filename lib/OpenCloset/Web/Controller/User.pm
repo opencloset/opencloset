@@ -121,6 +121,32 @@ sub user {
         { join => 'booking' }
     )->next;
 
+    ## for refresh Verification Code
+    my $password;
+    my $verification_code;
+    if ( my $phone = $user_info->phone ) {
+        my $sms = $self->DB->resultset('SMS')->search(
+            {
+                to   => $phone,
+                text => { 'like', '열린옷장 인증번호%' }
+            },
+            {
+                order_by => { -desc => 'id' },
+                rows     => 1,
+            }
+        )->single;
+
+        if ($sms) {
+            my $text = $sms->get_column('text');
+            ($verification_code) = $text =~ m/(\d+)/;
+            $password->{code} = $verification_code;
+
+            my $expires = $user->expires;
+            my $now = DateTime->now( time_zone => $self->config->{timezone} )->epoch;
+            $password->{is_valid} = $expires > $now;
+        }
+    }
+
     #
     # response
     #
@@ -132,7 +158,8 @@ sub user {
         avg                   => $data->{avg},
         diff                  => $data->{diff},
         avg2                  => $data2->{avg2},
-        does_wear             => $order
+        does_wear             => $order,
+        password              => $password,
     );
 }
 

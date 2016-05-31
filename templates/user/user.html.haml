@@ -84,6 +84,18 @@
                                 .profile-info-value
                                   %span.editable#user-name{ 'data-name' => 'name' }= $user->name
 
+                              - if (!$user_info->staff && $password) {
+                                - my $klass = $password->{is_valid} ? 'btn-success' : 'btn-danger';
+                                - my $desc  = $password->{is_valid} ? '사용가능' : '만료됨';
+                                .profile-info-row
+                                  .profile-info-name 인증번호
+                                  .profile-info-value
+                                    %span= $password->{code}
+                                    %button#btn-reset-expires.btn.btn-xs{:class => $klass}
+                                      %i.icon-refresh
+                                      %span= $desc
+                              - }
+
                               .profile-info-row
                                 .profile-info-name 분류
                                 .profile-info-value
