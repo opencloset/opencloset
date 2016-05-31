@@ -93,6 +93,7 @@ sub user {
     my $user = $self->get_user( \%params );
     return unless $user;
 
+    my $user_info             = $user->user_info;
     my $donated_clothes_count = 0;
     $donated_clothes_count += $_->clothes->count for $user->donations;
 
@@ -120,17 +121,45 @@ sub user {
         { join => 'booking' }
     )->next;
 
+    ## for refresh Verification Code
+    my $password;
+    my $verification_code;
+    if ( my $phone = $user_info->phone ) {
+        my $sms = $self->DB->resultset('SMS')->search(
+            {
+                to   => $phone,
+                text => { 'like', '열린옷장 인증번호%' }
+            },
+            {
+                order_by => { -desc => 'id' },
+                rows     => 1,
+            }
+        )->single;
+
+        if ($sms) {
+            my $text = $sms->get_column('text');
+            ($verification_code) = $text =~ m/(\d+)/;
+            $password->{code} = $verification_code;
+
+            my $expires = $user->expires;
+            my $now = DateTime->now( time_zone => $self->config->{timezone} )->epoch;
+            $password->{is_valid} = $expires > $now;
+        }
+    }
+
     #
     # response
     #
     $self->stash(
         user                  => $user,
+        user_info             => $user_info,
         donated_clothes_count => $donated_clothes_count,
         rented_clothes_count  => $rented_clothes_count,
         avg                   => $data->{avg},
         diff                  => $data->{diff},
         avg2                  => $data2->{avg2},
-        does_wear             => $order
+        does_wear             => $order,
+        password              => $password,
     );
 }
 
