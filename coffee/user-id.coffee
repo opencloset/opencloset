@@ -231,3 +231,21 @@ $ ->
     comment = if comment then "#{comment}\n#{additional_comment}" else additional_comment
     $("#user-comment").editable "setValue", comment
     $("#user-comment").editable "submit"
+
+  $('#btn-reset-expires:not(.disabled)').click ->
+    $this = $(@)
+    $this.addClass('disabled')
+
+    now     = parseInt(Date.now() / 1000)
+    expires = now + 60 * 5
+    userID  = $('#profile-user-info-data').data('pk')
+    $.ajax "/api/user/#{userID}.json",
+      type: 'PUT'
+      data: { expires: expires }
+      success: (data, textStatus, jqXHR) ->
+        $this.addClass('btn-success').removeClass('btn-danger')
+        $this.find('span').text('사용가능')
+      error: (jqXHR, textStatus, errorThrown) ->
+        OpenCloset.alert textStatus
+      complete: (jqXHR, textStatus) ->
+        $this.removeClass('disabled')

@@ -36,10 +36,10 @@
 
                       .profile-contact-info
                         .profile-contact-links.align-left
-                          %a.btn.btn-link{ :href => "#{ url_for('/sms')->query( to => $user->user_info->phone ) }" }
+                          %a.btn.btn-link{ :href => "#{ url_for('/sms')->query( to => $user_info->phone ) }" }
                             %i.icon-phone.bigger-120.green
                             SMS 보내기
-                          %a.btn.btn-link{ :href => "#{ url_for('/sms')->query( to => $user->user_info->phone, msg => measurement2text($user) ) }" }
+                          %a.btn.btn-link{ :href => "#{ url_for('/sms')->query( to => $user_info->phone, msg => measurement2text($user) ) }" }
                             %i.icon-envelope.bigger-120.green
                             신체 사이즈 전송
                           %a.btn.btn-link{ :href => "#{ url_for('/user/' . $user->id . '/search/clothes/') }" }
@@ -84,10 +84,22 @@
                                 .profile-info-value
                                   %span.editable#user-name{ 'data-name' => 'name' }= $user->name
 
+                              - if (!$user_info->staff && $password) {
+                                - my $klass = $password->{is_valid} ? 'btn-success' : 'btn-danger';
+                                - my $desc  = $password->{is_valid} ? '사용가능' : '만료됨';
+                                .profile-info-row
+                                  .profile-info-name 인증번호
+                                  .profile-info-value
+                                    %span= $password->{code}
+                                    %button#btn-reset-expires.btn.btn-xs{:class => $klass}
+                                      %i.icon-refresh
+                                      %span= $desc
+                              - }
+
                               .profile-info-row
                                 .profile-info-name 분류
                                 .profile-info-value
-                                  %span.editable#user-staff{ 'data-name' => 'staff', 'data-type' => 'select', 'data-value' => "#{ $user->user_info->staff }" }
+                                  %span.editable#user-staff{ 'data-name' => 'staff', 'data-type' => 'select', 'data-value' => "#{ $user_info->staff }" }
 
                               .profile-info-row
                                 .profile-info-name 전자우편
@@ -97,7 +109,7 @@
                               .profile-info-row
                                 .profile-info-name 휴대전화
                                 .profile-info-value
-                                  %span.editable#user-phone{ 'data-name' => 'phone' }= $user->user_info->phone
+                                  %span.editable#user-phone{ 'data-name' => 'phone' }= $user_info->phone
 
                               - if ( $user->id == current_user->id ) {
                                 .profile-info-row
@@ -110,51 +122,51 @@
                                 .profile-info-name 주소
                                 .profile-info-value
                                   %i.icon-map-marker.light-orange.bigger-110
-                                  %span.editable#user-address{ 'data-name' => 'address' }= $user->user_info->address2
-                                %input.postcodify_building_id{:name => 'address1' :type => 'hidden', :value => "#{$user->user_info->address1}"}
-                                %input.postcodify_address{:name => 'address2' :type => 'hidden', :value => "#{$user->user_info->address2}"}
-                                %input.postcodify_jibeon_address{:name => 'address3' :type => 'hidden', :value => "#{$user->user_info->address3}"}
+                                  %span.editable#user-address{ 'data-name' => 'address' }= $user_info->address2
+                                %input.postcodify_building_id{:name => 'address1' :type => 'hidden', :value => "#{$user_info->address1}"}
+                                %input.postcodify_address{:name => 'address2' :type => 'hidden', :value => "#{$user_info->address2}"}
+                                %input.postcodify_jibeon_address{:name => 'address3' :type => 'hidden', :value => "#{$user_info->address3}"}
 
                               .profile-info-row
                                 .profile-info-name 상세주소
                                 .profile-info-value
                                   %i.icon-map-marker.light-orange.bigger-110
-                                  %span.editable#user-detail-address{ 'data-name' => 'address4' }= $user->user_info->address4
+                                  %span.editable#user-detail-address{ 'data-name' => 'address4' }= $user_info->address4
 
                               .profile-info-row
                                 .profile-info-name 성별
                                 .profile-info-value
-                                  %span.editable#user-gender{ 'data-name' => 'gender', 'data-type' => 'select', 'data-value' => "#{ $user->user_info->gender }" }
+                                  %span.editable#user-gender{ 'data-name' => 'gender', 'data-type' => 'select', 'data-value' => "#{ $user_info->gender }" }
 
                               .profile-info-row
                                 .profile-info-name 태어난 해
                                 .profile-info-value
-                                  %span.editable#user-birth{ 'data-name' => 'birth' }= $user->user_info->birth
+                                  %span.editable#user-birth{ 'data-name' => 'birth' }= $user_info->birth
 
                               .profile-info-row
                                 .profile-info-name 대여 목적
                                 .profile-info-value
-                                  %span.editable#user-purpose{ 'data-name' => 'purpose', 'data-value' => "#{ $user->user_info->purpose }" }
+                                  %span.editable#user-purpose{ 'data-name' => 'purpose', 'data-value' => "#{ $user_info->purpose }" }
 
                               .profile-info-row
                                 .profile-info-name 상세 대여 목적
                                 .profile-info-value
-                                  %span.editable#user-purpose2{ 'data-name' => 'purpose2', 'data-value' => "#{ $user->user_info->purpose2 }" }
+                                  %span.editable#user-purpose2{ 'data-name' => 'purpose2', 'data-value' => "#{ $user_info->purpose2 }" }
 
                               .profile-info-row
                                 .profile-info-name 대여 희망 색상
                                 .profile-info-value
-                                  %span.editable#user-pre_color{ 'data-name' => 'pre_color', 'data-value' => "#{ $user->user_info->pre_color }" }
+                                  %span.editable#user-pre_color{ 'data-name' => 'pre_color', 'data-value' => "#{ $user_info->pre_color }" }
 
                               .profile-info-row
                                 .profile-info-name 착용 날짜
                                 .profile-info-value
-                                  %span.editable#user-wearon_date{ 'data-name' => 'wearon_date', 'data-value' => "#{ $user->user_info->wearon_date ? $user->user_info->wearon_date->ymd : q{} }" }
+                                  %span.editable#user-wearon_date{ 'data-name' => 'wearon_date', 'data-value' => "#{ $user_info->wearon_date ? $user_info->wearon_date->ymd : q{} }" }
 
                               .profile-info-row
                                 .profile-info-name 대여 희망 품목
                                 .profile-info-value
-                                  %span.editable#user-pre_category{ 'data-name' => 'pre_category', 'data-value' => "#{ $user->user_info->pre_category}" }
+                                  %span.editable#user-pre_category{ 'data-name' => 'pre_category', 'data-value' => "#{ $user_info->pre_category}" }
 
                               - if ($does_wear) {
                                 .profile-info-row
@@ -179,29 +191,29 @@
                                     -   my $value = $ac->{value};
                                       %button.btn.btn-xs{ :class => "btn-#{$class}", "data-name" => $value }= $value
                                     - }
-                                  %span.editable#user-comment{ 'data-name' => 'comment' }= $user->user_info->comment || ''
+                                  %span.editable#user-comment{ 'data-name' => 'comment' }= $user_info->comment || ''
 
                               .profile-info-row
                                 .profile-info-name 키
                                 .profile-info-value
-                                  %span.editable#user-height{ 'data-name' => 'height' }= $user->user_info->height
+                                  %span.editable#user-height{ 'data-name' => 'height' }= $user_info->height
 
                               .profile-info-row
                                 .profile-info-name 몸무게
                                 .profile-info-value
-                                  %span.editable#user-weight{ 'data-name' => 'weight' }= $user->user_info->weight
+                                  %span.editable#user-weight{ 'data-name' => 'weight' }= $user_info->weight
 
                               .profile-info-row.neck
                                 .profile-info-name 목 둘레
                                 .profile-info-value
-                                  %span.editable#user-neck{ 'data-name' => 'neck' }= $user->user_info->neck
+                                  %span.editable#user-neck{ 'data-name' => 'neck' }= $user_info->neck
                                   %span.diff= $diff->{neck}
                                   %span.avg= $avg->{neck}
 
                               .profile-info-row.bust
                                 .profile-info-name 가슴 둘레
                                 .profile-info-value
-                                  %span.editable#user-bust{ 'data-name' => 'bust' }= $user->user_info->bust
+                                  %span.editable#user-bust{ 'data-name' => 'bust' }= $user_info->bust
                                   %span.diff= $diff->{bust}
                                   %span.avg= $avg->{bust}
                                   %span.avg2= $avg2->{bust} || ''
@@ -209,7 +221,7 @@
                               .profile-info-row.waist
                                 .profile-info-name 허리 둘레
                                 .profile-info-value
-                                  %span.editable#user-waist{ 'data-name' => 'waist' }= $user->user_info->waist
+                                  %span.editable#user-waist{ 'data-name' => 'waist' }= $user_info->waist
                                   %span.diff= $diff->{waist}
                                   %span.avg= $avg->{waist}
                                   %span.avg2= $avg2->{waist} || ''
@@ -217,7 +229,7 @@
                               .profile-info-row.topbelly
                                 .profile-info-name 윗배 둘레
                                 .profile-info-value
-                                  %span.editable#user-topbelly{ 'data-name' => 'topbelly' }= $user->user_info->topbelly
+                                  %span.editable#user-topbelly{ 'data-name' => 'topbelly' }= $user_info->topbelly
                                   %span.diff= $diff->{topbelly}
                                   %span.avg= $avg->{topbelly}
                                   %span.avg2= $avg2->{topbelly} || ''
@@ -225,7 +237,7 @@
                               .profile-info-row.belly
                                 .profile-info-name 배꼽 둘레
                                 .profile-info-value
-                                  %span.editable#user-belly{ 'data-name' => 'belly' }= $user->user_info->belly
+                                  %span.editable#user-belly{ 'data-name' => 'belly' }= $user_info->belly
                                   %span.diff= $diff->{belly}
                                   %span.avg= $avg->{belly}
                                   %span.avg2= $avg2->{belly} || ''
@@ -233,28 +245,28 @@
                               .profile-info-row.arm
                                 .profile-info-name 팔 길이
                                 .profile-info-value
-                                  %span.editable#user-arm{ 'data-name' => 'arm' }= $user->user_info->arm
+                                  %span.editable#user-arm{ 'data-name' => 'arm' }= $user_info->arm
                                   %span.diff= $diff->{arm}
                                   %span.avg= $avg->{arm}
 
                               .profile-info-row.leg
                                 .profile-info-name 다리 길이
                                 .profile-info-value
-                                  %span.editable#user-leg{ 'data-name' => 'leg' }= $user->user_info->leg
+                                  %span.editable#user-leg{ 'data-name' => 'leg' }= $user_info->leg
                                   %span.diff= $diff->{leg}
                                   %span.avg= $avg->{leg}
 
                               .profile-info-row.knee
                                 .profile-info-name 무릎 길이
                                 .profile-info-value
-                                  %span.editable#user-knee{ 'data-name' => 'knee' }= $user->user_info->knee
+                                  %span.editable#user-knee{ 'data-name' => 'knee' }= $user_info->knee
                                   %span.diff= $diff->{knee}
                                   %span.avg= $avg->{knee}
 
                               .profile-info-row.thigh
                                 .profile-info-name 허벅지 둘레
                                 .profile-info-value
-                                  %span.editable#user-thigh{ 'data-name' => 'thigh' }= $user->user_info->thigh
+                                  %span.editable#user-thigh{ 'data-name' => 'thigh' }= $user_info->thigh
                                   %span.diff= $diff->{thigh}
                                   %span.avg= $avg->{thigh}
                                   %span.avg2= $avg2->{thigh} || ''
@@ -262,7 +274,7 @@
                               .profile-info-row.hip
                                 .profile-info-name 엉덩이 둘레
                                 .profile-info-value
-                                  %span.editable#user-hip{ 'data-name' => 'hip' }= $user->user_info->hip
+                                  %span.editable#user-hip{ 'data-name' => 'hip' }= $user_info->hip
                                   %span.diff= $diff->{hip}
                                   %span.avg= $avg->{hip}
                                   %span.avg2= $avg2->{hip} || ''
@@ -270,14 +282,14 @@
                               .profile-info-row.foot
                                 .profile-info-name 발 크기
                                 .profile-info-value
-                                  %span.editable#user-foot{ 'data-name' => 'foot' }= $user->user_info->foot
+                                  %span.editable#user-foot{ 'data-name' => 'foot' }= $user_info->foot
                                   %span.diff= $diff->{foot}
                                   %span.avg= $avg->{foot}
 
                               .profile-info-row
                                 .profile-info-name 바지 길이
                                 .profile-info-value
-                                  %span.editable#user-pants{ 'data-name' => 'pants' }= $user->user_info->pants
+                                  %span.editable#user-pants{ 'data-name' => 'pants' }= $user_info->pants
 
                       .space-20
 
