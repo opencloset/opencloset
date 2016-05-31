@@ -93,6 +93,7 @@ sub user {
     my $user = $self->get_user( \%params );
     return unless $user;
 
+    my $user_info             = $user->user_info;
     my $donated_clothes_count = 0;
     $donated_clothes_count += $_->clothes->count for $user->donations;
 
@@ -125,6 +126,7 @@ sub user {
     #
     $self->stash(
         user                  => $user,
+        user_info             => $user_info,
         donated_clothes_count => $donated_clothes_count,
         rented_clothes_count  => $rented_clothes_count,
         avg                   => $data->{avg},
