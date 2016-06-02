@@ -188,7 +188,7 @@ sub search_clothes {
         weight   => $user_info->weight,
         bust     => $user_info->bust || 0,
         waist    => $user_info->waist || 0,
-        topbelly => $user_info->waist || 0,
+        topbelly => $user_info->topbelly || 0,
         thigh    => $user_info->thigh || 0,
         arm      => $user_info->arm || 0,
         leg      => $user_info->leg || 0,
