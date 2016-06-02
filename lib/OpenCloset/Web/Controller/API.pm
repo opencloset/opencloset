@@ -3,9 +3,12 @@ use Mojo::Base 'Mojolicious::Controller';
 
 use DateTime;
 use Encode qw/decode_utf8/;
+use Mojo::JSON qw/encode_json/;
 use Postcodify;
 use String::Random;
 use Try::Tiny;
+
+use OpenCloset::Size::Guess;
 
 has DB => sub { shift->app->DB };
 
@@ -292,7 +295,153 @@ sub api_delete_user {
     $self->respond_to( json => { status => 200, json => \%data } );
 }
 
-=head2 user_list
+=head2 api_search_clothes_user
+
+    GET /api/user/:id/search_clothes
+
+=cut
+
+sub api_search_clothes_user {
+    my $self = shift;
+    my $id   = $self->param('id');
+
+    my $user = $self->get_user( { id => $id } );
+    return $self->error( 404, { str => "User not found: $id" } ) unless $user;
+
+    my $user_info = $user->user_info;
+    my $weight    = $user_info->weight;
+    my $height    = $user_info->height;
+
+    return $self->error( 400, { str => 'Height is reuired' } )  unless $height;
+    return $self->error( 400, { str => 'Weight is required' } ) unless $weight;
+
+    my $gender   = $user_info->gender;
+    my $bust     = $user_info->bust || 0;
+    my $waist    = $user_info->waist || 0;
+    my $topbelly = $user_info->topbelly || 0;
+    my $thigh    = $user_info->thigh || 0;
+    my $arm      = $user_info->arm || 0;
+    my $leg      = $user_info->leg || 0;
+
+    my $guesser = OpenCloset::Size::Guess->new(
+        'OpenCPU::RandomForest',
+        gender    => $gender,
+        height    => $height,
+        weight    => $weight,
+        _bust     => $bust,
+        _waist    => $waist,
+        _topbelly => $topbelly,
+        _thigh    => $thigh,
+        _arm      => $arm,
+        _leg      => $leg,
+    );
+
+    my $measurement = $self->measurement2text($user);
+    $self->log->info("User measurements: $measurement");
+
+    my $guess = $guesser->guess;
+    return $self->error( 500, { str => "Guess failed: $guess->{reason}" } )
+        unless $guess->{success};
+
+    $self->log->info( "guess: " . encode_json($guess) );
+
+    my $config     = $self->config->{'user-id-search-clothes'}{$gender};
+    my $upper_name = $config->{upper_name};
+    my $lower_name = $config->{lower_name};
+
+    my %between;
+    for my $part ( keys %$guess ) {
+        next unless exists $config->{range_rules}{$part};
+        my $fn = $config->{range_rules}{$part};
+        $between{$part} = [ $fn->( $guess->{$part} ) ];
+    }
+    $self->log->info( "between: " . encode_json( {%between} ) );
+
+    my $clothes_rs = $self->DB->resultset('Clothes')->search(
+        {
+            'category' => { '-in' => [ $upper_name, $lower_name ] },
+            'gender'   => $gender,
+            'order_details.order_id' => { '!=' => undef },
+        },
+        {
+            join  => 'order_details', '+select' => ['order_details.order_id'],
+            '+as' => ['order_id'],
+        }
+    );
+
+    my ( %order_pair, %pair_count, %pair );
+    while ( my $clothes = $clothes_rs->next ) {
+        my $order_id = $clothes->get_column('order_id');
+        my $category = $clothes->get_column('category');
+        my $code     = $clothes->get_column('code');
+
+        $order_pair{$order_id}{$category} = $code;
+    }
+
+    while ( my ( $order_id, $pair ) = each %order_pair ) {
+        ## upper: top(jacket), lower: bottom(pants, skirt)
+        my ( $upper_code, $lower_code ) = ( $pair->{$upper_name}, $pair->{$lower_name} );
+        next unless $upper_code;
+        next unless $lower_code;
+        next unless keys %{$pair} == 2;
+
+        $pair_count{$upper_code}{$lower_code}++;
+    }
+
+    for my $upper_code ( keys %pair_count ) {
+        my $upper = $pair_count{$upper_code};
+        my ($highest_rent_lower_code) = sort { $upper->{$b} <=> $upper->{$a} } keys %$upper;
+        $pair{$upper_code} = {
+            $upper_name => $upper_code,
+            $lower_name => $highest_rent_lower_code,
+            count       => $pair_count{$upper_code}{$highest_rent_lower_code},
+        };
+    }
+
+    my $upper_rs = $self->DB->resultset('Clothes')->search(
+        {
+            category    => $upper_name,
+            gender      => $gender,
+            'status.id' => 1,
+            map { $_ => { -between => $between{$_} } } @{ $config->{upper_params} }
+        },
+        { prefetch => [ { 'donation' => 'user' }, 'status' ] }
+    );
+
+    my $lower_rs = $self->DB->resultset('Clothes')->search(
+        {
+            'category'  => $lower_name,
+            'gender'    => $gender,
+            'status.id' => 1,
+            map { $_ => { -between => $between{$_} } } @{ $config->{lower_params} }
+        },
+        { prefetch => [ { 'donation' => 'user' }, 'status' ] }
+    );
+
+    my @lower_codes;
+    map { push @lower_codes, $_->code } $lower_rs->all;
+
+    my @result;
+    while ( my $upper = $upper_rs->next ) {
+        my $upper_code = $upper->code;
+        next unless $pair{$upper_code};
+
+        my $lower_code = $pair{$upper_code}{$lower_name};
+        next unless $lower_code;
+        next unless "@lower_codes" =~ m/\b$lower_code\b/;
+
+        my $count = $pair{$upper_code}{count};
+        push @result, [ $upper_code, $lower_code, $count ];
+    }
+
+    @result = sort { $b->[2] <=> $a->[2] } @result;
+    my $json_result = encode_json( [@result] );
+    $self->log->info("guess result: $json_result");
+
+    $self->respond_to( json => { json => \@result } );
+}
+
+=head2 api_user_list
 
     GET /api/user-list
 
