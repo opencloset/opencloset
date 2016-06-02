@@ -209,12 +209,7 @@ sub search_clothes {
         _arm      => $params{arm},
         _leg      => $params{leg},
     );
-    $self->app->log->info(
-        "guess parameter : "
-            . encode_json(
-            { @params{qw/gender height weight bust waist topbelly thigh arm leg/} }
-            )
-    );
+    $self->app->log->info( "guess params : " . encode_json( { user_id => $id,  %params } ));
 
     my $result = $guesser->guess;
 
@@ -223,7 +218,7 @@ sub search_clothes {
 
     my %guess = map { $_ => $result->{$_} } grep { $result->{$_} } keys %{$result};
 
-    $self->app->log->info( "guess result : " . encode_json( \%guess ) );
+    $self->app->log->info( "guess result size : " . encode_json( \%guess ) );
     #
     # fetch clothes
     #
@@ -238,7 +233,7 @@ sub search_clothes {
         next unless exists $config->{range_rules}{$k};
         $guess_range{$k} = [ &{ $config->{range_rules}{$k} }( $guess{$k} ) ];
     }
-    $self->app->log->info( "guess range : " . encode_json( \%guess_range ) );
+    $self->app->log->info( "guess filter range : " . encode_json( \%guess_range ) );
 
     my $rent_pair = $self->DB->resultset('Clothes')->search(
         {
@@ -325,7 +320,8 @@ sub search_clothes {
     @result = sort { $b->[4] <=> $a->[4] } @result;
 
     $self->app->log->info(
-        "guess result : " . encode_json( [ map { [ @{$_}[ 0, 1, 4 ] ] } @result ] ) );
+        "guess result list : " . encode_json( [ map { [ @{$_}[ 0, 1, 4 ] ] } @result ] ) );
+    $self->app->log->info( "guess result list count : " . scalar @result);
 
     $self->render(
         result => \@result,
