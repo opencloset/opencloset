@@ -312,7 +312,7 @@ sub api_search_clothes_user {
     my $weight    = $user_info->weight;
     my $height    = $user_info->height;
 
-    return $self->error( 400, { str => 'Height is reuired' } )  unless $height;
+    return $self->error( 400, { str => 'Height is required' } ) unless $height;
     return $self->error( 400, { str => 'Weight is required' } ) unless $weight;
 
     my $gender   = $user_info->gender;
