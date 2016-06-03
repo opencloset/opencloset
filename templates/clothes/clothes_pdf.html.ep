@@ -100,9 +100,58 @@
       var result = chars[0] + chars[1] + " - " + chars[2] + chars[3];
       return result;
     };
+
+    charScreenWidth = function(ch) {
+      var charCode;
+      if (ch === null || ch.length === 0) {
+        return 0;
+      }
+      charCode = ch.charCodeAt(0);
+      if (charCode <= 0x00007F) {
+        return 1;
+      }
+      if (charCode <= 0x0007FF) {
+        return 2;
+      }
+      if (charCode <= 0x00FFFF) {
+        return 2;
+      }
+      return 2;
+    };
+
+    strScreenWidth = function(str) {
+      var i, size, _i, _ref;
+      if (str === null || str.length === 0) {
+        return 0;
+      }
+      size = 0;
+      for (i = _i = 0, _ref = str.length; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
+        size += charScreenWidth(str.charAt(i));
+      }
+      return size;
+    };
   % end
 
   %= javascript begin
+    var colorStr = colorToStr("<%= $color %>");
+
+    var donationUserName = "<%= $clothes->donation->user->name =~ s/"/_/gr; %>";
+    var _ref = donationUserName.split("");
+    var wrappedDonationUserName = "";
+    var _lastLineScreenWidth = 0;
+    for (var _i = 0, _len = _ref.length; _i < _len; _i++) {
+      var ch = _ref[_i];
+      var chScreenWidth = strScreenWidth(ch);
+      if ( _lastLineScreenWidth + chScreenWidth > 15 ) {
+        wrappedDonationUserName += "\n" + ch;
+        _lastLineScreenWidth = chScreenWidth;
+      }
+      else {
+        wrappedDonationUserName += ch;
+        _lastLineScreenWidth += chScreenWidth;
+      }
+    }
+
     var fontDefinition = {
       D2Coding: {
         normal: "D2Coding.ttf",
@@ -125,7 +174,7 @@
         11, // left
         94, // top
         11, // right
-        60  // bottom
+        20  // bottom
       ],
       background: { image: "<%= $background %>" },
       defaultStyle: {
@@ -165,6 +214,10 @@
         tableBodyColor: {
           font: "D2Coding",
           fontSize: 15
+        },
+        tableBodyColorLong: {
+          font: "D2Coding",
+          fontSize: 13
         }
       },
       content: [
@@ -208,7 +261,7 @@
               ],
               [
                 { style: "tableBody", alignment: "center", text: "색상"   },
-                { style: "tableBodyColor", alignment: "center", text: colorToStr("<%= $color %>") }
+                { style: colorStr.length < 5 ? "tableBodyColor" : "tableBodyColorLong", alignment: "center", text: colorStr }
               ],
               [
                 { style: "tableBody", alignment: "center", text: "가슴" },
@@ -251,7 +304,7 @@
                   text: [
                     { text: "기증자\n", style: "tableFooter" },
                     { text: " \n", style: "tableFooterSpace" },
-                    { text: "<%= $clothes->donation->user->name %>", style: "tableFooterName" }
+                    { text: wrappedDonationUserName, style: "tableFooterName" }
                   ],
                   colSpan: 2,
                   alignment: "center"

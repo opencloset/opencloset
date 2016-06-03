@@ -205,6 +205,7 @@ sub _private_routes {
     $api->get('/user/:id')->to('API#api_get_user');
     $api->put('/user/:id')->to('API#api_update_user');
     $api->delete('/user/:id')->to('API#api_delete_user');
+    $api->get('/user/:id/search/clothes')->to('API#api_search_clothes_user');
     $api->get('/user-list')->to('API#api_user_list');
 
     $api->post('/order')->to('API#api_create_order');
