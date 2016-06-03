@@ -192,15 +192,16 @@ sub _public_routes_visit {
 
 sub _private_routes {
     my $self = shift;
-    my $r    = $self->routes->under('/')->to('user#auth');
+    my $root = $self->routes;
 
-    my $csv = $r->under('/csv');
+    my $r   = $root->under('/')->to('user#auth');
+    my $csv = $root->under('/csv')->to('user#auth');
     $csv->get('/user')->to('CSV#user');
     $csv->get('/clothes')->to('CSV#clothes');
 
     ## Add prerix `api_` to all API controller methods
     ## to prevent deep recusion with helpers
-    my $api = $r->under('/api');
+    my $api = $root->under('/api')->to('user#auth');
     $api->post('/user')->to('API#api_create_user');
     $api->get('/user/:id')->to('API#api_get_user');
     $api->put('/user/:id')->to('API#api_update_user');
@@ -268,7 +269,8 @@ sub _private_routes {
 
     $r->get('/user')->to('user#index');
     $r->get('/user/:id')->to('user#user');
-    $r->get('/user/:id/search/clothes')->to('user#search_clothes');
+    ## for prevent deep recusion with helper 'search_clothes'
+    $r->get('/user/:id/search/clothes')->to('user#user_search_clothes');
 
     $r->get('/new-clothes')->to('clothes#add');
     $r->get('/clothes')->to('clothes#index');
