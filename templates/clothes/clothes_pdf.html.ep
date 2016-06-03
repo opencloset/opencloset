@@ -127,7 +127,7 @@
         11, // left
         94, // top
         11, // right
-        60  // bottom
+        20  // bottom
       ],
       background: { image: "<%= $background %>" },
       defaultStyle: {
