@@ -209,7 +209,8 @@ sub search_clothes {
         _arm      => $params{arm},
         _leg      => $params{leg},
     );
-    $self->app->log->info( "guess params : " . encode_json( { user_id => $id,  %params } ));
+    $self->app->log->info(
+        "guess params : " . encode_json( { user_id => $id, %params } ) );
 
     my $result = $guesser->guess;
 
@@ -321,7 +322,7 @@ sub search_clothes {
 
     $self->app->log->info(
         "guess result list : " . encode_json( [ map { [ @{$_}[ 0, 1, 4 ] ] } @result ] ) );
-    $self->app->log->info( "guess result list count : " . scalar @result);
+    $self->app->log->info( "guess result list count : " . scalar @result );
 
     $self->render(
         result => \@result,
