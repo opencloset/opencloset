@@ -310,41 +310,41 @@ sub api_search_clothes_user {
     return $self->error( 404, { str => "User not found: $id" } ) unless $user;
 
     my $user_info = $user->user_info;
-    my $weight    = $user_info->weight;
-    my $height    = $user_info->height;
+    my %params = (
+        gender   => $user_info->gender,
+        height   => $user_info->height,
+        weight   => $user_info->weight,
+        bust     => $user_info->bust || 0,
+        waist    => $user_info->waist || 0,
+        topbelly => $user_info->topbelly || 0,
+        thigh    => $user_info->thigh || 0,
+        arm      => $user_info->arm || 0,
+        leg      => $user_info->leg || 0,
+    );
 
-    return $self->error( 400, { str => 'Height is required' } ) unless $height;
-    return $self->error( 400, { str => 'Weight is required' } ) unless $weight;
-
-    my $gender   = $user_info->gender;
-    my $bust     = $user_info->bust || 0;
-    my $waist    = $user_info->waist || 0;
-    my $topbelly = $user_info->topbelly || 0;
-    my $thigh    = $user_info->thigh || 0;
-    my $arm      = $user_info->arm || 0;
-    my $leg      = $user_info->leg || 0;
+    return $self->error( 400, { str => 'Height is required' } ) unless $params{height};
+    return $self->error( 400, { str => 'Weight is required' } ) unless $params{weight};
 
     my $guesser = OpenCloset::Size::Guess->new(
         'OpenCPU::RandomForest',
-        gender    => $gender,
-        height    => $height,
-        weight    => $weight,
-        _bust     => $bust,
-        _waist    => $waist,
-        _topbelly => $topbelly,
-        _thigh    => $thigh,
-        _arm      => $arm,
-        _leg      => $leg,
+        gender    => $params{gender},
+        height    => $params{height},
+        weight    => $params{weight},
+        _bust     => $params{bust},
+        _waist    => $params{waist},
+        _topbelly => $params{topbelly},
+        _thigh    => $params{thigh},
+        _arm      => $params{arm},
+        _leg      => $params{leg},
     );
+    $self->log->info( "guess params : " . encode_json( { user_id => $id,  %params } ));
 
-    my $measurement = $self->measurement2text($user);
-    $self->log->info("User measurements: $measurement");
-
+    my $gender = $params{gender};
     my $guess = $guesser->guess;
     return $self->error( 500, { str => "Guess failed: $guess->{reason}" } )
         unless $guess->{success};
 
-    $self->log->info( "guess: " . encode_json($guess) );
+    $self->log->info( "guess result size : " . encode_json( $guess ) );
 
     my $config     = $self->config->{'user-id-search-clothes'}{$gender};
     my $upper_name = $config->{upper_name};
@@ -356,7 +356,7 @@ sub api_search_clothes_user {
         my $fn = $config->{range_rules}{$part};
         $between{$part} = [ $fn->( $guess->{$part} ) ];
     }
-    $self->log->info( "between: " . encode_json( {%between} ) );
+    $self->log->info( "guess filter range : " . encode_json( \%between ) );
 
     my $clothes_rs = $self->DB->resultset('Clothes')->search(
         {
@@ -437,7 +437,9 @@ sub api_search_clothes_user {
 
     @result = sort { $b->[2] <=> $a->[2] } @result;
     my $json_result = encode_json( [@result] );
-    $self->log->info("guess result: $json_result");
+
+    $self->log->info( "guess result list : $json_result" );
+    $self->log->info( "guess result list count : " . scalar @result);
 
     $self->respond_to( json => { json => \@result } );
 }
