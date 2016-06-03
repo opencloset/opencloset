@@ -3,6 +3,7 @@ use Mojo::Base 'Mojolicious::Controller';
 
 use DateTime;
 use Encode qw/decode_utf8/;
+use List::Util qw/any/;
 use Mojo::JSON qw/encode_json/;
 use Postcodify;
 use String::Random;
@@ -428,7 +429,7 @@ sub api_search_clothes_user {
 
         my $lower_code = $pair{$upper_code}{$lower_name};
         next unless $lower_code;
-        next unless "@lower_codes" =~ m/\b$lower_code\b/;
+        next unless any { $_ eq $lower_code } @lower_codes;
 
         my $count = $pair{$upper_code}{count};
         push @result, [ $upper_code, $lower_code, $count ];
