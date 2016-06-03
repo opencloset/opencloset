@@ -317,6 +317,27 @@ sub clothes_pdf {
         $cuff          = $clothes_bottom->cuff;
     }
 
+    #
+    # 의류 태그 PDF 출력시 코트와 원피스의 코드 및 사이즈 내역이 표기되지 않음 (#843)
+    #
+    {
+        use experimental qw( smartmatch );
+
+        if ( $clothes->category ~~ [ "onepiece", "coat" ] ) {
+            $bust          = $clothes->bust;
+            $topbelly      = $clothes->topbelly;
+            $length_top    = $clothes->length;
+            $arm           = $clothes->arm;
+            $waist         = $clothes->waist;
+            $hip           = $clothes->hip;
+            $thigh         = $clothes->thigh;
+            $length_bottom = $clothes->length;
+            $cuff          = $clothes->cuff;
+
+            $clothes_top = $clothes;
+        }
+    }
+
     $bust          ||= "-";
     $topbelly      ||= "-";
     $length_top    ||= "-";
