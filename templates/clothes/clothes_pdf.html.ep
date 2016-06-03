@@ -103,6 +103,8 @@
   % end
 
   %= javascript begin
+    var colorStr = colorToStr("<%= $color %>");
+
     var fontDefinition = {
       D2Coding: {
         normal: "D2Coding.ttf",
@@ -165,6 +167,10 @@
         tableBodyColor: {
           font: "D2Coding",
           fontSize: 15
+        },
+        tableBodyColorLong: {
+          font: "D2Coding",
+          fontSize: 13
         }
       },
       content: [
@@ -208,7 +214,7 @@
               ],
               [
                 { style: "tableBody", alignment: "center", text: "색상"   },
-                { style: "tableBodyColor", alignment: "center", text: colorToStr("<%= $color %>") }
+                { style: colorStr.length < 5 ? "tableBodyColor" : "tableBodyColorLong", alignment: "center", text: colorStr }
               ],
               [
                 { style: "tableBody", alignment: "center", text: "가슴" },
