@@ -198,14 +198,13 @@
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
-          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
           <h4 class="modal-title" id="rentalModalLabel">
             대여 희망 항목과 포장 항목 확인
           </h4>
         </div>
         <div class="modal-body" style="height: 300px; overflow-y: auto;">
           <div>
-            <strong>대여 희망 항목과 포장 항목을 다시 한 번 확인합니다. 주의해서 확인한 후 진행해주세요.</strong>
+            <strong>대여 희망 항목과 포장 항목을 다시 한 번 확인합니다.</strong>
           </div>
           <div class="space-4"></div>
           <div>
@@ -218,13 +217,27 @@
           </div>
           <div class="space-4"></div>
           <div class="rental-caution"></div>
-          <div>
-            대여를 계속 진행할까요?
+          <div class="rental-match">
+            <p>
+              대여 희망 항목과 포장 항목이 일치합니다.
+            </p>
+            <p class="rental-emphasis">
+              대여 품목에 변화가 없는 경우 대여를 계속 진행해주세요.
+            </p>
+          </div>
+          <div class="rental-unmatch">
+            <p class="rental-emphasis">
+              대여를 계속 진행할까요?
+            </p>
+            <p>
+              ※ 한 번 더 포장 항목을 확인한 후 정확하다면 <strong>대여 진행</strong> 버튼을 눌러 대여를 계속 진행해주세요.
+              포장에 문제가 있다면 <strong>대여 취소</strong> 버튼을 눌러 다시 대여 항목과 대여자를 확인하신 후 대여를 진행해주세요.
+            </p>
           </div>
         </div>
         <div class="modal-footer">
-          <button id="btn-rental-modal-cancel" type="button" class="btn btn-danger" >취소</button>
-          <button id="btn-rental-modal-ok"     type="button" class="btn btn-primary">확인</button>
+          <button id="btn-rental-modal-cancel" type="button" class="btn btn-danger" >대여 취소</button>
+          <button id="btn-rental-modal-ok"     type="button" class="btn btn-primary">대여 진행</button>
         </div>
       </div>
     </div>

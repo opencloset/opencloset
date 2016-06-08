@@ -116,6 +116,11 @@ $ ->
 
     if pre_category != post_category
       $("#modal-rental .rental-caution").html("대여 희망 항목과 포장 항목이 서로 다릅니다!")
+      $(".rental-match").hide()
+      $(".rental-unmatch").show()
+    else
+      $(".rental-match").show()
+      $(".rental-unmatch").hide()
 
     pre_category_str  = ( OpenCloset.category[i].str for i in pre_category.split(",")  ).join(",")
     post_category_str = ( OpenCloset.category[i].str for i in post_category.split(",") ).join(",")
@@ -129,6 +134,9 @@ $ ->
   $("#btn-rental-modal-cancel").click (e) ->
     $("#modal-rental .pre_category").html("")
     $("#modal-rental .post_category").html("")
+    $("#modal-rental .rental-caution").html("")
+    $(".rental-match").hide()
+    $(".rental-unmatch").hide()
     $("input[name=id]:checked").prop("checked", false)
     $("#modal-rental").modal("hide")
 
@@ -138,7 +146,11 @@ $ ->
   $("#btn-rental-modal-ok").click (e) ->
     $("#modal-rental .pre_category").html("")
     $("#modal-rental .post_category").html("")
+    $("#modal-rental .rental-caution").html("")
+    $(".rental-match").hide()
+    $(".rental-unmatch").hide()
     $("#modal-rental").modal("hide")
+    return
     $('#order-form').submit()
 
   #
