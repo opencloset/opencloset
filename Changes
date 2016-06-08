@@ -1,3 +1,4 @@
+  - 포장 시 대여 희망 항목과 실제 포장 항목이 다를 경우 확인할 수 있게 함 (#762)
   - 사용자 의류검색 api 추가 (#800)
   - 잘못된 routing 으로 인한 중복된 auth 제거
   - Add helper `search_clothes`
