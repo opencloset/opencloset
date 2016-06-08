@@ -56,6 +56,7 @@
         - for my $order ( $order_rs->all ) {
         -   my $user = $order->user;
         -   my $order_id = $order->id;
+        -   my $pre_category = $user->user_info->pre_category;
           %tr{ 'data-order-id' => "#{ $order->id }" }
             %td.center
               %label
@@ -79,7 +80,7 @@
                 %button.btn.btn-default.btn-wearing.btn-sm{:type => 'button'} 안입고감
               - }
             %td
-              %span.pre_category= $user->user_info->pre_category  || ''
+              %span.pre_category{ "data-pre-category" => "#{ $pre_category }" }= $pre_category  || ''
         - }
 
 :plain
@@ -141,7 +142,7 @@
 
 :plain
   <script id="tpl-row-checkbox-readonly-without-order" type="text/html">
-    <tr class="row-checkbox" data-clothes-code="<%= code %>">
+    <tr class="row-checkbox" data-clothes-code="<%= code %>" data-category="<%= category %>">
       <td class="center">
         <label>
           <input class="ace" type="checkbox" readonly="readonly">
@@ -167,7 +168,7 @@
     <tr class="row-checkbox" data-clothes-code="<%= code %>">
       <td class="center">
         <label>
-          <input class="ace" type="checkbox" name="clothes_code" value="<%= code %>" data-clothes-code="<%= code %>" checked="checked">
+          <input class="ace" type="checkbox" name="clothes_code" value="<%= code %>" data-clothes-code="<%= code %>" data-category="<%= category %>" checked="checked">
           <span class="lbl"></span>
         </label>
       </td>
@@ -191,3 +192,40 @@
       연장료 <%= OpenCloset.commify(order.late_fee) %>원 = <%= OpenCloset.commify(order.clothes_price) %>원 x <%= order.overdue %>일 x 20%
     </span>
   </script>
+
+:plain
+  <div id="modal-rental" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="rentalModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h4 class="modal-title" id="rentalModalLabel">
+            대여 희망 항목과 포장 항목 확인
+          </h4>
+        </div>
+        <div class="modal-body" style="height: 300px; overflow-y: auto;">
+          <div>
+            <strong>대여 희망 항목과 포장 항목을 다시 한 번 확인합니다. 주의해서 확인한 후 진행해주세요.</strong>
+          </div>
+          <div class="space-4"></div>
+          <div>
+            대여 희망 항목:
+            <span class="pre_category"></span>
+          </div>
+          <div>
+            포장 항목:
+            <span class="post_category"></span>
+          </div>
+          <div class="space-4"></div>
+          <div class="rental-caution"></div>
+          <div>
+            대여를 계속 진행할까요?
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button id="btn-rental-modal-cancel" type="button" class="btn btn-danger" >취소</button>
+          <button id="btn-rental-modal-ok"     type="button" class="btn btn-primary">확인</button>
+        </div>
+      </div>
+    </div>
+  </div>

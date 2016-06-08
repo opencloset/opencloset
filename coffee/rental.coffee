@@ -98,6 +98,47 @@ $ ->
     return OpenCloset.alert('danger', '대여할 주문서를 선택해 주세요') unless order
     return OpenCloset.alert('danger', '대여할 옷을 선택해 주세요.')    unless clothes
 
+    $("#modal-rental").modal('show')
+
+  #
+  # 대여 모달이 열릴 때
+  #
+  $("#modal-rental").on "show.bs.modal", (e) ->
+    order = $('input[name=id]:checked').val()
+
+    category = []
+    $('input[name=clothes_code]:checked').each (i, el) ->
+      return if $(el).attr('id') is 'input-check-all'
+      category.push($(el).data('category'))
+
+    pre_category  = $("tr[data-order-id=#{order}] td span.pre_category").data("pre-category").split(",").sort().join(",")
+    post_category = category.sort().join(",")
+
+    if pre_category != post_category
+      $("#modal-rental .rental-caution").html("대여 희망 항목과 포장 항목이 서로 다릅니다!")
+
+    pre_category_str  = ( OpenCloset.category[i].str for i in pre_category.split(",")  ).join(",")
+    post_category_str = ( OpenCloset.category[i].str for i in post_category.split(",") ).join(",")
+
+    $("#modal-rental .pre_category").html(pre_category_str)
+    $("#modal-rental .post_category").html(post_category_str)
+
+  #
+  # 대여 모달에서 대여 취소
+  #
+  $("#btn-rental-modal-cancel").click (e) ->
+    $("#modal-rental .pre_category").html("")
+    $("#modal-rental .post_category").html("")
+    $("input[name=id]:checked").prop("checked", false)
+    $("#modal-rental").modal("hide")
+
+  #
+  # 대여 모달에서 대여 진행
+  #
+  $("#btn-rental-modal-ok").click (e) ->
+    $("#modal-rental .pre_category").html("")
+    $("#modal-rental .post_category").html("")
+    $("#modal-rental").modal("hide")
     $('#order-form').submit()
 
   #
@@ -128,10 +169,11 @@ $ ->
   $("#clothes-table table tbody").on 'click', 'input[type=checkbox][readonly=readonly]', (e) ->
     e.preventDefault()
 
-    return unless confirm "대여가능상태로 변경하시겠습니까?"
+    return unless confirm "대여가능 상태로 변경하시겠습니까?"
 
     $this = $(@)
     clothes_code = $this.closest('tr').data('clothes-code')
+    category = $this.closest('tr').data('category')
     $.ajax "/api/clothes/#{clothes_code}",
       type: 'PUT'
       data: { status_id: OpenCloset['status']['대여가능']['id'] }
@@ -139,7 +181,7 @@ $ ->
       success: (data, textStatus, jqXHR) ->
         OpenCloset.alert 'info', "#{clothes_code} 의류 상태가 대여가능으로 변경되었습니다"
         $this.closest('td').nextAll().slice(2, 3).find('span').text('대여가능').removeClass('label-inverse').addClass(OpenCloset.status["대여가능"].css)
-        $this.data('clothes-code', clothes_code).prop('value', clothes_code).prop('name', 'clothes_code').prop('checked', true)
+        $this.data('clothes-code', clothes_code).data('category', category).prop('value', clothes_code).prop('name', 'clothes_code').prop('checked', true)
         $('#action-buttons').show()
       error: (jqXHR, textStatus, errorThrown) ->
         OpenCloset.alert('danger', "의류 상태변경에 실패했습니다: #{jqXHR.responseJSON.error.str}")
