@@ -150,7 +150,6 @@ $ ->
     $(".rental-match").hide()
     $(".rental-unmatch").hide()
     $("#modal-rental").modal("hide")
-    return
     $('#order-form').submit()
 
   #
