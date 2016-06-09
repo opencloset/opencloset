@@ -308,8 +308,9 @@ sub api_search_clothes_user {
     my $result = $self->search_clothes($id);
     return $self->render unless $result;
 
+    my $guess = shift @$result;
     my @result = map { [ @{$_}[ 0, 1, 4 ] ] } @$result;
-    $self->respond_to( json => { json => [@result] } );
+    $self->respond_to( json => { json => { guess => $guess, result => [@result] } } );
 }
 
 =head2 api_user_list

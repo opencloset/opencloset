@@ -2077,10 +2077,11 @@ sub search_clothes {
     }
 
     @result = sort { $b->[4] <=> $a->[4] } @result;
-
     $self->log->info(
         "guess result list : " . encode_json( [ map { [ @{$_}[ 0, 1, 4 ] ] } @result ] ) );
     $self->log->info( "guess result list count : " . scalar @result );
+
+    unshift @result, $guess;
     return \@result;
 }
 

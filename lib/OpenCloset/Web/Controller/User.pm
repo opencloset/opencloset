@@ -179,6 +179,7 @@ sub user_search_clothes {
     my $result = $self->search_clothes($id);
     return $self->render unless $result;
 
+    shift @$result; # throw away guess param
     $self->render( result => $result );
 }
 
