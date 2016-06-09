@@ -294,7 +294,7 @@ sub api_delete_user {
 
 =head2 api_search_clothes_user
 
-    GET /api/user/:id/search_clothes
+    GET /api/user/:id/search/clothes
 
 =cut
 
