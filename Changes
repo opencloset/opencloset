@@ -1,3 +1,4 @@
+v1.7.4    Thu, 09 Jun 2016 14:50:54 +0900
   - 사용자 의류검색 api 추가 (#800)
   - 잘못된 routing 으로 인한 중복된 auth 제거
   - Add helper `search_clothes`
