@@ -14,7 +14,7 @@ sub run {
     return pod2usage(0) if $opts->{help};
     return pod2usage(0) unless @args;
 
-    my $plaintext   = 'abcde';
+    my $plaintext   = $args[0];
     my $hex_key     = $ENV{OPENCLOSET_EVENT_SEOUL_KEY} || 'A' x 32;
     my $key         = pack( 'H*', $hex_key );
     my $m           = Crypt::Mode::ECB->new('AES');
