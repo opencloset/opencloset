@@ -8,6 +8,8 @@
 %     "red-white.png"    when "offline-female";
 %     "green-white.png"  when "online-male";
 %     "orange-white.png" when "online-female";
+%     "white-white.png"  when "offline-male-summer";
+%     "gray-white.png"   when "offline-male-winter";
 %     default { "blank.png" }
 %   }
 % };
