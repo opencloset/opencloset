@@ -35,12 +35,14 @@ sub seoul {
             error => '잘못된 요청입니다 - MberSn 이 없습니다' );
     }
 
+    my $tz = $self->config->{timezone};
+
     my $endDate = DateTime->new(
-        year   => 2016, month => 12, day => 30, hour => 23, minute => 59,
-        second => 59
+        year   => 2016, month     => 12, day => 30, hour => 23, minute => 59,
+        second => 59,   time_zone => $tz,
     );
 
-    if ( $endDate->epoch < DateTime->now->epoch ) {
+    if ( $endDate->epoch < DateTime->now( time_zone => $tz )->epoch ) {
         return $self->render(
             error => '이벤트가 종료되었습니다 - 이벤트 기간 종료' );
     }

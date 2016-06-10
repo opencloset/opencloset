@@ -29,6 +29,46 @@
           </form>
         </div>
         <hr>
+
+        <table class="table table-striped table-bordered table-hover">
+          <thead>
+            <tr>
+              <th>월별</th>
+              <th>열린옷장 방문인원</th>
+              <th>열린옷장 미방문인원</th>
+              <th>취업날개 방문인원</th>
+              <th>취업날개 미방문인원</th>
+            </tr>
+          </thead>
+          <tbody>
+            % my %sum;
+            % for my $ym (reverse sort keys %{ $counts->{monthly} }) {
+            % my $opencloset_visited = $counts->{monthly}{$ym}{opencloset}{visited} || 0;
+            % my $opencloset_not_visited = $counts->{monthly}{$ym}{opencloset}{not_visited} || 0;
+            % my $events_visited = $counts->{monthly}{$ym}{events}{visited} || 0;
+            % my $events_not_visited = $counts->{monthly}{$ym}{events}{not_visited} || 0;
+            % $sum{opencloset}{visited} += $opencloset_visited;
+            % $sum{opencloset}{not_visited} += $opencloset_not_visited;
+            % $sum{events}{visited} += $events_visited;
+            % $sum{events}{not_visited} += $events_not_visited;
+            <tr>
+              <td><%= $ym %></td>
+              <td><samp><%= $opencloset_visited %></samp></td>
+              <td><samp><%= $opencloset_not_visited %></samp></td>
+              <td><samp><%= $events_visited %></samp></td>
+              <td><samp><%= $events_not_visited %></samp></td>
+            </tr>
+            % }
+            <tr>
+              <th>합계</th>
+              <td><samp><%= $sum{opencloset}{visited} %></samp></td>
+              <td><samp><%= $sum{opencloset}{not_visited} %></samp></td>
+              <td><samp><%= $sum{events}{visited} %></samp></td>
+              <td><samp><%= $sum{events}{not_visited} %></samp></td>
+            </tr>
+          </tbody>
+        </table>
+
         <table class="table table-striped table-bordered table-hover">
           <thead>
             <tr>
