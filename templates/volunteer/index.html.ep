@@ -27,10 +27,12 @@
         % my $done = $work->done_1365;
         % my $from = $work->activity_from_date;
         % my $to   = $work->activity_to_date;
+        % my $org_username = $work->org_username || '';
         % my $duration = $to - $from;
         % my $hours = $duration->hours;
         % $hours-- if $hours >= 8;
         <p class="pull-right">
+          <small><%= $org_username %></small>
           <button type="button" data-work-id="<%= $work->id %>" data-1365="<%= $done %>" class="btn btn-xs btn-1365 btn-<%= $done == 1 ? 'success' : $done == 0 ? 'danger' : 'default' %>">
             1365
             %= $hours . '시간'
