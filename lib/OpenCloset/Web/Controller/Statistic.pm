@@ -762,6 +762,63 @@ sub events_seoul {
     my %counts;
     my %dates;
     my $storage = $self->DB->storage;
+
+    ## 월별 열린옷장 방문
+    my $monthly_visited = $storage->dbh_do(
+        sub {
+            my ( $storage, $dbh, @args ) = @_;
+            $dbh->selectall_arrayref(
+                qq{SELECT DATE_FORMAT(b.date, '%Y-%m') AS ym, count(*) AS visited
+FROM `order` o JOIN booking b ON o.booking_id = b.id
+WHERE o.status_id NOT IN (12, 14) AND b.date >= '2016-04-01' GROUP BY DATE_FORMAT(b.date, '%Y-%m')}
+            );
+        }
+    );
+
+    for my $row (@$monthly_visited) {
+        my ( $ym, $c ) = @$row;
+        $counts{monthly}{$ym}{opencloset}{visited} = $c;
+    }
+
+    ## 월별 열린옷장 미방문
+    my $monthly_not_visited = $storage->dbh_do(
+        sub {
+            my ( $storage, $dbh, @args ) = @_;
+            $dbh->selectall_arrayref(
+                qq{SELECT DATE_FORMAT(b.date, '%Y-%m') AS ym, count(*) AS not_visited
+FROM `order` o JOIN booking b ON o.booking_id = b.id
+WHERE o.status_id IN (12, 14) AND b.date >= '2016-04-01' GROUP BY DATE_FORMAT(b.date, '%Y-%m')}
+            );
+        }
+    );
+
+    for my $row (@$monthly_not_visited) {
+        my ( $ym, $c ) = @$row;
+        $counts{monthly}{$ym}{opencloset}{not_visited} = $c;
+    }
+
+    ## 월별 취업날개 예약/방문
+    my $monthly_events = $self->DB->storage->dbh_do(
+        sub {
+            my ( $storage, $dbh, @args ) = @_;
+            $dbh->selectall_arrayref(
+                qq{SELECT DATE_FORMAT(c.update_date, '%Y-%m'), c.status, COUNT(c.status)
+FROM (SELECT DISTINCT(coupon_id)
+FROM `order`
+WHERE coupon_id IS NOT NULL) o
+JOIN coupon c ON o.coupon_id = c.id
+WHERE c.desc LIKE 'seoul%' GROUP BY DATE_FORMAT(c.update_date, '%Y-%m'), c.status}
+            );
+        },
+    );
+
+    for my $row (@$monthly_events) {
+        my ( $ym, $status, $c ) = @$row;
+
+        $counts{monthly}{$ym}{events}{visited}     = $c if $status eq 'used';
+        $counts{monthly}{$ym}{events}{not_visited} = $c if $status eq 'provided';
+    }
+
     ## 일별 열린옷장 방문
     my $visited = $storage->dbh_do(
         sub {
@@ -786,7 +843,7 @@ WHERE o.status_id NOT IN (12, 14) AND b.date BETWEEN '$from->ymd' AND '$to->ymd'
         sub {
             my ( $storage, $dbh, @args ) = @_;
             $dbh->selectall_arrayref(
-                qq{SELECT DATE_FORMAT(b.date, '%Y-%m-%d') AS ymd, count(*) AS visited
+                qq{SELECT DATE_FORMAT(b.date, '%Y-%m-%d') AS ymd, count(*) AS not_visited
 FROM `order` o JOIN booking b ON o.booking_id = b.id
 WHERE o.status_id IN (12, 14) AND b.date BETWEEN '$from->ymd' AND '$to->ymd' GROUP BY DATE_FORMAT(b.date, '%Y-%m-%d')}
             );
@@ -821,20 +878,17 @@ WHERE c.desc LIKE 'seoul%' AND o.coupon_id IS NOT NULL AND b.date BETWEEN '$from
         $counts{events}{reserved}{$ymd} += $c;
     }
 
-    ## 연령대별 누적
-
     ## 성별 누적
     my $gender = $self->DB->storage->dbh_do(
         sub {
             my ( $storage, $dbh, @args ) = @_;
             $dbh->selectall_arrayref(
-                qq{SELECT ui.gender, COUNT(ui.gender) AS accumulation
-FROM (SELECT DISTINCT(coupon_id), user_id
-FROM `order`
-WHERE coupon_id IS NOT NULL) o
-JOIN user_info ui ON o.user_id = ui.user_id
-JOIN coupon c ON o.coupon_id = c.id
-WHERE c.desc LIKE 'seoul%' AND o.coupon_id IS NOT NULL AND c.status = 'used' GROUP BY ui.gender}
+                qq{SELECT ui.gender, COUNT(DISTINCT(coupon_id))
+FROM `order` o
+JOIN `coupon` c ON o.coupon_id = c.id
+JOIN `user_info` ui ON o.user_id = ui.user_id
+WHERE o.coupon_id IS NOT NULL AND c.status = 'used'
+GROUP BY ui.gender}
             );
         },
     );
@@ -847,17 +901,17 @@ WHERE c.desc LIKE 'seoul%' AND o.coupon_id IS NOT NULL AND c.status = 'used' GRO
     }
 
     ## 연령대별 누적
+    ## TODO: 오차가 생기는데 왜 그런지 모르겠음
     my $birth = $self->DB->storage->dbh_do(
         sub {
             my ( $storage, $dbh, @args ) = @_;
             $dbh->selectall_arrayref(
-                qq{SELECT ui.birth, COUNT(ui.birth) AS accumulation
-FROM (SELECT DISTINCT(coupon_id), user_id
-FROM `order`
-WHERE coupon_id IS NOT NULL) o
-JOIN user_info ui ON o.user_id = ui.user_id
-JOIN coupon c ON o.coupon_id = c.id
-WHERE c.desc LIKE 'seoul%' AND o.coupon_id IS NOT NULL AND c.status = 'used' GROUP BY ui.birth}
+                qq{SELECT ui.birth, COUNT(DISTINCT(coupon_id))
+FROM `order` o
+JOIN `coupon` c ON o.coupon_id = c.id
+JOIN `user_info` ui ON o.user_id = ui.user_id
+WHERE o.coupon_id IS NOT NULL AND c.status = 'used'
+GROUP BY ui.birth}
             );
         },
     );
