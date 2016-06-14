@@ -19,7 +19,11 @@
 - my $clothes_code = trim_clothes_code($clothes);
 - title meta_text($_id) . qq{: $clothes_code};
 - use OpenCloset::Constants::Status qw/$DISCARD/;
+- use DateTime;
 - my $status_id = $clothes->status->id;
+- my $now_dt          = DateTime->now( time_zone =>  $config->{timezone});
+- my $system_start_dt = DateTime->new( %{ $config->{start_date} }, time_zone => $config->{timezone} );
+
 
                 %div
                   #user-profile-1.user-profile.row
@@ -50,7 +54,7 @@
                           %br
                           빌린 횟수
                         .grid2
-                          %span.bigger-175.blue= $clothes->rentable_duration($config->{start_date}, $config->{timezone})
+                          %span.bigger-175.blue= $clothes->rentable_duration($now_dt, $system_start_dt)
                           %br
                           대여가능 일
                         .grid2
@@ -58,7 +62,7 @@
                           %br
                           대여일
                         .grid2
-                          %span.bigger-175.blue= sprintf("%.1f%%",$clothes->rent_ratio($config->{start_date},$config->{timezone}) * 100);
+                          %span.bigger-175.blue= sprintf("%.1f%%",$clothes->rent_ratio($now_dt, $system_start_dt) * 100);
                           %br
                           대여율
                       .hr.hr16.dotted
