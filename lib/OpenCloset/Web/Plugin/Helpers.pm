@@ -1987,6 +1987,12 @@ sub search_clothes {
     return $self->error( 500, { str => "Guess failed: $guess->{reason}" } )
         unless $guess->{success};
 
+    map {
+        if ( $guess->{$_} and $guess->{$_} eq 'NA' ) {
+            $guess->{$_} = 0;
+        }
+    } keys %$guess;
+
     $self->log->info( "guess result size : " . encode_json($guess) );
 
     my $config     = $self->config->{'user-id-search-clothes'}{$gender};
