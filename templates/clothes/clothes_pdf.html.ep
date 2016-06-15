@@ -4,12 +4,18 @@
 % my $background = do {
 %   use experimental qw( smartmatch );
 %   given ($background_type) {
-%     "blue-white.png"   when "offline-male";
-%     "red-white.png"    when "offline-female";
-%     "green-white.png"  when "online-male";
-%     "orange-white.png" when "online-female";
-%     "white-white.png"  when "offline-male-summer";
-%     "gray-white.png"   when "offline-male-winter";
+%     "blue-gray-white.png"     when "offline-male-winter";
+%     "blue-white.png"          when "offline-male";
+%     "blue-yellow-white.png"   when "offline-male-summer";
+%     "green-gray-white.png"    when "online-male-winter";
+%     "green-white.png"         when "online-male";
+%     "green-yellow-white.png"  when "online-male-summer";
+%     "orange-gray-white.png"   when "online-female-winter";
+%     "orange-white.png"        when "online-female";
+%     "orange-yellow-white.png" when "online-female-summer";
+%     "red-gray-white.png"      when "offline-female-winter";
+%     "red-white.png"           when "offline-female";
+%     "red-yellow-white.png"    when "offline-female-summer";
 %     default { "blank.png" }
 %   }
 % };

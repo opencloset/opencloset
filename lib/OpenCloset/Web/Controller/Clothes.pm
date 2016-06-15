@@ -367,23 +367,22 @@ sub clothes_pdf {
         }
         else {
             if ( $clothes->gender eq "male" ) {
-                if ( "하복" ~~ @tags ) {
-                    $background_type = "offline-male-summer";
-                    $type_str        = "오프라인 - 남성 - 하복";
-                }
-                elsif ( "동복" ~~ @tags ) {
-                    $background_type = "offline-male-winter";
-                    $type_str        = "오프라인 - 남성 - 동복";
-                }
-                else {
-                    $background_type = "offline-male";
-                    $type_str        = "오프라인 - 남성";
-                }
+                $background_type = "offline-male";
+                $type_str        = "오프라인 - 남성";
             }
             elsif ( $clothes->gender eq "female" ) {
                 $background_type = "offline-female";
                 $type_str        = "오프라인 - 여성";
             }
+        }
+
+        if ( "하복" ~~ @tags ) {
+            $background_type .= "-summer";
+            $type_str        .= " - 하복";
+        }
+        elsif ( "동복" ~~ @tags ) {
+            $background_type .= "-winter";
+            $type_str        .= " - 동복";
         }
     }
 
