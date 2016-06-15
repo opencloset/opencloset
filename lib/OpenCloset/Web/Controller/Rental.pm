@@ -2,7 +2,6 @@ package OpenCloset::Web::Controller::Rental;
 use Mojo::Base 'Mojolicious::Controller';
 
 use DateTime;
-use Mojo::JSON qw/decode_json/;
 use Try::Tiny;
 
 has DB => sub { shift->app->DB };
@@ -78,13 +77,10 @@ sub ymd {
         { join => [qw/ booking status /], order_by => { -asc => 'update_date' }, },
     );
 
-    my $json    = $self->redis->get('opencloset:storage') || '{}';
-    my $data    = decode_json($json);
-    my @repairs = keys %{ $data->{repair} ||= {} };
-
+    my $repairs = $self->redis->hkeys('opencloset:storage:repair');
     $self->stash(
         order_rs => $order_rs,
-        repairs  => [@repairs],
+        repairs  => $repairs,
         dt_start => $dt_start,
         dt_end   => $dt_end
     );

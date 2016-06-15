@@ -1,5 +1,6 @@
 - use utf8;
 - use List::Util;
+- use OpenCloset::Constants::Category qw/$JACKET $PANTS $SKIRT/;
 - my $_id = 'order-id';
 - layout 'default',
 -   page_id     => $_id,
@@ -599,6 +600,7 @@
                   %th 기타
               %tbody
                 - my $detail_count = 0;
+                - my $is_suit = is_suit_order($order);
                 - for my $detail ( $order->order_details ) {
                   %tr
                     %td.center.return-process
@@ -608,10 +610,15 @@
                           %span.lbl
                       - }
                     %td.center= ++$detail_count
-                    - if ( $detail->clothes ) {
+                    - if ( my $clothes = $detail->clothes ) {
+                      - my $category = $clothes->category;
                       %td
                         %span
-                          %a{ :href => "/clothes/#{ trim_clothes_code($detail->clothes) }" }= $detail->name
+                          - if ($is_suit && "$JACKET $PANTS $SKIRT" =~ m/\b$category\b/) {
+                            = clothes2link($detail->clothes, { text => $detail->name, class => ['label-success'] })
+                          - } else {
+                            = clothes2link($detail->clothes, { text => $detail->name })
+                          - }
                         %br
                         %span
                           %a{ :href => "/donation/#{ $detail->clothes->donation_id }" }= $detail->clothes->donation_id
