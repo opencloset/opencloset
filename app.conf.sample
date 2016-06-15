@@ -454,4 +454,10 @@ $db_opts->{AutoCommit} //= 1;
     income => {
         opencloset => '25ab86bed149ca6ca9c1c0d5db7c9a91388ddeab',    # s3cr3t
     },
+    start_date => {
+        year      => 2014,
+        month     => 12,
+        day       => 17,
+        time_zone => 'Asia/Seoul'
+    },
 };
