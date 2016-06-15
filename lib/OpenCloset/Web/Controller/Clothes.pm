@@ -375,6 +375,15 @@ sub clothes_pdf {
                 $type_str        = "오프라인 - 여성";
             }
         }
+
+        if ( "하복" ~~ @tags ) {
+            $background_type .= "-summer";
+            $type_str        .= " - 하복";
+        }
+        elsif ( "동복" ~~ @tags ) {
+            $background_type .= "-winter";
+            $type_str        .= " - 동복";
+        }
     }
 
     #
