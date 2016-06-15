@@ -21,6 +21,7 @@ use Try::Tiny;
 
 use OpenCloset::Size::Guess;
 use OpenCloset::Constants::Measurement;
+use OpenCloset::Constants::Category qw/$JACKET $PANTS $SKIRT/;
 
 =encoding utf8
 
@@ -87,6 +88,8 @@ sub register {
     $app->helper( calc_overdue_fee          => \&calc_overdue_fee );
     $app->helper( calc_overdue_days         => \&calc_overdue_days );
     $app->helper( search_clothes            => \&search_clothes );
+    $app->helper( clothes2link              => \&clothes2link );
+    $app->helper( is_suit_order             => \&is_suit_order );
 }
 
 =head1 HELPERS
@@ -2089,6 +2092,146 @@ sub search_clothes {
 
     unshift @result, $guess;
     return \@result;
+}
+
+=head2 clothes2link( $clothes, $opts )
+
+    %= clothes2link($clothes)
+    # <a href="/clothes/J001">
+    #   <span class="label label-primary">
+    #     <i class="fa fa-external-link"></i>
+    #     J001
+    #   </span>
+    # </a>
+
+    %= clothes2link($clothes, { with_status => 1, external => 1, class => ['label-success'] })    # external link with status
+    # <a href="/clothes/J001" target="_blank">
+    #   <span class="label label-primary">
+    #     <i class="fa fa-external-link"></i>
+    #     J001
+    #     <small>대여가능</small>
+    #   </span>
+    # </a>
+
+=head3 $opt
+
+외부링크로 제공하거나, 상태를 함께 표시할지 여부를 선택합니다.
+Default 는 모두 off 입니다.
+
+=over
+
+=item C<1>
+
+상태없이 외부링크로 나타냅니다.
+
+=item C<$hashref>
+
+=over
+
+=item C<$text>
+
+의류코드 대신에 나타낼 text.
+
+=item C<$with_status>
+
+상태도 함께 나타낼지에 대한 Bool.
+
+=item C<$external>
+
+외부링크로 제공할지에 대한 Bool.
+
+=item C<$class>
+
+label 태그에 추가될 css class.
+
+=back
+
+=back
+
+=cut
+
+sub clothes2link {
+    my ( $self, $clothes, $opts ) = @_;
+    return '' unless $clothes;
+
+    my $code = $clothes->code;
+    $code =~ s/^0//;
+    my $prefix = '/clothes';
+    my $dom    = Mojo::DOM::HTML->new;
+
+    my $html  = "$code";
+    my @class = qw/label label-primary/;
+    if ($opts) {
+        if ( ref $opts eq 'HASH' ) {
+            push @class, @{ $opts->{class} ||= [] };
+
+            if ( my $text = $opts->{text} ) {
+                $html = $text;
+            }
+
+            if ( $opts->{with_status} ) {
+                my $status = $clothes->status->name;
+                $html .= qq{ <small>$status</small>};
+            }
+
+            if ( $opts->{external} ) {
+                $html = qq{<i class="fa fa-external-link"></i> } . $html;
+                $html = qq{<span class="@class">$html</span>};
+                $html = qq{<a href="$prefix/$code" target="_blank">$html</a>};
+            }
+            else {
+                $html = qq{<span class="@class">$html</span>};
+                $html = qq{<a href="$prefix/$code">$html</a>};
+            }
+        }
+        else {
+            $html = qq{<i class="fa fa-external-link"></i> } . $html;
+            $html = qq{<span class="@class">$html</span>};
+            $html = qq{<a href="$prefix/$code" target="_blank">$html</a>};
+        }
+    }
+    else {
+        $html = qq{<a href="$prefix/$code"><span class="@class">$html</span></a>};
+    }
+
+    $dom->parse($html);
+    my $tree = $dom->tree;
+    return Mojo::ByteStream->new( Mojo::DOM::HTML::_render($tree) );
+}
+
+=head2 is_suit_order
+
+    % my $bool = is_suit_order($order)
+
+=cut
+
+sub is_suit_order {
+    my ( $self, $order ) = @_;
+    return unless $order;
+
+    my ( @code_top, @code_bottom );
+    for my $detail ( $order->order_details ) {
+        my $clothes = $detail->clothes;
+        next unless $clothes;
+
+        my $category = $clothes->category;
+        next unless "$JACKET $PANTS $SKIRT" =~ m/\b$category\b/;
+
+        my $top    = $clothes->top;
+        my $bottom = $clothes->bottom;
+        return unless $top && $bottom;
+
+        my $code_top    = $top->code;
+        my $code_bottom = $top->code;
+
+        return 1
+            if "@code_top" =~ m/\b$code_top\b/ and "@code_bottom" =~ m/\b$code_bottom\b/;
+
+        push @code_top,    $code_top;
+        push @code_bottom, $code_bottom;
+    }
+
+    return;
 }
 
 1;
