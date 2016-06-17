@@ -55,7 +55,7 @@ $ ->
           compiled = _.template($('#tpl-row-checkbox-enabled').html())
           $html = $(compiled(data))
           $('#action-buttons').show() if data.status is '대여가능'
-        else if data.status in [ '반납', '세탁', '수선', '포장취소', '예약' ]
+        else if data.status in [ '반납', '세탁', '수선', '포장취소', '예약', '대여불가' ]
           compiled = _.template($('#tpl-row-checkbox-readonly-without-order').html())
           $html = $(compiled(data))
         else
