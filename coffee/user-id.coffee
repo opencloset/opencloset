@@ -251,6 +251,13 @@ $ ->
     $("#user-comment").editable "setValue", comment
     $("#user-comment").editable "submit"
 
+  $(".rental-fit.btn").on "click", (e) ->
+    additional_comment = $(this).data("order-booking-ymd") + " 주문서 의류 요청합니다."
+    comment = $("#user-comment").editable "getValue", true
+    comment = if comment then "#{comment}\n#{additional_comment}" else additional_comment
+    $("#user-comment").editable "setValue", comment
+    $("#user-comment").editable "submit"
+
   $('#btn-reset-expires:not(.disabled)').click ->
     $this = $(@)
     $this.addClass('disabled')

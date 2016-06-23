@@ -56,7 +56,7 @@
                                     - if ( $user && $user->user_info && $user->user_info->weight && $order->weight ) {
                                     -   my $weight_diff = abs( $user->user_info->weight - $order->weight );
                                     -   if ( $weight_diff <= 3 ) { # 현재 몸무게와 이전 주문서의 몸무게가 -3kg ~ +3kg 이내
-                                      %span.rental-fit.btn.btn-sm.btn-success{ "data-order-weight" => "#{ $order->weight }" } 대여 적합
+                                      %span.rental-fit.btn.btn-sm.btn-success{ "data-order-weight" => "#{ $order->weight }", "data-order-booking-ymd" => "#{ $order->booking->date->ymd }" } 대여 적합
                                     -   }
                                     -   else {
                                       %span.rental-fit.btn.btn-sm.btn-danger.disabled{ "data-order-weight" => "#{ $order->weight }" } 대여 부적합
