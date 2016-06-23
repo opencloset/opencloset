@@ -10,6 +10,7 @@ requires 'Digest::SHA1';
 requires 'FindBin';
 requires 'Getopt::Long::Descriptive';
 requires 'Gravatar::URL';
+requires 'HTTP::Body::Builder::MultiPart';
 requires 'HTTP::Tiny';
 requires 'JSON';
 requires 'List::MoreUtils';
