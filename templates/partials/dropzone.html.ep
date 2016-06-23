@@ -1,0 +1,9 @@
+<form id="<%= $id %>"
+      class="dropzone"
+      action="<%= $action %>"
+      data-dz-name="<%= $name %>"
+      data-dz-thumbnail="<%= $thumbnail %>">
+  <div class="fallback">
+    <input name="<%= $name %>" type="file">
+  </div>
+</form>

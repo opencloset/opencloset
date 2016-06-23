@@ -10,6 +10,7 @@ requires 'Digest::SHA1';
 requires 'FindBin';
 requires 'Getopt::Long::Descriptive';
 requires 'Gravatar::URL';
+requires 'HTTP::Body::Builder::MultiPart';
 requires 'HTTP::Tiny';
 requires 'JSON';
 requires 'List::MoreUtils';
@@ -43,7 +44,7 @@ requires 'git://github.com/aanoaa/p5-postcodify.git@v0.2.6';
 # from opencloset cpan
 requires 'OpenCloset::Common';
 requires 'OpenCloset::Config',               '0.002';
-requires 'OpenCloset::Plugin::Helpers',      'v0.0.5';
+requires 'OpenCloset::Plugin::Helpers',      'v0.0.7';
 requires 'OpenCloset::Schema',               '0.035';
 requires 'OpenCloset::Size::Guess',          '0.003';
 requires 'OpenCloset::Size::Guess::BodyKit', '0.001';

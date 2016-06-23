@@ -129,3 +129,18 @@ $ ->
         location.href = '/clothes'
       error: (jqXHR, textStatus, errorThrown) ->
       complete: (jqXHR, textStatus) ->
+
+  $dz  = $('#clothes-dropzone')
+  code = $('#clothes-code.clothes-code').text()
+  Dropzone.options.clothesDropzone =
+    paramName: $dz.data('dz-name')
+    maxFiles: 1
+    init: ->
+      mockFile = { name: 'photo', size: 12345 }
+      @emit('addedfile', mockFile)
+      @emit('thumbnail', mockFile, $dz.data('dz-thumbnail'))
+      @emit('complete', mockFile)
+      @on 'sending', (file, xhr, formData) ->
+        formData.append('key', code)
+      @on 'success', (file) ->
+        @emit('removedfile', mockFile)

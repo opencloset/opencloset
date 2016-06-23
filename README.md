@@ -3,7 +3,7 @@ opencloset
 
 ## Version ##
 
-v1.7.7
+v1.7.8
 
 ## Requirements ##
 
@@ -44,7 +44,7 @@ bower를 통해 front-end 패키지를 설치합니다.
 MySQL을 사용해서 데이터베이스를 `opencloset`, 사용자 이름 `opencloset`,
 비밀번호 `opencloset`으로 설정하려면 다음 명령을 이용합니다.
 
-    $ mysql -u root -p -e 'GRANT ALL PRIVILEGES ON `opencloset`.* TO opencloset@localhost IDENTIFIED by "opencloset";'
+    $ mysql -u root -p -e 'GRANT ALL PRIVILEGES ON `opencloset`.* TO opencloset@localhost IDENTIFIED by "xxxxxxx";'
     $ mysql -u opencloset -p -e 'CREATE DATABASE `opencloset` DEFAULT CHARACTER SET utf8;'
     $ mysql -u opencloset -p opencloset < db/init.sql
 
