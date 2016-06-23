@@ -263,6 +263,8 @@ sub _private_routes {
 
     $api->any('/postcode/search')->to('API#api_postcode_search');
 
+    $api->post('/photos')->to('API#api_upload_photo');
+
     $r->get('/')->to('root#index');
 
     $r->get('/tag')->to('tag#index');

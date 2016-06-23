@@ -10,10 +10,12 @@
 -   jses  => [
 -     '/lib/bootstrap3-editable/js/bootstrap-editable.min.js',
 -     '/lib/chosen/js/chosen.jquery.min.js',
+-     '/components/dropzone/dist/min/dropzone.min.js',
 -   ],
 -   csses => [
 -     '/lib/bootstrap3-editable/css/bootstrap-editable.css',
 -     '/lib/chosen/css/chosen.min.css',
+-     '/components/dropzone/dist/min/dropzone.min.css',
 -   ],
 -   ;
 - my $clothes_code = trim_clothes_code($clothes);
@@ -32,8 +34,7 @@
                     /
                     .col-xs-12.col-sm-3.center
                       %div
-                        %span.profile-picture
-                          %img.avatar.img-responsive{ :src => '' }
+                        = include 'partials/dropzone', name => 'photo', action => url_for('/api/photos'), id => 'clothes-dropzone', thumbnail => oavatar_url($clothes_code, size => 120)
                         .space-4
                         .width-80.label.label-info.label-xlg.arrowed-in.arrowed-in-right
                           .inline.position-relative
