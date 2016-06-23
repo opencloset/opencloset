@@ -53,6 +53,15 @@
                                       - if (my $coupon = $order->coupon) {
                                         = coupon2label($coupon)
                                       - }
+                                    - if ( $user && $user->user_info && $user->user_info->weight && $order->weight ) {
+                                    -   my $weight_diff = abs( $user->user_info->weight - $order->weight );
+                                    -   if ( $weight_diff <= 3 ) { # 현재 몸무게와 이전 주문서의 몸무게가 -3kg ~ +3kg 이내
+                                      %span.rental-fit.btn.btn-sm.btn-success{ "data-order-weight" => "#{ $order->weight }" } 대여 적합
+                                    -   }
+                                    -   else {
+                                      %span.rental-fit.btn.btn-sm.btn-danger.disabled{ "data-order-weight" => "#{ $order->weight }" } 대여 부적합
+                                    -   }
+                                    - }
                                     .time
                                       %i.icon-time.bigger-110
                                       = $order->create_date->ymd . q{ } . $order->create_date->hms
