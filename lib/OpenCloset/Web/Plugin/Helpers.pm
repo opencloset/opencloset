@@ -22,6 +22,7 @@ use Try::Tiny;
 use OpenCloset::Size::Guess;
 use OpenCloset::Constants::Measurement;
 use OpenCloset::Constants::Category qw/$JACKET $PANTS $SKIRT/;
+use OpenCloset::Constants::Status qw/$RENTABLE $RENTAL/;
 
 =encoding utf8
 
@@ -2160,7 +2161,7 @@ sub clothes2link {
     my $dom    = Mojo::DOM::HTML->new;
 
     my $html  = "$code";
-    my @class = qw/label label-primary/;
+    my @class = qw/label/;
     if ($opts) {
         if ( ref $opts eq 'HASH' ) {
             push @class, @{ $opts->{class} ||= [] };
@@ -2170,8 +2171,19 @@ sub clothes2link {
             }
 
             if ( $opts->{with_status} ) {
-                my $status = $clothes->status->name;
-                $html .= qq{ <small>$status</small>};
+                my $status = $clothes->status;
+                my $name   = $status->name;
+                my $sid    = $status->id;
+                if ( $sid == $RENTABLE ) {
+                    push @class, 'label-primary';
+                }
+                elsif ( $sid == $RENTAL ) {
+                    push @class, 'label-danger';
+                }
+                else {
+                    push @class, 'label-default';
+                }
+                $html .= qq{ <small>$name</small>};
             }
 
             if ( $opts->{external} ) {
