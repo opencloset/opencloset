@@ -6,6 +6,8 @@ use Try::Tiny;
 use Data::Pageset;
 use HTTP::Tiny;
 
+use OpenCloset::Constants::Status qw/$RETURNED/;
+
 has DB => sub { shift->app->DB };
 
 =head1 METHODS
@@ -410,9 +412,10 @@ sub order {
     # response
     #
     $self->render(
-        order      => $order, history => $history,
+        order      => $order,          history     => $history,
         nonpayment => $nonpayment,
         today      => $params{today},
+        visited    => $orders->search( { status_id => $RETURNED } )->count,
     );
 }
 
