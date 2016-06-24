@@ -3,6 +3,9 @@ use Mojo::Base 'Mojolicious::Controller';
 
 use DateTime;
 use Encode qw/decode_utf8/;
+use HTTP::Body::Builder::MultiPart;
+use HTTP::Tiny;
+use Path::Tiny ();
 use Postcodify;
 use String::Random;
 use Try::Tiny;
@@ -2912,6 +2915,61 @@ sub api_postcode_search {
     my $result = $p->search($q);
     $self->app->log->info("postcode search query: $q");
     $self->render( text => decode_utf8( $result->json ), format => 'json' );
+}
+
+=head2 api_upload_photo
+
+    POST /api/photos
+
+=cut
+
+sub api_upload_photo {
+    my $self = shift;
+
+    my $v = $self->validation;
+    $v->required('key');
+    $v->required('photo')->upload->size( 1, 1024 * 1024 * 10 ); # 10MB
+
+    if ( $v->has_error ) {
+        my $failed = $v->failed;
+        return $self->error(
+            400,
+            { str => 'Parameter Validation Failed: ' . join( ', ', @$failed ) }
+        );
+    }
+
+    my $key   = $v->param('key');
+    my $photo = $v->param('photo');
+
+    my $temp = Path::Tiny->tempfile;
+    $photo->move_to("$temp");
+
+    my $oavatar = $self->config->{oavatar};
+    my ( $token, $url ) = ( $oavatar->{token}, $oavatar->{url} );
+    return $self->error( 500, { str => 'Configuration failed' } ) unless $token;
+
+    my $multipart = HTTP::Body::Builder::MultiPart->new;
+    $multipart->add_content( token => $oavatar->{token} );
+    $multipart->add_content( key   => $key );
+    $multipart->add_file( img => $temp );
+
+    my $http = HTTP::Tiny->new;
+    my $res  = $http->request(
+        'POST', $url,
+        {
+            headers =>
+                { 'content-type' => 'multipart/form-data; boundary=' . $multipart->{boundary} },
+            content => $multipart->as_string
+        }
+    );
+
+    unless ( $res->{success} ) {
+        my $error = "Failed to upload photo: $res->{reason}";
+        $self->log->error($error);
+        return $self->error( 500, { str => $error } );
+    }
+
+    $self->render( text => $res->{content} );
 }
 
 1;

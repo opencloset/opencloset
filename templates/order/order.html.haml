@@ -348,7 +348,11 @@
             .col-sm-6
               .row
                 .col-xs-11.label.label-lg.label-success.arrowed-in.arrowed-right
-                  %strong 대여자 정보
+                  %strong
+                    대여자 정보
+                    - if ($visited) {
+                      = $visited . '회 대여'
+                    - }
               .row
                 %ul.list-unstyled.spaced
                   %li.row

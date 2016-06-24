@@ -5,7 +5,7 @@ use CHI;
 use DateTime;
 
 use OpenCloset::Schema;
-use version; our $VERSION = qv("v1.7.7");
+use version; our $VERSION = qv("v1.8.1");
 has CACHE => sub {
     my $self  = shift;
     my $cache = CHI->new(
@@ -262,6 +262,8 @@ sub _private_routes {
     $api->get('/gui/user/:id/avg2')->to('API#api_gui_user_id_avg2');
 
     $api->any('/postcode/search')->to('API#api_postcode_search');
+
+    $api->post('/photos')->to('API#api_upload_photo');
 
     $r->get('/')->to('root#index');
 
