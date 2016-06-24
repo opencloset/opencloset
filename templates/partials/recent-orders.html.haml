@@ -75,11 +75,10 @@
                                     .clothes
                                       %p
                                         %span.label.label-success 의류 현황
-                                      - my $clothes_status = q{};
-                                      - for my $clothes ( $order->clothes->all ) {
-                                      -   $clothes_status .= trim_clothes_code($clothes) . " - " . $clothes->status->name . "\n";
-                                      - }
-                                      %pre= $clothes_status
+                                      %p
+                                        - for my $clothes ( $order->clothes->all ) {
+                                          = clothes2link( $clothes, { with_status => 1 } )
+                                        - }
                                     .desc
                                       %p
                                         %span.label.label-info 주문서 메모 5F
