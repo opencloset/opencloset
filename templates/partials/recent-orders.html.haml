@@ -77,7 +77,15 @@
                                         %span.label.label-success 의류 현황
                                       %p
                                         - for my $clothes ( $order->clothes->all ) {
-                                          = clothes2link( $clothes, { with_status => 1 } )
+                                        -   my $code = trim_clothes_code($clothes);
+                                        -   my $status_name = $clothes->status->name;
+                                        -   my $status_class = "label-default";
+                                        -   $status_class = "label-danger"  if $status_name eq "대여중";
+                                        -   $status_class = "label-primary" if $status_name eq "대여가능";
+                                          %a{ :href => '#{ url_for("/clothes/$code") }' }
+                                            %span.label{ :class => "#{ $status_class }" }
+                                              = $code
+                                              %small= $status_name
                                         - }
                                     .desc
                                       %p
