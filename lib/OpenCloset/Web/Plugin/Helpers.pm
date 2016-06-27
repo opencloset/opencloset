@@ -2164,8 +2164,6 @@ sub clothes2link {
     my @class = qw/label/;
     if ($opts) {
         if ( ref $opts eq 'HASH' ) {
-            push @class, @{ $opts->{class} ||= [] };
-
             if ( my $text = $opts->{text} ) {
                 $html = $text;
             }
@@ -2185,6 +2183,11 @@ sub clothes2link {
                 }
                 $html .= qq{ <small>$name</small>};
             }
+            else {
+                push @class, 'label-primary' unless $opts->{class};
+            }
+
+            push @class, @{ $opts->{class} ||= [] };
 
             if ( $opts->{external} ) {
                 $html = qq{<i class="fa fa-external-link"></i> } . $html;
