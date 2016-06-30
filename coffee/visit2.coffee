@@ -53,6 +53,9 @@ $ ->
     phone   = $("input[name=phone]").val()
 
     if name && phone
+      if /(^\s+|\s+$)/.test( name )
+        OpenCloset.alert 'danger', '이름에 빈 칸이 들어있습니다.', '#visit-alert'
+        return
       $('#visit-form').submit()
     else
       #
