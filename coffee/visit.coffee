@@ -156,6 +156,9 @@ $ ->
       unless name
         OpenCloset.alert 'danger', '이름을 입력해주세요.', '#visit-alert'
         return
+      if /(^\s+|\s+$)/.test( name )
+        OpenCloset.alert 'danger', '이름에 빈 칸이 들어있습니다.', '#visit-alert'
+        return
 
       #
       # 휴대전화 점검
