@@ -77,6 +77,15 @@ sub visit {
     $self->app->log->debug("pre_color: $pre_color");
 
     #
+    # validate name
+    #
+    if ( $name =~ m/(^\s+|\s+$)/ ) {
+        $self->app->log->warn( "name includes trailing space: [$name]" );
+        $self->stash( alert => '이름에 빈 칸이 들어있습니다.' );
+        return;
+    }
+
+    #
     # find user
     #
     my @users = $self->DB->resultset('User')->search(
@@ -315,6 +324,15 @@ sub visit2 {
     $self->app->log->debug("purpose2: $purpose2");
     $self->app->log->debug("pre_category: $pre_category");
     $self->app->log->debug("pre_color: $pre_color");
+
+    #
+    # validate name
+    #
+    if ( $name =~ m/(^\s+|\s+$)/ ) {
+        $self->app->log->warn( "name includes trailing space: [$name]" );
+        $self->stash( alert => '이름에 빈 칸이 들어있습니다.' );
+        return;
+    }
 
     #
     # find user
