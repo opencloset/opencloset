@@ -725,6 +725,14 @@ sub update_user {
     #
     my $v = $self->create_validator;
     $v->field('id')->required(1)->regexp(qr/^\d+$/);
+    $v->field('name')->trim(0)->callback(
+        sub {
+            my $value = shift;
+
+            return 1 unless $value =~ m/(^\s+|\s+$)/;
+            return ( 0, "name has trailing space" );
+        }
+    );
     $v->field('email')->email;
     $v->field('expires')->regexp(qr/^\d+$/);
     $v->field('phone')->regexp(qr/^\d+$/);
@@ -743,7 +751,8 @@ sub update_user {
         while ( my ( $k, $v ) = each %{ $v->errors } ) {
             push @error_str, "$k:$v";
         }
-        return $self->error( 400, { str => join( ',', @error_str ), data => $v->errors, } );
+        $self->error( 400, { str => join( ',', @error_str ), data => $v->errors, } );
+        return ( undef, join( ',', @error_str ) );
     }
 
     #
