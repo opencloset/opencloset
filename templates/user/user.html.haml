@@ -297,4 +297,4 @@
                       -   { 'parent_id' => undef },
                       -   { order_by    => { -desc => 'rental_date' } },
                       - );
-                      = include 'partials/recent-orders', orders => [ $user->orders(@search_params) ];
+                      = include 'partials/recent-orders', user => $user, orders => [ $user->orders(@search_params) ];

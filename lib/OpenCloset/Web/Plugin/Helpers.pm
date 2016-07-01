@@ -22,6 +22,7 @@ use Try::Tiny;
 use OpenCloset::Size::Guess;
 use OpenCloset::Constants::Measurement;
 use OpenCloset::Constants::Category qw/$JACKET $PANTS $SKIRT/;
+use OpenCloset::Constants::Status qw/$RENTABLE $RENTAL/;
 
 =encoding utf8
 
@@ -724,6 +725,14 @@ sub update_user {
     #
     my $v = $self->create_validator;
     $v->field('id')->required(1)->regexp(qr/^\d+$/);
+    $v->field('name')->trim(0)->callback(
+        sub {
+            my $value = shift;
+
+            return 1 unless $value =~ m/(^\s+|\s+$)/;
+            return ( 0, "name has trailing space" );
+        }
+    );
     $v->field('email')->email;
     $v->field('expires')->regexp(qr/^\d+$/);
     $v->field('phone')->regexp(qr/^\d+$/);
@@ -742,7 +751,8 @@ sub update_user {
         while ( my ( $k, $v ) = each %{ $v->errors } ) {
             push @error_str, "$k:$v";
         }
-        return $self->error( 400, { str => join( ',', @error_str ), data => $v->errors, } );
+        $self->error( 400, { str => join( ',', @error_str ), data => $v->errors, } );
+        return ( undef, join( ',', @error_str ) );
     }
 
     #
@@ -2160,19 +2170,33 @@ sub clothes2link {
     my $dom    = Mojo::DOM::HTML->new;
 
     my $html  = "$code";
-    my @class = qw/label label-primary/;
+    my @class = qw/label/;
     if ($opts) {
         if ( ref $opts eq 'HASH' ) {
-            push @class, @{ $opts->{class} ||= [] };
-
             if ( my $text = $opts->{text} ) {
                 $html = $text;
             }
 
             if ( $opts->{with_status} ) {
-                my $status = $clothes->status->name;
-                $html .= qq{ <small>$status</small>};
+                my $status = $clothes->status;
+                my $name   = $status->name;
+                my $sid    = $status->id;
+                if ( $sid == $RENTABLE ) {
+                    push @class, 'label-primary';
+                }
+                elsif ( $sid == $RENTAL ) {
+                    push @class, 'label-danger';
+                }
+                else {
+                    push @class, 'label-default';
+                }
+                $html .= qq{ <small>$name</small>};
             }
+            else {
+                push @class, 'label-primary' unless $opts->{class};
+            }
+
+            push @class, @{ $opts->{class} ||= [] };
 
             if ( $opts->{external} ) {
                 $html = qq{<i class="fa fa-external-link"></i> } . $html;

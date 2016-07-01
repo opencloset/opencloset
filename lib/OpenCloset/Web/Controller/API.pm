@@ -69,7 +69,14 @@ sub api_create_user {
     # validate params
     #
     my $v = $self->create_validator;
-    $v->field('name')->required(1);
+    $v->field('name')->required(1)->trim(0)->callback(
+        sub {
+            my $value = shift;
+
+            return 1 unless $value =~ m/(^\s+|\s+$)/;
+            return ( 0, "name has trailing space" );
+        }
+    );
     $v->field('email')->email;
     $v->field('phone')->regexp(qr/^\d+$/);
     $v->field('gender')->in(qw/ male female /);
@@ -2294,7 +2301,14 @@ sub api_create_sms_validation {
     # validate params
     #
     my $v = $self->create_validator;
-    $v->field('name')->required(1);
+    $v->field('name')->required(1)->trim(0)->callback(
+        sub {
+            my $value = shift;
+
+            return 1 unless $value =~ m/(^\s+|\s+$)/;
+            return ( 0, "name has trailing space" );
+        }
+    );
     $v->field('to')->required(1)->regexp(qr/^\d+$/);
 
     unless ( $self->validate( $v, \%params ) ) {

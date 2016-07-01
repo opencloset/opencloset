@@ -1,4 +1,22 @@
 $ ->
+  updateRentalFit = ->
+    userWeight  = $('#user-weight').text()
+    orderWeight = $('.rental-fit').data('order-weight')
+    return unless userWeight
+    return unless orderWeight
+    return if userWeight  is '0'
+    return if orderWeight is '0'
+
+    weightDiff = Math.abs( userWeight - orderWeight )
+    if weightDiff <= 3
+      $(".rental-fit").removeClass("btn-danger disabled")
+      $(".rental-fit").addClass("btn-success")
+      $(".rental-fit").text("대여 적합")
+    else
+      $(".rental-fit").removeClass("btn-success")
+      $(".rental-fit").addClass("btn-danger disabled")
+      $(".rental-fit").text("대여 부적합")
+
   updateAverageDiff = ->
     height = $('#user-height').text()
     weight = $('#user-weight').text()
@@ -201,9 +219,10 @@ $ ->
             data: data
       when 'user-height', 'user-weight', 'user-neck', 'user-bust', 'user-waist', 'user-skirt', 'user-topbelly', 'user-belly', 'user-arm', 'user-leg', 'user-knee', 'user-thigh', 'user-hip', 'user-foot'
         params.success = (response, newValue) ->
-          updateAverageDiff()
           setTimeout ->
             $el.closest('.profile-info-row').next().find('.editable').trigger('click')
+            updateRentalFit()
+            updateAverageDiff()
           , 500
       else
         params.type = 'text'
@@ -227,6 +246,13 @@ $ ->
 
   $(".profile-info-user-comment .btn").on "click", (e) ->
     additional_comment = $(this).data("name")
+    comment = $("#user-comment").editable "getValue", true
+    comment = if comment then "#{comment}\n#{additional_comment}" else additional_comment
+    $("#user-comment").editable "setValue", comment
+    $("#user-comment").editable "submit"
+
+  $(".rental-fit.btn").on "click", (e) ->
+    additional_comment = $(this).data("order-booking-ymd") + " 주문서 의류 요청합니다."
     comment = $("#user-comment").editable "getValue", true
     comment = if comment then "#{comment}\n#{additional_comment}" else additional_comment
     $("#user-comment").editable "setValue", comment
