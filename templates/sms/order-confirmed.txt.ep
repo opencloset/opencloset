@@ -4,6 +4,8 @@
 
 1. 택배로 발송을 하신 경우: <%= url_for("/order/$order_id/return")->to_abs %> 를 클릭하여 반납택배 발송알리미를 작성해주세요.
 
+서울시 광진구 아차산로 213(화양동 48-3번지) 웅진빌딩 403호 열린옷장
+
 2. 대여기간을 연장 하려는 경우: <%= url_for("/order/$order_id/extension")->to_abs %> 를 클릭하여 대여기간 연장신청서를 작성해주세요.
 
 3. 기증이야기 안내: https://story.theopencloset.net/letters/o/<%= $order_id %>/d 를 클릭하시어 오늘 대여하신 의류의 기증이야기를 만나보세요.
