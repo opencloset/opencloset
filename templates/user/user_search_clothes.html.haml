@@ -21,6 +21,7 @@
   %thead
     %tr
       %th{ :rowspan => "2" } #
+      %th{ :rowspan => "2" } 오차
       %th{ :rowspan => "2" } 대여수
       %th.center{ :colspan => "7" } 상의
       %th.center{ :colspan => "7" } 하의
@@ -42,9 +43,10 @@
   %tbody
     - my $count = 0;
     - for my $row ( @{ $result } ) {
-      - my ( $upper_id, $lower_id, $upper_rs, $lower_rs, $rent_count ) = @{ $row };
+      - my ( $upper_id, $lower_id, $upper_rs, $lower_rs, $rss, $rent_count ) = @{ $row };
       %tr
         %td= ++$count
+        %td= sprintf "%.2f", $rss;
         %td= $rent_count;
         %td
           %a{ :href => "#{ url_for( '/user/' . $upper_rs->donation->user->id) }" }= $upper_rs->donation->user->name;

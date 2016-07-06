@@ -2088,14 +2088,32 @@ sub search_clothes {
         next unless $pair{$upper_code};
 
         my $lower_code = $pair{$upper_code}{$lower_name};
+        my $lower = $lower_map{$lower_code};
         next unless $lower_code;
         next unless any { $_ eq $pair{$upper_code}{$lower_name} } keys %lower_map;
 
+        $self->log->info( sprintf '< %s / %s >', $upper->code, $lower->code );
+        my $rss;
+        for my $size (keys %$guess) {
+            next if $size eq 'reason';
+            next if $size eq 'success';
+            next unless $guess->{$size};
+            next unless $upper->$size || $lower->$size;
+
+            my $guess    = $guess->{$size};
+            my $real     = $upper->$size || $lower->$size;
+            my $residual = $guess - $real;
+
+            $rss += $residual ** 2;
+            $self->log->info( sprintf '[%-8s] guess : %.2f / real : %.2f / residual : %.2f', $size, $guess, $real, $residual );
+        }
+        $self->log->info('-' x 50 . "RSS : $rss");
+
         my $count = $pair{$upper_code}{count};
-        push @result, [ $upper_code, $lower_code, $upper, $lower_map{$lower_code}, $count ];
+        push @result, [ $upper_code, $lower_code, $upper, $lower, $rss, $count ];
     }
 
-    @result = sort { $b->[4] <=> $a->[4] } @result;
+    @result = sort { $a->[4] <=> $b->[4] } @result;
     $self->log->info(
         "guess result list : " . encode_json( [ map { [ @{$_}[ 0, 1, 4 ] ] } @result ] ) );
     $self->log->info( "guess result list count : " . scalar @result );
