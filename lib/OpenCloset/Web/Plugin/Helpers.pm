@@ -2008,6 +2008,10 @@ sub search_clothes {
 
     $self->log->info( "guess result size : " . encode_json($guess) );
 
+    $self->log->info(
+        "guess replace user arm : " . $guess->{arm} . ' => ' .  $user_info->arm );
+    $guess->{arm} = $user_info->arm;
+
     my $config     = $self->config->{'user-id-search-clothes'}{$gender};
     my $upper_name = $config->{upper_name};
     my $lower_name = $config->{lower_name};
