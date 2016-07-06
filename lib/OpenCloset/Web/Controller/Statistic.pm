@@ -386,6 +386,27 @@ sub clothes_hit_category {
     );
 }
 
+=head2 clothes_rent
+
+    GET /stat/clothes/rent
+
+=cut
+
+sub clothes_rent {
+    my $self = shift;
+
+    my $default_category = 'jacket';
+    my $default_gender   = 'male';
+    my $default_limit    = 10;
+
+    $self->redirect_to(
+        $self->url_for( '/stat/clothes/rent/' . $default_category )->query(
+            gender => $default_gender,
+            limit  => $default_limit,
+        )
+    );
+}
+
 =head2 status
 
     GET /stat/status
