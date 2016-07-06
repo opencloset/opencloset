@@ -43,11 +43,12 @@
   %tbody
     - my $count = 0;
     - for my $row ( @{ $result } ) {
-      - my ( $upper_id, $lower_id, $upper_rs, $lower_rs, $rss, $rent_count ) = @{ $row };
+      - my $upper_rs = $row->{upper_rs};
+      - my $lower_rs = $row->{lower_rs};
       %tr
         %td= ++$count
-        %td= sprintf "%.2f", $rss;
-        %td= $rent_count;
+        %td= sprintf "%.2f", $row->{rss}
+        %td= $row->{rent_count}
         %td
           %a{ :href => "#{ url_for( '/user/' . $upper_rs->donation->user->id) }" }= $upper_rs->donation->user->name;
         %td

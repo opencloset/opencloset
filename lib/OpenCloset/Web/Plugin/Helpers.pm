@@ -2113,13 +2113,14 @@ sub search_clothes {
         }
         $self->log->info('-' x 50 . "RSS : $rss");
 
-        my $count = $pair{$upper_code}{count};
-        push @result, [ $upper_code, $lower_code, $upper, $lower, $rss, $count ];
+        my $rent_count = $pair{$upper_code}{count};
+        push @result, { upper_code => $upper_code, lower_code => $lower_code,
+                        upper_rs   => $upper,      lower_rs   => $lower,
+                        rss        => $rss,        rent_count => $rent_count, };
     }
 
-    @result = sort { $a->[4] <=> $b->[4] } @result;
-    $self->log->info(
-        "guess result list : " . encode_json( [ map { [ @{$_}[ 0, 1, 4 ] ] } @result ] ) );
+    @result = sort { $a->{rss} <=> $b->{rss} } @result;
+    $self->log->info( "guess result list : " . encode_json( [ map { [ @{$_}{ qw/upper_code lower_code rss rent_count/ } ] } @result ] ) );
     $self->log->info( "guess result list count : " . scalar @result );
 
     unshift @result, $guess;
