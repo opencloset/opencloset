@@ -2008,13 +2008,36 @@ sub search_clothes {
 
     $self->log->info( "guess result size : " . encode_json($guess) );
 
-    $self->log->info(
-        "guess replace user arm : " . $guess->{arm} . ' => ' .  $user_info->arm );
-    $guess->{arm} = $user_info->arm;
+    my $range_filter = sub {
+        my ($f, $measure, $guess) = @_;
+
+        my $result;
+        if( $guess < $measure ) {
+            my $max = ($f->($guess))[1];
+            my $min = ($f->($measure))[0];
+
+            $result = $max - $min >= 0 ? $guess : $measure;
+        } elsif( $guess > $measure ) {
+            my $min = ($f->($guess))[0];
+            my $max = ($f->($measure))[1];
+
+            $result = $min - $max >= 0 ? $measure : $guess;
+        } else { $result = $guess };
+
+        return $result;
+    };
 
     my $config     = $self->config->{'user-id-search-clothes'}{$gender};
     my $upper_name = $config->{upper_name};
     my $lower_name = $config->{lower_name};
+
+    for my $part (qw/arm waist/) {
+        my $val = $range_filter->($config->{range_rules}{$part}, $user_info->$part, $guess->{$part});
+        next if $val == $guess->{$part};
+
+        $self->log->info( "guess replace user $part : " . $guess->{$part} . ' => ' .  $val );
+        $guess->{$part} = $val;
+    }
 
     my %between;
     for my $part ( keys %$guess ) {
