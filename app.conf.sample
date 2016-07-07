@@ -460,7 +460,7 @@ $db_opts->{AutoCommit} //= 1;
         year      => 2014,
         month     => 12,
         day       => 17,
-        time_zone => 'Asia/Seoul'
+        time_zone => 'Asia/Seoul',
     },
     oavatar => {
         token => $ENV{OPENCLOSET_AVATAR_TOKEN} || 's3cr3t',
