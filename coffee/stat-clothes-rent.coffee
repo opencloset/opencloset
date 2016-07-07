@@ -8,7 +8,7 @@ $ ->
   $('#btn-rent-search').click (e) ->
     category = $("select[name=category]").val()
     gender   = $("select[name=gender]").val()
-    limit    = $('input[name=limit]').prop('value')
+    limit    = $("#limit").val()
 
     unless /^\d+$/.test( limit )
       OpenCloset.alert 'danger', '유효하지 않은 입력값입니다.'

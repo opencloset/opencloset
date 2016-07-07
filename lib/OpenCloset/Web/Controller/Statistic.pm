@@ -420,7 +420,7 @@ sub clothes_rent_category {
     #
     # fetch params
     #
-    my %params = $self->get_params(qw/ category gender limit /);
+    my %params = $self->get_params(qw/ category gender limit p /);
 
     #
     # validate params
@@ -430,6 +430,7 @@ sub clothes_rent_category {
     $v->field('category')->in(qw/ jacket pants skirt /);
     $v->field('gender')->in(qw/ male female /);
     $v->field('limit')->regexp(qr/^\d+$/);
+    $v->field('p')->regexp(qr/^\d+$/);
 
     unless ( $self->validate( $v, \%params ) ) {
         my @error_str;
@@ -467,7 +468,13 @@ sub clothes_rent_category {
 
     my $cached = $self->CACHE->get($name);
     my @cached_page;
-    @cached_page = grep { defined } @{$cached}[ 0 .. 9 ] if $cached;
+
+    my $page  = $params{p}     || 1;
+    my $limit = $params{limit} || 10;
+    my $start_idx = ( $page - 1 ) * $limit;
+    my $end_idx   = $start_idx + $limit - 1;
+
+    @cached_page = grep { defined } @{$cached}[ $start_idx .. $end_idx ] if $cached;
 
     my $clothes_rs = $self->DB->resultset('Clothes')->search(
         {
@@ -496,12 +503,24 @@ sub clothes_rent_category {
         },
     );
 
+    my $pageset = Data::Pageset->new(
+        {
+            total_entries    => scalar(@$cached),
+            entries_per_page => $limit,
+            pages_per_set    => 5,
+            current_page     => $page,
+        }
+    );
+
     $self->render(
         clothes_rs  => $clothes_rs,
         cached_page => \@cached_page,
         category    => $params{category},
         gender      => $params{gender},
         limit       => $params{limit},
+        start_idx   => $start_idx,
+        end_idx     => $end_idx,
+        pageset     => $pageset,
     );
 }
 
