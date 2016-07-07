@@ -1,6 +1,7 @@
 package OpenCloset::Web::Controller::Statistic;
 use Mojo::Base 'Mojolicious::Controller';
 
+use DateTime::TimeZone;
 use DateTime;
 use Try::Tiny;
 
@@ -404,6 +405,103 @@ sub clothes_rent {
             gender => $default_gender,
             limit  => $default_limit,
         )
+    );
+}
+
+=head2 clothes_rent_category
+
+    GET /stat/clothes/rent/:category
+
+=cut
+
+sub clothes_rent_category {
+    my $self = shift;
+
+    #
+    # fetch params
+    #
+    my %params = $self->get_params(qw/ category gender limit /);
+
+    #
+    # validate params
+    #
+
+    my $v = $self->create_validator;
+    $v->field('category')->in(qw/ jacket pants skirt /);
+    $v->field('gender')->in(qw/ male female /);
+    $v->field('limit')->regexp(qr/^\d+$/);
+
+    unless ( $self->validate( $v, \%params ) ) {
+        my @error_str;
+        while ( my ( $k, $v ) = each %{ $v->errors } ) {
+            push @error_str, "$k:$v";
+        }
+        return $self->error( 400, { str => join( ',', @error_str ), data => $v->errors, } );
+    }
+
+    #
+    # fetch clothes
+    #
+
+    my $today = try {
+        DateTime->now(
+            time_zone => $self->config->{timezone},
+        );
+    };
+    unless ($today) {
+        $self->app->log->warn("cannot create datetime object");
+        $self->redirect_to( $self->url_for('/stat/clothes/rent') );
+        return;
+    }
+    $today->truncate( to => 'day' );
+
+    my $name = sprintf(
+        "stat-clothes-rent-%s-%s-%s-%s",
+        $params{gender},
+        $params{category},
+        $today->ymd,
+        DateTime::TimeZone->offset_as_string(
+            $today->time_zone->offset_for_datetime($today)
+        ),
+    );
+
+    my $cached = $self->CACHE->get($name);
+    my @cached_page;
+    @cached_page = grep { defined } @{$cached}[ 0 .. 9 ] if $cached;
+
+    my $clothes_rs = $self->DB->resultset('Clothes')->search(
+        {
+            'category' => $params{category},
+            'gender'   => $params{gender},
+        },
+        {
+            join     => [ { order_details => 'order' }, { donation => 'user' }, ],
+            prefetch => [ { donation      => 'user' }, "status" ],
+            columns  => [
+                qw/
+                    arm
+                    belly
+                    bust
+                    category
+                    code
+                    color
+                    hip
+                    length
+                    neck
+                    thigh
+                    topbelly
+                    waist
+                    /
+            ],
+        },
+    );
+
+    $self->render(
+        clothes_rs  => $clothes_rs,
+        cached_page => \@cached_page,
+        category    => $params{category},
+        gender      => $params{gender},
+        limit       => $params{limit},
     );
 }
 

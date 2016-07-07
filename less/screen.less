@@ -851,6 +851,51 @@
             }
         }
     }
+    #stat-clothes-rent {
+        #clothes-rent {
+            table tr:nth-child(2) {
+                th:nth-child(1),
+                th:nth-child(2),
+                th:nth-child(3) {
+                    width: 60px;
+                    text-align: right;
+                }
+            }
+            table th:first-child,
+            table td:first-child {
+                text-align: right;
+            }
+            table td {
+                &:nth-child(1) {
+                    width: 60px;
+                }
+                &:nth-child(2) {
+                    width: 100px;
+                }
+                &:nth-child(5),
+                &:nth-child(6),
+                &:nth-child(7),
+                &:nth-child(8),
+                &:nth-child(9),
+                &:nth-child(10) {
+                    width: 80px;
+                    text-align: right;
+                }
+            }
+            table td {
+                &:nth-child(1),
+                &:nth-child(2),
+                &:nth-child(5),
+                &:nth-child(6),
+                &:nth-child(7),
+                &:nth-child(8),
+                &:nth-child(9),
+                &:nth-child(10) {
+                    font-family: Monospace;
+                }
+            }
+        }
+    }
     #stat-status {
         span.date {
             font-weight: bold;
