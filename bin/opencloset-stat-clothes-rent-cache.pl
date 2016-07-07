@@ -74,22 +74,36 @@ die "$config_file: cannot load config\n" unless $CONF;
     my %clothes_list;
     my $clothes_rs = $DB->resultset("Clothes")->search(
         {
-            gender   => [ qw/ male female / ],
-            category => [ qw/ jacket pants skirt / ],
+            gender    => [qw/ male female /],
+            category  => [qw/ jacket pants skirt /],
+            status_id => [                          # 가용 가능 의류 상태
+                1,                                  # 대여가능
+                2,                                  # 대여중
+                3,                                  # 대여불가
+                4,                                  # 예약
+                5,                                  # 세탁
+                6,                                  # 수선
+                9,                                  # 반납
+                10,                                 # 부분반납
+                11,                                 # 반납배송중
+                16,                                 # 치수측정
+                17,                                 # 의류준비
+                18,                                 # 포장
+                19,                                 # 결제대기
+            ],
         },
         {},
     );
     while ( my $clothes = $clothes_rs->next ) {
-        use feature qw( switch );
-        use experimental qw( smartmatch );
-
         print "calculating: " . $clothes->code . "\n";
 
         my %data = (
-            code     => $clothes->code,
-            rentable => $clothes->rentable_duration( $today, $start_date ),
-            rented   => $clothes->rented_duration($TIMEZONE),
-            ratio    => $clothes->rent_ratio( $today, $start_date ),
+            code        => $clothes->code,
+            status_id   => $clothes->status_id,
+            status_name => $clothes->status->name,
+            rentable    => $clothes->rentable_duration( $today, $start_date ),
+            rented      => $clothes->rented_duration($TIMEZONE),
+            ratio       => $clothes->rent_ratio( $today, $start_date ),
         );
 
         push @{ $clothes_list{ $clothes->gender }{ $clothes->category } }, \%data;
