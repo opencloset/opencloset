@@ -130,7 +130,7 @@
             %span.color{ 'data-color' => "#{ $clothes->color }" }= $clothes->color;
           %td= $data->{rented}
           %td= $data->{rentable}
-          %td= $data->{ratio}
+          %td= sprintf "%.2f", $data->{ratio}
           - use feature qw( switch );
           - use experimental qw( smartmatch );
           - given ($category) {
