@@ -48,6 +48,26 @@
       %label.col-sm-3.control-label.no-padding-right{ :for => 'limit' } 한 번에 볼 개수
       .col-sm-9
         %input#limit.form-control{ :name => "limit" :placeholder => '10', :value => "#{$limit}" }
+    .form-group
+      %label.col-sm-3.control-label.no-padding-right{ :for => 'sort' } 회전율 정렬
+      .col-sm-9
+        %select.col-xs-10.col-sm-5{ :name => "sort", :type => 'hidden' }
+          - use feature qw( switch );
+          - use experimental qw( smartmatch );
+          - given ($sort) {
+          -   when ('asc') {
+            %option{ :value => "asc", :selected => "selected" } 낮은 순서
+            %option{ :value => "desc" } 높은 순서
+          -   }
+          -   when ('desc') {
+            %option{ :value => "asc" } 낮은 순서
+            %option{ :value => "desc", :selected => "selected" } 높은 순서
+          -   }
+          -   default {
+            %option{ :value => "asc", :selected => "selected" } 낮은 순서
+            %option{ :value => "desc" } 높은 순서
+          -   }
+          - }
     .form-actions.clearfix
       .col-md-offset-3.col-md-9
         %button.btn.btn-info.pull-right#btn-rent-search{ :type => 'button' }

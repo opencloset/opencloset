@@ -9,10 +9,11 @@ $ ->
     category = $("select[name=category]").val()
     gender   = $("select[name=gender]").val()
     limit    = $("#limit").val()
+    sort     = $("select[name=sort]").val()
 
     unless /^\d+$/.test( limit )
       OpenCloset.alert 'danger', '유효하지 않은 입력값입니다.'
       $('input[name=limit]').focus()
       return
 
-    window.location = "/stat/clothes/rent/#{category}?#{$.param({ gender: gender, limit: limit })}"
+    window.location = "/stat/clothes/rent/#{category}?#{$.param({ gender: gender, limit: limit, sort: sort })}"

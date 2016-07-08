@@ -420,7 +420,7 @@ sub clothes_rent_category {
     #
     # fetch params
     #
-    my %params = $self->get_params(qw/ category gender limit p /);
+    my %params = $self->get_params(qw/ category gender limit p sort /);
 
     #
     # validate params
@@ -431,6 +431,7 @@ sub clothes_rent_category {
     $v->field('gender')->in(qw/ male female /);
     $v->field('limit')->regexp(qr/^\d+$/);
     $v->field('p')->regexp(qr/^\d+$/);
+    $v->field('sort')->in(qw/ asc desc /);
 
     unless ( $self->validate( $v, \%params ) ) {
         my @error_str;
@@ -466,15 +467,21 @@ sub clothes_rent_category {
         ),
     );
 
-    my $cached = $self->CACHE->get($name);
+    my $cached = $self->CACHE->get($name) || [];
     my @cached_page;
 
     my $page  = $params{p}     || 1;
     my $limit = $params{limit} || 10;
+    my $sort  = $params{sort}  || "asc";
     my $start_idx = ( $page - 1 ) * $limit;
     my $end_idx   = $start_idx + $limit - 1;
 
-    @cached_page = grep { defined } @{$cached}[ $start_idx .. $end_idx ] if $cached;
+    if ( $sort eq "asc" ) {
+        @cached_page = grep { defined } @{$cached}[ $start_idx .. $end_idx ];
+    }
+    else {
+        @cached_page = grep { defined } ( reverse @{$cached} )[ $start_idx .. $end_idx ];
+    }
 
     my $clothes_rs = $self->DB->resultset('Clothes')->search(
         {
@@ -518,6 +525,7 @@ sub clothes_rent_category {
         category    => $params{category},
         gender      => $params{gender},
         limit       => $params{limit},
+        sort        => $params{sort},
         start_idx   => $start_idx,
         end_idx     => $end_idx,
         pageset     => $pageset,
