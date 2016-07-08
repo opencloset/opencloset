@@ -2011,6 +2011,8 @@ sub search_clothes {
     my $range_filter = sub {
         my ($f, $measure, $guess) = @_;
 
+        return $measure unless $f;
+
         my $result;
         if( $guess < $measure ) {
             my $max = ($f->($guess))[1];
