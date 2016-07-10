@@ -120,6 +120,7 @@ $db_opts->{AutoCommit} //= 1;
             'stat-bestfit'        => { text => '어울림',                icon => q{},         desc => '베스트핏에 해당하는 의류와 대여자 신체 치수 정보를 보여줍니다.', link => '/stat/bestfit'        },
             'stat-clothes-amount' => { text => '수량',                  icon => q{},         desc => '옷의 종류별 수량을 보여줍니다.',                                 link => '/stat/clothes/amount' },
             'stat-clothes-hit'    => { text => '인기 의류',             icon => q{},         desc => '가장 많이 대여한 옷을 종류별로 보여줍니다.',                     link => '/stat/clothes/hit'    },
+            'stat-clothes-rent'   => { text => '대여 회전율',           icon => q{},         desc => '옷의 대여일 및 대여 회전율을 보여줍니다.',                       link => '/stat/clothes/rent'   },
             'stat-status'         => { text => '상태',                  icon => q{},         desc => '주문서의 상태별 처리 시간을 보여줍니다.',                        link => '/stat/status'         },
             'stat-visitor'        => { text => '방문자',                icon => q{},         desc => '일/주/월 별 방문자 정보',                                        link => '/stat/visitor'        },
             'stat-events-seoul'   => { text => '취업날개 이벤트',       icon => q{},         desc => '취업날개 이벤트 이용현황',                                       link => '/stat/events/seoul'   },
@@ -154,6 +155,7 @@ $db_opts->{AutoCommit} //= 1;
                     { id => 'stat-bestfit'        },
                     { id => 'stat-clothes-amount' },
                     { id => 'stat-clothes-hit'    },
+                    { id => 'stat-clothes-rent'   },
                     { id => 'stat-status'         },
                     { id => 'stat-visitor'        },
                     { id => 'stat-events-seoul'   },
@@ -458,7 +460,7 @@ $db_opts->{AutoCommit} //= 1;
         year      => 2014,
         month     => 12,
         day       => 17,
-        time_zone => 'Asia/Seoul'
+        time_zone => 'Asia/Seoul',
     },
     oavatar => {
         token => $ENV{OPENCLOSET_AVATAR_TOKEN} || 's3cr3t',

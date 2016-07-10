@@ -5,7 +5,7 @@ use CHI;
 use DateTime;
 
 use OpenCloset::Schema;
-use version; our $VERSION = qv("v1.8.5");
+use version; our $VERSION = qv("v1.8.6");
 has CACHE => sub {
     my $self  = shift;
     my $cache = CHI->new(
@@ -306,6 +306,8 @@ sub _private_routes {
         ->to('statistic#clothes_amount_category_gender');
     $r->get('/stat/clothes/hit')->to('statistic#clothes_hit');
     $r->get('/stat/clothes/hit/:category')->to('statistic#clothes_hit_category');
+    $r->get('/stat/clothes/rent')->to('statistic#clothes_rent');
+    $r->get('/stat/clothes/rent/:category')->to('statistic#clothes_rent_category');
     $r->get('/stat/status')->to('statistic#status');
     $r->get('/stat/status/:ymd')->to('statistic#status_ymd');
     $r->get('/stat/visitor')->to('statistic#visitor');
