@@ -7,6 +7,12 @@
 -     { text => meta_text('stat') },
 -     { text => meta_text($_id)   },
 -   ],
+-   jses  => [
+-     '/lib/chosen/js/chosen.jquery.min.js',
+-   ],
+-   csses => [
+-     '/lib/chosen/css/chosen.min.css',
+-   ],
 -   ;
 - title meta_text($_id);
 
@@ -66,6 +72,34 @@
           -   default {
             %option{ :value => "asc", :selected => "selected" } 낮은 순서
             %option{ :value => "desc" } 높은 순서
+          -   }
+          - }
+    .form-group
+      %label.col-sm-3.control-label.no-padding-right{ :for => 'status_ids' } 상태
+      .col-sm-9
+        %select.chosen-select.tag-input-style#status{ :name => "status_ids", "data-placeholder" => "열람할 의류 상태를 선택하세요", :multiple => "" }
+          - my %status_items = (
+          -   1  => "대여가능",
+          -   2  => "대여중",
+          -   3  => "대여불가",
+          -   4  => "예약",
+          -   5  => "세탁",
+          -   6  => "수선",
+          -   9  => "반납",
+          -   10 => "부분반납",
+          -   11 => "반납배송중",
+          -   16 => "치수측정",
+          -   17 => "의류준비",
+          -   18 => "포장",
+          -   19 => "결제대기",
+          - );
+          - for my $status_id ( sort { $a <=> $b } keys %status_items ) {
+          -   use experimental qw( smartmatch );
+          -   if ( $status_id ~~ $status_ids ) {
+            %option{ :value => "#{$status_id}",  :selected => "" }= $status_items{$status_id}
+          -   }
+          -   else {
+            %option{ :value => "#{$status_id}" }= $status_items{$status_id}
           -   }
           - }
     .form-actions.clearfix

@@ -399,11 +399,29 @@ sub clothes_rent {
     my $default_category = 'jacket';
     my $default_gender   = 'male';
     my $default_limit    = 10;
+    my $default_sort     = 'asc';
+    my @default_status_ids = ( # 가용 가능 의류 상태
+        1,                     # 대여가능
+        2,                     # 대여중
+        3,                     # 대여불가
+        4,                     # 예약
+        5,                     # 세탁
+        6,                     # 수선
+        9,                     # 반납
+        10,                    # 부분반납
+        11,                    # 반납배송중
+        16,                    # 치수측정
+        17,                    # 의류준비
+        18,                    # 포장
+        19,                    # 결제대기
+    );
 
     $self->redirect_to(
         $self->url_for( '/stat/clothes/rent/' . $default_category )->query(
-            gender => $default_gender,
-            limit  => $default_limit,
+            gender         => $default_gender,
+            limit          => $default_limit,
+            sort           => $default_sort,
+            "status_ids[]" => \@default_status_ids,
         )
     );
 }
@@ -420,7 +438,7 @@ sub clothes_rent_category {
     #
     # fetch params
     #
-    my %params = $self->get_params(qw/ category gender limit p sort /);
+    my %params = $self->get_params(qw/ category gender limit status_ids[] p sort /);
 
     #
     # validate params
@@ -430,6 +448,7 @@ sub clothes_rent_category {
     $v->field('category')->in(qw/ jacket pants skirt /);
     $v->field('gender')->in(qw/ male female /);
     $v->field('limit')->regexp(qr/^\d+$/);
+    $v->field('status_ids[]')->regexp(qr/^\d+$/);
     $v->field('p')->regexp(qr/^\d+$/);
     $v->field('sort')->in(qw/ asc desc /);
 
@@ -467,20 +486,39 @@ sub clothes_rent_category {
         ),
     );
 
-    my $cached = $self->CACHE->get($name) || [];
-    my @cached_page;
-
     my $page  = $params{p}     || 1;
     my $limit = $params{limit} || 10;
     my $sort  = $params{sort}  || "asc";
     my $start_idx = ( $page - 1 ) * $limit;
     my $end_idx   = $start_idx + $limit - 1;
 
-    if ( $sort eq "asc" ) {
-        @cached_page = grep { defined } @{$cached}[ $start_idx .. $end_idx ];
+    my $status_ids;
+    if ( $params{"status_ids[]"} ) {
+        if ( ref $params{"status_ids[]"} eq "ARRAY" ) {
+            $status_ids = $params{"status_ids[]"};
+        }
+        else {
+            $status_ids = [ $params{"status_ids[]"} ];
+        }
     }
     else {
-        @cached_page = grep { defined } ( reverse @{$cached} )[ $start_idx .. $end_idx ];
+        $status_ids = [];
+    }
+
+    my $cached = $self->CACHE->get($name) || [];
+    my @status_filtered_cached;
+    for my $item (@$cached) {
+        use experimental qw( smartmatch );
+        next unless $item->{status_id} ~~ @$status_ids;
+        push @status_filtered_cached, $item;
+    }
+
+    my @cached_page;
+    if ( $sort eq "asc" ) {
+        @cached_page = grep { defined } @status_filtered_cached[ $start_idx .. $end_idx ];
+    }
+    else {
+        @cached_page = grep { defined } ( reverse @status_filtered_cached )[ $start_idx .. $end_idx ];
     }
 
     my $clothes_rs = $self->DB->resultset('Clothes')->search(
@@ -512,7 +550,7 @@ sub clothes_rent_category {
 
     my $pageset = Data::Pageset->new(
         {
-            total_entries    => scalar(@$cached),
+            total_entries    => scalar(@status_filtered_cached),
             entries_per_page => $limit,
             pages_per_set    => 5,
             current_page     => $page,
@@ -525,6 +563,7 @@ sub clothes_rent_category {
         category    => $params{category},
         gender      => $params{gender},
         limit       => $params{limit},
+        status_ids  => $params{"status_ids[]"},
         sort        => $params{sort},
         start_idx   => $start_idx,
         end_idx     => $end_idx,

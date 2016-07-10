@@ -852,6 +852,33 @@
         }
     }
     #stat-clothes-rent {
+        .chosen-container-multi {
+            .chosen-choices {
+                min-height: 100px;
+                li.search-field input[type="text"] {
+                    height: 25px;
+                }
+                li.search-choice .search-choice-close {
+                    background:none;
+                    &:before {
+                        content: "\f00d";
+                        display: inline-block;
+                        color: #888;
+                        font-family: FontAwesome;
+                        font-size: 13px;
+                        position: absolute;
+                        right: 5px;
+                        top: -1px;
+                    }
+                    &:hover {
+                        text-decoration:none;
+                    }
+                    &:hover:before {
+                        color:#464646;
+                    }
+                }
+            }
+        }
         #clothes-rent {
             table tr:nth-child(2) {
                 th:nth-child(1),
