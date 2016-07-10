@@ -319,7 +319,7 @@ sub api_search_clothes_user {
     return $self->render unless $result;
 
     my $guess = shift @$result;
-    my @result = map { [ @{$_}[ 0, 1, 4 ] ] } @$result;
+    my @result = map { [ @{$_}{qw/upper_code lower_code rss rent_count/ } ] } @$result;
     $self->respond_to( json => { json => { guess => $guess, result => [@result] } } );
 }
 

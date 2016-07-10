@@ -422,11 +422,11 @@ $db_opts->{AutoCommit} //= 1;
                 waist
             /],
             range_rules  => {
-                bust     => sub { ( ceil( $_[0] ) - 2, ceil( $_[0] ) + 2 ) },
+                bust     => sub { ( ceil( $_[0] ) - 3, ceil( $_[0] ) + 3 ) },
                 topbelly => sub { ( ceil( $_[0] ) - 2, ceil( $_[0] ) + 2 ) },
-                arm      => sub { ( ceil( $_[0] ) - 1, ceil( $_[0] ) + 1 ) },
-                thigh    => sub { ( ceil( $_[0] ) - 2, ceil( $_[0] ) + 2 ) },
-                waist    => sub { ( ceil( $_[0] ),     ceil( $_[0] ) + 2 ) },
+                arm      => sub { ( ceil( $_[0] ) - 1, ceil( $_[0] ) + 2 ) },
+                thigh    => sub { ( ceil( $_[0] ) - 2, ceil( $_[0] ) + 3 ) },
+                waist    => sub { ( ceil( $_[0] ) - 1, ceil( $_[0] ) + 2 ) },
             },
         },
         female => {
