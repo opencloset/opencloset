@@ -91,6 +91,7 @@ sub register {
     $app->helper( search_clothes            => \&search_clothes );
     $app->helper( clothes2link              => \&clothes2link );
     $app->helper( is_suit_order             => \&is_suit_order );
+    $app->helper( choose_value_by_range     => \&choose_value_by_range );
 }
 
 =head1 HELPERS
@@ -1956,6 +1957,46 @@ sub redis {
     my $result_arrref = $self->search_clothes($user_id);
 
 =cut
+
+sub range_filter {
+    my ($f, $measure, $guess) = @_;
+
+    return $measure unless $f;
+
+    my $result;
+    if( $guess < $measure ) {
+        my $max = ($f->($guess))[1];
+        my $min = ($f->($measure))[0];
+
+        $result = $max - $min >= 0 ? $guess : $measure;
+    } elsif( $guess > $measure ) {
+        my $min = ($f->($guess))[0];
+        my $max = ($f->($measure))[1];
+
+        $result = $min - $max >= 0 ? $measure : $guess;
+    } else { $result = $guess };
+
+    return $result;
+}
+
+sub choose_value_by_range {
+    my ($self, $guess, $user_info, @parts) = @_;
+
+    my $config     = $self->config->{'user-id-search-clothes'}{$user_info->gender};
+
+    for my $part (@parts) {
+        next unless $guess->{$part};
+        next unless $user_info->$part;
+
+        my $val = range_filter($config->{range_rules}{$part}, $user_info->$part, $guess->{$part});
+        next if $val == $guess->{$part};
+
+        $self->log->info( "guess replace user $part : " . $guess->{$part} . ' => ' .  $val );
+        $guess->{$part} = $val;
+    }
+
+    return $guess;
+}
 
 sub search_clothes {
     my ( $self, $user_id ) = @_;
