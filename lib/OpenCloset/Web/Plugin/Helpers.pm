@@ -10,7 +10,7 @@ use DateTime;
 use Gravatar::URL;
 use HTTP::Tiny;
 use List::MoreUtils qw( zip );
-use List::Util qw/any/;
+use List::Util qw/any uniq/;
 use Mojo::ByteStream;
 use Mojo::DOM::HTML;
 use Mojo::JSON qw/encode_json/;
@@ -2005,81 +2005,46 @@ sub search_clothes {
     my $user = $self->get_user( { id => $user_id } );
     return $self->error( 404, { str => "User not found: $user_id" } ) unless $user;
 
-    my $user_info = $user->user_info;
-    my %params    = (
-        gender   => $user_info->gender,
-        height   => $user_info->height,
-        weight   => $user_info->weight,
-        bust     => $user_info->bust || 0,
-        waist    => $user_info->waist || 0,
-        topbelly => $user_info->topbelly || 0,
-        thigh    => $user_info->thigh || 0,
-        arm      => $user_info->arm || 0,
-        leg      => $user_info->leg || 0,
-    );
-
-    return $self->error( 400, { str => 'Height is required' } ) unless $params{height};
-    return $self->error( 400, { str => 'Weight is required' } ) unless $params{weight};
-
-    my $guesser = OpenCloset::Size::Guess->new(
-        'OpenCPU::RandomForest',
-        gender    => $params{gender},
-        height    => $params{height},
-        weight    => $params{weight},
-        _bust     => $params{bust},
-        _waist    => $params{waist},
-        _topbelly => $params{topbelly},
-        _thigh    => $params{thigh},
-        _arm      => $params{arm},
-        _leg      => $params{leg},
-    );
-    $self->log->info(
-        "guess params : " . encode_json( { user_id => $user_id, %params } ) );
-
-    my $gender = $params{gender};
-    my $guess  = $guesser->guess;
-    return $self->error( 500, { str => "Guess failed: $guess->{reason}" } )
-        unless $guess->{success};
-
-    map {
-        if ( $guess->{$_} and $guess->{$_} eq 'NA' ) {
-            $guess->{$_} = 0;
-        }
-    } keys %$guess;
-
-    $self->log->info( "guess result size : " . encode_json($guess) );
-
-    my $range_filter = sub {
-        my ($f, $measure, $guess) = @_;
-
-        return $measure unless $f;
-
-        my $result;
-        if( $guess < $measure ) {
-            my $max = ($f->($guess))[1];
-            my $min = ($f->($measure))[0];
-
-            $result = $max - $min >= 0 ? $guess : $measure;
-        } elsif( $guess > $measure ) {
-            my $min = ($f->($guess))[0];
-            my $max = ($f->($measure))[1];
-
-            $result = $min - $max >= 0 ? $measure : $guess;
-        } else { $result = $guess };
-
-        return $result;
-    };
-
+    my $user_info  = $user->user_info;
+    my $gender     = $user_info->gender;
     my $config     = $self->config->{'user-id-search-clothes'}{$gender};
     my $upper_name = $config->{upper_name};
     my $lower_name = $config->{lower_name};
 
-    for my $part (qw/arm waist/) {
-        my $val = $range_filter->($config->{range_rules}{$part}, $user_info->$part, $guess->{$part});
-        next if $val == $guess->{$part};
+    my @param_keys = uniq ( @{ $config->{'upper_params'} }, @{ $config->{'lower_params'} } ) ;
+    my @param_values = map { $user_info->$_ } @param_keys;
 
-        $self->log->info( "guess replace user $part : " . $guess->{$part} . ' => ' .  $val );
-        $guess->{$part} = $val;
+    my %params = (
+        gender => $gender,
+        height => $user_info->height,
+        weight => $user_info->weight,
+        zip(@param_keys, @param_values),
+    );
+
+    for my $key ( 'height','weight','gender', @param_keys ) {
+        return $self->error( 400, { str => ucfirst($key) . ' is required' } ) unless $params{$key};
+    }
+
+    my $guesser = OpenCloset::Size::Guess->new(
+        'OpenCPU::RandomForest',
+        gender    => $gender,
+        height    => $params{height},
+        weight    => $params{weight},
+        map { (sprintf("_%s", $_) => $params{$_} ) } @param_keys,
+    );
+    $self->log->info(
+        "guess params : " . encode_json( { user_id => $user_id, %params } ) );
+
+    my $guess  = $guesser->guess;
+    return $self->error( 500, { str => "Guess failed: $guess->{reason}" } )
+        unless $guess->{success};
+
+    $self->log->info( "guess result size : " . encode_json($guess) );
+
+    if( $gender eq 'male' ) {
+        $guess = $self->choose_value_by_range($guess, $user_info, qw/arm waist/);
+    } elsif ( $gender eq 'female' ) {
+        $guess = $self->choose_value_by_range($guess, $user_info, qw/hip/);
     }
 
     my %between;
