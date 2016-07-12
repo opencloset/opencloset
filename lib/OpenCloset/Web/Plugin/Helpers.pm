@@ -2045,6 +2045,9 @@ sub search_clothes {
         $guess = $self->choose_value_by_range($guess, $user_info, qw/arm waist/);
     } elsif ( $gender eq 'female' ) {
         $guess = $self->choose_value_by_range($guess, $user_info, qw/hip/);
+
+        $self->log->info( "guess always replace female waist with topbelly : " . $guess->{waist} . ' => ' .  $user_info->topbelly );
+        $guess->{waist} = $user_info->topbelly;
     }
 
     my %between;
