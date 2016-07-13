@@ -83,6 +83,20 @@ $ ->
     is_checked = $('#input-check-all').is(':checked')
     $(@).closest('thead').next().find(':checkbox:not(:disabled):not([readonly])').prop('checked', is_checked)
 
+  getPreCategory = () ->
+    order = $('input[name=id]:checked').val()
+    return $("tr[data-order-id=#{order}] td span.pre_category").data("pre-category").split(",").sort().join(",")
+
+  getPostCategory = () ->
+    category = []
+    $('input[name=clothes_code]:checked').each (i, el) ->
+      return if $(el).attr('id') is 'input-check-all'
+      category.push($(el).data('category'))
+    return category.sort().join(",")
+
+  isPrePostCategorySame = () ->
+    return getPreCategory() == getPostCategory()
+
   #
   # 대여 버튼 클릭
   #
@@ -98,32 +112,17 @@ $ ->
     return OpenCloset.alert('danger', '대여할 주문서를 선택해 주세요') unless order
     return OpenCloset.alert('danger', '대여할 옷을 선택해 주세요.')    unless clothes
 
-    $("#modal-rental").modal('show')
+    if isPrePostCategorySame()
+      $('#order-form').submit()
+    else
+      $("#modal-rental").modal('show')
 
   #
   # 대여 모달이 열릴 때
   #
   $("#modal-rental").on "show.bs.modal", (e) ->
-    order = $('input[name=id]:checked').val()
-
-    category = []
-    $('input[name=clothes_code]:checked').each (i, el) ->
-      return if $(el).attr('id') is 'input-check-all'
-      category.push($(el).data('category'))
-
-    pre_category  = $("tr[data-order-id=#{order}] td span.pre_category").data("pre-category").split(",").sort().join(",")
-    post_category = category.sort().join(",")
-
-    if pre_category != post_category
-      $("#modal-rental .rental-caution").html("대여 희망 항목과 포장 항목이 서로 다릅니다!")
-      $(".rental-match").hide()
-      $(".rental-unmatch").show()
-    else
-      $(".rental-match").show()
-      $(".rental-unmatch").hide()
-
-    pre_category_str  = ( OpenCloset.category[i].str for i in pre_category.split(",")  ).join(",")
-    post_category_str = ( OpenCloset.category[i].str for i in post_category.split(",") ).join(",")
+    pre_category_str  = ( OpenCloset.category[i].str for i in getPreCategory().split(",")  ).join(",")
+    post_category_str = ( OpenCloset.category[i].str for i in getPostCategory().split(",") ).join(",")
 
     $("#modal-rental .pre_category").html(pre_category_str)
     $("#modal-rental .post_category").html(post_category_str)
@@ -134,9 +133,6 @@ $ ->
   $("#btn-rental-modal-cancel").click (e) ->
     $("#modal-rental .pre_category").html("")
     $("#modal-rental .post_category").html("")
-    $("#modal-rental .rental-caution").html("")
-    $(".rental-match").hide()
-    $(".rental-unmatch").hide()
     $("input[name=id]:checked").prop("checked", false)
     $("#modal-rental").modal("hide")
 
@@ -146,9 +142,6 @@ $ ->
   $("#btn-rental-modal-ok").click (e) ->
     $("#modal-rental .pre_category").html("")
     $("#modal-rental .post_category").html("")
-    $("#modal-rental .rental-caution").html("")
-    $(".rental-match").hide()
-    $(".rental-unmatch").hide()
     $("#modal-rental").modal("hide")
     $('#order-form').submit()
 
