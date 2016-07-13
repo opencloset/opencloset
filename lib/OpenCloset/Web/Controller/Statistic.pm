@@ -972,7 +972,7 @@ WHERE o.status_id NOT IN (12, 14) AND b.date >= '2016-04-01' GROUP BY DATE_FORMA
             $dbh->selectall_arrayref(
                 qq{SELECT DATE_FORMAT(b.date, '%Y-%m') AS ym, count(*) AS not_visited
 FROM `order` o JOIN booking b ON o.booking_id = b.id
-WHERE o.status_id IN (12, 14) AND b.date >= '2016-04-01' GROUP BY DATE_FORMAT(b.date, '%Y-%m')}
+WHERE o.status_id IN (12, 14) AND b.date >= '2016-04-01' AND b.date < NOW() GROUP BY DATE_FORMAT(b.date, '%Y-%m')}
             );
         }
     );
