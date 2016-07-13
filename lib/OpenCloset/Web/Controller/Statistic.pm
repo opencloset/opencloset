@@ -396,24 +396,24 @@ sub clothes_hit_category {
 sub clothes_rent {
     my $self = shift;
 
-    my $default_category = 'jacket';
-    my $default_gender   = 'male';
-    my $default_limit    = 10;
-    my $default_sort     = 'asc';
-    my @default_status_ids = ( # 가용 가능 의류 상태
-        1,                     # 대여가능
-        2,                     # 대여중
-        3,                     # 대여불가
-        4,                     # 예약
-        5,                     # 세탁
-        6,                     # 수선
-        9,                     # 반납
-        10,                    # 부분반납
-        11,                    # 반납배송중
-        16,                    # 치수측정
-        17,                    # 의류준비
-        18,                    # 포장
-        19,                    # 결제대기
+    my $default_category   = 'jacket';
+    my $default_gender     = 'male';
+    my $default_limit      = 10;
+    my $default_sort       = 'asc';
+    my @default_status_ids = (        # 가용 가능 의류 상태
+        1,                            # 대여가능
+        2,                            # 대여중
+        3,                            # 대여불가
+        4,                            # 예약
+        5,                            # 세탁
+        6,                            # 수선
+        9,                            # 반납
+        10,                           # 부분반납
+        11,                           # 반납배송중
+        16,                           # 치수측정
+        17,                           # 의류준비
+        18,                           # 포장
+        19,                           # 결제대기
     );
 
     $self->redirect_to(
@@ -518,7 +518,8 @@ sub clothes_rent_category {
         @cached_page = grep { defined } @status_filtered_cached[ $start_idx .. $end_idx ];
     }
     else {
-        @cached_page = grep { defined } ( reverse @status_filtered_cached )[ $start_idx .. $end_idx ];
+        @cached_page =
+            grep { defined } ( reverse @status_filtered_cached )[ $start_idx .. $end_idx ];
     }
 
     my $clothes_rs = $self->DB->resultset('Clothes')->search(
@@ -528,7 +529,7 @@ sub clothes_rent_category {
         },
         {
             join     => [ { order_details => 'order' }, { donation => 'user' }, ],
-            prefetch => [ { donation      => 'user' }, "status" ],
+            prefetch => [ { donation      => 'user' },  "status" ],
             columns  => [
                 qw/
                     arm
