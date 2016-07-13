@@ -1111,6 +1111,49 @@ GROUP BY ui.birth}
         $counts{age_group}{$age_group} += $c;
     }
 
+    ## 월별, 성별
+    my $monthly_gender = $self->DB->storage->dbh_do(
+        sub {
+            my ( $storage, $dbh, @args ) = @_;
+            $dbh->selectall_arrayref(
+                qq{SELECT DATE_FORMAT(b.date, '%Y-%m') AS ym, ui.gender, COUNT(DISTINCT(coupon_id))
+FROM `order` o
+JOIN `coupon` c ON o.coupon_id = c.id
+JOIN `user_info` ui ON o.user_id = ui.user_id
+JOIN `booking` b ON o.booking_id = b.id
+WHERE o.coupon_id IS NOT NULL AND c.status = 'used'
+GROUP BY DATE_FORMAT(b.date, '%Y-%m'), ui.gender}
+            );
+        },
+    );
+
+    for my $row (@$monthly_gender) {
+        my ( $ym, $gender, $c ) = @$row;
+        $counts{monthly}{$ym}{gender}{$gender} += $c;
+    }
+
+    ## 월별, 연령대별
+    my $monthly_birth = $self->DB->storage->dbh_do(
+        sub {
+            my ( $storage, $dbh, @args ) = @_;
+            $dbh->selectall_arrayref(
+                qq{SELECT DATE_FORMAT(b.date, '%Y-%m') AS ym, ui.birth, COUNT(DISTINCT(coupon_id))
+FROM `order` o
+JOIN `coupon` c ON o.coupon_id = c.id
+JOIN `user_info` ui ON o.user_id = ui.user_id
+JOIN `booking` b ON o.booking_id = b.id
+WHERE o.coupon_id IS NOT NULL AND c.status = 'used'
+GROUP BY DATE_FORMAT(b.date, '%Y-%m'), ui.birth}
+            );
+        },
+    );
+
+    for my $row (@$monthly_birth) {
+        my ( $ym, $birth, $c ) = @$row;
+        my $age_group = int( ( $year - $birth ) / 10 ) * 10;
+        $counts{monthly}{$ym}{age_group}{$age_group} += $c;
+    }
+
     $self->render( from => $from, $to => $to, counts => \%counts, dates => \%dates );
 }
 
