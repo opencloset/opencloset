@@ -38,6 +38,11 @@
               <th>열린옷장 미방문인원</th>
               <th>취업날개 방문인원</th>
               <th>취업날개 미방문인원</th>
+              <th>남성</th>
+              <th>여성</th>
+              <th>10대</th>
+              <th>20대</th>
+              <th>30대</th>
             </tr>
           </thead>
           <tbody>
@@ -47,16 +52,31 @@
             % my $opencloset_not_visited = $counts->{monthly}{$ym}{opencloset}{not_visited} || 0;
             % my $events_visited = $counts->{monthly}{$ym}{events}{visited} || 0;
             % my $events_not_visited = $counts->{monthly}{$ym}{events}{not_visited} || 0;
+            % my $gender_male = $counts->{monthly}{$ym}{gender}{male} || 0;
+            % my $gender_female = $counts->{monthly}{$ym}{gender}{female} || 0;
+            % my $age_group_10 = $counts->{monthly}{$ym}{age_group}{10} || 0;
+            % my $age_group_20 = $counts->{monthly}{$ym}{age_group}{20} || 0;
+            % my $age_group_30 = $counts->{monthly}{$ym}{age_group}{30} || 0;
             % $sum{opencloset}{visited} += $opencloset_visited;
             % $sum{opencloset}{not_visited} += $opencloset_not_visited;
             % $sum{events}{visited} += $events_visited;
             % $sum{events}{not_visited} += $events_not_visited;
+            % $sum{gender}{male} += $gender_male;
+            % $sum{gender}{female} += $gender_female;
+            % $sum{age_group}{10} += $age_group_10;
+            % $sum{age_group}{20} += $age_group_20;
+            % $sum{age_group}{30} += $age_group_30;
             <tr>
               <td><%= $ym %></td>
               <td><samp><%= $opencloset_visited %></samp></td>
               <td><samp><%= $opencloset_not_visited %></samp></td>
               <td><samp><%= $events_visited %></samp></td>
               <td><samp><%= $events_not_visited %></samp></td>
+              <td><samp><%= $gender_male %></samp></td>
+              <td><samp><%= $gender_female %></samp></td>
+              <td><samp><%= $age_group_10 %></samp></td>
+              <td><samp><%= $age_group_20 %></samp></td>
+              <td><samp><%= $age_group_30 %></samp></td>
             </tr>
             % }
             <tr>
@@ -65,6 +85,11 @@
               <td><samp><%= $sum{opencloset}{not_visited} %></samp></td>
               <td><samp><%= $sum{events}{visited} %></samp></td>
               <td><samp><%= $sum{events}{not_visited} %></samp></td>
+              <td><samp><%= $sum{gender}{male} %></samp></td>
+              <td><samp><%= $sum{gender}{female} %></samp></td>
+              <td><samp><%= $sum{age_group}{10} %></samp></td>
+              <td><samp><%= $sum{age_group}{20} %></samp></td>
+              <td><samp><%= $sum{age_group}{30} %></samp></td>
             </tr>
           </tbody>
         </table>

@@ -396,24 +396,24 @@ sub clothes_hit_category {
 sub clothes_rent {
     my $self = shift;
 
-    my $default_category = 'jacket';
-    my $default_gender   = 'male';
-    my $default_limit    = 10;
-    my $default_sort     = 'asc';
-    my @default_status_ids = ( # 가용 가능 의류 상태
-        1,                     # 대여가능
-        2,                     # 대여중
-        3,                     # 대여불가
-        4,                     # 예약
-        5,                     # 세탁
-        6,                     # 수선
-        9,                     # 반납
-        10,                    # 부분반납
-        11,                    # 반납배송중
-        16,                    # 치수측정
-        17,                    # 의류준비
-        18,                    # 포장
-        19,                    # 결제대기
+    my $default_category   = 'jacket';
+    my $default_gender     = 'male';
+    my $default_limit      = 10;
+    my $default_sort       = 'asc';
+    my @default_status_ids = (        # 가용 가능 의류 상태
+        1,                            # 대여가능
+        2,                            # 대여중
+        3,                            # 대여불가
+        4,                            # 예약
+        5,                            # 세탁
+        6,                            # 수선
+        9,                            # 반납
+        10,                           # 부분반납
+        11,                           # 반납배송중
+        16,                           # 치수측정
+        17,                           # 의류준비
+        18,                           # 포장
+        19,                           # 결제대기
     );
 
     $self->redirect_to(
@@ -518,7 +518,8 @@ sub clothes_rent_category {
         @cached_page = grep { defined } @status_filtered_cached[ $start_idx .. $end_idx ];
     }
     else {
-        @cached_page = grep { defined } ( reverse @status_filtered_cached )[ $start_idx .. $end_idx ];
+        @cached_page =
+            grep { defined } ( reverse @status_filtered_cached )[ $start_idx .. $end_idx ];
     }
 
     my $clothes_rs = $self->DB->resultset('Clothes')->search(
@@ -528,7 +529,7 @@ sub clothes_rent_category {
         },
         {
             join     => [ { order_details => 'order' }, { donation => 'user' }, ],
-            prefetch => [ { donation      => 'user' }, "status" ],
+            prefetch => [ { donation      => 'user' },  "status" ],
             columns  => [
                 qw/
                     arm
@@ -972,7 +973,7 @@ WHERE o.status_id NOT IN (12, 14) AND b.date >= '2016-04-01' GROUP BY DATE_FORMA
             $dbh->selectall_arrayref(
                 qq{SELECT DATE_FORMAT(b.date, '%Y-%m') AS ym, count(*) AS not_visited
 FROM `order` o JOIN booking b ON o.booking_id = b.id
-WHERE o.status_id IN (12, 14) AND b.date >= '2016-04-01' GROUP BY DATE_FORMAT(b.date, '%Y-%m')}
+WHERE o.status_id IN (12, 14) AND b.date >= '2016-04-01' AND b.date < NOW() GROUP BY DATE_FORMAT(b.date, '%Y-%m')}
             );
         }
     );
@@ -1108,6 +1109,49 @@ GROUP BY ui.birth}
 
         my $age_group = int( ( $year - $birth ) / 10 ) * 10;
         $counts{age_group}{$age_group} += $c;
+    }
+
+    ## 월별, 성별
+    my $monthly_gender = $self->DB->storage->dbh_do(
+        sub {
+            my ( $storage, $dbh, @args ) = @_;
+            $dbh->selectall_arrayref(
+                qq{SELECT DATE_FORMAT(b.date, '%Y-%m') AS ym, ui.gender, COUNT(DISTINCT(coupon_id))
+FROM `order` o
+JOIN `coupon` c ON o.coupon_id = c.id
+JOIN `user_info` ui ON o.user_id = ui.user_id
+JOIN `booking` b ON o.booking_id = b.id
+WHERE o.coupon_id IS NOT NULL AND c.status = 'used'
+GROUP BY DATE_FORMAT(b.date, '%Y-%m'), ui.gender}
+            );
+        },
+    );
+
+    for my $row (@$monthly_gender) {
+        my ( $ym, $gender, $c ) = @$row;
+        $counts{monthly}{$ym}{gender}{$gender} += $c;
+    }
+
+    ## 월별, 연령대별
+    my $monthly_birth = $self->DB->storage->dbh_do(
+        sub {
+            my ( $storage, $dbh, @args ) = @_;
+            $dbh->selectall_arrayref(
+                qq{SELECT DATE_FORMAT(b.date, '%Y-%m') AS ym, ui.birth, COUNT(DISTINCT(coupon_id))
+FROM `order` o
+JOIN `coupon` c ON o.coupon_id = c.id
+JOIN `user_info` ui ON o.user_id = ui.user_id
+JOIN `booking` b ON o.booking_id = b.id
+WHERE o.coupon_id IS NOT NULL AND c.status = 'used'
+GROUP BY DATE_FORMAT(b.date, '%Y-%m'), ui.birth}
+            );
+        },
+    );
+
+    for my $row (@$monthly_birth) {
+        my ( $ym, $birth, $c ) = @$row;
+        my $age_group = int( ( $year - $birth ) / 10 ) * 10;
+        $counts{monthly}{$ym}{age_group}{$age_group} += $c;
     }
 
     $self->render( from => $from, $to => $to, counts => \%counts, dates => \%dates );
