@@ -408,14 +408,24 @@ sub order {
         last if $history && $nonpayment;
     }
 
+    my $visited_order_rs = $orders->search(
+        { status_id => $RETURNED },
+        { order_by  => { -desc => 'return_date' } },
+    );
+
+    my $visited    = $visited_order_rs->count;
+    my $last_order = $visited_order_rs->first;
+
     #
     # response
     #
     $self->render(
-        order      => $order,          history     => $history,
+        order      => $order,
+        last_order => $last_order,
+        history    => $history,
         nonpayment => $nonpayment,
         today      => $params{today},
-        visited    => $orders->search( { status_id => $RETURNED } )->count,
+        visited    => $visited,
     );
 }
 
