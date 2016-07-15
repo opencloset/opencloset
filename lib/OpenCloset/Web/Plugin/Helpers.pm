@@ -1496,6 +1496,8 @@ sub convert_sec_to_locale {
 sub convert_sec_to_hms {
     my ( $self, $seconds ) = @_;
 
+    return unless $seconds;
+
     my $dfd = DateTime::Format::Duration->new( normalize => 'ISO', pattern => "%M:%S" );
     my $dur1 = DateTime::Duration->new( seconds => $seconds );
     my $hms = sprintf(
