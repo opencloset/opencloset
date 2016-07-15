@@ -12,7 +12,6 @@ use Time::Piece;
 use Try::Tiny;
 use List::Util qw/sum/;
 
-
 use OpenCloset::Config;
 use OpenCloset::Schema;
 
@@ -21,6 +20,7 @@ binmode STDERR, ':utf8';
 
 my $config_file = shift || "$Bin/../app.conf";
 my $ymd         = shift || localtime->ymd;
+my $prefix      = 'stat-status';
 
 die "Usage: $Script <config path> [ <yyyy-mm-dd> ] \n"
     unless (
@@ -79,6 +79,7 @@ die "$config_file: cannot load config\n" unless $CONF;
     die "cannot create datetime object: today\n" unless $today;
     $today->truncate( to => 'day' );
 
+    my %count;
     my $from = $dt->clone->truncate( to => 'year' );
     my $to   = $dt->clone->truncate( to => 'day' );
     my $basis_dt = try {
@@ -87,6 +88,8 @@ die "$config_file: cannot load config\n" unless $CONF;
             day       => 29
         );
     };
+
+    # 01/01 ~ specified day
     for ( ; $from <= $to; $from->add( days => 1 ) ) {
         my $f = $from->clone->truncate( to => 'day' );
         my $t = $from->clone->truncate( to => 'day' )->add( days => 1, seconds => -1 );
@@ -95,80 +98,15 @@ die "$config_file: cannot load config\n" unless $CONF;
         next if $f >= $today;
         next if $t >= $today;
 
-        my $result = mean_status( $DB, $f, $t, $online_order_hour );
-        use Data::Dumper;
-        print Dumper [ $f->ymd, $t->ymd, $result ];
-    }
-}
-
-=cut
-
-{
-    my $DB_CONF   = $CONF->{database};
-    my $TIMEZONE  = $CONF->{timezone};
-    my $CACHE_DIR = $CONF->{cache}{dir};
-
-    die "$config_file: database is needed\n"  unless $DB_CONF;
-    die "$config_file: timezone is needed\n"  unless $TIMEZONE;
-    die "$config_file: cache.dir is needed\n" unless $CACHE_DIR;
-
-    my $DB = OpenCloset::Schema->connect(
-        {
-            dsn      => $DB_CONF->{dsn},
-            user     => $DB_CONF->{user},
-            password => $DB_CONF->{pass},
-            %{ $DB_CONF->{opts} },
-        }
-    );
-
-    my $CACHE = CHI->new(
-        driver   => 'File',
-        root_dir => $CACHE_DIR,
-    );
-
-    $ymd =~ m/^(\d{4})-(\d{2})-(\d{2})$/;
-    my $year  = $1;
-    my $month = $2;
-    my $day   = $3;
-
-    my $dt = try {
-        DateTime->new(
-            time_zone => $TIMEZONE,
-            year      => $year,
-            month     => $month,
-            day       => $day,
-        );
-    };
-    die "cannot create datetime object\n" unless $dt;
-
-    my $today = try {
-        DateTime->now(
-            time_zone => $TIMEZONE,
-        );
-    };
-    die "cannot create datetime object: today\n" unless $today;
-    $today->truncate( to => 'day' );
-
-    # 01/01 ~ specified day
-    my %count;
-    my $from = $dt->clone->truncate( to => 'year' );
-    my $to   = $dt->clone->truncate( to => 'day' );
-    for ( ; $from <= $to; $from->add( days => 1 ) ) {
-        my $f = $from->clone->truncate( to => 'day' );
-        my $t = $from->clone->truncate( to => 'day' )->add( days => 1, seconds => -1 );
-
-        next if $f >= $today;
-        next if $t >= $today;
-
         my $f_str = $f->strftime('%Y%m%d%H%M%S');
         my $t_str = $t->strftime('%Y%m%d%H%M%S');
-        my $name  = "day-$f_str-$t_str";
+        my $name  = "$prefix-day-$f_str-$t_str";
         my $count = $CACHE->compute(
             $name,
             undef,
             sub {
                 print "caching: $name\n";
-                count_visitor( $DB, $f, $t );
+                mean_status( $DB, $f, $t, $online_order_hour );
             },
         );
 
@@ -179,19 +117,20 @@ die "$config_file: cannot load config\n" unless $CONF;
     for ( my $i = $dt->clone->truncate( to => 'year'); $i <= $today; $i->add( weeks => 1 ) ) {
         my $f = $i->clone->truncate( to => 'week' );
         my $t = $i->clone->truncate( to => 'week' )->add( weeks => 1, seconds => -1 );
+        my $online_order_hour = $f >= $basis_dt ? 22 : 19;
 
         next if $f >= $today;
         next if $t >= $today;
 
         my $f_str = $f->strftime('%Y%m%d%H%M%S');
         my $t_str = $t->strftime('%Y%m%d%H%M%S');
-        my $name  = "week-$f_str-$t_str";
+        my $name  = "$prefix-week-$f_str-$t_str";
         my $count = $CACHE->compute(
             $name,
             undef,
             sub {
                 print "caching: $name\n";
-                count_visitor( $DB, $f, $t );
+                mean_status( $DB, $f, $t, $online_order_hour );
             },
         );
 
@@ -202,27 +141,26 @@ die "$config_file: cannot load config\n" unless $CONF;
     for ( my $i = $dt->clone->truncate( to => 'year'); $i <= $today; $i->add( months => 1 ) ) {
         my $f = $i->clone->truncate( to => 'month' );
         my $t = $i->clone->truncate( to => 'month' )->add( months => 1, seconds => -1 );
+        my $online_order_hour = $f >= $basis_dt ? 22 : 19;
 
         next if $f >= $today;
         next if $t >= $today;
 
         my $f_str = $f->strftime('%Y%m%d%H%M%S');
         my $t_str = $t->strftime('%Y%m%d%H%M%S');
-        my $name  = "month-$f_str-$t_str";
+        my $name  = "$prefix-month-$f_str-$t_str";
         my $count = $CACHE->compute(
             $name,
             undef,
             sub {
                 print "caching: $name\n";
-                count_visitor( $DB, $f, $t );
+                mean_status( $DB, $f, $t, $online_order_hour );
             },
         );
 
         push @{ $count{month} }, $count;
     }
 };
-
-=cut
 
 sub mean_status {
     my ( $DB, $start_dt, $end_dt, $online_order_hour ) = @_;
@@ -267,6 +205,7 @@ sub mean_status {
 
         $count{$_} = sum(@{ $total{$_} }) / $n;
     }
+    $count{total} = sum( values %count );
 
     return \%count;
 }
