@@ -10,6 +10,8 @@ use CHI;
 use DateTime;
 use Time::Piece;
 use Try::Tiny;
+use List::Util qw/sum/;
+
 
 use OpenCloset::Config;
 use OpenCloset::Schema;
@@ -79,17 +81,23 @@ die "$config_file: cannot load config\n" unless $CONF;
 
     my $from = $dt->clone->truncate( to => 'year' );
     my $to   = $dt->clone->truncate( to => 'day' );
+    my $basis_dt = try {
+        DateTime->new(
+            time_zone => $TIMEZONE, year => 2015, month => 5,
+            day       => 29
+        );
+    };
     for ( ; $from <= $to; $from->add( days => 1 ) ) {
         my $f = $from->clone->truncate( to => 'day' );
         my $t = $from->clone->truncate( to => 'day' )->add( days => 1, seconds => -1 );
+        my $online_order_hour = $f >= $basis_dt ? 22 : 19;
 
         next if $f >= $today;
         next if $t >= $today;
 
-        my $result = count_visitor( $DB, $f, $t );
+        my $result = mean_status( $DB, $f, $t, $online_order_hour );
         use Data::Dumper;
         print Dumper [ $f->ymd, $t->ymd, $result ];
-        last;
     }
 }
 
@@ -216,70 +224,49 @@ die "$config_file: cannot load config\n" unless $CONF;
 
 =cut
 
-sub count_visitor {
-    my ( $DB, $start_dt, $end_dt, $cb ) = @_;
+sub mean_status {
+    my ( $DB, $start_dt, $end_dt, $online_order_hour ) = @_;
 
-    my $dtf        = $DB->storage->datetime_parser;
-    my $booking_rs = $DB->resultset('Booking')->search(
+    my $dtf      = $DB->storage->datetime_parser;
+    my $order_rs = $DB->resultset('Order')->search(
         {
-            date => {
-                -between => [
-                    $dtf->format_datetime($start_dt),
-                    $dtf->format_datetime($end_dt),
-                ],
-            },
+            -and => [
+                'booking.date' => {
+                    -between => [ $dtf->format_datetime($start_dt), $dtf->format_datetime($end_dt), ],
+                },
+                \[ 'HOUR(`booking`.`date`) != ?', $online_order_hour ],
+            ]
         },
-        {
-            prefetch       => {
-                'orders' => {
-                    'user' => 'user_info'
-                }
-            },
-        },
+        { join => [qw/ booking /], order_by => { -asc => 'date' }, prefetch => 'booking', },
     );
 
-    my %count = (
-        all        => { total => 0, male => 0, female => 0 },
-        visited    => { total => 0, male => 0, female => 0 },
-        notvisited => { total => 0, male => 0, female => 0 },
-        bestfit    => { total => 0, male => 0, female => 0 },
-        loanee     => { total => 0, male => 0, female => 0 },
+    my @status = (qw/대기 치수측정 의류준비 탈의 수선 포장 결제/);
+    my %count  = (
+        '대기'       => 0,
+        '치수측정'   => 0,
+        '의류준비'   => 0,
+        '탈의'       => 0,
+        '수선'       => 0,
+        '포장'       => 0,
+        '결제'       => 0,
     );
-    while ( my $booking = $booking_rs->next ) {
-        for my $order ( $booking->orders ) {
-            next unless $order->user->user_info;
 
-            my $gender = $order->user->user_info->gender;
-            next unless $gender;
+    my %total;
+    while ( my $order = $order_rs->next ) {
+        my %analyze = $order->analyze_order_status_logs;
+        next unless $analyze{elapsed_time};
 
-            ++$count{all}{total};
-            ++$count{all}{$gender};
+        for (@status) {
+            next unless $analyze{elapsed_time}{$_};
 
-            if ( $order->rental_date ) {
-                ++$count{loanee}{total};
-                ++$count{loanee}{$gender};
-            }
-
-            if ( $order->bestfit ) {
-                ++$count{bestfit}{total};
-                ++$count{bestfit}{$gender};
-            }
-
-            use feature qw( switch );
-            use experimental qw( smartmatch );
-            given ( $order->status_id ) {
-                when (/^12|14$/) {
-                    ++$count{notvisited}{total};
-                    ++$count{notvisited}{$gender};
-                }
-            }
-
-            $cb->( $booking, $order, $gender ) if $cb && ref($cb) eq 'CODE';
+            push @{ $total{$_} }, $analyze{elapsed_time}{$_};
         }
     }
-    $count{visited}{total}  = $count{all}{total}  - $count{notvisited}{total};
-    $count{visited}{male}   = $count{all}{male}   - $count{notvisited}{male};
-    $count{visited}{female} = $count{all}{female} - $count{notvisited}{female};
+    foreach ( keys %total ) {
+        my $n = scalar(@{$total{$_}});
+
+        $count{$_} = sum(@{ $total{$_} }) / $n;
+    }
 
     return \%count;
-};
+}
