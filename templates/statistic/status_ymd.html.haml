@@ -7,19 +7,6 @@
 -   ;
 - title meta_text($_id);
 
-- use List::Util;
-- use Statistics::Basic;
-
-- my @status_names = (qw/대기 치수측정 의류준비 탈의 수선 포장 결제/);
-- my %status;
-- my %status_mean;
-- while ( my $order = $order_rs->next ) {
--   my %analyze = $order->analyze_order_status_logs;
--   my $booking_date = $order->booking->date->ymd;
--   push @{ $status{$booking_date} } , { order => $order, analyze => \%analyze };
--   push @{ $status_mean{$booking_date}{$_} }, $analyze{elapsed_time}{$_} for @status_names;
-- }
-
 .search
   %form#search-form
     .input-group
@@ -29,9 +16,7 @@
 
 #status-day
   %h2
-    상태별 처리 시간:
-    %span.date= $dt->ymd;
-
+    일별 평균 처리 시간
   .space-8
 
   %table.table.table-striped.table-bordered.table-hover
@@ -49,47 +34,50 @@
         %th 포장
         %th 결제
     %tbody
-      - for my $day ( sort keys %status ) {
+      - for ( my $i = 0 ; $i <  @{ $count->{day} } ; $i++ ) {
+      -   my $label = $count->{day}[$i]{label};
+      -   my $ymd   = $dt->ymd;
         %tr
           %td
-            - if ( $day eq $dt->ymd ) {
+            - if ( $label =~ m/^$ymd/ ) {
               %span.date
-                %a{ :href => "#{ url_for( '/order' )->query('booking_ymd' => $day ) }" }= $day
+                %a{ :href => "#{ url_for( '/order' )->query( 'booking_ymd' => $label ) }" }= $label
             - }
             - else {
               %span
-                %a{ :href => "#{ url_for( '/order' )->query('booking_ymd' => $day ) }" }= $day
+                %a{ :href => "#{ url_for( '/order' )->query( 'booking_ymd' => $label ) }" }= $label
             - }
-          - my $total = 0;
-          - for my $status_name (@status_names) {
-          -   my @taken_times;
-          -   for ( @{ $status_mean{$day}{$status_name} } ) {
-          -     next unless defined;
-          -     next unless $_ > 0;
-          -     next if     $_ < 60 && $status_name =~ m/^(치수측정|의류준비|탈의|수선|포장|결제)$/; # GH 440
-          -     push @taken_times, $_;
-          -   }
-          -   my $avg_sec = Statistics::Basic::mean( @taken_times )->query;
-          -   if ($avg_sec) {
-            %td= convert_sec_to_hms($avg_sec);
-          -     $total += $avg_sec;
-          -   }
-          -   else {
-            %td
-          -   }
+          - if ( $count->{day}[$i] ) {
+            %td= convert_sec_to_hms( $count->{day}[$i]{'대기'} )
+            %td= convert_sec_to_hms( $count->{day}[$i]{'치수측정'} )
+            %td= convert_sec_to_hms( $count->{day}[$i]{'의류준비'} )
+            %td= convert_sec_to_hms( $count->{day}[$i]{'탈의'} )
+            %td= convert_sec_to_hms( $count->{day}[$i]{'수선'} )
+            %td= convert_sec_to_hms( $count->{day}[$i]{'포장'} )
+            %td= convert_sec_to_hms( $count->{day}[$i]{'결제'} )
           - }
-          %td= convert_sec_to_hms($total);
+          - else {
+            %td N/A
+            %td N/A
+            %td N/A
+            %td N/A
+            %td N/A
+            %td N/A
+            %td N/A
+          - }
+            %td= convert_sec_to_hms( $count->{day}[$i]{'total'} )
       - }
 
-  .space-4
+#status-week
+  %h2
+    주별 평균 처리 시간
+  .space-8
 
   %table.table.table-striped.table-bordered.table-hover
     %thead
       %tr
-        %th{ :rowspan => "2" } #
-        %th{ :rowspan => "2" } 주문번호
-        %th{ :rowspan => "2" } 방문자명
-        %th.center{ :colspan => "7" } 처리시간
+        %th{ :rowspan => "2" } 주차(시작일 ~ 종료일)
+        %th.center{ :colspan => "7" } 평균 처리시간
         %th{ :rowspan => "2" } Total
       %tr
         %th 대기
@@ -100,21 +88,74 @@
         %th 포장
         %th 결제
     %tbody
-      - my $count = 0;
-      - for my $log ( @{ $status{$dt->ymd} }) {
-        - my $order = $log->{order};
-        - my %elapsed_time = %{ $log->{analyze}->{elapsed_time} };
-        - my $total = List::Util::sum0 grep { defined } @elapsed_time{@status_names};
-        - next unless $total;
+      - for ( my $i = 0 ; $i <  @{ $count->{week} } ; $i++ ) {
         %tr
-          %td= ++$count
-          %td
-            %a{ :href => "#{ url_for( '/order/' . $order->id ) }" }= $order->id
-          %td
-            %a{ :href => "#{ url_for( '/user/' . $order->user->id ) }" }= $order->user->name
-          - for my $status_name (@status_names) {
-            - my $taken_sec = $elapsed_time{$status_name};
-            %td= $taken_sec ? convert_sec_to_hms($taken_sec) : q{};
+          - if ( $count->{week}[$i] ) {
+            %td= $count->{week}[$i]{label}
+            %td= convert_sec_to_hms( $count->{week}[$i]{'대기'} )
+            %td= convert_sec_to_hms( $count->{week}[$i]{'치수측정'} )
+            %td= convert_sec_to_hms( $count->{week}[$i]{'의류준비'} )
+            %td= convert_sec_to_hms( $count->{week}[$i]{'탈의'} )
+            %td= convert_sec_to_hms( $count->{week}[$i]{'수선'} )
+            %td= convert_sec_to_hms( $count->{week}[$i]{'포장'} )
+            %td= convert_sec_to_hms( $count->{week}[$i]{'결제'} )
+            %td= convert_sec_to_hms( $count->{week}[$i]{total} )
           - }
-          %td= convert_sec_to_hms($total);
+          - else {
+            %td N/A
+            %td N/A
+            %td N/A
+            %td N/A
+            %td N/A
+            %td N/A
+            %td N/A
+            %td N/A
+            %td N/A
+          - }
+      - }
+
+#status-month
+  %h2
+    월별 평균 처리 시간
+  .space-8
+
+  %table.table.table-striped.table-bordered.table-hover
+    %thead
+      %tr
+        %th{ :rowspan => "2" } 연월
+        %th.center{ :colspan => "7" } 평균 처리시간
+        %th{ :rowspan => "2" } Total
+      %tr
+        %th 대기
+        %th 치수측정
+        %th 의류준비
+        %th 탈의
+        %th 수선
+        %th 포장
+        %th 결제
+    %tbody
+      - for ( my $i = 0 ; $i <  @{ $count->{month} } ; $i++ ) {
+        %tr
+          - if ( $count->{month}[$i] ) {
+            %td= $count->{month}[$i]{label}
+            %td= convert_sec_to_hms( $count->{month}[$i]{'대기'} )
+            %td= convert_sec_to_hms( $count->{month}[$i]{'치수측정'} )
+            %td= convert_sec_to_hms( $count->{month}[$i]{'의류준비'} )
+            %td= convert_sec_to_hms( $count->{month}[$i]{'탈의'} )
+            %td= convert_sec_to_hms( $count->{month}[$i]{'수선'} )
+            %td= convert_sec_to_hms( $count->{month}[$i]{'포장'} )
+            %td= convert_sec_to_hms( $count->{month}[$i]{'결제'} )
+            %td= convert_sec_to_hms( $count->{month}[$i]{total} )
+          - }
+          - else {
+            %td N/A
+            %td N/A
+            %td N/A
+            %td N/A
+            %td N/A
+            %td N/A
+            %td N/A
+            %td N/A
+            %td N/A
+          - }
       - }
