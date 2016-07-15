@@ -80,7 +80,7 @@ sub visit {
     # validate name
     #
     if ( $name =~ m/(^\s+|\s+$)/ ) {
-        $self->app->log->warn( "name includes trailing space: [$name]" );
+        $self->app->log->warn("name includes trailing space: [$name]");
         $self->stash( alert => '이름에 빈 칸이 들어있습니다.' );
         return;
     }
@@ -206,6 +206,18 @@ sub visit {
                     #
                     my $order_obj = $self->DB->resultset('Order')->find($order);
                     if ($order_obj) {
+                        #
+                        # 쿠폰없이 예약했다가, 쿠폰을 사용해서 다시 예약을 했을때
+                        #
+                        my $coupon_id = $order_obj->coupon_id;
+                        unless ($coupon_id) {
+                            if ( my $code = delete $self->session->{coupon_code} ) {
+                                my $coupon = $self->DB->resultset('Coupon')->find( { code => $code } );
+                                $coupon_id = $coupon->id;
+                                $order_obj->update( { coupon_id => $coupon_id } );
+                            }
+                        }
+
                         if ( $booking != $booking_saved ) {
                             #
                             # 변경한 예약 정보가 기존 정보와 다를 경우 갱신함
@@ -329,7 +341,7 @@ sub visit2 {
     # validate name
     #
     if ( $name =~ m/(^\s+|\s+$)/ ) {
-        $self->app->log->warn( "name includes trailing space: [$name]" );
+        $self->app->log->warn("name includes trailing space: [$name]");
         $self->stash( alert => '이름에 빈 칸이 들어있습니다.' );
         return;
     }
