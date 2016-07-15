@@ -80,7 +80,7 @@ sub visit {
     # validate name
     #
     if ( $name =~ m/(^\s+|\s+$)/ ) {
-        $self->app->log->warn( "name includes trailing space: [$name]" );
+        $self->app->log->warn("name includes trailing space: [$name]");
         $self->stash( alert => '이름에 빈 칸이 들어있습니다.' );
         return;
     }
@@ -329,7 +329,7 @@ sub visit2 {
     # validate name
     #
     if ( $name =~ m/(^\s+|\s+$)/ ) {
-        $self->app->log->warn( "name includes trailing space: [$name]" );
+        $self->app->log->warn("name includes trailing space: [$name]");
         $self->stash( alert => '이름에 빈 칸이 들어있습니다.' );
         return;
     }
