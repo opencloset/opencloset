@@ -36,6 +36,7 @@
 %     42, # 환불
 %   ],
 % });
+% my $user_info = $order->user->user_info;
 % my $revisited = $rs->count;
 % my $coupon    = $order->coupon;
 % my $event     = $coupon ? $coupon->desc : '';
@@ -57,6 +58,9 @@
     </div>
     <div class="widget-body">
       <div class="widget-main">
+        <p class="phone text-muted">
+          <small><%= $user_info->phone %></small>
+        </p>
         <p class="pre_category" data-category="<%= $order->user->user_info->pre_category %>"></p>
         <p class="pre_color"    data-color="<%= $order->user->user_info->pre_color %>"></p>
         <p class="wearon_date">

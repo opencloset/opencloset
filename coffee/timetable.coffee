@@ -276,3 +276,17 @@ $ ->
       $editable.editable('setValue', bestfit, true)
   sock.onerror = (e) ->
     location.reload()
+
+  #
+  # 같은 이름 찾기
+  #
+  nameOrderMap = {}
+  $('.people-box').each ->
+    order_id = $(@).data('order-id')
+    name = $(@).find('.widget-header > h4 > a').text().trim().split(' ')[0]
+    unless nameOrderMap[name]
+      nameOrderMap[name] = order_id
+    else
+      exists = nameOrderMap[name]
+      $(".people-box[data-order-id=#{exists}]").addClass('name-duplicated')
+      $(@).addClass('name-duplicated')

@@ -353,6 +353,13 @@
                     - if ($visited) {
                       %em.revisit= $visited . '회 대여'
                     - }
+                    - if ( $visited && $last_order ) {
+                      = "-"
+                    - }
+                    - if ($last_order) {
+                    -   my $ago = $order->booking->date->delta_days( $last_order->booking->date );
+                      %em.revisit= $ago->delta_days . '일 지남'
+                    - }
               .row
                 %ul.list-unstyled.spaced
                   %li.row
