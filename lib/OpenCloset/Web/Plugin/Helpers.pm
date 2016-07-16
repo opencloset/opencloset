@@ -1985,7 +1985,7 @@ sub range_filter {
 sub choose_value_by_range {
     my ( $self, $guess, $user_info, @parts ) = @_;
 
-    my $config = $self->config->{'user-id-search-clothes'}{ $user_info->gender };
+    my $config = $self->config->{'search-clothes'}{$user_info->gender};
 
     for my $part (@parts) {
         next unless $guess->{$part};
@@ -2013,7 +2013,7 @@ sub search_clothes {
 
     my $user_info  = $user->user_info;
     my $gender     = $user_info->gender;
-    my $config     = $self->config->{'user-id-search-clothes'}{$gender};
+    my $config     = $self->config->{'search-clothes'}{$gender};
     my $upper_name = $config->{upper_name};
     my $lower_name = $config->{lower_name};
 
