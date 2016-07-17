@@ -2141,7 +2141,10 @@ sub search_clothes {
         next unless $lower_code;
         next unless any { $_ eq $pair{$upper_code}{$lower_name} } keys %lower_map;
 
-        $self->log->info( sprintf '< %s / %s >', $upper->code, $lower->code );
+        my $rent_count = $pair{$upper_code}{count};
+        my $color = $upper->color;
+        my @tags = map { $_->name } $upper->tags;
+        $self->log->info( sprintf '< %s / %s / %d / %s / %s >', $upper->code, $lower->code, $rent_count, $color, join(', ', @tags ) );
         my $rss;
         for my $size ( keys %$guess ) {
             next if $size eq 'reason';
@@ -2161,12 +2164,11 @@ sub search_clothes {
         }
         $self->log->info( '-' x 50 . "RSS : $rss" );
 
-        my $rent_count = $pair{$upper_code}{count};
-        push @result, {
-            upper_code => $upper_code, lower_code => $lower_code,
-            upper_rs   => $upper,      lower_rs   => $lower,
-            rss        => $rss,        rent_count => $rent_count,
-        };
+        push @result, { upper_code => $upper_code, lower_code => $lower_code,
+                        upper_rs   => $upper,      lower_rs   => $lower,
+                        rss        => $rss,        rent_count => $rent_count,
+                        color      => $color,
+                    };
     }
 
     @result = sort { $a->{rss} <=> $b->{rss} } @result;
