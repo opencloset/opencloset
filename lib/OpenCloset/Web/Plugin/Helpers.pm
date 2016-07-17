@@ -2170,18 +2170,30 @@ sub search_clothes {
                         color      => $color,
                     };
     }
+    my $rss_limit = 15;
+    my @colors    = (qw/black navy charcoalgray gray brown/);
+    my $fav_color = (split(/,/, $user_info->pre_color))[0];
+    $self->log->info("guess user pre_color : " . $user_info->pre_color);
+    $self->log->info("guess user fav color : " . $fav_color);
+    $self->log->info("guess user rss limit : " . $rss_limit);
 
-    @result = sort { $a->{rss} <=> $b->{rss} } @result;
-    $self->log->info(
-        "guess result list : "
-            . encode_json(
-            [ map { [ @{$_}{qw/upper_code lower_code rss rent_count/} ] } @result ]
-            )
-    );
-    $self->log->info( "guess result list count : " . scalar @result );
+    my @sorted;
+    if( $fav_color && any { $fav_color eq $_ } @colors ) {
+        my @fav_suits    = sort { $a->{rss} <=> $b->{rss} } grep { $_->{color} eq $fav_color } @result;
+        my @nonfav_suits = sort { $a->{rss} <=> $b->{rss} } grep { $_->{color} ne $fav_color } @result;
 
-    unshift @result, $guess;
-    return \@result;
+        @sorted = (
+            grep { $_->{rss} < $rss_limit } @fav_suits,
+            grep { $_->{rss} < $rss_limit } @nonfav_suits,
+        );
+    } else {
+        @sorted = sort { $a->{rss} <=> $b->{rss} } @result;
+    }
+
+    $self->log->info( "guess result list : " . encode_json( [ map { [ @{$_}{qw/upper_code lower_code rss rent_count/} ] } @sorted ]));
+    $self->log->info( "guess result list count : " . scalar @sorted );
+
+    return [ $guess, @sorted ];
 }
 
 =head2 clothes2link( $clothes, $opts )
