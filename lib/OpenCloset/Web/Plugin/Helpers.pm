@@ -2193,6 +2193,11 @@ sub search_clothes {
     $self->log->info( "guess result list : " . encode_json( [ map { [ @{$_}{qw/upper_code lower_code rss rent_count/} ] } @sorted ]));
     $self->log->info( "guess result list count : " . scalar @sorted );
 
+    unless( scalar(@result) == scalar(@sorted) ) {
+        $self->log->info( "guess sorted result list : " . encode_json( [ map { [ @{$_}{ qw/upper_code lower_code rss rent_count/ } ] } @sorted ] ) );
+        $self->log->info( "guess sorted result list count : " . scalar @sorted );
+    }
+
     return [ $guess, @sorted ];
 }
 
