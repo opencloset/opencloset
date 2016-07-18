@@ -2170,12 +2170,11 @@ sub search_clothes {
                         color      => $color,
                     };
     }
-    my $rss_limit = 15;
+
     my @colors    = (qw/black navy charcoalgray gray brown/);
     my $fav_color = (split(/,/, $user_info->pre_color))[0];
     $self->log->info("guess user pre_color : " . $user_info->pre_color);
     $self->log->info("guess user fav color : " . $fav_color);
-    $self->log->info("guess user rss limit : " . $rss_limit);
 
     my @sorted;
     if( $fav_color && any { $fav_color eq $_ } @colors ) {
@@ -2183,8 +2182,8 @@ sub search_clothes {
         my @nonfav_suits = sort { $a->{rss} <=> $b->{rss} } grep { $_->{color} ne $fav_color } @result;
 
         @sorted = (
-            grep { $_->{rss} < $rss_limit } @fav_suits,
-            grep { $_->{rss} < $rss_limit } @nonfav_suits,
+            @fav_suits,
+            @nonfav_suits,
         );
     } else {
         @sorted = sort { $a->{rss} <=> $b->{rss} } @result;
@@ -2192,11 +2191,6 @@ sub search_clothes {
 
     $self->log->info( "guess result list : " . encode_json( [ map { [ @{$_}{qw/upper_code lower_code rss rent_count/} ] } @sorted ]));
     $self->log->info( "guess result list count : " . scalar @sorted );
-
-    unless( scalar(@result) == scalar(@sorted) ) {
-        $self->log->info( "guess sorted result list : " . encode_json( [ map { [ @{$_}{ qw/upper_code lower_code rss rent_count/ } ] } @sorted ] ) );
-        $self->log->info( "guess sorted result list count : " . scalar @sorted );
-    }
 
     return [ $guess, @sorted ];
 }
