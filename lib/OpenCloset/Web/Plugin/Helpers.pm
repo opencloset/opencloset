@@ -22,7 +22,7 @@ use Try::Tiny;
 use OpenCloset::Size::Guess;
 use OpenCloset::Constants::Measurement;
 use OpenCloset::Constants::Category qw/$JACKET $PANTS $SKIRT/;
-use OpenCloset::Constants::Status qw/$RENTABLE $RENTAL/;
+use OpenCloset::Constants::Status qw/$RENTABLE $RENTAL $PAYMENT $RESERVATED/;
 
 =encoding utf8
 
@@ -1455,13 +1455,14 @@ sub get_nearest_booked_order {
     my $rs = $user->search_related(
         'orders',
         {
-            'me.status_id' => 14,                                       # 방문예약
-            'booking.date' => { '>' => $dtf->format_datetime($dt_now) },
+            'me.status_id' => { -in => [ $RESERVATED, $PAYMENT ] }, # 방문예약, 결제대기
         },
         {
             join => 'booking', order_by => [ { -asc => 'booking.date' }, { -asc => 'me.id' }, ],
         },
-    );
+        )
+        ->search_literal( 'DATE_FORMAT(`booking`.`date`, "%Y-%m-%d") >= ?',
+        $dt_now->ymd );
 
     my $order = $rs->next;
 
@@ -1959,39 +1960,44 @@ sub redis {
 =cut
 
 sub range_filter {
-    my ($f, $measure, $guess) = @_;
+    my ( $f, $measure, $guess ) = @_;
 
     return $measure unless $f;
 
     my $result;
-    if( $guess < $measure ) {
-        my $max = ($f->($guess))[1];
-        my $min = ($f->($measure))[0];
+    if ( $guess < $measure ) {
+        my $max = ( $f->($guess) )[1];
+        my $min = ( $f->($measure) )[0];
 
         $result = $max - $min >= 0 ? $guess : $measure;
-    } elsif( $guess > $measure ) {
-        my $min = ($f->($guess))[0];
-        my $max = ($f->($measure))[1];
+    }
+    elsif ( $guess > $measure ) {
+        my $min = ( $f->($guess) )[0];
+        my $max = ( $f->($measure) )[1];
 
         $result = $min - $max >= 0 ? $measure : $guess;
-    } else { $result = $guess };
+    }
+    else { $result = $guess }
 
     return $result;
 }
 
 sub choose_value_by_range {
-    my ($self, $guess, $user_info, @parts) = @_;
+    my ( $self, $guess, $user_info, @parts ) = @_;
 
-    my $config     = $self->config->{'user-id-search-clothes'}{$user_info->gender};
+    my $config = $self->config->{'user-id-search-clothes'}{ $user_info->gender };
 
     for my $part (@parts) {
         next unless $guess->{$part};
         next unless $user_info->$part;
 
-        my $val = range_filter($config->{range_rules}{$part}, $user_info->$part, $guess->{$part});
+        my $val = range_filter(
+            $config->{range_rules}{$part}, $user_info->$part,
+            $guess->{$part}
+        );
         next if $val == $guess->{$part};
 
-        $self->log->info( "guess replace user $part : " . $guess->{$part} . ' => ' .  $val );
+        $self->log->info( "guess replace user $part : " . $guess->{$part} . ' => ' . $val );
         $guess->{$part} = $val;
     }
 
@@ -2011,42 +2017,47 @@ sub search_clothes {
     my $upper_name = $config->{upper_name};
     my $lower_name = $config->{lower_name};
 
-    my @param_keys = uniq ( @{ $config->{'upper_params'} }, @{ $config->{'lower_params'} } ) ;
+    my @param_keys =
+        uniq( @{ $config->{'upper_params'} }, @{ $config->{'lower_params'} } );
     my @param_values = map { $user_info->$_ } @param_keys;
 
     my %params = (
         gender => $gender,
         height => $user_info->height,
         weight => $user_info->weight,
-        zip(@param_keys, @param_values),
+        zip( @param_keys, @param_values ),
     );
 
-    for my $key ( 'height','weight','gender', @param_keys ) {
-        return $self->error( 400, { str => ucfirst($key) . ' is required' } ) unless $params{$key};
+    for my $key ( 'height', 'weight', 'gender', @param_keys ) {
+        return $self->error( 400, { str => ucfirst($key) . ' is required' } )
+            unless $params{$key};
     }
 
     my $guesser = OpenCloset::Size::Guess->new(
         'OpenCPU::RandomForest',
-        gender    => $gender,
-        height    => $params{height},
-        weight    => $params{weight},
-        map { (sprintf("_%s", $_) => $params{$_} ) } @param_keys,
+        gender => $gender,
+        height => $params{height},
+        weight => $params{weight},
+        map { ( sprintf( "_%s", $_ ) => $params{$_} ) } @param_keys,
     );
     $self->log->info(
         "guess params : " . encode_json( { user_id => $user_id, %params } ) );
 
-    my $guess  = $guesser->guess;
+    my $guess = $guesser->guess;
     return $self->error( 500, { str => "Guess failed: $guess->{reason}" } )
         unless $guess->{success};
 
     $self->log->info( "guess result size : " . encode_json($guess) );
 
-    if( $gender eq 'male' ) {
-        $guess = $self->choose_value_by_range($guess, $user_info, qw/arm waist/);
-    } elsif ( $gender eq 'female' ) {
-        $guess = $self->choose_value_by_range($guess, $user_info, qw/hip/);
+    if ( $gender eq 'male' ) {
+        $guess = $self->choose_value_by_range( $guess, $user_info, qw/arm waist/ );
+    }
+    elsif ( $gender eq 'female' ) {
+        $guess = $self->choose_value_by_range( $guess, $user_info, qw/hip/ );
 
-        $self->log->info( "guess always replace female waist with topbelly : " . $guess->{waist} . ' => ' .  $user_info->topbelly );
+        $self->log->info( "guess always replace female waist with topbelly : "
+                . $guess->{waist} . ' => '
+                . $user_info->topbelly );
         $guess->{waist} = $user_info->topbelly;
     }
 
@@ -2126,13 +2137,13 @@ sub search_clothes {
         next unless $pair{$upper_code};
 
         my $lower_code = $pair{$upper_code}{$lower_name};
-        my $lower = $lower_map{$lower_code};
+        my $lower      = $lower_map{$lower_code};
         next unless $lower_code;
         next unless any { $_ eq $pair{$upper_code}{$lower_name} } keys %lower_map;
 
         $self->log->info( sprintf '< %s / %s >', $upper->code, $lower->code );
         my $rss;
-        for my $size (keys %$guess) {
+        for my $size ( keys %$guess ) {
             next if $size eq 'reason';
             next if $size eq 'success';
             next unless $guess->{$size};
@@ -2142,19 +2153,29 @@ sub search_clothes {
             my $real     = $upper->$size || $lower->$size;
             my $residual = $guess - $real;
 
-            $rss += $residual ** 2;
-            $self->log->info( sprintf '[%-8s] guess : %.2f / real : %.2f / residual : %.2f', $size, $guess, $real, $residual );
+            $rss += $residual**2;
+            $self->log->info(
+                sprintf '[%-8s] guess : %.2f / real : %.2f / residual : %.2f',
+                $size, $guess, $real, $residual
+            );
         }
-        $self->log->info('-' x 50 . "RSS : $rss");
+        $self->log->info( '-' x 50 . "RSS : $rss" );
 
         my $rent_count = $pair{$upper_code}{count};
-        push @result, { upper_code => $upper_code, lower_code => $lower_code,
-                        upper_rs   => $upper,      lower_rs   => $lower,
-                        rss        => $rss,        rent_count => $rent_count, };
+        push @result, {
+            upper_code => $upper_code, lower_code => $lower_code,
+            upper_rs   => $upper,      lower_rs   => $lower,
+            rss        => $rss,        rent_count => $rent_count,
+        };
     }
 
     @result = sort { $a->{rss} <=> $b->{rss} } @result;
-    $self->log->info( "guess result list : " . encode_json( [ map { [ @{$_}{ qw/upper_code lower_code rss rent_count/ } ] } @result ] ) );
+    $self->log->info(
+        "guess result list : "
+            . encode_json(
+            [ map { [ @{$_}{qw/upper_code lower_code rss rent_count/} ] } @result ]
+            )
+    );
     $self->log->info( "guess result list count : " . scalar @result );
 
     unshift @result, $guess;
