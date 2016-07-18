@@ -2597,7 +2597,7 @@ sub api_search_sms {
     # find sms
     #
     my @sms_list = $self->DB->resultset('SMS')->search( { status => $params{status} } );
-    return $self->error( 404, { str => 'sms not found', data => {}, } ) unless @sms_list;
+    return $self->respond_to( json => { status => 200, json => [] } ) unless @sms_list;
 
     #
     # response
