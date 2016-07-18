@@ -22,7 +22,7 @@ use Try::Tiny;
 use OpenCloset::Size::Guess;
 use OpenCloset::Constants::Measurement;
 use OpenCloset::Constants::Category qw/$JACKET $PANTS $SKIRT/;
-use OpenCloset::Constants::Status qw/$RENTABLE $RENTAL/;
+use OpenCloset::Constants::Status qw/$RENTABLE $RENTAL $PAYMENT $RESERVATED/;
 
 =encoding utf8
 
@@ -1455,13 +1455,14 @@ sub get_nearest_booked_order {
     my $rs = $user->search_related(
         'orders',
         {
-            'me.status_id' => 14,                                       # 방문예약
-            'booking.date' => { '>' => $dtf->format_datetime($dt_now) },
+            'me.status_id' => { -in => [ $RESERVATED, $PAYMENT ] }, # 방문예약, 결제대기
         },
         {
             join => 'booking', order_by => [ { -asc => 'booking.date' }, { -asc => 'me.id' }, ],
         },
-    );
+        )
+        ->search_literal( 'DATE_FORMAT(`booking`.`date`, "%Y-%m-%d") >= ?',
+        $dt_now->ymd );
 
     my $order = $rs->next;
 
