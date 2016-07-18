@@ -2597,7 +2597,7 @@ sub api_search_sms {
     # find sms
     #
     my @sms_list = $self->DB->resultset('SMS')->search( { status => $params{status} } );
-    return $self->error( 404, { str => 'sms not found', data => {}, } ) unless @sms_list;
+    return $self->respond_to( json => { status => 200, json => [] } ) unless @sms_list;
 
     #
     # response
@@ -2925,6 +2925,11 @@ sub api_gui_user_id_avg2 {
 sub api_postcode_search {
     my $self   = shift;
     my $q      = $self->param('q');
+
+    if ( length $q < 3 || length $q > 80 ) {
+        return $self->error( 400, { str => 'Query is too long or too short : ' . $q } );
+    }
+
     my $p      = Postcodify->new( config => $ENV{MOJO_CONFIG} || './app.psgi.conf' );
     my $result = $p->search($q);
     $self->app->log->info("postcode search query: $q");
