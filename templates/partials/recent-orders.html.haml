@@ -76,7 +76,22 @@
                                       %p
                                         %span.label.label-success 의류 현황
                                       %p
-                                        - for my $clothes ( $order->clothes->all ) {
+                                        - my %category_score = (
+                                        -   jacket   => 1,
+                                        -   pants    => 2,
+                                        -   skirt    => 3,
+                                        -   shirt    => 4,
+                                        -   blouse   => 5,
+                                        -   shoes    => 6,
+                                        -   tie      => 7,
+                                        -   belt     => 8,
+                                        -   onepiece => 9,
+                                        -   coat     => 10,
+                                        - );
+                                        - my @sorted_clothes_list = sort {
+                                        -   $category_score{ $a->category } <=> $category_score{ $b->category };
+                                        - } $order->clothes->all;
+                                        - for my $clothes (@sorted_clothes_list) {
                                           = clothes2link($clothes, { with_status => 1 })
                                         - }
                                     .desc
