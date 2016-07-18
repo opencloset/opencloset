@@ -1,6 +1,4 @@
 $ ->
-  $("input[name=booking]").val(undefined)
-
   #
   # 페이지 로드시 첫/두 번째 선호 색상 설정
   #
