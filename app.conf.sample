@@ -406,9 +406,9 @@ $db_opts->{AutoCommit} //= 1;
     volunteer_uri => 'http://localhost:5000',
 
     #
-    # /user/:id/search/clothes
+    # search clothes
     #
-    'user-id-search-clothes' => {
+    'search-clothes' => {
         male => {
             upper_name   => 'jacket',
             lower_name   => 'pants',

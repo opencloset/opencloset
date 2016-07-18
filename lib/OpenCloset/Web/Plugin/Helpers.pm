@@ -1985,7 +1985,7 @@ sub range_filter {
 sub choose_value_by_range {
     my ( $self, $guess, $user_info, @parts ) = @_;
 
-    my $config = $self->config->{'user-id-search-clothes'}{ $user_info->gender };
+    my $config = $self->config->{'search-clothes'}{$user_info->gender};
 
     for my $part (@parts) {
         next unless $guess->{$part};
@@ -2013,7 +2013,7 @@ sub search_clothes {
 
     my $user_info  = $user->user_info;
     my $gender     = $user_info->gender;
-    my $config     = $self->config->{'user-id-search-clothes'}{$gender};
+    my $config     = $self->config->{'search-clothes'}{$gender};
     my $upper_name = $config->{upper_name};
     my $lower_name = $config->{lower_name};
 
@@ -2141,7 +2141,10 @@ sub search_clothes {
         next unless $lower_code;
         next unless any { $_ eq $pair{$upper_code}{$lower_name} } keys %lower_map;
 
-        $self->log->info( sprintf '< %s / %s >', $upper->code, $lower->code );
+        my $rent_count = $pair{$upper_code}{count};
+        my $color = $upper->color;
+        my @tags = map { $_->name } $upper->tags;
+        $self->log->info( sprintf '< %s / %s / %d / %s / %s >', $upper->code, $lower->code, $rent_count, $color, join(', ', @tags ) );
         my $rss;
         for my $size ( keys %$guess ) {
             next if $size eq 'reason';
@@ -2161,25 +2164,35 @@ sub search_clothes {
         }
         $self->log->info( '-' x 50 . "RSS : $rss" );
 
-        my $rent_count = $pair{$upper_code}{count};
-        push @result, {
-            upper_code => $upper_code, lower_code => $lower_code,
-            upper_rs   => $upper,      lower_rs   => $lower,
-            rss        => $rss,        rent_count => $rent_count,
-        };
+        push @result, { upper_code => $upper_code, lower_code => $lower_code,
+                        upper_rs   => $upper,      lower_rs   => $lower,
+                        rss        => $rss,        rent_count => $rent_count,
+                        color      => $color,
+                    };
     }
 
-    @result = sort { $a->{rss} <=> $b->{rss} } @result;
-    $self->log->info(
-        "guess result list : "
-            . encode_json(
-            [ map { [ @{$_}{qw/upper_code lower_code rss rent_count/} ] } @result ]
-            )
-    );
-    $self->log->info( "guess result list count : " . scalar @result );
+    my @colors    = (qw/black navy charcoalgray gray brown/);
+    my $fav_color = (split(/,/, $user_info->pre_color))[0];
+    $self->log->info("guess user pre_color : " . $user_info->pre_color);
+    $self->log->info("guess user fav color : " . $fav_color);
 
-    unshift @result, $guess;
-    return \@result;
+    my @sorted;
+    if( $fav_color && any { $fav_color eq $_ } @colors ) {
+        my @fav_suits    = sort { $a->{rss} <=> $b->{rss} } grep { $_->{color} eq $fav_color } @result;
+        my @nonfav_suits = sort { $a->{rss} <=> $b->{rss} } grep { $_->{color} ne $fav_color } @result;
+
+        @sorted = (
+            @fav_suits,
+            @nonfav_suits,
+        );
+    } else {
+        @sorted = sort { $a->{rss} <=> $b->{rss} } @result;
+    }
+
+    $self->log->info( "guess result list : " . encode_json( [ map { [ @{$_}{qw/upper_code lower_code rss rent_count/} ] } @sorted ]));
+    $self->log->info( "guess result list count : " . scalar @sorted );
+
+    return [ $guess, @sorted ];
 }
 
 =head2 clothes2link( $clothes, $opts )
