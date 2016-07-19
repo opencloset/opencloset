@@ -7,6 +7,17 @@
 -   ;
 - title meta_text($_id);
 
+- use List::Util;
+- use Statistics::Basic;
+
+- my @status_names = (qw/대기 치수측정 의류준비 탈의 수선 포장 결제/);
+- my %status;
+- while ( my $order = $order_rs->next ) {
+-   my %analyze = $order->analyze_order_status_logs;
+-   my $booking_date = $order->booking->date->ymd;
+-   push @{ $status{$booking_date} } , { order => $order, analyze => \%analyze };
+- }
+
 .search
   %form#search-form
     .input-group
@@ -72,6 +83,53 @@
                     %td N/A
                   - }
                     %td= convert_sec_to_hms( $count->{day}[$i]{'total'} )
+              - }
+
+#status-day-detail
+  .widget-box.collapsed.stat
+    .widget-header.widget-header-flat.widget-header-small
+      %h3.widget-title
+        %i.ace-icon.icon-time
+        %span 일별 처리 시간(상세)
+      .widget-toolbar.no-border
+        %a{ :href => '#', 'data-action' => 'collapse' }
+          %i.icon-chevron-down
+      .widget-body
+        .widget-main
+          %table.table.table-striped.table-bordered.table-hover
+            %thead
+              %tr
+                %th{ :rowspan => "2" } #
+                %th{ :rowspan => "2" } 주문번호
+                %th{ :rowspan => "2" } 방문자명
+                %th.center{ :colspan => "7" } 처리시간
+                %th{ :rowspan => "2" } Total
+              %tr
+                %th 대기
+                %th 치수측정
+                %th 의류준비
+                %th 탈의
+                %th 수선
+                %th 포장
+                %th 결제
+            %tbody
+              - my $cnt = 0;
+              - for my $log ( @{ $status{$dt->ymd} }) {
+                - my $order = $log->{order};
+                - my %elapsed_time = %{ $log->{analyze}->{elapsed_time} };
+                - my $total = List::Util::sum0 grep { defined } @elapsed_time{@status_names};
+                - next unless $total;
+                %tr
+                  %td= ++$cnt
+                  %td
+                    %a{ :href => "#{ url_for( '/order/' . $order->id ) }" }= $order->id
+                  %td
+                    %a{ :href => "#{ url_for( '/user/' . $order->user->id ) }" }= $order->user->name
+                  - for my $status_name (@status_names) {
+                    - my $taken_sec = $elapsed_time{$status_name};
+                    %td= $taken_sec ? convert_sec_to_hms($taken_sec) : q{};
+                  - }
+                  %td= convert_sec_to_hms($total);
               - }
 
 #status-week

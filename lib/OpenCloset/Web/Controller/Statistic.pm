@@ -821,7 +821,42 @@ sub status_ymd {
     $count{week}[-1]  = \%current_week  if $no_cache_week;
     $count{month}[-1] = \%current_month if $no_cache_month;
 
-    $self->render( count => \%count, dt => $dt, );
+    # for daily status detail
+    my $dt_start =
+        try { $dt->clone->truncate( to => 'day' )->add( hours => 24 * 2 * -1 ); };
+    unless ($dt_start) {
+        $self->app->log->warn("cannot create start datetime object");
+        $self->redirect_to( $self->url_for('/stat/status') );
+        return;
+    }
+
+    my $dt_end = try {
+        $dt->clone->truncate( to => 'day' )->add( hours => 24 * 3, seconds => -1 );
+    };
+    unless ($dt_end) {
+        $self->app->log->warn("cannot create end datetime object");
+        $self->redirect_to( $self->url_for('/stat/status') );
+        return;
+    }
+
+    my $dtf      = $self->DB->storage->datetime_parser;
+    my $order_rs = $self->DB->resultset('Order')->search(
+        #
+        # do not query all data for specific month due to speed
+        #
+        #\[ 'DATE_FORMAT(`booking`.`date`,"%Y-%m") = ?', $dt->strftime("%Y-%m") ],
+        {
+            -and => [
+                'booking.date' => {
+                    -between => [ $dtf->format_datetime($dt_start), $dtf->format_datetime($dt_end), ],
+                },
+                \[ 'HOUR(`booking`.`date`) != ?', $online_order_hour ],
+            ]
+        },
+        { join => [qw/ booking /], order_by => { -asc => 'date' }, prefetch => 'booking', },
+    );
+
+    $self->render( count => \%count, dt => $dt, order_rs => $order_rs, );
 }
 
 =head2 visitor
