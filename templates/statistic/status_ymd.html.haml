@@ -69,50 +69,56 @@
       - }
 
 #status-week
-  %h2
-    주별 평균 처리 시간
-  .space-8
-
-  %table.table.table-striped.table-bordered.table-hover
-    %thead
-      %tr
-        %th{ :rowspan => "2" } 주차(시작일 ~ 종료일)
-        %th.center{ :colspan => "7" } 평균 처리시간
-        %th{ :rowspan => "2" } Total
-      %tr
-        %th 대기
-        %th 치수측정
-        %th 의류준비
-        %th 탈의
-        %th 수선
-        %th 포장
-        %th 결제
-    %tbody
-      - for ( my $i = 0 ; $i <  @{ $count->{week} } ; $i++ ) {
-        %tr
-          - if ( $count->{week}[$i] ) {
-            %td= $count->{week}[$i]{label}
-            %td= convert_sec_to_hms( $count->{week}[$i]{'대기'} )
-            %td= convert_sec_to_hms( $count->{week}[$i]{'치수측정'} )
-            %td= convert_sec_to_hms( $count->{week}[$i]{'의류준비'} )
-            %td= convert_sec_to_hms( $count->{week}[$i]{'탈의'} )
-            %td= convert_sec_to_hms( $count->{week}[$i]{'수선'} )
-            %td= convert_sec_to_hms( $count->{week}[$i]{'포장'} )
-            %td= convert_sec_to_hms( $count->{week}[$i]{'결제'} )
-            %td= convert_sec_to_hms( $count->{week}[$i]{total} )
-          - }
-          - else {
-            %td N/A
-            %td N/A
-            %td N/A
-            %td N/A
-            %td N/A
-            %td N/A
-            %td N/A
-            %td N/A
-            %td N/A
-          - }
-      - }
+  .widget-box.collapsed.stat
+    .widget-header.widget-header-flat.widget-header-small
+      %h3.widget-title
+        %i.ace-icon.icon-time
+        %span 주별 평균 처리 시간
+      .widget-toolbar.no-border
+        %a{ :href => '#', 'data-action' => 'collapse' }
+          %i.icon-chevron-down
+      .widget-body
+        .widget-main
+          %table.table.table-striped.table-bordered.table-hover
+            %thead
+              %tr
+                %th{ :rowspan => "2" } 주차(시작일 ~ 종료일)
+                %th.center{ :colspan => "7" } 평균 처리시간
+                %th{ :rowspan => "2" } Total
+              %tr
+                %th 대기
+                %th 치수측정
+                %th 의류준비
+                %th 탈의
+                %th 수선
+                %th 포장
+                %th 결제
+            %tbody
+              - for ( my $i = 0 ; $i <  @{ $count->{week} } ; $i++ ) {
+                %tr
+                  - if ( $count->{week}[$i] ) {
+                    %td= $count->{week}[$i]{label}
+                    %td= convert_sec_to_hms( $count->{week}[$i]{'대기'} )
+                    %td= convert_sec_to_hms( $count->{week}[$i]{'치수측정'} )
+                    %td= convert_sec_to_hms( $count->{week}[$i]{'의류준비'} )
+                    %td= convert_sec_to_hms( $count->{week}[$i]{'탈의'} )
+                    %td= convert_sec_to_hms( $count->{week}[$i]{'수선'} )
+                    %td= convert_sec_to_hms( $count->{week}[$i]{'포장'} )
+                    %td= convert_sec_to_hms( $count->{week}[$i]{'결제'} )
+                    %td= convert_sec_to_hms( $count->{week}[$i]{total} )
+                  - }
+                  - else {
+                    %td N/A
+                    %td N/A
+                    %td N/A
+                    %td N/A
+                    %td N/A
+                    %td N/A
+                    %td N/A
+                    %td N/A
+                    %td N/A
+                  - }
+              - }
 
 #status-month
   %h2
