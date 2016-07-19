@@ -816,8 +816,8 @@ sub status_ymd {
             $current_month{'결제'}       += $data->{'결제'};
         }
     }
-    $current_week{total} = sum( values %current_week );
-    $current_month{total} = sum( values %current_month );
+    $current_week{total}  = sum( @current_week{qw/대기 치수측정 의류준비 탈의 수선 포장 결제/} );
+    $current_month{total} = sum( @current_month{qw/대기 치수측정 의류준비 탈의 수선 포장 결제/} );
     $count{week}[-1]  = \%current_week  if $no_cache_week;
     $count{month}[-1] = \%current_month if $no_cache_month;
 
