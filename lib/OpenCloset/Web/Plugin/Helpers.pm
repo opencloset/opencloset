@@ -1476,10 +1476,10 @@ sub get_nearest_booked_order {
 sub convert_sec_to_locale {
     my ( $self, $seconds ) = @_;
 
-    my $dfd = OpenCloset::Patch::DateTime::Format::Duration->new( normalize => 'ISO', pattern => '%M:%S' );
+    my $dfd = DateTime::Format::Duration->new( normalize => 'ISO', pattern => '%M:%S' );
     my $dur1 = DateTime::Duration->new( seconds => $seconds );
     my $dur2 = DateTime::Duration->new( $dfd->normalize($dur1) );
-    my $dfhd = DateTime::Format::Human::Duration->new;
+    my $dfhd = OpenCloset::Patch::DateTime::Format::Human::Duration->new;
 
     my $locale = $dfhd->format_duration( $dur2, locale => "ko" );
     $locale =~ s/\s*(년|개월|주|일|시간|분|초|나노초)/$1/gms;
