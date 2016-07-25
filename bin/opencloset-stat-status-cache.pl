@@ -184,7 +184,7 @@ sub mean_status {
         },
     );
 
-    my @status = qw( 대기 치수측정 의류준비 탈의 수선 포장 결제 );
+    my @status_list = qw( 대기 치수측정 의류준비 탈의 수선 포장 결제 );
     my %count  = (
         '대기'       => 0,
         '치수측정'   => 0,
@@ -200,10 +200,10 @@ sub mean_status {
         my %analyze = $order->analyze_order_status_logs;
         next unless $analyze{elapsed_time};
 
-        for (@status) {
-            next unless $analyze{elapsed_time}{$_};
+        for my $status (@status_list) {
+            next unless $analyze{elapsed_time}{$status};
 
-            push @{ $total{$_} }, $analyze{elapsed_time}{$_};
+            push @{ $total{$status} }, $analyze{elapsed_time}{$status};
         }
     }
     foreach ( keys %total ) {
