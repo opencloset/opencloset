@@ -21,7 +21,7 @@ binmode STDERR, ':utf8';
 
 my $config_file = shift || "$Bin/../app.conf";
 my $ymd         = shift || localtime->ymd;
-my $prefix      = 'stat-status';
+my $prefix      = 'stat-status-';
 
 die "Usage: $Script <config path> [ <yyyy-mm-dd> ] \n"
     unless (
@@ -103,7 +103,7 @@ die "$config_file: cannot load config\n" unless $CONF;
 
         my $f_str = $f->strftime('%Y%m%d%H%M%S');
         my $t_str = $t->strftime('%Y%m%d%H%M%S');
-        my $name  = "$prefix-day-$f_str-$t_str";
+        my $name  = "${prefix}day-$f_str-$t_str";
         my $count = $CACHE->compute(
             $name,
             undef,
@@ -127,7 +127,7 @@ die "$config_file: cannot load config\n" unless $CONF;
 
         my $f_str = $f->strftime('%Y%m%d%H%M%S');
         my $t_str = $t->strftime('%Y%m%d%H%M%S');
-        my $name  = "$prefix-week-$f_str-$t_str";
+        my $name  = "${prefix}week-$f_str-$t_str";
         my $count = $CACHE->compute(
             $name,
             undef,
@@ -151,7 +151,7 @@ die "$config_file: cannot load config\n" unless $CONF;
 
         my $f_str = $f->strftime('%Y%m%d%H%M%S');
         my $t_str = $t->strftime('%Y%m%d%H%M%S');
-        my $name  = "$prefix-month-$f_str-$t_str";
+        my $name  = "${prefix}month-$f_str-$t_str";
         my $count = $CACHE->compute(
             $name,
             undef,
