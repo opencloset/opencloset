@@ -206,10 +206,10 @@ sub mean_status {
             push @{ $total{$status} }, $analyze{elapsed_time}{$status};
         }
     }
-    for ( keys %total ) {
-        my $n = scalar(@{$total{$_}});
+    for my $status ( keys %total ) {
+        my $n = scalar(@{$total{$status}});
 
-        $count{$_} = List::Util::sum(@{ $total{$_} }) / $n;
+        $count{$status} = List::Util::sum(@{ $total{$status} }) / $n;
     }
     $count{total} = List::Util::sum( values %count );
 
