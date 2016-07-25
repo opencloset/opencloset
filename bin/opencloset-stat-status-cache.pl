@@ -9,6 +9,7 @@ use FindBin qw( $Bin $Script );
 use CHI;
 use DateTime;
 use List::Util;
+use Statistics::Basic;
 use Time::Piece;
 use Try::Tiny;
 
@@ -208,9 +209,7 @@ sub mean_status {
         '결제'       => 0,
     );
     for my $status ( keys %total ) {
-        my $n = scalar(@{$total{$status}});
-
-        $count{$status} = List::Util::sum(@{ $total{$status} }) / $n;
+        $count{$status} = Statistics::Basic::mean( $total{$status} )->query;
     }
     $count{total} = List::Util::sum( values %count );
 
