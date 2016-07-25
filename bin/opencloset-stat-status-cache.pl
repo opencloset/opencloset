@@ -185,15 +185,6 @@ sub mean_status {
     );
 
     my @status_list = qw( 대기 치수측정 의류준비 탈의 수선 포장 결제 );
-    my %count  = (
-        '대기'       => 0,
-        '치수측정'   => 0,
-        '의류준비'   => 0,
-        '탈의'       => 0,
-        '수선'       => 0,
-        '포장'       => 0,
-        '결제'       => 0,
-    );
 
     my %total;
     while ( my $order = $order_rs->next ) {
@@ -206,6 +197,16 @@ sub mean_status {
             push @{ $total{$status} }, $analyze{elapsed_time}{$status};
         }
     }
+
+    my %count  = (
+        '대기'       => 0,
+        '치수측정'   => 0,
+        '의류준비'   => 0,
+        '탈의'       => 0,
+        '수선'       => 0,
+        '포장'       => 0,
+        '결제'       => 0,
+    );
     for my $status ( keys %total ) {
         my $n = scalar(@{$total{$status}});
 
