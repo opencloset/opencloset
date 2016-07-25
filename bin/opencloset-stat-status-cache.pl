@@ -8,9 +8,9 @@ use FindBin qw( $Bin $Script );
 
 use CHI;
 use DateTime;
+use List::Util;
 use Time::Piece;
 use Try::Tiny;
-use List::Util;
 
 use OpenCloset::Config;
 use OpenCloset::Schema;
