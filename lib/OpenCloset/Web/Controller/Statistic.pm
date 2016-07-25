@@ -614,7 +614,9 @@ sub status_ymd {
 
     my $dt = try {
         DateTime->new(
-            time_zone => $self->config->{timezone}, year => $1, month => $2,
+            time_zone => $self->config->{timezone},
+            year      => $1,
+            month     => $2,
             day       => $3,
         );
     };
@@ -625,7 +627,7 @@ sub status_ymd {
     }
 
     my $today = try {
-        DateTime->now( time_zone => $self->config->{timezone}, );
+        DateTime->now( time_zone => $self->config->{timezone} );
     };
     unless ($today) {
         $self->app->log->warn("cannot create datetime object: today");
@@ -636,7 +638,9 @@ sub status_ymd {
 
     my $basis_dt = try {
         DateTime->new(
-            time_zone => $self->config->{timezone}, year => 2015, month => 5,
+            time_zone => $self->config->{timezone},
+            year      => 2015,
+            month     => 5,
             day       => 29
         );
     };
@@ -755,23 +759,23 @@ sub status_ymd {
             $dt->clone->truncate( to => 'week' )->add( weeks => 1, seconds => -1 )
                 ->strftime('%m/%d'),
         ),
-        '대기'       => 0,
-        '치수측정'   => 0,
-        '의류준비'   => 0,
-        '탈의'       => 0,
-        '수선'       => 0,
-        '포장'       => 0,
-        '결제'       => 0,
+        '대기'     => 0,
+        '치수측정' => 0,
+        '의류준비' => 0,
+        '탈의'     => 0,
+        '수선'     => 0,
+        '포장'     => 0,
+        '결제'     => 0,
     );
     my %current_month = (
-        label        => $dt->strftime('%Y-%m'),
-        '대기'       => 0,
-        '치수측정'   => 0,
-        '의류준비'   => 0,
-        '탈의'       => 0,
-        '수선'       => 0,
-        '포장'       => 0,
-        '결제'       => 0,
+        label      => $dt->strftime('%Y-%m'),
+        '대기'     => 0,
+        '치수측정' => 0,
+        '의류준비' => 0,
+        '탈의'     => 0,
+        '수선'     => 0,
+        '포장'     => 0,
+        '결제'     => 0,
     );
     for (
         my $i = $today->clone->add( months => -1 )->truncate( to => 'month' );
@@ -851,12 +855,20 @@ sub status_ymd {
                     -between => [ $dtf->format_datetime($dt_start), $dtf->format_datetime($dt_end), ],
                 },
                 \[ 'HOUR(`booking`.`date`) != ?', $online_order_hour ],
-            ]
+            ],
         },
-        { join => [qw/ booking /], order_by => { -asc => 'date' }, prefetch => 'booking', },
+        {
+            join     => [qw/ booking /],
+            order_by => { -asc => 'date' },
+            prefetch => 'booking',
+        },
     );
 
-    $self->render( count => \%count, dt => $dt, order_rs => $order_rs, );
+    $self->render(
+        count    => \%count,
+        dt       => $dt,
+        order_rs => $order_rs,
+    );
 }
 
 =head2 visitor
