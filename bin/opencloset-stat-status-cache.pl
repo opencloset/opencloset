@@ -177,7 +177,11 @@ sub mean_status {
                 \[ 'HOUR(`booking`.`date`) != ?', $online_order_hour ],
             ]
         },
-        { join => [qw/ booking /], order_by => { -asc => 'date' }, prefetch => 'booking', },
+        {
+            join     => [qw/ booking /],
+            order_by => { -asc => 'date' },
+            prefetch => 'booking',
+        },
     );
 
     my @status = (qw/대기 치수측정 의류준비 탈의 수선 포장 결제/);
