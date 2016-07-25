@@ -84,8 +84,10 @@ die "$config_file: cannot load config\n" unless $CONF;
     my $to   = $dt->clone->truncate( to => 'day' );
     my $basis_dt = try {
         DateTime->new(
-            time_zone => $TIMEZONE, year => 2015, month => 5,
-            day       => 29
+            time_zone => $TIMEZONE,
+            year      => 2015,
+            month     => 5,
+            day       => 29,
         );
     };
 
