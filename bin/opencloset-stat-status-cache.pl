@@ -200,13 +200,13 @@ sub mean_status {
     }
 
     my %count  = (
-        '대기'       => 0,
-        '치수측정'   => 0,
-        '의류준비'   => 0,
-        '탈의'       => 0,
-        '수선'       => 0,
-        '포장'       => 0,
-        '결제'       => 0,
+        '대기'     => 0,
+        '치수측정' => 0,
+        '의류준비' => 0,
+        '탈의'     => 0,
+        '수선'     => 0,
+        '포장'     => 0,
+        '결제'     => 0,
     );
     for my $status ( keys %total ) {
         $count{$status} = Statistics::Basic::mean( $total{$status} )->query;
