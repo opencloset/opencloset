@@ -10,7 +10,7 @@ use CHI;
 use DateTime;
 use Time::Piece;
 use Try::Tiny;
-use List::Util qw/sum/;
+use List::Util;
 
 use OpenCloset::Config;
 use OpenCloset::Schema;
@@ -209,9 +209,9 @@ sub mean_status {
     foreach ( keys %total ) {
         my $n = scalar(@{$total{$_}});
 
-        $count{$_} = sum(@{ $total{$_} }) / $n;
+        $count{$_} = List::Util::sum(@{ $total{$_} }) / $n;
     }
-    $count{total} = sum( values %count );
+    $count{total} = List::Util::sum( values %count );
 
     return \%count;
 }
