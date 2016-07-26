@@ -4,6 +4,7 @@ use Mojo::Base 'Mojolicious::Controller';
 use DateTime::TimeZone;
 use DateTime;
 use Try::Tiny;
+use List::Util qw/sum/;
 
 has DB    => sub { shift->app->DB };
 has CACHE => sub { shift->app->CACHE };
@@ -601,19 +602,21 @@ sub status_ymd {
 
     unless ( $params{ymd} ) {
         $self->app->log->warn("ymd is required");
-        $self->redirect_to( $self->url_for('/stat/visitor') );
+        $self->redirect_to( $self->url_for('/stat/status') );
         return;
     }
 
     unless ( $params{ymd} =~ m/^(\d{4})-(\d{2})-(\d{2})$/ ) {
         $self->app->log->warn("invalid ymd format: $params{ymd}");
-        $self->redirect_to( $self->url_for('/stat/visitor') );
+        $self->redirect_to( $self->url_for('/stat/status') );
         return;
     }
 
     my $dt = try {
         DateTime->new(
-            time_zone => $self->config->{timezone}, year => $1, month => $2,
+            time_zone => $self->config->{timezone},
+            year      => $1,
+            month     => $2,
             day       => $3,
         );
     };
@@ -623,6 +626,206 @@ sub status_ymd {
         return;
     }
 
+    my $today = try {
+        DateTime->now( time_zone => $self->config->{timezone} );
+    };
+    unless ($today) {
+        $self->app->log->warn("cannot create datetime object: today");
+        $self->redirect_to( $self->url_for('/stat/visitor') );
+        return;
+    }
+    $today->truncate( to => 'day' );
+
+    my $basis_dt = try {
+        DateTime->new(
+            time_zone => $self->config->{timezone},
+            year      => 2015,
+            month     => 5,
+            day       => 29
+        );
+    };
+    my $online_order_hour = $dt >= $basis_dt ? 22 : 19;
+
+    # -$day_range ~ +$day_range days from now
+    my $day_range = 3;
+    my %count;
+    my $today_data;
+    my $from = $dt->clone->truncate( to => 'day' )->add( days => -$day_range );
+    my $to   = $dt->clone->truncate( to => 'day' )->add( days => $day_range );
+    for ( ; $from <= $to; $from->add( days => 1 ) ) {
+        my $f = $from->clone->truncate( to => 'day' );
+        my $t = $from->clone->truncate( to => 'day' )->add( days => 1, seconds => -1 );
+
+        my $f_str = $f->strftime('%Y%m%d%H%M%S');
+        my $t_str = $t->strftime('%Y%m%d%H%M%S');
+        my $name  = "stat-status-day-$f_str-$t_str";
+
+        my $data;
+        if ( $f < $today && $t < $today ) {
+            $data = $self->CACHE->get($name);
+        }
+        elsif ( $f->clone->truncate( to => 'day' ) == $today ) {
+            $self->app->log->info("do not cache and by-pass cache: $name");
+            $data = $self->mean_status( $f, $t, $online_order_hour );
+            $today_data = $data;
+        }
+        my $dow = do {
+            use experimental qw( smartmatch );
+            given ( $f->day_of_week ) {
+                "월" when 1;
+                "화" when 2;
+                "수" when 3;
+                "목" when 4;
+                "금" when 5;
+                "토" when 6;
+                "일" when 7;
+                default { q{} }
+            }
+        };
+        $data->{label} = $f->ymd . " ($dow)";
+
+        push @{ $count{day} }, $data;
+    }
+
+    # from first to current week of this year
+    my $current_week_start_dt;
+    my $current_week_end_dt;
+    for ( my $i = $dt->clone->subtract( years => 1 ); $i <= $dt; $i->add( weeks => 1 ) )
+    {
+        my $f = $i->clone->truncate( to => 'week' );
+        my $t = $i->clone->truncate( to => 'week' )->add( weeks => 1, seconds => -1 );
+
+        my $f_str = $f->strftime('%Y%m%d%H%M%S');
+        my $t_str = $t->strftime('%Y%m%d%H%M%S');
+        my $name  = "stat-status-week-$f_str-$t_str";
+
+        $current_week_start_dt = $f->clone;
+        $current_week_end_dt   = $t->clone;
+
+        my $data;
+        if ( $f < $today && $t < $today ) {
+            $data = $self->CACHE->get($name);
+            $data->{label} = sprintf(
+                "%04d %02d : %s ~ %s",
+                ( $f->week ), # week_year, week_number
+                $f->strftime('%m/%d'),
+                $t->strftime('%m/%d'),
+            );
+        }
+
+        push @{ $count{week} }, $data;
+    }
+
+
+    # from january to current months of this year
+    my $current_month_start_dt;
+    my $current_month_end_dt;
+    for (
+        my $i = $dt->clone->subtract( years => 1 );
+        $i <= $dt;
+        $i->add( months => 1 )
+        )
+    {
+        my $f = $i->clone->truncate( to => 'month' );
+        my $t = $i->clone->truncate( to => 'month' )->add( months => 1, seconds => -1 );
+
+        my $f_str = $f->strftime('%Y%m%d%H%M%S');
+        my $t_str = $t->strftime('%Y%m%d%H%M%S');
+        my $name  = "stat-status-month-$f_str-$t_str";
+
+        $current_month_start_dt = $f->clone;
+        $current_month_end_dt   = $t->clone;
+
+        my $data;
+        if ( $f < $today && $t < $today ) {
+            $data = $self->CACHE->get($name);
+            $data->{label} = $f->strftime('%Y-%m');
+        }
+
+        push @{ $count{month} }, $data;
+    }
+
+    my $no_cache_week;
+    my $no_cache_month;
+    ++$no_cache_week  if $today->clone->truncate( to => 'week' ) <= $dt;
+    ++$no_cache_month if $today->clone->truncate( to => 'month' ) <= $dt;
+
+    # current data with and without cache
+    my %current_week = (
+        label => sprintf(
+            "%04d %02d : %s ~ %s",
+            ( $dt->week ), # week_year, week_number
+            $dt->clone->truncate( to => 'week' )->strftime('%m/%d'),
+            $dt->clone->truncate( to => 'week' )->add( weeks => 1, seconds => -1 )
+                ->strftime('%m/%d'),
+        ),
+        '대기'     => 0,
+        '치수측정' => 0,
+        '의류준비' => 0,
+        '탈의'     => 0,
+        '수선'     => 0,
+        '포장'     => 0,
+        '결제'     => 0,
+    );
+    my %current_month = (
+        label      => $dt->strftime('%Y-%m'),
+        '대기'     => 0,
+        '치수측정' => 0,
+        '의류준비' => 0,
+        '탈의'     => 0,
+        '수선'     => 0,
+        '포장'     => 0,
+        '결제'     => 0,
+    );
+    for (
+        my $i = $today->clone->add( months => -1 )->truncate( to => 'month' );
+        $i <= $today;
+        $i->add( days => 1 )
+        )
+    {
+        my $f = $i->clone->truncate( to => 'day' );
+        my $t = $i->clone->truncate( to => 'day' )->add( days => 1, seconds => -1 );
+
+        my $f_str = $f->strftime('%Y%m%d%H%M%S');
+        my $t_str = $t->strftime('%Y%m%d%H%M%S');
+        my $name  = "stat-status-day-$f_str-$t_str";
+
+        my $data;
+        if ( $f < $today && $t < $today ) {
+            $data = $self->CACHE->get($name);
+        }
+        elsif ( $f->clone->truncate( to => 'day' ) == $today ) {
+            $self->app->log->info("do not cache and by-pass cache: $name");
+            $data = $today_data;
+        }
+
+        if ( $current_week_start_dt <= $i && $i <= $current_week_end_dt ) {
+            $self->app->log->info("calculationg for this week: $name");
+            $current_week{'대기'}       += $data->{'대기'};
+            $current_week{'치수측정'}   += $data->{'치수측정'};
+            $current_week{'의류준비'}   += $data->{'의류준비'};
+            $current_week{'탈의'}       += $data->{'탈의'};
+            $current_week{'수선'}       += $data->{'수선'};
+            $current_week{'포장'}       += $data->{'포장'};
+            $current_week{'결제'}       += $data->{'결제'};
+        }
+        if ( $current_month_start_dt <= $i && $i <= $current_month_end_dt ) {
+            $self->app->log->info("calculationg for this month $name");
+            $current_month{'대기'}       += $data->{'대기'};
+            $current_month{'치수측정'}   += $data->{'치수측정'};
+            $current_month{'의류준비'}   += $data->{'의류준비'};
+            $current_month{'탈의'}       += $data->{'탈의'};
+            $current_month{'수선'}       += $data->{'수선'};
+            $current_month{'포장'}       += $data->{'포장'};
+            $current_month{'결제'}       += $data->{'결제'};
+        }
+    }
+    $current_week{total}  = sum( @current_week{qw/대기 치수측정 의류준비 탈의 수선 포장 결제/} );
+    $current_month{total} = sum( @current_month{qw/대기 치수측정 의류준비 탈의 수선 포장 결제/} );
+    $count{week}[-1]  = \%current_week  if $no_cache_week;
+    $count{month}[-1] = \%current_month if $no_cache_month;
+
+    # for daily status detail
     my $dt_start =
         try { $dt->clone->truncate( to => 'day' )->add( hours => 24 * 2 * -1 ); };
     unless ($dt_start) {
@@ -640,14 +843,6 @@ sub status_ymd {
         return;
     }
 
-    my $basis_dt = try {
-        DateTime->new(
-            time_zone => $self->config->{timezone}, year => 2015, month => 5,
-            day       => 29
-        );
-    };
-    my $online_order_hour = $dt >= $basis_dt ? 22 : 19;
-
     my $dtf      = $self->DB->storage->datetime_parser;
     my $order_rs = $self->DB->resultset('Order')->search(
         #
@@ -660,12 +855,20 @@ sub status_ymd {
                     -between => [ $dtf->format_datetime($dt_start), $dtf->format_datetime($dt_end), ],
                 },
                 \[ 'HOUR(`booking`.`date`) != ?', $online_order_hour ],
-            ]
+            ],
         },
-        { join => [qw/ booking /], order_by => { -asc => 'date' }, prefetch => 'booking', },
+        {
+            join     => [qw/ booking /],
+            order_by => { -asc => 'date' },
+            prefetch => 'booking',
+        },
     );
 
-    $self->render( order_rs => $order_rs, dt => $dt, );
+    $self->render(
+        count    => \%count,
+        dt       => $dt,
+        order_rs => $order_rs,
+    );
 }
 
 =head2 visitor

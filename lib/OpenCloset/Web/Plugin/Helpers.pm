@@ -92,6 +92,7 @@ sub register {
     $app->helper( clothes2link              => \&clothes2link );
     $app->helper( is_suit_order             => \&is_suit_order );
     $app->helper( choose_value_by_range     => \&choose_value_by_range );
+    $app->helper( mean_status               => \&mean_status );
 }
 
 =head1 HELPERS
@@ -1496,6 +1497,8 @@ sub convert_sec_to_locale {
 sub convert_sec_to_hms {
     my ( $self, $seconds ) = @_;
 
+    return unless $seconds;
+
     my $dfd = DateTime::Format::Duration->new( normalize => 'ISO', pattern => "%M:%S" );
     my $dur1 = DateTime::Duration->new( seconds => $seconds );
     my $hms = sprintf(
@@ -2347,6 +2350,55 @@ sub is_suit_order {
     }
 
     return;
+}
+
+=head2 mean_status( $start_dt, $end_dt, $online__order_hour )
+
+=cut
+
+sub mean_status {
+    my ( $self, $start_dt, $end_dt, $online_order_hour ) = @_;
+
+    my $dtf      = $self->app->DB->storage->datetime_parser;
+    my $order_rs = $self->app->DB->resultset('Order')->search(
+        {
+            -and => [
+                'booking.date' => {
+                    -between => [ $dtf->format_datetime($start_dt), $dtf->format_datetime($end_dt), ],
+                },
+                \[ 'HOUR(`booking`.`date`) != ?', $online_order_hour ],
+            ]
+        },
+        { join => [qw/ booking /], order_by => { -asc => 'date' }, prefetch => 'booking', },
+    );
+
+    my @status = (qw/대기 치수측정 의류준비 탈의 수선 포장 결제/);
+    my %count  = (
+        '대기'       => 0,
+        '치수측정'   => 0,
+        '의류준비'   => 0,
+        '탈의'       => 0,
+        '수선'       => 0,
+        '포장'       => 0,
+        '결제'       => 0,
+    );
+
+    my %total;
+    while ( my $order = $order_rs->next ) {
+        my %analyze = $order->analyze_order_status_logs;
+        next unless $analyze{elapsed_time};
+
+        for (@status) {
+            next unless $analyze{elapsed_time}{$_};
+
+            push @{ $total{$_} }, $analyze{elapsed_time}{$_};
+        }
+    }
+    for my $status  ( keys %total ) {
+        $count{$status} = Statistics::Basic::mean( $total{$status} )->query;
+    }
+
+    return \%count;
 }
 
 1;
