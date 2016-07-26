@@ -18,6 +18,7 @@ binmode STDOUT, ':utf8';
 binmode STDERR, ':utf8';
 
 my $config_file = shift || "$Bin/../app.conf";
+my $prefix      = 'stat-clothes-rent-';
 
 die "Usage: $Script <config path>\n"
     unless (
@@ -125,7 +126,7 @@ die "$config_file: cannot load config\n" unless $CONF;
             #   ex) stat-clothes-rent-male-jacket-2016-07-06-+0900
             #
             my $name = sprintf(
-                "stat-clothes-rent-%s-%s-%s-%s",
+                "${prefix}%s-%s-%s-%s",
                 $gender,
                 $category,
                 $today->ymd,
