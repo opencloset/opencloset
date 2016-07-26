@@ -38,7 +38,7 @@ requires 'Unicode::GCString';
 requires 'experimental';
 
 # from git repository
-requires 'git://github.com/aanoaa/p5-postcodify.git@v0.2.6';
+# requires 'git://github.com/aanoaa/p5-postcodify.git@v0.2.6';
 
 # from opencloset cpan
 requires 'OpenCloset::Common';
