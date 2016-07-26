@@ -446,7 +446,7 @@ sub clothes_rent_category {
     #
 
     my $v = $self->create_validator;
-    $v->field('category')->in(qw/ jacket pants skirt /);
+    $v->field('category')->in( keys %{ $self->config->{category} } );
     $v->field('gender')->in(qw/ male female /);
     $v->field('limit')->regexp(qr/^\d+$/);
     $v->field('status_ids[]')->regexp(qr/^\d+$/);
