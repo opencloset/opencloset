@@ -2394,10 +2394,8 @@ sub mean_status {
             push @{ $total{$_} }, $analyze{elapsed_time}{$_};
         }
     }
-    foreach ( keys %total ) {
-        my $n = scalar(@{$total{$_}});
-
-        $count{$_} = sum(@{ $total{$_} }) / $n;
+    for my $status  ( keys %total ) {
+        $count{$status} = Statistics::Basic::mean( $total{$status} )->query;
     }
 
     return \%count;
