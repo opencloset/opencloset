@@ -22,7 +22,7 @@
       %label.col-sm-3.control-label.no-padding-right{ :for => 'category' } 종류
       .col-sm-9
         %select.col-xs-10.col-sm-5{ :name => "category", :type => 'hidden' }
-          - for my $k ( qw( jacket pants skirt ) ) {
+          - for my $k ( qw( jacket pants skirt shirt blouse shoes tie bag belt coat onepiece waistcoat ) ) {
           -  if ( $k eq $category ) {
             %option{ :value => $k, :selected => "selected" }= $app->config->{category}{$k}->{str}
           -  }
@@ -150,6 +150,11 @@
           %th 엉덩이
           %th 길이
         -   }
+        -   default {
+          %th 길이
+          %th -
+          %th -
+        -   }
         - }
     %tbody
       - my $count = $start_idx;
@@ -182,6 +187,11 @@
             %td= $clothes->waist;
             %td= $clothes->hip;
             %td= $clothes->length;
+          -   }
+          -   default {
+            %td= $clothes->length;
+            %td -
+            %td -
           -   }
           - }
       - }

@@ -4,7 +4,6 @@ requires 'Crypt::Mode::ECB';
 requires 'Data::Pageset';
 requires 'DateTime';
 requires 'DateTime::Format::Duration';
-requires 'DateTime::Format::Human::Duration', '0.62';
 requires 'DateTime::Format::Strptime';
 requires 'Digest::SHA1';
 requires 'FindBin';
@@ -39,11 +38,12 @@ requires 'Unicode::GCString';
 requires 'experimental';
 
 # from git repository
-requires 'git://github.com/aanoaa/p5-postcodify.git@v0.2.6';
+# requires 'git://github.com/aanoaa/p5-postcodify.git@v0.2.6';
 
 # from opencloset cpan
 requires 'OpenCloset::Common';
 requires 'OpenCloset::Config',               '0.002';
+requires 'OpenCloset::Patch::DateTime::Format::Human::Duration', 'v0.62.1';
 requires 'OpenCloset::Plugin::Helpers',      'v0.0.7';
 requires 'OpenCloset::Schema',               '0.037';
 requires 'OpenCloset::Size::Guess',          '0.003';
