@@ -9,9 +9,9 @@ use FindBin qw( $Script );
 
 use DateTime::Duration;
 use DateTime::Format::Duration;
+use DateTime::Format::Human::Duration;
 
 use OpenCloset::Config;
-use OpenCloset::Patch::DateTime::Format::Human::Duration;
 use OpenCloset::Schema;
 
 binmode STDOUT, ':utf8';
@@ -139,7 +139,7 @@ sub convert_sec {
     my $dfd   = DateTime::Format::Duration->new( normalize => 'ISO', pattern => '%M:%S' );
     my $dur1  = DateTime::Duration->new( seconds => $seconds );
     my $dur2  = DateTime::Duration->new( $dfd->normalize($dur1) );
-    my $dfhd  = OpenCloset::Patch::DateTime::Format::Human::Duration->new;
+    my $dfhd  = DateTime::Format::Human::Duration->new;
     my $hms  = sprintf(
         '%02d:%s',
         $seconds / 3600,
