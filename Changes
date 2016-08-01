@@ -1,4 +1,5 @@
   - 의존 모듈 DateTime::Format::Human::Duration 0.64 이상 버전을 사용 (#920)
+  - /clothes/:code 에 의류사진 링크 추가
 
 v1.8.13   Tue, 26 Jul 2016 18:39:03 +0900
   - 대여 회전율의 품목 추가 (#914)
