@@ -38,7 +38,10 @@
                         .space-4
                         .width-80.label.label-info.label-xlg.arrowed-in.arrowed-in-right
                           .inline.position-relative
-                            %span.white.clothes-code= $clothes_code
+                            %span.white.clothes-code
+                              %a{ :href => "#{ oavatar_url($clothes_code) . '/images/' }", target => "_blank" }
+                                %i.icon-external-link
+                                = $clothes_code
 
                       .space-6
 
