@@ -409,8 +409,8 @@ sub order {
     }
 
     my $visited_order_rs = $orders->search(
-        { status_id => $RETURNED },
-        { order_by  => { -desc => 'return_date' } },
+        { status_id => $RETURNED, parent_id => undef },
+        { order_by => { -desc => 'return_date' } },
     );
 
     my $visited    = $visited_order_rs->count;
