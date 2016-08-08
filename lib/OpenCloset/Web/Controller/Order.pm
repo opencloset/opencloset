@@ -4,7 +4,7 @@ use Mojo::Base 'Mojolicious::Controller';
 use Data::Pageset;
 use DateTime;
 use HTTP::Tiny;
-use List::Util;
+use List::MoreUtils;
 use Try::Tiny;
 
 use OpenCloset::Constants::Status qw/$RETURNED/;
@@ -345,104 +345,137 @@ sub create {
                     "tie"          => [],
                     "shoes"        => [],
                     "belt"         => [],
+                    "etc"          => [],
+                );
+                my %count_by_category = (
+                    "shirt-blouse" => 0,
+                    "pants-skirt"  => 0,
+                    "jacket"       => 0,
+                    "tie"          => 0,
+                    "shoes"        => 0,
+                    "belt"         => 0,
+                    "etc"          => 0,
                 );
                 my $jacket       = 0;
                 my $pants_skirt  = 0;
                 for my $order_detail (@order_details) {
                     my $category = $order_detail->{clothes_category};
-                    $category = "shirt-blouse" if $category =~ m/^shirt|blouse$/;
-                    $category = "pants-skirt"  if $category =~ m/^pants|skirt$/;
 
-                    ++$jacket      if $category eq "jacket";
-                    ++$pants_skirt if $category eq "pants-skirt";
-
-                    $order_details_by_category{$category} = []
-                        unless $order_details_by_category{$category};
-                    push @{ $order_details_by_category{$category} }, $order_detail;
+                    use experimental qw( smartmatch );
+                    given ($category) {
+                        when (/^shirt|blouse$/) {
+                            my $adjust_category = "shirt-blouse";
+                            push @{ $order_details_by_category{$adjust_category} }, $order_detail;
+                            ++$count_by_category{$adjust_category};
+                        }
+                        when (/^pants|skirt$/) {
+                            my $adjust_category = "pants-skirt";
+                            push @{ $order_details_by_category{$adjust_category} }, $order_detail;
+                            ++$count_by_category{$adjust_category};
+                        }
+                        when (/^jacket|tie|shoes|belt$/) {
+                            push @{ $order_details_by_category{$category} }, $order_detail;
+                            ++$count_by_category{$category};
+                        }
+                        default {
+                            my $adjust_category = "etc";
+                            push @{ $order_details_by_category{$adjust_category} }, $order_detail;
+                            ++$count_by_category{$adjust_category};
+                        }
+                    }
                 }
 
                 #
                 # 재킷 또는 바지, 치마가 각각 3개 미만이어야 조건 충족
                 #
-                if (   scalar( @{ $order_details_by_category{"jacket"} } ) < 3
-                    && scalar( @{ $order_details_by_category{"pants-skirt"} } ) < 3 )
+                if (   $count_by_category{"jacket"} < 3
+                    && $count_by_category{"pants-skirt"} < 3 )
                 {
-                    #
-                    # 재킷 또는 바지, 치마 셋트 개수
-                    #
-                    my $pair_count = List::Util::min(
-                        scalar( @{ $order_details_by_category{"jacket"} } ),
-                        scalar( @{ $order_details_by_category{"pants-skirt"} } ),
+                    my $ea = List::MoreUtils::each_arrayref(
+                        $order_details_by_category{"shirt-blouse"},
+                        $order_details_by_category{"pants-skirt"},
+                        $order_details_by_category{"jacket"},
+                        $order_details_by_category{"tie"},
+                        $order_details_by_category{"shoes"},
+                        $order_details_by_category{"belt"},
                     );
+                    while ( my ( $shirt_blouse, $pants_skirt, $jacket, $tie, $shoes, $belt ) = $ea->() ) {
+                        if ( $jacket && $pants_skirt ) {
+                            if ($tie) {
+                                $tie->{price}       = 0;
+                                $tie->{final_price} = 0;
 
-                    #
-                    # 셋트 개수에 따른 무료 대여 항목 중 카테고리 별 가장 많은 항목 개수
-                    #
-                    my $etc_count = List::Util::max(
-                        scalar( @{ $order_details_by_category{"shirt-blouse"} } ),
-                        scalar( @{ $order_details_by_category{"tie"} } ),
-                        scalar( @{ $order_details_by_category{"shoes"} } ),
-                        scalar( @{ $order_details_by_category{"belt"} } ),
-                    );
+                                if ( $shirt_blouse || $shoes || $belt ) {
+                                    #
+                                    # 위 아래 셋트와 타이가 있으며 다른 항목이 있으므로 셋트 가격만 지불
+                                    #
+                                    for my $order_detail ( $shirt_blouse, $shoes, $belt ) {
+                                        next unless $order_detail;
 
-                    #
-                    # 최종 무료 항목 개수를 결정할 할인 개수
-                    # 이 개수 이외의 항목은 일괄 30% 적용
-                    #
-                    my $sale_count = List::Util::min $pair_count, $etc_count;
+                                        $order_detail->{price}       = 0;
+                                        $order_detail->{final_price} = 0;
+                                    }
+                                }
+                                else {
+                                    #
+                                    # 위 아래 셋트와 타이가 있으며 다른 항목이 없으므로 30% 할인
+                                    #
+                                    for my $order_detail ( $jacket, $pants_skirt, $tie ) {
+                                        next unless $order_detail;
 
-                    #
-                    # 할인 기준으로 셔츠, 블라우스, 타이, 구두, 벨트를 무료 대여
-                    #
-                    my %free_count;
-                    for my $category ( qw/ shirt-blouse tie shoes belt / ) {
-                        my $count = 0;
-                        for my $order_detail ( @{ $order_details_by_category{$category} } ) {
-                            if ( $count < $sale_count ) {
-                                $order_detail->{price}       = 0;
-                                $order_detail->{final_price} = 0;
-
-                                ++$free_count{$category};
+                                        $order_detail->{price}       *= 0.7;
+                                        $order_detail->{final_price} *= 0.7;
+                                    }
+                                }
                             }
                             else {
-                                #
-                                # 이외의 항목은 일괄 30% 할인
-                                #
+                                if ( $shirt_blouse || $shoes || $belt ) {
+                                    #
+                                    # 위 아래 셋트이며 다른 항목이 있으므로 셋트 가격만 지불
+                                    #
+                                    for my $order_detail ( $shirt_blouse, $shoes, $belt ) {
+                                        next unless $order_detail;
+
+                                        $order_detail->{price}       = 0;
+                                        $order_detail->{final_price} = 0;
+                                    }
+                                }
+                                else {
+                                    #
+                                    # 위 아래 셋트이며 다른 항목이 없으므로 30% 할인
+                                    #
+                                    for my $order_detail ( $jacket, $pants_skirt) {
+                                        next unless $order_detail;
+
+                                        $order_detail->{price}       *= 0.7;
+                                        $order_detail->{final_price} *= 0.7;
+                                    }
+                                }
+                            }
+                        }
+                        else {
+                            #
+                            # 위 아래 셋트가 아니므로 일괄 30% 할인
+                            #
+                            if ($tie) {
+                                $tie->{price}       = 2000;
+                                $tie->{final_price} = 2000;
+                            }
+                            for my $order_detail ( $shirt_blouse, $pants_skirt, $jacket, $tie, $shoes, $belt ) {
+                                next unless $order_detail;
+
                                 $order_detail->{price}       *= 0.7;
                                 $order_detail->{final_price} *= 0.7;
                             }
-                            ++$count;
                         }
                     }
 
                     #
-                    # 할인 기준으로 위 아래 셋트 가격 결정
+                    # 이외의 항목은 일괄 30% 할인
                     #
-                    for my $category ( qw/ jacket pants-skirt / ) {
-                        my $count = 0;
-                        for my $order_detail ( @{ $order_details_by_category{$category} } ) {
-                            if ( $count < $sale_count ) {
-                                # nothing to do
-                            }
-                            else {
-                                #
-                                # 이외의 항목은 일괄 30% 할인
-                                #
-                                $order_detail->{price}       *= 0.7;
-                                $order_detail->{final_price} *= 0.7;
-                            }
-                            ++$count;
-                        }
-                    }
-
-                    #
-                    # 이외의 모든 항목은 일괄 30% 할인
-                    #
-                    for my $category ( qw/ coat misc onepiece waistcoat / ) {
-                        for my $order_detail ( @{ $order_details_by_category{$category} } ) {
-                            $order_detail->{price}       *= 0.7;
-                            $order_detail->{final_price} *= 0.7;
-                        }
+                    for my $order_detail ( @{ $order_details_by_category{etc} } ) {
+                        $order_detail->{price}       *= 0.7;
+                        $order_detail->{final_price} *= 0.7;
                     }
                 }
             }
