@@ -192,6 +192,191 @@ sub index {
     $self->respond_to( html => { status => 200 } );
 }
 
+#
+# GH #790: 3회째 대여자 부터 대여자의 부담을 줄이기 위해 비용을 할인함
+#
+sub _sale_order {
+    my ( $self, $order, $order_details ) = @_;
+
+    #
+    # 쿠폰을 제외하고 몇 회째 대여인가?
+    #
+    my $visited = 0;
+    {
+        my $orders                          = $order->user->orders;
+        my $visited_without_coupon_order_rs = $orders->search(
+            {
+                status_id => $RETURNED,
+                parent_id => undef,
+                -and      => [
+                    -or => [
+                        {
+                            "coupon.id"     => { "!=" => undef },
+                            "coupon.status" => { "!=" => "used" },
+                        },
+                        {
+                            "coupon.id" => undef,
+                        },
+                    ],
+                ],
+            },
+            {
+                join => [qw/ coupon /],
+            },
+        );
+
+        $visited = $visited_without_coupon_order_rs->count;
+        $self->app->log->debug(
+            sprintf( "order %d: %d visited without coupon", $order->id, $visited ) );
+    }
+
+    #
+    # 3회 째 방문이라면 조건 충족
+    #
+    return unless $visited >= 2;
+
+    my %order_details_by_category = (
+        "shirt-blouse" => [],
+        "pants-skirt"  => [],
+        "jacket"       => [],
+        "tie"          => [],
+        "shoes"        => [],
+        "belt"         => [],
+        "etc"          => [],
+    );
+    my %count_by_category = (
+        "shirt-blouse" => 0,
+        "pants-skirt"  => 0,
+        "jacket"       => 0,
+        "tie"          => 0,
+        "shoes"        => 0,
+        "belt"         => 0,
+        "etc"          => 0,
+    );
+    my $jacket      = 0;
+    my $pants_skirt = 0;
+    for my $order_detail (@$order_details) {
+        my $category = $order_detail->{clothes_category};
+
+        use experimental qw( smartmatch );
+        given ($category) {
+            when (/^shirt|blouse$/) {
+                my $adjust_category = "shirt-blouse";
+                push @{ $order_details_by_category{$adjust_category} }, $order_detail;
+                ++$count_by_category{$adjust_category};
+            }
+            when (/^pants|skirt$/) {
+                my $adjust_category = "pants-skirt";
+                push @{ $order_details_by_category{$adjust_category} }, $order_detail;
+                ++$count_by_category{$adjust_category};
+            }
+            when (/^jacket|tie|shoes|belt$/) {
+                push @{ $order_details_by_category{$category} }, $order_detail;
+                ++$count_by_category{$category};
+            }
+            default {
+                my $adjust_category = "etc";
+                push @{ $order_details_by_category{$adjust_category} }, $order_detail;
+                ++$count_by_category{$adjust_category};
+            }
+        }
+    }
+
+    #
+    # 재킷 또는 바지, 치마가 각각 3개 미만이어야 조건 충족
+    #
+    return
+        unless $count_by_category{"jacket"} < 3 && $count_by_category{"pants-skirt"} < 3;
+
+    my $ea = List::MoreUtils::each_arrayref(
+        $order_details_by_category{"shirt-blouse"},
+        $order_details_by_category{"pants-skirt"},
+        $order_details_by_category{"jacket"},
+        $order_details_by_category{"tie"},
+        $order_details_by_category{"shoes"},
+        $order_details_by_category{"belt"},
+    );
+    while ( my ( $shirt_blouse, $pants_skirt, $jacket, $tie, $shoes, $belt ) = $ea->() )
+    {
+        if ( $jacket && $pants_skirt ) {
+            if ($tie) {
+                $tie->{price}       = 0;
+                $tie->{final_price} = 0;
+
+                if ( $shirt_blouse || $shoes || $belt ) {
+                    #
+                    # 위 아래 셋트와 타이가 있으며 다른 항목이 있으므로 셋트 가격만 지불
+                    #
+                    for my $order_detail ( $shirt_blouse, $shoes, $belt ) {
+                        next unless $order_detail;
+
+                        $order_detail->{price}       = 0;
+                        $order_detail->{final_price} = 0;
+                    }
+                }
+                else {
+                    #
+                    # 위 아래 셋트와 타이가 있으며 다른 항목이 없으므로 30% 할인
+                    #
+                    for my $order_detail ( $jacket, $pants_skirt, $tie ) {
+                        next unless $order_detail;
+
+                        $order_detail->{price}       *= 0.7;
+                        $order_detail->{final_price} *= 0.7;
+                    }
+                }
+            }
+            else {
+                if ( $shirt_blouse || $shoes || $belt ) {
+                    #
+                    # 위 아래 셋트이며 다른 항목이 있으므로 셋트 가격만 지불
+                    #
+                    for my $order_detail ( $shirt_blouse, $shoes, $belt ) {
+                        next unless $order_detail;
+
+                        $order_detail->{price}       = 0;
+                        $order_detail->{final_price} = 0;
+                    }
+                }
+                else {
+                    #
+                    # 위 아래 셋트이며 다른 항목이 없으므로 30% 할인
+                    #
+                    for my $order_detail ( $jacket, $pants_skirt ) {
+                        next unless $order_detail;
+
+                        $order_detail->{price}       *= 0.7;
+                        $order_detail->{final_price} *= 0.7;
+                    }
+                }
+            }
+        }
+        else {
+            #
+            # 위 아래 셋트가 아니므로 일괄 30% 할인
+            #
+            if ($tie) {
+                $tie->{price}       = 2000;
+                $tie->{final_price} = 2000;
+            }
+            for my $order_detail ( $shirt_blouse, $pants_skirt, $jacket, $tie, $shoes, $belt ) {
+                next unless $order_detail;
+
+                $order_detail->{price}       *= 0.7;
+                $order_detail->{final_price} *= 0.7;
+            }
+        }
+    }
+
+    #
+    # 이외의 항목은 일괄 30% 할인
+    #
+    for my $order_detail ( @{ $order_details_by_category{etc} } ) {
+        $order_detail->{price}       *= 0.7;
+        $order_detail->{final_price} *= 0.7;
+    }
+}
+
 =head2 create
 
     POST /order
@@ -301,184 +486,7 @@ sub create {
             #
             # GH #790: 3회째 대여자 부터 대여자의 부담을 줄이기 위해 비용을 할인함
             #
-
-            #
-            # 쿠폰을 제외하고 몇 회째 대여인가?
-            #
-            my $visited = 0;
-            {
-                my $orders                          = $order->user->orders;
-                my $visited_without_coupon_order_rs = $orders->search(
-                    {
-                        status_id       => $RETURNED,
-                        parent_id       => undef,
-                        -and => [
-                            -or => [
-                                {
-                                    "coupon.id"     => { "!=" => undef  },
-                                    "coupon.status" => { "!=" => "used" },
-                                },
-                                {
-                                    "coupon.id"     => undef,
-                                },
-                            ],
-                        ],
-                    },
-                    {
-                        join => [qw/ coupon /],
-                    },
-                );
-
-                $visited = $visited_without_coupon_order_rs->count;
-                $self->app->log->debug(
-                    sprintf( "order %d: %d visited without coupon", $order->id, $visited ) );
-            }
-
-            #
-            # 3회 째 방문이라면 조건 충족
-            #
-            if ( $visited >= 2 ) {
-                my %order_details_by_category = (
-                    "shirt-blouse" => [],
-                    "pants-skirt"  => [],
-                    "jacket"       => [],
-                    "tie"          => [],
-                    "shoes"        => [],
-                    "belt"         => [],
-                    "etc"          => [],
-                );
-                my %count_by_category = (
-                    "shirt-blouse" => 0,
-                    "pants-skirt"  => 0,
-                    "jacket"       => 0,
-                    "tie"          => 0,
-                    "shoes"        => 0,
-                    "belt"         => 0,
-                    "etc"          => 0,
-                );
-                my $jacket       = 0;
-                my $pants_skirt  = 0;
-                for my $order_detail (@order_details) {
-                    my $category = $order_detail->{clothes_category};
-
-                    use experimental qw( smartmatch );
-                    given ($category) {
-                        when (/^shirt|blouse$/) {
-                            my $adjust_category = "shirt-blouse";
-                            push @{ $order_details_by_category{$adjust_category} }, $order_detail;
-                            ++$count_by_category{$adjust_category};
-                        }
-                        when (/^pants|skirt$/) {
-                            my $adjust_category = "pants-skirt";
-                            push @{ $order_details_by_category{$adjust_category} }, $order_detail;
-                            ++$count_by_category{$adjust_category};
-                        }
-                        when (/^jacket|tie|shoes|belt$/) {
-                            push @{ $order_details_by_category{$category} }, $order_detail;
-                            ++$count_by_category{$category};
-                        }
-                        default {
-                            my $adjust_category = "etc";
-                            push @{ $order_details_by_category{$adjust_category} }, $order_detail;
-                            ++$count_by_category{$adjust_category};
-                        }
-                    }
-                }
-
-                #
-                # 재킷 또는 바지, 치마가 각각 3개 미만이어야 조건 충족
-                #
-                if (   $count_by_category{"jacket"} < 3
-                    && $count_by_category{"pants-skirt"} < 3 )
-                {
-                    my $ea = List::MoreUtils::each_arrayref(
-                        $order_details_by_category{"shirt-blouse"},
-                        $order_details_by_category{"pants-skirt"},
-                        $order_details_by_category{"jacket"},
-                        $order_details_by_category{"tie"},
-                        $order_details_by_category{"shoes"},
-                        $order_details_by_category{"belt"},
-                    );
-                    while ( my ( $shirt_blouse, $pants_skirt, $jacket, $tie, $shoes, $belt ) = $ea->() ) {
-                        if ( $jacket && $pants_skirt ) {
-                            if ($tie) {
-                                $tie->{price}       = 0;
-                                $tie->{final_price} = 0;
-
-                                if ( $shirt_blouse || $shoes || $belt ) {
-                                    #
-                                    # 위 아래 셋트와 타이가 있으며 다른 항목이 있으므로 셋트 가격만 지불
-                                    #
-                                    for my $order_detail ( $shirt_blouse, $shoes, $belt ) {
-                                        next unless $order_detail;
-
-                                        $order_detail->{price}       = 0;
-                                        $order_detail->{final_price} = 0;
-                                    }
-                                }
-                                else {
-                                    #
-                                    # 위 아래 셋트와 타이가 있으며 다른 항목이 없으므로 30% 할인
-                                    #
-                                    for my $order_detail ( $jacket, $pants_skirt, $tie ) {
-                                        next unless $order_detail;
-
-                                        $order_detail->{price}       *= 0.7;
-                                        $order_detail->{final_price} *= 0.7;
-                                    }
-                                }
-                            }
-                            else {
-                                if ( $shirt_blouse || $shoes || $belt ) {
-                                    #
-                                    # 위 아래 셋트이며 다른 항목이 있으므로 셋트 가격만 지불
-                                    #
-                                    for my $order_detail ( $shirt_blouse, $shoes, $belt ) {
-                                        next unless $order_detail;
-
-                                        $order_detail->{price}       = 0;
-                                        $order_detail->{final_price} = 0;
-                                    }
-                                }
-                                else {
-                                    #
-                                    # 위 아래 셋트이며 다른 항목이 없으므로 30% 할인
-                                    #
-                                    for my $order_detail ( $jacket, $pants_skirt) {
-                                        next unless $order_detail;
-
-                                        $order_detail->{price}       *= 0.7;
-                                        $order_detail->{final_price} *= 0.7;
-                                    }
-                                }
-                            }
-                        }
-                        else {
-                            #
-                            # 위 아래 셋트가 아니므로 일괄 30% 할인
-                            #
-                            if ($tie) {
-                                $tie->{price}       = 2000;
-                                $tie->{final_price} = 2000;
-                            }
-                            for my $order_detail ( $shirt_blouse, $pants_skirt, $jacket, $tie, $shoes, $belt ) {
-                                next unless $order_detail;
-
-                                $order_detail->{price}       *= 0.7;
-                                $order_detail->{final_price} *= 0.7;
-                            }
-                        }
-                    }
-
-                    #
-                    # 이외의 항목은 일괄 30% 할인
-                    #
-                    for my $order_detail ( @{ $order_details_by_category{etc} } ) {
-                        $order_detail->{price}       *= 0.7;
-                        $order_detail->{final_price} *= 0.7;
-                    }
-                }
-            }
+            $self->_sale_order( $order, \@order_details ) if $self->config->{sale}{enable};
 
             for my $order_detail (@order_details) {
                 $order->add_to_order_details(
