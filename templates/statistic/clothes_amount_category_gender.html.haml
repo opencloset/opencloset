@@ -28,6 +28,7 @@
           %th 수량
           %th 가용 수량
           %th 대여중
+          %th 대여불가
           %th 수선중
           %th 세탁중
           %th 분실
@@ -46,6 +47,8 @@
             %td= $item->{available_qty}
             %td
               %a{ :href => "#{ url_for( '/clothes' )->query( %query_params, status => 2 ) }" }= $item->{rental}
+            %td
+              %a{ :href => "#{ url_for( '/clothes' )->query( %query_params, status => 3 ) }" }= $item->{cant_rental}
             %td
               %a{ :href => "#{ url_for( '/clothes' )->query( %query_params, status => 6 ) }" }= $item->{repair}
             %td
