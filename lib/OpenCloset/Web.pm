@@ -184,6 +184,9 @@ sub _public_routes_visit {
     $r->post('/coupon/validate')->to('coupon#validate');
 
     $r->get('/events/seoul')->to('event#seoul');
+
+    $r->options('/api/postcode/search')->to('API#api_postcode_preflight_cors');
+    $r->get('/api/postcode/search')->to('API#api_postcode_search');
 }
 
 =head2 _private_routes
@@ -260,8 +263,6 @@ sub _private_routes {
     $api->get('/gui/timetable/:ymd')->to('API#api_gui_timetable');
     $api->get('/gui/user/:id/avg')->to('API#api_gui_user_id_avg');
     $api->get('/gui/user/:id/avg2')->to('API#api_gui_user_id_avg2');
-
-    $api->any('/postcode/search')->to('API#api_postcode_search');
 
     $api->post('/photos')->to('API#api_upload_photo');
 
