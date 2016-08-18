@@ -244,3 +244,53 @@ $ ->
 
   sock.onerror = (e) ->
     location.reload()
+
+  #
+  # 주문서 검색 자동완성
+  #
+  suggestion = new Bloodhound
+    datumTokenizer: Bloodhound.tokenizers.obj.whitespace('phone')
+    queryTokenizer: Bloodhound.tokenizers.whitespace
+    remote:
+      url: "#{location.pathname}/search?q=%QUERY"
+      wildcard: '%QUERY'
+
+  $('#query.typeahead').typeahead null,
+    name: 'q'
+    display: 'phone'
+    source: suggestion
+    limit: 10
+    templates:
+      empty: [
+        '<div class="empty-message">',
+          'oops, order not found',
+        '</div>'
+      ].join('\n')
+      suggestion: (data) ->
+        "<div><strong>#{data.phone}</strong> | #{data.name} | #{data.email}</div>"
+
+  $('#query.typeahead').on 'typeahead:select', (e, data) ->
+    $('#selected').html("""<div>
+      <strong>#{data.phone}</strong> | #{data.name} | #{data.email}
+      <a href="/api/order/#{data.order_id}" class="btn btn-xs btn-success btn-update-status">
+        방문예약
+        <i class="icon-arrow-right"></i>
+        방문
+      </a>
+    </div>""")
+
+  #
+  # 방문예약 -> 방문 버튼
+  #
+  $('#selected').on 'click', '.btn-update-status:not(.disabled)', (e) ->
+    e.preventDefault()
+    $this = $(@)
+    $this.addClass('disabled')
+    $.ajax $this.prop('href'),
+      type: 'PUT'
+      data: { status_id: OpenCloset.status['방문'].id }
+      success: (data, textStatus, jqXHR) ->
+        location.reload()
+      error: (jqXHR, textStatus, errorThrown) ->
+      complete: (jqXHR, textStatus) ->
+        $this.removeClass('disabled')

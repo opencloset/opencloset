@@ -3,7 +3,8 @@ use Mojo::Base 'Mojolicious::Controller';
 
 use DateTime;
 use Try::Tiny;
-use OpenCloset::Constants::Status qw/$REPAIR $FITTING_ROOM1 $FITTING_ROOM20/;
+use OpenCloset::Constants::Status
+    qw/$REPAIR $FITTING_ROOM1 $FITTING_ROOM20 $RESERVATED/;
 
 has DB => sub { shift->app->DB };
 
@@ -103,6 +104,91 @@ sub ymd {
         dt_end       => $dt_end,
         room_repairs => $rs,
     );
+}
+
+=head2 search
+
+    GET /rental/:ymd/search?q=xxx
+
+=cut
+
+sub search {
+    my $self = shift;
+    my $ymd  = $self->param('ymd');
+
+    my $v = $self->validation;
+    $v->input( { ymd => $ymd } );
+    $v->required('ymd')->like(qr/^\d{4}-\d{2}-\d{2}$/);
+
+    if ( $v->has_error ) {
+        my $failed = $v->failed;
+        my $error = 'Parameter Validation Failed: ' . join( ', ', @$failed );
+        return $self->error( 400, { str => $error } );
+    }
+
+    my $q = $self->param('q');
+    return $self->error( 400, { str => 'Parameter "q" is required' } ) unless $q;
+    return $self->error( 400, { str => 'Query is too short' } ) if length $q < 2;
+
+    my @or;
+    if ( $q =~ /^[0-9\-]+$/ ) {
+        $q =~ s/-//g;
+        push @or, { 'user_info.phone' => { like => "%$q%" } };
+    }
+    elsif ( $q =~ /^[a-zA-Z0-9_\-]+/ ) {
+        if ( $q =~ /\@/ ) {
+            push @or, { email => { like => "%$q%" } };
+        }
+        else {
+            push @or, { email => { like => "%$q%" } };
+            push @or, { name  => { like => "%$q%" } };
+        }
+    }
+    elsif ( $q =~ m/^[ㄱ-힣]+$/ ) {
+        push @or, { name => { like => "%$q%" } };
+    }
+
+    my ( $yyyy, $mm, $dd ) = $ymd =~ m/^(\d{4})-(\d{2})-(\d{2})$/;
+    my $timezone = $self->config->{timezone};
+    my $dt_start =
+        DateTime->new( year => $yyyy, month => $mm, day => $dd, time_zone => $timezone );
+    my $dt_end = $dt_start->clone->add( hours => 24, seconds => -1 );
+
+    my $dtf = $self->DB->storage->datetime_parser;
+    my $rs  = $self->DB->resultset('Order')->search(
+        {
+            -or  => [@or],
+            -and => [
+                status_id      => $RESERVATED,
+                'booking.date' => {
+                    -between => [
+                        $dtf->format_datetime($dt_start),
+                        $dtf->format_datetime($dt_end)
+                    ],
+                },
+                \[ 'HOUR(`booking`.`date`) != ?', 22 ],
+            ]
+        },
+        {
+            join => [ 'booking', { user => 'user_info' } ],
+            rows => 5,
+            order_by => { -asc => 'update_date' },
+        }
+    );
+
+    my @orders;
+    while ( my $row = $rs->next ) {
+        my $user      = $row->user;
+        my $user_info = $user->user_info;
+        push @orders, {
+            order_id => $row->id,
+            name     => $user->name,
+            email    => $user->email,
+            phone    => $user_info->phone
+        };
+    }
+
+    $self->render( json => [@orders] );
 }
 
 1;

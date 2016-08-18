@@ -5,6 +5,7 @@
 -   breadcrumbs => [ { text => meta_text($_id) } ],
 -   jses => [
 -     '/lib/reconnectingWebsocket/reconnecting-websocket.js',
+-     '/components/typeahead.js/dist/typeahead.bundle.min.js',
 -     '/components/handlebars/handlebars.runtime.min.js',
 -     '/js/templates.js'
 -   ];
@@ -13,19 +14,25 @@
 %h3 탈의/수선 상태의 주문서
 .space-4
 
-%ul#list-fitting-room-repair
-  - while (my $order = $room_repairs->next) {
-    - my $user      = $order->user;
-    - my $user_info = $user->user_info;
-    - my $gender    = $user_info->gender;
-    %li{:data-order-id => "#{$order->id}"}
-      %i{:class => "icon-#{$gender} #{$gender} icon-fixed-width"}
-      = $user->name
-      %a.btn.btn-success.btn-xs.btn-update-status{:href => "#{url_for('/api/order/' . $order->id)}"}
-        = substr $order->status->name, 0, 2
-        %i.icon-arrow-right
-        포장
-  - }
+.row
+  .col-md-2
+    %ul#list-fitting-room-repair
+      - while (my $order = $room_repairs->next) {
+        - my $user      = $order->user;
+        - my $user_info = $user->user_info;
+        - my $gender    = $user_info->gender;
+        %li{:data-order-id => "#{$order->id}"}
+          %i{:class => "icon-#{$gender} #{$gender} icon-fixed-width"}
+          = $user->name
+          %a.btn.btn-success.btn-xs.btn-update-status{:href => "#{url_for('/api/order/' . $order->id)}"}
+            = substr $order->status->name, 0, 2
+            %i.icon-arrow-right
+            포장
+      - }
+  .col-md-10
+    .form-group
+      %input#query.typeahead.form-control{:name => 'q', :type => 'text', :placeholder => '이름, 전화번호, 이메일', :autocomplete => 'off'}
+      #selected.text-muted
 
 %hr
 
