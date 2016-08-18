@@ -2,3 +2,4 @@
 
     $ grunt dist-css
     $ npm install
+    $ bower install
