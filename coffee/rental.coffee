@@ -236,7 +236,9 @@ $ ->
       if to in REPAIR_RANGE
         data.order.status_name = '수선'
       if to in ROOM_RANGE
-        data.order.status_name = '탈의'
+        num = to - 19
+        if num < 10 then num = '0' + num
+        data.order.status_name = '탈의' + num
 
       template = JST['rental/fitting-room-repair-item']
       html     = template(data)

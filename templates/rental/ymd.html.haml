@@ -25,7 +25,7 @@
           %i{:class => "icon-#{$gender} #{$gender} icon-fixed-width"}
           = $user->name
           %a.btn.btn-success.btn-xs.btn-update-status{:href => "#{url_for('/api/order/' . $order->id)}"}
-            = substr $order->status->name, 0, 2
+            = $order->status->name
             %i.icon-arrow-right
             포장
       - }
