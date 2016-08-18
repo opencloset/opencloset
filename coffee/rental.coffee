@@ -207,3 +207,40 @@ $ ->
       error: (jqXHR, textStatus, errorThrown) ->
       complete: (jqXHR, textStatus) ->
         $this.removeClass('disabled')
+
+  #
+  # 탈의/수선 목록의 실시간 갱신
+  #
+  REPAIR_RANGE = [6]
+  ROOM_RANGE   = [20..39]
+  RANGE = []
+  RANGE.push i for i in REPAIR_RANGE
+  RANGE.push i for i in ROOM_RANGE
+  ymd = location.pathname.split('/').pop()
+  url  = "#{CONFIG.monitor_uri}/socket".replace 'http', 'ws'
+  sock = new ReconnectingWebSocket url, null, { debug: false }
+  sock.onopen = (e) ->
+    sock.send '/subscribe order'
+  sock.onmessage = (e) ->
+    data = JSON.parse(e.data)
+
+    return if data.order.booking.date.substr(0, 10) isnt ymd
+
+    from = parseInt(data.from)
+    to   = parseInt(data.to)
+
+    if from in RANGE
+      $("#list-fitting-room-repair li[data-order-id=#{data.order.id}]").remove()
+
+    if to in RANGE
+      if to in REPAIR_RANGE
+        data.order.status_name = '수선'
+      if to in ROOM_RANGE
+        data.order.status_name = '탈의'
+
+      template = JST['rental/fitting-room-repair-item']
+      html     = template(data)
+      $('#list-fitting-room-repair').append(html)
+
+  sock.onerror = (e) ->
+    location.reload()
