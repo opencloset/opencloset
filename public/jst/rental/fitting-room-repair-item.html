@@ -1,0 +1,9 @@
+<li data-order-id="{{order.id}}">
+  <i class="icon-{{order.user_info.gender}} {{order.user_info.gender}} icon-fixed-width"></i>
+  {{order.user.name}}
+  <a class="btn btn-success btn-xs btn-update-status" href="/api/order/{{order.id}}">
+    {{order.status_name}}
+    <i class="icon-arrow-right"></i>
+    포장
+  </a>
+</li>
