@@ -2,9 +2,42 @@
 - my $_id   = 'rental';
 - layout 'default',
 -   page_id     => $_id,
--   breadcrumbs => [ { text => meta_text($_id) } ]
--   ;
+-   breadcrumbs => [ { text => meta_text($_id) } ],
+-   jses => [
+-     '/lib/reconnectingWebsocket/reconnecting-websocket.js',
+-     '/lib/bootstrap3-editable/js/bootstrap-editable.min.js',
+-     '/components/typeahead.js/dist/typeahead.bundle.min.js',
+-     '/components/handlebars/handlebars.runtime.min.js',
+-     '/js/templates.js'
+-   ], csses => [
+-     '/lib/bootstrap3-editable/css/bootstrap-editable.css'
+-   ];
 - title meta_text($_id);
+
+%h3 탈의/수선 상태의 주문서
+.space-4
+
+.row
+  .col-md-2
+    %ul#list-fitting-room-repair
+      - while (my $order = $room_repairs->next) {
+        - my $user      = $order->user;
+        - my $user_info = $user->user_info;
+        - my $gender    = $user_info->gender;
+        %li{:data-order-id => "#{$order->id}"}
+          %i{:class => "icon-#{$gender} #{$gender} icon-fixed-width"}
+          = $user->name
+          %a.btn.btn-success.btn-xs.btn-update-status{:href => "#{url_for('/api/order/' . $order->id)}"}
+            = $order->status->name
+            %i.icon-arrow-right
+            포장
+      - }
+  .col-md-10
+    .form-group
+      %input#query.typeahead.form-control{:name => 'q', :type => 'text', :placeholder => '이름, 전화번호, 이메일', :autocomplete => 'off'}
+      #selected.text-muted
+
+%hr
 
 .search
   %form#search-form
@@ -51,6 +84,7 @@
           %th 이름
           %th 연락처
           %th 착용여부
+          %th 바지길이
           %th 대여 희망 품목
       %tbody
         - for my $order ( $order_rs->all ) {
@@ -79,6 +113,8 @@
               - } else {
                 %button.btn.btn-default.btn-wearing.btn-sm{:type => 'button'} 안입고감
               - }
+            %td
+              %span.editable#pants{:data-name => 'pants', :data-user-id => "#{$user->id}", :data-order-id => "#{$order->id}"}= $order->pants || ''
             %td
               %span.pre_category{ "data-pre-category" => "#{ $pre_category }" }= $pre_category  || ''
         - }

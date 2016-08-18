@@ -5,7 +5,7 @@ use CHI;
 use DateTime;
 
 use OpenCloset::Schema;
-use version; our $VERSION = qv("v1.8.13");
+use version; our $VERSION = qv("v1.8.14");
 has CACHE => sub {
     my $self  = shift;
     my $cache = CHI->new(
@@ -184,6 +184,9 @@ sub _public_routes_visit {
     $r->post('/coupon/validate')->to('coupon#validate');
 
     $r->get('/events/seoul')->to('event#seoul');
+
+    $r->options('/api/postcode/search')->to('API#api_postcode_preflight_cors');
+    $r->get('/api/postcode/search')->to('API#api_postcode_search');
 }
 
 =head2 _private_routes
@@ -261,8 +264,6 @@ sub _private_routes {
     $api->get('/gui/user/:id/avg')->to('API#api_gui_user_id_avg');
     $api->get('/gui/user/:id/avg2')->to('API#api_gui_user_id_avg2');
 
-    $api->any('/postcode/search')->to('API#api_postcode_search');
-
     $api->post('/photos')->to('API#api_upload_photo');
 
     $r->get('/')->to('root#index');
@@ -281,6 +282,7 @@ sub _private_routes {
 
     $r->get('/rental')->to('rental#index');
     $r->get('/rental/:ymd')->to('rental#ymd');
+    $r->get('/rental/:ymd/search')->to('rental#search');
 
     $r->get('/order')->to('order#index');
     $r->post('/order')->to('order#create');

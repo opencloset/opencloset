@@ -191,3 +191,130 @@ $ ->
         OpenCloset.alert('danger', "의류 상태변경에 실패했습니다: #{jqXHR.responseJSON.error.str}")
       complete: ->
         $this.prop('readonly',false)
+
+  #
+  # 탈의 -> 포장, 수선 -> 포장 버튼
+  #
+  $('#list-fitting-room-repair').on 'click', '.btn-update-status:not(.disabled)', (e) ->
+    e.preventDefault()
+    $this = $(@)
+    $this.addClass('disabled')
+    $.ajax $this.prop('href'),
+      type: 'PUT'
+      data: { status_id: OpenCloset.status['포장'].id }
+      success: (data, textStatus, jqXHR) ->
+        location.reload()
+      error: (jqXHR, textStatus, errorThrown) ->
+      complete: (jqXHR, textStatus) ->
+        $this.removeClass('disabled')
+
+  #
+  # 탈의/수선 목록의 실시간 갱신
+  #
+  REPAIR_RANGE = [6]
+  ROOM_RANGE   = [20..39]
+  RANGE = []
+  RANGE.push i for i in REPAIR_RANGE
+  RANGE.push i for i in ROOM_RANGE
+  ymd = location.pathname.split('/').pop()
+  url  = "#{CONFIG.monitor_uri}/socket".replace 'http', 'ws'
+  sock = new ReconnectingWebSocket url, null, { debug: false }
+  sock.onopen = (e) ->
+    sock.send '/subscribe order'
+  sock.onmessage = (e) ->
+    data = JSON.parse(e.data)
+
+    return if data.order.booking.date.substr(0, 10) isnt ymd
+
+    from = parseInt(data.from)
+    to   = parseInt(data.to)
+
+    if from in RANGE
+      $("#list-fitting-room-repair li[data-order-id=#{data.order.id}]").remove()
+
+    if to in RANGE
+      if to in REPAIR_RANGE
+        data.order.status_name = '수선'
+      if to in ROOM_RANGE
+        num = to - 19
+        if num < 10 then num = '0' + num
+        data.order.status_name = '탈의' + num
+
+      template = JST['rental/fitting-room-repair-item']
+      html     = template(data)
+      $('#list-fitting-room-repair').append(html)
+
+  sock.onerror = (e) ->
+    location.reload()
+
+  #
+  # 주문서 검색 자동완성
+  #
+  suggestion = new Bloodhound
+    datumTokenizer: Bloodhound.tokenizers.obj.whitespace('phone')
+    queryTokenizer: Bloodhound.tokenizers.whitespace
+    remote:
+      url: "#{location.pathname}/search?q=%QUERY"
+      wildcard: '%QUERY'
+
+  $('#query.typeahead').typeahead null,
+    name: 'q'
+    display: 'phone'
+    source: suggestion
+    limit: 10
+    templates:
+      empty: [
+        '<div class="empty-message">',
+          'oops, order not found',
+        '</div>'
+      ].join('\n')
+      suggestion: (data) ->
+        "<div><strong>#{data.booking}</strong> | #{data.phone} | #{data.name} | #{data.email}</div>"
+
+  $('#query.typeahead').on 'typeahead:select', (e, data) ->
+    $('#selected').html("""<div>
+      <strong>#{data.booking}</strong> | #{data.phone} | #{data.name} | #{data.email}
+      <a href="/api/order/#{data.order_id}" class="btn btn-xs btn-success btn-update-status">
+        방문예약
+        <i class="icon-arrow-right"></i>
+        방문
+      </a>
+    </div>""")
+
+  #
+  # 방문예약 -> 방문 버튼
+  #
+  $('#selected').on 'click', '.btn-update-status:not(.disabled)', (e) ->
+    e.preventDefault()
+    $this = $(@)
+    $this.addClass('disabled')
+    $.ajax $this.prop('href'),
+      type: 'PUT'
+      data: { status_id: OpenCloset.status['방문'].id }
+      success: (data, textStatus, jqXHR) ->
+        location.reload()
+      error: (jqXHR, textStatus, errorThrown) ->
+      complete: (jqXHR, textStatus) ->
+        $this.removeClass('disabled')
+
+  #
+  # 바지길이 수정
+  #
+  $('.editable').each (i, el) ->
+    $el = $(el)
+    params =
+      mode:        'inline'
+      showbuttons: 'true'
+      emptytext:   '바지길이'
+      pk:          1
+      url: (params) ->
+        data = {}
+        data[params.name] = params.value
+        $.ajax "/api/order/#{$el.data('order-id')}",
+          type: 'PUT'
+          data: data
+        $.ajax "/api/user/#{$el.data('user-id')}",
+          type: 'PUT'
+          data: data
+
+    $(el).editable params

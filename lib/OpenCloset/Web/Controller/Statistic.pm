@@ -46,6 +46,7 @@ sub clothes_amount {
     my @available_status_ids = (
         1, # 대여가능
         2, # 대여중
+        3, # 대여불가
         5, # 세탁
         6, # 수선
         9, # 반납
@@ -119,6 +120,7 @@ sub clothes_amount_category_gender {
     my @available_status_ids = (
         1, # 대여가능
         2, # 대여중
+        3, # 대여불가
         5, # 세탁
         6, # 수선
         9, # 반납
@@ -154,6 +156,10 @@ sub clothes_amount_category_gender {
                 $self->DB->resultset('Clothes')
                 ->search(
                 { category => $category, gender => $gender, $criterion => $size, status_id => 2 } );
+            my $cant_rental =
+                $self->DB->resultset('Clothes')
+                ->search(
+                { category => $category, gender => $gender, $criterion => $size, status_id => 3 } );
             my $repair =
                 $self->DB->resultset('Clothes')
                 ->search(
@@ -178,6 +184,7 @@ sub clothes_amount_category_gender {
                     qty           => $qty,
                     available_qty => $available_qty,
                     rental        => $rental,
+                    cant_rental   => $cant_rental,
                     repair        => $repair,
                     cleaning      => $cleaning,
                     lost          => $lost,
@@ -195,6 +202,8 @@ sub clothes_amount_category_gender {
             { category => $category, gender => $gender, status_id => \@available_status_ids } );
         my $rental = $self->DB->resultset('Clothes')
             ->search( { category => $category, gender => $gender, status_id => 2 } );
+        my $cant_rental = $self->DB->resultset('Clothes')
+            ->search( { category => $category, gender => $gender, status_id => 3 } );
         my $repair = $self->DB->resultset('Clothes')
             ->search( { category => $category, gender => $gender, status_id => 6 } );
         my $cleaning = $self->DB->resultset('Clothes')
@@ -210,6 +219,7 @@ sub clothes_amount_category_gender {
                 qty           => $qty,
                 available_qty => $available_qty,
                 rental        => $rental,
+                cant_rental   => $cant_rental,
                 repair        => $repair,
                 cleaning      => $cleaning,
                 lost          => $lost,

@@ -2916,21 +2916,41 @@ sub api_gui_user_id_avg2 {
     $self->respond_to( json => { status => 200, json => $data } );
 }
 
+=head2 postcode_preflight_cors
+
+    OPTIONS /api/postcode/search
+
+=cut
+
+sub api_postcode_preflight_cors {
+    my $self = shift;
+
+    my $origin = $self->req->headers->header('origin');
+    my $method = $self->req->headers->header('access-control-request-method');
+
+    $self->res->headers->header( 'Access-Control-Allow-Origin'  => $origin );
+    $self->res->headers->header( 'Access-Control-Allow-Methods' => $method );
+    $self->respond_to( any => { data => '', status => 200 } );
+}
+
 =head2 postcode_search
 
-    any /api/postcode/search
+    GET /api/postcode/search
 
 =cut
 
 sub api_postcode_search {
-    my $self   = shift;
-    my $q      = $self->param('q');
+    my $self = shift;
+    my $q    = $self->param('q');
+
+    my $origin = $self->req->headers->header('origin');
+    $self->res->headers->header( 'Access-Control-Allow-Origin' => $origin );
 
     if ( length $q < 3 || length $q > 80 ) {
         return $self->error( 400, { str => 'Query is too long or too short : ' . $q } );
     }
 
-    my $p      = Postcodify->new( config => $ENV{MOJO_CONFIG} || './app.psgi.conf' );
+    my $p = Postcodify->new( config => $ENV{MOJO_CONFIG} || './app.psgi.conf' );
     my $result = $p->search($q);
     $self->app->log->info("postcode search query: $q");
     $self->render( text => decode_utf8( $result->json ), format => 'json' );

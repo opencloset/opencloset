@@ -4,6 +4,7 @@ use Mojo::Base 'Mojolicious::Plugin';
 
 use Crypt::Mode::ECB;
 use DateTime::Format::Duration;
+use DateTime::Format::Human::Duration;
 use DateTime::Format::Strptime;
 use DateTime;
 use Gravatar::URL;
@@ -22,7 +23,6 @@ use OpenCloset::Size::Guess;
 use OpenCloset::Constants::Measurement;
 use OpenCloset::Constants::Category qw/$JACKET $PANTS $SKIRT/;
 use OpenCloset::Constants::Status qw/$RENTABLE $RENTAL $PAYMENT $RESERVATED/;
-use OpenCloset::Patch::DateTime::Format::Human::Duration;
 
 =encoding utf8
 
@@ -1480,7 +1480,7 @@ sub convert_sec_to_locale {
     my $dfd = DateTime::Format::Duration->new( normalize => 'ISO', pattern => '%M:%S' );
     my $dur1 = DateTime::Duration->new( seconds => $seconds );
     my $dur2 = DateTime::Duration->new( $dfd->normalize($dur1) );
-    my $dfhd = OpenCloset::Patch::DateTime::Format::Human::Duration->new;
+    my $dfhd = DateTime::Format::Human::Duration->new;
 
     my $locale = $dfhd->format_duration( $dur2, locale => "ko" );
     $locale =~ s/\s*(년|개월|주|일|시간|분|초|나노초)/$1/gms;

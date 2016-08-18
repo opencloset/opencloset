@@ -375,6 +375,14 @@ $db_opts->{AutoCommit} //= 1;
     },
 
     #
+    # sale
+    #
+    sale => {
+        enable => 1,
+        desc   => "3회째 대여자 부터 대여자의 부담을 줄이기 위해 비용을 할인함 (#790)",
+    },
+
+    #
     # postcodify
     #
     postcodify => {
