@@ -2,8 +2,12 @@
 - my $_id   = 'rental';
 - layout 'default',
 -   page_id     => $_id,
--   breadcrumbs => [ { text => meta_text($_id) } ]
--   ;
+-   breadcrumbs => [ { text => meta_text($_id) } ],
+-   jses => [
+-     '/lib/reconnectingWebsocket/reconnecting-websocket.js',
+-     '/components/handlebars/handlebars.runtime.min.js',
+-     '/js/templates.js'
+-   ];
 - title meta_text($_id);
 
 %h3 탈의/수선 상태의 주문서
@@ -14,7 +18,7 @@
     - my $user      = $order->user;
     - my $user_info = $user->user_info;
     - my $gender    = $user_info->gender;
-    %li
+    %li{:data-order-id => "#{$order->id}"}
       %i{:class => "icon-#{$gender} #{$gender} icon-fixed-width"}
       = $user->name
       %a.btn.btn-success.btn-xs.btn-update-status{:href => "#{url_for('/api/order/' . $order->id)}"}
