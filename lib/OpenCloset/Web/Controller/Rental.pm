@@ -172,7 +172,7 @@ sub search {
         {
             join => [ 'booking', { user => 'user_info' } ],
             rows => 5,
-            order_by => { -asc => 'update_date' },
+            order_by => { -asc => 'booking.date' },
         }
     );
 
@@ -184,7 +184,8 @@ sub search {
             order_id => $row->id,
             name     => $user->name,
             email    => $user->email,
-            phone    => $user_info->phone
+            phone    => $user_info->phone,
+            booking  => substr $row->booking->date, 11, 5,
         };
     }
 

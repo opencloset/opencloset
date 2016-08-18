@@ -269,11 +269,11 @@ $ ->
         '</div>'
       ].join('\n')
       suggestion: (data) ->
-        "<div><strong>#{data.phone}</strong> | #{data.name} | #{data.email}</div>"
+        "<div><strong>#{data.booking}</strong> | #{data.phone} | #{data.name} | #{data.email}</div>"
 
   $('#query.typeahead').on 'typeahead:select', (e, data) ->
     $('#selected').html("""<div>
-      <strong>#{data.phone}</strong> | #{data.name} | #{data.email}
+      <strong>#{data.booking}</strong> | #{data.phone} | #{data.name} | #{data.email}
       <a href="/api/order/#{data.order_id}" class="btn btn-xs btn-success btn-update-status">
         방문예약
         <i class="icon-arrow-right"></i>
