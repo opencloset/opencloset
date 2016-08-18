@@ -6,6 +6,25 @@
 -   ;
 - title meta_text($_id);
 
+%h3 탈의/수선 상태의 주문서
+.space-4
+
+%ul#list-fitting-room-repair
+  - while (my $order = $room_repairs->next) {
+    - my $user      = $order->user;
+    - my $user_info = $user->user_info;
+    - my $gender    = $user_info->gender;
+    %li
+      %i{:class => "icon-#{$gender} #{$gender} icon-fixed-width"}
+      = $user->name
+      %a.btn.btn-success.btn-xs.btn-update-status{:href => "#{url_for('/api/order/' . $order->id)}"}
+        = substr $order->status->name, 0, 2
+        %i.icon-arrow-right
+        포장
+  - }
+
+%hr
+
 .search
   %form#search-form
     .input-group

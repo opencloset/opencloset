@@ -191,3 +191,19 @@ $ ->
         OpenCloset.alert('danger', "의류 상태변경에 실패했습니다: #{jqXHR.responseJSON.error.str}")
       complete: ->
         $this.prop('readonly',false)
+
+  #
+  # 탈의 -> 포장, 수선 -> 포장 버튼
+  #
+  $('#list-fitting-room-repair').on 'click', '.btn-update-status:not(.disabled)', (e) ->
+    e.preventDefault()
+    $this = $(@)
+    $this.addClass('disabled')
+    $.ajax $this.prop('href'),
+      type: 'PUT'
+      data: { status_id: OpenCloset.status['포장'].id }
+      success: (data, textStatus, jqXHR) ->
+        location.reload()
+      error: (jqXHR, textStatus, errorThrown) ->
+      complete: (jqXHR, textStatus) ->
+        $this.removeClass('disabled')

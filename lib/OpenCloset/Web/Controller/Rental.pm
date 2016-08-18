@@ -3,6 +3,7 @@ use Mojo::Base 'Mojolicious::Controller';
 
 use DateTime;
 use Try::Tiny;
+use OpenCloset::Constants::Status qw/$REPAIR $FITTING_ROOM1 $FITTING_ROOM20/;
 
 has DB => sub { shift->app->DB };
 
@@ -78,11 +79,29 @@ sub ymd {
     );
 
     my $repairs = $self->redis->hkeys('opencloset:storage:repair');
+
+    #
+    # 탈의/수선 상태의 사용자
+    #
+    my $rs = $self->DB->resultset('Order')->search(
+        {
+            -and => [
+                status_id      => { -in => [ $REPAIR, $FITTING_ROOM1 .. $FITTING_ROOM20 ] },
+                'booking.date' => {
+                    -between => [ $dtf->format_datetime($dt_start), $dtf->format_datetime($dt_end), ],
+                },
+                \[ 'HOUR(`booking`.`date`) != ?', 22 ],
+            ]
+        },
+        { order_by => { -asc => 'update_date' }, join => 'booking', prefetch => 'booking' }
+    );
+
     $self->stash(
-        order_rs => $order_rs,
-        repairs  => $repairs,
-        dt_start => $dt_start,
-        dt_end   => $dt_end
+        order_rs     => $order_rs,
+        repairs      => $repairs,
+        dt_start     => $dt_start,
+        dt_end       => $dt_end,
+        room_repairs => $rs,
     );
 }
 
