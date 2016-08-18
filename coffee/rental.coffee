@@ -296,3 +296,25 @@ $ ->
       error: (jqXHR, textStatus, errorThrown) ->
       complete: (jqXHR, textStatus) ->
         $this.removeClass('disabled')
+
+  #
+  # 바지길이 수정
+  #
+  $('.editable').each (i, el) ->
+    $el = $(el)
+    params =
+      mode:        'inline'
+      showbuttons: 'true'
+      emptytext:   '바지길이'
+      pk:          1
+      url: (params) ->
+        data = {}
+        data[params.name] = params.value
+        $.ajax "/api/order/#{$el.data('order-id')}",
+          type: 'PUT'
+          data: data
+        $.ajax "/api/user/#{$el.data('user-id')}",
+          type: 'PUT'
+          data: data
+
+    $(el).editable params

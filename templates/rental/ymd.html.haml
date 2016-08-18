@@ -5,9 +5,12 @@
 -   breadcrumbs => [ { text => meta_text($_id) } ],
 -   jses => [
 -     '/lib/reconnectingWebsocket/reconnecting-websocket.js',
+-     '/lib/bootstrap3-editable/js/bootstrap-editable.min.js',
 -     '/components/typeahead.js/dist/typeahead.bundle.min.js',
 -     '/components/handlebars/handlebars.runtime.min.js',
 -     '/js/templates.js'
+-   ], csses => [
+-     '/lib/bootstrap3-editable/css/bootstrap-editable.css'
 -   ];
 - title meta_text($_id);
 
@@ -81,6 +84,7 @@
           %th 이름
           %th 연락처
           %th 착용여부
+          %th 바지길이
           %th 대여 희망 품목
       %tbody
         - for my $order ( $order_rs->all ) {
@@ -109,6 +113,8 @@
               - } else {
                 %button.btn.btn-default.btn-wearing.btn-sm{:type => 'button'} 안입고감
               - }
+            %td
+              %span.editable#pants{:data-name => 'pants', :data-user-id => "#{$user->id}", :data-order-id => "#{$order->id}"}= $order->pants || ''
             %td
               %span.pre_category{ "data-pre-category" => "#{ $pre_category }" }= $pre_category  || ''
         - }
