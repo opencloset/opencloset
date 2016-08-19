@@ -148,7 +148,7 @@ $ ->
   #
   # 착용 버튼 토글
   #
-  $('.btn-wearing:not(.disabled)').click (e) ->
+  $('#order-table').on 'click', '.btn-wearing:not(.disabled)', (e) ->
     $this = $(@)
     $this.addClass('disabled')
 
