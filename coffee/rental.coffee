@@ -12,8 +12,8 @@ $ ->
   #
   # 대여 희망 품목을 코드가 아닌 레이블로 표시
   #
-  $('.pre_category').each (i, el) ->
-    value = $(el).html()
+  category_localize = ($el) ->
+    value = $el.html()
     return unless value
 
     mapped_values = []
@@ -23,7 +23,10 @@ $ ->
       str = item.str.replace /^\s+|\s+$/, ""
       continue if str is ''
       mapped_values.push str
-      $(el).html( mapped_values.join(',') )
+      $el.html( mapped_values.join(',') )
+
+  $('.pre_category').each (i, el) ->
+    category_localize($(el))
 
   $('#search-form').submit (e) ->
     e.preventDefault()
@@ -214,8 +217,10 @@ $ ->
             template = JST['rental/order-table-item']
             html     = template(data)
             $('#order-table tbody').append(html)
-            $el = $('#order-table tbody tr:last-child .editable')
-            editableOn($el)
+            $editable = $('#order-table tbody tr:last-child .editable')
+            $pre_category = $('#order-table tbody tr:last-child td:last-child .pre_category')
+            editableOn($editable)
+            category_localize($pre_category)
           error: (jqXHR, textStatus, errorThrown) ->
           complete: (jqXHR, textStatus) ->
             $this.closest('li').remove()
