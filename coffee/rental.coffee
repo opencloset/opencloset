@@ -308,7 +308,8 @@ $ ->
       type: 'PUT'
       data: { status_id: OpenCloset.status['방문'].id }
       success: (data, textStatus, jqXHR) ->
-        location.reload()
+        $('#query').val('')
+        $('#selected').empty()
       error: (jqXHR, textStatus, errorThrown) ->
       complete: (jqXHR, textStatus) ->
         $this.removeClass('disabled')
