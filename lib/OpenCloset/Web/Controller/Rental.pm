@@ -3,7 +3,6 @@ use Mojo::Base 'Mojolicious::Controller';
 
 use DateTime;
 use Try::Tiny;
-use OpenCloset::Constants::Category ();
 use OpenCloset::Constants::Status
     qw/$REPAIR $BOX $FITTING_ROOM1 $FITTING_ROOM20 $RESERVATED/;
 
@@ -219,9 +218,6 @@ sub order {
     my %user_info = $user_info->get_columns;
 
     delete $user{password};
-    my @pre_category = split /,/, $user_info{pre_category};
-    map { $_ = $OpenCloset::Constants::Category::LABEL_MAP{$_} } @pre_category;
-    $user_info{pre_category} = join( ', ', @pre_category );
 
     $self->render(
         json => {
