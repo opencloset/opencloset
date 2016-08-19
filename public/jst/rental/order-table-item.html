@@ -1,0 +1,34 @@
+<tr data-order-id="{{order.id}}">
+  <td class="center">
+    <label>
+      <input class="ace" name="id" type="radio" value="{{order.id}}">
+      <span class="lbl"></span>
+    </label>
+  </td>
+  <td>
+    <a href="/user/{{user.id}}">{{user.name}}</a>
+    {{#if had_repair}}
+    <span class="label labe-info">수선됨</span>
+    {{/if}}
+  </td>
+  <td>
+    <i class="icon-envelope"></i>
+    <a href="mailto:{{user.email}}">{{user.email}}</a>
+    <br>
+    <i class="icon-phone"></i>
+    {{user_info.phone}}
+  </td>
+  <td>
+    {{#if order.does_wear}}
+    <button class="btn btn-success btn-sm btn-wearing" type="button">입고감</button>
+    {{else}}
+    <button class="btn btn-default btn-sm btn-wearing" type="button">안입고감</button>
+    {{/if}}
+  </td>
+  <td>
+    <span id="pants" class="editable" data-name="pants" data-user-id="{{user.id}}" data-order-id="{{order.id}}">{{order.pants}}</span>
+  </td>
+  <td>
+    <span class="pre_category" data-pre-category="{{user_info.pre_category}}">{{user_info.pre_category}}</span>
+  </td>
+</tr>
