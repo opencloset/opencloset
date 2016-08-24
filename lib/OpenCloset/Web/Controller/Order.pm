@@ -492,7 +492,7 @@ sub create {
                 $order->add_to_order_details(
                     {
                         clothes_code => $order_detail->{clothes_code},
-                        status_id    => $order_detail->{status_is},
+                        status_id    => $order_detail->{status_id},
                         name         => $order_detail->{name},
                         price        => $order_detail->{price},
                         final_price  => $order_detail->{final_price},
