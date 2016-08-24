@@ -5,7 +5,7 @@ use CHI;
 use DateTime;
 
 use OpenCloset::Schema;
-use version; our $VERSION = qv("v1.8.14");
+use version; our $VERSION = qv("v1.8.15");
 has CACHE => sub {
     my $self  = shift;
     my $cache = CHI->new(
@@ -283,6 +283,7 @@ sub _private_routes {
     $r->get('/rental')->to('rental#index');
     $r->get('/rental/:ymd')->to('rental#ymd');
     $r->get('/rental/:ymd/search')->to('rental#search');
+    $r->get('/rental/order/:order_id')->to('rental#order');
 
     $r->get('/order')->to('order#index');
     $r->post('/order')->to('order#create');

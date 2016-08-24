@@ -12,8 +12,8 @@ $ ->
   #
   # 대여 희망 품목을 코드가 아닌 레이블로 표시
   #
-  $('.pre_category').each (i, el) ->
-    value = $(el).html()
+  category_localize = ($el) ->
+    value = $el.html()
     return unless value
 
     mapped_values = []
@@ -23,7 +23,10 @@ $ ->
       str = item.str.replace /^\s+|\s+$/, ""
       continue if str is ''
       mapped_values.push str
-      $(el).html( mapped_values.join(',') )
+      $el.html( mapped_values.join(',') )
+
+  $('.pre_category').each (i, el) ->
+    category_localize($(el))
 
   $('#search-form').submit (e) ->
     e.preventDefault()
@@ -148,7 +151,7 @@ $ ->
   #
   # 착용 버튼 토글
   #
-  $('.btn-wearing:not(.disabled)').click (e) ->
+  $('#order-table').on 'click', '.btn-wearing:not(.disabled)', (e) ->
     $this = $(@)
     $this.addClass('disabled')
 
@@ -199,11 +202,29 @@ $ ->
     e.preventDefault()
     $this = $(@)
     $this.addClass('disabled')
+
+    order_id = $this.closest('li').data('order-id')
     $.ajax $this.prop('href'),
       type: 'PUT'
       data: { status_id: OpenCloset.status['포장'].id }
+      dataType: 'json'
       success: (data, textStatus, jqXHR) ->
-        location.reload()
+        $.ajax "/rental/order/#{order_id}",
+          type: 'GET'
+          dataType: 'json'
+          success: (data, textStatus, jqXHR) ->
+            data.order.does_wear = parseInt(data.order.does_wear)
+            template = JST['rental/order-table-item']
+            html     = template(data)
+            $('#order-table tbody').append(html)
+            $editable = $('#order-table tbody tr:last-child .editable')
+            $pre_category = $('#order-table tbody tr:last-child td:last-child .pre_category')
+            editableOn($editable)
+            category_localize($pre_category)
+          error: (jqXHR, textStatus, errorThrown) ->
+          complete: (jqXHR, textStatus) ->
+            $this.closest('li').remove()
+
       error: (jqXHR, textStatus, errorThrown) ->
       complete: (jqXHR, textStatus) ->
         $this.removeClass('disabled')
@@ -292,7 +313,8 @@ $ ->
       type: 'PUT'
       data: { status_id: OpenCloset.status['방문'].id }
       success: (data, textStatus, jqXHR) ->
-        location.reload()
+        $('#query').val('')
+        $('#selected').empty()
       error: (jqXHR, textStatus, errorThrown) ->
       complete: (jqXHR, textStatus) ->
         $this.removeClass('disabled')
@@ -300,8 +322,7 @@ $ ->
   #
   # 바지길이 수정
   #
-  $('.editable').each (i, el) ->
-    $el = $(el)
+  editableOn = ($el) ->
     params =
       mode:        'inline'
       showbuttons: 'true'
@@ -312,9 +333,15 @@ $ ->
         data[params.name] = params.value
         $.ajax "/api/order/#{$el.data('order-id')}",
           type: 'PUT'
+          dataType: 'json'
           data: data
         $.ajax "/api/user/#{$el.data('user-id')}",
           type: 'PUT'
+          dataType: 'json'
           data: data
 
-    $(el).editable params
+    $el.editable params
+
+  $('.editable').each (i, el) ->
+    $el = $(el)
+    editableOn($el)
