@@ -4,7 +4,7 @@ use Mojo::Base 'Mojolicious::Controller';
 use DateTime;
 use Try::Tiny;
 use OpenCloset::Constants::Status
-    qw/$REPAIR $FITTING_ROOM1 $FITTING_ROOM20 $RESERVATED/;
+    qw/$REPAIR $BOX $FITTING_ROOM1 $FITTING_ROOM20 $RESERVATED/;
 
 has DB => sub { shift->app->DB };
 
@@ -190,6 +190,43 @@ sub search {
     }
 
     $self->render( json => [@orders] );
+}
+
+=head2 order
+
+    GET /rental/order/:order_id
+
+=cut
+
+sub order {
+    my $self     = shift;
+    my $order_id = $self->param('order_id');
+
+    my $order = $self->DB->resultset('Order')->find( { id => $order_id } );
+    return $self->error( 404, { str => "Not found order: $order_id" } ) unless $order;
+    return $self->error( 400, { str => "Invalid order status" } )
+        if $order->status_id != $BOX;
+
+    my $repairs    = $self->redis->hkeys('opencloset:storage:repair');
+    my $had_repair = "@$repairs" =~ m/\b$order_id\b/;
+
+    my $user      = $order->user;
+    my $user_info = $user->user_info;
+
+    my %order     = $order->get_columns;
+    my %user      = $user->get_columns;
+    my %user_info = $user_info->get_columns;
+
+    delete $user{password};
+
+    $self->render(
+        json => {
+            order      => \%order,
+            user       => \%user,
+            user_info  => \%user_info,
+            had_repair => $had_repair,
+        }
+    );
 }
 
 1;
