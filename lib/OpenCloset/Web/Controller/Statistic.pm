@@ -5,6 +5,7 @@ use DateTime::TimeZone;
 use DateTime;
 use Try::Tiny;
 use List::Util qw/sum/;
+use DateTime::Format::MySQL;
 
 has DB    => sub { shift->app->DB };
 has CACHE => sub { shift->app->CACHE };
@@ -1139,8 +1140,6 @@ sub visitor_ymd {
 
 =cut
 
-our $DEFAULT_BETWEEN_DAYS = 10;
-
 sub events_seoul {
     my $self = shift;
     my $ymd  = $self->param('ymd');
@@ -1156,218 +1155,79 @@ sub events_seoul {
 
     my $timezone = $self->config->{timezone} or die "Config timezone is not set";
     $to->set_time_zone($timezone);
-    my $from = $to->clone->subtract( days => $DEFAULT_BETWEEN_DAYS );
 
-    my %counts;
-    my %dates;
     my $storage = $self->DB->storage;
 
-    ## 월별 열린옷장 방문
-    my $monthly_visited = $storage->dbh_do(
+    my $query = $storage->dbh_do(
         sub {
             my ( $storage, $dbh, @args ) = @_;
-            $dbh->selectall_arrayref(
-                qq{SELECT DATE_FORMAT(b.date, '%Y-%m') AS ym, count(*) AS visited
-FROM `order` o JOIN booking b ON o.booking_id = b.id
-WHERE o.status_id NOT IN (12, 14) AND b.date >= '2016-04-01' GROUP BY DATE_FORMAT(b.date, '%Y-%m')}
-            );
+            $dbh->selectall_hashref(<<END_SQL
+                SELECT
+                    *
+                FROM
+                    (
+                        SELECT
+                            a.`date`                                        AS 'booking_date'
+                            ,b.`id`                                         AS 'order_id'
+                            ,YEAR(a.`date`)                                 AS 'booking_year'
+                            ,MONTH(a.`date`)                                AS 'booking_month'
+                            ,DAY(a.`date`)                                  AS 'booking_day'
+                            ,IF(b.status_id = 12 OR b.status_id = 14, 0, 1) AS 'is_visit'
+                            ,d.gender                                       AS 'gender'
+                            ,d.birth                                        AS 'birth'
+                            ,YEAR(NOW()) - d.birth                          AS 'age'
+                            ,TRUNCATE(YEAR(NOW()) - d.birth, -1)            AS 'age_group'
+                            ,IF(b.`coupon_id` IS NOT NULL, 1, 0)            AS 'is_coupon_use'
+                            ,e.`id`                                         AS 'coupon_id'
+                            ,e.`update_date`                                AS 'coupon_date'
+                            ,e.`status`                                     AS 'coupon_status'
+                            ,SUBSTRING_INDEX(e.desc, '|', 1)                AS 'coupon_type'
+                            ,IFNULL(a.`date` - e.`update_date`,0)           AS 'booking_coupon_issue_diff'
+                        FROM
+                            `booking` AS a
+                            INNER JOIN `order`      AS b ON ( a.id = b.booking_id )
+                            INNER JOIN `user`       AS c ON ( b.user_id = c.id )
+                            INNER JOIN `user_info`  AS d ON ( c.id = d.user_id )
+                            LEFT  JOIN `coupon`     AS e ON ( b.coupon_id = e.id )
+                    ) AS x
+                WHERE
+                    `booking_coupon_issue_diff` >= 0
+                    AND `booking_date` > '2016-04-25'
+END_SQL
+            , 'order_id');
+        });
+
+    my %cnt;
+    foreach my $key ( keys %$query ) {
+        my $r = $query->{$key};
+        my $month = sprintf("%d-%02d", $r->{booking_year}, $r->{booking_month});
+        my $dt = DateTime::Format::MySQL->parse_datetime($r->{booking_date});
+
+        ## 월별 열린옷장 방문/미방문
+        $cnt{'month-visit'}{$month}{$r->{is_visit}}{$r->{is_coupon_use}}++;
+        ## 월별 취업날개 예약/방문
+        $cnt{'month-coupon'}{$month}{$r->{is_visit}}{$r->{is_coupon_use}}++;
+        ## 월별 취업날개 예약/방문 - 성별
+        $cnt{'month-coupon-gender'}{$month}{$r->{is_visit}}{$r->{is_coupon_use}}{$r->{gender}}++;
+        ## 월별 취업날개 예약/방문 - 나이
+        $cnt{'month-coupon-agegroup'}{$month}{$r->{is_visit}}{$r->{is_coupon_use}}{$r->{age_group}}++;
+
+        # 전체 성별
+        $cnt{'gender'}{$r->{is_coupon_use}}{$r->{is_visit}}{$r->{gender}}++;
+        # 전체 연령
+        $cnt{'age_group'}{$r->{is_coupon_use}}{$r->{is_visit}}{$r->{age_group}}++;
+
+        if( $dt <= $to ) {
+            my $ymd = $dt->ymd;
+            ## 일별 열린옷장 방문/미방문
+            $cnt{'daily-visit'}{$ymd}{$r->{is_visit}}++;
+            ## 일별 취업날개 방문/미방문
+            $cnt{'daily-visit-coupon'}{$ymd}{$r->{is_visit}}{$r->{is_coupon_use}}++;
+            $cnt{'daily-visit-coupon-gender'}{$ymd}{$r->{is_visit}}{$r->{is_coupon_use}}{$r->{gender}}++;
+            $cnt{'daily-visit-coupon-agegroup'}{$ymd}{$r->{is_visit}}{$r->{is_coupon_use}}{$r->{age_group}}++;
         }
-    );
-
-    for my $row (@$monthly_visited) {
-        my ( $ym, $c ) = @$row;
-        $counts{monthly}{$ym}{opencloset}{visited} = $c;
     }
-
-    ## 월별 열린옷장 미방문
-    my $monthly_not_visited = $storage->dbh_do(
-        sub {
-            my ( $storage, $dbh, @args ) = @_;
-            $dbh->selectall_arrayref(
-                qq{SELECT DATE_FORMAT(b.date, '%Y-%m') AS ym, count(*) AS not_visited
-FROM `order` o JOIN booking b ON o.booking_id = b.id
-WHERE o.status_id IN (12, 14) AND b.date >= '2016-04-01' AND b.date < NOW() GROUP BY DATE_FORMAT(b.date, '%Y-%m')}
-            );
-        }
-    );
-
-    for my $row (@$monthly_not_visited) {
-        my ( $ym, $c ) = @$row;
-        $counts{monthly}{$ym}{opencloset}{not_visited} = $c;
-    }
-
-    ## 월별 취업날개 예약/방문
-    my $monthly_events = $self->DB->storage->dbh_do(
-        sub {
-            my ( $storage, $dbh, @args ) = @_;
-            $dbh->selectall_arrayref(
-                qq{SELECT DATE_FORMAT(c.update_date, '%Y-%m'), c.status, COUNT(c.status)
-FROM (SELECT DISTINCT(coupon_id)
-FROM `order`
-WHERE coupon_id IS NOT NULL) o
-JOIN coupon c ON o.coupon_id = c.id
-WHERE c.desc LIKE 'seoul%' GROUP BY DATE_FORMAT(c.update_date, '%Y-%m'), c.status}
-            );
-        },
-    );
-
-    for my $row (@$monthly_events) {
-        my ( $ym, $status, $c ) = @$row;
-
-        $counts{monthly}{$ym}{events}{visited}     = $c if $status eq 'used';
-        $counts{monthly}{$ym}{events}{not_visited} = $c if $status eq 'provided';
-    }
-
-    ## 일별 열린옷장 방문
-    my $visited = $storage->dbh_do(
-        sub {
-            my ( $storage, $dbh, @args ) = @_;
-            $dbh->selectall_arrayref(
-                qq{SELECT DATE_FORMAT(b.date, '%Y-%m-%d') AS ymd, count(*) AS visited
-FROM `order` o JOIN booking b ON o.booking_id = b.id
-WHERE o.status_id NOT IN (12, 14) AND b.date BETWEEN '$from->ymd' AND '$to->ymd' GROUP BY DATE_FORMAT(b.date, '%Y-%m-%d')}
-            );
-        }
-    );
-
-    for my $row (@$visited) {
-        my ( $ymd, $c ) = @$row;
-        $dates{$ymd}++;
-        $counts{visited}{$ymd}  = $c;
-        $counts{reserved}{$ymd} = $c;
-    }
-
-    ## 일별 열린옷장 미방문
-    my $not_visited = $storage->dbh_do(
-        sub {
-            my ( $storage, $dbh, @args ) = @_;
-            $dbh->selectall_arrayref(
-                qq{SELECT DATE_FORMAT(b.date, '%Y-%m-%d') AS ymd, count(*) AS not_visited
-FROM `order` o JOIN booking b ON o.booking_id = b.id
-WHERE o.status_id IN (12, 14) AND b.date BETWEEN '$from->ymd' AND '$to->ymd' GROUP BY DATE_FORMAT(b.date, '%Y-%m-%d')}
-            );
-        }
-    );
-
-    for my $row (@$not_visited) {
-        my ( $ymd, $c ) = @$row;
-        $dates{$ymd}++;
-        $counts{not_visited}{$ymd} = $c;
-        $counts{reserved}{$ymd} += $c;
-    }
-
-    ## 일별 취업날개 예약/방문
-    my $events = $self->DB->storage->dbh_do(
-        sub {
-            my ( $storage, $dbh, @args ) = @_;
-            $dbh->selectall_arrayref(
-                qq{SELECT DATE_FORMAT(b.date, '%Y-%m-%d'), status, COUNT(status)
-FROM `order` o JOIN booking b ON o.booking_id = b.id JOIN coupon c ON o.coupon_id = c.id
-WHERE c.desc LIKE 'seoul%' AND o.coupon_id IS NOT NULL AND b.date BETWEEN '$from->ymd' AND '$to->ymd' GROUP BY DATE_FORMAT(b.date, '%Y-%m-%d'), status}
-            );
-        },
-    );
-
-    for my $row (@$events) {
-        my ( $ymd, $status, $c ) = @$row;
-
-        $dates{$ymd}++;
-        $counts{events}{visited}{$ymd}     = $c if $status eq 'used';
-        $counts{events}{not_visited}{$ymd} = $c if $status eq 'provided';
-        $counts{events}{reserved}{$ymd} += $c;
-    }
-
-    ## 성별 누적
-    my $gender = $self->DB->storage->dbh_do(
-        sub {
-            my ( $storage, $dbh, @args ) = @_;
-            $dbh->selectall_arrayref(
-                qq{SELECT ui.gender, COUNT(DISTINCT(coupon_id))
-FROM `order` o
-JOIN `coupon` c ON o.coupon_id = c.id
-JOIN `user_info` ui ON o.user_id = ui.user_id
-WHERE o.coupon_id IS NOT NULL AND c.status = 'used'
-GROUP BY ui.gender}
-            );
-        },
-    );
-
-    my %GENDER_MAP = ( male => '남성', female => '여성' );
-    for my $row (@$gender) {
-        my ( $gender, $c ) = @$row;
-
-        $counts{gender}{ $GENDER_MAP{$gender} } = $c;
-    }
-
-    ## 연령대별 누적
-    ## TODO: 오차가 생기는데 왜 그런지 모르겠음
-    my $birth = $self->DB->storage->dbh_do(
-        sub {
-            my ( $storage, $dbh, @args ) = @_;
-            $dbh->selectall_arrayref(
-                qq{SELECT ui.birth, COUNT(DISTINCT(coupon_id))
-FROM `order` o
-JOIN `coupon` c ON o.coupon_id = c.id
-JOIN `user_info` ui ON o.user_id = ui.user_id
-WHERE o.coupon_id IS NOT NULL AND c.status = 'used'
-GROUP BY ui.birth}
-            );
-        },
-    );
-
-    my $now  = DateTime->now;
-    my $year = $now->year;
-    for my $row (@$birth) {
-        my ( $birth, $c ) = @$row;
-
-        my $age_group = int( ( $year - $birth ) / 10 ) * 10;
-        $counts{age_group}{$age_group} += $c;
-    }
-
-    ## 월별, 성별
-    my $monthly_gender = $self->DB->storage->dbh_do(
-        sub {
-            my ( $storage, $dbh, @args ) = @_;
-            $dbh->selectall_arrayref(
-                qq{SELECT DATE_FORMAT(b.date, '%Y-%m') AS ym, ui.gender, COUNT(DISTINCT(coupon_id))
-FROM `order` o
-JOIN `coupon` c ON o.coupon_id = c.id
-JOIN `user_info` ui ON o.user_id = ui.user_id
-JOIN `booking` b ON o.booking_id = b.id
-WHERE o.coupon_id IS NOT NULL AND c.status = 'used'
-GROUP BY DATE_FORMAT(b.date, '%Y-%m'), ui.gender}
-            );
-        },
-    );
-
-    for my $row (@$monthly_gender) {
-        my ( $ym, $gender, $c ) = @$row;
-        $counts{monthly}{$ym}{gender}{$gender} += $c;
-    }
-
-    ## 월별, 연령대별
-    my $monthly_birth = $self->DB->storage->dbh_do(
-        sub {
-            my ( $storage, $dbh, @args ) = @_;
-            $dbh->selectall_arrayref(
-                qq{SELECT DATE_FORMAT(b.date, '%Y-%m') AS ym, ui.birth, COUNT(DISTINCT(coupon_id))
-FROM `order` o
-JOIN `coupon` c ON o.coupon_id = c.id
-JOIN `user_info` ui ON o.user_id = ui.user_id
-JOIN `booking` b ON o.booking_id = b.id
-WHERE o.coupon_id IS NOT NULL AND c.status = 'used'
-GROUP BY DATE_FORMAT(b.date, '%Y-%m'), ui.birth}
-            );
-        },
-    );
-
-    for my $row (@$monthly_birth) {
-        my ( $ym, $birth, $c ) = @$row;
-        my $age_group = int( ( $year - $birth ) / 10 ) * 10;
-        $counts{monthly}{$ym}{age_group}{$age_group} += $c;
-    }
-
-    $self->render( from => $from, $to => $to, counts => \%counts, dates => \%dates );
+    $self->render( counts => \%cnt );
 }
 
 1;
