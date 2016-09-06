@@ -146,6 +146,9 @@ sub _public_routes {
         $self->log->warn("Not allowed site_type: $site_type");
     }
 
+    ## common public routes
+    $r->options('/api/postcode/search')->to('API#api_postcode_preflight_cors');
+    $r->get('/api/postcode/search')->to('API#api_postcode_search');
     $r->get('/browse-happy')->to('root#browse_happy');
 }
 
@@ -184,9 +187,6 @@ sub _public_routes_visit {
     $r->post('/coupon/validate')->to('coupon#validate');
 
     $r->get('/events/seoul')->to('event#seoul');
-
-    $r->options('/api/postcode/search')->to('API#api_postcode_preflight_cors');
-    $r->get('/api/postcode/search')->to('API#api_postcode_search');
 }
 
 =head2 _private_routes
