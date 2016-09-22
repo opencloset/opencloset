@@ -30,138 +30,132 @@
         </div>
         <hr>
 
-        <table class="table table-striped table-bordered table-hover">
-          <thead>
-            <tr>
-              <th>월별</th>
-              <th>열린옷장 방문인원</th>
-              <th>열린옷장 미방문인원</th>
-              <th>취업날개 방문인원</th>
-              <th>취업날개 미방문인원</th>
-              <th>남성</th>
-              <th>여성</th>
-              <th>10대</th>
-              <th>20대</th>
-              <th>30대</th>
-            </tr>
-          </thead>
-          <tbody>
-            % my %sum;
-            % for my $ym (reverse sort keys %{ $counts->{monthly} }) {
-            % my $opencloset_visited = $counts->{monthly}{$ym}{opencloset}{visited} || 0;
-            % my $opencloset_not_visited = $counts->{monthly}{$ym}{opencloset}{not_visited} || 0;
-            % my $events_visited = $counts->{monthly}{$ym}{events}{visited} || 0;
-            % my $events_not_visited = $counts->{monthly}{$ym}{events}{not_visited} || 0;
-            % my $gender_male = $counts->{monthly}{$ym}{gender}{male} || 0;
-            % my $gender_female = $counts->{monthly}{$ym}{gender}{female} || 0;
-            % my $age_group_10 = $counts->{monthly}{$ym}{age_group}{10} || 0;
-            % my $age_group_20 = $counts->{monthly}{$ym}{age_group}{20} || 0;
-            % my $age_group_30 = $counts->{monthly}{$ym}{age_group}{30} || 0;
-            % $sum{opencloset}{visited} += $opencloset_visited;
-            % $sum{opencloset}{not_visited} += $opencloset_not_visited;
-            % $sum{events}{visited} += $events_visited;
-            % $sum{events}{not_visited} += $events_not_visited;
-            % $sum{gender}{male} += $gender_male;
-            % $sum{gender}{female} += $gender_female;
-            % $sum{age_group}{10} += $age_group_10;
-            % $sum{age_group}{20} += $age_group_20;
-            % $sum{age_group}{30} += $age_group_30;
-            <tr>
-              <td><%= $ym %></td>
-              <td><samp><%= $opencloset_visited %></samp></td>
-              <td><samp><%= $opencloset_not_visited %></samp></td>
-              <td><samp><%= $events_visited %></samp></td>
-              <td><samp><%= $events_not_visited %></samp></td>
-              <td><samp><%= $gender_male %></samp></td>
-              <td><samp><%= $gender_female %></samp></td>
-              <td><samp><%= $age_group_10 %></samp></td>
-              <td><samp><%= $age_group_20 %></samp></td>
-              <td><samp><%= $age_group_30 %></samp></td>
-            </tr>
-            % }
-            <tr>
-              <th>합계</th>
-              <td><samp><%= $sum{opencloset}{visited} %></samp></td>
-              <td><samp><%= $sum{opencloset}{not_visited} %></samp></td>
-              <td><samp><%= $sum{events}{visited} %></samp></td>
-              <td><samp><%= $sum{events}{not_visited} %></samp></td>
-              <td><samp><%= $sum{gender}{male} %></samp></td>
-              <td><samp><%= $sum{gender}{female} %></samp></td>
-              <td><samp><%= $sum{age_group}{10} %></samp></td>
-              <td><samp><%= $sum{age_group}{20} %></samp></td>
-              <td><samp><%= $sum{age_group}{30} %></samp></td>
-            </tr>
-          </tbody>
-        </table>
+        <div class="monthly-stat">
+            <h2> 월간 방문 인원 </h2>
+            <table class="table table-striped table-bordered table-hover">
+            <thead>
+                <tr>
+                <th rowspan="2">월별</th>
+                <th rowspan="2">취업날개 방문인원</th>
+                <th colspan="2">성별</th>
+                <th colspan="3">연령</th>
+                <th rowspan="2">취업날개 미방문인원</th>
+                <th colspan="2">성별</th>
+                <th colspan="3">연령</th>
+                </tr>
+                <tr>
+                <th>남성</th>
+                <th>여성</th>
+                <th>10대</th>
+                <th>20대</th>
+                <th>30대</th>
+                <th>남성</th>
+                <th>여성</th>
+                <th>10대</th>
+                <th>20대</th>
+                <th>30대</th>
+                </tr>
+            </thead>
+            <tbody>
+                % my %sum;
+                % for my $ym (reverse sort keys %{ $counts->{'month-visit'} }) {
+                % $sum{'month-coupon'}{1} += $counts->{'month-coupon'}{$ym}{1}{1};
+                % $sum{'month-coupon-visit-gender'}{male} += $counts->{'month-coupon-gender'}{$ym}{1}{1}{male};
+                % $sum{'month-coupon-visit-gender'}{female} += $counts->{'month-coupon-gender'}{$ym}{1}{1}{female};
+                % $sum{'month-coupon-visit-agegroup'}{10} += $counts->{'month-coupon-agegroup'}{$ym}{1}{1}{10};
+                % $sum{'month-coupon-visit-agegroup'}{20} += $counts->{'month-coupon-agegroup'}{$ym}{1}{1}{20};
+                % $sum{'month-coupon-visit-agegroup'}{30} += $counts->{'month-coupon-agegroup'}{$ym}{1}{1}{30};
+                % $sum{'month-coupon'}{0} += $counts->{'month-coupon'}{$ym}{0}{1};
+                % $sum{'month-coupon-novisit-gender'}{male} += $counts->{'month-coupon-gender'}{$ym}{0}{1}{male};
+                % $sum{'month-coupon-novisit-gender'}{female} += $counts->{'month-coupon-gender'}{$ym}{0}{1}{female};
+                % $sum{'month-coupon-novisit-agegroup'}{10} += $counts->{'month-coupon-agegroup'}{$ym}{0}{1}{10};
+                % $sum{'month-coupon-novisit-agegroup'}{20} += $counts->{'month-coupon-agegroup'}{$ym}{0}{1}{20};
+                % $sum{'month-coupon-novisit-agegroup'}{30} += $counts->{'month-coupon-agegroup'}{$ym}{0}{1}{30};
+                <tr>
+                <td><%= $ym %></td>
+                <td><samp><%= $counts->{'month-coupon'}{$ym}{1}{1} %></samp></td>
+                <td><samp><%= $counts->{'month-coupon-gender'}{$ym}{1}{1}{male} %></samp></td>
+                <td><samp><%= $counts->{'month-coupon-gender'}{$ym}{1}{1}{female} %></samp></td>
+                <td><samp><%= $counts->{'month-coupon-agegroup'}{$ym}{1}{1}{10} %></samp></td>
+                <td><samp><%= $counts->{'month-coupon-agegroup'}{$ym}{1}{1}{20} %></samp></td>
+                <td><samp><%= $counts->{'month-coupon-agegroup'}{$ym}{1}{1}{30} %></samp></td>
+                <td><samp><%= $counts->{'month-coupon'}{$ym}{0}{1} %></samp></td>
+                <td><samp><%= $counts->{'month-coupon-gender'}{$ym}{0}{1}{male} %></samp></td>
+                <td><samp><%= $counts->{'month-coupon-gender'}{$ym}{0}{1}{female} %></samp></td>
+                <td><samp><%= $counts->{'month-coupon-agegroup'}{$ym}{0}{1}{10} %></samp></td>
+                <td><samp><%= $counts->{'month-coupon-agegroup'}{$ym}{0}{1}{20} %></samp></td>
+                <td><samp><%= $counts->{'month-coupon-agegroup'}{$ym}{0}{1}{30} %></samp></td>
+                </tr>
+                % }
+                <tr>
+                <th>합계</th>
+                <td><samp><%= $sum{'month-coupon'}{1} %></samp></td>
+                <td><samp><%= $sum{'month-coupon-visit-gender'}{male} %></samp></td>
+                <td><samp><%= $sum{'month-coupon-visit-gender'}{female} %></samp></td>
+                <td><samp><%= $sum{'month-coupon-visit-agegroup'}{10} %></samp></td>
+                <td><samp><%= $sum{'month-coupon-visit-agegroup'}{20} %></samp></td>
+                <td><samp><%= $sum{'month-coupon-visit-agegroup'}{30} %></samp></td>
+                <td><samp><%= $sum{'month-coupon'}{0} %></samp></td>
+                <td><samp><%= $sum{'month-coupon-novisit-gender'}{male} %></samp></td>
+                <td><samp><%= $sum{'month-coupon-novisit-gender'}{female} %></samp></td>
+                <td><samp><%= $sum{'month-coupon-novisit-agegroup'}{10} %></samp></td>
+                <td><samp><%= $sum{'month-coupon-novisit-agegroup'}{20} %></samp></td>
+                <td><samp><%= $sum{'month-coupon-novisit-agegroup'}{30} %></samp></td>
+                </tr>
+            </tbody>
+            </table>
+        </div>
 
-        <table class="table table-striped table-bordered table-hover">
-          <thead>
-            <tr>
-              <th>연월일</th>
-              <th>열린옷장 예약인원</th>
-              <th>열린옷장 방문인원</th>
-              <th>취업날개 예약인원</th>
-              <th>취업날개 방문인원</th>
-            </tr>
-          </thead>
-          <tbody>
-            % for my $ymd (reverse sort keys %$dates) {
-            <tr>
-              <td><%= $ymd %></td>
-              <td><samp><%= $counts->{reserved}{$ymd} || 0 %></samp></td>
-              <td><samp><%= $counts->{visited}{$ymd} || 0 %></samp></td>
-              <td><samp><%= $counts->{events}{reserved}{$ymd} || 0 %></samp></td>
-              <td><samp><%= $counts->{events}{visited}{$ymd} || 0 %></samp></td>
-            </tr>
-            % }
-          </tbody>
-        </table>
-
-        <table class="table table-striped table-bordered table-hover">
-          <thead>
-            <tr>
-              <th>성별</th>
-              <th>누적</th>
-            </tr>
-          </thead>
-          <tbody>
-            % my $sum = 0;
-            % for my $gender (sort keys %{ $counts->{gender} }) {
-            % $sum += $counts->{gender}{$gender};
-            <tr>
-              <td><%= $gender %></td>
-              <td><samp><%= $counts->{gender}{$gender} %></samp></td>
-            </tr>
-            % }
-            <tr>
-              <td>합계</td>
-              <td><samp><%= $sum %></samp></td>
-            </tr>
-          </tbody>
-        </table>
-
-        <table class="table table-striped table-bordered table-hover">
-          <thead>
-            <tr>
-              <th>연령대</th>
-              <th>누적</th>
-            </tr>
-          </thead>
-          <tbody>
-            % $sum = 0;
-            % for my $age_group (sort keys %{ $counts->{age_group} }) {
-            % $sum += $counts->{age_group}{$age_group};
-            <tr>
-              <td><%= $age_group %>대</td>
-              <td><samp><%= $counts->{age_group}{$age_group} %></samp></td>
-            </tr>
-            % }
-            <tr>
-              <td>합계</td>
-              <td><samp><%= $sum %></samp></td>
-            </tr>
-          </tbody>
-        </table>
+        <div class='daily-stat collapse-group'>
+            <h2> 일간 방문인원 </h2>
+            <p><a class="btn" href="#">더보기&raquo;</a></p>
+            <div class="collapse">
+                <table class="table table-striped table-bordered table-hover">
+                <thead>
+                    <tr>
+                    <th rowspan="2">일별</th>
+                    <th rowspan="2">취업날개 방문인원</th>
+                    <th colspan="2">성별</th>
+                    <th colspan="3">연령</th>
+                    <th rowspan="2">취업날개 미방문인원</th>
+                    <th colspan="2">성별</th>
+                    <th colspan="3">연령</th>
+                    </tr>
+                    <tr>
+                    <th>남성</th>
+                    <th>여성</th>
+                    <th>10대</th>
+                    <th>20대</th>
+                    <th>30대</th>
+                    <th>남성</th>
+                    <th>여성</th>
+                    <th>10대</th>
+                    <th>20대</th>
+                    <th>30대</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    % for my $ymd (reverse sort keys %{ $counts->{'daily-visit'} }) {
+                    <tr>
+                    <td><%= $ymd %></td>
+                    <td><samp><%= $counts->{'daily-visit-coupon'}{$ymd}{1}{1} || 0 %></samp></td>
+                    <td><samp><%= $counts->{'daily-visit-coupon-gender'}{$ymd}{1}{1}{male} || 0 %></samp></td>
+                    <td><samp><%= $counts->{'daily-visit-coupon-gender'}{$ymd}{1}{1}{female} || 0 %></samp></td>
+                    <td><samp><%= $counts->{'daily-visit-coupon-agegroup'}{$ymd}{1}{1}{10} || 0 %></samp></td>
+                    <td><samp><%= $counts->{'daily-visit-coupon-agegroup'}{$ymd}{1}{1}{20} || 0 %></samp></td>
+                    <td><samp><%= $counts->{'daily-visit-coupon-agegroup'}{$ymd}{1}{1}{30} || 0 %></samp></td>
+                    <td><samp><%= $counts->{'daily-visit-coupon'}{$ymd}{0}{1} || 0 %></samp></td>
+                    <td><samp><%= $counts->{'daily-visit-coupon-gender'}{$ymd}{0}{1}{male} || 0 %></samp></td>
+                    <td><samp><%= $counts->{'daily-visit-coupon-gender'}{$ymd}{0}{1}{female} || 0 %></samp></td>
+                    <td><samp><%= $counts->{'daily-visit-coupon-agegroup'}{$ymd}{0}{1}{10} || 0 %></samp></td>
+                    <td><samp><%= $counts->{'daily-visit-coupon-agegroup'}{$ymd}{0}{1}{20} || 0 %></samp></td>
+                    <td><samp><%= $counts->{'daily-visit-coupon-agegroup'}{$ymd}{0}{1}{30} || 0 %></samp></td>
+                    </tr>
+                    % }
+                </tbody>
+                </table>
+            </div>
+        </div>
       </div>
     </div>
     <script src="/components/jquery/dist/jquery.min.js"></script>
@@ -171,6 +165,3 @@
     <script src="/js/stat-events-seoul.js"></script>
   </body>
 </html>
-
-
-
