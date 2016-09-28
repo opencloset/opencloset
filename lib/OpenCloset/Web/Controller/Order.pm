@@ -118,6 +118,13 @@ sub index {
                 %cond = %$cond_ref;
                 %attr = ( %$attr_ref, order_by => 'return_date', );
             }
+            when ('nonpayment') {
+                %cond = (
+                    'order_details.stage' => 4,
+                    'order_details.name'  => '불납',
+                );
+                %attr = ( join => [qw/order_details/], order_by => 'return_date' );
+            }
             default {
                 my @valid = 1 .. 44;
                 %cond = ( status_id => $status_id ) if $status_id ~~ @valid;
