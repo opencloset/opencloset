@@ -59,6 +59,15 @@ $ ->
       when 'clothes-comment'
         params.type = 'textarea'
       when 'clothes-discard-to'
+        params.type    = 'select'
+        params.source  = [
+          { value: '옷캔', text: '옷캔' },
+          { value: '비백', text: '비백' },
+          { value: '영구보관', text: '영구보관' },
+          { value: '재활용불가', text: '재활용불가' }
+        ]
+        params.display = (value) ->
+          $(this).html value
         params.url = (params) ->
           code = $(@).data('clothes-code')
           url = "/api/clothes/#{code}/discard"
@@ -68,7 +77,16 @@ $ ->
             type: 'PUT'
             data: data
       when 'clothes-discard-comment'
-        params.type = 'textarea'
+        params.type    = 'select'
+        params.source  = [
+          { value: '손상 수선 불가', text: '손상 수선 불가' },
+          { value: '오염 제거 불가', text: '오염 제거 불가' },
+          { value: '변색', text: '변색' },
+          { value: '사용하지 않는 스타일', text: '사용하지 않는 스타일' },
+          { value: '짝 잃음', text: '짝 잃음' }
+        ]
+        params.display = (value) ->
+          $(this).html value
         params.url = (params) ->
           code = $(@).data('clothes-code')
           url = "/api/clothes/#{code}/discard"
