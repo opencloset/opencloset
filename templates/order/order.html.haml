@@ -369,9 +369,10 @@
                     .col-sm-8
                       %a#user-name{ :href => "#{ url_for('/user/' . $order->user->id) }" }= $order->user->name
                       - if ($history) {
-                        %span.label.label-danger
-                          %i.icon-warning-sign
-                          = $history
+                        %a{:href => "#{url_for('/order')->query(q => $order->user->name, booking_ymd => 'all', status => 'unpaid')}"}
+                          %span.label.label-danger
+                            %i.icon-warning-sign
+                            = $history
                       - }
                       - if ($nonpayment) {
                         %span.label.label-danger
