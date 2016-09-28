@@ -97,3 +97,20 @@ $ ->
       error: (jqXHR, textStatus) ->
         OpenCloset.alert('danger', "오류가 발생했습니다: #{jqXHR.responseJSON.error.str}")
   ## 미납금 완납, 불납 end
+
+  ## 불납 -> 완납
+  $('.nonpayment2full').click (e) ->
+    e.preventDefault()
+    return unless confirm '완납 으로 변경하시겠습니까?'
+
+    $tr      = $(@).closest('tr')
+    order_id = $tr.find('td:first a').text()
+    $.ajax "/api/order/#{order_id}/nonpayment2full",
+      type: 'PUT'
+      dataType: 'json'
+      data: {}
+      success: (data) ->
+        $tr.remove()
+        OpenCloset.alert('success', "완납처리 되었습니다")
+      error: (jqXHR, textStatus) ->
+        OpenCloset.alert('danger', "오류가 발생했습니다: #{jqXHR.responseJSON.error.str}")
