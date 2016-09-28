@@ -752,6 +752,47 @@ sub api_update_order_unpaid {
     $self->respond_to( json => { status => 200, json => $data } );
 }
 
+=head2 update_order_nonpayment2full
+
+    PUT /api/order/:id/nonpayment2full
+
+=cut
+
+sub api_update_order_nonpayment2full {
+    my $self = shift;
+    my $id   = $self->param('id');
+
+    my $order = $self->DB->resultset('Order')->find( { id => $id } );
+    return $self->error( 404, { str => "Not found order: $id", data => {} } )
+        unless $order;
+
+    my $bool = $self->is_nonpayment($id);
+    return $self->error( 400, { str => "Not nonpayment order: $id", data => {} } )
+        unless $bool;
+
+    my $detail = $order->order_details( { stage => 1 }, { rows => 1 } )->single;
+    return $self->error( 400, { str => "Not found unpayment price", data => {} } )
+        unless $detail;
+
+    my $final_price = $detail->final_price;
+    my ( $ret, $status, $error ) = do {
+        my $guard = $self->DB->txn_scope_guard;
+        my $details = $order->order_details( { stage => 4 } );
+        while ( my $detail = $details->next ) {
+            my $cond = { stage => 5 };
+            if ( $detail->name eq '불납' ) {
+                $cond->{name}        = '완납';
+                $cond->{price}       = $final_price;
+                $cond->{final_price} = $final_price;
+            }
+            $detail->update($cond);
+        }
+        $guard->commit;
+    };
+
+    $self->respond_to( json => { status => 200, json => {} } );
+}
+
 =head2 order_return_part
 
     PUT /api/order/:id/return-part
