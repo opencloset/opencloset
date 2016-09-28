@@ -5,7 +5,7 @@ use CHI;
 use DateTime;
 
 use OpenCloset::Schema;
-use version; our $VERSION = qv("v1.8.17");
+use version; our $VERSION = qv("v1.8.18");
 has CACHE => sub {
     my $self  = shift;
     my $cache = CHI->new(
@@ -218,6 +218,7 @@ sub _private_routes {
     $api->put('/order/:id')->to('API#api_update_order');
     $api->delete('/order/:id')->to('API#api_delete_order');
     $api->put('/order/:id/unpaid')->to('API#api_update_order_unpaid');
+    $api->put('/order/:id/nonpayment2full')->to('API#api_update_order_nonpayment2full');
     $api->put('/order/:id/return-part')->to('API#api_order_return_part');
     $api->get('/order/:id/set-package')->to('API#api_order_set_package');
     $api->get('/order-list')->to('API#api_order_list');
