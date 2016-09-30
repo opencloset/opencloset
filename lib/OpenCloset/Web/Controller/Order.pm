@@ -36,7 +36,7 @@ sub index {
 
     #
     # undef       => '상태없음'
-    # late        => '연장중'
+    # late        => '연체중'
     # rental-late => '대여중(연장아님)'
     # unpaid      => '미납'
     #
