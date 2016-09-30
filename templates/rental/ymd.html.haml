@@ -14,6 +14,8 @@
 -   ];
 - title meta_text($_id);
 
+- use OpenCloset::Constants::Category;
+
 %h3 탈의/수선 상태의 주문서
 .space-4
 
@@ -89,8 +91,9 @@
       %tbody
         - for my $order ( $order_rs->all ) {
         -   my $user = $order->user;
+        -   my $user_info = $user->user_info;
         -   my $order_id = $order->id;
-        -   my $pre_category = $user->user_info->pre_category;
+        -   my $pre_category = $user_info->pre_category;
           %tr{ 'data-order-id' => "#{ $order->id }" }
             %td.center
               %label
@@ -106,7 +109,7 @@
               %a{ :href => "mailto:#{ $user->email}" }= $user->email
               %br
               %i.icon-phone
-              = $user->user_info->phone
+              = $user_info->phone
             %td
               - if ($order->does_wear) {
                 %button.btn.btn-success.btn-wearing.btn-sm{:type => 'button'} 입고감
@@ -115,8 +118,27 @@
               - }
             %td
               %span.editable#pants{:data-name => 'pants', :data-user-id => "#{$user->id}", :data-order-id => "#{$order->id}"}= $order->pants || ''
-            %td
-              %span.pre_category{ "data-pre-category" => "#{ $pre_category }" }= $pre_category  || ''
+            %td.pre_category{ "data-pre-category" => "#{ $pre_category || '' }", "data-user-id" => "#{$user->id}" }
+              - my %categories;
+              - my @categories = split /,/, $pre_category;
+              - map { $categories{$_} = 1 } @categories;
+              - my $gender = $user_info->gender;
+              - if ($gender eq 'female') {
+                - if (not $categories{$SKIRT} and not $categories{$BLOUSE}) {
+                  - map { $categories{$_} //= undef } ($JACKET, $PANTS, $SKIRT, $SHIRT, $BLOUSE, $SHOES, $BELT, $TIE);
+                - } else {
+                  - map { $categories{$_} //= undef } ($JACKET, $SKIRT, $BLOUSE, $SHOES);
+                - }
+              - } else {
+                - map { $categories{$_} //= undef } ($JACKET, $PANTS, $SHIRT, $SHOES, $TIE, $BELT);
+              - }
+              - for my $c (sort keys %categories) {
+                - if ($categories{$c}) {
+                  %span.label.label-success.label-category{:data-category => "#{$c}"}= $OpenCloset::Constants::Category::LABEL_MAP{$c}
+                - } else {
+                  %span.label.label-default.label-category{:data-category => "#{$c}"}= $OpenCloset::Constants::Category::LABEL_MAP{$c}
+                - }
+              - }
         - }
 
 :plain

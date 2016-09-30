@@ -75,13 +75,13 @@ $ ->
       '사이즈없음': { id: 43, css: 'label-inverse'   }
       '포장완료':   { id: 44, css: 'label-inverse'   }
     category:
-      jacket:    { str: '재킷',     price: 10000 }
-      pants:     { str: '바지',     price: 10000 }
-      skirt:     { str: '치마',     price: 10000 }
+      jacket:    { str: '자켓',     price: 10000 }
+      pants:     { str: '팬츠',     price: 10000 }
+      skirt:     { str: '스커트',     price: 10000 }
       shirt:     { str: '셔츠',     price: 5000  }
       blouse:    { str: '블라우스', price: 5000  }
-      shoes:     { str: '신발',     price: 5000  }
-      tie:       { str: '넥타이',   price: 0     }
+      shoes:     { str: '구두',     price: 5000  }
+      tie:       { str: '타이',   price: 0     }
       onepiece:  { str: '원피스',   price: 10000 }
       coat:      { str: '코트',     price: 10000 }
       waistcoat: { str: '조끼',     price: 5000  }
