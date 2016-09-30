@@ -19,6 +19,9 @@ Handlebars.registerHelper 'preCategory', (preCategory, gender) ->
       categories[c] = false unless categories[c]
   categories
 
+Handlebars.registerHelper 'preCategoryCnt', (preCategory) ->
+  preCategory.split(',').length
+
 $ ->
   $('#clothes-id').focus()
   $('#btn-clear').click (e) ->
@@ -376,6 +379,7 @@ $ ->
 
     preCategory = categories.join(',')
     $td.data('pre-category', preCategory)
+    $td.find('.category-cnt').text(categories.length)
 
     $.ajax "/api/user/#{user_id}",
       type: 'PUT'
