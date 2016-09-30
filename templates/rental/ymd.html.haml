@@ -89,8 +89,9 @@
       %tbody
         - for my $order ( $order_rs->all ) {
         -   my $user = $order->user;
+        -   my $user_info = $user->user_info;
         -   my $order_id = $order->id;
-        -   my $pre_category = $user->user_info->pre_category;
+        -   my $pre_category = $user_info->pre_category;
           %tr{ 'data-order-id' => "#{ $order->id }" }
             %td.center
               %label
@@ -106,7 +107,7 @@
               %a{ :href => "mailto:#{ $user->email}" }= $user->email
               %br
               %i.icon-phone
-              = $user->user_info->phone
+              = $user_info->phone
             %td
               - if ($order->does_wear) {
                 %button.btn.btn-success.btn-wearing.btn-sm{:type => 'button'} 입고감
