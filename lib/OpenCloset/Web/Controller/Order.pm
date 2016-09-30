@@ -36,7 +36,7 @@ sub index {
 
     #
     # undef       => '상태없음'
-    # late        => '연장중'
+    # late        => '연체중'
     # rental-late => '대여중(연장아님)'
     # unpaid      => '미납'
     #
@@ -99,9 +99,11 @@ sub index {
                 %cond = ( status_id => { '=' => undef }, );
             }
             when ('late') {
+                my $dt_day_end = DateTime->today( time_zone => $self->config->{timezone} )
+                    ->add( days => 4, hours => 24, seconds => -1 );
                 %cond = (
                     -and => [
-                        status_id => 2, target_date => { '<' => $dtf->format_datetime($dt_day_end) },
+                        status_id => 2, user_target_date => { '<' => $dtf->format_datetime($dt_day_end) },
                     ],
                 );
             }

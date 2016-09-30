@@ -1,3 +1,27 @@
+# Handlebars helper
+Handlebars.registerHelper 'category2hangul', (c) ->
+  category = OpenCloset.category[c]?.str or c
+  category
+
+Handlebars.registerHelper 'preCategory', (preCategory, gender) ->
+  categories = {}
+  _.map preCategory.split(','), (c) -> categories[c] = true
+
+  if gender is 'female'
+    if not _.has categories, 'skirt' and not _.has categories, 'blouse'
+      _.map ['jacket', 'pants', 'skirt', 'shirt', 'blouse', 'shoes', 'belt', 'tie'], (c) ->
+        categories[c] = false unless categories[c]
+    else
+      _.map ['jacket', 'skirt', 'blouse', 'shoes'], (c) ->
+        categories[c] = false unless categories[c]
+  else
+    _.map ['jacket', 'pants', 'shirt', 'shoes', 'belt', 'tie'], (c) ->
+      categories[c] = false unless categories[c]
+  categories
+
+Handlebars.registerHelper 'preCategoryCnt', (preCategory) ->
+  preCategory.split(',').length
+
 $ ->
   $('#clothes-id').focus()
   $('#btn-clear').click (e) ->
@@ -24,9 +48,6 @@ $ ->
       continue if str is ''
       mapped_values.push str
       $el.html( mapped_values.join(',') )
-
-  $('.pre_category').each (i, el) ->
-    category_localize($(el))
 
   $('#search-form').submit (e) ->
     e.preventDefault()
@@ -88,7 +109,7 @@ $ ->
 
   getPreCategory = () ->
     order = $('input[name=id]:checked').val()
-    return $("tr[data-order-id=#{order}] td span.pre_category").data("pre-category").split(",").sort().join(",")
+    return $("tr[data-order-id=#{order}] td.pre_category").data("pre-category").split(",").sort().join(",")
 
   getPostCategory = () ->
     category = []
@@ -218,9 +239,7 @@ $ ->
             html     = template(data)
             $('#order-table tbody').append(html)
             $editable = $('#order-table tbody tr:last-child .editable')
-            $pre_category = $('#order-table tbody tr:last-child td:last-child .pre_category')
             editableOn($editable)
-            category_localize($pre_category)
           error: (jqXHR, textStatus, errorThrown) ->
           complete: (jqXHR, textStatus) ->
             $this.closest('li').remove()
@@ -345,3 +364,28 @@ $ ->
   $('.editable').each (i, el) ->
     $el = $(el)
     editableOn($el)
+
+  #
+  # 대여희망품목의 수정
+  #
+  $('#order-table').on 'click', '.label-category', (e) ->
+    $(@).toggleClass('label-default label-success')
+    $td = $(@).closest('.pre_category')
+    user_id = $td.data('user-id')
+
+    categories = []
+    $td.find('.label-success').each ->
+      categories.push $(@).data('category')
+
+    preCategory = categories.join(',')
+    $td.data('pre-category', preCategory)
+    $td.find('.category-cnt').text(categories.length)
+
+    $.ajax "/api/user/#{user_id}",
+      type: 'PUT'
+      dataType: 'json'
+      data: { pre_category: preCategory }
+      success: (data, textStatus, jqXHR) ->
+      error: (jqXHR, textStatus, errorThrown) ->
+        location.reload()
+      complete: (jqXHR, textStatus) ->

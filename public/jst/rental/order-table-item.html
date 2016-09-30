@@ -28,7 +28,18 @@
   <td>
     <span id="pants" class="editable" data-name="pants" data-user-id="{{user.id}}" data-order-id="{{order.id}}">{{order.pants}}</span>
   </td>
-  <td>
-    <span class="pre_category" data-pre-category="{{user_info.pre_category}}">{{user_info.pre_category}}</span>
+  <td class="pre_category" data-pre-category="{{user_info.pre_category}}" data-user-id="{{user.id}}">
+    {{#each (preCategory user_info.pre_category user_info.gender) as |value c|}}
+      {{#if value}}
+      <span class="label label-success label-category" data-category="{{c}}">
+        {{category2hangul c}}
+      </span>
+      {{else}}
+      <span class="label label-default label-category" data-category="{{c}}">
+        {{category2hangul c}}
+      </span>
+      {{/if}}
+    {{/each}}
+    <span class="badge category-cnt">{{preCategoryCnt user_info.pre_category}}</span>
   </td>
 </tr>
