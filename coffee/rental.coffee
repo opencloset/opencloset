@@ -1,3 +1,24 @@
+# Handlebars helper
+Handlebars.registerHelper 'category2hangul', (c) ->
+  category = OpenCloset.category[c]?.str or c
+  category
+
+Handlebars.registerHelper 'preCategory', (preCategory, gender) ->
+  categories = {}
+  _.map preCategory.split(','), (c) -> categories[c] = true
+
+  if gender is 'female'
+    if not _.has categories, 'skirt' and not _.has categories, 'blouse'
+      _.map ['jacket', 'pants', 'skirt', 'shirt', 'blouse', 'shoes', 'belt', 'tie'], (c) ->
+        categories[c] = false unless categories[c]
+    else
+      _.map ['jacket', 'skirt', 'blouse', 'shoes'], (c) ->
+        categories[c] = false unless categories[c]
+  else
+    _.map ['jacket', 'pants', 'shirt', 'shoes', 'belt', 'tie'], (c) ->
+      categories[c] = false unless categories[c]
+  categories
+
 $ ->
   $('#clothes-id').focus()
   $('#btn-clear').click (e) ->
