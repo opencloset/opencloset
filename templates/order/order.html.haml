@@ -357,8 +357,12 @@
                       = "-"
                     - }
                     - if ($last_order) {
-                    -   my $ago = $order->booking->date->delta_days( $last_order->booking->date );
+                    -   my $booking = $order->booking;
+                    -   my $last_order_booking = $last_order->booking;
+                    -   if ($booking && $last_order_booking) {
+                    -     my $ago = $booking->date->delta_days( $last_order_booking->date );
                       %em.revisit= $ago->delta_days . '일 지남'
+                    -   }
                     - }
               .row
                 %ul.list-unstyled.spaced
