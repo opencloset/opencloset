@@ -100,8 +100,7 @@ sub index {
             }
             when ('late') {
                 my $dt_day_end =
-                    DateTime->today( time_zone => $self->config->{timezone} )->subtract( days => 4 )
-                    ->truncate( to => 'day' );
+                    DateTime->today( time_zone => $self->config->{timezone} )->subtract( days => 4 );
                 %cond = (
                     -and => [
                         status_id => 2, user_target_date => { '<' => $dtf->format_datetime($dt_day_end) },
