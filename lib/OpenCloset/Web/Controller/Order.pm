@@ -99,8 +99,9 @@ sub index {
                 %cond = ( status_id => { '=' => undef }, );
             }
             when ('late') {
-                my $dt_day_end = DateTime->today( time_zone => $self->config->{timezone} )
-                    ->add( days => 4, hours => 24, seconds => -1 );
+                my $dt_day_end =
+                    DateTime->today( time_zone => $self->config->{timezone} )->subtract( days => 4 )
+                    ->truncate( to => 'day' );
                 %cond = (
                     -and => [
                         status_id => 2, user_target_date => { '<' => $dtf->format_datetime($dt_day_end) },
