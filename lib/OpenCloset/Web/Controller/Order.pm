@@ -99,6 +99,7 @@ sub index {
                 %cond = ( status_id => { '=' => undef }, );
             }
             when ('late') {
+                ## 연체중
                 my $dt_day_end =
                     DateTime->today( time_zone => $self->config->{timezone} )->subtract( days => 4 );
                 %cond = (
@@ -108,9 +109,22 @@ sub index {
                 );
             }
             when ('rental-late') {
+                ## 대여중
                 %cond = (
                     -and => [
                         status_id => 2, target_date => { '>=' => $dtf->format_datetime($dt_day_end) },
+                    ],
+                );
+            }
+            when ('extension') {
+                ## 연장중
+                my $today = DateTime->today( time_zone => $self->config->{timezone} );
+                %cond = (
+                    -and => [
+                        status_id        => 2,
+                        target_date      => { '<' => $dtf->format_datetime($today) },
+                        user_target_date => { '>=' => $dtf->format_datetime($today) },
+                        \'DATEDIFF(user_target_date, target_date) > 7',
                     ],
                 );
             }
