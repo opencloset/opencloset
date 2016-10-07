@@ -1104,6 +1104,7 @@ sub update_order {
             }
             );
         $v->field('bestfit')->in( 0, 1 );
+        $v->field('ignore_sms')->in( 0, 1 );
         unless ( $self->validate( $v, $order_params ) ) {
             my @error_str;
             while ( my ( $k, $v ) = each %{ $v->errors } ) {
