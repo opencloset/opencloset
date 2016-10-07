@@ -326,6 +326,16 @@
                   %li.row
                     .col-sm-1
                       %i.icon-caret-right.blue
+                    .col-sm-3.no-padding-left 연체문자전송:
+                    .col-sm-8
+                      - if ($order->ignore_sms) {
+                        %button#btn-ignore-sms.btn.btn-xs.btn-default off
+                      - } else {
+                        %button#btn-ignore-sms.btn.btn-xs.btn-success on
+                      - }
+                  %li.row
+                    .col-sm-1
+                      %i.icon-caret-right.blue
                     .col-sm-3.no-padding-left 주문 신체 치수:
                     .col-sm-8
                       %span.label.label-success= $order->height   || '-'
@@ -357,8 +367,12 @@
                       = "-"
                     - }
                     - if ($last_order) {
-                    -   my $ago = $order->booking->date->delta_days( $last_order->booking->date );
+                    -   my $booking = $order->booking;
+                    -   my $last_order_booking = $last_order->booking;
+                    -   if ($booking && $last_order_booking) {
+                    -     my $ago = $booking->date->delta_days( $last_order_booking->date );
                       %em.revisit= $ago->delta_days . '일 지남'
+                    -   }
                     - }
               .row
                 %ul.list-unstyled.spaced
