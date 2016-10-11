@@ -2677,7 +2677,7 @@ sub api_gui_staff_list {
 
 =head2 gui_update_booking
 
-    PUT /api/booking/:id
+    PUT /api/gui/booking/:id
 
 =cut
 
