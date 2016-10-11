@@ -5,6 +5,7 @@ use Data::Pageset;
 use DateTime;
 use JSON qw/encode_json/;
 
+use OpenCloset::Constants::Category;
 use OpenCloset::Size::Guess;
 
 has DB => sub { shift->app->DB };
@@ -147,6 +148,36 @@ sub user {
         }
     }
 
+    my $donated_items = +{};
+    {
+        my $rs = $user->donations->search(
+            {
+                "me.id"        => { "!=" => undef },
+                "clothes.code" => { "!=" => undef },
+            },
+            {
+                join      => ["clothes"],
+                group_by  => ["clothes.category"],
+                "columns" => [
+                    { category => "clothes.category" },
+                    {
+                        count => { count => "clothes.category", -as => "clothes_category_count" },
+                    },
+                ],
+            },
+        );
+
+        my %result;
+        while ( my $row = $rs->next ) {
+            my %clothes = $row->get_columns;
+            my $category_to_string =
+                $OpenCloset::Constants::Category::LABEL_MAP{ $clothes{category} };
+            $result{$category_to_string} = $clothes{count};
+        }
+
+        $donated_items = \%result;
+    }
+
     #
     # response
     #
@@ -160,6 +191,7 @@ sub user {
         avg2                  => $data2->{avg2},
         does_wear             => $order,
         password              => $password,
+        donated_items         => $donated_items,
     );
 }
 

@@ -60,6 +60,19 @@
                           빌렸던 옷
                       .hr.hr16.dotted
 
+                      .space-6
+
+                      .profile-donation-info
+                        %div
+                          기증 물품:
+                          %ul.list-group
+                            - for my $k ( sort keys %$donated_items ) {
+                            -   my $v = $donated_items->{$k};
+                              %li.list-group-item
+                                %span.badge= $v
+                                %span.label.label-primary= $k
+                            - }
+
                     /
                     / right
                     /
