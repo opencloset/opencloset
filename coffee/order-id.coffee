@@ -808,3 +808,20 @@ $ ->
         $this.removeClass(IGNOREKLASSMAP[ignore])
         $this.addClass(IGNOREKLASSMAP[tobe])
         $this.text(IGNORETEXTMAP[tobe])
+
+  $('#btn-ignore-sms:not(.disabled)').click ->
+    $this = $(@)
+    $this.addClass('disabled')
+
+    $this.toggleClass('btn-default btn-success')
+    ignore_sms = if $this.hasClass('btn-success') then 0 else 1
+    $this.text if ignore_sms then 'off' else 'on'
+    order_id = $('#order').data('order-id')
+    $.ajax "/api/order/#{ order_id }.json",
+      type: 'PUT'
+      data: { ignore_sms: ignore_sms }
+      success: (data, textStatus, jqXHR) ->
+      error: (jqXHR, textStatus, errorThrown) ->
+        OpenCloset.alert 'danger', '연체문자전송 업데이트에 실패하였습니다.'
+      complete: (jqXHR, textStatus) ->
+        $this.removeClass('disabled')

@@ -469,6 +469,7 @@ sub api_update_order {
             hip
             id
             ignore
+            ignore_sms
             knee
             late_fee_pay_with
             leg

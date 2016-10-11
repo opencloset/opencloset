@@ -8,6 +8,9 @@
 -   ];
 - title meta_text($_id);
 
+- use DateTime;
+- my $list_name = param('status') || '';
+
 #unpaid-done-pay-with{:style => 'display: none'}
   %h3
     미납금 - 완납
@@ -42,10 +45,10 @@
     %a{ :href => "#{ url_with->query([ booking_ymd => 'all', status => 'late' ]) }" } 연체중
   %span= '|'
   %span
-    %a{ :href => "#{ url_with->query([ p => 1, status => 'rental-late' ]) }" } 대여중(연장아님)
+    %a{ :href => "#{ url_with->query([ p => 1, status => 'rental-late' ]) }" } 대여중
   %span= '|'
   %span
-    %a{ :href => "#{ url_with->query([ p => 1, status => '2' ]) }" } 대여중(연장포함)
+    %a{ :href => "#{ url_with->query([ p => 1, status => 'extension' ]) }" } 연장중
   %span= '|'
   %span
     %a{ :href => "#{ url_with->query([ p => 1, status => '9' ]) }" } 반납
@@ -92,7 +95,7 @@
         %th.center #
         %th 상태
         %th 대여일
-        %th 반납 예정일
+        %th= $list_name eq 'late' ? '반납 희망일' : '반납 예정일'
         %th 대여자
         %th 담당자
         %th 대여 품목
@@ -149,7 +152,6 @@
               -   }
               - }
               - else {
-              -   use DateTime;
               -   my $dt_today = DateTime->now( time_zone => $timezone );
               -   if ( $overdue && $order->status->name eq '대여중' && $dt_today > $order->user_target_date ) {
               -     $sms_label = '연체 문자 전송';
@@ -179,8 +181,21 @@
               - }
           %td
             = $order->rental_date ? $order->rental_date->ymd : q{}
+            - if ($list_name eq 'late') {
+              - if (my $user_target_date = $order->user_target_date) {
+                - my $today = DateTime->today;
+                - my $dur = $user_target_date->delta_days($today);
+                %small= $dur->in_units('days') . '일 연체'
+              - }
+            - }
           %td
-            = $order->target_date ? $order->target_date->ymd : q{}
+            - if ($list_name eq 'late') {
+              - my $dt = $order->user_target_date;
+              = $dt ? $dt->ymd : q{}
+            - } else {
+              - my $dt = $order->target_date;
+              = $dt ? $dt->ymd : q{}
+            - }
           %td
             - if ( $order->user ) {
               %a{ :href => "/user/#{ $order->user->id }" }= $order->user->name
