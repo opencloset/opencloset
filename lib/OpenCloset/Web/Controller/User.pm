@@ -195,6 +195,36 @@ sub user {
         $rented_order_count = $rs->count;
     };
 
+    my $rented_category_count = +{};
+    {
+        my $rs = $user->donations->search(
+            {
+                "clothes.code" => { "!=" => undef },
+                "order.id"     => { "!=" => undef },
+            },
+            {
+                join => [
+                    { "clothes" => { "order_details" => "order" } },
+                ],
+                group_by  => ["clothes.category"],
+                "columns" => [
+                    { category => "clothes.category" },
+                    { count    => { count => "clothes.category" } },
+                ],
+            },
+        );
+
+        my %result;
+        while ( my $row = $rs->next ) {
+            my %clothes = $row->get_columns;
+            my $category_to_string =
+                $OpenCloset::Constants::Category::LABEL_MAP{ $clothes{category} };
+            $result{$category_to_string} = $clothes{count};
+        }
+
+        $rented_category_count = \%result;
+    }
+
     #
     # response
     #
@@ -210,6 +240,7 @@ sub user {
         password              => $password,
         donated_items         => $donated_items,
         rented_order_count    => $rented_order_count,
+        rented_category_count => $rented_category_count,
     );
 }
 

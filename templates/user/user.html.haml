@@ -75,6 +75,16 @@
                         %div
                           대여된 주문서 횟수:
                           %span= $rented_order_count
+                        .space-6
+                        %div
+                          품목별 대여된 횟수:
+                          %ul.list-group
+                            - for my $k ( sort keys %$rented_category_count ) {
+                            -   my $v = $rented_category_count->{$k};
+                              %li.list-group-item
+                                %span.badge= $v
+                                %span.label.label-primary= $k
+                            - }
 
                     /
                     / right
