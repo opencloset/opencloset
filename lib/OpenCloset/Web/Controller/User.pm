@@ -178,6 +178,23 @@ sub user {
         $donated_items = \%result;
     }
 
+    my $rented_order_count = 0;
+    {
+        my $rs = $user->donations->search(
+            {
+                "clothes.code" => { "!=" => undef },
+                "order.id"     => { "!=" => undef },
+            },
+            {
+                join      => [
+                    { "clothes" => { "order_details" => "order" } },
+                ],
+                group_by  => ["order.id"],
+            },
+        );
+        $rented_order_count = $rs->count;
+    };
+
     #
     # response
     #
@@ -192,6 +209,7 @@ sub user {
         does_wear             => $order,
         password              => $password,
         donated_items         => $donated_items,
+        rented_order_count    => $rented_order_count,
     );
 }
 
