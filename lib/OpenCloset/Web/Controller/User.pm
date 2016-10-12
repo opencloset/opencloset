@@ -193,7 +193,14 @@ sub user_search_clothes {
 sub auth {
     my $self = shift;
 
-    return 1 if $self->is_user_authenticated;
+    if ( $self->is_user_authenticated ) {
+        my $user      = $self->current_user;
+        my $user_info = $user->user_info;
+        return 1 if $user_info->staff;
+
+        my $email = $user->email;
+        $self->log->warn("oops! $email is not a staff");
+    }
 
     my $req_path = $self->req->url->path;
     return 1 if $req_path =~ m{^/api/sms/validation(\.json)?$};
