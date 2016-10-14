@@ -221,6 +221,15 @@ sub index {
 sub _sale_order {
     my ( $self, $order, $order_details ) = @_;
 
+    my %sale_price = (
+        before => 0,
+        after  => 0,
+    );
+    for my $order_detail (@$order_details) {
+        $sale_price{before} += $order_detail->{final_price};
+        $sale_price{after}  += $order_detail->{final_price};
+    }
+
     #
     # 쿠폰을 제외하고 몇 회째 대여인가?
     #
@@ -256,7 +265,7 @@ sub _sale_order {
     #
     # 3회 째 방문이라면 조건 충족
     #
-    return unless $visited >= 2;
+    return \%sale_price unless $visited >= 2;
 
     my %order_details_by_category = (
         "shirt-blouse" => [],
@@ -308,7 +317,7 @@ sub _sale_order {
     #
     # 재킷 또는 바지, 치마가 각각 3개 미만이어야 조건 충족
     #
-    return
+    return \%sale_price
         unless $count_by_category{"jacket"} < 3 && $count_by_category{"pants-skirt"} < 3;
 
     my $ea = List::MoreUtils::each_arrayref(
@@ -323,8 +332,10 @@ sub _sale_order {
     {
         if ( $jacket && $pants_skirt ) {
             if ($tie) {
-                $tie->{price}       = 0;
-                $tie->{final_price} = 0;
+                $sale_price{after} -= $tie->{price} - 0;
+
+                $tie->{price}        = 0;
+                $tie->{final_price}  = 0;
 
                 if ( $shirt_blouse || $shoes || $belt ) {
                     #
@@ -333,8 +344,11 @@ sub _sale_order {
                     for my $order_detail ( $shirt_blouse, $shoes, $belt ) {
                         next unless $order_detail;
 
+                        $sale_price{after} -= $order_detail->{price} - 0;
+
                         $order_detail->{price}       = 0;
                         $order_detail->{final_price} = 0;
+                        $order_detail->{desc}        = "3회 이상 방문(셋트 이외 무료)";
                     }
                 }
                 else {
@@ -344,8 +358,11 @@ sub _sale_order {
                     for my $order_detail ( $jacket, $pants_skirt, $tie ) {
                         next unless $order_detail;
 
+                        $sale_price{after} -= $order_detail->{price} * 0.3;
+
                         $order_detail->{price}       *= 0.7;
                         $order_detail->{final_price} *= 0.7;
+                        $order_detail->{desc}         = "3회 이상 방문(30% 할인)";
                     }
                 }
             }
@@ -357,8 +374,11 @@ sub _sale_order {
                     for my $order_detail ( $shirt_blouse, $shoes, $belt ) {
                         next unless $order_detail;
 
+                        $sale_price{after} -= $order_detail->{price} - 0;
+
                         $order_detail->{price}       = 0;
                         $order_detail->{final_price} = 0;
+                        $order_detail->{desc}         = "3회 이상 방문(셋트 이외 무료)";
                     }
                 }
                 else {
@@ -368,8 +388,11 @@ sub _sale_order {
                     for my $order_detail ( $jacket, $pants_skirt ) {
                         next unless $order_detail;
 
+                        $sale_price{after} -= $order_detail->{price} * 0.3;
+
                         $order_detail->{price}       *= 0.7;
                         $order_detail->{final_price} *= 0.7;
+                        $order_detail->{desc}         = "3회 이상 방문(30% 할인)";
                     }
                 }
             }
@@ -385,8 +408,11 @@ sub _sale_order {
             for my $order_detail ( $shirt_blouse, $pants_skirt, $jacket, $tie, $shoes, $belt ) {
                 next unless $order_detail;
 
+                $sale_price{after} -= $order_detail->{price} * 0.3;
+
                 $order_detail->{price}       *= 0.7;
                 $order_detail->{final_price} *= 0.7;
+                $order_detail->{desc}         = "3회 이상 방문(30% 할인)";
             }
         }
     }
@@ -395,9 +421,14 @@ sub _sale_order {
     # 이외의 항목은 일괄 30% 할인
     #
     for my $order_detail ( @{ $order_details_by_category{etc} } ) {
+        $sale_price{after} -= $order_detail->{price} * 0.3;
+
         $order_detail->{price}       *= 0.7;
         $order_detail->{final_price} *= 0.7;
+        $order_detail->{desc}         = "3회 이상 방문(30% 할인)";
     }
+
+    return \%sale_price;
 }
 
 =head2 create
@@ -509,7 +540,13 @@ sub create {
             #
             # GH #790: 3회째 대여자 부터 대여자의 부담을 줄이기 위해 비용을 할인함
             #
-            $self->_sale_order( $order, \@order_details ) if $self->config->{sale}{enable};
+            my $sale_price = {
+                before => 0,
+                after  => 0,
+            };
+            if ( $self->config->{sale}{enable} ) {
+                $sale_price = $self->_sale_order( $order, \@order_details );
+            }
 
             for my $order_detail (@order_details) {
                 $order->add_to_order_details(
@@ -519,6 +556,7 @@ sub create {
                         name         => $order_detail->{name},
                         price        => $order_detail->{price},
                         final_price  => $order_detail->{final_price},
+                        desc         => $order_detail->{desc},
                     }
                 ) or die "failed to create a new order_detail\n";
             }
@@ -538,6 +576,22 @@ sub create {
                     final_price => 0,
                 }
             ) or die "failed to create a new order_detail for discount\n";
+
+            if ( $sale_price->{before} != $sale_price->{after} ) {
+                my $desc = sprintf(
+                    "기존 대여료: %s원, 할인 금액 %s원",
+                    $self->commify( $sale_price->{before} ),
+                    $self->commify( $sale_price->{before} - $sale_price->{after} ),
+                );
+                $order->add_to_order_details(
+                    {
+                        name        => "3회 이상 대여",
+                        price       => 0,
+                        final_price => 0,
+                        desc        => $desc,
+                    }
+                ) or die "failed to create a new order_detail for 3 times visit discount\n";
+            }
 
             #
             # 쿠폰을 사용했다면 결제방법을 입력
