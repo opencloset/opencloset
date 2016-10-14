@@ -195,7 +195,8 @@ sub user {
         $rented_order_count = $rs->count;
     };
 
-    my $rented_category_count = +{};
+    my $rented_category_count     = +{};
+    my $rented_category_count_all = 0;
     {
         my $rs = $user->donations->search(
             {
@@ -220,6 +221,7 @@ sub user {
             my $category_to_string =
                 $OpenCloset::Constants::Category::LABEL_MAP{ $clothes{category} };
             $result{$category_to_string} = $clothes{count};
+            $rented_category_count_all += $clothes{count};
         }
 
         $rented_category_count = \%result;
@@ -229,18 +231,19 @@ sub user {
     # response
     #
     $self->stash(
-        user                  => $user,
-        user_info             => $user_info,
-        donated_clothes_count => $donated_clothes_count,
-        rented_clothes_count  => $rented_clothes_count,
-        avg                   => $data->{avg},
-        diff                  => $data->{diff},
-        avg2                  => $data2->{avg2},
-        does_wear             => $order,
-        password              => $password,
-        donated_items         => $donated_items,
-        rented_order_count    => $rented_order_count,
-        rented_category_count => $rented_category_count,
+        user                      => $user,
+        user_info                 => $user_info,
+        donated_clothes_count     => $donated_clothes_count,
+        rented_clothes_count      => $rented_clothes_count,
+        avg                       => $data->{avg},
+        diff                      => $data->{diff},
+        avg2                      => $data2->{avg2},
+        does_wear                 => $order,
+        password                  => $password,
+        donated_items             => $donated_items,
+        rented_order_count        => $rented_order_count,
+        rented_category_count     => $rented_category_count,
+        rented_category_count_all => $rented_category_count_all,
     );
 }
 

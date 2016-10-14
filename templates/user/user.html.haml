@@ -78,6 +78,7 @@
                         .space-6
                         %div
                           품목별 대여된 횟수:
+                          %span= $rented_category_count_all
                           %ul.list-group
                             - for my $k ( sort keys %$rented_category_count ) {
                             -   my $v = $rented_category_count->{$k};
