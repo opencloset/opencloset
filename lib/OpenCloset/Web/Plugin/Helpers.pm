@@ -2400,12 +2400,12 @@ sub is_suit_order {
     return;
 }
 
-=head2 mean_status( $start_dt, $end_dt, $online__order_hour )
+=head2 mean_status( $start_dt, $end_dt )
 
 =cut
 
 sub mean_status {
-    my ( $self, $start_dt, $end_dt, $online_order_hour ) = @_;
+    my ( $self, $start_dt, $end_dt ) = @_;
 
     my $dtf      = $self->app->DB->storage->datetime_parser;
     my $order_rs = $self->app->DB->resultset('Order')->search(
@@ -2414,7 +2414,7 @@ sub mean_status {
                 'booking.date' => {
                     -between => [ $dtf->format_datetime($start_dt), $dtf->format_datetime($end_dt), ],
                 },
-                \[ 'HOUR(`booking`.`date`) != ?', $online_order_hour ],
+                online => 0,
             ]
         },
         { join => [qw/ booking /], order_by => { -asc => 'date' }, prefetch => 'booking', },

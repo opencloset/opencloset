@@ -2273,7 +2273,7 @@ sub api_create_sms {
 
         my $booking_time = $order_obj->booking->date->strftime('%H:%M');
         $self->app->log->debug("booking time: $booking_time");
-        if ( $booking_time eq '22:00' ) {
+        if ( $order_obj->online ) {
             $from = $self->config->{sms}{from}{online};
         }
         $to = $phone;

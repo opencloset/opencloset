@@ -647,16 +647,6 @@ sub status_ymd {
     }
     $today->truncate( to => 'day' );
 
-    my $basis_dt = try {
-        DateTime->new(
-            time_zone => $self->config->{timezone},
-            year      => 2015,
-            month     => 5,
-            day       => 29
-        );
-    };
-    my $online_order_hour = $dt >= $basis_dt ? 22 : 19;
-
     # -$day_range ~ +$day_range days from now
     my $day_range = 3;
     my %count;
@@ -677,7 +667,7 @@ sub status_ymd {
         }
         elsif ( $f->clone->truncate( to => 'day' ) == $today ) {
             $self->app->log->info("do not cache and by-pass cache: $name");
-            $data = $self->mean_status( $f, $t, $online_order_hour );
+            $data = $self->mean_status( $f, $t );
             $today_data = $data;
         }
         my $dow = do {
