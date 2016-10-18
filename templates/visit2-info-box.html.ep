@@ -37,6 +37,24 @@
                         <input type="hidden" name="type" value="visit">
                         <fieldset>
                           <label class="block clearfix">
+                            <div class="control-group">
+                              <label class="control-label bolder">주문서종류</label>
+                              <div class="radio">
+                                <label>
+                                  <input type="radio" class="ace" name="online" value="1" <%= $order && $order->online ? 'checked' : q{} %>>
+                                  <span class="lbl"> online</span>
+                                </label>
+                              </div>
+                              <div class="radio">
+                                <label>
+                                  <input type="radio" class="ace" name="online" value="0" <%= $order && $order->online ? q{} : 'checked' %>>
+                                  <span class="lbl"> offline</span>
+                                </label>
+                              </div>
+                            </div>
+                          </label>
+
+                          <label class="block clearfix">
                             <span class="block input-icon input-icon-right">
                               <input name="name" type="text" class="form-control" placeholder="이름" value="<%= $user->name %>" readonly />
                               <i class="icon-user"></i>

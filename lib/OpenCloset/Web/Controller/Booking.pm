@@ -297,9 +297,10 @@ sub visit {
 sub visit2 {
     my $self = shift;
 
-    my $type  = $self->param('type') || q{};
-    my $name  = $self->param('name');
-    my $phone = $self->param('phone');
+    my $type   = $self->param('type') || q{};
+    my $name   = $self->param('name');
+    my $phone  = $self->param('phone');
+    my $online = $self->param('online');
 
     my $email         = $self->param('email');
     my $gender        = $self->param('gender');
@@ -320,6 +321,7 @@ sub visit2 {
     $self->app->log->debug("type: $type");
     $self->app->log->debug("name: $name");
     $self->app->log->debug("phone: $phone");
+    $self->app->log->debug("online: $online");
 
     $self->app->log->debug("email: $email");
     $self->app->log->debug("gender: $gender");
@@ -452,6 +454,7 @@ sub visit2 {
                         {
                             status_id  => 14,      # 방문예약: status 테이블 참조
                             booking_id => $booking,
+                            online     => $online,
                         }
                     );
                 }
