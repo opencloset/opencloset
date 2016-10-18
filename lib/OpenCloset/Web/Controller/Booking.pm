@@ -441,7 +441,12 @@ sub visit2 {
                             #
                             # 변경한 예약 정보가 기존 정보와 다를 경우 갱신함
                             #
-                            $order_obj->update( { booking_id => $booking } );
+                            $order_obj->update(
+                                {
+                                    booking_id => $booking,
+                                    online     => $online,
+                                }
+                            );
                         }
                     }
                 }
