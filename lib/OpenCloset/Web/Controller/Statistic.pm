@@ -727,7 +727,6 @@ sub status_ymd {
         push @{ $count{week} }, $data;
     }
 
-
     # from january to current months of this year
     my $current_month_start_dt;
     my $current_month_end_dt;
@@ -770,23 +769,23 @@ sub status_ymd {
             $dt->clone->truncate( to => 'week' )->add( weeks => 1, seconds => -1 )
                 ->strftime('%m/%d'),
         ),
-        '대기'     => 0,
+        '대기'       => 0,
         '치수측정' => 0,
         '의류준비' => 0,
-        '탈의'     => 0,
-        '수선'     => 0,
-        '포장'     => 0,
-        '결제'     => 0,
+        '탈의'       => 0,
+        '수선'       => 0,
+        '포장'       => 0,
+        '결제'       => 0,
     );
     my %current_month = (
-        label      => $dt->strftime('%Y-%m'),
-        '대기'     => 0,
+        label          => $dt->strftime('%Y-%m'),
+        '대기'       => 0,
         '치수측정' => 0,
         '의류준비' => 0,
-        '탈의'     => 0,
-        '수선'     => 0,
-        '포장'     => 0,
-        '결제'     => 0,
+        '탈의'       => 0,
+        '수선'       => 0,
+        '포장'       => 0,
+        '결제'       => 0,
     );
     for (
         my $i = $today->clone->add( months => -1 )->truncate( to => 'month' );
@@ -813,8 +812,8 @@ sub status_ymd {
         if ( $current_week_start_dt <= $i && $i <= $current_week_end_dt ) {
             $self->app->log->info("calculationg for this week: $name");
             $current_week{'대기'}       += $data->{'대기'};
-            $current_week{'치수측정'}   += $data->{'치수측정'};
-            $current_week{'의류준비'}   += $data->{'의류준비'};
+            $current_week{'치수측정'} += $data->{'치수측정'};
+            $current_week{'의류준비'} += $data->{'의류준비'};
             $current_week{'탈의'}       += $data->{'탈의'};
             $current_week{'수선'}       += $data->{'수선'};
             $current_week{'포장'}       += $data->{'포장'};
@@ -823,16 +822,18 @@ sub status_ymd {
         if ( $current_month_start_dt <= $i && $i <= $current_month_end_dt ) {
             $self->app->log->info("calculationg for this month $name");
             $current_month{'대기'}       += $data->{'대기'};
-            $current_month{'치수측정'}   += $data->{'치수측정'};
-            $current_month{'의류준비'}   += $data->{'의류준비'};
+            $current_month{'치수측정'} += $data->{'치수측정'};
+            $current_month{'의류준비'} += $data->{'의류준비'};
             $current_month{'탈의'}       += $data->{'탈의'};
             $current_month{'수선'}       += $data->{'수선'};
             $current_month{'포장'}       += $data->{'포장'};
             $current_month{'결제'}       += $data->{'결제'};
         }
     }
-    $current_week{total}  = sum( @current_week{qw/대기 치수측정 의류준비 탈의 수선 포장 결제/} );
-    $current_month{total} = sum( @current_month{qw/대기 치수측정 의류준비 탈의 수선 포장 결제/} );
+    $current_week{total} = sum(
+        @current_week{qw/대기 치수측정 의류준비 탈의 수선 포장 결제/} );
+    $current_month{total} = sum(
+        @current_month{qw/대기 치수측정 의류준비 탈의 수선 포장 결제/} );
     $count{week}[-1]  = \%current_week  if $no_cache_week;
     $count{month}[-1] = \%current_month if $no_cache_month;
 
@@ -1161,7 +1162,8 @@ sub events_seoul {
     my $query = $storage->dbh_do(
         sub {
             my ( $storage, $dbh, @args ) = @_;
-            $dbh->selectall_hashref(<<END_SQL
+            $dbh->selectall_hashref(
+                <<END_SQL
                 SELECT
                     *
                 FROM
@@ -1194,37 +1196,43 @@ sub events_seoul {
                     `booking_coupon_issue_diff` >= 0
                     AND `booking_date` > '2016-04-25'
 END_SQL
-            , 'order_id');
-        });
+                , 'order_id'
+            );
+        }
+    );
 
     my %cnt;
     foreach my $key ( keys %$query ) {
-        my $r = $query->{$key};
-        my $month = sprintf("%d-%02d", $r->{booking_year}, $r->{booking_month});
-        my $dt = DateTime::Format::MySQL->parse_datetime($r->{booking_date});
+        my $r     = $query->{$key};
+        my $month = sprintf( "%d-%02d", $r->{booking_year}, $r->{booking_month} );
+        my $dt    = DateTime::Format::MySQL->parse_datetime( $r->{booking_date} );
 
         ## 월별 열린옷장 방문/미방문
-        $cnt{'month-visit'}{$month}{$r->{is_visit}}{$r->{is_coupon_use}}++;
+        $cnt{'month-visit'}{$month}{ $r->{is_visit} }{ $r->{is_coupon_use} }++;
         ## 월별 취업날개 예약/방문
-        $cnt{'month-coupon'}{$month}{$r->{is_visit}}{$r->{is_coupon_use}}++;
+        $cnt{'month-coupon'}{$month}{ $r->{is_visit} }{ $r->{is_coupon_use} }++;
         ## 월별 취업날개 예약/방문 - 성별
-        $cnt{'month-coupon-gender'}{$month}{$r->{is_visit}}{$r->{is_coupon_use}}{$r->{gender}}++;
+        $cnt{'month-coupon-gender'}{$month}{ $r->{is_visit} }{ $r->{is_coupon_use} }
+            { $r->{gender} }++;
         ## 월별 취업날개 예약/방문 - 나이
-        $cnt{'month-coupon-agegroup'}{$month}{$r->{is_visit}}{$r->{is_coupon_use}}{$r->{age_group}}++;
+        $cnt{'month-coupon-agegroup'}{$month}{ $r->{is_visit} }{ $r->{is_coupon_use} }
+            { $r->{age_group} }++;
 
         # 전체 성별
-        $cnt{'gender'}{$r->{is_coupon_use}}{$r->{is_visit}}{$r->{gender}}++;
+        $cnt{'gender'}{ $r->{is_coupon_use} }{ $r->{is_visit} }{ $r->{gender} }++;
         # 전체 연령
-        $cnt{'age_group'}{$r->{is_coupon_use}}{$r->{is_visit}}{$r->{age_group}}++;
+        $cnt{'age_group'}{ $r->{is_coupon_use} }{ $r->{is_visit} }{ $r->{age_group} }++;
 
-        if( $dt <= $to ) {
+        if ( $dt <= $to ) {
             my $ymd = $dt->ymd;
             ## 일별 열린옷장 방문/미방문
-            $cnt{'daily-visit'}{$ymd}{$r->{is_visit}}++;
+            $cnt{'daily-visit'}{$ymd}{ $r->{is_visit} }++;
             ## 일별 취업날개 방문/미방문
-            $cnt{'daily-visit-coupon'}{$ymd}{$r->{is_visit}}{$r->{is_coupon_use}}++;
-            $cnt{'daily-visit-coupon-gender'}{$ymd}{$r->{is_visit}}{$r->{is_coupon_use}}{$r->{gender}}++;
-            $cnt{'daily-visit-coupon-agegroup'}{$ymd}{$r->{is_visit}}{$r->{is_coupon_use}}{$r->{age_group}}++;
+            $cnt{'daily-visit-coupon'}{$ymd}{ $r->{is_visit} }{ $r->{is_coupon_use} }++;
+            $cnt{'daily-visit-coupon-gender'}{$ymd}{ $r->{is_visit} }{ $r->{is_coupon_use} }
+                { $r->{gender} }++;
+            $cnt{'daily-visit-coupon-agegroup'}{$ymd}{ $r->{is_visit} }{ $r->{is_coupon_use} }
+                { $r->{age_group} }++;
         }
     }
     $self->render( counts => \%cnt );

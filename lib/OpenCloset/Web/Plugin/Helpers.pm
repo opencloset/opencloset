@@ -2183,8 +2183,10 @@ sub search_clothes {
         my $rent_count = $pair{$upper_code}{count};
         my $color      = $upper->color;
         my @tags       = map { $_->name } $upper->tags;
-        $self->log->info( sprintf '< %s / %s / %d / %s / %s >', $upper->code, $lower->code,
-            $rent_count, $color, join( ', ', @tags ) );
+        $self->log->info(
+            sprintf '< %s / %s / %d / %s / %s >', $upper->code, $lower->code,
+            $rent_count, $color, join( ', ', @tags )
+        );
         my $rss;
         for my $size ( keys %$guess ) {
             next if $size eq 'reason';
