@@ -856,7 +856,7 @@ sub status_ymd {
                 'booking.date' => {
                     -between => [ $dtf->format_datetime($dt_start), $dtf->format_datetime($dt_end), ],
                 },
-                \[ 'HOUR(`booking`.`date`) != ?', $online_order_hour ],
+                online => 0,
             ],
         },
         {
