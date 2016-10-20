@@ -578,19 +578,19 @@ sub create {
             ) or die "failed to create a new order_detail for discount\n";
 
             if ( $sale_price->{before} != $sale_price->{after} ) {
+                my $sale = $self->DB->resultset("Sale")->find( { name => "3times" } );
+                my $clothes_tag = $self->DB->resultset("OrderSale")->create(
+                    {
+                        order_id => $order->id,
+                        sale_id  => $sale->id,
+                    }
+                );
+
                 my $desc = sprintf(
                     "기존 대여료: %s원, 할인 금액 %s원",
                     $self->commify( $sale_price->{before} ),
                     $self->commify( $sale_price->{before} - $sale_price->{after} ),
                 );
-                $order->add_to_order_details(
-                    {
-                        name        => "3회 이상 대여",
-                        price       => 0,
-                        final_price => 0,
-                        desc        => $desc,
-                    }
-                ) or die "failed to create a new order_detail for 3 times visit discount\n";
             }
 
             #

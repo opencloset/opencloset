@@ -497,6 +497,39 @@ sub flatten_order {
     return unless $order;
 
     my ( $order_price, $order_stage_price ) = $self->order_price($order);
+    my $sale_price = 0;
+    {
+        my $original_price = 0;
+        my $jacket         = 0;
+        my $pants_skirt    = 0;
+        my $tie            = 0;
+        for my $order_detail ( $order->order_details ) {
+            next unless $order_detail->stage == 0;
+            next unless $order_detail->clothes_code;
+
+            $original_price += $order_detail->clothes->price
+                + $order_detail->clothes->price * 0.2 * $order->additional_day;
+
+            use experimental qw( smartmatch );
+            given ( $order_detail->clothes->category ) {
+                ++$jacket      when "jacket";
+                ++$pants_skirt when /^pants|skirt$/;
+                ++$tie         when "tie";
+            }
+        }
+
+        #
+        # 현재 데이터베이스에 타이 가격이 0원으로 책정되어 있어
+        # 수동으로 타이 가격을 더해야 함
+        #
+        my $set = List::Util::min $jacket, $pants_skirt;
+        if ( $tie > $set ) {
+            my $tie_price = ( $tie - $set ) * 2000;
+            $original_price += $tie_price + $tie_price * 0.2 * $order->additional_day;
+        }
+
+        $sale_price = $original_price - $order_stage_price->{0};
+    }
 
     my $extension_fee = $self->calc_extension_fee( $order, $today );
     my $overdue_fee = $self->calc_overdue_fee( $order, $today );
@@ -510,6 +543,7 @@ sub flatten_order {
         return_date      => undef,
         price            => $order_price,
         stage_price      => $order_stage_price,
+        sale_price       => $sale_price,
         clothes_price    => $self->order_clothes_price($order),
         clothes          => [
             $order->order_details( { clothes_code => { '!=' => undef } } )
