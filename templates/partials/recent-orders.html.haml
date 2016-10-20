@@ -56,7 +56,8 @@
                                     - if ( $user && $user->user_info && $user->user_info->weight && $order->weight ) {
                                     -   my $weight_diff = abs( $user->user_info->weight - $order->weight );
                                     -   if ( $weight_diff <= 3 ) { # 현재 몸무게와 이전 주문서의 몸무게가 -3kg ~ +3kg 이내
-                                      %span.rental-fit.btn.btn-sm.btn-success{ "data-order-weight" => "#{ $order->weight }", "data-order-booking-ymd" => "#{ $order->booking->date->ymd }" } 대여 적합
+                                      - my $booking = $order->booking;
+                                      %span.rental-fit.btn.btn-sm.btn-success{ "data-order-weight" => "#{ $order->weight }", "data-order-booking-ymd" => "#{ $booking ? $booking->date->ymd : '' }" } 대여 적합
                                     -   }
                                     -   else {
                                       %span.rental-fit.btn.btn-sm.btn-danger.disabled{ "data-order-weight" => "#{ $order->weight }" } 대여 부적합
@@ -65,13 +66,15 @@
                                     .time
                                       %i.icon-time.bigger-110
                                       = $order->create_date->ymd . q{ } . $order->create_date->hms
-                                      - my $booking_date = $order->booking->date;
-                                      - my $booking_ymd  = $booking_date->ymd;
-                                      - my $booking_hhmm = sprintf "%02d%02d", $booking_date->hour, $booking_date->minute;
-                                      %i.icon-calendar.bigger-110
-                                      %a{:href => '#{url_for("/timetable/" . $booking_ymd)->fragment("timetable-$booking_hhmm")}', :title => '시간표'}
-                                        = $booking_ymd
-                                        = $booking_date->hms
+                                      - if (my $booking = $order->booking) {
+                                        - my $booking_date = $booking->date;
+                                        - my $booking_ymd  = $booking_date->ymd;
+                                        - my $booking_hhmm = sprintf "%02d%02d", $booking_date->hour, $booking_date->minute;
+                                        %i.icon-calendar.bigger-110
+                                        %a{:href => '#{url_for("/timetable/" . $booking_ymd)->fragment("timetable-$booking_hhmm")}', :title => '시간표'}
+                                          = $booking_ymd
+                                          = $booking_date->hms
+                                      - }
                                     .clothes
                                       %p
                                         %span.label.label-success 의류 현황

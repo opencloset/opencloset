@@ -12,6 +12,7 @@ use DateTime::Format::Duration;
 use DateTime::Format::Human::Duration;
 
 use OpenCloset::Config;
+use OpenCloset::Constants::Status;
 use OpenCloset::Schema;
 
 binmode STDOUT, ':utf8';
@@ -54,6 +55,7 @@ order_id: %d
   status:      %s
   staff:       %s
   booking:     %s
+  visited:     %d
   create_date: %s
   update_date: %s
   user:
@@ -69,6 +71,7 @@ END_ORDER_FORMAT
             $order->status->name,
             ( $order->staff ? $order->staff->name : q{N/A} ),
             $order->booking->date,
+            count_visited($order),
             $order->create_date->set_time_zone('UTC')->set_time_zone('Asia/Seoul'),
             $order->update_date->set_time_zone('UTC')->set_time_zone('Asia/Seoul'),
             $order->user->name,
@@ -152,4 +155,38 @@ sub convert_sec {
     $locale =~ s/,//gms;
 
     return ( $hms, $locale );
+}
+
+sub count_visited {
+    my $order = shift;
+
+    my $visited = 0;
+
+    {
+        my $orders                          = $order->user->orders;
+        my $visited_without_coupon_order_rs = $orders->search(
+            {
+                status_id => $OpenCloset::Constants::Status::RETURNED,
+                parent_id => undef,
+                -and      => [
+                    -or => [
+                        {
+                            "coupon.id"     => { "!=" => undef },
+                            "coupon.status" => { "!=" => "used" },
+                        },
+                        {
+                            "coupon.id" => undef,
+                        },
+                    ],
+                ],
+            },
+            {
+                join => [qw/ coupon /],
+            },
+        );
+
+        $visited = $visited_without_coupon_order_rs->count;
+    }
+
+	return $visited;
 }

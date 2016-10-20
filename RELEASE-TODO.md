@@ -1,6 +1,4 @@
 배포 전 해야할 일들
 
+    $ cpanm --mirror=http://cpan.silex.kr --mirror=https://cpan.theopencloset.net OpenCloset::Schema
     $ grunt
-    $ closetpan OpenCloset::Cron::SMS    # v0.010
-    $ closetpan OpenCloset::Schema       # v0.038
-    $ ubic restart opencloset.cron

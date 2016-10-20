@@ -1,5 +1,6 @@
 package OpenCloset::Web::Controller::API;
 use Mojo::Base 'Mojolicious::Controller';
+use Mojo::JSON;
 
 use DateTime;
 use Encode qw/decode_utf8/;
@@ -2677,7 +2678,7 @@ sub api_gui_staff_list {
 
 =head2 gui_update_booking
 
-    PUT /api/booking/:id
+    PUT /api/gui/booking/:id
 
 =cut
 
@@ -2711,6 +2712,8 @@ sub api_gui_update_booking {
     return $self->error( 404, { str => 'booking not found', data => {}, } )
         unless $booking;
 
+    my $old_data = $self->flatten_booking($booking);
+
     #
     # update booking
     #
@@ -2725,6 +2728,16 @@ sub api_gui_update_booking {
     # response
     #
     my $data = $self->flatten_booking($booking);
+
+    #
+    # log
+    #
+    my $log_str = sprintf(
+        "%s -> %s",
+        Mojo::JSON::encode_json($old_data),
+        Mojo::JSON::encode_json($data),
+    );
+    $self->app->log->info($log_str);
 
     $self->respond_to( json => { status => 200, json => $data } );
 }

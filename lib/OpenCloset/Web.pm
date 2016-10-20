@@ -5,7 +5,7 @@ use CHI;
 use DateTime;
 
 use OpenCloset::Schema;
-use version; our $VERSION = qv("v1.8.20");
+use version; our $VERSION = qv("v1.8.21");
 has CACHE => sub {
     my $self  = shift;
     my $cache = CHI->new(
@@ -109,11 +109,6 @@ sub _authentication {
 
                 unless ( $user_obj->check_password($pass) ) {
                     $self->log->warn("$user\'s password is wrong");
-                    return;
-                }
-
-                unless ( $user_obj->user_info->staff ) {
-                    $self->log->warn("$user is not a staff");
                     return;
                 }
 
