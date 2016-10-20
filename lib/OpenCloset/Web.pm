@@ -112,11 +112,6 @@ sub _authentication {
                     return;
                 }
 
-                unless ( $user_obj->user_info->staff ) {
-                    $self->log->warn("$user is not a staff");
-                    return;
-                }
-
                 return $user_obj->id;
             },
         }
