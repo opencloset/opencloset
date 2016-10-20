@@ -81,6 +81,7 @@ $ ->
         #
         $(".order-stage0-price").html( OpenCloset.commify(data.stage_price['0']) + '원' )
         $(".order-price").html( OpenCloset.commify(data.price) + '원' )
+        $(".sale-price").html( OpenCloset.commify(data.sale_price) + '원' )
         $(".order-price-input").prop( 'value', data.price )
 
         #
