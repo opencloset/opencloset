@@ -794,16 +794,24 @@ sub update {
                     if ( $value == 2 ) {
                         my $from = $self->config->{sms}{ $self->config->{sms}{driver} }{_from};
                         my $to   = $order->user->user_info->phone;
-                        my $msg  = $self->render_to_string(
-                            "sms/order-confirmed", format => 'txt',
-                            order => $order
-                        );
 
-                        my $sms =
-                            $self->DB->resultset('SMS')
-                            ->create( { to => $to, from => $from, text => $msg } );
+                        {
+                            my $msg = $self->render_to_string(
+                                "sms/order-confirmed-1",
+                                format => 'txt',
+                                order  => $order,
+                            );
 
-                        $self->app->log->error("Failed to create a new SMS: $msg") unless $sms;
+                            my $sms = $self->DB->resultset('SMS')->create(
+                                {
+                                    to   => $to,
+                                    from => $from,
+                                    text => $msg,
+                                }
+                            );
+
+                            $self->app->log->error("Failed to create a new SMS: $msg") unless $sms;
+                        }
                     }
 
                     #
