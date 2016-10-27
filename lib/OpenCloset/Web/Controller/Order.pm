@@ -7,6 +7,7 @@ use HTTP::Tiny;
 use List::MoreUtils;
 use Try::Tiny;
 
+use OpenCloset::Constants::Category;
 use OpenCloset::Constants::Status qw/$RETURNED/;
 
 has DB => sub { shift->app->DB };
@@ -811,6 +812,91 @@ sub update {
                             );
 
                             $self->app->log->error("Failed to create a new SMS: $msg") unless $sms;
+                        }
+
+                        #
+                        # GH #949
+                        #
+                        #   기증 이야기 안내를 별도의 문자로 전송
+                        #
+                        #   이때, 다음과 같은 우선 순위로 기증 메시지를 보여주며,
+                        #   기증 메시지가 없을 경우 문자를 발송하지 않음.
+                        #
+                        #   자켓
+                        #   바지
+                        #   스커트
+                        #   원피스
+                        #   코트
+                        #   조끼
+                        #   셔츠
+                        #   블라우스
+                        #   타이
+                        #   벨트
+                        #   구두
+                        #   기타
+                        #
+                        {
+
+                            my @clothes_list;
+                            for my $order_detail ( $order->order_details ) {
+                                next unless $order_detail->clothes;
+                                next unless $order_detail->clothes->donation;
+                                next unless $order_detail->clothes->donation->message;
+
+                                push @clothes_list, $order_detail->clothes;
+                            }
+
+                            my %category_score = (
+                                $OpenCloset::Constants::Category::JACKET    => 10,
+                                $OpenCloset::Constants::Category::PANTS     => 20,
+                                $OpenCloset::Constants::Category::SKIRT     => 30,
+                                $OpenCloset::Constants::Category::ONEPIECE  => 40,
+                                $OpenCloset::Constants::Category::COAT      => 50,
+                                $OpenCloset::Constants::Category::WAISTCOAT => 60,
+                                $OpenCloset::Constants::Category::SHIRT     => 70,
+                                $OpenCloset::Constants::Category::BLOUSE    => 80,
+                                $OpenCloset::Constants::Category::TIE       => 90,
+                                $OpenCloset::Constants::Category::BELT      => 100,
+                                $OpenCloset::Constants::Category::SHOES     => 110,
+                                $OpenCloset::Constants::Category::MISC      => 120,
+                            );
+
+                            my @sorted_clothes_list = sort {
+                                $category_score{ $a->category } <=> $category_score{ $b->category }
+                            } @clothes_list;
+
+                            my $clothes  = $sorted_clothes_list[0];
+                            my $donation = $sorted_clothes_list[0]->donation;
+                            if ($donation) {
+                                my $msg = $self->render_to_string(
+                                    "sms/order-confirmed-2",
+                                    format   => 'txt',
+                                    order    => $order,
+                                    donation => $donation,
+                                    category => $OpenCloset::Constants::Category::LABEL_MAP{ $clothes->category },
+                                );
+
+                                my $sms = $self->DB->resultset('SMS')->create(
+                                    {
+                                        to   => $to,
+                                        from => $from,
+                                        text => $msg,
+                                    }
+                                );
+
+                                $self->app->log->debug(
+                                    sprintf(
+                                        "donation message: order(%d), donation(%d), clothes(%s)",
+                                        $order->id,
+                                        $donation->id,
+                                        $clothes->code,
+                                    )
+
+                                $self->app->log->error("Failed to create a new SMS: $msg") unless $sms;
+                            }
+                            else {
+                                $self->app->log->info("no donation message to send SMS for order: " . $order->id);
+                            }
                         }
                     }
 
