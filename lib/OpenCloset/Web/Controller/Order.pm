@@ -891,6 +891,7 @@ sub update {
                                         $donation->id,
                                         $clothes->code,
                                     )
+                                );
 
                                 $self->app->log->error("Failed to create a new SMS: $msg") unless $sms;
                             }
