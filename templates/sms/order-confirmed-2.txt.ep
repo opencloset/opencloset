@@ -1,0 +1,14 @@
+% my $order_id   = $order->id;
+% my $user_name  = $order->user->name;
+% my $donor_name = $donation->user->name;
+[열린옷장] 안녕하세요. <%= $user_name %>님. <%= $category %> 기증자 <%= $donor_name %>님의 기증 편지를 읽어보세요.
+
+----
+
+<%= $donation->message %>
+
+----
+
+<%= $user_name %>님이 대여하신 다른 의류의 기증자 이야기를 읽으시려면 URL을 클릭해 주세요.
+
+https://story.theopencloset.net/letters/o/<%= $order_id %>/d
