@@ -1,7 +1,8 @@
 % my $order_id   = $order->id;
 % my $user_name  = $order->user->name;
 % my $donor_name = $donation->user->name;
-[열린옷장] 안녕하세요. <%= $user_name %>님. <%= $category %> 기증자 <%= $donor_name %>님의 기증 편지를 읽어보세요.
+[열린옷장] 안녕하세요. <%= $user_name %>님.
+<%= $category %> 기증자 <%= $donor_name %>님의 기증 편지를 읽어보세요.
 
 ----
 
