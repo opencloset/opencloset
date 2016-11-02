@@ -1,4 +1,3 @@
 배포 전 해야할 일들
 
-    $ bower install
-    $ grunt
+    $ ...
