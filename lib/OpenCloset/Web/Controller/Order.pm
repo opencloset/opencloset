@@ -335,8 +335,8 @@ sub _sale_order {
             if ($tie) {
                 $sale_price{after} -= $tie->{price} - 0;
 
-                $tie->{price}        = 0;
-                $tie->{final_price}  = 0;
+                $tie->{price}       = 0;
+                $tie->{final_price} = 0;
 
                 if ( $shirt_blouse || $shoes || $belt ) {
                     #
@@ -363,7 +363,7 @@ sub _sale_order {
 
                         $order_detail->{price}       *= 0.7;
                         $order_detail->{final_price} *= 0.7;
-                        $order_detail->{desc}         = "3회 이상 방문(30% 할인)";
+                        $order_detail->{desc} = "3회 이상 방문(30% 할인)";
                     }
                 }
             }
@@ -379,7 +379,7 @@ sub _sale_order {
 
                         $order_detail->{price}       = 0;
                         $order_detail->{final_price} = 0;
-                        $order_detail->{desc}         = "3회 이상 방문(셋트 이외 무료)";
+                        $order_detail->{desc}        = "3회 이상 방문(셋트 이외 무료)";
                     }
                 }
                 else {
@@ -393,7 +393,7 @@ sub _sale_order {
 
                         $order_detail->{price}       *= 0.7;
                         $order_detail->{final_price} *= 0.7;
-                        $order_detail->{desc}         = "3회 이상 방문(30% 할인)";
+                        $order_detail->{desc} = "3회 이상 방문(30% 할인)";
                     }
                 }
             }
@@ -413,7 +413,7 @@ sub _sale_order {
 
                 $order_detail->{price}       *= 0.7;
                 $order_detail->{final_price} *= 0.7;
-                $order_detail->{desc}         = "3회 이상 방문(30% 할인)";
+                $order_detail->{desc} = "3회 이상 방문(30% 할인)";
             }
         }
     }
@@ -426,7 +426,7 @@ sub _sale_order {
 
         $order_detail->{price}       *= 0.7;
         $order_detail->{final_price} *= 0.7;
-        $order_detail->{desc}         = "3회 이상 방문(30% 할인)";
+        $order_detail->{desc} = "3회 이상 방문(30% 할인)";
     }
 
     return \%sale_price;
@@ -861,9 +861,9 @@ sub update {
                                 $OpenCloset::Constants::Category::MISC      => 120,
                             );
 
-                            my @sorted_clothes_list = sort {
-                                $category_score{ $a->category } <=> $category_score{ $b->category }
-                            } @clothes_list;
+                            my @sorted_clothes_list =
+                                sort { $category_score{ $a->category } <=> $category_score{ $b->category } }
+                                @clothes_list;
 
                             my $clothes  = $sorted_clothes_list[0];
                             my $donation = $sorted_clothes_list[0]->donation;
@@ -896,7 +896,7 @@ sub update {
                                 $self->app->log->error("Failed to create a new SMS: $msg") unless $sms;
                             }
                             else {
-                                $self->app->log->info("no donation message to send SMS for order: " . $order->id);
+                                $self->app->log->info( "no donation message to send SMS for order: " . $order->id );
                             }
                         }
                     }
