@@ -865,9 +865,9 @@ sub update {
                                 sort { $category_score{ $a->category } <=> $category_score{ $b->category } }
                                 @clothes_list;
 
-                            my $clothes  = $sorted_clothes_list[0];
-                            my $donation = $sorted_clothes_list[0]->donation;
-                            if ($donation) {
+                            my $clothes = $sorted_clothes_list[0];
+                            my $donation = $clothes->donation if $clothes;
+                            if ( $clothes and $donation ) {
                                 my $msg = $self->render_to_string(
                                     "sms/order-confirmed-2",
                                     format   => 'txt',
