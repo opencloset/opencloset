@@ -1,0 +1,141 @@
+% my $code = "";
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  %= tag title => sprintf( "정장 반납 안내: %d - %s - $site->{name}", $order->id, $order->user->name );
+  %= tag "meta", charset => "utf-8"
+  %= tag "meta", "http-equiv" => "Content-Type", content => "text/html; charset=UTF-8"
+  %= tag "link", rel => "icon", type => "image/png", href => url_for("/img/icon.png")
+  %= javascript url_for("/components/pdfmake-dist/build/pdfmake.min.js")
+  %= javascript url_for("/components/pdfmake-dist/build/vfs_fonts_custom.js")
+</head>
+<body>
+
+  %= javascript begin
+    var orderUserName     = "<%= $order->user->name =~ s/"/_/gr; %>";
+    var donationUserNames = "<%= join( ", ", @$donation_user_names ) %>";
+    var orderId           = "<%= $order->id %>";
+    var rentalMonth       = "<%= sprintf "%02d", $order->rental_date->month %>";
+    var rentalDay         = "<%= sprintf "%02d", $order->rental_date->day %>";
+    var targetMonth       = "<%= sprintf "%02d", $order->target_date->month %>";
+    var targetDay         = "<%= sprintf "%02d", $order->target_date->day %>";
+
+    var fontDefinition = {
+      D2Coding: {
+        normal: "D2Coding.ttf",
+        bold: "D2CodingBold.ttf"
+      },
+      Roboto: {
+        normal: "Roboto-Regular.ttf",
+        bold: "Roboto-Medium.ttf",
+        italics: "Roboto-Italic.ttf",
+        bolditalics: "Roboto-Italic.ttf"
+      }
+    };
+
+    var docDefinition = {
+      pageSize: "A5",
+      pageMargins: [
+        10, // left
+        10, // top
+        10, // right
+        10  // bottom
+      ],
+      defaultStyle: {
+        font: "Roboto"
+      },
+      styles: {
+        orderUserName: {
+          margin: [ 20, 28, 0, 0 ],
+          font: "D2Coding",
+          fontSize: 20
+        },
+        orderRentalDate: {
+          margin: [ 108, 32, 0, 0 ],
+          font: "Roboto",
+          fontSize: 14
+        },
+        orderTargetDate: {
+          margin: [ 108, 8, 0, 0 ],
+          font: "Roboto",
+          fontSize: 14
+        },
+        orderId: {
+          margin: [ 340, 0, 0, 0 ],
+          font: "Roboto",
+          fontSize: 12
+        },
+        donationUserName: {
+          margin: [ 68, 80, 0, 0 ],
+          font: "D2Coding",
+          fontSize: 15
+        },
+      },
+      content: [
+        /**
+         * Page 1
+         */
+        {
+          columns: [
+            {
+              text: orderUserName,
+              style: "orderUserName",
+              alignment: "left"
+            },
+            [
+              {
+                text: rentalMonth + "       " + rentalDay,
+                style: "orderRentalDate",
+                alignment: "left"
+              },
+              {
+                text: targetMonth + "       " + targetDay,
+                style: "orderTargetDate",
+                alignment: "left"
+              }
+            ],
+          ],
+        },
+        /**
+         * Page 2
+         */
+        {
+          pageBreak: "before",
+          text: orderId,
+          style: "orderId",
+          alignment: "left"
+        },
+        {
+          text: donationUserNames,
+          style: "donationUserName",
+          alignment: "left"
+        }
+      ]
+    };
+
+    pdfMake.fonts = fontDefinition;
+
+    /**
+     *
+     * Javascript: open new page in same window
+     *   http://stackoverflow.com/a/267712
+     *
+     * Is there any way to specify a suggested filename when using data: URI?
+     *   http://stackoverflow.com/a/6171323
+     *
+     * Re: data URIs - filename and content-disposition
+     *   http://lists.w3.org/Archives/Public/uri/2010Feb/0069.html
+     *
+     */
+    pdfMake.createPdf(docDefinition).getBase64(function(outDoc) {
+      var link = document.createElement('a');
+      document.body.appendChild(link); // Firefox requires the link to be in the body
+      link.href = "javascript:q=(document.location.href);void(open('" + "data:application/pdf;headers=Content-Disposition%3A%20attachment%3Bfilename%3Dopencloset%2Dorder%2Drental%2Dpaper%2D<%= $order->id %>.pdf%3B;base64," + outDoc + "','_self','resizable,location,menubar,toolbar,scrollbars,status'));";
+      link.click();
+      document.body.removeChild(link); // remove the link when done
+    });
+
+  % end
+
+</body>
+</html>
