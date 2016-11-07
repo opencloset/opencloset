@@ -1131,4 +1131,29 @@ sub order_extension_success {
     $self->render( order => $order );
 }
 
+=head2 order_pdf
+
+    GET /order/:order_id/pdf
+
+=cut
+
+sub rental_paper_pdf {
+    my $self = shift;
+
+    my $order_id = $self->param("order_id");
+    my $order = $self->get_order( { id => $order_id } );
+    return unless $order;
+
+    my @donation_user_names =
+        List::MoreUtils::uniq map { $_->donation->user->name } $order->clothes;
+
+    #
+    # response
+    #
+    $self->stash(
+        order               => $order,
+        donation_user_names => \@donation_user_names,
+    );
+}
+
 1;
