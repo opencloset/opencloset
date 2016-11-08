@@ -12,11 +12,12 @@
 <body>
 
   %= javascript begin
-    var orderUserName     = "<%= $order->user->name =~ s/"/_/gr; %> 대여자님";
-    var donationUserNames = "기증자 <%= join( ", ", @$donation_user_names ) %> 님";
-    var orderId           = "No. <%= $order->id %>";
-    var rentalDate        = "<%= sprintf "대여 %02d월 %02d일", $order->rental_date->month, $order->rental_date->day %>";
-    var targetDate        = "<%= sprintf "반납 %02d월 %02d일", $order->target_date->month, $order->target_date->day %>";
+    var orderUserName      = "<%= $order->user->name =~ s/"/_/gr; %> 대여자님";
+    var donationUserNames1 = '"기증자를 알려드립니다."';
+    var donationUserNames2 = "<%= join( ", ", @$donation_str ) %>";
+    var orderId            = "No. <%= $order->id %>";
+    var rentalDate         = "<%= sprintf "대여 %02d월 %02d일", $order->rental_date->month, $order->rental_date->day %>";
+    var targetDate         = "<%= sprintf "반납 %02d월 %02d일", $order->target_date->month, $order->target_date->day %>";
 
     var fontDefinition = {
       D2Coding: {
@@ -59,15 +60,20 @@
           fontSize: 14
         },
         orderId: {
-          margin: [ 330, 20, 0, 0 ],
+          margin: [ 330, 18, 0, 0 ],
           font: "Roboto",
           fontSize: 12
         },
-        donationUserName: {
-          margin: [ 18, 70, 0, 0 ],
+        donationUserName1: {
+          margin: [ 18, 20, 0, 0 ],
+          font: "D2Coding",
+          fontSize: 12
+        },
+        donationUserName2: {
+          margin: [ 18, 8, 0, 0 ],
           font: "D2Coding",
           fontSize: 15
-        },
+        }
       },
       content: [
         /**
@@ -104,8 +110,13 @@
           alignment: "left"
         },
         {
-          text: donationUserNames,
-          style: "donationUserName",
+          text: donationUserNames1,
+          style: "donationUserName1",
+          alignment: "left"
+        },
+        {
+          text: donationUserNames2,
+          style: "donationUserName2",
           alignment: "left"
         }
       ]
