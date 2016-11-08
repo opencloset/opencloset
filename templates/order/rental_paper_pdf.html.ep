@@ -12,13 +12,11 @@
 <body>
 
   %= javascript begin
-    var orderUserName     = "<%= $order->user->name =~ s/"/_/gr; %>";
-    var donationUserNames = "<%= join( ", ", @$donation_user_names ) %>";
-    var orderId           = "<%= $order->id %>";
-    var rentalMonth       = "<%= sprintf "%02d", $order->rental_date->month %>";
-    var rentalDay         = "<%= sprintf "%02d", $order->rental_date->day %>";
-    var targetMonth       = "<%= sprintf "%02d", $order->target_date->month %>";
-    var targetDay         = "<%= sprintf "%02d", $order->target_date->day %>";
+    var orderUserName     = "<%= $order->user->name =~ s/"/_/gr; %> 대여자님";
+    var donationUserNames = "기증자 <%= join( ", ", @$donation_user_names ) %> 님";
+    var orderId           = "No. <%= $order->id %>";
+    var rentalDate        = "<%= sprintf "대여 %02d월 %02d일", $order->rental_date->month, $order->rental_date->day %>";
+    var targetDate        = "<%= sprintf "반납 %02d월 %02d일", $order->target_date->month, $order->target_date->day %>";
 
     var fontDefinition = {
       D2Coding: {
@@ -46,27 +44,27 @@
       },
       styles: {
         orderUserName: {
-          margin: [ 20, 28, 0, 0 ],
+          margin: [ 19, 20, 0, 0 ],
           font: "D2Coding",
           fontSize: 20
         },
         orderRentalDate: {
-          margin: [ 108, 32, 0, 0 ],
-          font: "Roboto",
+          margin: [ 85, 20, 0, 0 ],
+          font: "D2Coding",
           fontSize: 14
         },
         orderTargetDate: {
-          margin: [ 108, 8, 0, 0 ],
-          font: "Roboto",
+          margin: [ 85, 8, 0, 0 ],
+          font: "D2Coding",
           fontSize: 14
         },
         orderId: {
-          margin: [ 340, 0, 0, 0 ],
+          margin: [ 330, 20, 0, 0 ],
           font: "Roboto",
           fontSize: 12
         },
         donationUserName: {
-          margin: [ 68, 80, 0, 0 ],
+          margin: [ 18, 70, 0, 0 ],
           font: "D2Coding",
           fontSize: 15
         },
@@ -84,12 +82,12 @@
             },
             [
               {
-                text: rentalMonth + "       " + rentalDay,
+                text: rentalDate,
                 style: "orderRentalDate",
                 alignment: "left"
               },
               {
-                text: targetMonth + "       " + targetDay,
+                text: targetDate,
                 style: "orderTargetDate",
                 alignment: "left"
               }
