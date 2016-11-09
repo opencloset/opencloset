@@ -165,6 +165,7 @@ sub _public_routes_staff {
     $r->get('/order/:order_id/extension')->to('order#order_extension');
     $r->post('/order/:order_id/extension')->to('order#create_order_extension');
     $r->get('/order/:order_id/extension/success')->to('order#order_extension_success');
+    $r->get('/order/:order_id/rental/paper/pdf')->to('order#rental_paper_pdf');
     $r->get('/stat/events/seoul')->to('statistic#events_seoul');
 }
 

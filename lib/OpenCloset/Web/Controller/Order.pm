@@ -1,6 +1,8 @@
 package OpenCloset::Web::Controller::Order;
 use Mojo::Base 'Mojolicious::Controller';
 
+use Mojo::JSON;
+
 use Data::Pageset;
 use DateTime;
 use HTTP::Tiny;
@@ -1129,6 +1131,82 @@ sub order_extension_success {
     return unless $order;
 
     $self->render( order => $order );
+}
+
+=head2 order_pdf
+
+    GET /order/:order_id/pdf
+
+=cut
+
+sub rental_paper_pdf {
+    my $self = shift;
+
+    my $order_id = $self->param("order_id");
+    my $order = $self->get_order( { id => $order_id } );
+    return unless $order;
+
+    my @donation_user_names =
+        List::MoreUtils::uniq map { $_->donation->user->name } $order->clothes;
+
+    my %donation_info;
+    for my $clothes ( $order->clothes ) {
+        my $user = $clothes->donation->user;
+
+        unless ( $donation_info{ $user->id } ) {
+            $donation_info{ $user->id }{name}     = $user->name;
+            $donation_info{ $user->id }{category} = [];
+        }
+
+        push @{ $donation_info{ $user->id }{category} }, $clothes->category;
+    }
+    my @donation_str;
+    my %category_score = (
+        $OpenCloset::Constants::Category::JACKET    => 10,
+        $OpenCloset::Constants::Category::PANTS     => 20,
+        $OpenCloset::Constants::Category::SKIRT     => 30,
+        $OpenCloset::Constants::Category::ONEPIECE  => 40,
+        $OpenCloset::Constants::Category::COAT      => 50,
+        $OpenCloset::Constants::Category::WAISTCOAT => 60,
+        $OpenCloset::Constants::Category::SHIRT     => 70,
+        $OpenCloset::Constants::Category::BLOUSE    => 80,
+        $OpenCloset::Constants::Category::TIE       => 90,
+        $OpenCloset::Constants::Category::BELT      => 100,
+        $OpenCloset::Constants::Category::SHOES     => 110,
+        $OpenCloset::Constants::Category::MISC      => 120,
+    );
+    for my $key ( sort { $donation_info{$a}{name} cmp $donation_info{$b}{name} } keys %donation_info ) {
+        my @sorted_category_list =
+            map  { $OpenCloset::Constants::Category::LABEL_MAP{$_}; }
+            sort { $category_score{$a} <=> $category_score{$b} }
+            List::MoreUtils::uniq @{ $donation_info{$key}{category} };
+
+        push(
+            @donation_str,
+            sprintf(
+                "[%s] %s",
+                join(", ", @sorted_category_list),
+                $donation_info{$key}{name},
+            ),
+        );
+    }
+
+    my $rental_date =
+        $order->rental_date->clone->set_time_zone( $self->config->{timezone} )
+        ->set_locale("ko_KR")->strftime("대여 %m월 %d일(%a)");
+    my $target_date =
+        $order->target_date->clone->set_time_zone( $self->config->{timezone} )
+        ->set_locale("ko_KR")->strftime("반납 %m월 %d일(%a)");
+
+    #
+    # response
+    #
+    $self->stash(
+        order        => $order,
+        donation_str => Mojo::JSON::to_json(\@donation_str),
+        rental_date  => $rental_date,
+        target_date  => $target_date,
+    );
 }
 
 1;

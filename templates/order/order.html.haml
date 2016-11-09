@@ -556,6 +556,7 @@
     .space
 
     .clearfix.form-actions
+      %a.btn.btn-info{ :type => 'button', :href => "#{ url_for('/order/' . $order->id . '/rental/paper/pdf') }", :target => "_blank" } 정장 반납 안내 출력
       - if ( $order->status ) {
         - if ( $order_status eq '대여중' || $order_status eq '반납' ) {
           - if ($order->pass) {
