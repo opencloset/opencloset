@@ -14,7 +14,7 @@
   %= javascript begin
     var orderUserName      = "<%= $order->user->name =~ s/"/_/gr; %> 대여자님";
     var donationUserNames1 = '"기증자를 알려드립니다."';
-    var donationUserNames2 = "<%= join( ", ", @$donation_str ) %>";
+    var donationUserNames2 = JSON.parse('<%== $donation_str %>').join("\n");
     var orderId            = "No. <%= $order->id %>";
     var rentalDate         = "<%= sprintf "대여 %02d월 %02d일", $order->rental_date->month, $order->rental_date->day %>";
     var targetDate         = "<%= sprintf "반납 %02d월 %02d일", $order->target_date->month, $order->target_date->day %>";

@@ -1,6 +1,8 @@
 package OpenCloset::Web::Controller::Order;
 use Mojo::Base 'Mojolicious::Controller';
 
+use Mojo::JSON;
+
 use Data::Pageset;
 use DateTime;
 use HTTP::Tiny;
@@ -1189,13 +1191,12 @@ sub rental_paper_pdf {
         );
     }
 
-
     #
     # response
     #
     $self->stash(
         order        => $order,
-        donation_str => \@donation_str,
+        donation_str => Mojo::JSON::to_json(\@donation_str),
     );
 }
 
