@@ -67,12 +67,13 @@
         donationUserName1: {
           margin: [ 18, 20, 0, 0 ],
           font: "D2Coding",
-          fontSize: 12
+          fontSize: 11
         },
         donationUserName2: {
           margin: [ 18, 8, 0, 0 ],
           font: "D2Coding",
-          fontSize: 15
+          fontSize: 12.5,
+          lineHeight: 1.1
         }
       },
       content: [
