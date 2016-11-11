@@ -57,7 +57,11 @@
         orderTargetDate: {
           margin: [ 55, 8, 0, 0 ],
           font: "D2Coding",
-          fontSize: 14
+          fontSize: 14,
+          decoration: "underline",
+          decorationStyle: "wavy",
+          decorationColor: "red",
+          background: "#eeffaa"
         },
         orderId: {
           margin: [ 330, 18, 0, 0 ],
