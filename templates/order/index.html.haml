@@ -10,6 +10,7 @@
 
 - use DateTime;
 - my $list_name = param('status') || '';
+- my $user = current_user;
 
 #unpaid-done-pay-with{:style => 'display: none'}
   %h3
@@ -127,7 +128,8 @@
               - if ($status eq '포장완료') {
                 %span
                   %span.text-primary.glyphicon.glyphicon-arrow-right{:aria-hidden => 'true'}
-                  %span.status-update.label.order-status{ 'data-order-status' => "결제대기", 'data-order-id' => "#{$order->id}", 'data-status-to' => '19' }
+                  - my $staff_id = $user->id;
+                  %span.status-update.label.order-status{ 'data-order-status' => "결제대기", 'data-order-id' => "#{$order->id}", 'data-status-to' => '19', 'data-staff-id' => "#{$staff_id}" }
                     결제대기
               - } elsif ($search_status eq 'nonpayment') {
                 %a.nonpayment2full.label.label-warning{:href => '#'}
