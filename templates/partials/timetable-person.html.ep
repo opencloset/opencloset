@@ -47,7 +47,7 @@
     <div class="widget-header">
       <h4>
         <a tabindex="-1" href="<%= url_for( '/user/' . $order->user->id ) %>">
-          <%= $order->user->name %> <%= $revisited ? $revisited . '회 대여' : q{} %>
+          <%= $order->user->name %> <%= $revisited ? $revisited . '회 방문' : q{} %>
         </a>
         % if ($coupon) {
         <small>
