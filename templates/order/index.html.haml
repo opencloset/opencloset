@@ -217,7 +217,12 @@
                 %a.clothes-category{ :href => '/clothes/#{ trim_clothes_code($detail->clothes) }' }= $detail->clothes->category
             - }
           %td
-            = $order->return_memo || ''
+            %span
+              - if ( $status =~ m/^포장완료|결제대기$/ ) {
+                %a.btn.btn-xs.btn-info{ :type => "button", :href => "#{ url_for('/order/' . $order->id . '/rental/paper/pdf') }", :target => "_blank" } 정장 반납 안내 출력
+              - }
+            %span
+              = $order->return_memo || ''
       - }
 
   = include 'partials/pagination'
