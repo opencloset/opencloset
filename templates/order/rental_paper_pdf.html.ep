@@ -57,7 +57,16 @@
         orderTargetDate: {
           margin: [ 55, 8, 0, 0 ],
           font: "D2Coding",
-          fontSize: 14
+          fontSize: 14,
+          decoration: "underline",
+          decorationStyle: "wavy",
+          decorationColor: "red",
+          background: "#eeffaa"
+        },
+        cautionParcel: {
+          margin: [ 55, 8, 0, 0 ],
+          font: "D2Coding",
+          fontSize: 9
         },
         orderId: {
           margin: [ 330, 18, 0, 0 ],
@@ -96,6 +105,11 @@
               {
                 text: targetDate,
                 style: "orderTargetDate",
+                alignment: "left"
+              },
+              {
+                text: "택배 반납은 반납일 1일전 발송",
+                style: "cautionParcel",
                 alignment: "left"
               }
             ],
