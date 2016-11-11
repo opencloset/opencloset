@@ -1191,21 +1191,27 @@ sub rental_paper_pdf {
         );
     }
 
-    my $rental_date =
-        $order->rental_date->clone->set_time_zone( $self->config->{timezone} )
-        ->set_locale("ko_KR")->strftime("대여 %m월 %d일(%a)");
+    my $rental_date = $order->rental_date ? $order->rental_date->clone : DateTime->today;
     my $target_date =
-        $order->target_date->clone->set_time_zone( $self->config->{timezone} )
-        ->set_locale("ko_KR")->strftime("반납 %m월 %d일(%a)");
+          $order->target_date
+        ? $order->target_date->clone
+        : DateTime->today->add( days => 4, seconds => -1 );
+
+    my $rental_date_str =
+        $rental_date->set_time_zone( $self->config->{timezone} )->set_locale("ko_KR")
+        ->strftime("대여 %m월 %d일(%a)");
+    my $target_date_str =
+        $target_date->set_time_zone( $self->config->{timezone} )->set_locale("ko_KR")
+        ->strftime("반납 %m월 %d일(%a)");
 
     #
     # response
     #
     $self->stash(
-        order        => $order,
-        donation_str => Mojo::JSON::to_json(\@donation_str),
-        rental_date  => $rental_date,
-        target_date  => $target_date,
+        order           => $order,
+        donation_str    => Mojo::JSON::to_json(\@donation_str),
+        rental_date_str => $rental_date_str,
+        target_date_str => $target_date_str,
     );
 }
 
