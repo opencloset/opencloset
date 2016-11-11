@@ -714,6 +714,8 @@
                           data-name        = "detail-final_price"
                         ></a>원
                     %td
+                      - my $detail_desc = $detail->desc || q{};
+                      - $detail_desc =~ s/"/&quot;/gms;
                       :plain
                         <a
                           id               = "order-detail-desc-#{ $detail->id }"
@@ -725,7 +727,7 @@
                           data-type        = "text"
                           data-emptytext   = "비어있음"
 
-                          data-value       = "#{ $detail->desc || q{} }"
+                          data-value       = "#{ $detail_desc }"
 
                           data-url         = "/order/#{ $order->id }/update"
                           data-pk          = "#{ $detail->id }"
@@ -776,6 +778,8 @@
                   %strong 주문서 메모 5F
                 .row
                 .space-6
+                - my $order_desc = $order->desc || q{};
+                - $order_desc =~ s/"/&quot;/gms;
                 :plain
                   <a
                     id               = "order-desc"
@@ -788,7 +792,7 @@
                     data-type        = "textarea"
                     data-emptytext   = "비어있음"
 
-                    data-value       = "#{ $order->desc || q{} }"
+                    data-value       = "#{ $order_desc }"
 
                     data-url         = "/order/#{ $order->id }/update"
                     data-pk          = "#{ $order->id }"
@@ -802,6 +806,8 @@
                   %strong 대여 메세지
                 .row
                 .space-6
+                - my $order_message = $order->message || q{};
+                - $order_message =~ s/"/&quot;/gms;
                 :plain
                   <a
                     id               = "order-message"
@@ -814,7 +820,7 @@
                     data-type        = "textarea"
                     data-emptytext   = "비어있음"
 
-                    data-value       = "#{ $order->message || q{} }"
+                    data-value       = "#{ $order_message }"
 
                     data-url         = "/order/#{ $order->id }/update"
                     data-pk          = "#{ $order->id }"
@@ -828,6 +834,8 @@
                   %strong 반납 확인 메모 4F
                 .row
                 .space-6
+                - my $order_return_memo = $order->return_memo || q{};
+                - $order_return_memo =~ s/"/&quot;/gms;
                 :plain
                   <a
                     id               = "order-return-memo"
@@ -840,7 +848,7 @@
                     data-type        = "textarea"
                     data-emptytext   = "비어있음"
 
-                    data-value       = "#{ $order->return_memo || q{} }"
+                    data-value       = "#{ $order_return_memo }"
 
                     data-url         = "/order/#{ $order->id }/update"
                     data-pk          = "#{ $order->id }"
