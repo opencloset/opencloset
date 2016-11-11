@@ -22,9 +22,13 @@ $ ->
     $this = $(@)
     order_id  = $this.data('order-id')
     status_to = $this.data('status-to')
+    staff_id  = $this.data('staff-id')
     $.ajax "/api/order/#{order_id}.json",
       type: 'PUT'
-      data: { id: order_id, status_id: status_to }
+      data:
+        id: order_id
+        status_id: status_to
+        staff_id: staff_id
       beforeSend: ->
         sock.close() if sock
       success: (data) ->
