@@ -16,8 +16,8 @@
     var donationUserNames1 = '"기증자를 알려드립니다."';
     var donationUserNames2 = JSON.parse('<%== $donation_str %>').join("\n");
     var orderId            = "No. <%= $order->id %>";
-    var rentalDate         = "<%= $rental_date %>";
-    var targetDate         = "<%= $target_date %>";
+    var rentalDate         = "<%= $rental_date_str %>";
+    var targetDate         = "<%= $target_date_str %>";
 
     var fontDefinition = {
       D2Coding: {
@@ -57,7 +57,16 @@
         orderTargetDate: {
           margin: [ 55, 8, 0, 0 ],
           font: "D2Coding",
-          fontSize: 14
+          fontSize: 14,
+          decoration: "underline",
+          decorationStyle: "wavy",
+          decorationColor: "red",
+          background: "#eeffaa"
+        },
+        cautionParcel: {
+          margin: [ 55, 8, 0, 0 ],
+          font: "D2Coding",
+          fontSize: 9
         },
         orderId: {
           margin: [ 330, 18, 0, 0 ],
@@ -96,6 +105,11 @@
               {
                 text: targetDate,
                 style: "orderTargetDate",
+                alignment: "left"
+              },
+              {
+                text: "택배 반납은 반납일 1일전 발송",
+                style: "cautionParcel",
                 alignment: "left"
               }
             ],

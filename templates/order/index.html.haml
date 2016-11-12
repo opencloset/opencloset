@@ -10,6 +10,7 @@
 
 - use DateTime;
 - my $list_name = param('status') || '';
+- my $user = current_user;
 
 #unpaid-done-pay-with{:style => 'display: none'}
   %h3
@@ -127,7 +128,8 @@
               - if ($status eq '포장완료') {
                 %span
                   %span.text-primary.glyphicon.glyphicon-arrow-right{:aria-hidden => 'true'}
-                  %span.status-update.label.order-status{ 'data-order-status' => "결제대기", 'data-order-id' => "#{$order->id}", 'data-status-to' => '19' }
+                  - my $staff_id = $user->id;
+                  %span.status-update.label.order-status{ 'data-order-status' => "결제대기", 'data-order-id' => "#{$order->id}", 'data-status-to' => '19', 'data-staff-id' => "#{$staff_id}" }
                     결제대기
               - } elsif ($search_status eq 'nonpayment') {
                 %a.nonpayment2full.label.label-warning{:href => '#'}
@@ -215,7 +217,12 @@
                 %a.clothes-category{ :href => '/clothes/#{ trim_clothes_code($detail->clothes) }' }= $detail->clothes->category
             - }
           %td
-            = $order->return_memo || ''
+            %span
+              - if ( $status =~ m/^포장완료|결제대기$/ ) {
+                %a.btn.btn-xs.btn-info{ :type => "button", :href => "#{ url_for('/order/' . $order->id . '/rental/paper/pdf') }", :target => "_blank" } 정장 반납 안내 출력
+              - }
+            %span
+              = $order->return_memo || ''
       - }
 
   = include 'partials/pagination'
