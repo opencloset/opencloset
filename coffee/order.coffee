@@ -118,17 +118,3 @@ $ ->
         OpenCloset.alert('success', "완납처리 되었습니다")
       error: (jqXHR, textStatus) ->
         OpenCloset.alert('danger', "오류가 발생했습니다: #{jqXHR.responseJSON.error.str}")
-
-  ##
-  ## GH #907 포장 완료 상태인 주문서도 내역을 취소할 수 있게 함
-  ##
-  $(".btn-order-clear").click (e) ->
-    e.preventDefault()
-    return unless confirm '정말 새로 주문하시겠습니까?'
-    order_id = $(this).data('order-id')
-    $.ajax "/api/order/#{ order_id }/set-package.json",
-      type: 'GET'
-      success: (data, textStatus, jqXHR) ->
-      error: (jqXHR, textStatus, errorThrown) ->
-      complete: (jqXHR, textStatus) ->
-        window.location.reload(true)
