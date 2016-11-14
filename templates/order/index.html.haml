@@ -220,6 +220,7 @@
             %span
               - if ( $status =~ m/^포장완료|결제대기$/ ) {
                 %a.btn.btn-xs.btn-info{ :type => "button", :href => "#{ url_for('/order/' . $order->id . '/rental/paper/pdf') }", :target => "_blank" } 정장 반납 안내 출력
+                %a.btn.btn-xs.btn-danger.btn-order-clear{ :type => "button", :href => "#", "data-order-id" => "#{ $order->id }" } 새로 주문
               - }
             %span
               = $order->return_memo || ''
