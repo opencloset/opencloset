@@ -1193,13 +1193,12 @@ sub rental_paper_pdf {
 
     my $rental_date =
           $order->rental_date
-        ? $order->rental_date->clone
+        ? $order->rental_date->clone->set_time_zone( "Asia/Seoul" )
         : DateTime->today( time_zone => $self->config->{timezone} );
     my $target_date =
           $order->target_date
-        ? $order->target_date->clone
-        : DateTime->today( time_zone => $self->config->{timezone} );
-    $target_date->add( days => 4, seconds => -1 );
+        ? $order->target_date->clone->set_time_zone( "Asia/Seoul" )
+        : DateTime->today( time_zone => $self->config->{timezone} )->add( days => 4, seconds => -1 );
 
     my $rental_date_str = $rental_date->set_locale("ko_KR")->strftime("대여 %m월 %d일(%a)");
     my $target_date_str = $target_date->set_locale("ko_KR")->strftime("반납 %m월 %d일(%a)");
