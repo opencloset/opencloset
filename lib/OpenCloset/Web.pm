@@ -297,6 +297,10 @@ sub _private_routes {
     $r->get('/timetable/:ymd')->to('timetable#ymd');
 
     $r->get('/sms')->to('SMS#index');
+    $r->get('/sms/macros')->to('SMS#macros');
+    $r->get('/sms/macros/:id')->to('SMS#macro');
+    $r->put('/sms/macros/:id')->to('SMS#update_macro');
+    $r->delete('/sms/macros/:id')->to('SMS#delete_macro');
 
     $r->get('/donation')->to('donation#index');
     $r->get('/donation/:id')->to('donation#donation');
