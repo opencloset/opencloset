@@ -41,13 +41,12 @@ $ ->
     msg  = $this.attr('title')
     url  = $this.attr('href')
 
-    OpenCloset.sendSMS to, msg
-
     $.ajax url,
       type: 'DELETE'
       success: (data, textStatus, jqXHR) ->
         $this.closest('span.dropdown').remove()
         OpenCloset.alert 'info', "#{name}님 예약이 취소 되었습니다"
+        OpenCloset.sendSMS to, msg
       error: (jqXHR, textStatus, errorThrown) ->
         OpenCloset.alert 'warning', jqXHR.responseJSON.error.str
       complete: (jqXHR, textStatus) ->
