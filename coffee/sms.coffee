@@ -25,6 +25,7 @@ $ ->
     updateMsgScreenWidth()
 
   $('#btn-sms-send').click (e) ->
+    from = $('input[name=from]').prop('value')
     to  = $('input[name=to]').prop('value')
     msg = $('textarea[name=msg]').prop('value')
 
@@ -55,7 +56,8 @@ $ ->
     #
     # 전송
     #
-    OpenCloset.sendSMS to, msg
+    OpenCloset.sendSMS to, msg, null, from
+    $('input[name=from]').prop('value', '')
     $('input[name=to]').prop('value', '')
     $('input[name=msg]').prop('value', '')
     OpenCloset.alert 'success', '문자 메시지를 전송했습니다.'
