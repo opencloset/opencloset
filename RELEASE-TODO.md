@@ -1,6 +1,8 @@
 배포 전 해야할 일들
 
     $ grunt
+    $ mysql -u xxxx -p xxxx < /path/to/OpenCloset-Schema/db/alter/100-sms-macro.sql
+    $ closetpan OpenCloset::Schema
 
 `app.conf` 수정
 
