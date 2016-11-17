@@ -49,5 +49,5 @@ $ ->
         $this.closest('span.dropdown').remove()
         OpenCloset.alert 'info', "#{name}님 예약이 취소 되었습니다"
       error: (jqXHR, textStatus, errorThrown) ->
-        OpenCloset.alert 'warning', textStatus
+        OpenCloset.alert 'warning', jqXHR.responseJSON.error.str
       complete: (jqXHR, textStatus) ->
