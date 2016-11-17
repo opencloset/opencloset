@@ -12,3 +12,5 @@
   <a href="<%= url_for('/sms/macros/' . $macro->id) %>" class="list-group-item"><%= $macro->name %></a>
   % }
 </div>
+
+<a class="btn btn-primary" href="<%= url_for('/sms/macros/new') %>">추가</a>

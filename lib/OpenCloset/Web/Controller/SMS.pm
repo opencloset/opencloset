@@ -40,7 +40,7 @@ sub index {
 
 =head2 macros
 
-    GET /macros
+    GET /sms/macros
 
 =cut
 
@@ -50,15 +50,61 @@ sub macros {
     $self->render( 'sms/macros', macros => $macros );
 }
 
+=head2 add_macro
+
+    GET /sms/macros/new
+
+=cut
+
+sub add_macro {
+    my $self = shift;
+    $self->render('sms/add_macro');
+}
+
+=head2 create_macro
+
+    POST /sms/macros
+
+=cut
+
+sub create_macro {
+    my $self = shift;
+    my $v    = $self->validation;
+
+    $v->required('name');
+    $v->required('from')->like(qr/^\d+$/);
+    $v->required('text');
+
+    return $self->error( 400, { str => "Parameter validation failed" } )
+        if $v->has_error;
+
+    my $name  = $v->param('name');
+    my $from  = $v->param('from');
+    my $text  = $v->param('text');
+    my $macro = $self->DB->resultset('SmsMacro')->create(
+        {
+            name => $name,
+            from => $from,
+            text => $text
+        }
+    );
+
+    return $self->error( 500, { str => "Failed to create a new macro" } )
+        unless $macro;
+
+    $self->flash( success => '추가되었습니다' );
+    $self->redirect_to('/sms/macros');
+}
+
 =head2 macro
 
-    GET /macros/:id
+    GET /sms/macros/:id
 
 =cut
 
 sub macro {
-    my $self = shift;
-    my $id   = $self->param('id');
+    my $self  = shift;
+    my $id    = $self->param('id');
     my $macro = $self->DB->resultset('SmsMacro')->find( { id => $id } );
     return $self->error( 404, { str => "Not found macro: $id" } ) unless $macro;
 
@@ -67,37 +113,37 @@ sub macro {
 
 =head2 update_macro
 
-    PUT /macros/:id
+    PUT /sms/macros/:id
 
 =cut
 
 sub update_macro {
-    my $self = shift;
-    my $id   = $self->param('id');
+    my $self  = shift;
+    my $id    = $self->param('id');
     my $macro = $self->DB->resultset('SmsMacro')->find( { id => $id } );
     return $self->error( 404, { str => "Not found macro: $id" } ) unless $macro;
 
     my $v = $self->validation;
-    $macro->update($v->input);
-    $self->flash(success => '수정되었습니다');
-    $self->render(json => {});
+    $macro->update( $v->input );
+    $self->flash( success => '수정되었습니다' );
+    $self->render( json => {} );
 }
 
 =head2 delete_macro
 
-    DELETE /macros/:id
+    DELETE /sms/macros/:id
 
 =cut
 
 sub delete_macro {
-    my $self = shift;
-    my $id   = $self->param('id');
+    my $self  = shift;
+    my $id    = $self->param('id');
     my $macro = $self->DB->resultset('SmsMacro')->find( { id => $id } );
     return $self->error( 404, { str => "Not found macro: $id" } ) unless $macro;
 
     $macro->delete;
-    $self->flash(success => '삭제되었습니다');
-    $self->render(json => {});
+    $self->flash( success => '삭제되었습니다' );
+    $self->render( json => {} );
 }
 
 1;
