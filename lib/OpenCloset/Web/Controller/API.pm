@@ -993,6 +993,62 @@ sub api_order_set_package {
     $self->respond_to( json => { status => 200, json => $data } );
 }
 
+=head2 delete_order_booking
+
+    DELETE /api/order/:id/booking
+
+=cut
+
+sub api_delete_order_booking {
+    my $self = shift;
+
+    #
+    # fetch params
+    #
+    my %order_params = $self->get_params(qw/ id /);
+
+    #
+    # update the order
+    #
+    my $order = $self->get_order( { id => $order_params{id} } );
+    unless ($order) {
+        $self->app->log->warn( "cannot find such order: " . $order->id );
+    }
+    return $self->error(
+        400,
+        {
+            str  => "cannot find such order: " . $order->id,
+            data => {},
+        },
+    ) unless $order;
+
+    #
+    # 방문 예약(14) 상태의 주문서의 예약만 취소할 수 있도록 합니다.
+    #
+    if ( $order->status_id != 14 ) {
+        return $self->error(
+            500,
+            {
+                str => "cannot delete booking since order.status_id is not 14",
+                data => { status_id => $order->status_id },
+            }
+        );
+    }
+
+    $order = $self->update_order(
+        {
+            id         => $order->id,
+            booking_id => undef,
+        },
+    );
+
+    #
+    # response
+    #
+    my $data = $self->flatten_order($order);
+    $self->respond_to( json => { status => 200, json => $data } );
+}
+
 =head2 order_list
 
     GET /api/order-list
