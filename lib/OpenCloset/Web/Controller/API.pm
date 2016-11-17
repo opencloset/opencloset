@@ -2225,12 +2225,13 @@ sub api_create_sms {
     #
     # fetch params
     #
-    my %params = $self->get_params(qw/ to text status /);
+    my %params = $self->get_params(qw/ from to text status /);
 
     #
     # validate params
     #
     my $v = $self->create_validator;
+    $v->field('from')->regexp(qr/^#?\d+$/);
     $v->field('to')->required(1)->regexp(qr/^#?\d+$/);
     $v->field('text')->required(1)->regexp(qr/^(\s|\S)+$/);
     $v->field('status')->in(qw/ pending sending sent /);
@@ -2243,9 +2244,11 @@ sub api_create_sms {
         $self->error( 400, { str => join( ',', @error_str ), data => $v->errors, } ), return;
     }
 
+    $params{from} =~ s/-//g;
     $params{to} =~ s/-//g;
-    my $from = $self->config->{sms}{ $self->config->{sms}{driver} }{_from};
-    my $to   = $params{to};
+    my $from =
+        $params{from} || $self->config->{sms}{ $self->config->{sms}{driver} }{_from};
+    my $to = $params{to};
     if ( $params{to} =~ m/^#(\d+)/ ) {
         my $order_id = $1;
         return $self->error(
