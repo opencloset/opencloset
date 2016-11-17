@@ -28,11 +28,13 @@ sub index {
     my $balance = +{ success => undef };
     $balance = $sender->balance if $sender->_OBJECT_->can('balance');
 
+    my $macros = $self->DB->resultset('SmsMacro')->search;
     $self->render(
         'sms',
         to  => $params{to}  || q{},
         msg => $params{msg} || q{},
         balance => $balance->{success} ? $balance->{detail} : { cash => 0, point => 0 },
+        macros => $macros,
     );
 }
 
