@@ -993,6 +993,62 @@ sub api_order_set_package {
     $self->respond_to( json => { status => 200, json => $data } );
 }
 
+=head2 delete_order_booking
+
+    DELETE /api/order/:id/booking
+
+=cut
+
+sub api_delete_order_booking {
+    my $self = shift;
+
+    #
+    # fetch params
+    #
+    my %order_params = $self->get_params(qw/ id /);
+
+    #
+    # update the order
+    #
+    my $order = $self->get_order( { id => $order_params{id} } );
+    unless ($order) {
+        $self->app->log->warn( "cannot find such order: " . $order->id );
+    }
+    return $self->error(
+        400,
+        {
+            str  => "cannot find such order: " . $order->id,
+            data => {},
+        },
+    ) unless $order;
+
+    #
+    # 방문 예약(14) 상태의 주문서의 예약만 취소할 수 있도록 합니다.
+    #
+    if ( $order->status_id != 14 ) {
+        return $self->error(
+            500,
+            {
+                str => "cannot delete booking since order.status_id is not 14",
+                data => { status_id => $order->status_id },
+            }
+        );
+    }
+
+    $order = $self->update_order(
+        {
+            id         => $order->id,
+            booking_id => undef,
+        },
+    );
+
+    #
+    # response
+    #
+    my $data = $self->flatten_order($order);
+    $self->respond_to( json => { status => 200, json => $data } );
+}
+
 =head2 order_list
 
     GET /api/order-list
@@ -2169,12 +2225,13 @@ sub api_create_sms {
     #
     # fetch params
     #
-    my %params = $self->get_params(qw/ to text status /);
+    my %params = $self->get_params(qw/ from to text status /);
 
     #
     # validate params
     #
     my $v = $self->create_validator;
+    $v->field('from')->regexp(qr/^#?\d+$/);
     $v->field('to')->required(1)->regexp(qr/^#?\d+$/);
     $v->field('text')->required(1)->regexp(qr/^(\s|\S)+$/);
     $v->field('status')->in(qw/ pending sending sent /);
@@ -2187,9 +2244,11 @@ sub api_create_sms {
         $self->error( 400, { str => join( ',', @error_str ), data => $v->errors, } ), return;
     }
 
+    $params{from} =~ s/-//g;
     $params{to} =~ s/-//g;
-    my $from = $self->config->{sms}{ $self->config->{sms}{driver} }{_from};
-    my $to   = $params{to};
+    my $from =
+        $params{from} || $self->config->{sms}{ $self->config->{sms}{driver} }{_from};
+    my $to = $params{to};
     if ( $params{to} =~ m/^#(\d+)/ ) {
         my $order_id = $1;
         return $self->error(

@@ -1,0 +1,19 @@
+% my $_id = 'sms-macros';
+% layout 'default',
+%   page_id => $_id;
+% title meta_text($_id);
+
+<form id="form-macro" action="<%= url_for('/sms/macros') %>" method="POST" role="form">
+  <div class="form-group">
+    <input name="name" type="text" placeholder="매크로이름">
+  </div>
+  <div class="form-group">
+    <input name="from" type="text" placeholder="발신번호">
+  </div>
+  <div class="form-group">
+    <textarea cols="30" name="text" rows="25" placeholder="내용"></textarea>
+  </div>
+  <div class="form-group">
+    <input type="submit" class="btn btn-primary" value="추가">
+  </div>
+</form>

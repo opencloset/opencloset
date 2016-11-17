@@ -5,7 +5,7 @@ use CHI;
 use DateTime;
 
 use OpenCloset::Schema;
-use version; our $VERSION = qv("v1.8.27");
+use version; our $VERSION = qv("v1.8.28");
 has CACHE => sub {
     my $self  = shift;
     my $cache = CHI->new(
@@ -217,6 +217,7 @@ sub _private_routes {
     $api->put('/order/:id/nonpayment2full')->to('API#api_update_order_nonpayment2full');
     $api->put('/order/:id/return-part')->to('API#api_order_return_part');
     $api->get('/order/:id/set-package')->to('API#api_order_set_package');
+    $api->delete('/order/:id/booking')->to('API#api_delete_order_booking');
     $api->get('/order-list')->to('API#api_order_list');
 
     ## prevent deep recursion with create_order_detail helper
@@ -296,6 +297,12 @@ sub _private_routes {
     $r->get('/timetable/:ymd')->to('timetable#ymd');
 
     $r->get('/sms')->to('SMS#index');
+    $r->get('/sms/macros')->to('SMS#macros');
+    $r->get('/sms/macros/new')->to('SMS#add_macro');
+    $r->post('/sms/macros')->to('SMS#create_macro');
+    $r->get('/sms/macros/:id')->to('SMS#macro');
+    $r->put('/sms/macros/:id')->to('SMS#update_macro');
+    $r->delete('/sms/macros/:id')->to('SMS#delete_macro');
 
     $r->get('/donation')->to('donation#index');
     $r->get('/donation/:id')->to('donation#donation');

@@ -102,7 +102,7 @@
                     %li
                       %a{:href => "#{url_for( '/user/' . $u->id )}"} 사용자 정보
                     %li
-                      %a.order-cancel{:href => "#{url_for('/api/order/' . $order->id)}", :title => $msg, :data-phone => $user_info->phone, :data-name => $u->name}
+                      %a.order-cancel{:href => "#{url_for('/api/order/' . $order->id . '/booking.json')}", :title => $msg, :data-phone => $user_info->phone, :data-name => $u->name}
                         %i.icon-warning-sign.red
                         예약 취소
               -   }
