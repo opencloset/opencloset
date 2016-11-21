@@ -299,15 +299,17 @@
 
                 <script id="tpl-booking" type="text/html">
                   <tr>
+                    <%% moment.locale("ko"); %>
                     <%% var dt = moment(date); %>
                     <%% var ymd = dt.format('YYYY-MM-DD'); %>
                     <%% var hm  = dt.format('HH:mm'); %>
+                    <%% var wd  = dt.format('dddd'); %>
                     <%% if ( id > 0 ) { %>
                       <td class="center">
                         <input type="radio" name="booking_id" value="<%%= id %>" data-id="<%%= id %>" data-ymd="<%%= ymd %>" data-hm="<%%= hm %>">
                         <span class="lbl"></span>
                       </td>
-                      <td> <%%= ymd %> </td>
+                      <td> <%%= ymd %> (<%%= wd %>) </td>
                       <td> <%%= hm %> </td>
                     <%% } else { %>
                       <td class="center">
