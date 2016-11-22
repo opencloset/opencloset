@@ -482,7 +482,7 @@ $ ->
       complete: ->
         $this.removeClass('disabled')
 
-  returnClothesReal = (type, redirect_url, order_id, late_fee_pay_with, compensation_pay_with, today) ->
+  returnClothesReal = (type, redirect_url, order_id, late_fee_pay_with, compensation_pay_with, today, cb) ->
     if today and /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(today)
       return_date = moment().format(today)
     else
@@ -540,6 +540,7 @@ $ ->
       type:    'PUT'
       data:    $.param(data, 1)
       success: (data, textStatus, jqXHR) ->
+        do cb if cb
         #
         # 주문서 페이지 리로드
         #
@@ -554,7 +555,7 @@ $ ->
         else
           location.reload()
 
-  returnOrder = (type, redirect_url) ->
+  returnOrder = (type, redirect_url, cb) ->
     order_id              = $('#order').data('order-id')
     clothes_price         = $('#order').data('order-clothes-price')
     late_fee              = $('#order').data('order-late-fee')
@@ -664,7 +665,7 @@ $ ->
     #
     today = $('#order').data('today')
 
-    returnClothesReal type, redirect_url, order_id, late_fee_pay_with, compensation_pay_with, today
+    returnClothesReal type, redirect_url, order_id, late_fee_pay_with, compensation_pay_with, today, cb
 
   #
   # 전체 반납 버튼 클릭
@@ -681,12 +682,17 @@ $ ->
   # 부분 반납 버튼 클릭
   #
   $('#btn-return-part').click (e) ->
+    $this = $(@)
+    return if $this.hasClass('disabled')
+
+    $this.addClass('disabled')
     redirect_url = $(e.target).data('redirect-url')
     count        = countSelectedOrderDetail()
     unless count.selected > 0
       OpenCloset.alert 'error', "반납할 항목을 선택하지 않았습니다."
       return
-    returnOrder 'part', redirect_url
+    returnOrder 'part', redirect_url, ->
+      $this.removeClass('disabled')
 
   #
   # 주문서 목록에서 선택된 항목과 선택할 수 있는 항목 총 개수를 반환
