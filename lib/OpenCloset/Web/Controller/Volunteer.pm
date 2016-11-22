@@ -36,13 +36,23 @@ sub index {
             },
             {
                 order_by => [
-                    { -desc => 'need_1365' }, { -asc => 'done_1365' }, { -asc => 'activity_from_date' }
+                    { -desc => 'need_1365' }, { -asc => 'done_1365' }, { -desc => 'activity_from_date' }
                 ]
             }
         );
         $standby = $self->DB->resultset('VolunteerWork')->search(
-            { status   => $status, need_1365 => 1,             done_1365 => 0, },
-            { order_by => [        { -desc   => 'need_1365' }, { -asc    => 'done_1365' } ] }
+            {
+                status    => $status,
+                need_1365 => 1,
+                done_1365 => 0,
+            },
+            {
+                order_by => [
+                    { -desc => 'need_1365' },
+                    { -asc  => 'done_1365' },
+                    { -desc => 'activity_from_date' }
+                ]
+            }
         );
     }
     elsif ( $status eq 'canceled' ) {
