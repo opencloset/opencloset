@@ -113,6 +113,7 @@ $ ->
           late_fee = $('#order').data('order-late-fee-final')
           discount = parseInt(late_fee) * -1
           $('#order-late-fee-discount').editable 'setValue', discount
+          $('#order-late-fee-pay-with').editable 'disable'
 
           #
           # bootstrap-xeditable가 로컬 submit이라던가
