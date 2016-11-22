@@ -321,14 +321,14 @@
                         <span class="lbl"></span>
                       </td>
                       <td> <%%= ymd %> (<%%= wd %>) </td>
-                      <td> <%%= hm %> </td>
+                      <td> <%%= hm %> <%%= slot > user_count ? slot - user_count : 0 %>명 예약 가능 </td>
                     <%% } else { %>
                       <td class="center">
                         <input type="radio" name="booking_id" disabled data-ymd="<%%= ymd %>" data-hm="<%%= hm %>">
                         <span class="lbl"></span>
                       </td>
-                      <td> <del> <%%= ymd %> </del> </td>
-                      <td> <del> <%%= hm %>  </del> <strong>예약 인원 초과</strong> </td>
+                      <td> <del> <%%= ymd %> (<%%= wd %>) </del> </td>
+                      <td> <del> <%%= hm %> </del> <strong>예약 인원 초과</strong> </td>
                     <%% } %>
                   </tr>
                 </script>
