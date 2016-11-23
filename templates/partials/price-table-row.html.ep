@@ -1,0 +1,110 @@
+%# requires $order, $detail, $detail_count, $is_suit, $order_status
+% use OpenCloset::Constants::Category qw/$JACKET $PANTS $SKIRT/;
+% my $clothes = $detail->clothes;
+<tr>
+  <td class="center return-process">
+    % if ($clothes) {
+    <label>
+      <input class="ace" type="checkbox" data-clothes-code="<%= trim_clothes_code($detail->clothes) %>" data-id="<%= $detail->id %>">
+      <span class="lbl"></span>
+    </label>
+    % }
+  </td>
+  <td class="center"><%= $detail_count %></td>
+  % if ($clothes) {
+    % my $category = $clothes->category;
+    <td>
+      <span>
+        % if ($is_suit && "$JACKET $PANTS $SKIRT" =~ m/\b$category\b/) {
+        %= clothes2link($detail->clothes, { text => $detail->name, class => ['label-success'] })
+        % } else {
+        %= clothes2link($detail->clothes, { text => $detail->name })
+        % }
+      </span>
+      <br>
+      <span>
+        % my $donation      = $detail->clothes->donation;
+        % my $donation_user = $donation->user;
+        <a href="/donation/<%= $donation->id %>">
+          %= $donation->id
+        </a>
+        -
+        <a href="/user/<%= $donation_user->id %>">
+          %= $donation_user->name
+        </a>
+      </span>
+    </td>
+    <td>
+      % my $detail_status = $detail->status;
+      % if ($order_status ne '결제대기' && $detail->status) {
+      <span class="order-status label" data-order-detail-status="<%= $detail_status->name %>">
+        %= $detail_status->name
+      </span>
+      % } else {
+      % my $clothes_status = $clothes->status;
+      <span class="order-status label" data-order-detail-status="<%= $clothes_status->name %>">
+        %= $clothes_status->name
+      </span>
+      % }
+    </td>
+  % } else {
+    <td>
+      %= $detail->name
+    </td>
+    <td></td>
+  % }
+  <td class="return-process-reverse">
+    <a
+       id="order-detail-price-<%= $detail->id %>"
+       class="order-detail-price editable editable-click"
+       href="#"
+       data-disabled="<%= $order_status ne '결제대기' ? 'true' : 'false' %>"
+       data-mode="inline"
+       data-showbuttons="true"
+       data-type="text"
+       data-emptytext="0"
+       data-value="<%= $detail->price || 0 %>"
+       data-url="/order/<%= $order->id %>/update"
+       data-pk="<%= $detail->id %>"
+       data-name="detail-price"
+       data-id-clothes="<%= $detail->clothes ? 'true' : 'false' %>"
+       data-is-pre-paid="<%= $detail->name eq '이전 주문 납부' ? 'true' : 'false' %>"></a>원
+  </td>
+  <td class="return-process-reverse">
+    % if ($detail->stage) {
+    <span><%= sprintf('%d일', calc_overdue($order)) %></span>
+    % } else {
+    <span><%= sprintf('4+%d일', $order->additional_day) %></span>
+    % }
+  </td>
+  <td>
+    <a
+       id="order-detail-final-price-<%= $detail->id %>"
+       class="order-detail-final-price editable editable-click"
+       href="#"
+       data-disabled="<%= $order_status ne '결제대기' ? 'true' : 'false' %>"
+       data-mode="inline"
+       data-showbuttons="true"
+       data-type="text"
+       data-emptytext="0"
+       data-value="<%= $detail->final_price || 0 %>"
+       data-url="/order/<%= $order->id %>/update"
+       data-pk="<%= $detail->id %>"
+       data-name="detail-final_price"></a>원
+  </td>
+  <td>
+    % my $detail_desc = $detail->desc || q{};
+    <a
+       id="order-detail-desc-<%= $detail->id %>"
+       class="order-detail editable editable-click"
+       href="#"
+       data-mode="inline"
+       data-showbuttons="true"
+       data-type="text"
+       data-emptytext="비어있음"
+       data-value="<%= $detail_desc %>"
+       data-url="/order/<%= $order->id %>/update"
+       data-pk="<%= $detail->id %>"
+       data-name="detail-desc"></a>
+  </td>
+</tr>
