@@ -67,7 +67,7 @@
        data-url="/order/<%= $order->id %>/update"
        data-pk="<%= $detail->id %>"
        data-name="detail-price"
-       data-id-clothes="<%= $detail->clothes ? 'true' : 'false' %>"
+       data-is-clothes="<%= $detail->clothes ? 'true' : 'false' %>"
        data-is-pre-paid="<%= $detail->name eq '이전 주문 납부' ? 'true' : 'false' %>"></a>원
   </td>
   <td class="return-process-reverse">
