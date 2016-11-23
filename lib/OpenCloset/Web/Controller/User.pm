@@ -345,7 +345,7 @@ sub auth {
                 $self->redirect_to( $self->url_for('/visit') );
             }
             else {
-                $self->redirect_to( $self->url_for('/login') );
+                $self->redirect_to( $self->url_for('/login')->query( return => $self->req->url->to_abs ) );
             }
         }
     );
