@@ -718,6 +718,17 @@ sub order {
     my $detail_others = $order->order_details( { clothes_code => undef } );
 
     #
+    # 사용된 쿠폰 갯수
+    #
+    my $used_coupons = $orders->search(
+        {
+            coupon_id       => { '!=' => undef },
+            'coupon.status' => 'used',
+        },
+        { join => 'coupon' }
+    )->count;
+
+    #
     # response
     #
     $self->render(
@@ -729,6 +740,7 @@ sub order {
         visited        => $visited,
         detail_clothes => $detail_clothes,
         detail_others  => $detail_others,
+        used_coupons   => $used_coupons,
     );
 }
 
