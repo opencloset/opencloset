@@ -711,16 +711,24 @@ sub order {
     my $visited    = $visited_order_rs->count;
     my $last_order = $visited_order_rs->first;
 
+    my $detail_clothes = $order->order_details(
+        { clothes_code => { '!='  => undef } },
+        { order_by     => { -desc => 'price' } }
+    );
+    my $detail_others = $order->order_details( { clothes_code => undef } );
+
     #
     # response
     #
     $self->render(
-        order      => $order,
-        last_order => $last_order,
-        history    => $history,
-        nonpayment => $nonpayment,
-        today      => $params{today},
-        visited    => $visited,
+        order          => $order,
+        last_order     => $last_order,
+        history        => $history,
+        nonpayment     => $nonpayment,
+        today          => $params{today},
+        visited        => $visited,
+        detail_clothes => $detail_clothes,
+        detail_others  => $detail_others,
     );
 }
 
@@ -1175,7 +1183,9 @@ sub rental_paper_pdf {
         $OpenCloset::Constants::Category::SHOES     => 110,
         $OpenCloset::Constants::Category::MISC      => 120,
     );
-    for my $key ( sort { $donation_info{$a}{name} cmp $donation_info{$b}{name} } keys %donation_info ) {
+    for my $key ( sort { $donation_info{$a}{name} cmp $donation_info{$b}{name} }
+        keys %donation_info )
+    {
         my @sorted_category_list =
             map  { $OpenCloset::Constants::Category::LABEL_MAP{$_}; }
             sort { $category_score{$a} <=> $category_score{$b} }
@@ -1185,7 +1195,7 @@ sub rental_paper_pdf {
             @donation_str,
             sprintf(
                 "[%s] %s",
-                join(", ", @sorted_category_list),
+                join( ", ", @sorted_category_list ),
                 $donation_info{$key}{name},
             ),
         );
@@ -1198,17 +1208,20 @@ sub rental_paper_pdf {
     my $target_date =
           $order->target_date
         ? $order->target_date->clone->set_time_zone( $self->config->{timezone} )
-        : DateTime->today( time_zone => $self->config->{timezone} )->add( days => 4, seconds => -1 );
+        : DateTime->today( time_zone => $self->config->{timezone} )
+        ->add( days => 4, seconds => -1 );
 
-    my $rental_date_str = $rental_date->set_locale("ko_KR")->strftime("대여 %m월 %d일(%a)");
-    my $target_date_str = $target_date->set_locale("ko_KR")->strftime("반납 %m월 %d일(%a)");
+    my $rental_date_str =
+        $rental_date->set_locale("ko_KR")->strftime("대여 %m월 %d일(%a)");
+    my $target_date_str =
+        $target_date->set_locale("ko_KR")->strftime("반납 %m월 %d일(%a)");
 
     #
     # response
     #
     $self->stash(
         order           => $order,
-        donation_str    => Mojo::JSON::to_json(\@donation_str),
+        donation_str    => Mojo::JSON::to_json( \@donation_str ),
         rental_date_str => $rental_date_str,
         target_date_str => $target_date_str,
     );
