@@ -711,16 +711,24 @@ sub order {
     my $visited    = $visited_order_rs->count;
     my $last_order = $visited_order_rs->first;
 
+    my $detail_clothes = $order->order_details(
+        { clothes_code => { '!='  => undef } },
+        { order_by     => { -desc => 'price' } }
+    );
+    my $detail_others = $order->order_details( { clothes_code => undef } );
+
     #
     # response
     #
     $self->render(
-        order      => $order,
-        last_order => $last_order,
-        history    => $history,
-        nonpayment => $nonpayment,
-        today      => $params{today},
-        visited    => $visited,
+        order          => $order,
+        last_order     => $last_order,
+        history        => $history,
+        nonpayment     => $nonpayment,
+        today          => $params{today},
+        visited        => $visited,
+        detail_clothes => $detail_clothes,
+        detail_others  => $detail_others,
     );
 }
 

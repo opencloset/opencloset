@@ -628,11 +628,11 @@
               %tbody
                 - my $detail_count = 0;
                 - my $is_suit = is_suit_order($order);
-                - for my $detail ( $order->order_details({ clothes_code => { '!=' => undef } }, { order_by => { -desc => 'price' } }) ) {
-                  = include 'partials/price-table-row', order => $order, detail => $detail, detail_count => $detail_count++, is_suit => $is_suit, order_status => $order_status;
+                - while (my $detail = $detail_clothes->next) {
+                  = include 'partials/price-table-row', order => $order, detail => $detail, detail_count => ++$detail_count, is_suit => $is_suit, order_status => $order_status;
                 - }
-                - for my $detail ( $order->order_details({ clothes_code => undef }) ) {
-                  = include 'partials/price-table-row', order => $order, detail => $detail, detail_count => $detail_count++, is_suit => $is_suit, order_status => $order_status;
+                - while (my $detail = $detail_others->next) {
+                  = include 'partials/price-table-row', order => $order, detail => $detail, detail_count => ++$detail_count, is_suit => $is_suit, order_status => $order_status;
                 - }
 
           .hr.hr8.hr-double.hr-dotted
