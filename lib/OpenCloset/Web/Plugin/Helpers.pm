@@ -2183,8 +2183,10 @@ sub search_clothes {
         my $rent_count = $pair{$upper_code}{count};
         my $color      = $upper->color;
         my @tags       = map { $_->name } $upper->tags;
-        $self->log->info( sprintf '< %s / %s / %d / %s / %s >', $upper->code, $lower->code,
-            $rent_count, $color, join( ', ', @tags ) );
+        $self->log->info(
+            sprintf '< %s / %s / %d / %s / %s >', $upper->code, $lower->code,
+            $rent_count, $color, join( ', ', @tags )
+        );
         my $rss;
         for my $size ( keys %$guess ) {
             next if $size eq 'reason';
@@ -2398,12 +2400,12 @@ sub is_suit_order {
     return;
 }
 
-=head2 mean_status( $start_dt, $end_dt, $online__order_hour )
+=head2 mean_status( $start_dt, $end_dt )
 
 =cut
 
 sub mean_status {
-    my ( $self, $start_dt, $end_dt, $online_order_hour ) = @_;
+    my ( $self, $start_dt, $end_dt ) = @_;
 
     my $dtf      = $self->app->DB->storage->datetime_parser;
     my $order_rs = $self->app->DB->resultset('Order')->search(
@@ -2412,7 +2414,7 @@ sub mean_status {
                 'booking.date' => {
                     -between => [ $dtf->format_datetime($start_dt), $dtf->format_datetime($end_dt), ],
                 },
-                \[ 'HOUR(`booking`.`date`) != ?', $online_order_hour ],
+                online => 0,
             ]
         },
         { join => [qw/ booking /], order_by => { -asc => 'date' }, prefetch => 'booking', },

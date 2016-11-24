@@ -160,7 +160,7 @@
                                 placeholder="착용 날짜를 고르세요."
                                 data-date-format="yyyy-mm-dd"
                                 data-date-start-date="<%= $now->ymd %>"
-                                value="<%= ( $order || $load || $user->user_info->wearon_date ) ? $user->user_info->wearon_date->ymd : q{} %>"
+                                value="<%= ( $order || $load ) ? $user->user_info->wearon_date->ymd : q{} %>"
                               />
                               <i class="icon-calendar"></i>
                             </span>

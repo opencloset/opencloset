@@ -91,7 +91,7 @@ sub ymd {
                 'booking.date' => {
                     -between => [ $dtf->format_datetime($dt_start), $dtf->format_datetime($dt_end), ],
                 },
-                \[ 'HOUR(`booking`.`date`) != ?', 22 ],
+                online => 0,
             ]
         },
         { order_by => { -asc => 'update_date' }, join => 'booking', prefetch => 'booking' }
@@ -166,7 +166,7 @@ sub search {
                         $dtf->format_datetime($dt_end)
                     ],
                 },
-                \[ 'HOUR(`booking`.`date`) != ?', 22 ],
+                online => 0,
             ]
         },
         {

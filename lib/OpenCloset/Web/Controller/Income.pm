@@ -124,15 +124,10 @@ sub ymd {
         my ( undef, $price ) = $self->order_price($order);
         my $fee = $price->{$STAGE_RENTAL_FEE} || 0;
 
-        my $booking = $order->booking;
-        if ($booking) {
-            my $dt   = $booking->date;
-            my $hour = $dt->hour;
-            if ( $hour == 22 ) {
-                $online_rental_fee->{$pay_with} += $fee;
-                $online_total_fee += $fee;
-                next;
-            }
+        if ( $order->online ) {
+            $online_rental_fee->{$pay_with} += $fee;
+            $online_total_fee += $fee;
+            next;
         }
 
         if ( $pay_with =~ /^쿠폰/ ) {
