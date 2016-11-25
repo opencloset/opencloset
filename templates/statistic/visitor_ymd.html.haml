@@ -23,13 +23,27 @@
     %thead
       %tr
         %th{ :rowspan => "2" } 일
-        %th.center{ :colspan => "5" } 방문자
+        %th.center{ :colspan => "3" } 예약자
+        %th.center{ :colspan => "3" } 방문자
+        %th.center{ :colspan => "3" } 미방문자
+        %th.center{ :colspan => "3" } BestFit
+        %th.center{ :colspan => "3" } 대여자
       %tr
-        %th 예약자
-        %th 방문자
-        %th 미방문자
-        %th BestFit
-        %th 대여자
+        %th 합
+        %th 남
+        %th 여
+        %th 합
+        %th 남
+        %th 여
+        %th 합
+        %th 남
+        %th 여
+        %th 합
+        %th 남
+        %th 여
+        %th 합
+        %th 남
+        %th 여
     %tbody
       - for ( my $i = 0 ; $i <  @{ $count->{day} } ; $i++ ) {
       -   my $label = $count->{day}[$i]{label};
@@ -44,15 +58,34 @@
               %span
                 %a{ :href => "#{ url_for( '/order' )->query( 'booking_ymd' => $label ) }" }= $label
             - }
-
           - if ( $count->{day}[$i] ) {
             %td= $count->{day}[$i]{all}{total}
+            %td= $count->{day}[$i]{all}{male}
+            %td= $count->{day}[$i]{all}{female}
             %td= $count->{day}[$i]{visited}{total}
+            %td= $count->{day}[$i]{visited}{male}
+            %td= $count->{day}[$i]{visited}{female}
             %td= $count->{day}[$i]{notvisited}{total}
+            %td= $count->{day}[$i]{notvisited}{male}
+            %td= $count->{day}[$i]{notvisited}{female}
             %td= $count->{day}[$i]{bestfit}{total}
+            %td= $count->{day}[$i]{bestfit}{male}
+            %td= $count->{day}[$i]{bestfit}{female}
             %td= $count->{day}[$i]{loanee}{total}
+            %td= $count->{day}[$i]{loanee}{male}
+            %td= $count->{day}[$i]{loanee}{female}
           - }
           - else {
+            %td N/A
+            %td N/A
+            %td N/A
+            %td N/A
+            %td N/A
+            %td N/A
+            %td N/A
+            %td N/A
+            %td N/A
+            %td N/A
             %td N/A
             %td N/A
             %td N/A
@@ -70,26 +103,60 @@
     %thead
       %tr
         %th{ :rowspan => "2" } 주차(시작일 ~ 종료일)
-        %th.center{ :colspan => "5" } 방문자
+        %th.center{ :colspan => "3" } 예약자
+        %th.center{ :colspan => "3" } 방문자
+        %th.center{ :colspan => "3" } 미방문자
+        %th.center{ :colspan => "3" } BestFit
+        %th.center{ :colspan => "3" } 대여자
       %tr
-        %th 예약자
-        %th 방문자
-        %th 미방문자
-        %th BestFit
-        %th 대여자
+        %th 합
+        %th 남
+        %th 여
+        %th 합
+        %th 남
+        %th 여
+        %th 합
+        %th 남
+        %th 여
+        %th 합
+        %th 남
+        %th 여
+        %th 합
+        %th 남
+        %th 여
     %tbody
       - for ( my $i = 0 ; $i <  @{ $count->{week} } ; $i++ ) {
         %tr
           - if ( $count->{week}[$i] ) {
             %td= $count->{week}[$i]{label}
             %td= $count->{week}[$i]{all}{total}
+            %td= $count->{week}[$i]{all}{male}
+            %td= $count->{week}[$i]{all}{female}
             %td= $count->{week}[$i]{visited}{total}
+            %td= $count->{week}[$i]{visited}{male}
+            %td= $count->{week}[$i]{visited}{female}
             %td= $count->{week}[$i]{notvisited}{total}
+            %td= $count->{week}[$i]{notvisited}{male}
+            %td= $count->{week}[$i]{notvisited}{female}
             %td= $count->{week}[$i]{bestfit}{total}
+            %td= $count->{week}[$i]{bestfit}{male}
+            %td= $count->{week}[$i]{bestfit}{female}
             %td= $count->{week}[$i]{loanee}{total}
+            %td= $count->{week}[$i]{loanee}{male}
+            %td= $count->{week}[$i]{loanee}{female}
           - }
           - else {
             %td -
+            %td N/A
+            %td N/A
+            %td N/A
+            %td N/A
+            %td N/A
+            %td N/A
+            %td N/A
+            %td N/A
+            %td N/A
+            %td N/A
             %td N/A
             %td N/A
             %td N/A
@@ -107,26 +174,60 @@
     %thead
       %tr
         %th{ :rowspan => "2" } 연월
-        %th.center{ :colspan => "5" } 방문자
+        %th.center{ :colspan => "3" } 예약자
+        %th.center{ :colspan => "3" } 방문자
+        %th.center{ :colspan => "3" } 미방문자
+        %th.center{ :colspan => "3" } BestFit
+        %th.center{ :colspan => "3" } 대여자
       %tr
-        %th 예약자
-        %th 방문자
-        %th 미방문자
-        %th BestFit
-        %th 대여자
+        %th 합
+        %th 남
+        %th 여
+        %th 합
+        %th 남
+        %th 여
+        %th 합
+        %th 남
+        %th 여
+        %th 합
+        %th 남
+        %th 여
+        %th 합
+        %th 남
+        %th 여
     %tbody
       - for ( my $i = 0 ; $i <  @{ $count->{month} } ; $i++ ) {
         %tr
           - if ( $count->{month}[$i] ) {
             %td= $count->{month}[$i]{label}
             %td= $count->{month}[$i]{all}{total}
+            %td= $count->{month}[$i]{all}{male}
+            %td= $count->{month}[$i]{all}{female}
             %td= $count->{month}[$i]{visited}{total}
+            %td= $count->{month}[$i]{visited}{male}
+            %td= $count->{month}[$i]{visited}{female}
             %td= $count->{month}[$i]{notvisited}{total}
+            %td= $count->{month}[$i]{notvisited}{male}
+            %td= $count->{month}[$i]{notvisited}{female}
             %td= $count->{month}[$i]{bestfit}{total}
+            %td= $count->{month}[$i]{bestfit}{male}
+            %td= $count->{month}[$i]{bestfit}{female}
             %td= $count->{month}[$i]{loanee}{total}
+            %td= $count->{month}[$i]{loanee}{male}
+            %td= $count->{month}[$i]{loanee}{female}
           - }
           - else {
             %td -
+            %td N/A
+            %td N/A
+            %td N/A
+            %td N/A
+            %td N/A
+            %td N/A
+            %td N/A
+            %td N/A
+            %td N/A
+            %td N/A
             %td N/A
             %td N/A
             %td N/A
