@@ -309,17 +309,14 @@ $ ->
         '</div>'
       ].join('\n')
       suggestion: (data) ->
-        "<div><strong>#{data.booking}</strong> | #{data.phone} | #{data.name} | #{data.email}</div>"
+        template = JST['rental/typeahead-query']
+        html     = template(data)
+        return html
 
   $('#query.typeahead').on 'typeahead:select', (e, data) ->
-    $('#selected').html("""<div>
-      <strong>#{data.booking}</strong> | #{data.phone} | #{data.name} | #{data.email}
-      <a href="/api/order/#{data.order_id}" class="btn btn-xs btn-success btn-update-status">
-        방문예약
-        <i class="icon-arrow-right"></i>
-        방문
-      </a>
-    </div>""")
+    template = JST['rental/typeahead-select']
+    html     = template(data)
+    $('#selected').html(html)
 
   #
   # 방문예약 -> 방문 버튼
