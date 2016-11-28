@@ -941,6 +941,18 @@
         span.date {
             font-weight: bold;
         }
+        #status-day,
+        #status-week,
+        #status-month {
+            table {
+                thead th {
+                    text-align: center;
+                }
+                tbody td:nth-child(n+2) {
+                    text-align: right;
+                }
+            }
+        }
     }
     .step-content {
         .step-pane {
@@ -1185,4 +1197,9 @@ strong em.revisit {
 
 .highlighter-yellow {
     background-color: #ccff00;
+}
+p span.return-memo {
+    margin-left: 10px;
+    font-size: 2em;
+    color: red;
 }

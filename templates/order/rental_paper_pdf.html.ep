@@ -57,11 +57,12 @@
         orderTargetDate: {
           margin: [ 55, 8, 0, 0 ],
           font: "D2Coding",
-          fontSize: 14,
-          decoration: "underline",
-          decorationStyle: "wavy",
-          decorationColor: "red",
-          background: "#eeffaa"
+          fontSize: 14
+          // GH #1058: 정장 반납 안내지의 음영과 밑줄을 제거함
+          //decoration: "underline",
+          //decorationStyle: "wavy",
+          //decorationColor: "red",
+          //background: "#eeffaa"
         },
         cautionParcel: {
           margin: [ 55, 8, 0, 0 ],
