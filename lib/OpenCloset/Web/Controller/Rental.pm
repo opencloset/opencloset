@@ -178,14 +178,19 @@ sub search {
 
     my @orders;
     while ( my $row = $rs->next ) {
-        my $user      = $row->user;
-        my $user_info = $user->user_info;
+        my $user        = $row->user;
+        my $user_info   = $user->user_info;
+        my $coupon      = $row->coupon;
+        my $coupon_desc = $coupon ? $coupon->desc : '';
+        my $event_seoul = $coupon_desc =~ m/^seoul/;
+
         push @orders, {
-            order_id => $row->id,
-            name     => $user->name,
-            email    => $user->email,
-            phone    => $user_info->phone,
-            booking  => substr $row->booking->date, 11, 5,
+            order_id    => $row->id,
+            name        => $user->name,
+            email       => $user->email,
+            phone       => $user_info->phone,
+            booking     => substr( $row->booking->date, 11, 5 ),
+            event_seoul => $event_seoul,
         };
     }
 
