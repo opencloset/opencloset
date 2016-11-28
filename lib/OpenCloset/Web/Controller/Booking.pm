@@ -264,13 +264,33 @@ sub visit {
 지도 안내: https://goo.gl/UuJyrx}, $user->name,
                             $order_obj->booking->date->strftime('%m월 %d일 %H시 %M분'),
                         );
+
+                        my $from = $self->config->{sms}{ $self->config->{sms}{driver} }{_from};
                         $self->DB->resultset('SMS')->create(
                             {
                                 to   => $user->user_info->phone,
-                                from => $self->config->{sms}{ $self->config->{sms}{driver} }{_from},
+                                from => $from,
                                 text => $msg,
                             }
                         ) or $self->app->log->warn("failed to create a new sms: $msg");
+
+                        #
+                        # 취업날개 예약시 신분증 관련한 문자 메세지를 보냄 (#1061)
+                        #
+                        if ( my $coupon = $order_obj->coupon ) {
+                            my $desc = $coupon->desc || '';
+                            if ( $desc =~ m/^seoul/ ) {
+                                my $msg =
+                                    "[열린옷장] 취업날개 서비스(면접정장 무료대여)는 주민등록상 '서울시'에 거주 중인 만18세 ~ 34세를 대상으로 합니다. 현장에서 이용조건의 증명이 불가능할 경우 무료 대여가 되지 않습니다. 따라서, 주소와 나이를 증명할 수 있는 신분증(주민등록증, 운전면허증)을 반드시 지참해주시기 바랍니다. 이용조건 증명을 할 수 있는 신분증이 없는 경우 본 서비스를 이용할 수 없다는 점을 거듭 안내드립니다. 감사합니다.";
+                                $self->DB->resultset('SMS')->create(
+                                    {
+                                        to   => $user->user_info->phone,
+                                        from => $from,
+                                        text => $msg,
+                                    }
+                                ) or $self->app->log->warn("failed to create a new sms: $msg");
+                            }
+                        }
                     }
                 }
             }
