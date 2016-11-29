@@ -1274,6 +1274,11 @@ sub auth {
     my $user      = $order->user;
     my $user_info = $user->user_info;
 
+    unless ( $user_info->gender ) {
+        $self->error( 400, { str => "성별을 확인할 수 없습니다." } );
+        return;
+    }
+
     if ( substr( $user_info->phone, -4 ) ne $phone ) {
         $self->error(
             400,
