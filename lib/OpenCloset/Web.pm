@@ -185,10 +185,11 @@ sub _public_routes_visit {
     $r->get('/events/seoul')->to('event#seoul');
 
     ## easy cancel order and update booking.date
-    my $cancelable = $r->under('/order/:id')->to('order#cancelable');
-    $cancelable->get('/cancel')->to('order#cancel_form');
-    $cancelable->delete('/')->to('order#delete');
-    $r->put('/booking/:id')->to('booking#update');
+    my $auth = $r->under('/order/:id')->to('order#auth');
+    $auth->get('/cancel')->to('order#cancel_form');
+    $auth->delete('/')->to('order#delete');
+    $auth->get('/booking/edit')->to('order#booking');
+    $auth->put('/booking')->to('order#update_booking');
 }
 
 =head2 _private_routes

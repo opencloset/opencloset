@@ -1241,13 +1241,13 @@ sub rental_paper_pdf {
     );
 }
 
-=head2 cancelable
+=head2 auth
 
     under /order/:id
 
 =cut
 
-sub cancelable {
+sub auth {
     my $self  = shift;
     my $id    = $self->param('id');
     my $phone = $self->param('phone') || '';
@@ -1318,6 +1318,24 @@ sub delete {
 
     $order->delete;
     $self->render( json => {} );
+}
+
+=head2 booking
+
+    GET /order/:id/booking/edit
+
+=cut
+
+sub booking {
+}
+
+=head2 update_booking
+
+    PUT /order/:id/booking
+
+=cut
+
+sub update_booking {
 }
 
 1;
