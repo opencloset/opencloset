@@ -1,0 +1,16 @@
+% title '방문예약 시간 변경';
+% layout 'common';
+
+<h1>열린옷장</h1>
+<h3>방문예약 시간 변경</h3>
+<p>
+  <%= $user->name %>님 열린옷장 방문 예약 시간
+  <strong>
+    %= $booking->date->strftime('%m월 %d일 %H시 %M분')
+  </strong>
+</p>
+
+<p class="help-block">
+  <i class="fa fa-info-circle fa-fw" aria-hidden="true"></i>
+  변경 가능한 목록에서 선택해주세요
+</p>
