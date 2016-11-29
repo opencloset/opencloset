@@ -1195,8 +1195,10 @@ sub rental_paper_pdf {
         $OpenCloset::Constants::Category::SHOES     => 110,
         $OpenCloset::Constants::Category::MISC      => 120,
     );
-    for my $key ( sort { $donation_info{$a}{name} cmp $donation_info{$b}{name} }
-        keys %donation_info )
+    for my $key (
+        sort { $donation_info{$a}{name} cmp $donation_info{$b}{name} }
+        keys %donation_info
+        )
     {
         my @sorted_category_list =
             map  { $OpenCloset::Constants::Category::LABEL_MAP{$_}; }
