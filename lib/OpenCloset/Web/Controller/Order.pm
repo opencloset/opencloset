@@ -1266,7 +1266,7 @@ sub auth {
     if ( $order->status_id != 14 ) {
         $self->error(
             400,
-            { str => "방문예약 상태의 주문서만 취소할 수 있습니다." }
+            { str => "방문예약 상태의 주문서만 변경/취소할 수 있습니다." }
         );
         return;
     }
