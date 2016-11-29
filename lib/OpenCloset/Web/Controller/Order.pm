@@ -1241,4 +1241,83 @@ sub rental_paper_pdf {
     );
 }
 
+=head2 cancelable
+
+    under /order/:id
+
+=cut
+
+sub cancelable {
+    my $self  = shift;
+    my $id    = $self->param('id');
+    my $phone = $self->param('phone') || '';
+
+    my $order = $self->DB->resultset('Order')->find( { id => $id } );
+    unless ($order) {
+        $self->error( 404, { str => "주문서를 찾을 수 없습니다.: $id" } );
+        return;
+    }
+
+    unless ($phone) {
+        $self->error( 400, { str => "본인확인을 할 수 없습니다." } );
+        return;
+    }
+
+    if ( $order->status_id != 14 ) {
+        $self->error(
+            400,
+            { str => "방문예약 상태의 주문서만 취소할 수 있습니다." }
+        );
+        return;
+    }
+
+    my $user      = $order->user;
+    my $user_info = $user->user_info;
+
+    if ( substr( $user_info->phone, -4 ) ne $phone ) {
+        $self->error(
+            400,
+            { str => "대여자의 휴대폰번호와 일치하지 않습니다." }
+        );
+        return;
+    }
+
+    my $booking = $order->booking;
+    unless ( $booking and $booking->date ) {
+        $self->error( 400, { str => "예약시간이 비어있습니다." } );
+        return;
+    }
+
+    $self->stash(
+        order     => $order,
+        user      => $user,
+        user_info => $user_info,
+        booking   => $booking
+    );
+
+    return 1;
+}
+
+=head2 cancel_form
+
+    GET /order/:id/cancel?phone=xxxx
+
+=cut
+
+sub cancel_form { }
+
+=head2 delete
+
+    DELETE /order/:id?phone=xxxx
+
+=cut
+
+sub delete {
+    my $self  = shift;
+    my $order = $self->stash('order');
+
+    $order->delete;
+    $self->render( json => {} );
+}
+
 1;
