@@ -1029,7 +1029,7 @@ sub api_delete_order_booking {
         return $self->error(
             500,
             {
-                str => "cannot delete booking since order.status_id is not 14",
+                str  => "cannot delete booking since order.status_id is not 14",
                 data => { status_id => $order->status_id },
             }
         );

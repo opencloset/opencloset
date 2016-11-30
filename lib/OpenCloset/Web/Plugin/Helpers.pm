@@ -513,9 +513,9 @@ sub flatten_order {
 
             use experimental qw( smartmatch );
             given ( $order_detail->clothes->category ) {
-                ++$jacket      when "jacket";
+                ++$jacket when "jacket";
                 ++$pants_skirt when /^pants|skirt$/;
-                ++$tie         when "tie";
+                ++$tie when "tie";
             }
         }
 
