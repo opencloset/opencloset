@@ -1353,6 +1353,24 @@ sub booking {
 =cut
 
 sub update_booking {
+    my $self  = shift;
+    my $order = $self->stash('order');
+
+    my $v = $self->validation;
+    $v->required('booking_id');
+
+    return $self->error('booking_id is required') if $v->has_error;
+
+    my $booking_id = $v->param('booking_id');
+    $self->update_order(
+        {
+            id         => $order->id,
+            booking_id => $booking_id,
+        }
+    );
+
+    $self->flash( alert => '예약시간이 변경되었습니다.' );
+    $self->render( json => $self->flatten_booking( $order->booking ) );
 }
 
 1;
