@@ -1332,6 +1332,18 @@ sub delete {
 =cut
 
 sub booking {
+    my $self         = shift;
+    my $user_info    = $self->stash('user_info');
+    my @booking_list = $self->booking_list( $user_info->gender );
+    return unless @booking_list;
+
+    my %dateby;
+    for my $row (@booking_list) {
+        my $ymd = substr $row->{date}, 0, 10;
+        push @{ $dateby{$ymd} }, $row;
+    }
+
+    $self->render( booking_list => \%dateby );
 }
 
 =head2 update_booking
