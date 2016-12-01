@@ -103,17 +103,19 @@ sub register {
 =cut
 
 sub error {
-    my ( $self, $status, $error ) = @_;
+    my ( $self, $status, $error, $template ) = @_;
 
     $self->app->log->error( $error->{str} );
+    $self->log->debug($template);
 
-    no warnings 'experimental';
-    my $template;
-    given ($status) {
-        $template = 'bad_request' when 400;
-        $template = 'not_found' when 404;
-        $template = 'exception' when 500;
-        default { $template = 'unknown' }
+    unless ($template) {
+        no warnings 'experimental';
+        given ($status) {
+            $template = 'bad_request' when 400;
+            $template = 'not_found' when 404;
+            $template = 'exception' when 500;
+            default { $template = 'unknown' }
+        }
     }
 
     $self->respond_to(
