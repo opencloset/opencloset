@@ -1266,19 +1266,26 @@ sub auth {
 
     my $order = $self->DB->resultset('Order')->find( { id => $id } );
     unless ($order) {
-        $self->error( 404, { str => "주문서를 찾을 수 없습니다.: $id" } );
+        $self->error(
+            404, { str => "주문서를 찾을 수 없습니다: $id" },
+            'error/not_found'
+        );
         return;
     }
 
     unless ($phone) {
-        $self->error( 400, { str => "본인확인을 할 수 없습니다." } );
+        $self->error(
+            400, { str => "본인확인을 할 수 없습니다." },
+            'error/bad_request'
+        );
         return;
     }
 
     if ( $order->status_id != 14 ) {
         $self->error(
             400,
-            { str => "방문예약 상태의 주문서만 변경/취소할 수 있습니다." }
+            { str => "방문예약 상태의 주문서만 변경/취소할 수 있습니다." },
+            'error/bad_request'
         );
         return;
     }
@@ -1287,21 +1294,28 @@ sub auth {
     my $user_info = $user->user_info;
 
     unless ( $user_info->gender ) {
-        $self->error( 400, { str => "성별을 확인할 수 없습니다." } );
+        $self->error(
+            400, { str => "성별을 확인할 수 없습니다." },
+            'error/bad_request'
+        );
         return;
     }
 
     if ( substr( $user_info->phone, -4 ) ne $phone ) {
         $self->error(
             400,
-            { str => "대여자의 휴대폰번호와 일치하지 않습니다." }
+            { str => "대여자의 휴대폰번호와 일치하지 않습니다." },
+            'error/bad_request'
         );
         return;
     }
 
     my $booking = $order->booking;
     unless ( $booking and $booking->date ) {
-        $self->error( 400, { str => "예약시간이 비어있습니다." } );
+        $self->error(
+            400, { str => "예약시간이 비어있습니다." },
+            'error/bad_request'
+        );
         return;
     }
 
@@ -1396,7 +1410,8 @@ sub update_booking {
     my $v = $self->validation;
     $v->required('booking_id');
 
-    return $self->error('booking_id is required') if $v->has_error;
+    return $self->error( 400, { str => 'booking_id is required' }, 'error/bad_request' )
+        if $v->has_error;
 
     my $booking_id = $v->param('booking_id');
     $self->update_order(
