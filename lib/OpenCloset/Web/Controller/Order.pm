@@ -15,6 +15,17 @@ use OpenCloset::Constants::Status qw/$RETURNED/;
 
 has DB => sub { shift->app->DB };
 
+## Day of week map
+my %DOW_MAP = (
+    1 => '월',
+    2 => '화',
+    3 => '수',
+    4 => '목',
+    5 => '금',
+    6 => '토',
+    7 => '일',
+);
+
 =head1 METHODS
 
 =head2 index
@@ -1310,7 +1321,12 @@ sub auth {
 
 =cut
 
-sub cancel_form { }
+sub cancel_form {
+    my $self    = shift;
+    my $booking = $self->stash('booking');
+    my $dow     = $booking->date->day_of_week;
+    $self->render( day_of_week => $DOW_MAP{$dow} );
+}
 
 =head2 delete
 
@@ -1337,17 +1353,6 @@ sub booking {
     my $user_info    = $self->stash('user_info');
     my @booking_list = $self->booking_list( $user_info->gender );
     return unless @booking_list;
-
-    ## Day of week map
-    my %DOW_MAP = (
-        1 => '월',
-        2 => '화',
-        3 => '수',
-        4 => '목',
-        5 => '금',
-        6 => '토',
-        7 => '일',
-    );
 
     my $pattern = '%Y-%m-%d';
     my $strp    = DateTime::Format::Strptime->new(

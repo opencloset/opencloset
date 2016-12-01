@@ -7,6 +7,7 @@
   <%= $user->name %>님
   <strong>
     %= $booking->date->strftime('%m월 %d일 %H시 %M분')
+    %= $day_of_week . '요일'
   </strong>
   열린옷장 방문예약을 취소하시겠습니까?
 </p>
