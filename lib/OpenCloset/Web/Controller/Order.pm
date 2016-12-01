@@ -1319,6 +1319,18 @@ sub auth {
         return;
     }
 
+    ## 예약일이 이미 지난날이면 아니됨 최대 오늘까지
+    my $today = DateTime->today;
+    my $booking_day = $booking->date->clone->truncate( to => 'day' );
+    if ( $today->epoch - $booking_day->epoch > 0 ) {
+        $self->error(
+            400,
+            { str => "예약시간이 지났습니다. 다시 방문예약을 해주세요." },
+            'error/bad_request'
+        );
+        return;
+    }
+
     $self->stash(
         order     => $order,
         user      => $user,
