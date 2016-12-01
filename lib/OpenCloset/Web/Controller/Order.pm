@@ -4,6 +4,7 @@ use Mojo::Base 'Mojolicious::Controller';
 use Mojo::JSON;
 
 use Data::Pageset;
+use DateTime::Format::Strptime;
 use DateTime;
 use HTTP::Tiny;
 use List::MoreUtils;
@@ -1337,9 +1338,34 @@ sub booking {
     my @booking_list = $self->booking_list( $user_info->gender );
     return unless @booking_list;
 
+    ## Day of week map
+    my %DOW_MAP = (
+        1 => '월요일',
+        2 => '화요일',
+        3 => '수요일',
+        4 => '목요일',
+        5 => '금요일',
+        6 => '토요일',
+        7 => '일요일',
+    );
+
+    my $pattern = '%Y-%m-%d';
+    my $strp    = DateTime::Format::Strptime->new(
+        pattern   => $pattern,
+        time_zone => $self->config->{timezone},
+        on_error  => 'undef',
+    );
+
     my %dateby;
     for my $row (@booking_list) {
-        my $ymd = substr $row->{date}, 0, 10;
+        my $ymd = substr $row->{date}, 0,  10;
+        my $hm  = substr $row->{date}, -8, 5;
+
+        my $dt  = $strp->parse_datetime($ymd);
+        my $dow = $dt->day_of_week;
+        $row->{date_str} = sprintf "%s (%s) %s %d명 예약 가능", $ymd,
+            $DOW_MAP{$dow}, $hm, $row->{slot};
+
         push @{ $dateby{$ymd} }, $row;
     }
 

@@ -28,14 +28,16 @@
 <h3><%= $ymd %></h3>
 <div class="list-group">
   % for my $row (@{ $booking_list->{$ymd} }) {
+  % next unless $row->{slot};
+  % my $href = url_for('/order/' . $order->id . '/booking')->query(phone => substr($user_info->phone, -4));
   % if ($booking_datetime eq $row->{date}) {
-  <a class="list-group-item list-group-item-info booking-row" href="<%= url_for('/order/' . $order->id . '/booking')->query(phone => substr($user_info->phone, -4)) %>" data-booking-id="<%= $row->{id} %>">
-    %= $row->{date}
+  <a class="list-group-item list-group-item-info" href="#" data-booking-id="<%= $row->{id} %>">
+    %= $row->{date_str}
     <i class="fa fa-check fa-fw" aria-hidden="true"></i>
   </a>
   % } else {
-  <a class="list-group-item booking-row" href="<%= url_for('/order/' . $order->id . '/booking')->query(phone => substr($user_info->phone, -4)) %>" data-booking-id="<%= $row->{id} %>">
-    %= $row->{date}
+  <a class="list-group-item booking-row<%= $row->{slot} ? '' : ' disabled' %>" href="<%= $href %>" data-booking-id="<%= $row->{id} %>">
+    %= $row->{date_str}
   </a>
   % }
   % }
