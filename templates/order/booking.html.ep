@@ -29,6 +29,7 @@
 <div class="list-group">
   % for my $row (@{ $booking_list->{$ymd} }) {
   % next unless $row->{slot};
+  % my $allow = $row->{slot} - $row->{user_count};
   % my $href = url_for('/order/' . $order->id . '/booking')->query(phone => substr($user_info->phone, -4));
   % if ($booking_datetime eq $row->{date}) {
   <a class="list-group-item list-group-item-info" href="#" data-booking-id="<%= $row->{id} %>">
@@ -36,7 +37,7 @@
     <i class="fa fa-check fa-fw" aria-hidden="true"></i>
   </a>
   % } else {
-  <a class="list-group-item booking-row<%= $row->{slot} ? '' : ' disabled' %>" href="<%= $href %>" data-booking-id="<%= $row->{id} %>">
+  <a class="list-group-item booking-row<%= $allow ? '' : ' disabled' %>" href="<%= $href %>" data-booking-id="<%= $row->{id} %>">
     %= $row->{date_str}
   </a>
   % }

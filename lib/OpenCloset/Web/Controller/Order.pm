@@ -1340,13 +1340,13 @@ sub booking {
 
     ## Day of week map
     my %DOW_MAP = (
-        1 => '월요일',
-        2 => '화요일',
-        3 => '수요일',
-        4 => '목요일',
-        5 => '금요일',
-        6 => '토요일',
-        7 => '일요일',
+        1 => '월',
+        2 => '화',
+        3 => '수',
+        4 => '목',
+        5 => '금',
+        6 => '토',
+        7 => '일',
     );
 
     my $pattern = '%Y-%m-%d';
@@ -1363,8 +1363,8 @@ sub booking {
 
         my $dt  = $strp->parse_datetime($ymd);
         my $dow = $dt->day_of_week;
-        $row->{date_str} = sprintf "%s (%s) %s %d명 예약 가능", $ymd,
-            $DOW_MAP{$dow}, $hm, $row->{slot};
+        $row->{date_str} = sprintf "%s (%s요일) %s %d명 예약 가능", $ymd,
+            $DOW_MAP{$dow}, $hm, $row->{slot} - $row->{user_count};
 
         push @{ $dateby{$ymd} }, $row;
     }
