@@ -1368,8 +1368,14 @@ sub booking {
 
         my $dt  = $strp->parse_datetime($ymd);
         my $dow = $dt->day_of_week;
-        $row->{date_str} = sprintf "%s (%s요일) %s %d명 예약 가능", $ymd,
-            $DOW_MAP{$dow}, $hm, $row->{slot} - $row->{user_count};
+        if ( $row->{slot} - $row->{user_count} ) {
+            $row->{date_str} = sprintf "%s (%s요일) %s %d명 예약 가능", $ymd,
+                $DOW_MAP{$dow}, $hm, $row->{slot} - $row->{user_count};
+        }
+        else {
+            $row->{date_str} = sprintf "%s (%s요일) %s 예약 인원 초과", $ymd,
+                $DOW_MAP{$dow}, $hm;
+        }
 
         push @{ $dateby{$ymd} }, $row;
     }
