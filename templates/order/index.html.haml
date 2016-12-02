@@ -152,6 +152,8 @@
               -       calc_overdue_days($order),
               -       commify($unpaid),
               -     );
+              -     $sms_str =~ s/, 0일 연장//;
+              -     $sms_str =~ s/, 0일 연체/으/;
               -   }
               - }
               - else {
