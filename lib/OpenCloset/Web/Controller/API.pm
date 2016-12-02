@@ -1029,7 +1029,7 @@ sub api_delete_order_booking {
         return $self->error(
             500,
             {
-                str => "cannot delete booking since order.status_id is not 14",
+                str  => "cannot delete booking since order.status_id is not 14",
                 data => { status_id => $order->status_id },
             }
         );
@@ -2828,100 +2828,13 @@ sub api_gui_booking_list {
         return $self->error( 400, { str => join( ',', @error_str ), data => $v->errors, } );
     }
 
-    #
-    # find booking
-    #
-    my $dt_start = DateTime->now( time_zone => $self->config->{timezone} );
-    unless ($dt_start) {
-        my $msg = "cannot create start datetime object";
-        $self->app->log->warn($msg);
-        $self->error( 500, { str => $msg, data => {}, } );
-        return;
-    }
-
-    my $dt_end = $dt_start->clone->truncate( to => 'day' )
-        ->add( hours => 24 * 15, seconds => -1 );
-    unless ($dt_end) {
-        my $msg = "cannot create end datetime object";
-        $self->app->log->warn($msg);
-        $self->error( 500, { str => $msg, data => {}, } );
-        return;
-    }
-
-    my %search_attrs = (
-        '+columns' => [ { user_count => { count => 'user.id', -as => 'user_count' } }, ],
-        join     => { 'orders' => 'user' },
-        group_by => [qw/ me.id /],
-        order_by => { -asc     => 'me.date' },
-    );
-
-    #
-    # SELECT
-    #     `me`.`id`,
-    #     `me`.`date`,
-    #     `me`.`gender`,
-    #     `me`.`slot`,
-    #     COUNT( `user`.`id` ) AS `user_count`
-    # FROM `booking` `me`
-    # LEFT JOIN `order` `orders`
-    #     ON `orders`.`booking_id` = `me`.`id`
-    # LEFT JOIN `user` `user`
-    #     ON `user`.`id` = `orders`.`user_id`
-    # WHERE (
-    #     ( `me`.`date` BETWEEN ? AND ? )
-    #     AND `me`.`gender` = ?
-    #     AND `me`.`id` IS NOT NULL
-    # )
-    # GROUP BY `me`.`id` HAVING COUNT(user.id) < me.slot
-    # ORDER BY `me`.`date` ASC
-    #
-    # http://stackoverflow.com/questions/5285448/mysql-select-only-not-null-values
-    # https://metacpan.org/pod/DBIx::Class::Manual::Joining#Across-multiple-relations
-    #
-    my $dtf        = $self->DB->storage->datetime_parser;
-    my $booking_rs = $self->DB->resultset('Booking')->search(
-        {
-            'me.id'     => { '!=' => undef },
-            'me.gender' => $params{gender},
-            'me.date'   => {
-                -between => [ $dtf->format_datetime($dt_start), $dtf->format_datetime($dt_end), ],
-            },
-        },
-        \%search_attrs,
-    );
-
-    my @booking_list = $booking_rs->all;
-    return $self->error( 404, { str => 'booking list not found', data => {}, } )
-        unless @booking_list;
-
-    #
-    # additional information for clothes list
-    #
-    my @data;
-    #
-    # [GH 279] 직원 전용 방문 예약은 인원 제한과 상관없이 예약 가능하게 함
-    # [GH 548] 방문 예약시 예약 마감된 시간을 표시할 수 있도록 수정
-    #
-    for my $b (@booking_list) {
-        my $flat = $self->flatten_booking($b);
-
-        unless ( $self->is_user_authenticated
-            && $self->current_user
-            && $self->current_user->user_info
-            && $self->current_user->user_info->staff )
-        {
-            next unless $flat->{slot} > 0;
-
-            $flat->{id} = 0 unless $flat->{slot} > $flat->{user_count};
-        }
-
-        push @data, $flat;
-    }
+    my @booking_list = $self->booking_list( $params{gender} );
+    return unless @booking_list;
 
     #
     # response
     #
-    $self->respond_to( json => { status => 200, json => \@data } );
+    $self->respond_to( json => { status => 200, json => \@booking_list } );
 }
 
 =head2 gui_timetable

@@ -1,0 +1,27 @@
+% title '방문예약취소';
+% layout 'common', jses => ['/js/order-cancel.js'];
+
+<h1>열린옷장</h1>
+<h3>방문예약취소</h3>
+<p>
+  <%= $user->name %>님
+  <strong>
+    %= $booking->date->strftime('%m월 %d일 %H시 %M분')
+    %= $day_of_week . '요일'
+  </strong>
+  열린옷장 방문예약을 취소하시겠습니까?
+</p>
+
+<p class="help-block">
+  <i class="fa fa-info-circle fa-fw" aria-hidden="true"></i>
+  한번 취소하면 되돌릴 수 없습니다.
+</p>
+
+<p class="help-block">
+  <i class="fa fa-info-circle fa-fw" aria-hidden="true"></i>
+  <a href="<%= url_for('/order/' . $order->id . '/booking/edit')->query(phone => substr($user_info->phone, -4)) %>">방문예약 시간 변경</a>에서 방문예약 시간을 변경할 수 있습니다.
+</p>
+
+<p>
+  <button id="btn-cancel" class="btn btn-primary" data-url="<%= url_for('/order/' . $order->id)->query(phone => substr($user_info->phone, -4)) %>">네 취소하겠습니다</button>
+</p>

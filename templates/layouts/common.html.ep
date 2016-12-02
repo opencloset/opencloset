@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title><%= title %> · 열린옷장</title>
+
+    <link rel="stylesheet" href="/components/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/components/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/components/opencloset.css/dist/css/opencloset.min.css">
+    <link rel="stylesheet" href="/css/screen.min.css">
+  </head>
+  <body>
+    <div class="container">
+      <div id="content">
+        <%= content %>
+      </div>
+    </div>
+    %= footer
+    <script src="/components/jquery/dist/jquery.min.js"></script>
+    <script src="/components/bootstrap/dist/js/bootstrap.min.js"></script>
+    % for my $js (@$jses) {
+    <script src="<%= $js %>"></script>
+    % }
+  </body>
+</html>

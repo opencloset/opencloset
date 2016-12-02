@@ -1,0 +1,48 @@
+% title '방문예약 시간 변경';
+% layout 'common', jses => ['/js/order-booking-edit.js'];
+
+<h1>열린옷장</h1>
+<h3>방문예약 시간 변경</h3>
+% if (my $alert = flash('alert')) {
+<div class="alert alert-success" role="alert"><%= $alert %></div>
+% }
+<p>
+  <%= $user->name %>님 열린옷장 방문 예약 시간
+  <strong>
+    %= $booking->date->strftime('%m월 %d일 %H시 %M분')
+  </strong>
+</p>
+
+<p class="help-block">
+  <i class="fa fa-info-circle fa-fw" aria-hidden="true"></i>
+  아래 예약가능목록에서 원하시는 요일/시간을 선택해주세요.
+</p>
+
+<p class="help-block">
+  <i class="fa fa-info-circle fa-fw" aria-hidden="true"></i>
+  <a href="<%= url_for('/order/' . $order->id . '/cancel')->query(phone => substr($user_info->phone, -4)) %>">방문예약취소</a>에서 방문예약을 취소할 수 있습니다.
+</p>
+
+% my $booking_datetime = $booking->date->ymd . ' ' . $booking->date->hms;
+% for my $ymd (sort keys %$booking_list) {
+<h3><%= $ymd %></h3>
+<div class="list-group">
+  % for my $row (@{ $booking_list->{$ymd} }) {
+  % next unless $row->{slot};
+  % my $allow = $row->{slot} - $row->{user_count};
+  % my $href = url_for('/order/' . $order->id . '/booking')->query(phone => substr($user_info->phone, -4));
+  % if ($booking_datetime eq $row->{date}) {
+  <a class="list-group-item list-group-item-info" href="#" data-booking-id="<%= $row->{id} %>">
+    %= $row->{date_str}
+    <i class="fa fa-check fa-fw" aria-hidden="true"></i>
+  </a>
+  % } else {
+  <a class="list-group-item booking-row<%= $allow ? '' : ' disabled' %>" href="<%= $href %>" data-booking-id="<%= $row->{id} %>">
+    %= $row->{date_str}
+  </a>
+  % }
+  % }
+</div>
+<hr>
+% }
+</div>

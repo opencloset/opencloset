@@ -1,0 +1,8 @@
+% title 'Bad request';
+% layout 'common';
+
+<h1>열린옷장</h1>
+<h2>400 <small>error</small></h2>
+<h3>Bad request</h3>
+<hr>
+<p><%= $error %></p>
