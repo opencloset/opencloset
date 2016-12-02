@@ -183,6 +183,13 @@ sub _public_routes_visit {
     $r->post('/coupon/validate')->to('coupon#validate');
 
     $r->get('/events/seoul')->to('event#seoul');
+
+    ## easy cancel order and update booking.date
+    my $auth = $r->under('/order/:id')->to('order#auth');
+    $auth->get('/cancel')->to('order#cancel_form');
+    $auth->delete('/')->to('order#delete');
+    $auth->get('/booking/edit')->to('order#booking');
+    $auth->put('/booking')->to('order#update_booking');
 }
 
 =head2 _private_routes

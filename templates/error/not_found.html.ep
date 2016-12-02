@@ -1,0 +1,8 @@
+% title 'Bad request';
+% layout 'common';
+
+<h1>열린옷장</h1>
+<h2>404 <small>error</small></h2>
+<h3>Page not found</h3>
+<hr>
+<p><%= $error %></p>
