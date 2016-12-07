@@ -51,6 +51,12 @@
                   %li.row
                     .col-sm-1
                       %i.icon-caret-right.blue
+                    .col-sm-3.no-padding-left 상태:
+                    .col-sm-8
+                      %span.order-status.label{ "data-order-status" => "#{$order_status}" }= $order_status
+                  %li.row
+                    .col-sm-1
+                      %i.icon-caret-right.blue
                     .col-sm-3.no-padding-left 상위 주문서:
                     .col-sm-8
                       - if ( $order->parent_id ) {

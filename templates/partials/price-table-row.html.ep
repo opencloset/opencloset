@@ -37,12 +37,12 @@
     <td>
       % my $detail_status = $detail->status;
       % if ($order_status ne '결제대기' && $detail->status) {
-      <span class="order-status label" data-order-detail-status="<%= $detail_status->name %>">
+      <span class="order-detail-status label" data-order-detail-status="<%= $detail_status->name %>">
         %= $detail_status->name
       </span>
       % } else {
       % my $clothes_status = $clothes->status;
-      <span class="order-status label" data-order-detail-status="<%= $clothes_status->name %>">
+      <span class="order-detail-status label" data-order-detail-status="<%= $clothes_status->name %>">
         %= $clothes_status->name
       </span>
       % }
