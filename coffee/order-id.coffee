@@ -167,6 +167,9 @@ $ ->
   updateOrder()
 
   $('span.order-status.label').each (i, el) ->
+    $(el).addClass OpenCloset.status[ $(el).data('order-status') ].css
+
+  $('span.order-detail-status.label').each (i, el) ->
     $(el).addClass OpenCloset.status[ $(el).data('order-detail-status') ].css
 
   $('#order-staff-name').editable()
