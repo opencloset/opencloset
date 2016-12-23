@@ -1,5 +1,6 @@
 requires 'Algorithm::CouponCode';
 requires 'CHI';
+requires 'Capture::Tiny';
 requires 'Crypt::Mode::ECB';
 requires 'Data::Pageset';
 requires 'DateTime';
@@ -36,6 +37,7 @@ requires 'Text::CSV';
 requires 'Text::Haml', '0.990114';
 requires 'Try::Tiny';
 requires 'Unicode::GCString';
+requires 'Version::Next';
 requires 'experimental';
 
 # from git repository
