@@ -11,10 +11,32 @@ use Path::Tiny;
 use Version::Next;
 use version;
 
+my @FILES = qw(
+    Changes
+    README.md
+    lib/OpenCloset/Web.pm
+);
+
+clear_files(@FILES);
 my ( $next_version, $current_version ) = next_version();
 update_version( $_, $current_version, $next_version )
     for qw{ README.md lib/OpenCloset/Web.pm };
 update_changes( "Changes", $current_version, $next_version );
+git_add_commit(@FILES);
+
+sub clear_files {
+    my @files = @_;
+
+    system( "git", "checkout", @FILES );
+}
+
+sub git_add_commit {
+    my @files = @_;
+
+    system( "git", "add", @files );
+    system( "git", "diff", "--staged" );
+    system( "git", "commit", "-m", "Bump up version" );
+}
 
 sub update_changes {
     my ( $file, $old_ver, $new_ver ) = @_;
