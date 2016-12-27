@@ -19,7 +19,7 @@
     <script src="/components/jquery/dist/jquery.min.js"></script>
     <script src="/components/bootstrap/dist/js/bootstrap.min.js"></script>
     <script src="/components/bootstrap-validator/dist/validator.min.js"></script>
-    <script src="/components/jQuery-Mask-Plugin/dist/jquery.mask.min.js"></script>
+    <script src="/components/jquery-mask-plugin/dist/jquery.mask.js"></script>
     <script src="/js/order-return.js"></script>
   </body>
 </html>
