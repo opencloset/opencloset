@@ -363,5 +363,4 @@ my %BOOKING_SLOT = (
         token => $ENV{OPENCLOSET_AVATAR_TOKEN} || 's3cr3t',
         url   => $ENV{OPENCLOSET_AVATAR_URL}   || 'https://avatar.theopencloset.net/avatar',
     },
-    extra_holidays => $ENV{OPENCLOSET_EXTRA_HOLIDAYS} || 'extra-holidays.ini',
 };
