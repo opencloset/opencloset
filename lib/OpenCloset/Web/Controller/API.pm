@@ -11,6 +11,8 @@ use Postcodify;
 use String::Random;
 use Try::Tiny;
 
+use OpenCloset::Constants::Status qw/$LOST $DISCARD/;
+
 has DB => sub { shift->app->DB };
 
 =head1 METHODS
@@ -1705,8 +1707,14 @@ sub api_update_clothes_list {
     {
         my %_params = %params;
         my $code    = delete $_params{code};
-        $self->DB->resultset('Clothes')->search( { code => $params{code} } )
-            ->update( \%_params )
+        my $clothes = $self->DB->resultset('Clothes')->search( { code => $params{code} } );
+        $clothes->update( \%_params );
+        ## 분실, 폐기일때에 의류의 모든 태그를 제거 #1127
+        if ( $params{status_id} == $LOST || $params{status_id} == $DISCARD ) {
+            while ( my $c = $clothes->next ) {
+                $c->delete_related('clothes_tags');
+            }
+        }
     }
 
     #
