@@ -110,6 +110,8 @@ $ ->
                 .html(clothes.status)
                 .removeClass( (i, c) -> c )
                 .addClass [ 'order-status', 'label', OpenCloset.status[ clothes.status ].css ].join(' ')
+              if parseInt(clothes.status_id) in [7,8]    # 7: 분실, 8: 폐기
+                $("#clothes-table table tbody tr[data-clothes-code='#{code}'] td:nth-child(6)").empty()
           error: (jqXHR, textStatus, errorThrown) ->
             OpenCloset.alert('danger', jqXHR.responseJSON.error)
       error: (jqXHR, textStatus, errorThrown) ->

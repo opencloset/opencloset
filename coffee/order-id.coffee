@@ -764,12 +764,13 @@ $ ->
   $('#order-return-method').editable
     source: [
       '방문반납'
-      '우체국'
       'CJ대한통운'
       'KGB'
-      '한진'
-      '옐로우캡'
       '동부'
+      '롯데'
+      '옐로우캡'
+      '우체국'
+      '한진'
     ]
     url: (params) ->
       url = $('#order').data('url')
