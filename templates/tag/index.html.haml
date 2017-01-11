@@ -37,7 +37,7 @@
               %button.btn.btn-xs.btn-danger.btn-tag-remove{ 'data-tag-id' => "#{ $tag->id }" } 제거
             %span.editable{ :id => "tag-id-#{ $tag->id }", 'data-pk' => "#{ $tag->id }", 'data-name' => 'name', 'data-value' => "#{ $tag->name }" }
           %td
-            %span.editable{ 'data-pk' => "#{ $tag->id }", 'data-name' => 'desc', 'data-value' => "#{ $tag->desc }" }
+            %span.editable{ 'data-pk' => "#{ $tag->id }", 'data-name' => 'desc', 'data-value' => "#{ $tag->desc || '' }" }
       - }
 
 :plain
