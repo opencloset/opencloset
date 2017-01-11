@@ -28,6 +28,7 @@
     %thead
       %tr
         %th 태그 이름
+        %th 설명
     %tbody
       - while ( my $tag = $tag_rs->next ) {
         %tr{ :class => "tag-id-#{ $tag->id }" }
@@ -35,6 +36,8 @@
             %span.tag-action
               %button.btn.btn-xs.btn-danger.btn-tag-remove{ 'data-tag-id' => "#{ $tag->id }" } 제거
             %span.editable{ :id => "tag-id-#{ $tag->id }", 'data-pk' => "#{ $tag->id }", 'data-name' => 'name', 'data-value' => "#{ $tag->name }" }
+          %td
+            %span.editable{ 'data-pk' => "#{ $tag->id }", 'data-name' => 'desc', 'data-value' => "#{ $tag->desc }" }
       - }
 
 :plain
