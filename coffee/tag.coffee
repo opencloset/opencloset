@@ -57,7 +57,8 @@ $ ->
       showbuttons: 'true'
       emptytext:   '비어있음'
       url: (params) ->
-        return OpenCloset.alert('danger', '변경할 태그 이름을 입력하세요.') unless params.value
+        if params.name is 'name'
+          return OpenCloset.alert('danger', '변경할 태그 이름을 입력하세요.') unless params.value
 
         base_url = $('#tag-data').data('base-url')
         data = {}
