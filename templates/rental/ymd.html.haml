@@ -104,6 +104,9 @@
               - if ("@$repairs" =~ m/\b$order_id\b/) {
                 %span.label.label-info 수선됨
               - }
+              - if ($order->get_column('online')) {
+                %i.icon-circle.text-success{:title => 'online'}
+              - }
             %td
               %i.icon-envelope
               %a{ :href => "mailto:#{ $user->email}" }= $user->email

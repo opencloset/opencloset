@@ -47,7 +47,7 @@ requires 'experimental';
 requires 'OpenCloset::Common',               'v0.0.8';
 requires 'OpenCloset::Config',               '0.002';
 requires 'OpenCloset::Plugin::Helpers',      'v0.0.8';
-requires 'OpenCloset::Schema',               '0.040';
+requires 'OpenCloset::Schema',               '0.042';
 requires 'OpenCloset::Size::Guess',          '0.003';
 requires 'OpenCloset::Size::Guess::BodyKit', '0.001';
 requires 'OpenCloset::Size::Guess::DB',      '0.005';
