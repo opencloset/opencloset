@@ -2498,19 +2498,19 @@ sub api_create_sms_validation {
         $self->error( 400, { str => 'failed to create a user', } ), return;
     }
 
-    my $password = String::Random->new->randregex('\d\d\d\d\d\d');
+    my $authcode = String::Random->new->randregex('\d\d\d\d\d\d');
     my $expires =
         DateTime->now( time_zone => $self->config->{timezone} )->add( minutes => 20 );
-    $user->update( { password => $password, expires => $expires->epoch, } )
+    $user->update( { authcode => $authcode, expires => $expires->epoch, } )
         or return $self->error( 500, { str => 'failed to update a user', data => {}, } );
     $self->app->log->debug(
-        "sent temporary password: to($params{to}) password($password)");
+        "sent temporary authcode: to($params{to}) authcode($authcode)");
 
     my $sms = $self->DB->resultset('SMS')->create(
         {
             to   => $params{to},
             from => $self->config->{sms}{ $self->config->{sms}{driver} }{_from},
-            text => "열린옷장 인증번호: $password",
+            text => "열린옷장 인증번호: $authcode",
         }
     );
     return $self->error( 404, { str => 'failed to create a new sms', data => {}, } )

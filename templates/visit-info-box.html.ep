@@ -35,7 +35,7 @@
 
                       <form id="visit-info-form" method="post" action="<%= url_for('/visit') %>">
                         <input type="hidden" name="type" value="visit">
-                        <input type="hidden" name="sms"  value="<%= $password %>" />
+                        <input type="hidden" name="sms"  value="<%= $authcode %>" />
                         <fieldset>
                           <label class="block clearfix">
                             <span class="block input-icon input-icon-right">
