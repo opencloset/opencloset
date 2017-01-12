@@ -2206,7 +2206,7 @@ sub api_delete_suit {
     # validate params
     #
     my $v = $self->create_validator;
-    $v->field('code')->required(1)->regexp(qr/^0?[JPS][A-Z0-9]{3}$/);
+    $v->field('code')->required(1)->regexp(qr/^0?[JPK][A-Z0-9]{3}$/);
     unless ( $self->validate( $v, \%params ) ) {
         my @error_str;
         while ( my ( $k, $v ) = each %{ $v->errors } ) {
