@@ -302,7 +302,7 @@ sub auth {
         $self->error( 400, { data => { error => 'sms is expired' } } ), return
             unless $user->expires > $now;
         $self->error( 400, { data => { error => 'sms is wrong' } } ), return
-            unless $user->check_password($sms);
+            if $sms ne $user->authcode;
 
         return 1;
     }
