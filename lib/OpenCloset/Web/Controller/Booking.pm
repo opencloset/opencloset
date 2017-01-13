@@ -107,12 +107,12 @@ sub visit {
     #
     my $now = DateTime->now( time_zone => $self->config->{timezone} )->epoch;
     unless ( $user->expires && $user->expires > $now ) {
-        $self->app->log->warn( $user->email . "\'s password is expired" );
+        $self->log->warn( $user->email . "\'s authcode is expired" );
         $self->stash( alert => '인증코드가 만료되었습니다.' );
         return;
     }
     if ( $user->authcode ne $authcode ) {
-        $self->app->log->warn( $user->email . "\'s password is wrong" );
+        $self->log->warn( $user->email . "\'s authcode is wrong" );
         $self->stash( alert => '인증코드가 유효하지 않습니다.' );
         return;
     }
