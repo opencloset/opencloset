@@ -35,7 +35,7 @@ sub visit {
     my $phone    = $self->param('phone');
     my $service  = $self->param('service');
     my $privacy  = $self->param('privacy');
-    my $password = $self->param('sms');
+    my $authcode = $self->param('sms');
 
     my $email         = $self->param('email');
     my $gender        = $self->param('gender');
@@ -58,7 +58,7 @@ sub visit {
     $self->app->log->debug("phone: $phone");
     $self->app->log->debug("service: $service");
     $self->app->log->debug("privacy: $privacy");
-    $self->app->log->debug("sms: $password");
+    $self->app->log->debug("sms: $authcode");
 
     $self->app->log->debug("email: $email");
     $self->app->log->debug("gender: $gender");
@@ -107,12 +107,12 @@ sub visit {
     #
     my $now = DateTime->now( time_zone => $self->config->{timezone} )->epoch;
     unless ( $user->expires && $user->expires > $now ) {
-        $self->app->log->warn( $user->email . "\'s password is expired" );
+        $self->log->warn( $user->email . "\'s authcode is expired" );
         $self->stash( alert => '인증코드가 만료되었습니다.' );
         return;
     }
-    unless ( $user->check_password($password) ) {
-        $self->app->log->warn( $user->email . "\'s password is wrong" );
+    if ( $user->authcode ne $authcode ) {
+        $self->log->warn( $user->email . "\'s authcode is wrong" );
         $self->stash( alert => '인증코드가 유효하지 않습니다.' );
         return;
     }
@@ -316,7 +316,7 @@ sub visit {
 
     $self->stash(
         load     => $self->config->{visit_load}, type => $type, user => $user,
-        password => $password,
+        authcode => $authcode,
     );
 }
 

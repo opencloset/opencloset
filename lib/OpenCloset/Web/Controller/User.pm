@@ -125,27 +125,12 @@ sub user {
     ## for refresh Verification Code
     my $password;
     my $verification_code;
-    if ( my $phone = $user_info->phone ) {
-        my $sms = $self->DB->resultset('SMS')->search(
-            {
-                to   => $phone,
-                text => { 'like', '열린옷장 인증번호%' }
-            },
-            {
-                order_by => { -desc => 'id' },
-                rows     => 1,
-            }
-        )->single;
+    if ( my $authcode = $user->authcode ) {
+        $verification_code = $authcode;
 
-        if ($sms) {
-            my $text = $sms->get_column('text');
-            ($verification_code) = $text =~ m/(\d+)/;
-            $password->{code} = $verification_code;
-
-            my $expires = $user->expires;
-            my $now = DateTime->now( time_zone => $self->config->{timezone} )->epoch;
-            $password->{is_valid} = $expires > $now;
-        }
+        my $expires = $user->expires;
+        my $now = DateTime->now( time_zone => $self->config->{timezone} )->epoch;
+        $password->{is_valid} = $expires > $now;
     }
 
     my $donated_items = +{};
@@ -186,10 +171,10 @@ sub user {
                 "order.id"     => { "!=" => undef },
             },
             {
-                join      => [
+                join => [
                     { "clothes" => { "order_details" => "order" } },
                 ],
-                group_by  => ["order.id"],
+                group_by => ["order.id"],
             },
         );
         $rented_order_count = $rs->count;
@@ -345,7 +330,8 @@ sub auth {
                 $self->redirect_to( $self->url_for('/visit') );
             }
             else {
-                $self->redirect_to( $self->url_for('/login')->query( return => $self->req->url->to_abs ) );
+                $self->redirect_to(
+                    $self->url_for('/login')->query( return => $self->req->url->to_abs ) );
             }
         }
     );
