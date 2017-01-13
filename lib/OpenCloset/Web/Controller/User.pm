@@ -171,10 +171,10 @@ sub user {
                 "order.id"     => { "!=" => undef },
             },
             {
-                join      => [
+                join => [
                     { "clothes" => { "order_details" => "order" } },
                 ],
-                group_by  => ["order.id"],
+                group_by => ["order.id"],
             },
         );
         $rented_order_count = $rs->count;
@@ -330,7 +330,8 @@ sub auth {
                 $self->redirect_to( $self->url_for('/visit') );
             }
             else {
-                $self->redirect_to( $self->url_for('/login')->query( return => $self->req->url->to_abs ) );
+                $self->redirect_to(
+                    $self->url_for('/login')->query( return => $self->req->url->to_abs ) );
             }
         }
     );
