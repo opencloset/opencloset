@@ -3,6 +3,12 @@
   {{#if event_seoul}}
   | 취업날개
   {{/if}}
+  {{#if visited}}
+    | {{visited}}회 대여
+    {{#if ago}}
+      - {{ago}}일 지남
+    {{/if}}
+  {{/if}}
   <a href="/api/order/{{order_id}}" class="btn btn-xs btn-success btn-update-status">
     방문예약
     <i class="icon-arrow-right"></i>

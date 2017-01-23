@@ -177,20 +177,48 @@ sub search {
     );
 
     my @orders;
-    while ( my $row = $rs->next ) {
-        my $user        = $row->user;
+    while ( my $order = $rs->next ) {
+        my $user        = $order->user;
         my $user_info   = $user->user_info;
-        my $coupon      = $row->coupon;
+        my $coupon      = $order->coupon;
         my $coupon_desc = $coupon ? $coupon->desc : '';
         my $event_seoul = $coupon_desc =~ m/^seoul/;
 
+        #
+        # GH 1142: 대여 화면에서 예약자의 이전 방문 기록 확인
+        #
+        my $visited = 0;
+        my $ago     = 0;
+        {
+            my $visited_order_rs = $order->user->orders->search(
+                {
+                    status_id => $OpenCloset::Constants::Status::RETURNED,
+                    parent_id => undef,
+                },
+                { order_by => { -desc => 'return_date' } },
+            );
+
+            $visited = $visited_order_rs->count;
+            my $last_order = $visited_order_rs->first;
+            if ($last_order) {
+                my $booking            = $order->booking;
+                my $last_order_booking = $last_order->booking;
+                if ( $booking && $last_order_booking ) {
+                    my $dur = $booking->date->delta_days( $last_order_booking->date );
+                    $ago = $dur->delta_days;
+                }
+            }
+        }
+
         push @orders, {
-            order_id    => $row->id,
+            order_id    => $order->id,
             name        => $user->name,
             email       => $user->email,
             phone       => $user_info->phone,
-            booking     => substr( $row->booking->date, 11, 5 ),
+            booking     => substr( $order->booking->date, 11, 5 ),
             event_seoul => $event_seoul,
+            visited     => $visited,
+            ago         => $ago,
         };
     }
 
