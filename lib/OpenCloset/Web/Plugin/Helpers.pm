@@ -2587,10 +2587,8 @@ sub transfer_order {
         $to->update( { coupon_id => $coupon->id } ) if $to;
     }
     elsif ( $status eq 'provided' || $status eq '' ) {
-        if ($to) {
-            $coupon->update( { status => 'reserved' } );
-            $to->update( { coupon_id => $coupon->id } );
-        }
+        $coupon->update( { status => 'reserved' } );
+        $to->update( { coupon_id => $coupon->id } ) if $to;
     }
 
     return 1;
