@@ -2573,6 +2573,7 @@ sub transfer_order {
 
     if ( $status =~ m/(us|discard|expir)ed/ ) {
         $self->log->info("Coupon is not valid: $code($status)");
+        return;
     }
     elsif ( $status eq 'reserved' ) {
         my $orders = $coupon->orders;
