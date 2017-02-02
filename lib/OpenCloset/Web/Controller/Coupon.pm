@@ -65,18 +65,7 @@ sub _validate_code {
 
     if ( my $coupon_status = $coupon->status ) {
         return ( undef, 3 ) if $coupon_status =~ m/(us|discard|expir)ed/;
-
-        if ( $coupon_status eq 'reserved' ) {
-            if ( my $order = $coupon->order ) {
-                my $order_id = $order->id;
-                $self->log->info("Delete coupon_id from existing order($order_id): $valid_code");
-                $order->update( { coupon_id => undef } );
-            }
-            else {
-                $self->log->warn(
-                    "It is reserved coupon, but the order can not be found: $valid_code");
-            }
-        }
+        $self->transfer_order($coupon);
     }
 
     if ( my $expires = $coupon->expires_date ) {
