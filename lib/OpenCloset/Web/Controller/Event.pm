@@ -38,7 +38,7 @@ sub seoul {
     my $tz = $self->config->{timezone};
 
     my $endDate = DateTime->new(
-        year   => 2016, month     => 12, day => 30, hour => 23, minute => 59,
+        year   => 2017, month     => 3, day => 31, hour => 23, minute => 59,
         second => 59,   time_zone => $tz,
     );
 
