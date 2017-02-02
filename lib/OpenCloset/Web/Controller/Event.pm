@@ -73,6 +73,13 @@ sub seoul {
         $status{invalid}++ if $status =~ /(us|discard|expir)ed/;
     }
 
+    $self->log->info("Coupon payment status for $mbersn");
+    while ( my ( $status, $cnt ) = each %status ) {
+        next if $status eq 'total';
+        next if $status eq 'invalid';
+        $self->log->info("$mbersn $status($cnt)");
+    }
+
     ## 이미 2회이상 사용되었음
     if ( $status{invalid} && $status{invalid} >= 2 ) {
         return $self->render( error =>
