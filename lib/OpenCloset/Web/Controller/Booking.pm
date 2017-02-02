@@ -245,6 +245,7 @@ sub visit {
                     my $coupon_id;
                     if ( my $code = delete $self->session->{coupon_code} ) {
                         my $coupon = $self->DB->resultset('Coupon')->find( { code => $code } );
+                        $coupon->update( { status => 'reserved' } );
                         $coupon_id = $coupon->id;
                     }
 
