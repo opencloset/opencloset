@@ -2575,13 +2575,15 @@ sub transfer_order {
         $self->log->info("Coupon is not valid: $code($status)");
     }
     elsif ( $status eq 'reserved' ) {
-        if ( my $order = $coupon->order ) {
+        my $orders = $coupon->orders;
+        unless ( $orders->count ) {
+            $self->log->warn("It is reserved coupon, but the order can not be found: $code");
+        }
+
+        while ( my $order = $orders->next ) {
             my $order_id = $order->id;
             $self->log->info("Delete coupon_id from existing order($order_id): $code");
             $order->update( { coupon_id => undef } );
-        }
-        else {
-            $self->log->warn("It is reserved coupon, but the order can not be found: $code");
         }
 
         $to->update( { coupon_id => $coupon->id } ) if $to;
