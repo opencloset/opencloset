@@ -213,8 +213,27 @@ sub visit {
                         unless ($coupon_id) {
                             if ( my $code = delete $self->session->{coupon_code} ) {
                                 my $coupon = $self->DB->resultset('Coupon')->find( { code => $code } );
-                                $coupon_id = $coupon->id;
-                                $order_obj->update( { coupon_id => $coupon_id } );
+                                my $coupon_status = $coupon->status || '';
+
+                                if ( $coupon_status =~ m/(us|discard|expir)ed/ ) {
+                                    $self->log->info("Coupon is not valid: $code($coupon_status)");
+                                    $coupon_id = undef;
+                                }
+                                elsif ( $coupon_status eq 'reserved' ) {
+                                    if ( my $order = $coupon->order ) {
+                                        my $order_id = $order->id;
+                                        $self->log->info("Delete coupon_id from existing order($order_id): $code");
+                                        $order->update( { coupon_id => undef } );
+                                    }
+                                    else {
+                                        $self->log->warn("It is reserved coupon, but the order can not be found: $code");
+                                    }
+                                }
+                                elsif ( $coupon_status eq 'provided' || $coupon_status eq '' ) {
+                                    $coupon->update( { status => 'reserved' } );
+                                    $coupon_id = $coupon->id;
+                                    $order_obj->update( { coupon_id => $coupon_id } );
+                                }
                             }
                         }
 
@@ -245,8 +264,25 @@ sub visit {
                     my $coupon_id;
                     if ( my $code = delete $self->session->{coupon_code} ) {
                         my $coupon = $self->DB->resultset('Coupon')->find( { code => $code } );
-                        $coupon->update( { status => 'reserved' } );
-                        $coupon_id = $coupon->id;
+                        my $coupon_status = $coupon->status || '';
+                        if ( $coupon_status =~ m/(us|discard|expir)ed/ ) {
+                            $self->log->info("Coupon is not valid: $code($coupon_status)");
+                            $coupon_id = undef;
+                        }
+                        elsif ( $coupon_status eq 'reserved' ) {
+                            if ( my $order = $coupon->order ) {
+                                my $order_id = $order->id;
+                                $self->log->info("Delete coupon_id from existing order($order_id): $code");
+                                $order->update( { coupon_id => undef } );
+                            }
+                            else {
+                                $self->log->warn("It is reserved coupon, but the order can not be found: $code");
+                            }
+                        }
+                        elsif ( $coupon_status eq 'provided' || $coupon_status eq '' ) {
+                            $coupon->update( { status => 'reserved' } );
+                            $coupon_id = $coupon->id;
+                        }
                     }
 
                     my $order_obj = $user->create_related(
