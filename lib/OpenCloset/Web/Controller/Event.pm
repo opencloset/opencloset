@@ -77,15 +77,16 @@ sub seoul {
         );
     }
 
-    ## 아직 사용되지 않은 쿠폰이 있음
-    if ( $status{provided} && $status{provided} == 1 ) {
-        my $coupon = $rs->search( { desc => "seoul|$mbersn", status => 'provided' } )->next;
-        $self->session( coupon_code => $coupon->code );
-        return;
+    ## 지급된 쿠폰이 있으면 다시 발급
+    my $coupon;
+    if ( $status{provided} ) {
+        $coupon = $given->search( { status => 'provided' }, { rows => 1 } )->single;
+        return $self->error( 500, "Not found provided coupon" ) unless $coupon;
     }
-
-    my $coupon = $self->_issue_coupon($mbersn);
-    return $self->error( 500, "Failed to create a new coupon" ) unless $coupon;
+    else {
+        $coupon = $self->_issue_coupon($mbersn);
+        return $self->error( 500, "Failed to create a new coupon" ) unless $coupon;
+    }
 
     $self->session( coupon_code => $coupon->code );
     $self->render;
@@ -99,7 +100,7 @@ sub _issue_coupon {
         {
             code   => $code,
             type   => 'suit',
-            desc   => "seoul|$mbersn",
+            desc   => "$EVENT_NAME|$mbersn",
             status => 'provided'
         }
     );
