@@ -1890,6 +1890,7 @@ our %COUPON_STATUS_MAP = (
     ''        => '사용가능',
     used      => '사용된',
     provided  => '사용가능',
+    reserved  => '사용가능',
     discarded => '폐기된'
 );
 
