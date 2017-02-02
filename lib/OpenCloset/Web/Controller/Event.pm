@@ -25,6 +25,9 @@ C<MberSn> param is ciphertext. it encrypted AES algorithm with ECB mode
 
 =cut
 
+our $EVENT_NAME       = 'seoul-2017';
+our $EVENT_MAX_COUPON = 667;
+
 sub seoul {
     my $self = shift;
     my $mbersn = lc( $self->param('MberSn') || '' );
@@ -49,8 +52,8 @@ sub seoul {
 
     my $rs = $self->DB->resultset('Coupon');
     my $used_coupon =
-        $rs->search( { desc => { -like => 'seoul|%' }, status => 'used' } )->count;
-    if ( $used_coupon > 4000 ) {
+        $rs->search( { desc => { -like => "$EVENT_NAME|%" }, status => 'used' } )->count;
+    if ( $used_coupon > $EVENT_MAX_COUPON ) {
         return $self->render(
             error => '이벤트가 종료되었습니다 - 발급건수 초과' );
     }
@@ -62,9 +65,9 @@ sub seoul {
     }
 
     my %status;
-    my $given = $rs->search( { desc => "seoul|$mbersn" } );
+    my $given = $rs->search( { desc => "$EVENT_NAME|$mbersn" } );
     while ( my $coupon = $given->next ) {
-        my $status = $coupon->status; # provided | used | discarded | expired
+        my $status = $coupon->status; # provided | reserved | used | discarded | expired
         $status{$status}++;
         $status{total}++;
         $status{invalid}++ if $status =~ /(us|discard|expir)ed/;
