@@ -93,6 +93,12 @@ sub seoul {
         $coupon = $given->search( { status => 'provided' }, { rows => 1 } )->single;
         return $self->error( 500, "Not found provided coupon" ) unless $coupon;
     }
+    elsif ( $status{reserved} ) {
+        $coupon = $given->search( { status => 'reserved' }, { rows => 1 } )->single;
+        return $self->error( 500, "Not found reserved coupon" ) unless $coupon;
+        $self->transfer_order($coupon);
+        $coupon->update( { status => 'provided' } );
+    }
     else {
         $coupon = $self->_issue_coupon($mbersn);
         return $self->error( 500, "Failed to create a new coupon" ) unless $coupon;
