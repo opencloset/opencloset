@@ -131,6 +131,7 @@ sub user {
         my $expires = $user->expires;
         my $now = DateTime->now( time_zone => $self->config->{timezone} )->epoch;
         $password->{is_valid} = $expires > $now;
+        $password->{code}     = $authcode;
     }
 
     my $donated_items = +{};
