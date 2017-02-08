@@ -74,6 +74,18 @@ $ ->
       '환불':       { id: 42, css: 'label-inverse'   }
       '사이즈없음': { id: 43, css: 'label-inverse'   }
       '포장완료':   { id: 44, css: 'label-inverse'   }
+      '재활용(옷캔)': { id: 45, css: 'label-inverse' }
+      '재활용(비백)': { id: 46, css: 'label-inverse' }
+      '사용못함':    { id: 47, css: 'label-inverse' }
+      '의류선택':    { id: 48, css: 'label-inverse' }
+      '주소선택':    { id: 49, css: 'label-inverse' }
+      '결제완료':    { id: 50, css: 'label-inverse' }
+      '입금확인':    { id: 51, css: 'label-inverse' }
+      '발송대기':    { id: 52, css: 'label-inverse' }
+      '배송중':     { id: 53, css: 'label-inverse' }
+      '배송완료':    { id: 54, css: 'label-inverse' }
+      '반송신청':    { id: 55, css: 'label-inverse' }
+      '입금대기':    { id: 56, css: 'label-inverse' }
     category:
       jacket:    { str: '자켓',     price: 10000 }
       pants:     { str: '팬츠',     price: 10000 }
