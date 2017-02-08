@@ -174,8 +174,10 @@
                       %i.icon-caret-right.blue
                     .col-sm-3.no-padding-left
                       반납방법:
-                      %a#order-tracking-url{ :href => "#{ tracking_url($order) || '#' }", :target => '_blank' }
-                        %span.glyphicon.glyphicon-link
+                      - if (my $tracking_url = tracking_url($order)) {
+                        %a#order-tracking-url{:href => "#{$tracking_url}", :target => '_blank'}
+                          %span.glyphicon.glyphicon-link
+                      - }
                     .col-sm-8.return-method
                       :plain
                         <a
