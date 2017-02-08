@@ -2587,11 +2587,19 @@ sub transfer_order {
             $order->update( { coupon_id => undef } );
         }
 
-        $to->update( { coupon_id => $coupon->id } ) if $to;
+        if ($to) {
+            $self->log->info(
+                sprintf( "Now, use coupon(%d) in order(%d)", $coupon->id, $to->id ) );
+            $to->update( { coupon_id => $coupon->id } );
+        }
     }
     elsif ( $status eq 'provided' || $status eq '' ) {
         $coupon->update( { status => 'reserved' } );
-        $to->update( { coupon_id => $coupon->id } ) if $to;
+        if ($to) {
+            $self->log->info(
+                sprintf( "Now, use coupon(%d) in order(%d)", $coupon->id, $to->id ) );
+            $to->update( { coupon_id => $coupon->id } );
+        }
     }
 
     return 1;
