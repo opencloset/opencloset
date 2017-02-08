@@ -94,6 +94,7 @@ sub register {
     $app->helper( choose_value_by_range     => \&choose_value_by_range );
     $app->helper( mean_status               => \&mean_status );
     $app->helper( booking_list              => \&booking_list );
+    $app->helper( transfer_order            => \&transfer_order );
 }
 
 =head1 HELPERS
@@ -1890,6 +1891,7 @@ our %COUPON_STATUS_MAP = (
     ''        => '사용가능',
     used      => '사용된',
     provided  => '사용가능',
+    reserved  => '사용가능',
     discarded => '폐기된'
 );
 
@@ -2554,6 +2556,45 @@ sub booking_list {
     }
 
     return @data;
+}
+
+=head2 transfer_order($coupon, $order)
+
+    $self->transfer_order( $coupon, $order );
+
+=cut
+
+sub transfer_order {
+    my ( $self, $coupon, $to ) = @_;
+    return unless $coupon;
+
+    my $code = $coupon->code;
+    my $status = $coupon->status || '';
+
+    if ( $status =~ m/(us|discard|expir)ed/ ) {
+        $self->log->info("Coupon is not valid: $code($status)");
+        return;
+    }
+    elsif ( $status eq 'reserved' ) {
+        my $orders = $coupon->orders;
+        unless ( $orders->count ) {
+            $self->log->warn("It is reserved coupon, but the order can not be found: $code");
+        }
+
+        while ( my $order = $orders->next ) {
+            my $order_id = $order->id;
+            $self->log->info("Delete coupon_id from existing order($order_id): $code");
+            $order->update( { coupon_id => undef } );
+        }
+
+        $to->update( { coupon_id => $coupon->id } ) if $to;
+    }
+    elsif ( $status eq 'provided' || $status eq '' ) {
+        $coupon->update( { status => 'reserved' } );
+        $to->update( { coupon_id => $coupon->id } ) if $to;
+    }
+
+    return 1;
 }
 
 1;

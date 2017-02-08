@@ -1,3 +1,15 @@
 <div>
-  <strong>{{booking}}</strong> | {{phone}} | {{name}} | {{email}}{{#if event_seoul}} | 취업날개{{/if}}
+  <strong>{{booking}}</strong>
+  | {{phone}}
+  | {{name}}
+  | {{email}}
+  {{#if event_seoul}}
+    | 취업날개
+  {{/if}}
+  {{#if visited}}
+    | {{visited}}회 대여
+    {{#if ago}}
+      - {{ago}}일 지남
+    {{/if}}
+  {{/if}}
 </div>

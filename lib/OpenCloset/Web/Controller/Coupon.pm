@@ -65,10 +65,12 @@ sub _validate_code {
 
     if ( my $coupon_status = $coupon->status ) {
         return ( undef, 3 ) if $coupon_status =~ m/(us|discard|expir)ed/;
+        $self->transfer_order($coupon);
     }
 
     if ( my $expires = $coupon->expires_date ) {
         if ( $expires->epoch < DateTime->now->epoch ) {
+            $self->log->info("coupon is expired: $valid_code");
             $coupon->update( { status => 'expired' } );
             return ( undef, 4 );
         }

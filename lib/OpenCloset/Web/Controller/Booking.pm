@@ -213,8 +213,7 @@ sub visit {
                         unless ($coupon_id) {
                             if ( my $code = delete $self->session->{coupon_code} ) {
                                 my $coupon = $self->DB->resultset('Coupon')->find( { code => $code } );
-                                $coupon_id = $coupon->id;
-                                $order_obj->update( { coupon_id => $coupon_id } );
+                                $self->transfer_order( $coupon, $order_obj );
                             }
                         }
 
@@ -245,7 +244,7 @@ sub visit {
                     my $coupon_id;
                     if ( my $code = delete $self->session->{coupon_code} ) {
                         my $coupon = $self->DB->resultset('Coupon')->find( { code => $code } );
-                        $coupon_id = $coupon->id;
+                        $coupon_id = $coupon->id if $self->transfer_order($coupon);
                     }
 
                     my $order_obj = $user->create_related(

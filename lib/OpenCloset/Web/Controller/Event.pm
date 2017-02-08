@@ -25,6 +25,9 @@ C<MberSn> param is ciphertext. it encrypted AES algorithm with ECB mode
 
 =cut
 
+our $EVENT_NAME       = 'seoul-2017';
+our $EVENT_MAX_COUPON = 667;
+
 sub seoul {
     my $self = shift;
     my $mbersn = lc( $self->param('MberSn') || '' );
@@ -38,7 +41,7 @@ sub seoul {
     my $tz = $self->config->{timezone};
 
     my $endDate = DateTime->new(
-        year   => 2016, month     => 12, day => 30, hour => 23, minute => 59,
+        year   => 2017, month     => 3, day => 31, hour => 23, minute => 59,
         second => 59,   time_zone => $tz,
     );
 
@@ -49,8 +52,8 @@ sub seoul {
 
     my $rs = $self->DB->resultset('Coupon');
     my $used_coupon =
-        $rs->search( { desc => { -like => 'seoul|%' }, status => 'used' } )->count;
-    if ( $used_coupon > 4000 ) {
+        $rs->search( { desc => { -like => "$EVENT_NAME|%" }, status => 'used' } )->count;
+    if ( $used_coupon > $EVENT_MAX_COUPON ) {
         return $self->render(
             error => '이벤트가 종료되었습니다 - 발급건수 초과' );
     }
@@ -62,12 +65,19 @@ sub seoul {
     }
 
     my %status;
-    my $given = $rs->search( { desc => "seoul|$mbersn" } );
+    my $given = $rs->search( { desc => "$EVENT_NAME|$mbersn" } );
     while ( my $coupon = $given->next ) {
-        my $status = $coupon->status; # provided | used | discarded | expired
+        my $status = $coupon->status; # provided | reserved | used | discarded | expired
         $status{$status}++;
         $status{total}++;
         $status{invalid}++ if $status =~ /(us|discard|expir)ed/;
+    }
+
+    $self->log->info("Coupon payment status for $mbersn");
+    while ( my ( $status, $cnt ) = each %status ) {
+        next if $status eq 'total';
+        next if $status eq 'invalid';
+        $self->log->info("$mbersn $status($cnt)");
     }
 
     ## 이미 2회이상 사용되었음
@@ -77,15 +87,22 @@ sub seoul {
         );
     }
 
-    ## 아직 사용되지 않은 쿠폰이 있음
-    if ( $status{provided} && $status{provided} == 1 ) {
-        my $coupon = $rs->search( { desc => "seoul|$mbersn", status => 'provided' } )->next;
-        $self->session( coupon_code => $coupon->code );
-        return;
+    ## 지급된 쿠폰이 있으면 다시 발급
+    my $coupon;
+    if ( $status{provided} ) {
+        $coupon = $given->search( { status => 'provided' }, { rows => 1 } )->single;
+        return $self->error( 500, "Not found provided coupon" ) unless $coupon;
     }
-
-    my $coupon = $self->_issue_coupon($mbersn);
-    return $self->error( 500, "Failed to create a new coupon" ) unless $coupon;
+    elsif ( $status{reserved} ) {
+        $coupon = $given->search( { status => 'reserved' }, { rows => 1 } )->single;
+        return $self->error( 500, "Not found reserved coupon" ) unless $coupon;
+        $self->transfer_order($coupon);
+        $coupon->update( { status => 'provided' } );
+    }
+    else {
+        $coupon = $self->_issue_coupon($mbersn);
+        return $self->error( 500, "Failed to create a new coupon" ) unless $coupon;
+    }
 
     $self->session( coupon_code => $coupon->code );
     $self->render;
@@ -99,7 +116,7 @@ sub _issue_coupon {
         {
             code   => $code,
             type   => 'suit',
-            desc   => "seoul|$mbersn",
+            desc   => "$EVENT_NAME|$mbersn",
             status => 'provided'
         }
     );
