@@ -22,7 +22,7 @@ module.exports = (grunt) ->
         rootPath: 'pdfmake/'
       dist:
         files:
-          'public/components/pdfmake-dist/build/vfs_fonts_custom.js': [ 'pdfmake/*' ]
+          'public/components/pdfmake/build/vfs_fonts_custom.js': [ 'pdfmake/*' ]
 
     uglify:
       options:
