@@ -2178,6 +2178,7 @@ sub search_clothes {
             $rent_count, $color, join( ', ', @tags )
         );
         my $rss;
+
         for my $size ( keys %$guess ) {
             next if $size eq 'reason';
             next if $size eq 'success';
@@ -2196,12 +2197,13 @@ sub search_clothes {
         }
         $self->log->info( '-' x 50 . "RSS : $rss" );
 
-        push @result, {
+        push @result,
+            {
             upper_code => $upper_code, lower_code => $lower_code,
             upper_rs   => $upper,      lower_rs   => $lower,
             rss        => $rss,        rent_count => $rent_count,
             color      => $color,
-        };
+            };
     }
 
     my @colors = (qw/black navy charcoalgray gray brown/);
