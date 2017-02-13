@@ -6,8 +6,8 @@
   %= tag "meta", charset => "utf-8"
   %= tag "meta", "http-equiv" => "Content-Type", content => "text/html; charset=UTF-8"
   %= tag "link", rel => "icon", type => "image/png", href => url_for("/img/icon.png")
-  %= javascript url_for("/components/pdfmake-dist/build/pdfmake.min.js")
-  %= javascript url_for("/components/pdfmake-dist/build/vfs_fonts_custom.js")
+  %= javascript url_for("/components/pdfmake/build/pdfmake.min.js")
+  %= javascript url_for("/components/pdfmake/build/vfs_fonts_custom.js")
 </head>
 <body>
 
