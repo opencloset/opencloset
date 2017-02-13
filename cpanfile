@@ -46,7 +46,7 @@ requires 'experimental';
 # from opencloset cpan
 requires 'OpenCloset::Common',               'v0.0.8';
 requires 'OpenCloset::Config',               '0.002';
-requires 'OpenCloset::Plugin::Helpers',      'v0.0.8';
+requires 'OpenCloset::Plugin::Helpers',      'v0.0.11';
 requires 'OpenCloset::Schema',               '0.043';
 requires 'OpenCloset::Size::Guess',          '0.003';
 requires 'OpenCloset::Size::Guess::BodyKit', '0.001';

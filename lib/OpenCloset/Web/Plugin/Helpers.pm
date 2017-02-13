@@ -50,7 +50,6 @@ sub register {
     $app->helper( get_gravatar              => \&get_gravatar );
     $app->helper( trim_clothes_code         => \&trim_clothes_code );
     $app->helper( order_clothes_price       => \&order_clothes_price );
-    $app->helper( commify                   => \&commify );
     $app->helper( flatten_user              => \&flatten_user );
     $app->helper( tracking_url              => \&tracking_url );
     $app->helper( order_price               => \&order_price );
@@ -94,7 +93,6 @@ sub register {
     $app->helper( choose_value_by_range     => \&choose_value_by_range );
     $app->helper( mean_status               => \&mean_status );
     $app->helper( booking_list              => \&booking_list );
-    $app->helper( transfer_order            => \&transfer_order );
 }
 
 =head1 HELPERS
@@ -351,19 +349,6 @@ sub calc_overdue {
     my $dur = $epoch2 - $epoch1;
     return 0 if $dur < 0;
     return int( $dur / $DAY_AS_SECONDS ) + 1;
-}
-
-=head2 commify
-
-    commify(1000000);    # 1,000,000
-
-=cut
-
-sub commify {
-    my $self = shift;
-    local $_ = shift;
-    1 while s/((?:\A|[^.0-9])[-+]?\d+)(\d{3})/$1,$2/s;
-    return $_;
 }
 
 =head2 calc_extension_fee( $order, $today )
@@ -2556,53 +2541,6 @@ sub booking_list {
     }
 
     return @data;
-}
-
-=head2 transfer_order($coupon, $order)
-
-    $self->transfer_order( $coupon, $order );
-
-=cut
-
-sub transfer_order {
-    my ( $self, $coupon, $to ) = @_;
-    return unless $coupon;
-
-    my $code = $coupon->code;
-    my $status = $coupon->status || '';
-
-    if ( $status =~ m/(us|discard|expir)ed/ ) {
-        $self->log->info("Coupon is not valid: $code($status)");
-        return;
-    }
-    elsif ( $status eq 'reserved' ) {
-        my $orders = $coupon->orders;
-        unless ( $orders->count ) {
-            $self->log->warn("It is reserved coupon, but the order can not be found: $code");
-        }
-
-        while ( my $order = $orders->next ) {
-            my $order_id = $order->id;
-            $self->log->info("Delete coupon_id from existing order($order_id): $code");
-            $order->update( { coupon_id => undef } );
-        }
-
-        if ($to) {
-            $self->log->info(
-                sprintf( "Now, use coupon(%d) in order(%d)", $coupon->id, $to->id ) );
-            $to->update( { coupon_id => $coupon->id } );
-        }
-    }
-    elsif ( $status eq 'provided' || $status eq '' ) {
-        $coupon->update( { status => 'reserved' } );
-        if ($to) {
-            $self->log->info(
-                sprintf( "Now, use coupon(%d) in order(%d)", $coupon->id, $to->id ) );
-            $to->update( { coupon_id => $coupon->id } );
-        }
-    }
-
-    return 1;
 }
 
 1;
