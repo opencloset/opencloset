@@ -2,7 +2,10 @@
 - my $_id = 'booking';
 - layout 'default',
 -   page_id     => $_id,
--   jses  => [ '/lib/bootstrap3-editable/js/bootstrap-editable.min.js' ],
+-   jses  => [
+-     '/components/moment/min/moment-with-locales.min.js',
+-     '/lib/bootstrap3-editable/js/bootstrap-editable.min.js',
+-   ],
 -   csses => [ '/lib/bootstrap3-editable/css/bootstrap-editable.css'   ],
 -   ;
 - title meta_text($_id);
@@ -95,17 +98,45 @@
                 - my $user_info = $u->user_info;
                 - my $booking_date = $booking->date;
                 - my $msg = sprintf("[열린옷장] %s님 %s 방문 예약이 취소되었습니다. 감사합니다.", $u->name, $booking_date->strftime('%m월 %d일 %H시 %M분'));
-                %span.dropdown
+                - my $url = url_for( sprintf("/api/order/%d/booking.json", $order->id) );
+                %span.dropdown{ :data-gender => $user_info->gender, :data-ymd => $dt_start->ymd, :data-url => $url, :data-user-name => $u->name }
                   %a{:href => '#', :data-toggle => 'dropdown'}
                     = $u->name
                   %ul.dropdown-menu
+                    %li.dropdown-header= $u->name
+                    %li.divider{ :role => "separator" }
                     %li
                       %a{:href => "#{url_for( '/user/' . $u->id )}"} 사용자 정보
                     %li
                       %a.order-cancel{:href => "#{url_for('/api/order/' . $order->id . '/booking.json')}", :title => $msg, :data-phone => $user_info->phone, :data-name => $u->name}
                         %i.icon-warning-sign.red
                         예약 취소
+                    %li.divider{ :role => "separator" }
+                    %li.dropdown-header.change-booking 예약 시간 변경
               -   }
               - }
           - }
       - }
+
+:plain
+  <div id="modal-booking" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="bookingModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title" id="bookingModalLabel">
+            예약 시간 변경
+          </h4>
+        </div>
+        <div class="modal-body">
+          <div class="space-8"></div>
+          <div>
+            <span id="modal-user-name">user_name</span>님
+            <span id="modal-booking-date">booking_date</span>로 예약이 변경되었습니다.
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button id="btn-booking-modal-ok" type="button" class="btn btn-primary">확인</button>
+        </div>
+      </div>
+    </div>
+  </div>
