@@ -1,4 +1,3 @@
-requires 'Algorithm::CouponCode';
 requires 'CHI';
 requires 'Capture::Tiny';
 requires 'Crypt::Mode::ECB';
