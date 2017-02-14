@@ -224,6 +224,7 @@ sub _private_routes {
     $api->put('/order/:id/nonpayment2full')->to('API#api_update_order_nonpayment2full');
     $api->put('/order/:id/return-part')->to('API#api_order_return_part');
     $api->get('/order/:id/set-package')->to('API#api_order_set_package');
+    $api->put('/order/:id/booking')->to('API#api_update_order_booking');
     $api->delete('/order/:id/booking')->to('API#api_delete_order_booking');
     $api->get('/order-list')->to('API#api_order_list');
 

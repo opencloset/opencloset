@@ -1,3 +1,4 @@
+  - 예약 화면에서 주문서의 예약시간을 변경 (#996)
   - 중복된 helper 의 삭제
   - OpenCloset::Plugin::Hepers::coupon_validate 를 사용
 

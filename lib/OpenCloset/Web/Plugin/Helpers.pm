@@ -2441,33 +2441,39 @@ sub mean_status {
     return \%count;
 }
 
-=head2 booking_list( $gender )
+=head2 booking_list( $gender [, $from, $to ] )
 
     my @list = $self->booking_list('male');
 
 =cut
 
 sub booking_list {
-    my ( $self, $gender ) = @_;
+    my ( $self, $gender, $from, $to ) = @_;
 
     #
     # find booking
     #
-    my $dt_start = DateTime->now( time_zone => $self->config->{timezone} );
+    my $dt_start = $from;
     unless ($dt_start) {
-        my $msg = "cannot create start datetime object";
-        $self->log->warn($msg);
-        $self->error( 500, { str => $msg, data => {}, } );
-        return;
+        $dt_start = DateTime->now( time_zone => $self->config->{timezone} );
+        unless ($dt_start) {
+            my $msg = "cannot create start datetime object";
+            $self->log->warn($msg);
+            $self->error( 500, { str => $msg, data => {}, } );
+            return;
+        }
     }
 
-    my $dt_end = $dt_start->clone->truncate( to => 'day' )
-        ->add( hours => 24 * 15, seconds => -1 );
+    my $dt_end = $to;
     unless ($dt_end) {
-        my $msg = "cannot create end datetime object";
-        $self->app->log->warn($msg);
-        $self->error( 500, { str => $msg, data => {}, } );
-        return;
+        $dt_end = $dt_start->clone->truncate( to => 'day' )
+            ->add( hours => 24 * 15, seconds => -1 );
+        unless ($dt_end) {
+            my $msg = "cannot create end datetime object";
+            $self->app->log->warn($msg);
+            $self->error( 500, { str => $msg, data => {}, } );
+            return;
+        }
     }
 
     my %search_attrs = (
