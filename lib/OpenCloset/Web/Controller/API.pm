@@ -995,6 +995,80 @@ sub api_order_set_package {
     $self->respond_to( json => { status => 200, json => $data } );
 }
 
+=head2 update_order_booking
+
+    GET /api/order/:id/booking
+
+=cut
+
+sub api_update_order_booking {
+    my $self = shift;
+
+    #
+    # fetch params
+    #
+    my %params = $self->get_params(qw/ id booking_id /);
+
+    my $order_id   = $params{id};
+    my $booking_id = $params{booking_id};
+
+    #
+    # check params
+    #
+    my $order = $self->get_order( { id => $order_id } );
+    unless ($order) {
+        my $msg = "cannot find such order: $order_id";
+        $self->app->log->warn($msg);
+        return $self->error( 400, { str => $msg, data => {} } );
+    }
+    my $booking = $self->DB->resultset("Booking")->find( { id => $params{booking_id} } );
+    unless ($booking) {
+        my $msg = "cannot find such booking: $booking_id";
+        $self->app->log->warn($msg);
+        return $self->error( 400, { str => $msg, data => {} } );
+    }
+    if ( $booking_id == $order->booking_id ) {
+        my $msg = "request booking id is same as already booked: $booking_id";
+        $self->app->log->warn($msg);
+        return $self->error( 400, { str => $msg, data => {} } );
+    }
+    unless ( $booking->gender eq $order->user->user_info->gender ) {
+        my $msg = "user gender and booking gender does not match: $booking_id";
+        $self->app->log->warn($msg);
+        return $self->error( 400, { str => $msg, data => {} } );
+    }
+
+    #
+    # update the order
+    #
+
+    #
+    # 방문 예약(14) 상태의 주문서의 예약만 변경할 수 있도록 합니다.
+    #
+    if ( $order->status_id != 14 ) {
+        return $self->error(
+            500,
+            {
+                str  => "cannot update booking since order.status_id is not 14",
+                data => { status_id => $order->status_id },
+            }
+        );
+    }
+
+    $order = $self->update_order(
+        {
+            id         => $order_id,
+            booking_id => $booking_id,
+        },
+    );
+
+    #
+    # response
+    #
+    my $data = $self->flatten_order($order);
+    $self->respond_to( json => { status => 200, json => $data } );
+}
+
 =head2 delete_order_booking
 
     DELETE /api/order/:id/booking
