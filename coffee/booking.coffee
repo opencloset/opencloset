@@ -37,11 +37,12 @@ $ ->
     $("#modal-booking").modal("hide")
   $(".dropdown").on "click", (e) ->
     $(".change-booking").nextAll().remove()
-    $dropdown_element = $(this)
-    gender            = $(this).data("gender")
-    ymd               = $(this).data("ymd")
-    url               = $(this).data("url")
-    user_name         = $(this).data("user-name")
+    $dropdown_element  = $(this)
+    gender             = $(this).data("gender")
+    ymd                = $(this).data("ymd")
+    url                = $(this).data("url")
+    user_name          = $(this).data("user-name")
+    current_booking_id = $(this).data("current-booking-id")
     $.ajax "/api/gui/booking-list.json",
       type: "GET"
       data:
@@ -50,9 +51,10 @@ $ ->
       success: (data, textStatus, jqXHR) ->
         additionalBooking = ""
         for booking in data
-          continue unless booking.user_count < booking.slot
-          continue unless moment() < moment(booking.date)
-          continue unless booking.id > 0
+          continue unless booking.user_count < booking.slot # show only slot is enough
+          continue unless moment() < moment(booking.date)   # show only before the booking time
+          continue unless booking.id > 0                    # show only booking is valid
+          continue if     booking.id == current_booking_id  # show only different booking
           additionalBooking += "<li><a href='#' class='dropdown-item update-booking' type='button' data-booking-id='#{booking.id}' data-booking-date='#{booking.date}'>#{booking.date}</button></li>"
         $(".change-booking").after(additionalBooking)
         $(".update-booking").on "click", (e) ->

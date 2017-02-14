@@ -99,7 +99,7 @@
                 - my $booking_date = $booking->date;
                 - my $msg = sprintf("[열린옷장] %s님 %s 방문 예약이 취소되었습니다. 감사합니다.", $u->name, $booking_date->strftime('%m월 %d일 %H시 %M분'));
                 - my $url = url_for( sprintf("/api/order/%d/booking.json", $order->id) );
-                %span.dropdown{ :data-gender => $user_info->gender, :data-ymd => $dt_start->ymd, :data-url => $url, :data-user-name => $u->name }
+                %span.dropdown{ :data-gender => $user_info->gender, :data-ymd => $dt_start->ymd, :data-url => $url, :data-user-name => $u->name, :data-current-booking-id => $booking->id }
                   %a{:href => '#', :data-toggle => 'dropdown'}
                     = $u->name
                   %ul.dropdown-menu
