@@ -2908,13 +2908,40 @@ sub api_gui_booking_list {
     #
     # fetch params
     #
-    my %params = $self->get_params(qw/ gender /);
+    my %params = $self->get_params(qw/ gender ymd /);
 
     #
     # validate params
     #
     my $v = $self->create_validator;
     $v->field('gender')->in(qw/ male female /);
+    $v->field('ymd')->callback(
+        sub {
+            my $val = shift;
+
+            unless ( $val =~ m/^(\d{4})-(\d{2})-(\d{2})$/ ) {
+                my $msg = "invalid ymd format: $params{ymd}";
+                $self->app->log->warn($msg);
+                return ( 0, $msg );
+            }
+
+            my $dt = try {
+                DateTime->new(
+                    time_zone => $self->config->{timezone},
+                    year      => $1,
+                    month     => $2,
+                    day       => $3,
+                );
+            };
+            unless ($dt) {
+                my $msg = "cannot create start datetime object: $params{ymd}";
+                $self->app->log->warn($msg);
+                return ( 0, $msg );
+            }
+
+            return 1;
+        }
+    );
     unless ( $self->validate( $v, \%params ) ) {
         my @error_str;
         while ( my ( $k, $v ) = each %{ $v->errors } ) {
@@ -2923,7 +2950,36 @@ sub api_gui_booking_list {
         return $self->error( 400, { str => join( ',', @error_str ), data => $v->errors, } );
     }
 
-    my @booking_list = $self->booking_list( $params{gender} );
+    #
+    # [GH 996] 예약 화면에서 주문서의 예약시간을 변경
+    #
+    my ( $from, $to );
+    if ( $params{ymd} ) {
+        $params{ymd} =~ m/^(\d{4})-(\d{2})-(\d{2})$/;
+        $from = DateTime->new(
+            time_zone => $self->config->{timezone},
+            year      => $1,
+            month     => $2,
+            day       => $3,
+        );
+        unless ($from) {
+            my $msg = "cannot create start datetime object";
+            $self->log->warn($msg);
+            $self->error( 500, { str => $msg, data => {}, } );
+            return;
+        }
+
+        $to = $from->clone->truncate( to => 'day' )
+            ->add( hours => 24 * 1, seconds => -1 );
+        unless ($to) {
+            my $msg = "cannot create end datetime object";
+            $self->app->log->warn($msg);
+            $self->error( 500, { str => $msg, data => {}, } );
+            return;
+        }
+    }
+
+    my @booking_list = $self->booking_list( $params{gender}, $from, $to );
     return unless @booking_list;
 
     #
@@ -2962,7 +3018,9 @@ sub api_gui_timetable {
 
             my $dt = try {
                 DateTime->new(
-                    time_zone => $self->config->{timezone}, year => $1, month => $2,
+                    time_zone => $self->config->{timezone},
+                    year      => $1,
+                    month     => $2,
                     day       => $3,
                 );
             };

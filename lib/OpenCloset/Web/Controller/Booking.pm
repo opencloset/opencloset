@@ -562,7 +562,8 @@ sub ymd {
     );
 
     $self->render(
-        booking_rs => $booking_rs, dt_start => $dt_start,
+        booking_rs => $booking_rs,
+        dt_start   => $dt_start,
         dt_end     => $dt_end,
     );
 }
