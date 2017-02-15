@@ -314,6 +314,9 @@ $ ->
         return html
 
   $('#query.typeahead').on 'typeahead:select', (e, data) ->
+    data.status =
+      visited: OpenCloset.status['방문'].id
+
     template = JST['rental/typeahead-select']
     html     = template(data)
     $('#selected').html(html)
@@ -325,9 +328,10 @@ $ ->
     e.preventDefault()
     $this = $(@)
     $this.addClass('disabled')
+    status_id = $this.data('status-id')
     $.ajax $this.prop('href'),
       type: 'PUT'
-      data: { status_id: OpenCloset.status['방문'].id }
+      data: { status_id: status_id }
       success: (data, textStatus, jqXHR) ->
         $('#query').val('')
         $('#selected').empty()
