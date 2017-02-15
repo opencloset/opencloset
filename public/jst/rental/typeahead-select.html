@@ -15,10 +15,14 @@
     방문
   </a>
   {{#if only_shoes_or_tie}}
-  <a href="/api/order/{{order_id}}" class="btn btn-xs btn-info btn-update-status" data-status-id="{{status.prepare_clothes}}">
+  <a href="/api/order/{{order_id}}" class="btn btn-xs btn-info btn-update-status" data-status-id="{{status.prepare_clothes}}" data-pre-category="{{pre_category}}">
     방문예약
     <i class="icon-arrow-right"></i>
     의류준비
   </a>
+    {{#if contain_shoes}}
+    발 크기:
+    <input id="foot-size" name="foot-size" type="text" placeholder="발 크기를 입력하세요." data-url="/api/user/{{user_id}}" value="{{foot}}">
+    {{/if}}
   {{/if}}
 </div>
