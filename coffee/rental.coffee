@@ -315,7 +315,8 @@ $ ->
 
   $('#query.typeahead').on 'typeahead:select', (e, data) ->
     data.status =
-      visited: OpenCloset.status['방문'].id
+      visited:         OpenCloset.status['방문'].id
+      prepare_clothes: OpenCloset.status['의류준비'].id
 
     template = JST['rental/typeahead-select']
     html     = template(data)
