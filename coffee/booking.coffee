@@ -30,6 +30,59 @@ $ ->
     params.type = 'text'
     $(el).editable params
 
+  #
+  # dropdown menu click
+  #
+  $("#btn-booking-modal-ok").click (e) ->
+    $("#modal-booking").modal("hide")
+  $(".dropdown").on "click", (e) ->
+    $(".change-booking").nextAll().remove()
+    $dropdown_element  = $(this)
+    gender             = $(this).data("gender")
+    ymd                = $(this).data("ymd")
+    url                = $(this).data("url")
+    user_name          = $(this).data("user-name")
+    current_booking_id = $(this).data("current-booking-id")
+    $.ajax "/api/gui/booking-list.json",
+      type: "GET"
+      data:
+        gender: gender
+        ymd:    ymd
+      success: (data, textStatus, jqXHR) ->
+        additionalBooking = ""
+        for booking in data
+          continue unless booking.user_count < booking.slot # show only slot is enough
+          continue unless moment() < moment(booking.date)   # show only before the booking time
+          continue unless booking.id > 0                    # show only booking is valid
+          continue if     booking.id == current_booking_id  # show only different booking
+          additionalBooking += "<li><a href='#' class='dropdown-item update-booking' type='button' data-booking-id='#{booking.id}' data-booking-date='#{booking.date}'>#{booking.date}</button></li>"
+        $(".change-booking").after(additionalBooking)
+        $(".update-booking").on "click", (e) ->
+          e.defaultPrevented
+          booking_id   = $(this).data("booking-id")
+          booking_date = $(this).data("booking-date")
+          return unless booking_id
+          $.ajax url,
+            type: "PUT"
+            data: { booking_id: booking_id }
+            success: (data, textStatus, jqXHR) ->
+              location.reload(true)
+              $dropdown_element.remove()
+              OpenCloset.alert "info", "#{user_name}님 #{booking_date}로 예약이 변경되었습니다."
+              $("#modal-booking").on "show.bs.modal", (e) ->
+                $("#modal-user-name").html(user_name)
+                $("#modal-booking-date").html(booking_date)
+              $("#modal-booking").on "hide.bs.modal", (e) ->
+                $("#modal-user-name").html("")
+                $("#modal-booking-date").html("")
+                location.reload(true)
+              $("#modal-booking").modal("show")
+            error: (jqXHR, textStatus, errorThrown) ->
+              OpenCloset.alert "warning", jqXHR.responseJSON.error.str
+            complete: (jqXHR, textStatus) ->
+      error: (jqXHR, textStatus, errorThrown) ->
+      complete: (jqXHR, textStatus) ->
+
   $('.order-cancel').click (e) ->
     e.preventDefault()
 
@@ -45,7 +98,7 @@ $ ->
       type: 'DELETE'
       success: (data, textStatus, jqXHR) ->
         $this.closest('span.dropdown').remove()
-        OpenCloset.alert 'info', "#{name}님 예약이 취소 되었습니다"
+        OpenCloset.alert 'info', "#{name}님 예약이 취소되었습니다"
         OpenCloset.sendSMS to, msg
       error: (jqXHR, textStatus, errorThrown) ->
         OpenCloset.alert 'warning', jqXHR.responseJSON.error.str
