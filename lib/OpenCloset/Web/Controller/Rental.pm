@@ -211,14 +211,15 @@ sub search {
         }
 
         push @orders, {
-            order_id    => $order->id,
-            name        => $user->name,
-            email       => $user->email,
-            phone       => $user_info->phone,
-            booking     => substr( $order->booking->date, 11, 5 ),
-            event_seoul => $event_seoul,
-            visited     => $visited,
-            ago         => $ago,
+            ago          => $ago,
+            booking      => substr( $order->booking->date, 11, 5 ),
+            email        => $user->email,
+            event_seoul  => $event_seoul,
+            name         => $user->name,
+            order_id     => $order->id,
+            phone        => $user_info->phone,
+            pre_category => $user_info->pre_category,
+            visited      => $visited,
         };
     }
 

@@ -318,6 +318,14 @@ $ ->
       visited:         OpenCloset.status['방문'].id
       prepare_clothes: OpenCloset.status['의류준비'].id
 
+    only_shoes_or_tie = true
+    for c in data.pre_category.split(",")
+      continue if c == "shoes"
+      continue if c == "tie"
+      only_shoes_or_tie = false
+      break
+    data.only_shoes_or_tie = only_shoes_or_tie
+
     template = JST['rental/typeahead-select']
     html     = template(data)
     $('#selected').html(html)
