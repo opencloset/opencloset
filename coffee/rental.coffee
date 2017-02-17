@@ -314,26 +314,76 @@ $ ->
         return html
 
   $('#query.typeahead').on 'typeahead:select', (e, data) ->
+    data.status =
+      visited:         OpenCloset.status['방문'].id
+      prepare_clothes: OpenCloset.status['의류준비'].id
+
+    only_shoes_or_tie = true
+    contain_shoes     = false
+    for c in data.pre_category.split(",")
+      if c == "shoes"
+        contain_shoes = true
+        continue
+      continue if c == "tie"
+      only_shoes_or_tie = false
+      break
+    data.only_shoes_or_tie = only_shoes_or_tie
+    data.contain_shoes     = contain_shoes
+
     template = JST['rental/typeahead-select']
     html     = template(data)
     $('#selected').html(html)
 
   #
   # 방문예약 -> 방문 버튼
+  # 방문예약 -> 의류준비 버튼
   #
-  $('#selected').on 'click', '.btn-update-status:not(.disabled)', (e) ->
-    e.preventDefault()
-    $this = $(@)
-    $this.addClass('disabled')
-    $.ajax $this.prop('href'),
-      type: 'PUT'
-      data: { status_id: OpenCloset.status['방문'].id }
+  changeOrderStatus = ($jqElem, statusId) ->
+    $.ajax $jqElem.prop("href"),
+      type: "PUT"
+      data: { status_id: statusId }
       success: (data, textStatus, jqXHR) ->
-        $('#query').val('')
-        $('#selected').empty()
+        $("#query").val("")
+        $("#selected").empty()
       error: (jqXHR, textStatus, errorThrown) ->
       complete: (jqXHR, textStatus) ->
-        $this.removeClass('disabled')
+        $(".btn-update-status").removeClass("disabled")
+
+  $("#selected").on "click", ".btn-update-status:not(.disabled)", (e) ->
+    e.preventDefault()
+
+    $(".btn-update-status").addClass("disabled")
+    $this = $(@)
+    status_id = $this.data("status-id")
+
+    #
+    # 의류준비면서 구두가 있을 경우 구두 사이즈를 입력 받음
+    #
+    if status_id == OpenCloset.status["의류준비"].id
+      pre_category = $this.data("pre-category")
+      if /shoes/.test( pre_category )
+        footSize    = $("#foot-size").val()
+        urlFootSize = $("#foot-size").data("url")
+        unless footSize
+          OpenCloset.alert "warning", "발 크기를 입력하세요."
+          $(".btn-update-status").removeClass("disabled")
+          return
+        unless /^\d+$/.test( footSize )
+          OpenCloset.alert "warning", "유효하지 않은 발 크기 입니다."
+          $(".btn-update-status").removeClass("disabled")
+          return
+        $.ajax urlFootSize,
+          type: "PUT"
+          data: { foot: footSize }
+          success: (data, textStatus, jqXHR) ->
+            changeOrderStatus($this, status_id)
+          error: (jqXHR, textStatus, errorThrown) ->
+            OpenCloset.alert "warning", "발 크기 입력에 실패했습니다. 다시 시도해주세요."
+            $(".btn-update-status").removeClass("disabled")
+            return
+          complete: (jqXHR, textStatus) ->
+        return
+    changeOrderStatus($this, status_id)
 
   #
   # 바지길이 수정
