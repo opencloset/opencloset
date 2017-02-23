@@ -9,6 +9,9 @@
       - {{ago}}일 지남
     {{/if}}
   {{/if}}
+  {{#if return_memo}}
+  | <span class="text-danger">{{return_memo}}</span>
+  {{/if}}
   <a href="/api/order/{{order_id}}" class="btn btn-xs btn-success btn-update-status" data-status-id="{{status.visited}}">
     방문예약
     <i class="icon-arrow-right"></i>

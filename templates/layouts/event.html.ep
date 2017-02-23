@@ -8,6 +8,7 @@
     <meta name="author" content="">
 
     <link href="/components/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/components/font-awesome/css/font-awesome.min.css" rel="stylesheet">
     <link href="/components/opencloset.css/dist/css/opencloset.min.css" rel="stylesheet">
     <link href="/css/event.min.css" rel="stylesheet">
 

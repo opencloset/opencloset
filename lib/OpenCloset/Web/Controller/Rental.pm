@@ -222,6 +222,7 @@ sub search {
             pre_category => $user_info->pre_category,
             user_id      => $user->id,
             visited      => $visited,
+            return_memo  => $order->return_memo,
         };
     }
 
