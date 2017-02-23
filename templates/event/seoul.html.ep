@@ -3,7 +3,7 @@
 
 <div class="col-md-12 ">
   <div class="top_area">
-    <p class="small top_des">서울시 + KEB 하나은행 + 열린옷장이 함께 하는</p>
+    <p class="small top_des">서울시 + 열린옷장이 함께 하는</p>
     <h1>"취업날개" 후원 캠페인</h1>
     <p>열린옷장 방문대여 서비스는 다음과 같이 운영됩니다</p>
   </div>
@@ -44,5 +44,12 @@
       <a class="btn btn-success btn-lg btn-block" href="<%= url_for('/visit') %>">열린옷장 방문예약</a>
       % }
     </div>
+
+    <p class="help-block">
+      <i class="fa fa-exclamation-circle fa-fw" aria-hidden="true"></i>
+      취업날개 이벤트는 서울시 일자리포털 사이트를 통해 예약한 본인만 사용할 수 있습니다.<br>
+      <i class="fa fa-exclamation-circle fa-fw" aria-hidden="true"></i>
+      타인에게 공유되거나 양도되는 경우에 발생하는 모든 불이익은 예약자 본인에게 있음을 유념하시기 바랍니다.
+    </p>
   </div>
 </div> <!-- //col-md-12 col-lg-12 -->

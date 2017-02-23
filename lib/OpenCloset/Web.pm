@@ -1,11 +1,14 @@
 package OpenCloset::Web;
 use Mojo::Base 'Mojolicious';
 
+use version; our $VERSION = qv("v1.8.47");
+
 use CHI;
 use DateTime;
 
 use OpenCloset::Schema;
-use version; our $VERSION = qv("v1.8.46");
+use OpenCloset::DB::Plugin::Order::Sale;
+
 has CACHE => sub {
     my $self  = shift;
     my $cache = CHI->new(
