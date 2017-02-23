@@ -1887,6 +1887,7 @@ sub coupon2label {
     my $type   = $coupon->type;
     my $status = $coupon->status || '';
     my $price  = $coupon->price;
+    my $title  = sprintf( "%d(%s)", $coupon->id, $coupon->code );
 
     my $klass = 'label-info';
     $klass = 'label-danger' if $status =~ /(us|discard)ed/;
@@ -1896,7 +1897,8 @@ sub coupon2label {
 
     my $html = Mojo::DOM::HTML->new;
     $html->parse(
-        qq{<span class="label $klass">$COUPON_STATUS_MAP{$status} 쿠폰$extra</span>});
+        qq{<span class="label $klass" title="$title">$COUPON_STATUS_MAP{$status} 쿠폰$extra</span>}
+    );
 
     my $tree = $html->tree;
     return Mojo::ByteStream->new( Mojo::DOM::HTML::_render($tree) );
