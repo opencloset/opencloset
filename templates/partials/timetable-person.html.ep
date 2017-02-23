@@ -36,10 +36,11 @@
 %     42, # 환불
 %   ],
 % });
-% my $user_info = $order->user->user_info;
-% my $revisited = $rs->count;
-% my $coupon    = $order->coupon;
-% my $event     = $coupon ? $coupon->desc : '';
+% my $user_info   = $order->user->user_info;
+% my $revisited   = $rs->count;
+% my $coupon      = $order->coupon;
+% my $return_memo = $order->return_memo;
+% my $event       = $coupon ? $coupon->desc : '';
 % ($event) = split(/\|/, $event) if $event;
 % my %EVENT_NAME_MAP = (seoul => '취업날개', gwanak => '관악고용', '10bob' => '십시일밥', 'seoul-2017' => '취업날개');
 <div class="people-box" data-target="<%= $alert_target %>" data-order-id="<%= $order->id %>" data-ymd="<%= $dt_start->ymd %>">
@@ -48,6 +49,9 @@
       <h4>
         <a tabindex="-1" href="<%= url_for( '/user/' . $order->user->id ) %>">
           <%= $order->user->name %> <%= $revisited ? $revisited . '회 방문' : q{} %>
+          % if ($return_memo) {
+            <i class="icon-warning-sign" title="<%= $return_memo %>"></i>
+          % }
         </a>
         % if ($coupon) {
         <small>
