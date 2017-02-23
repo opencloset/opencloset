@@ -12,7 +12,7 @@
 % use DateTime;
 
 <% my $volunteer_item_block = begin %>
-  % my ($work, $schema) = @_;
+  % my $work = shift;
   % my $volunteer = $work->volunteer;
   % my $from = $work->activity_from_date;
   % my $to   = $work->activity_to_date;
@@ -52,9 +52,9 @@
           </button>
         </p>
       % }
-      % my $nth = $schema->resultset('VolunteerWork')->count({ volunteer_id => $work->volunteer_id, status => 'done' });
-      % if ($nth && $nth != 1) {
-        <p><small><%= $nth %>번째 방문</small></p>
+      % my $nth = $volunteer->volunteer_works({ status => 'done' })->count;
+      % if ($nth) {
+        <p><small><%= $nth %>번 방문</small></p>
       % }
     </h4>
     <p class="list-group-item-text">
@@ -118,12 +118,11 @@
     %= include 'partials/pagination' if $pageset;
     <div class="list-group">
       % my $volunteer_uri = $config->{volunteer_uri};
-      % my $schema        = $works->result_source->schema;
       % while (my $work = $standby ? $standby->next : undef) {
-        %= $volunteer_item_block->($work, $schema)
+        %= $volunteer_item_block->($work)
       % }
       % while (my $work = $works->next) {
-        %= $volunteer_item_block->($work, $schema)
+        %= $volunteer_item_block->($work)
       % }
       % unless ($works->count) {
         % my $status = param('status') || 'reported';
