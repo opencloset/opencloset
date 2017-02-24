@@ -307,6 +307,57 @@ sub api_delete_user {
     $self->respond_to( json => { status => 200, json => \%data } );
 }
 
+=head2 api_search_clothes_order
+
+    GET /api/order/:id/search/clothes
+
+=cut
+
+sub api_search_clothes_order {
+    my $self = shift;
+    my $id   = $self->param('id');
+
+    my $order = $self->get_order( { id => $id } );
+    my $user  = $order->user;
+    return $self->error( 404, { str => "Order not found: $id" } ) unless $order;
+    return $self->error( 404, { str => "User not found: $order->user_id" } ) unless $user;
+
+    my $gender     = $user->user_info->gender;
+    my $config     = $self->config->{'search-clothes'}{$gender};
+    my $upper_name = $config->{upper_name};
+    my $lower_name = $config->{lower_name};
+
+    my @param_keys =
+        uniq( @{ $config->{'upper_params'} }, @{ $config->{'lower_params'} } );
+    my @param_values = map { $order->$_ } @param_keys;
+
+    my %params = (
+        gender  => $gender,
+        height  => $order->height,
+        weight  => $order->weight,
+        colors  => [ split(/,/, $order->pre_color) ],
+        sizes   => { zip( @param_keys, @param_values ) },
+        user_id => $order->user_id,
+    );
+
+    for my $key ( 'height', 'weight', 'gender') {
+        return $self->error( 400, { str => ucfirst($key) . ' is required' } )
+            unless $params{$key};
+    }
+
+    for my $key ( @param_keys ) {
+        return $self->error( 400, { str => ucfirst($key) . ' is required' } )
+            unless $params{sizes}->{$key};
+    }
+
+    my $result = $self->search_clothes( %params );
+    return $self->render unless $result;
+
+    my $guess = shift @$result;
+    my @result = map { [ @{$_}{qw/upper_code lower_code rss rent_count/} ] } @$result;
+    $self->respond_to( json => { json => { guess => $guess, result => [@result] } } );
+}
+
 =head2 api_search_clothes_user
 
     GET /api/user/:id/search/clothes
