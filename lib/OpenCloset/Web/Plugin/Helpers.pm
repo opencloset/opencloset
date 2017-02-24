@@ -2014,22 +2014,28 @@ sub range_filter {
 }
 
 sub choose_value_by_range {
-    my ( $self, $guess, $user_info, @parts ) = @_;
+    my ( $self, $guess, $gender, $sizes ) = @_;
 
-    my $config = $self->config->{'search-clothes'}{ $user_info->gender };
+    my $config = $self->config->{'search-clothes'}{ $gender };
 
-    for my $part (@parts) {
+    for my $part (@{ $config->{'fix_sizes'} }) {
         next unless $guess->{$part};
-        next unless $user_info->$part;
+        next unless $sizes->{$part};
 
         my $val = range_filter(
-            $config->{range_rules}{$part}, $user_info->$part,
+            $config->{range_rules}{$part}, $sizes->{$part},
             $guess->{$part}
         );
         next if $val == $guess->{$part};
 
         $self->log->info( "guess replace user $part : " . $guess->{$part} . ' => ' . $val );
         $guess->{$part} = $val;
+    }
+    if( $gender eq 'female' ) {
+        $self->log->info( "guess always replace female waist with topbelly : "
+                . $guess->{waist} . ' => '
+                . $sizes->{topbelly} );
+        $guess->{waist} = $sizes->{topbelly};
     }
 
     return $guess;
@@ -2059,17 +2065,7 @@ sub search_clothes {
 
     $self->log->info( "guess result size : " . encode_json($guess) );
 
-    if ( $gender eq 'male' ) {
-        $guess = $self->choose_value_by_range( $guess, $user_info, qw/arm waist/ );
-    }
-    elsif ( $gender eq 'female' ) {
-        $guess = $self->choose_value_by_range( $guess, $user_info, qw/hip/ );
-
-        $self->log->info( "guess always replace female waist with topbelly : "
-                . $guess->{waist} . ' => '
-                . $user_info->topbelly );
-        $guess->{waist} = $user_info->topbelly;
-    }
+    $guess = $self->choose_value_by_range( $guess, $gender, $params{sizes} );
 
     my %between;
     for my $part ( keys %$guess ) {
