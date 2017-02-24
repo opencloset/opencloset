@@ -325,6 +325,7 @@ my %BOOKING_SLOT = (
                 thigh    => sub { ( ceil( $_[0] ) - 2, ceil( $_[0] ) + 3 ) },
                 waist    => sub { ( ceil( $_[0] ) - 1, ceil( $_[0] ) + 2 ) },
             },
+            fix_sizes    => [ qw/arm waist/ ],
         },
         female => {
             upper_name   => 'jacket',
@@ -343,6 +344,7 @@ my %BOOKING_SLOT = (
                 hip      => sub { ( ceil( $_[0] ) - 2, ceil( $_[0] ) + 2 ) },
                 waist    => sub { ( ceil( $_[0] ),     ceil( $_[0] ) + 2 ) },
             },
+            fix_sizes    => [ qw/hip/ ],
         },
     },
     events => {
