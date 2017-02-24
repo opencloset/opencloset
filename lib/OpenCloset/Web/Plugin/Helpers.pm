@@ -2036,43 +2036,22 @@ sub choose_value_by_range {
 }
 
 sub search_clothes {
-    my ( $self, $user_id ) = @_;
-    return unless $user_id;
+    my ( $self, %params ) = @_;
 
-    my $user = $self->get_user( { id => $user_id } );
-    return $self->error( 404, { str => "User not found: $user_id" } ) unless $user;
-
-    my $user_info  = $user->user_info;
-    my $gender     = $user_info->gender;
-    my $config     = $self->config->{'search-clothes'}{$gender};
+    my $gender = $params{gender};
+    my $config = $self->config->{'search-clothes'}{ $gender };
     my $upper_name = $config->{upper_name};
     my $lower_name = $config->{lower_name};
-
-    my @param_keys =
-        uniq( @{ $config->{'upper_params'} }, @{ $config->{'lower_params'} } );
-    my @param_values = map { $user_info->$_ } @param_keys;
-
-    my %params = (
-        gender => $gender,
-        height => $user_info->height,
-        weight => $user_info->weight,
-        zip( @param_keys, @param_values ),
-    );
-
-    for my $key ( 'height', 'weight', 'gender', @param_keys ) {
-        return $self->error( 400, { str => ucfirst($key) . ' is required' } )
-            unless $params{$key};
-    }
 
     my $guesser = OpenCloset::Size::Guess->new(
         'OpenCPU::RandomForest',
         gender => $gender,
         height => $params{height},
         weight => $params{weight},
-        map { ( sprintf( "_%s", $_ ) => $params{$_} ) } @param_keys,
+        map { ( sprintf( "_%s", $_ ) => $params{sizes}->{$_} ) } keys %{ $params{sizes} },
     );
     $self->log->info(
-        "guess params : " . encode_json( { user_id => $user_id, %params } ) );
+        "guess params : " . encode_json( { %params } ) );
 
     my $guess = $guesser->guess;
     return $self->error( 500, { str => "Guess failed: $guess->{reason}" } )
@@ -2208,13 +2187,13 @@ sub search_clothes {
             };
     }
 
-    my @colors = (qw/black navy charcoalgray gray brown/);
-    my $fav_color = ( split( /,/, $user_info->pre_color ) )[0];
-    $self->log->info( "guess user pre_color : " . $user_info->pre_color );
+    my $fav_color = ${$params{colors}}[0];
+    $self->log->info( "guess user pre_color : " . join(',', @{$params{colors}} ) );
     $self->log->info( "guess user fav color : " . $fav_color );
 
     my @sorted;
-    if ( $fav_color && any { $fav_color eq $_ } @colors ) {
+    if ( $fav_color
+        && any { $fav_color eq $_ } (qw/black navy charcoalgray gray brown/) ) {
         my @fav_suits =
             sort { $a->{rss} <=> $b->{rss} } grep { $_->{color} eq $fav_color } @result;
         my @nonfav_suits =

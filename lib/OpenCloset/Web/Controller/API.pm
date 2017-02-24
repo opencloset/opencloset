@@ -6,6 +6,8 @@ use DateTime;
 use Encode qw/decode_utf8/;
 use HTTP::Body::Builder::MultiPart;
 use HTTP::Tiny;
+use List::MoreUtils qw( zip );
+use List::Util qw/any uniq/;
 use Path::Tiny ();
 use Postcodify;
 use String::Random;
@@ -315,10 +317,38 @@ sub api_search_clothes_user {
     my $self = shift;
     my $id   = $self->param('id');
 
-    my $user = $self->get_user( { id => $id } );
-    return $self->error( 404, { str => "User not found: $id" } ) unless $user;
+    my $user_info = $self->get_user( { id => $id } )->user_info;
+    return $self->error( 404, { str => "User not found: $id" } ) unless $user_info;
 
-    my $result = $self->search_clothes($id);
+    my $gender     = $user_info->gender;
+    my $config     = $self->config->{'search-clothes'}{$gender};
+    my $upper_name = $config->{upper_name};
+    my $lower_name = $config->{lower_name};
+
+    my @param_keys =
+        uniq( @{ $config->{'upper_params'} }, @{ $config->{'lower_params'} } );
+    my @param_values = map { $user_info->$_ } @param_keys;
+
+    my %params = (
+        gender  => $gender,
+        height  => $user_info->height,
+        weight  => $user_info->weight,
+        colors  => [ split(/,/, $user_info->pre_color) ],
+        sizes   => { zip( @param_keys, @param_values ) },
+        user_id => $user_info->user_id,
+    );
+
+    for my $key ( 'height', 'weight', 'gender') {
+        return $self->error( 400, { str => ucfirst($key) . ' is required' } )
+            unless $params{$key};
+    }
+
+    for my $key ( @param_keys ) {
+        return $self->error( 400, { str => ucfirst($key) . ' is required' } )
+            unless $params{sizes}->{$key};
+    }
+
+    my $result = $self->search_clothes( %params );
     return $self->render unless $result;
 
     my $guess = shift @$result;
