@@ -1,7 +1,7 @@
 package OpenCloset::Web;
 use Mojo::Base 'Mojolicious';
 
-use version; our $VERSION = qv("v1.8.47");
+use version; our $VERSION = qv("v1.8.48");
 
 use CHI;
 use DateTime;
@@ -230,6 +230,7 @@ sub _private_routes {
     $api->put('/order/:id/booking')->to('API#api_update_order_booking');
     $api->delete('/order/:id/booking')->to('API#api_delete_order_booking');
     $api->get('/order-list')->to('API#api_order_list');
+    $api->get('/order/:id/search/clothes')->to('API#api_search_clothes_order');
 
     ## prevent deep recursion with create_order_detail helper
     $api->post('/order_detail')->to('API#api_create_order_detail');
