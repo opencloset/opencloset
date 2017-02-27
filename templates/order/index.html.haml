@@ -146,14 +146,17 @@
               - if ( $search_status eq 'unpaid' && $order->status->name eq '반납' ) {
               -   my $unpaid = $order->get_column('sum_final_price');
               -   if ($unpaid) {
+              -     my $user = $order->user;
               -     $is_unpaid = 1;
               -     $sms_label = '미납 문자 전송';
               -     $sms_str   = sprintf(
-              -       '[열린옷장] %s님, %d일 연장, %d일 연체로 추가 금액 %s원이 발생하였습니다. 금일 중으로 국민은행 205737-04-003013 (예금주 : 사단법인열린옷장)으로 입금해주세요.',
-              -       $order->user->name,
+              -       '[열린옷장] %s님, %d일 연장, %d일 연체로 추가 금액 %s원이 발생하였습니다. 금일 중으로 국민은행 205737-04-003013 (예금주 : 사단법인열린옷장)으로 입금해주세요. 입금자명과 %s님의 이름이 동일해야 확인이 가능합니다. 반드시 %s님 이름으로 입금해 주세요.',
+              -       $user->name,
               -       calc_extension_days($order),
               -       calc_overdue_days($order),
               -       commify($unpaid),
+              -       $user->name,
+              -       $user->name,
               -     );
               -     $sms_str =~ s/, 0일 연장//;
               -     $sms_str =~ s/, 0일 연체/으/;
