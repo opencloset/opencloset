@@ -39,9 +39,6 @@ requires 'Unicode::GCString';
 requires 'Version::Next';
 requires 'experimental';
 
-# from git repository
-# requires 'git://github.com/aanoaa/p5-postcodify.git@v0.2.6';
-
 # from opencloset cpan
 requires 'OpenCloset::Common',                  'v0.0.8';
 requires 'OpenCloset::Config',                  '0.002';
@@ -52,3 +49,4 @@ requires 'OpenCloset::Size::Guess',             '0.003';
 requires 'OpenCloset::Size::Guess::BodyKit',    '0.001';
 requires 'OpenCloset::Size::Guess::DB',         '0.005';
 requires 'OpenCloset::Size::Guess::OpenCPU::RandomForest',      '0.008';
+requires 'Postcodify', 'v0.3.0';
