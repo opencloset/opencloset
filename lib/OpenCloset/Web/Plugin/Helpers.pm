@@ -22,7 +22,8 @@ use Try::Tiny;
 use OpenCloset::Size::Guess;
 use OpenCloset::Constants::Measurement;
 use OpenCloset::Constants::Category qw/$JACKET $PANTS $SKIRT/;
-use OpenCloset::Constants::Status qw/$RENTABLE $RENTAL $PAYMENT $RESERVATED/;
+use OpenCloset::Constants::Status
+    qw/$RENTABLE $RENTAL $PAYMENT $RESERVATED $PAYBACK/;
 
 =encoding utf8
 
@@ -1221,10 +1222,15 @@ sub update_order {
             #
             # update clothes status
             #
-            if ( $order_params->{status_id} ) {
+            if ( my $status_id = $order_params->{status_id} ) {
                 for my $clothes ( $order->clothes ) {
                     $clothes->update( { status_id => $order_params->{status_id} } )
                         or die "failed to update the clothes status\n";
+                }
+
+                ## 환불하면 쿠폰을 사용가능하도록 변경한다 (Github-#1193)
+                if ( my $coupon = $order->coupon and $status_id == $PAYBACK ) {
+                    $coupon->update( { status => 'reserved' } );
                 }
             }
 
