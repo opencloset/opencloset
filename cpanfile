@@ -7,6 +7,8 @@ requires 'DateTime::Format::Duration';
 requires 'DateTime::Format::Human::Duration', '0.64';
 requires 'DateTime::Format::Strptime';
 requires 'Digest::SHA1';
+requires 'Email::Simple';
+requires 'Encode';
 requires 'FindBin';
 requires 'Getopt::Long::Descriptive';
 requires 'Gravatar::URL';

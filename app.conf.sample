@@ -350,6 +350,10 @@ my %BOOKING_SLOT = (
     events => {
         seoul => {
             key => $ENV{OPENCLOSET_EVENT_SEOUL_KEY},
+            notification => {
+                from => '',
+                to   => [],
+            }
         },
     },
     income => {
