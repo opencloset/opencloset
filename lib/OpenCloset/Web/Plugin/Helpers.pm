@@ -22,7 +22,8 @@ use Try::Tiny;
 use OpenCloset::Size::Guess;
 use OpenCloset::Constants::Measurement;
 use OpenCloset::Constants::Category qw/$JACKET $PANTS $SKIRT/;
-use OpenCloset::Constants::Status qw/$RENTABLE $RENTAL $PAYMENT $RESERVATED/;
+use OpenCloset::Constants::Status
+    qw/$RENTABLE $RENTAL $PAYMENT $RESERVATED $PAYBACK/;
 
 =encoding utf8
 
@@ -1221,10 +1222,15 @@ sub update_order {
             #
             # update clothes status
             #
-            if ( $order_params->{status_id} ) {
+            if ( my $status_id = $order_params->{status_id} ) {
                 for my $clothes ( $order->clothes ) {
                     $clothes->update( { status_id => $order_params->{status_id} } )
                         or die "failed to update the clothes status\n";
+                }
+
+                ## 환불하면 쿠폰을 사용가능하도록 변경한다 (Github-#1193)
+                if ( my $coupon = $order->coupon and $status_id == $PAYBACK ) {
+                    $coupon->update( { status => 'reserved' } );
                 }
             }
 
@@ -2016,9 +2022,9 @@ sub range_filter {
 sub choose_value_by_range {
     my ( $self, $guess, $gender, $sizes ) = @_;
 
-    my $config = $self->config->{'search-clothes'}{ $gender };
+    my $config = $self->config->{'search-clothes'}{$gender};
 
-    for my $part (@{ $config->{'fix_sizes'} }) {
+    for my $part ( @{ $config->{'fix_sizes'} } ) {
         next unless $guess->{$part};
         next unless $sizes->{$part};
 
@@ -2031,7 +2037,7 @@ sub choose_value_by_range {
         $self->log->info( "guess replace user $part : " . $guess->{$part} . ' => ' . $val );
         $guess->{$part} = $val;
     }
-    if( $gender eq 'female' ) {
+    if ( $gender eq 'female' ) {
         $self->log->info( "guess always replace female waist with topbelly : "
                 . $guess->{waist} . ' => '
                 . $sizes->{topbelly} );
@@ -2044,8 +2050,8 @@ sub choose_value_by_range {
 sub search_clothes {
     my ( $self, %params ) = @_;
 
-    my $gender = $params{gender};
-    my $config = $self->config->{'search-clothes'}{ $gender };
+    my $gender     = $params{gender};
+    my $config     = $self->config->{'search-clothes'}{$gender};
     my $upper_name = $config->{upper_name};
     my $lower_name = $config->{lower_name};
 
@@ -2056,8 +2062,7 @@ sub search_clothes {
         weight => $params{weight},
         map { ( sprintf( "_%s", $_ ) => $params{sizes}->{$_} ) } keys %{ $params{sizes} },
     );
-    $self->log->info(
-        "guess params : " . encode_json( { %params } ) );
+    $self->log->info( "guess params : " . encode_json( {%params} ) );
 
     my $guess = $guesser->guess;
     return $self->error( 500, { str => "Guess failed: $guess->{reason}" } )
@@ -2183,13 +2188,14 @@ sub search_clothes {
             };
     }
 
-    my $fav_color = ${$params{colors}}[0];
-    $self->log->info( "guess user pre_color : " . join(',', @{$params{colors}} ) );
+    my $fav_color = ${ $params{colors} }[0];
+    $self->log->info( "guess user pre_color : " . join( ',', @{ $params{colors} } ) );
     $self->log->info( "guess user fav color : " . $fav_color );
 
     my @sorted;
     if ( $fav_color
-        && any { $fav_color eq $_ } (qw/black navy charcoalgray gray brown/) ) {
+        && any { $fav_color eq $_ } (qw/black navy charcoalgray gray brown/) )
+    {
         my @fav_suits =
             sort { $a->{rss} <=> $b->{rss} } grep { $_->{color} eq $fav_color } @result;
         my @nonfav_suits =
