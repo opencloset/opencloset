@@ -73,7 +73,16 @@
                 % $sum{'month-coupon-novisit-agegroup'}{30} += $counts->{'month-coupon-agegroup'}{$ym}{0}{1}{30};
                 <tr>
                 <td><%= $ym %></td>
-                <td><samp><%= $counts->{'month-coupon'}{$ym}{1}{1} %></samp></td>
+                <td><samp>
+                        % my $total = $counts->{'month-coupon'}{$ym}{1}{1};
+                        % my @days = keys %{ $counts->{'month-visit-day'}{$ym}{1}{1}{days} };
+                        % my $avg = scalar @days ? $total / @days : 0;
+                        <div><%=  $total %></div>
+                        % if( $avg ) {
+                            <div>(일평균 <%= sprintf('%.1f',$avg) %>명)</div>
+                        %}
+                    </samp>
+                </td>
                 <td><samp><%= $counts->{'month-coupon-gender'}{$ym}{1}{1}{male} %></samp></td>
                 <td><samp><%= $counts->{'month-coupon-gender'}{$ym}{1}{1}{female} %></samp></td>
                 <td><samp><%= $counts->{'month-coupon-agegroup'}{$ym}{1}{1}{10} %></samp></td>

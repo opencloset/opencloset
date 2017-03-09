@@ -1208,6 +1208,9 @@ END_SQL
         $cnt{'month-coupon-agegroup'}{$month}{ $r->{is_visit} }{ $r->{is_coupon_use} }
             { $r->{age_group} }++;
 
+        ## for percentile
+        $cnt{'month-visit-day'}{$month}{ $r->{is_visit} }{ $r->{is_coupon_use} }{days}{ $dt->ymd }++;
+
         # 전체 성별
         $cnt{'gender'}{ $r->{is_coupon_use} }{ $r->{is_visit} }{ $r->{gender} }++;
         # 전체 연령
