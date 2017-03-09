@@ -60,12 +60,14 @@
                 % my %sum;
                 % for my $ym (reverse sort keys %{ $counts->{'month-visit'} }) {
                 % $sum{'month-coupon'}{1} += $counts->{'month-coupon'}{$ym}{1}{1};
+                % $sum{'month-coupon'}{'visit-days'} += keys %{ $counts->{'month-visit-day'}{$ym}{1}{1}{days} };
                 % $sum{'month-coupon-visit-gender'}{male} += $counts->{'month-coupon-gender'}{$ym}{1}{1}{male};
                 % $sum{'month-coupon-visit-gender'}{female} += $counts->{'month-coupon-gender'}{$ym}{1}{1}{female};
                 % $sum{'month-coupon-visit-agegroup'}{10} += $counts->{'month-coupon-agegroup'}{$ym}{1}{1}{10};
                 % $sum{'month-coupon-visit-agegroup'}{20} += $counts->{'month-coupon-agegroup'}{$ym}{1}{1}{20};
                 % $sum{'month-coupon-visit-agegroup'}{30} += $counts->{'month-coupon-agegroup'}{$ym}{1}{1}{30};
                 % $sum{'month-coupon'}{0} += $counts->{'month-coupon'}{$ym}{0}{1};
+                % $sum{'month-coupon'}{'novisit-days'} += keys %{ $counts->{'month-visit-day'}{$ym}{0}{1}{days} };
                 % $sum{'month-coupon-novisit-gender'}{male} += $counts->{'month-coupon-gender'}{$ym}{0}{1}{male};
                 % $sum{'month-coupon-novisit-gender'}{female} += $counts->{'month-coupon-gender'}{$ym}{0}{1}{female};
                 % $sum{'month-coupon-novisit-agegroup'}{10} += $counts->{'month-coupon-agegroup'}{$ym}{0}{1}{10};
@@ -73,7 +75,16 @@
                 % $sum{'month-coupon-novisit-agegroup'}{30} += $counts->{'month-coupon-agegroup'}{$ym}{0}{1}{30};
                 <tr>
                 <td><%= $ym %></td>
-                <td><samp><%= $counts->{'month-coupon'}{$ym}{1}{1} %></samp></td>
+                <td><samp>
+                        % my $total = $counts->{'month-coupon'}{$ym}{1}{1};
+                        % my @days = keys %{ $counts->{'month-visit-day'}{$ym}{1}{1}{days} };
+                        % my $avg = scalar @days ? $total / @days : 0;
+                        <div><%=  $total %></div>
+                        % if( $avg ) {
+                            <div>(일평균 <%= sprintf('%.1f',$avg) %>명)</div>
+                        %}
+                    </samp>
+                </td>
                 <td><samp><%= $counts->{'month-coupon-gender'}{$ym}{1}{1}{male} %></samp></td>
                 <td><samp><%= $counts->{'month-coupon-gender'}{$ym}{1}{1}{female} %></samp></td>
                 <td><samp><%= $counts->{'month-coupon-agegroup'}{$ym}{1}{1}{10} %></samp></td>
@@ -89,18 +100,124 @@
                 % }
                 <tr>
                 <th>합계</th>
-                <td><samp><%= $sum{'month-coupon'}{1} %></samp></td>
-                <td><samp><%= $sum{'month-coupon-visit-gender'}{male} %></samp></td>
-                <td><samp><%= $sum{'month-coupon-visit-gender'}{female} %></samp></td>
-                <td><samp><%= $sum{'month-coupon-visit-agegroup'}{10} %></samp></td>
-                <td><samp><%= $sum{'month-coupon-visit-agegroup'}{20} %></samp></td>
-                <td><samp><%= $sum{'month-coupon-visit-agegroup'}{30} %></samp></td>
-                <td><samp><%= $sum{'month-coupon'}{0} %></samp></td>
-                <td><samp><%= $sum{'month-coupon-novisit-gender'}{male} %></samp></td>
-                <td><samp><%= $sum{'month-coupon-novisit-gender'}{female} %></samp></td>
-                <td><samp><%= $sum{'month-coupon-novisit-agegroup'}{10} %></samp></td>
-                <td><samp><%= $sum{'month-coupon-novisit-agegroup'}{20} %></samp></td>
-                <td><samp><%= $sum{'month-coupon-novisit-agegroup'}{30} %></samp></td>
+                <td>
+                    <samp>
+                        % my $total_visit = $sum{'month-coupon'}{1};
+                        % my $days_visit = $sum{'month-coupon'}{'visit-days'};
+                        % my $avg_visit = $days_visit ? $total_visit / $days_visit : '-';
+                        <div><%=  $total_visit %></div>
+                        <div>(일평균 <%= sprintf('%.1f',$avg_visit) %>명)</div>
+                    </samp>
+                </td>
+                <td>
+                    <samp>
+                        % {
+                        %   my $val = $sum{'month-coupon-visit-gender'}{male};
+                        %   my $percentile = $val / $total_visit * 100;
+                            <div> <%=  $val %> </div>
+                            <div> ( <%= sprintf('%d', $percentile) %>%) </div>
+                        % }
+                    </samp>
+                </td>
+                <td>
+                    <samp>
+                        % {
+                        %   my $val = $sum{'month-coupon-visit-gender'}{female};
+                        %   my $percentile = $val / $total_visit * 100;
+                            <div> <%=  $val %> </div>
+                            <div> ( <%= sprintf('%d', $percentile) %>%) </div>
+                        % }
+                    </samp>
+                </td>
+                <td>
+                    <samp>
+                        % {
+                        %   my $val = $sum{'month-coupon-visit-agegroup'}{10};
+                        %   my $percentile = $val / $total_visit * 100;
+                            <div> <%=  $val %> </div>
+                            <div> ( <%= sprintf('%d', $percentile) %>%) </div>
+                        % }
+                    </samp>
+                </td>
+                <td>
+                    <samp>
+                        % {
+                        %   my $val = $sum{'month-coupon-visit-agegroup'}{20};
+                        %   my $percentile = $val / $total_visit * 100;
+                            <div> <%=  $val %> </div>
+                            <div> ( <%= sprintf('%d', $percentile) %>%) </div>
+                        % }
+                    </samp>
+                </td>
+                <td>
+                    <samp>
+                        % {
+                        %   my $val = $sum{'month-coupon-visit-agegroup'}{30};
+                        %   my $percentile = $val / $total_visit * 100;
+                            <div> <%=  $val %> </div>
+                            <div> ( <%= sprintf('%d', $percentile) %>%) </div>
+                        % }
+                    </samp>
+                </td>
+                <td>
+                    <samp>
+                        % my $total_novisit = $sum{'month-coupon'}{0};
+                        % my $days_novisit = $sum{'month-coupon'}{'novisit-days'};
+                        % my $avg_novisit = $days_novisit ? $total_novisit / $days_novisit : '-';
+                        <div><%=  $total_novisit %></div>
+                        <div>(일평균 <%= sprintf('%d',$avg_novisit) %>명)</div>
+                    </samp>
+                </td>
+                <td>
+                    <samp>
+                        % {
+                        %   my $val = $sum{'month-coupon-novisit-gender'}{male};
+                        %   my $percentile = $val / $total_novisit * 100;
+                            <div> <%=  $val %> </div>
+                            <div> ( <%= sprintf('%d', $percentile) %>%) </div>
+                        % }
+                    </samp>
+                </td>
+                <td>
+                    <samp>
+                        % {
+                        %   my $val = $sum{'month-coupon-novisit-gender'}{female};
+                        %   my $percentile = $val / $total_novisit * 100;
+                            <div> <%=  $val %> </div>
+                            <div> ( <%= sprintf('%d', $percentile) %>%) </div>
+                        % }
+                    </samp>
+                </td>
+                <td>
+                    <samp>
+                        % {
+                        %   my $val = $sum{'month-coupon-novisit-agegroup'}{10};
+                        %   my $percentile = $val / $total_novisit * 100;
+                            <div> <%=  $val %> </div>
+                            <div> ( <%= sprintf('%d', $percentile) %>%) </div>
+                        % }
+                    </samp>
+                </td>
+                <td>
+                    <samp>
+                        % {
+                        %   my $val = $sum{'month-coupon-novisit-agegroup'}{20};
+                        %   my $percentile = $val / $total_novisit * 100;
+                            <div> <%=  $val %> </div>
+                            <div> ( <%= sprintf('%d', $percentile) %>%) </div>
+                        % }
+                    </samp>
+                </td>
+                <td>
+                    <samp>
+                        % {
+                        %   my $val = $sum{'month-coupon-novisit-agegroup'}{30};
+                        %   my $percentile = $val / $total_novisit * 100;
+                            <div> <%=  $val %> </div>
+                            <div> ( <%= sprintf('%d', $percentile) %>%) </div>
+                        % }
+                    </samp>
+                </td>
                 </tr>
             </tbody>
             </table>
