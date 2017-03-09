@@ -54,9 +54,10 @@
           % }
         </a>
         % if ($coupon) {
-        <small>
-          %= $EVENT_NAME_MAP{$event} || '쿠폰'
-        </small>
+          <small>
+            <i class="icon-ticket"></i>
+            %= $EVENT_NAME_MAP{$event} || "$event (쿠폰)"
+          </small>
         % }
       </h4>
     </div>

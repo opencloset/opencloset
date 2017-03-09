@@ -1878,6 +1878,13 @@ sub is_nonpayment {
 
 =cut
 
+my %COUPON_EVENT_NAME_MAP = (
+    seoul        => '취업날개',
+    gwanak       => '관악고용',
+    '10bob'      => '십시일밥',
+    'seoul-2017' => '취업날개'
+);
+
 our %COUPON_STATUS_MAP = (
     ''        => '사용가능',
     used      => '사용된',
@@ -1894,6 +1901,9 @@ sub coupon2label {
     my $status = $coupon->status || '';
     my $price  = $coupon->price;
     my $title  = sprintf( "%d(%s)", $coupon->id, $coupon->code );
+    my $event  = $coupon ? $coupon->desc : '';
+    ($event) = split( /\|/, $event ) if $event;
+    $event = $COUPON_EVENT_NAME_MAP{$event} || $event;
 
     my $klass = 'label-info';
     $klass = 'label-danger' if $status =~ /(us|discard)ed/;
@@ -1903,7 +1913,7 @@ sub coupon2label {
 
     my $html = Mojo::DOM::HTML->new;
     $html->parse(
-        qq{<span class="label $klass" title="$title">$COUPON_STATUS_MAP{$status} 쿠폰$extra</span>}
+        qq{<span class="label $klass" title="$title">$COUPON_STATUS_MAP{$status} 쿠폰($event)$extra</span>}
     );
 
     my $tree = $html->tree;
