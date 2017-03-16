@@ -838,3 +838,16 @@ $ ->
         OpenCloset.alert 'danger', '연체문자전송 업데이트에 실패하였습니다.'
       complete: (jqXHR, textStatus) ->
         $this.removeClass('disabled')
+
+  $('#form-coupon-code').on 'submit', (e) ->
+    e.preventDefault()
+    $form = $(@)
+    $.ajax $form.prop('action'),
+      type: 'POST'
+      dataType: 'json'
+      data: $form.serialize()
+      success: (data, textStatus, jqXHR) ->
+        location.reload()
+      error: (jqXHR, textStatus, errorThrown) ->
+        OpenCloset.alert(jqXHR.responseJSON.error.str)
+      complete: (jqXHR, textStatus) ->

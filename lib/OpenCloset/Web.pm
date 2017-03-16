@@ -1,7 +1,7 @@
 package OpenCloset::Web;
 use Mojo::Base 'Mojolicious';
 
-use version; our $VERSION = qv("v1.8.50");
+use version; our $VERSION = qv("v1.8.51");
 
 use CHI;
 use DateTime;
@@ -299,6 +299,7 @@ sub _private_routes {
     $r->post('/order')->to('order#create');
     $r->get('/order/:id')->to('order#order');
     $r->post('/order/:id/update')->to('order#update');
+    $r->post('/order/:id/coupon')->to('order#create_coupon');
 
     $r->get('/booking')->to('booking#index');
     $r->get('/booking/:ymd')->to('booking#ymd');
