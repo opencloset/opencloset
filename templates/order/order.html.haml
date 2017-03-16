@@ -29,6 +29,15 @@
       %span.return-memo= $memo
   %hr
 - }
+- unless ($order->coupon_id) {
+  .search
+    %form#form-coupon-code{:action => "#{url_for('/order/' . $order->id . '/coupon')}", :method => 'POST'}
+      .input-group
+        %input#input-coupon-code.form-control{:type => 'text', :name => 'coupon-code', :placeholder => '쿠폰코드'}
+        %span.input-group-btn
+          %button.btn.btn-sm.btn-default{:type => 'submit'}
+            입력
+- }
 
 .row#order{ 'data-order-id' => "#{ $order->id }", 'data-order-parent-id' => "#{ $order->parent_id // q{} } ", 'data-url' => "#{ url_for( '/api/order/' . $order->id ) }", 'data-today' => "#{ $today // q{} }" }
   .col-sm-10.col-sm-offset-1
