@@ -1229,4 +1229,29 @@ sub update_booking {
     $self->render( json => $self->flatten_booking( $order->booking ) );
 }
 
+=head2 create_coupon
+
+    POST /order/:id/coupon
+
+=cut
+
+sub create_coupon {
+    my $self = shift;
+    my $id   = $self->param('id');
+
+    my $order = $self->DB->resultset('Order')->find( { id => $id } );
+    return $self->error( 404, { str => "Not found order: $id" } ) unless $order;
+
+    my $v = $self->validation;
+    $v->required('coupon-code')->like(qr/^[0-9A-Z]{4}-[0-9A-Z]{4}-[0-9A-Z]{4}$/);
+    return $self->error( 400, { str => 'Invalid coupon-code' } ) if $v->has_error;
+
+    my $coupon_code = $self->param('coupon-code');
+    my ( $coupon, $error ) = $self->coupon_validate($coupon_code);
+    return $self->error( 400, { str => $error } ) if $error;
+
+    $self->transfer_order( $coupon, $order );
+    $self->render( json => { $coupon->get_columns } );
+}
+
 1;
