@@ -19,6 +19,7 @@ use Parcel::Track;
 use Statistics::Basic;
 use Try::Tiny;
 
+use OpenCloset::Calculator::LateFee;
 use OpenCloset::Size::Guess;
 use OpenCloset::Constants::Measurement;
 use OpenCloset::Constants::Category qw/$JACKET $PANTS $SKIRT/;
@@ -205,56 +206,8 @@ sub order_clothes_price {
 
 sub calc_extension_days {
     my ( $self, $order, $today ) = @_;
-
-    return 0 unless $order;
-
-    my $target_dt      = $order->target_date;
-    my $return_dt      = $order->return_date;
-    my $user_target_dt = $order->user_target_date;
-
-    return 0 unless $target_dt;
-    return 0 unless $user_target_dt;
-
-    my $now = DateTime->now( time_zone => $self->config->{timezone} );
-    if ( $today && $today =~ m/^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}:\d{2}$/ ) {
-        my $pattern = $today =~ /T/ ? q{%FT%T} : q{%F %T};
-        my $strp = DateTime::Format::Strptime->new(
-            pattern   => $pattern,
-            time_zone => $self->config->{timezone},
-            on_error  => 'undef',
-        );
-
-        my $dt = $strp->parse_datetime($today);
-        $now = $dt if $dt;
-    }
-
-    $return_dt ||= $now;
-
-    $target_dt->set_time_zone( $self->config->{timezone} );
-    $user_target_dt->set_time_zone( $self->config->{timezone} );
-
-    $target_dt = $target_dt->clone->truncate( to => 'day' );
-    $user_target_dt = $user_target_dt->clone->truncate( to => 'day' );
-    $return_dt = $return_dt->clone->truncate( to => 'day' );
-
-    my $DAY_AS_SECONDS = 60 * 60 * 24;
-
-    my $target_epoch      = $target_dt->epoch;
-    my $return_epoch      = $return_dt->epoch;
-    my $user_target_epoch = $user_target_dt->epoch;
-
-    return 0 if $target_epoch >= $return_epoch;
-
-    my $dur;
-    if ( $user_target_epoch - $return_epoch > 0 ) {
-        $dur = $return_epoch - $target_epoch;
-    }
-    else {
-        $dur = $user_target_epoch - $target_epoch;
-    }
-
-    return 0 if $dur <= 0;
-    return int( $dur / $DAY_AS_SECONDS );
+    my $calc = OpenCloset::Calculator::LateFee->new;
+    return $calc->extension_days( $order, $today );
 }
 
 =head2 calc_overdue_days( $order, $today )
@@ -265,51 +218,8 @@ sub calc_extension_days {
 
 sub calc_overdue_days {
     my ( $self, $order, $today ) = @_;
-
-    return 0 unless $order;
-
-    my $target_dt      = $order->target_date;
-    my $return_dt      = $order->return_date;
-    my $user_target_dt = $order->user_target_date;
-
-    return 0 unless $target_dt;
-    return 0 unless $user_target_dt;
-
-    my $now = DateTime->now( time_zone => $self->config->{timezone} );
-    if ( $today && $today =~ m/^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}:\d{2}$/ ) {
-        my $pattern = $today =~ /T/ ? q{%FT%T} : q{%F %T};
-        my $strp = DateTime::Format::Strptime->new(
-            pattern   => $pattern,
-            time_zone => $self->config->{timezone},
-            on_error  => 'undef',
-        );
-
-        my $dt = $strp->parse_datetime($today);
-        $now = $dt if $dt;
-    }
-
-    $return_dt ||= $now;
-
-    $target_dt->set_time_zone( $self->config->{timezone} );
-    $user_target_dt->set_time_zone( $self->config->{timezone} );
-
-    $target_dt = $target_dt->clone->truncate( to => 'day' );
-    $user_target_dt = $user_target_dt->clone->truncate( to => 'day' );
-    $return_dt = $return_dt->clone->truncate( to => 'day' );
-
-    my $DAY_AS_SECONDS = 60 * 60 * 24;
-
-    my $target_epoch      = $target_dt->epoch;
-    my $return_epoch      = $return_dt->epoch;
-    my $user_target_epoch = $user_target_dt->epoch;
-
-    return 0 if $target_epoch >= $return_epoch;
-    return 0 if $user_target_epoch >= $return_epoch;
-
-    my $dur = $return_epoch - $user_target_epoch;
-
-    return 0 if $dur <= 0;
-    return int( $dur / $DAY_AS_SECONDS );
+    my $calc = OpenCloset::Calculator::LateFee->new;
+    return $calc->overdue_days( $order, $today );
 }
 
 =head2 calc_overdue( $order, $today )
@@ -321,35 +231,9 @@ sub calc_overdue_days {
 sub calc_overdue {
     my ( $self, $order, $today ) = @_;
 
-    return 0 unless $order;
-
-    my $target_dt = $order->target_date;
-    my $return_dt = $order->return_date;
-
-    return 0 unless $target_dt;
-
-    my $now = DateTime->now( time_zone => $self->config->{timezone} );
-    if ( $today && $today =~ m/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/ ) {
-        my $strp = DateTime::Format::Strptime->new(
-            pattern   => q{%F %T},
-            time_zone => $self->config->{timezone},
-            on_error  => 'undef',
-        );
-
-        my $dt = $strp->parse_datetime($today);
-        $now = $dt if $dt;
-    }
-
-    $return_dt ||= $now;
-
-    my $DAY_AS_SECONDS = 60 * 60 * 24;
-
-    my $epoch1 = $target_dt->epoch;
-    my $epoch2 = $return_dt->epoch;
-
-    my $dur = $epoch2 - $epoch1;
-    return 0 if $dur < 0;
-    return int( $dur / $DAY_AS_SECONDS ) + 1;
+    my $calc = OpenCloset::Calculator::LateFee->new;
+    my $days = $calc->overdue_days( $order, $today );
+    return $days + $calc->extension_days( $order, $today );
 }
 
 =head2 calc_extension_fee( $order, $today )
@@ -361,13 +245,8 @@ sub calc_overdue {
 sub calc_extension_fee {
     my ( $self, $order, $today ) = @_;
 
-    my $price = $self->order_clothes_price($order);
-    my $days = $self->calc_extension_days( $order, $today );
-    return 0 unless $days;
-
-    my $extension_fee = $price * 0.2 * $days;
-
-    return $extension_fee;
+    my $calc = OpenCloset::Calculator::LateFee->new;
+    return $calc->extension_fee( $order, $today );
 }
 
 =head2 calc_overdue_fee( $order, $today )
@@ -378,14 +257,8 @@ sub calc_extension_fee {
 
 sub calc_overdue_fee {
     my ( $self, $order, $today ) = @_;
-
-    my $price = $self->order_clothes_price($order);
-    my $days = $self->calc_overdue_days( $order, $today );
-    return 0 unless $days;
-
-    my $overdue_fee = $price * 0.3 * $days;
-
-    return $overdue_fee;
+    my $calc = OpenCloset::Calculator::LateFee->new;
+    return $calc->overdue_fee( $order, $today );
 }
 
 =head2 calc_late_fee( $order, $today )
@@ -397,12 +270,8 @@ sub calc_overdue_fee {
 sub calc_late_fee {
     my ( $self, $order, $today ) = @_;
 
-    my $extension_fee = $self->calc_extension_fee( $order, $today );
-    my $overdue_fee = $self->calc_overdue_fee( $order, $today );
-
-    my $late_fee = $extension_fee + $overdue_fee;
-
-    return $late_fee;
+    my $calc = OpenCloset::Calculator::LateFee->new;
+    return $calc->late_fee( $order, $today );
 }
 
 =head2 flatten_user( $user )
