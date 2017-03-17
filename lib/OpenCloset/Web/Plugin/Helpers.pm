@@ -9,6 +9,7 @@ use DateTime::Format::Strptime;
 use DateTime;
 use Gravatar::URL;
 use HTTP::Tiny;
+use Iamport::REST::Client;
 use List::MoreUtils qw( zip );
 use List::Util qw/any uniq/;
 use Mojo::ByteStream;
@@ -95,6 +96,7 @@ sub register {
     $app->helper( choose_value_by_range    => \&choose_value_by_range );
     $app->helper( mean_status              => \&mean_status );
     $app->helper( booking_list             => \&booking_list );
+    $app->helper( create_vbank             => \&create_vbank );
 }
 
 =head1 HELPERS
@@ -2359,6 +2361,45 @@ sub booking_list {
     }
 
     return @data;
+}
+
+=head2 create_vbank( $tname, $code, $holder, $amount, $due, $order_id )
+
+    my %ret = json_decode(
+        $self->create_vbank(
+            '연장비', '04', '유용빈', '22000',
+            DateTime->now->epoch + 3600, 51183
+        );
+
+=cut
+
+sub create_vbank {
+    my ( $self, $tname, $code, $holder, $amount, $limit, $order_id ) = @_;
+
+    my $order =
+        $self->app->DB->resultset('Order')->find( { id => $order_id } );
+    die "order not found\n" unless $order;
+
+    my $imp = Iamport::REST::Client->new(
+        key    => $self->config->{iamport}{key},
+        secret => $self->config->{iamport}{secret}
+    );
+    my $opt = {
+        merchant_uid => $self->app->merchant_uid( "staff-%d-", $order->id ),
+        amount       => $amount,
+        vbank_due    => $limit,
+        vbank_holder => $holder,
+        vbank_code   => $code,
+        name         => $tname . "#$order_id",
+        buyer_name   => $order->user->name,
+        buyer_email  => $order->user->email,
+        buyer_tel    => $order->user->user_info->phone,
+        buyer_addr   => $order->user->user_info->address2,
+        notice_url => $self->url_for("/order/$order_id/unpaid/hook")->to_abs->to_string,
+    };
+    my $ret = $imp->create_vbank($opt);
+
+    return $ret;
 }
 
 1;
