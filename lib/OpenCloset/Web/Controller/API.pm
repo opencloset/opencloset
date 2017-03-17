@@ -12,6 +12,7 @@ use Path::Tiny ();
 use Postcodify;
 use String::Random;
 use Try::Tiny;
+use Mojo::JSON qw/decode_json/;
 
 use OpenCloset::Common::Unpaid ();
 use OpenCloset::Constants::Status qw/$LOST $DISCARD/;
@@ -3101,6 +3102,47 @@ sub api_upload_photo {
     }
 
     $self->render( text => $res->{content} );
+}
+
+=head2 send_vbank_sms
+
+    PUT /api/order/:id/send-vbank-sms
+
+=cut
+
+sub api_send_vbank_sms {
+    my $self = shift;
+    my $order_id   = $self->param('id');
+
+    my ( $cond_ref, $attr_ref ) = $self->get_dbic_cond_attr_unpaid;
+    my $order =
+        $self->DB->resultset('Order')->search( $cond_ref, $attr_ref )->find($order_id);
+
+    if ( $order->status->name eq '반납' ) {
+        my $unpaid = $order->get_column('sum_final_price');
+        if ($unpaid) {
+            my $user = $order->user;
+            my $vbank_ref = $self->create_vbank( '연장비', '04', '열린옷장-' . $user->name, $unpaid,
+                DateTime->now->epoch + 86400, * 3 $order->id );
+            my $json = decode_json($vbank_ref);
+            my $str  = sprintf(
+                '[열린옷장] %s님, %d일 연장, %d일 연체로 추가 금액 %s원이 발생하였습니다. 금일 중으로 %s %s(예금주 : %s)으로 입금해주세요. 지정된 금액으로 3일동안 유효한 %s님의 임금전용 가상계좌입니다. 금액과 입금기한에 유의해 주시기 바랍니다',
+                $user->name,
+                $self->calc_extension_days($order),
+                $self->calc_overdue_days($order),
+                $self->commify($unpaid),
+                $json->{response}{vbank_name},
+                $json->{response}{vbank_num},
+                $json->{response}{vbank_holder},
+                $user->name,
+            );
+            $str =~ s/, 0일 연장//;
+            $str =~ s/, 0일 연체/으/;
+            $self->sms($user->user_info->phone, $str);
+        }
+    }
+
+    $self->respond_to( json => { status => 200, json => {} } );
 }
 
 1;
