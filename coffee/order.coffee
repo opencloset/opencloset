@@ -118,3 +118,18 @@ $ ->
         OpenCloset.alert('success', "완납처리 되었습니다")
       error: (jqXHR, textStatus) ->
         OpenCloset.alert('danger', "오류가 발생했습니다: #{jqXHR.responseJSON.error.str}")
+
+  $('.send-vbank-sms').on 'click', (e) ->
+    e.preventDefault()
+    return unless confirm '전용 가상계좌를 발송하시겠습니까?'
+    $tr      = $(@).closest('tr')
+    order_id = $tr.find('td:first a').text()
+    $.ajax "/api/order/#{order_id}/send-vbank-sms.json",
+      type: 'PUT'
+      data:
+        price: 0
+      success: (data) ->
+        $tr.remove()
+        OpenCloset.alert('success', "전용계좌 발송이 처리되었습니다")
+      error: (jqXHR, textStatus) ->
+        OpenCloset.alert('danger', "오류가 발생했습니다: #{jqXHR.responseJSON.error.str}")

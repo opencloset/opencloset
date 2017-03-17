@@ -180,6 +180,8 @@
               - if ( $sms_label && $sms_str ) {
                 %br
                 %a{ :href => "#{ url_for('/sms')->query( to => $order->user->user_info->phone, msg => $sms_str ) }" }= $sms_label
+                %br
+                %a.send-vbank-sms.label.label-success{:href => "#"} 가상계좌 문자전송
                 - if (my $tracking_url = tracking_url($order)) {
                   %a{ :href => "#{ $tracking_url }", :target => '_blank', :title => '배송조회' }
                     %span.glyphicon.glyphicon-link
