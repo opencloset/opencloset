@@ -1256,4 +1256,25 @@ sub create_coupon {
     $self->render( json => { $coupon->get_columns } );
 }
 
+=head2 update_unpaid_hook
+
+iamport로 부터 전달받는 가상계좌의 완납 hook
+
+    POST /order/:id/unpaid/hook
+
+=cut
+
+sub update_unpaid_hook {
+    my $self = shift;
+    my $id   = $self->param('id');
+
+    my $order = $self->DB->resultset('Order')->find( { id => $id } );
+    return $self->error( 404, { str => "Not found order: $id" } ) unless $order;
+
+    # POST 내용을 확인하고 'paid'이면
+    # $order의 status를 '완납'으로 변경
+
+    $self->respond_to( html => { status => 200 } );
+}
+
 1;

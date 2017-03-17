@@ -302,6 +302,7 @@ sub _private_routes {
     $r->get('/order/:id')->to('order#order');
     $r->post('/order/:id/update')->to('order#update');
     $r->post('/order/:id/coupon')->to('order#create_coupon');
+    $r->post('/order/:id/unpaid/hook')->to('order#update_unpaid_hook');
 
     $r->get('/booking')->to('booking#index');
     $r->get('/booking/:ymd')->to('booking#ymd');
