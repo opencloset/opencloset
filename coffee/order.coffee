@@ -103,13 +103,13 @@ $ ->
   ## 미납금 완납, 불납 end
 
   ## 불납 -> 완납
-  $('.nonpayment2full').click (e) ->
+  $('.nonpaid2full').click (e) ->
     e.preventDefault()
     return unless confirm '완납 으로 변경하시겠습니까?'
 
     $tr      = $(@).closest('tr')
     order_id = $tr.find('td:first a').text()
-    $.ajax "/api/order/#{order_id}/nonpayment2full",
+    $.ajax "/api/order/#{order_id}/nonpaid2fullpaid",
       type: 'PUT'
       dataType: 'json'
       data: {}

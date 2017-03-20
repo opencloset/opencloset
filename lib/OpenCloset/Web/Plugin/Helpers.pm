@@ -20,6 +20,7 @@ use Statistics::Basic;
 use Try::Tiny;
 
 use OpenCloset::Calculator::LateFee;
+use OpenCloset::Common::Unpaid ();
 use OpenCloset::Size::Guess;
 use OpenCloset::Constants::Measurement;
 use OpenCloset::Constants::Category qw/$JACKET $PANTS $SKIRT/;
@@ -1730,12 +1731,10 @@ C<order_id> 에 대해 불납의 이력이 있는지 확인
 
 =cut
 
-sub is_nonpayment {
-    my ( $self, $order_id ) = @_;
-    return unless $order_id;
-
-    return $self->app->DB->resultset('OrderDetail')
-        ->search( { order_id => $order_id, stage => 4 } )->next;
+sub is_nonpaid {
+    my ( $self, $order ) = @_;
+    return unless $order;
+    return OpenCloset::Common::Unpaid::is_nonpaid($order);
 }
 
 =head2 coupon2label( $coupon )

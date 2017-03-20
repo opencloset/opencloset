@@ -45,7 +45,7 @@
                                           %i.icon-warning-sign
                                           미납
                                       - }
-                                      - if (is_nonpayment($order->id)) {
+                                      - if (is_nonpaid($order)) {
                                         %span.label.label-danger
                                           %i.icon-warning-sign
                                           불납

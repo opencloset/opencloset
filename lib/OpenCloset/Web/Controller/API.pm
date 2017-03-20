@@ -13,6 +13,7 @@ use Postcodify;
 use String::Random;
 use Try::Tiny;
 
+use OpenCloset::Common::Unpaid ();
 use OpenCloset::Constants::Status qw/$LOST $DISCARD/;
 
 has DB => sub { shift->app->DB };
@@ -837,13 +838,13 @@ sub api_update_order_unpaid {
     $self->respond_to( json => { status => 200, json => $data } );
 }
 
-=head2 update_order_nonpayment2full
+=head2 update_order_nonpaid2fullpaid
 
-    PUT /api/order/:id/nonpayment2full
+    PUT /api/order/:id/nonpaid2fullpaid
 
 =cut
 
-sub api_update_order_nonpayment2full {
+sub api_update_order_nonpaid2fullpaid {
     my $self = shift;
     my $id   = $self->param('id');
 
@@ -851,29 +852,12 @@ sub api_update_order_nonpayment2full {
     return $self->error( 404, { str => "Not found order: $id", data => {} } )
         unless $order;
 
-    my $bool = $self->is_nonpayment($id);
-    return $self->error( 400, { str => "Not nonpayment order: $id", data => {} } )
+    my $bool = OpenCloset::Common::Unpaid::is_nonpaid($order);
+    return $self->error( 400, { str => "Not nonpaid order: $id", data => {} } )
         unless $bool;
 
-    my $detail = $order->order_details( { stage => 1 }, { rows => 1 } )->single;
-    return $self->error( 400, { str => "Not found unpayment price", data => {} } )
-        unless $detail;
-
-    my $final_price = $detail->final_price;
-    my ( $ret, $status, $error ) = do {
-        my $guard = $self->DB->txn_scope_guard;
-        my $details = $order->order_details( { stage => 4 } );
-        while ( my $detail = $details->next ) {
-            my $cond = { stage => 5 };
-            if ( $detail->name eq '불납' ) {
-                $cond->{name}        = '완납';
-                $cond->{price}       = $final_price;
-                $cond->{final_price} = $final_price;
-            }
-            $detail->update($cond);
-        }
-        $guard->commit;
-    };
+    return $self->error( 500, { str => 'Failed to update nonpaid2fullpaid' } )
+        unless OpenCloset::Common::Unpaid::nonpaid2fullpaid($order);
 
     $self->respond_to( json => { status => 200, json => {} } );
 }
