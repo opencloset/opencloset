@@ -20,6 +20,7 @@ use Statistics::Basic;
 use Try::Tiny;
 
 use OpenCloset::Calculator::LateFee;
+use OpenCloset::Common::Unpaid ();
 use OpenCloset::Size::Guess;
 use OpenCloset::Constants::Measurement;
 use OpenCloset::Constants::Category qw/$JACKET $PANTS $SKIRT/;
@@ -46,55 +47,54 @@ sub register {
     my ( $self, $app, $conf ) = @_;
 
     $app->helper( log => sub { shift->app->log } );
-    $app->helper( error                     => \&error );
-    $app->helper( meta_link                 => \&meta_link );
-    $app->helper( meta_text                 => \&meta_text );
-    $app->helper( get_gravatar              => \&get_gravatar );
-    $app->helper( trim_clothes_code         => \&trim_clothes_code );
-    $app->helper( order_clothes_price       => \&order_clothes_price );
-    $app->helper( flatten_user              => \&flatten_user );
-    $app->helper( tracking_url              => \&tracking_url );
-    $app->helper( order_price               => \&order_price );
-    $app->helper( flatten_order             => \&flatten_order );
-    $app->helper( flatten_order_detail      => \&flatten_order_detail );
-    $app->helper( flatten_clothes           => \&flatten_clothes );
-    $app->helper( flatten_booking           => \&flatten_booking );
-    $app->helper( get_params                => \&get_params );
-    $app->helper( get_user                  => \&get_user );
-    $app->helper( update_user               => \&update_user );
-    $app->helper( get_user_list             => \&get_user_list );
-    $app->helper( create_order              => \&create_order );
-    $app->helper( get_order                 => \&get_order );
-    $app->helper( update_order              => \&update_order );
-    $app->helper( delete_order              => \&delete_order );
-    $app->helper( get_order_list            => \&get_order_list );
-    $app->helper( create_order_detail       => \&create_order_detail );
-    $app->helper( get_clothes               => \&get_clothes );
-    $app->helper( get_nearest_booked_order  => \&get_nearest_booked_order );
-    $app->helper( convert_sec_to_locale     => \&convert_sec_to_locale );
-    $app->helper( convert_sec_to_hms        => \&convert_sec_to_hms );
-    $app->helper( phone_format              => \&phone_format );
-    $app->helper( user_avg_diff             => \&user_avg_diff );
-    $app->helper( user_avg2                 => \&user_avg2 );
-    $app->helper( count_visitor             => \&count_visitor );
-    $app->helper( get_dbic_cond_attr_unpaid => \&get_dbic_cond_attr_unpaid );
-    $app->helper( is_nonpayment             => \&is_nonpayment );
-    $app->helper( coupon2label              => \&coupon2label );
-    $app->helper( measurement2text          => \&measurement2text );
-    $app->helper( decrypt_mbersn            => \&decrypt_mbersn );
-    $app->helper( redis                     => \&redis );
-    $app->helper( calc_late_fee             => \&calc_late_fee );
-    $app->helper( calc_overdue              => \&calc_overdue );
-    $app->helper( calc_extension_fee        => \&calc_extension_fee );
-    $app->helper( calc_extension_days       => \&calc_extension_days );
-    $app->helper( calc_overdue_fee          => \&calc_overdue_fee );
-    $app->helper( calc_overdue_days         => \&calc_overdue_days );
-    $app->helper( search_clothes            => \&search_clothes );
-    $app->helper( clothes2link              => \&clothes2link );
-    $app->helper( is_suit_order             => \&is_suit_order );
-    $app->helper( choose_value_by_range     => \&choose_value_by_range );
-    $app->helper( mean_status               => \&mean_status );
-    $app->helper( booking_list              => \&booking_list );
+    $app->helper( error                    => \&error );
+    $app->helper( meta_link                => \&meta_link );
+    $app->helper( meta_text                => \&meta_text );
+    $app->helper( get_gravatar             => \&get_gravatar );
+    $app->helper( trim_clothes_code        => \&trim_clothes_code );
+    $app->helper( order_clothes_price      => \&order_clothes_price );
+    $app->helper( flatten_user             => \&flatten_user );
+    $app->helper( tracking_url             => \&tracking_url );
+    $app->helper( order_price              => \&order_price );
+    $app->helper( flatten_order            => \&flatten_order );
+    $app->helper( flatten_order_detail     => \&flatten_order_detail );
+    $app->helper( flatten_clothes          => \&flatten_clothes );
+    $app->helper( flatten_booking          => \&flatten_booking );
+    $app->helper( get_params               => \&get_params );
+    $app->helper( get_user                 => \&get_user );
+    $app->helper( update_user              => \&update_user );
+    $app->helper( get_user_list            => \&get_user_list );
+    $app->helper( create_order             => \&create_order );
+    $app->helper( get_order                => \&get_order );
+    $app->helper( update_order             => \&update_order );
+    $app->helper( delete_order             => \&delete_order );
+    $app->helper( get_order_list           => \&get_order_list );
+    $app->helper( create_order_detail      => \&create_order_detail );
+    $app->helper( get_clothes              => \&get_clothes );
+    $app->helper( get_nearest_booked_order => \&get_nearest_booked_order );
+    $app->helper( convert_sec_to_locale    => \&convert_sec_to_locale );
+    $app->helper( convert_sec_to_hms       => \&convert_sec_to_hms );
+    $app->helper( phone_format             => \&phone_format );
+    $app->helper( user_avg_diff            => \&user_avg_diff );
+    $app->helper( user_avg2                => \&user_avg2 );
+    $app->helper( count_visitor            => \&count_visitor );
+    $app->helper( is_nonpaid               => \&is_nonpaid );
+    $app->helper( coupon2label             => \&coupon2label );
+    $app->helper( measurement2text         => \&measurement2text );
+    $app->helper( decrypt_mbersn           => \&decrypt_mbersn );
+    $app->helper( redis                    => \&redis );
+    $app->helper( calc_late_fee            => \&calc_late_fee );
+    $app->helper( calc_overdue             => \&calc_overdue );
+    $app->helper( calc_extension_fee       => \&calc_extension_fee );
+    $app->helper( calc_extension_days      => \&calc_extension_days );
+    $app->helper( calc_overdue_fee         => \&calc_overdue_fee );
+    $app->helper( calc_overdue_days        => \&calc_overdue_days );
+    $app->helper( search_clothes           => \&search_clothes );
+    $app->helper( clothes2link             => \&clothes2link );
+    $app->helper( is_suit_order            => \&is_suit_order );
+    $app->helper( choose_value_by_range    => \&choose_value_by_range );
+    $app->helper( mean_status              => \&mean_status );
+    $app->helper( booking_list             => \&booking_list );
 }
 
 =head1 HELPERS
@@ -1673,69 +1673,17 @@ sub count_visitor {
     return \%count;
 }
 
-=head2 get_dbic_cond_attr_unpaid
+=head2 is_nonpaid( $order )
 
-=cut
-
-sub get_dbic_cond_attr_unpaid {
-    my $self = shift;
-
-    #
-    # SELECT
-    #     o.id                    AS o_id,
-    #     o.user_id               AS o_user_id,
-    #     o.status_id             AS o_status_id,
-    #     o.late_fee_pay_with     AS o_late_fee_pay_with,
-    #     o.compensation_pay_with AS o_compensation_pay_with,
-    #     SUM( od.final_price )   AS sum_final_price
-    # FROM `order` AS o
-    # LEFT JOIN `order_detail` AS od ON o.id = od.order_id
-    # WHERE (
-    #     o.`status_id` = 9
-    #     AND (
-    #         -- 연체료나 배상비 중 최소 하나는 미납이어야 함
-    #         o.`late_fee_pay_with` = '미납'
-    #         OR o.`compensation_pay_with` = '미납'
-    #     )
-    #     AND od.stage > 0
-    # )
-    # GROUP BY o.id
-    # HAVING sum_final_price > 0
-    # ;
-    #
-
-    my %cond = (
-        -and => [
-            'me.status_id'        => 9,
-            'order_details.stage' => { '>' => 0 },
-            -or =>
-                [ 'me.late_fee_pay_with' => '미납', 'me.compensation_pay_with' => '미납', ],
-        ],
-    );
-
-    my %attr = (
-        join      => [qw/ order_details /],
-        group_by  => [qw/ me.id /],
-        having    => { 'sum_final_price' => { '>' => 0 } },
-        '+select' => [ { sum => 'order_details.final_price', -as => 'sum_final_price' }, ],
-    );
-
-    return ( \%cond, \%attr );
-}
-
-=head2 is_nonpayment( $order_id )
-
-C<order_id> 에 대해 불납의 이력이 있는지 확인
+C<order> 에 대해 불납의 이력이 있는지 확인
 불납이면 order_detail 에 대한 C<$resultset> 아니면 C<undef> 를 return
 
 =cut
 
-sub is_nonpayment {
-    my ( $self, $order_id ) = @_;
-    return unless $order_id;
-
-    return $self->app->DB->resultset('OrderDetail')
-        ->search( { order_id => $order_id, stage => 4 } )->next;
+sub is_nonpaid {
+    my ( $self, $order ) = @_;
+    return unless $order;
+    return OpenCloset::Common::Unpaid::is_nonpaid($order);
 }
 
 =head2 coupon2label( $coupon )

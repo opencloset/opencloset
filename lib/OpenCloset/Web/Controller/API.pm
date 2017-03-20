@@ -13,6 +13,7 @@ use Postcodify;
 use String::Random;
 use Try::Tiny;
 
+use OpenCloset::Common::Unpaid ();
 use OpenCloset::Constants::Status qw/$LOST $DISCARD/;
 
 has DB => sub { shift->app->DB };
@@ -663,170 +664,17 @@ sub api_update_order_unpaid {
     my $price    = $params{price} || 0;
     my $pay_with = $params{pay_with} || q{};
 
-    #
-    # find order
-    #
-    my ( $cond_ref, $attr_ref ) = $self->get_dbic_cond_attr_unpaid;
-    $cond_ref->{id} = $id;
-    my $order = $self->DB->resultset('Order')->find( $cond_ref, $attr_ref );
+    my $order = $self->DB->resultset('Order')->find( { id => $id } );
     return $self->error( 404, { str => 'unpaid order not found', data => {}, } )
         unless $order;
 
-    #
-    # stage
-    #
-    # - 연장: 1
-    # - 배상: 2
-    # - 환불: 3
-    # - 불납: 4
-    # - 완납: 5
-    # - 부분완납: 6
-    #
-
-    #
-    # 연장
-    #
-    my $unpaid_late_fee = 0;
-    if ( $order->late_fee_pay_with eq '미납' ) {
-        for my $od ( $order->order_details->search( { stage => 1 } )->all ) {
-            $unpaid_late_fee += $od->final_price;
-        }
-
+    ## unpaid2xxx: 미납->완납 혹은 미납->불납 으로 변경하는 기능
+    unless ( OpenCloset::Common::Unpaid::unpaid2xxx( $order, $price, $pay_with ) ) {
+        return $self->error(
+            500,
+            { str => 'Failed to update unpaid order to nonpaid or fullpaid' }
+        );
     }
-
-    #
-    # 배상
-    #
-    my $unpaid_compensation_pay = 0;
-    if ( $order->compensation_pay_with eq '미납' ) {
-        for my $od ( $order->order_details->search( { stage => 2 } )->all ) {
-            $unpaid_compensation_pay += $od->final_price;
-        }
-    }
-
-    #
-    # 미납금 = 미납 연장료 + 미납 배상료
-    #
-    my $unpaid = $unpaid_late_fee + $unpaid_compensation_pay;
-
-    $self->app->log->info( '미납금.연장료: ' . $self->commify($unpaid_late_fee) );
-    $self->app->log->info(
-        '미납금.배상료: ' . $self->commify($unpaid_compensation_pay) );
-    $self->app->log->info( '미납금.총합: ' . $self->commify($unpaid) );
-
-    #
-    # 완납 / 부분완납 / 불납 구분
-    #
-    my $stage;
-    my $od_name = q{};
-    if ($price) {
-        if ( $price == $unpaid ) {
-            $stage   = 5;
-            $od_name = '완납';
-        }
-        else {
-            $stage   = 6;
-            $od_name = '부분완납';
-        }
-    }
-    else {
-        $stage   = 4;
-        $od_name = '불납';
-    }
-
-    $self->app->log->info("미납금.상태: $od_name");
-    $self->app->log->info("미납금.지불방식: $pay_with");
-    $self->app->log->info("미납금.받은금액: $price");
-
-    #
-    # TRANSACTION:
-    #
-    my ( $ret, $status, $error ) = do {
-        my $guard = $self->DB->txn_scope_guard;
-        try {
-            #
-            # 미납 주문서의 경우 주문서 표시 금액보다 적은 금액을 받았기 때문에
-            # 실제 열린옷장에서 현재 시점 기준 받은 금액으로 맞춰주기 위해
-            # 미납료 만큼을 제거하는 항목 추가
-            #
-            # 예)
-            # 3만원 주문서에 2만원 연장료와 5만원 배상료가 나왔을 경우
-            # 주문서상으로 10만원을 받은 것으로 표시되지만 실제로는 3만원만
-            # 받은 상태입니다. 따라서 주문서에 -7만원을 표시해서 결과적으로
-            # 3만원만을 현재 받은 것으로 계산하기 위한 항목을 추가합니다.
-            #
-            {
-                my $od = $self->create_order_detail(
-                    {
-                        order_id    => $order->id,
-                        name        => '미납금 총합',
-                        price       => -($unpaid),
-                        final_price => -($unpaid),
-                        stage       => $stage,
-                        desc        => sprintf(
-                            "미납금 = 연장료 + 배상료 ( %s = %s + %s )",
-                            $self->commify($unpaid), $self->commify($unpaid_late_fee),
-                            $self->commify($unpaid_compensation_pay),
-                        ),
-                    }
-                );
-                die "failed to create a new order_detail: unpaid\n" unless $od;
-            }
-
-            #
-            # 받은 금액 표시 및 완납 / 부분완납 / 불납 여부 표시
-            #
-            {
-                my $od = $self->create_order_detail(
-                    {
-                        order_id    => $order->id,
-                        name        => $od_name,
-                        price       => $price,
-                        final_price => $price,
-                        stage       => $stage,
-                        desc        => sprintf(
-                            "결제방식(%s), 포기금액(%s), 미납금 중 대여자로부터 받은 최종 금액",
-                            $pay_with, $self->commify( $unpaid - $price ),
-                        ),
-                        pay_with => $pay_with,
-                    }
-                );
-                die "failed to create a new order_detail: final user paid\n" unless $od;
-            }
-
-            #
-            # 주문서의 연장료 납부 방식 및 배상료 납부 방식 갱신
-            #
-            {
-                my %order_params;
-                if ( $order->late_fee_pay_with eq '미납' ) {
-                    $order_params{late_fee_pay_with} = $pay_with;
-                }
-                if ( $order->compensation_pay_with eq '미납' ) {
-                    $order_params{compensation_pay_with} = $pay_with;
-                }
-                $order->update( \%order_params );
-            }
-
-            $guard->commit;
-
-            return 1;
-        }
-        catch {
-            chomp;
-            my $err = $_;
-            $self->app->log->error($err);
-
-            no warnings 'experimental';
-
-            my $status;
-            given ($err) {
-                default { $status = 500 }
-            }
-
-            return ( undef, $status, $err );
-        };
-    };
 
     #
     # response
@@ -837,13 +685,13 @@ sub api_update_order_unpaid {
     $self->respond_to( json => { status => 200, json => $data } );
 }
 
-=head2 update_order_nonpayment2full
+=head2 update_order_nonpaid2fullpaid
 
-    PUT /api/order/:id/nonpayment2full
+    PUT /api/order/:id/nonpaid2fullpaid
 
 =cut
 
-sub api_update_order_nonpayment2full {
+sub api_update_order_nonpaid2fullpaid {
     my $self = shift;
     my $id   = $self->param('id');
 
@@ -851,29 +699,12 @@ sub api_update_order_nonpayment2full {
     return $self->error( 404, { str => "Not found order: $id", data => {} } )
         unless $order;
 
-    my $bool = $self->is_nonpayment($id);
-    return $self->error( 400, { str => "Not nonpayment order: $id", data => {} } )
+    my $bool = OpenCloset::Common::Unpaid::is_nonpaid($order);
+    return $self->error( 400, { str => "Not nonpaid order: $id", data => {} } )
         unless $bool;
 
-    my $detail = $order->order_details( { stage => 1 }, { rows => 1 } )->single;
-    return $self->error( 400, { str => "Not found unpayment price", data => {} } )
-        unless $detail;
-
-    my $final_price = $detail->final_price;
-    my ( $ret, $status, $error ) = do {
-        my $guard = $self->DB->txn_scope_guard;
-        my $details = $order->order_details( { stage => 4 } );
-        while ( my $detail = $details->next ) {
-            my $cond = { stage => 5 };
-            if ( $detail->name eq '불납' ) {
-                $cond->{name}        = '완납';
-                $cond->{price}       = $final_price;
-                $cond->{final_price} = $final_price;
-            }
-            $detail->update($cond);
-        }
-        $guard->commit;
-    };
+    return $self->error( 500, { str => 'Failed to update nonpaid2fullpaid' } )
+        unless OpenCloset::Common::Unpaid::nonpaid2fullpaid($order);
 
     $self->respond_to( json => { status => 200, json => {} } );
 }
