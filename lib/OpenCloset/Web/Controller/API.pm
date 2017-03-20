@@ -319,9 +319,10 @@ sub api_search_clothes_order {
     my $id   = $self->param('id');
 
     my $order = $self->get_order( { id => $id } );
-    my $user  = $order->user;
+    my $user = $order->user;
     return $self->error( 404, { str => "Order not found: $id" } ) unless $order;
-    return $self->error( 404, { str => "User not found: $order->user_id" } ) unless $user;
+    return $self->error( 404, { str => "User not found: $order->user_id" } )
+        unless $user;
 
     my $gender     = $user->user_info->gender;
     my $config     = $self->config->{'search-clothes'}{$gender};
@@ -336,22 +337,22 @@ sub api_search_clothes_order {
         gender  => $gender,
         height  => $order->height,
         weight  => $order->weight,
-        colors  => [ split(/,/, $order->pre_color) ],
+        colors  => [ split( /,/, $order->pre_color ) ],
         sizes   => { zip( @param_keys, @param_values ) },
         user_id => $order->user_id,
     );
 
-    for my $key ( 'height', 'weight', 'gender') {
+    for my $key ( 'height', 'weight', 'gender' ) {
         return $self->error( 400, { str => ucfirst($key) . ' is required' } )
             unless $params{$key};
     }
 
-    for my $key ( @param_keys ) {
+    for my $key (@param_keys) {
         return $self->error( 400, { str => ucfirst($key) . ' is required' } )
             unless $params{sizes}->{$key};
     }
 
-    my $result = $self->search_clothes( %params );
+    my $result = $self->search_clothes(%params);
     return $self->render unless $result;
 
     my $guess = shift @$result;
@@ -385,22 +386,22 @@ sub api_search_clothes_user {
         gender  => $gender,
         height  => $user_info->height,
         weight  => $user_info->weight,
-        colors  => [ split(/,/, $user_info->pre_color) ],
+        colors  => [ split( /,/, $user_info->pre_color ) ],
         sizes   => { zip( @param_keys, @param_values ) },
         user_id => $user_info->user_id,
     );
 
-    for my $key ( 'height', 'weight', 'gender') {
+    for my $key ( 'height', 'weight', 'gender' ) {
         return $self->error( 400, { str => ucfirst($key) . ' is required' } )
             unless $params{$key};
     }
 
-    for my $key ( @param_keys ) {
+    for my $key (@param_keys) {
         return $self->error( 400, { str => ucfirst($key) . ' is required' } )
             unless $params{sizes}->{$key};
     }
 
-    my $result = $self->search_clothes( %params );
+    my $result = $self->search_clothes(%params);
     return $self->render unless $result;
 
     my $guess = shift @$result;
@@ -2881,8 +2882,7 @@ sub api_gui_booking_list {
             return;
         }
 
-        $to = $from->clone->truncate( to => 'day' )
-            ->add( hours => 24 * 1, seconds => -1 );
+        $to = $from->clone->truncate( to => 'day' )->add( hours => 24 * 1, seconds => -1 );
         unless ($to) {
             my $msg = "cannot create end datetime object";
             $self->app->log->warn($msg);
