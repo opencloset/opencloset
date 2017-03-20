@@ -10,6 +10,7 @@ use HTTP::Tiny;
 use List::MoreUtils;
 use Try::Tiny;
 
+use OpenCloset::Common::Unpaid qw/unpaid_cond unpaid_attr is_nonpaid/;
 use OpenCloset::Constants::Category;
 use OpenCloset::Constants::Status;
 
@@ -144,7 +145,8 @@ sub index {
                 );
             }
             when ('unpaid') {
-                my ( $cond_ref, $attr_ref ) = $self->get_dbic_cond_attr_unpaid;
+                my $cond_ref = unpaid_cond();
+                my $attr_ref = unpaid_attr();
 
                 %cond = %$cond_ref;
                 %attr = ( %$attr_ref, order_by => 'return_date', );
