@@ -29,6 +29,7 @@
       %tr
         %th
         %th 구분 이름
+        %th 표시 이름
         %th 설명
     %tbody
       - while ( my $tag = $tag_rs->next ) {
@@ -38,6 +39,8 @@
               %button.btn.btn-xs.btn-danger.btn-tag-remove{ 'data-tag-id' => "#{ $tag->id }" } 제거
           %td
             %span.editable{ :id => "tag-id-#{ $tag->id }", 'data-pk' => "#{ $tag->id }", 'data-name' => 'name', 'data-value' => "#{ $tag->name }" }
+          %td
+            %span.editable{ :id => "tag-id-#{ $tag->id }", 'data-pk' => "#{ $tag->id }", 'data-name' => 'label', 'data-value' => "#{ $tag->label }" }
           %td
             %span.editable{ 'data-pk' => "#{ $tag->id }", 'data-name' => 'desc', 'data-value' => "#{ $tag->desc || '' }" }
       - }
