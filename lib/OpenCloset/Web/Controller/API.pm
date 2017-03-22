@@ -1757,6 +1757,15 @@ sub api_create_tag {
             #
             # create tag
             #
+
+            #
+            # GH #1141 의류 정보 화면에서 의류 종류 별로 추가적인 정보를 입력 가능하게 함
+            #
+            # 특별한 요청 사항이 없기 때문에 일단은 사용자의 입력 없이 태그 이름과
+            # 태그 라벨을 동일하게 설정해서 태그를 추가합니다.
+            #
+            $params{label} = $params{name};
+
             my $tag = $self->DB->resultset('Tag')->create( \%params );
             die "failed to create a new tag\n" unless $tag;
 
