@@ -21,7 +21,7 @@ $ ->
         html = $(compiled(data))
         $("#tag-table table tbody").append(html)
 
-        makeEditable "#tag-id-#{ data.id }"
+        makeEditable ".tag-id-#{ data.id } .editable"
       error: (jqXHR, textStatus, errorThrown) ->
         msg = jqXHR.responseJSON.error.str
         switch jqXHR.status
@@ -75,11 +75,7 @@ $ ->
               msg = "\"#{newValue}\" 태그가 이미 존재합니다."
         return msg
 
-    id = $(el).attr('id')
-    if 0
-    else
-      params.type = 'text'
-
+    params.type = 'text'
     $(el).editable params
 
   #

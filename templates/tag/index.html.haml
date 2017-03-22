@@ -38,9 +38,9 @@
             %span.tag-action
               %button.btn.btn-xs.btn-danger.btn-tag-remove{ 'data-tag-id' => "#{ $tag->id }" } 제거
           %td
-            %span.editable{ :id => "tag-id-#{ $tag->id }", 'data-pk' => "#{ $tag->id }", 'data-name' => 'name', 'data-value' => "#{ $tag->name }" }
+            %span.editable{ 'data-pk' => "#{ $tag->id }", 'data-name' => 'name', 'data-value' => "#{ $tag->name }" }
           %td
-            %span.editable{ :id => "tag-id-#{ $tag->id }", 'data-pk' => "#{ $tag->id }", 'data-name' => 'label', 'data-value' => "#{ $tag->label }" }
+            %span.editable{ 'data-pk' => "#{ $tag->id }", 'data-name' => 'label', 'data-value' => "#{ $tag->label }" }
           %td
             %span.editable{ 'data-pk' => "#{ $tag->id }", 'data-name' => 'desc', 'data-value' => "#{ $tag->desc || '' }" }
       - }
@@ -52,7 +52,17 @@
         <span class="tag-action">
           <button class="btn btn-xs btn-danger" data-tag-id="<%= id %>">제거</button>
         </span>
-        <span class="editable" id="tag-id-<%= id %>" data-pk="<%= id %>" data-name="name" data-value="<%= name %>">
+      </td>
+      <td>
+        <span class="editable" data-pk="<%= id %>" data-name="name" data-value="<%= name %>">
+        </span>
+      </td>
+      <td>
+        <span class="editable" data-pk="<%= id %>" data-name="label" data-value="<%= label %>">
+        </span>
+      </td>
+      <td>
+        <span class="editable" data-pk="<%= id %>" data-name="desc" data-value="">
         </span>
       </td>
     </tr>
