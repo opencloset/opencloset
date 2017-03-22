@@ -1855,13 +1855,14 @@ sub api_update_tag {
     #
     # fetch params
     #
-    my %params = $self->get_params(qw/ id name desc /);
+    my %params = $self->get_params(qw/ id name label desc /);
 
     #
     # validate params
     #
     my $v = $self->create_validator;
     $v->field('id')->required(1)->regexp(qr/^\d*$/);
+    $v->field('name')->regexp(qr/^.+$/);
     $v->field('name')->regexp(qr/^.+$/);
     unless ( $self->validate( $v, \%params ) ) {
         my @error_str;
