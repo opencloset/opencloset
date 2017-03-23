@@ -3124,8 +3124,8 @@ sub api_send_vbank_sms {
         if ($unpaid) {
             my $user      = $order->user;
             my $vbank_ref = $self->create_vbank(
-                '연장비',                      '04', '열린옷장-' . $user->name, $unpaid,
-                DateTime->now->epoch + 86400 * 3, $order->id
+                '연장비',      '04', '열린옷장-' . $user->name, $unpaid,
+                time + 86400 * 3, $order->id
             );
             my $json = decode_json($vbank_ref);
             my $str  = sprintf(
