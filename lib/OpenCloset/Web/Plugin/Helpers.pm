@@ -9,7 +9,6 @@ use DateTime::Format::Strptime;
 use DateTime;
 use Gravatar::URL;
 use HTTP::Tiny;
-use Iamport::REST::Client;
 use List::MoreUtils qw( zip );
 use List::Util qw/any uniq/;
 use Mojo::ByteStream;
@@ -20,6 +19,7 @@ use Parcel::Track;
 use Statistics::Basic;
 use Try::Tiny;
 
+use Iamport::REST::Client;
 use OpenCloset::Calculator::LateFee;
 use OpenCloset::Common::Unpaid ();
 use OpenCloset::Size::Guess;
