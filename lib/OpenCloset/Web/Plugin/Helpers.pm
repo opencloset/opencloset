@@ -2380,10 +2380,13 @@ sub create_vbank {
         $self->app->DB->resultset('Order')->find( { id => $order_id } );
     die "order not found\n" unless $order;
 
-    my $imp = Iamport::REST::Client->new(
+    my $user      = $order->user;
+    my $user_info = $user->user_info;
+    my $imp       = Iamport::REST::Client->new(
         key    => $self->config->{iamport}{key},
         secret => $self->config->{iamport}{secret}
     );
+
     my $opt = {
         merchant_uid => $self->app->merchant_uid( "staff-%d-", $order->id ),
         amount       => $amount,
@@ -2391,15 +2394,14 @@ sub create_vbank {
         vbank_holder => $holder,
         vbank_code   => $code,
         name         => $tname . "#$order_id",
-        buyer_name   => $order->user->name,
-        buyer_email  => $order->user->email,
-        buyer_tel    => $order->user->user_info->phone,
-        buyer_addr   => $order->user->user_info->address2,
+        buyer_name   => $user->name,
+        buyer_email  => $user->email,
+        buyer_tel    => $user_info->phone,
+        buyer_addr   => $user_info->address2,
         notice_url => $self->url_for("/order/$order_id/unpaid/hook")->to_abs->to_string,
     };
-    my $ret = $imp->create_vbank($opt);
 
-    return $ret;
+    return $imp->create_vbank($opt);
 }
 
 1;
