@@ -1152,6 +1152,10 @@ sub events_seoul {
     my $query = $storage->dbh_do(
         sub {
             my ( $storage, $dbh, @args ) = @_;
+            # 아래 쿼리에서 생성하는 결과에서 booking_coupon_issue_diff 은 *잘못* 생성된 결과이며, WHERE절 조건에서
+            # 들어간 -21600도 임시방편적인 처치입니다. 자세한 사항은 아래 이슈를 확인하시기 바랍니다.
+            #
+            # https://github.com/opencloset/opencloset/issues/1198
             $dbh->selectall_hashref(
                 <<END_SQL
                 SELECT
@@ -1183,7 +1187,7 @@ sub events_seoul {
                             LEFT  JOIN `coupon`     AS e ON ( b.coupon_id = e.id )
                     ) AS x
                 WHERE
-                    `booking_coupon_issue_diff` >= 0
+                    `booking_coupon_issue_diff` >= -21600
                     AND `booking_date` > '2016-04-25'
 END_SQL
                 , 'order_id'

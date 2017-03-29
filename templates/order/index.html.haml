@@ -85,7 +85,7 @@
     %a{ :href => "#{ url_with->query([ p => 1, status => 'undef' ]) }" } 상태없음
   %span= '|'
   %span
-    %a{ :href => "#{ url_for->query([ booking_ymd => 'all', status => 'nonpayment' ]) }" } 불납
+    %a{ :href => "#{ url_for->query([ booking_ymd => 'all', status => 'nonpaid' ]) }" } 불납
 
 .space-4
 
@@ -134,8 +134,8 @@
                   - my $staff_id = $user->id;
                   %span.status-update.label.order-status{ 'data-order-status' => "결제대기", 'data-order-id' => "#{$order->id}", 'data-status-to' => '19', 'data-staff-id' => "#{$staff_id}" }
                     결제대기
-              - } elsif ($search_status eq 'nonpayment') {
-                %a.nonpayment2full.label.label-warning{:href => '#'}
+              - } elsif ($search_status eq 'nonpaid') {
+                %a.nonpaid2full.label.label-warning{:href => '#'}
                   불납
                   %i.icon-arrow-right
                   완납

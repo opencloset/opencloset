@@ -10,6 +10,7 @@ use HTTP::Tiny;
 use List::MoreUtils;
 use Try::Tiny;
 
+use OpenCloset::Common::Unpaid qw/unpaid_cond unpaid_attr is_nonpaid/;
 use OpenCloset::Constants::Category;
 use OpenCloset::Constants::Status;
 
@@ -144,12 +145,13 @@ sub index {
                 );
             }
             when ('unpaid') {
-                my ( $cond_ref, $attr_ref ) = $self->get_dbic_cond_attr_unpaid;
+                my $cond_ref = unpaid_cond();
+                my $attr_ref = unpaid_attr();
 
                 %cond = %$cond_ref;
                 %attr = ( %$attr_ref, order_by => 'return_date', );
             }
-            when ('nonpayment') {
+            when ('nonpaid') {
                 %cond = (
                     'order_details.stage' => 4,
                     'order_details.name'  => '불납',
@@ -493,7 +495,7 @@ sub order {
         );
     }
 
-    my ( $history, $nonpayment );
+    my ( $history, $nonpaid );
     my $orders = $order->user->orders;
     while ( my $order = $orders->next ) {
         my $late_fee_pay_with     = $order->late_fee_pay_with     || '';
@@ -503,8 +505,8 @@ sub order {
             $history = '미납';
         }
 
-        $nonpayment = $self->is_nonpayment( $order->id ) unless $nonpayment;
-        last if $history && $nonpayment;
+        $nonpaid = is_nonpaid($order) unless $nonpaid;
+        last if $history && $nonpaid;
     }
 
     my $visited_order_rs = $orders->search(
@@ -539,7 +541,7 @@ sub order {
         order          => $order,
         last_order     => $last_order,
         history        => $history,
-        nonpayment     => $nonpayment,
+        nonpaid        => $nonpaid,
         today          => $params{today},
         visited        => $visited,
         detail_clothes => $detail_clothes,
