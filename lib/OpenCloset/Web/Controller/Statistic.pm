@@ -1173,7 +1173,7 @@ sub events_seoul {
                             ,d.birth                                        AS 'birth'
                             ,YEAR(NOW()) - d.birth                          AS 'age'
                             ,TRUNCATE(YEAR(NOW()) - d.birth, -1)            AS 'age_group'
-                            ,IF(b.`coupon_id` IS NOT NULL, 1, 0)            AS 'is_coupon_use'
+                            ,IF(e.`status` IN ('used', 'provided', 'reserved'), 1, 0) AS 'is_coupon_use'
                             ,e.`id`                                         AS 'coupon_id'
                             ,e.`update_date`                                AS 'coupon_date'
                             ,e.`status`                                     AS 'coupon_status'
