@@ -1163,22 +1163,22 @@ sub events_seoul {
                 FROM
                     (
                         SELECT
-                            a.`date`                                        AS 'booking_date'
-                            ,b.`id`                                         AS 'order_id'
-                            ,YEAR(a.`date`)                                 AS 'booking_year'
-                            ,MONTH(a.`date`)                                AS 'booking_month'
-                            ,DAY(a.`date`)                                  AS 'booking_day'
-                            ,IF(b.status_id = 12 OR b.status_id = 14, 0, 1) AS 'is_visit'
-                            ,d.gender                                       AS 'gender'
-                            ,d.birth                                        AS 'birth'
-                            ,YEAR(NOW()) - d.birth                          AS 'age'
-                            ,TRUNCATE(YEAR(NOW()) - d.birth, -1)            AS 'age_group'
+                            a.`date`                                                  AS 'booking_date'
+                            ,b.`id`                                                   AS 'order_id'
+                            ,YEAR(a.`date`)                                           AS 'booking_year'
+                            ,MONTH(a.`date`)                                          AS 'booking_month'
+                            ,DAY(a.`date`)                                            AS 'booking_day'
+                            ,IF(b.status_id = 12 OR b.status_id = 14, 0, 1)           AS 'is_visit'
+                            ,d.gender                                                 AS 'gender'
+                            ,d.birth                                                  AS 'birth'
+                            ,YEAR(NOW()) - d.birth                                    AS 'age'
+                            ,TRUNCATE(YEAR(NOW()) - d.birth, -1)                      AS 'age_group'
                             ,IF(e.`status` IN ('used', 'provided', 'reserved'), 1, 0) AS 'is_coupon_use'
-                            ,e.`id`                                         AS 'coupon_id'
-                            ,e.`update_date`                                AS 'coupon_date'
-                            ,e.`status`                                     AS 'coupon_status'
-                            ,SUBSTRING_INDEX(e.desc, '|', 1)                AS 'coupon_type'
-                            ,IFNULL(a.`date` - e.`update_date`,0)           AS 'booking_coupon_issue_diff'
+                            ,e.`id`                                                   AS 'coupon_id'
+                            ,e.`update_date`                                          AS 'coupon_date'
+                            ,e.`status`                                               AS 'coupon_status'
+                            ,SUBSTRING_INDEX(e.desc, '|', 1)                          AS 'coupon_type'
+                            ,IFNULL(a.`date` - e.`update_date`,0)                     AS 'booking_coupon_issue_diff'
                         FROM
                             `booking` AS a
                             INNER JOIN `order`      AS b ON ( a.id = b.booking_id )
