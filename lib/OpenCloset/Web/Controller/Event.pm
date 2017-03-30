@@ -19,9 +19,13 @@ C<MberSn> param is ciphertext. it encrypted AES algorithm with ECB mode
 
 =over
 
-=item C<MberSn> 별로 연 2회 제한을 두어야 함
+=item *
 
-=item 총 발급횟수가 4000건을 넘지 말아야 함
+C<MberSn> 별로 연 2회 제한을 두어야 함
+
+=item *
+
+총 발급횟수가 4000건을 넘지 말아야 함
 
 =back
 
