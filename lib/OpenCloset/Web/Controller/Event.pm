@@ -7,6 +7,8 @@ use Email::Simple;
 use Encode qw/encode_utf8/;
 use Try::Tiny;
 
+use OpenCloset::Constants::Status qw/$NOT_VISITED $RESERVATED/;
+
 has DB => sub { shift->app->DB };
 
 =head1 METHODS
@@ -51,7 +53,8 @@ sub seoul {
         second => 59,   time_zone => $tz,
     );
 
-    if ( $endDate->epoch < time ) {
+    my $now = time;
+    if ( $endDate->epoch < $now ) {
         return $self->render(
             error => '이벤트가 종료되었습니다 - 이벤트 기간 종료' );
     }
@@ -62,6 +65,42 @@ sub seoul {
     if ( $used_coupon > $EVENT_MAX_COUPON ) {
         return $self->render(
             error => '이벤트가 종료되었습니다 - 발급건수 초과' );
+    }
+
+    my $april_start = DateTime->new(
+        year      => 2017,
+        month     => 4,
+        day       => 1,
+        time_zone => $tz
+    );
+
+    my $april_end = DateTime->new(
+        year      => 2017,
+        month     => 4,
+        day       => 30,
+        hour      => 23,
+        minute    => 59,
+        second    => 59,
+        time_zone => $tz
+    );
+
+    ## https://github.com/opencloset/opencloset/issues/1218
+    if ( $now > $april_start->epoch && $now < $april_end->epoch ) {
+        ## 2017년도 3월과 4월은 303 명씩 받아야 하지만 3월달에 이미 303 명을 초과했음
+        ## 초과분을 4월달에서 제외함
+        my $MAX   = 303 * 2;                              # 3월 + 4월
+        my $count = $self->DB->resultset('Order')->search(
+            {
+                'me.status_id' => { 'not in' => [ $NOT_VISITED, $RESERVATED ] },
+                'coupon.status' => { -in      => [ 'used',       'reserved', 'provided' ] },
+                'booking.date'  => { -between => [ '2017-03-01', '2017-04-30' ] }
+            },
+            { join => [qw/coupon booking/] }
+        )->count;
+
+        $self->log->info("april coupon(used+reserved+provided): $count");
+        return $self->render( error => '4월 발급건 수를 초과하였습니다.' )
+            if $count >= $MAX;
     }
 
     $mbersn = $self->decrypt_mbersn($mbersn);
