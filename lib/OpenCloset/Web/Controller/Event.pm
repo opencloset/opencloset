@@ -51,7 +51,7 @@ sub seoul {
         second => 59,   time_zone => $tz,
     );
 
-    if ( $endDate->epoch < DateTime->now( time_zone => $tz )->epoch ) {
+    if ( $endDate->epoch < time ) {
         return $self->render(
             error => '이벤트가 종료되었습니다 - 이벤트 기간 종료' );
     }
