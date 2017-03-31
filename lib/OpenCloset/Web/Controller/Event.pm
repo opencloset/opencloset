@@ -58,12 +58,14 @@ sub seoul {
     }
 
     my $rs = $self->DB->resultset('Coupon');
-    my $used_coupon =
-        $rs->search( { desc => { -like => "$EVENT_NAME|%" }, status => 'used' } )->count;
-    if ( $used_coupon > $EVENT_MAX_COUPON ) {
-        return $self->render(
-            error => '이벤트가 종료되었습니다 - 발급건수 초과' );
-    }
+
+    ## HOTFIX: 2017년도 3,4월에는 최대건수와 상관없이 303건까지 허용합니다.
+    # my $used_coupon =
+    #     $rs->search( { desc => { -like => "$EVENT_NAME|%" }, status => 'used' } )->count;
+    # if ( $used_coupon > $EVENT_MAX_COUPON ) {
+    #     return $self->render(
+    #         error => '이벤트가 종료되었습니다 - 발급건수 초과' );
+    # }
 
     my $april_start = DateTime->new(
         year      => 2017,
