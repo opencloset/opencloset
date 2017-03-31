@@ -1,8 +1,4 @@
-배포 전 해야할 일들
+v1.8.53
 
     $ closetpan OpenCloset::Common    # v0.0.15
     $ grunt
-
-배포 후 해야할 일들
-
-    $ ...
