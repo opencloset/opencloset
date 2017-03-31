@@ -3,8 +3,6 @@ use Mojo::Base 'Mojolicious::Controller';
 
 use Algorithm::CouponCode qw(cc_generate);
 use DateTime;
-use Email::Simple;
-use Encode qw/encode_utf8/;
 use Try::Tiny;
 
 use OpenCloset::Constants::Status qw/$NOT_VISITED $RESERVATED/;
@@ -147,26 +145,6 @@ sub seoul {
     else {
         $coupon = $self->_issue_coupon($mbersn);
         return $self->error( 500, "Failed to create a new coupon" ) unless $coupon;
-    }
-
-    my $notification = $self->config->{events}{seoul}{notification};
-    if ( $used_coupon == 300 && $notification ) {
-        my $from = $notification->{from};
-        my @to = @{ $notification->{to} || [] };
-
-        for my $to (@to) {
-            last unless $from;
-
-            my $email = Email::Simple->create(
-                header => [
-                    From    => $from,
-                    To      => $to,
-                    Subject => "[열린옷장] 취업날개 이벤트 사용자 수 알림",
-                ],
-                body => "$used_coupon 명 사용",
-            );
-            $self->send_mail( encode_utf8( $email->as_string ) );
-        }
     }
 
     $self->session( coupon_code => $coupon->code );
