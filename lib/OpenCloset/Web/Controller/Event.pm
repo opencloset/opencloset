@@ -3,9 +3,9 @@ use Mojo::Base 'Mojolicious::Controller';
 
 use Algorithm::CouponCode qw(cc_generate);
 use DateTime;
-use Email::Simple;
-use Encode qw/encode_utf8/;
 use Try::Tiny;
+
+use OpenCloset::Constants::Status qw/$NOT_VISITED $RESERVATED/;
 
 has DB => sub { shift->app->DB };
 
@@ -19,9 +19,13 @@ C<MberSn> param is ciphertext. it encrypted AES algorithm with ECB mode
 
 =over
 
-=item C<MberSn> 별로 연 2회 제한을 두어야 함
+=item *
 
-=item 총 발급횟수가 4000건을 넘지 말아야 함
+C<MberSn> 별로 연 2회 제한을 두어야 함
+
+=item *
+
+총 발급횟수가 4000건을 넘지 말아야 함
 
 =back
 
@@ -47,17 +51,56 @@ sub seoul {
         second => 59,   time_zone => $tz,
     );
 
-    if ( $endDate->epoch < DateTime->now( time_zone => $tz )->epoch ) {
+    my $now = time;
+    if ( $endDate->epoch < $now ) {
         return $self->render(
             error => '이벤트가 종료되었습니다 - 이벤트 기간 종료' );
     }
 
     my $rs = $self->DB->resultset('Coupon');
-    my $used_coupon =
-        $rs->search( { desc => { -like => "$EVENT_NAME|%" }, status => 'used' } )->count;
-    if ( $used_coupon > $EVENT_MAX_COUPON ) {
-        return $self->render(
-            error => '이벤트가 종료되었습니다 - 발급건수 초과' );
+
+    ## HOTFIX: 2017년도 3,4월에는 최대건수와 상관없이 303건까지 허용합니다.
+    # my $used_coupon =
+    #     $rs->search( { desc => { -like => "$EVENT_NAME|%" }, status => 'used' } )->count;
+    # if ( $used_coupon > $EVENT_MAX_COUPON ) {
+    #     return $self->render(
+    #         error => '이벤트가 종료되었습니다 - 발급건수 초과' );
+    # }
+
+    my $april_start = DateTime->new(
+        year      => 2017,
+        month     => 4,
+        day       => 1,
+        time_zone => $tz
+    );
+
+    my $april_end = DateTime->new(
+        year      => 2017,
+        month     => 4,
+        day       => 30,
+        hour      => 23,
+        minute    => 59,
+        second    => 59,
+        time_zone => $tz
+    );
+
+    ## https://github.com/opencloset/opencloset/issues/1218
+    if ( $now > $april_start->epoch && $now < $april_end->epoch ) {
+        ## 2017년도 3월과 4월은 303 명씩 받아야 하지만 3월달에 이미 303 명을 초과했음
+        ## 초과분을 4월달에서 제외함
+        my $MAX   = 303 * 2;                              # 3월 + 4월
+        my $count = $self->DB->resultset('Order')->search(
+            {
+                'me.status_id' => { 'not in' => [ $NOT_VISITED, $RESERVATED ] },
+                'coupon.status' => { -in      => [ 'used',       'reserved', 'provided' ] },
+                'booking.date'  => { -between => [ '2017-03-01', '2017-04-30' ] }
+            },
+            { join => [qw/coupon booking/] }
+        )->count;
+
+        $self->log->info("april coupon(used+reserved+provided): $count");
+        return $self->render( error => '4월 발급건 수를 초과하였습니다.' )
+            if $count >= $MAX;
     }
 
     $mbersn = $self->decrypt_mbersn($mbersn);
@@ -104,26 +147,6 @@ sub seoul {
     else {
         $coupon = $self->_issue_coupon($mbersn);
         return $self->error( 500, "Failed to create a new coupon" ) unless $coupon;
-    }
-
-    my $notification = $self->config->{events}{seoul}{notification};
-    if ( $used_coupon == 300 && $notification ) {
-        my $from = $notification->{from};
-        my @to = @{ $notification->{to} || [] };
-
-        for my $to (@to) {
-            last unless $from;
-
-            my $email = Email::Simple->create(
-                header => [
-                    From    => $from,
-                    To      => $to,
-                    Subject => "[열린옷장] 취업날개 이벤트 사용자 수 알림",
-                ],
-                body => "$used_coupon 명 사용",
-            );
-            $self->send_mail( encode_utf8( $email->as_string ) );
-        }
     }
 
     $self->session( coupon_code => $coupon->code );
