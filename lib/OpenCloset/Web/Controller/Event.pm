@@ -52,10 +52,12 @@ sub seoul {
     );
 
     my $now = time;
-    if ( $endDate->epoch < $now ) {
-        return $self->render(
-            error => '이벤트가 종료되었습니다 - 이벤트 기간 종료' );
-    }
+    ## https://github.com/opencloset/opencloset/issues/1220
+    ## HOTFIX: 임시로 이벤트 기간을 변경
+    # if ( $endDate->epoch < $now ) {
+    #     return $self->render(
+    #         error => '이벤트가 종료되었습니다 - 이벤트 기간 종료' );
+    # }
 
     my $rs = $self->DB->resultset('Coupon');
 
