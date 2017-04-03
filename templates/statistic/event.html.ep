@@ -11,7 +11,6 @@
 
     <link rel="stylesheet" href="/components/bootstrap/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="/components/font-awesome/css/font-awesome.min.css">
-    <link rel="stylesheet" href="/components/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css">
     <link rel="stylesheet" href="/components/opencloset.css/dist/css/opencloset.min.css">
     <link rel="stylesheet" href="/css/screen.css">
   </head>
@@ -20,16 +19,6 @@
       <div id="content">
 
         <h1>이벤트 통계</h1>
-
-        <div class="search">
-          <form id="search-form" action="">
-            <div class="input-group">
-              <input id="query" class="form-control" name="" type="text" value="" placeholder="날짜를 고르세요", data-date-format="yyyy-mm-dd" data-date-end-date="0d">
-            </div>
-          </form>
-        </div>
-        <hr>
-
         <div class="monthly-stat">
           <h2>
             월간 방문 인원
