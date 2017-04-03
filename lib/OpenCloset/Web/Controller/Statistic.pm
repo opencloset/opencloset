@@ -918,322 +918,222 @@ sub visitor_ymd {
             day       => $3,
         );
     };
+
     unless ($dt) {
         $self->app->log->warn("cannot create datetime object");
         $self->redirect_to( $self->url_for('/stat/visitor') );
         return;
     }
 
-    my $today = try {
-        DateTime->now( time_zone => $self->config->{timezone}, );
-    };
-    unless ($today) {
-        $self->app->log->warn("cannot create datetime object: today");
-        $self->redirect_to( $self->url_for('/stat/visitor') );
-        return;
-    }
-    $today->truncate( to => 'day' );
+    my $today = DateTime->now( time_zone => $self->config->{timezone} );
 
     # -$day_range ~ +$day_range days from now
     my $day_range = 7;
     my %count;
     my $today_data;
-    my $from = $dt->clone->truncate( to => 'day' )->add( days => -$day_range );
-    my $to   = $dt->clone->truncate( to => 'day' )->add( days => $day_range );
-    for ( ; $from <= $to; $from->add( days => 1 ) ) {
-        my $f = $from->clone->truncate( to => 'day' );
-        my $t = $from->clone->truncate( to => 'day' )->add( days => 1, seconds => -1 );
+    my $from = $dt->clone->subtract( days => $day_range );
+    my $to = $dt->clone->add( days => $day_range );
+    my %dow_map = (
+        1 => '월', 2 => '화', 3 => '수', 4 => '목', 5 => '금', 6 => '토',
+        7 => '일'
+    );
 
-        my $f_str = $f->strftime('%Y%m%d%H%M%S');
-        my $t_str = $t->strftime('%Y%m%d%H%M%S');
-        my $name  = "day-$f_str-$t_str";
+    my %visitor;
+    while ( $from <= $to ) {
+        my $rs = $self->DB->resultset('Visitor')->search(
+            {
+                date  => $to->ymd,
+                event => undef
+            },
+            undef
+        );
 
-        my $data;
-        if ( $f < $today && $t < $today ) {
-            $data = $self->CACHE->get($name);
+        while ( my $row = $rs->next ) {
+            my %columns = $row->get_columns;
+            $columns{label} = sprintf( "%s (%s)", $to->ymd, $dow_map{ $to->day_of_week } );
+            push @{ $visitor{daily} ||= [] }, \%columns;
         }
-        elsif ( $f->clone->truncate( to => 'day' ) == $today ) {
-            $self->app->log->info("do not cache and by-pass cache: $name");
-            $data = $self->count_visitor( $f, $t );
-            $today_data = $data;
+
+        $to->subtract( days => 1 );
+    }
+
+    my $rs = $self->DB->resultset('Visitor')->search(
+        { date => { -between => [ $dt->clone->subtract( years => 1 )->ymd, $dt->ymd ] } },
+        {
+            select => [
+                \'DATE_FORMAT(`date`, "%Y-%m")',
+                { sum => 'reserved' },
+                { sum => 'reserved_male' },
+                { sum => 'reserved_female' },
+                { sum => 'visited' },
+                { sum => 'visited_male' },
+                { sum => 'visited_female' },
+                { sum => 'unvisited' },
+                { sum => 'unvisited_male' },
+                { sum => 'unvisited_female' },
+                { sum => 'rented' },
+                { sum => 'rented_male' },
+                { sum => 'rented_female' },
+                { sum => 'bestfit' },
+                { sum => 'bestfit_male' },
+                { sum => 'bestfit_female' },
+            ],
+            as => [
+                'ym',
+                'total_reserved',
+                'total_reserved_male',
+                'total_reserved_female',
+                'total_visited',
+                'total_visited_male',
+                'total_visited_female',
+                'total_unvisited',
+                'total_unvisited_male',
+                'total_unvisited_female',
+                'total_rented',
+                'total_rented_male',
+                'total_rented_female',
+                'total_bestfit',
+                'total_bestfit_male',
+                'total_bestfit_female',
+            ],
+            group_by => \'DATE_FORMAT(`date`, "%Y-%m")',
+            order_by => \'DATE_FORMAT(`date`, "%Y-%m") DESC',
         }
-        my $dow = do {
-            use experimental qw( smartmatch );
-            given ( $f->day_of_week ) {
-                "월" when 1;
-                "화" when 2;
-                "수" when 3;
-                "목" when 4;
-                "금" when 5;
-                "토" when 6;
-                "일" when 7;
-                default { q{} }
+    );
+
+    while ( my $row = $rs->next ) {
+        my %columns = $row->get_columns;
+        push @{ $visitor{monthly} ||= [] }, \%columns;
+    }
+
+    ## 7일씩 끊어서 쿼리
+    $from = $dt->clone->subtract( years => 1 );
+    $to = $dt->clone;
+
+    my $dow = $from->day_of_week;
+    $from->add( days => 8 - $dow ) if $dow != 1;
+    while ( $from <= $to ) {
+        my $end = $from->clone->add( days => 6 );
+        my $rs = $self->DB->resultset('Visitor')->search(
+            { date => { -between => [ $from->ymd, $end->ymd ] } },
+            {
+                select => [
+                    { sum => 'reserved' },
+                    { sum => 'reserved_male' },
+                    { sum => 'reserved_female' },
+                    { sum => 'visited' },
+                    { sum => 'visited_male' },
+                    { sum => 'visited_female' },
+                    { sum => 'unvisited' },
+                    { sum => 'unvisited_male' },
+                    { sum => 'unvisited_female' },
+                    { sum => 'rented' },
+                    { sum => 'rented_male' },
+                    { sum => 'rented_female' },
+                    { sum => 'bestfit' },
+                    { sum => 'bestfit_male' },
+                    { sum => 'bestfit_female' },
+                ],
+                as => [
+                    'total_reserved',
+                    'total_reserved_male',
+                    'total_reserved_female',
+                    'total_visited',
+                    'total_visited_male',
+                    'total_visited_female',
+                    'total_unvisited',
+                    'total_unvisited_male',
+                    'total_unvisited_female',
+                    'total_rented',
+                    'total_rented_male',
+                    'total_rented_female',
+                    'total_bestfit',
+                    'total_bestfit_male',
+                    'total_bestfit_female',
+                ],
             }
-        };
-        $data->{label} = $f->ymd . " ($dow)";
+        );
 
-        push @{ $count{day} }, $data;
+        while ( my $row = $rs->next ) {
+            my %columns = $row->get_columns;
+            $columns{label} = sprintf( "%s ~ %s", $from->ymd, $end->ymd );
+            push @{ $visitor{weekly} ||= [] }, \%columns;
+        }
+
+        $from = $end;
+        $from->add( days => 1 );
     }
 
-    # from first to current week of this year
-    my $current_week_start_dt;
-    my $current_week_end_dt;
-    for ( my $i = $dt->clone->subtract( years => 1 ); $i <= $dt; $i->add( weeks => 1 ) )
-    {
-        my $f = $i->clone->truncate( to => 'week' );
-        my $t = $i->clone->truncate( to => 'week' )->add( weeks => 1, seconds => -1 );
-
-        my $f_str = $f->strftime('%Y%m%d%H%M%S');
-        my $t_str = $t->strftime('%Y%m%d%H%M%S');
-        my $name  = "week-$f_str-$t_str";
-
-        $current_week_start_dt = $f->clone;
-        $current_week_end_dt   = $t->clone;
-
-        my $data;
-        if ( $f < $today && $t < $today ) {
-            $data = $self->CACHE->get($name);
-            $data->{label} = sprintf(
-                "%04d %02d : %s ~ %s",
-                ( $f->week ), # week_year, week_number
-                $f->strftime('%m/%d'),
-                $t->strftime('%m/%d'),
-            );
-        }
-
-        push @{ $count{week} }, $data;
-    }
-
-    # from january to current months of this year
-    my $current_month_start_dt;
-    my $current_month_end_dt;
-    for (
-        my $i = $dt->clone->subtract( years => 1 );
-        $i <= $dt;
-        $i->add( months => 1 )
-        )
-    {
-        my $f = $i->clone->truncate( to => 'month' );
-        my $t = $i->clone->truncate( to => 'month' )->add( months => 1, seconds => -1 );
-
-        my $f_str = $f->strftime('%Y%m%d%H%M%S');
-        my $t_str = $t->strftime('%Y%m%d%H%M%S');
-        my $name  = "month-$f_str-$t_str";
-
-        $current_month_start_dt = $f->clone;
-        $current_month_end_dt   = $t->clone;
-
-        my $data;
-        if ( $f < $today && $t < $today ) {
-            $data = $self->CACHE->get($name);
-            $data->{label} = $f->strftime('%Y-%m');
-        }
-
-        push @{ $count{month} }, $data;
-    }
-
-    my $no_cache_week;
-    my $no_cache_month;
-    ++$no_cache_week  if $today->clone->truncate( to => 'week' ) <= $dt;
-    ++$no_cache_month if $today->clone->truncate( to => 'month' ) <= $dt;
-
-    # current data with and without cache
-    my %current_week = (
-        label => sprintf(
-            "%04d %02d : %s ~ %s",
-            ( $dt->week ), # week_year, week_number
-            $dt->clone->truncate( to => 'week' )->strftime('%m/%d'),
-            $dt->clone->truncate( to => 'week' )->add( weeks => 1, seconds => -1 )
-                ->strftime('%m/%d'),
-        ),
-        all        => { total => 0, male => 0, female => 0 },
-        visited    => { total => 0, male => 0, female => 0 },
-        notvisited => { total => 0, male => 0, female => 0 },
-        bestfit    => { total => 0, male => 0, female => 0 },
-        loanee     => { total => 0, male => 0, female => 0 },
-    );
-    my %current_month = (
-        label      => $dt->strftime('%Y-%m'),
-        all        => { total => 0, male => 0, female => 0 },
-        visited    => { total => 0, male => 0, female => 0 },
-        notvisited => { total => 0, male => 0, female => 0 },
-        bestfit => { total => 0, male => 0, female => 0 },
-        loanee  => { total => 0, male => 0, female => 0 },
-    );
-    for (
-        my $i = $today->clone->add( months => -1 )->truncate( to => 'month' );
-        $i <= $today;
-        $i->add( days => 1 )
-        )
-    {
-        my $f = $i->clone->truncate( to => 'day' );
-        my $t = $i->clone->truncate( to => 'day' )->add( days => 1, seconds => -1 );
-
-        my $f_str = $f->strftime('%Y%m%d%H%M%S');
-        my $t_str = $t->strftime('%Y%m%d%H%M%S');
-        my $name  = "day-$f_str-$t_str";
-
-        my $data;
-        if ( $f < $today && $t < $today ) {
-            $data = $self->CACHE->get($name);
-        }
-        elsif ( $f->clone->truncate( to => 'day' ) == $today ) {
-            $self->app->log->info("do not cache and by-pass cache: $name");
-            $data = $today_data;
-        }
-
-        if ( $current_week_start_dt <= $i && $i <= $current_week_end_dt ) {
-            $self->app->log->info("calculationg for this week: $name");
-            $current_week{all}{total}         += $data->{all}{total};
-            $current_week{all}{male}          += $data->{all}{male};
-            $current_week{all}{female}        += $data->{all}{female};
-            $current_week{visited}{total}     += $data->{visited}{total};
-            $current_week{visited}{male}      += $data->{visited}{male};
-            $current_week{visited}{female}    += $data->{visited}{female};
-            $current_week{notvisited}{total}  += $data->{notvisited}{total};
-            $current_week{notvisited}{male}   += $data->{notvisited}{male};
-            $current_week{notvisited}{female} += $data->{notvisited}{female};
-            $current_week{bestfit}{total}     += $data->{bestfit}{total};
-            $current_week{bestfit}{male}      += $data->{bestfit}{male};
-            $current_week{bestfit}{female}    += $data->{bestfit}{female};
-            $current_week{loanee}{total}      += $data->{loanee}{total};
-            $current_week{loanee}{male}       += $data->{loanee}{male};
-            $current_week{loanee}{female}     += $data->{loanee}{female};
-        }
-        if ( $current_month_start_dt <= $i && $i <= $current_month_end_dt ) {
-            $self->app->log->info("calculationg for this month $name");
-            $current_month{all}{total}         += $data->{all}{total};
-            $current_month{all}{male}          += $data->{all}{male};
-            $current_month{all}{female}        += $data->{all}{female};
-            $current_month{visited}{total}     += $data->{visited}{total};
-            $current_month{visited}{male}      += $data->{visited}{male};
-            $current_month{visited}{female}    += $data->{visited}{female};
-            $current_month{notvisited}{total}  += $data->{notvisited}{total};
-            $current_month{notvisited}{male}   += $data->{notvisited}{male};
-            $current_month{notvisited}{female} += $data->{notvisited}{female};
-            $current_month{bestfit}{total}     += $data->{bestfit}{total};
-            $current_month{bestfit}{male}      += $data->{bestfit}{male};
-            $current_month{bestfit}{female}    += $data->{bestfit}{female};
-            $current_month{loanee}{total}      += $data->{loanee}{total};
-            $current_month{loanee}{male}       += $data->{loanee}{male};
-            $current_month{loanee}{female}     += $data->{loanee}{female};
-        }
-    }
-    $count{week}[-1]  = \%current_week  if $no_cache_week;
-    $count{month}[-1] = \%current_month if $no_cache_month;
-
-    $self->render( count => \%count, dt => $dt, );
+    $self->render( dt => $dt, visitor => \%visitor );
 }
 
-=head2 events_seoul
+=head2 event
 
-    GET /stat/events/seoul
+    GET /stat/events/:event
 
 =cut
 
-sub events_seoul {
-    my $self = shift;
-    my $ymd  = $self->param('ymd');
+sub event {
+    my $self  = shift;
+    my $event = $self->param('event');
 
-    my $to;
-    if ($ymd) {
-        my ( $year, $month, $day ) = split /-/, $ymd;
-        $to = DateTime->new( year => $year, month => $month, day => $day );
-    }
-    else {
-        $to = DateTime->now;
-    }
-
-    my $timezone = $self->config->{timezone} or die "Config timezone is not set";
-    $to->set_time_zone($timezone);
-
-    my $storage = $self->DB->storage;
-
-    my $query = $storage->dbh_do(
-        sub {
-            my ( $storage, $dbh, @args ) = @_;
-            # 아래 쿼리에서 생성하는 결과에서 booking_coupon_issue_diff 은 *잘못* 생성된 결과이며, WHERE절 조건에서
-            # 들어간 -21600도 임시방편적인 처치입니다. 자세한 사항은 아래 이슈를 확인하시기 바랍니다.
-            #
-            # https://github.com/opencloset/opencloset/issues/1198
-            $dbh->selectall_hashref(
-                <<END_SQL
-                SELECT
-                    *
-                FROM
-                    (
-                        SELECT
-                            a.`date`                                                  AS 'booking_date'
-                            ,b.`id`                                                   AS 'order_id'
-                            ,YEAR(a.`date`)                                           AS 'booking_year'
-                            ,MONTH(a.`date`)                                          AS 'booking_month'
-                            ,DAY(a.`date`)                                            AS 'booking_day'
-                            ,IF(b.status_id = 12 OR b.status_id = 14, 0, 1)           AS 'is_visit'
-                            ,d.gender                                                 AS 'gender'
-                            ,d.birth                                                  AS 'birth'
-                            ,YEAR(NOW()) - d.birth                                    AS 'age'
-                            ,TRUNCATE(YEAR(NOW()) - d.birth, -1)                      AS 'age_group'
-                            ,IF(e.`status` IN ('used', 'provided', 'reserved'), 1, 0) AS 'is_coupon_use'
-                            ,e.`id`                                                   AS 'coupon_id'
-                            ,e.`update_date`                                          AS 'coupon_date'
-                            ,e.`status`                                               AS 'coupon_status'
-                            ,SUBSTRING_INDEX(e.desc, '|', 1)                          AS 'coupon_type'
-                            ,IFNULL(a.`date` - e.`update_date`,0)                     AS 'booking_coupon_issue_diff'
-                        FROM
-                            `booking` AS a
-                            INNER JOIN `order`      AS b ON ( a.id = b.booking_id )
-                            INNER JOIN `user`       AS c ON ( b.user_id = c.id )
-                            INNER JOIN `user_info`  AS d ON ( c.id = d.user_id )
-                            LEFT  JOIN `coupon`     AS e ON ( b.coupon_id = e.id )
-                    ) AS x
-                WHERE
-                    `booking_coupon_issue_diff` >= -21600
-                    AND `booking_date` > '2016-04-25'
-END_SQL
-                , 'order_id'
-            );
+    my %visitor;
+    my $rs = $self->DB->resultset('Visitor')->search(
+        { event => $event },
+        {
+            select => [
+                \'DATE_FORMAT(`date`, "%Y-%m")',
+                { sum => 'visited' },
+                { sum => 'visited_male' },
+                { sum => 'visited_female' },
+                { sum => 'visited_age_10' },
+                { sum => 'visited_age_20' },
+                { sum => 'visited_age_30' },
+                { sum => 'unvisited' },
+                { sum => 'unvisited_male' },
+                { sum => 'unvisited_female' },
+                { sum => 'unvisited_age_10' },
+                { sum => 'unvisited_age_20' },
+                { sum => 'unvisited_age_30' },
+                { avg => 'visited' }
+            ],
+            as => [
+                'ym',
+                'total_visited',
+                'total_visited_male',
+                'total_visited_female',
+                'total_visited_age_10',
+                'total_visited_age_20',
+                'total_visited_age_30',
+                'total_unvisited',
+                'total_unvisited_male',
+                'total_unvisited_female',
+                'total_unvisited_age_10',
+                'total_unvisited_age_20',
+                'total_unvisited_age_30',
+                'avg_visited',
+            ],
+            group_by => \'DATE_FORMAT(`date`, "%Y-%m")',
+            order_by => \'DATE_FORMAT(`date`, "%Y-%m") DESC',
         }
     );
 
-    my %cnt;
-    foreach my $key ( keys %$query ) {
-        my $r     = $query->{$key};
-        my $month = sprintf( "%d-%02d", $r->{booking_year}, $r->{booking_month} );
-        my $dt    = DateTime::Format::MySQL->parse_datetime( $r->{booking_date} );
-
-        ## 월별 열린옷장 방문/미방문
-        $cnt{'month-visit'}{$month}{ $r->{is_visit} }{ $r->{is_coupon_use} }++;
-        ## 월별 취업날개 예약/방문
-        $cnt{'month-coupon'}{$month}{ $r->{is_visit} }{ $r->{is_coupon_use} }++;
-        ## 월별 취업날개 예약/방문 - 성별
-        $cnt{'month-coupon-gender'}{$month}{ $r->{is_visit} }{ $r->{is_coupon_use} }
-            { $r->{gender} }++;
-        ## 월별 취업날개 예약/방문 - 나이
-        $cnt{'month-coupon-agegroup'}{$month}{ $r->{is_visit} }{ $r->{is_coupon_use} }
-            { $r->{age_group} }++;
-
-        ## for percentile
-        $cnt{'month-visit-day'}{$month}{ $r->{is_visit} }{ $r->{is_coupon_use} }{days}
-            { $dt->ymd }++;
-
-        # 전체 성별
-        $cnt{'gender'}{ $r->{is_coupon_use} }{ $r->{is_visit} }{ $r->{gender} }++;
-        # 전체 연령
-        $cnt{'age_group'}{ $r->{is_coupon_use} }{ $r->{is_visit} }{ $r->{age_group} }++;
-
-        if ( $dt <= $to ) {
-            my $ymd = $dt->ymd;
-            ## 일별 열린옷장 방문/미방문
-            $cnt{'daily-visit'}{$ymd}{ $r->{is_visit} }++;
-            ## 일별 취업날개 방문/미방문
-            $cnt{'daily-visit-coupon'}{$ymd}{ $r->{is_visit} }{ $r->{is_coupon_use} }++;
-            $cnt{'daily-visit-coupon-gender'}{$ymd}{ $r->{is_visit} }{ $r->{is_coupon_use} }
-                { $r->{gender} }++;
-            $cnt{'daily-visit-coupon-agegroup'}{$ymd}{ $r->{is_visit} }{ $r->{is_coupon_use} }
-                { $r->{age_group} }++;
-        }
+    while ( my $row = $rs->next ) {
+        my %columns = $row->get_columns;
+        push @{ $visitor{monthly} ||= [] }, \%columns;
     }
-    $self->render( counts => \%cnt );
+
+    $rs = $self->DB->resultset('Visitor')->search(
+        { event => $event },
+        { order_by => { -desc => 'id' } }
+    );
+
+    while ( my $row = $rs->next ) {
+        my %columns = $row->get_columns;
+        push @{ $visitor{daily} ||= [] }, \%columns;
+    }
+
+    $self->render( visitor => \%visitor );
 }
 
 1;
