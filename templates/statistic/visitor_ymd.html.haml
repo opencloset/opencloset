@@ -98,44 +98,24 @@
         %th 남
         %th 여
     %tbody
-      - for ( my $i = 0 ; $i <  @{ $count->{week} } ; $i++ ) {
+      - for my $row ( reverse @{ $visitor->{weekly} } ) {
         %tr
-          - if ( $count->{week}[$i] ) {
-            %td= $count->{week}[$i]{label}
-            %td= $count->{week}[$i]{all}{total}
-            %td= $count->{week}[$i]{all}{male}
-            %td= $count->{week}[$i]{all}{female}
-            %td= $count->{week}[$i]{visited}{total}
-            %td= $count->{week}[$i]{visited}{male}
-            %td= $count->{week}[$i]{visited}{female}
-            %td= $count->{week}[$i]{notvisited}{total}
-            %td= $count->{week}[$i]{notvisited}{male}
-            %td= $count->{week}[$i]{notvisited}{female}
-            %td= $count->{week}[$i]{bestfit}{total}
-            %td= $count->{week}[$i]{bestfit}{male}
-            %td= $count->{week}[$i]{bestfit}{female}
-            %td= $count->{week}[$i]{loanee}{total}
-            %td= $count->{week}[$i]{loanee}{male}
-            %td= $count->{week}[$i]{loanee}{female}
-          - }
-          - else {
-            %td -
-            %td N/A
-            %td N/A
-            %td N/A
-            %td N/A
-            %td N/A
-            %td N/A
-            %td N/A
-            %td N/A
-            %td N/A
-            %td N/A
-            %td N/A
-            %td N/A
-            %td N/A
-            %td N/A
-            %td N/A
-          - }
+          %td= $row->{label} || 0
+          %td= $row->{total_reserved} || 0
+          %td= $row->{total_reserved_male} || 0
+          %td= $row->{total_reserved_female} || 0
+          %td= $row->{total_visited} || 0
+          %td= $row->{total_visited_male} || 0
+          %td= $row->{total_visited_female} || 0
+          %td= $row->{total_unvisited} || 0
+          %td= $row->{total_unvisited_male} || 0
+          %td= $row->{total_unvisited_female} || 0
+          %td= $row->{total_bestfit} || 0
+          %td= $row->{total_bestfit_male} || 0
+          %td= $row->{total_bestfit_female} || 0
+          %td= $row->{total_rented} || 0
+          %td= $row->{total_rented_male} || 0
+          %td= $row->{total_rented_female} || 0
       - }
 
 #status-month

@@ -958,9 +958,7 @@ sub visitor_ymd {
     }
 
     my $rs = $self->DB->resultset('Visitor')->search(
-        {
-            date => { -between => [ $today->clone->subtract( years => 1 )->ymd, $today->ymd ] }
-        },
+        { date => { -between => [ $dt->clone->subtract( years => 1 )->ymd, $dt->ymd ] } },
         {
             select => [
                 \'DATE_FORMAT(`date`, "%Y-%m")',
@@ -1008,158 +1006,65 @@ sub visitor_ymd {
         push @{ $visitor{monthly} ||= [] }, \%columns;
     }
 
-    # from first to current week of this year
-    my $current_week_start_dt;
-    my $current_week_end_dt;
-    for ( my $i = $dt->clone->subtract( years => 1 ); $i <= $dt; $i->add( weeks => 1 ) )
-    {
-        my $f = $i->clone->truncate( to => 'week' );
-        my $t = $i->clone->truncate( to => 'week' )->add( weeks => 1, seconds => -1 );
+    ## 7일씩 끊어서 쿼리
+    $from = $dt->clone->subtract( years => 1 );
+    $to = $dt->clone;
 
-        my $f_str = $f->strftime('%Y%m%d%H%M%S');
-        my $t_str = $t->strftime('%Y%m%d%H%M%S');
-        my $name  = "week-$f_str-$t_str";
+    my $dow = $from->day_of_week;
+    $from->add( days => 8 - $dow ) if $dow != 1;
+    while ( $from <= $to ) {
+        my $end = $from->clone->add( days => 6 );
+        my $rs = $self->DB->resultset('Visitor')->search(
+            { date => { -between => [ $from->ymd, $end->ymd ] } },
+            {
+                select => [
+                    { sum => 'reserved' },
+                    { sum => 'reserved_male' },
+                    { sum => 'reserved_female' },
+                    { sum => 'visited' },
+                    { sum => 'visited_male' },
+                    { sum => 'visited_female' },
+                    { sum => 'unvisited' },
+                    { sum => 'unvisited_male' },
+                    { sum => 'unvisited_female' },
+                    { sum => 'rented' },
+                    { sum => 'rented_male' },
+                    { sum => 'rented_female' },
+                    { sum => 'bestfit' },
+                    { sum => 'bestfit_male' },
+                    { sum => 'bestfit_female' },
+                ],
+                as => [
+                    'total_reserved',
+                    'total_reserved_male',
+                    'total_reserved_female',
+                    'total_visited',
+                    'total_visited_male',
+                    'total_visited_female',
+                    'total_unvisited',
+                    'total_unvisited_male',
+                    'total_unvisited_female',
+                    'total_rented',
+                    'total_rented_male',
+                    'total_rented_female',
+                    'total_bestfit',
+                    'total_bestfit_male',
+                    'total_bestfit_female',
+                ],
+            }
+        );
 
-        $current_week_start_dt = $f->clone;
-        $current_week_end_dt   = $t->clone;
-
-        my $data;
-        if ( $f < $today && $t < $today ) {
-            $data = $self->CACHE->get($name);
-            $data->{label} = sprintf(
-                "%04d %02d : %s ~ %s",
-                ( $f->week ), # week_year, week_number
-                $f->strftime('%m/%d'),
-                $t->strftime('%m/%d'),
-            );
+        while ( my $row = $rs->next ) {
+            my %columns = $row->get_columns;
+            $columns{label} = sprintf( "%s ~ %s", $from->ymd, $end->ymd );
+            push @{ $visitor{weekly} ||= [] }, \%columns;
         }
 
-        push @{ $count{week} }, $data;
+        $from = $end;
+        $from->add( days => 1 );
     }
 
-    # from january to current months of this year
-    my $current_month_start_dt;
-    my $current_month_end_dt;
-    for (
-        my $i = $dt->clone->subtract( years => 1 );
-        $i <= $dt;
-        $i->add( months => 1 )
-        )
-    {
-        my $f = $i->clone->truncate( to => 'month' );
-        my $t = $i->clone->truncate( to => 'month' )->add( months => 1, seconds => -1 );
-
-        my $f_str = $f->strftime('%Y%m%d%H%M%S');
-        my $t_str = $t->strftime('%Y%m%d%H%M%S');
-        my $name  = "month-$f_str-$t_str";
-
-        $current_month_start_dt = $f->clone;
-        $current_month_end_dt   = $t->clone;
-
-        my $data;
-        if ( $f < $today && $t < $today ) {
-            $data = $self->CACHE->get($name);
-            $data->{label} = $f->strftime('%Y-%m');
-        }
-
-        push @{ $count{month} }, $data;
-    }
-
-    my $no_cache_week;
-    my $no_cache_month;
-    ++$no_cache_week  if $today->clone->truncate( to => 'week' ) <= $dt;
-    ++$no_cache_month if $today->clone->truncate( to => 'month' ) <= $dt;
-
-    # current data with and without cache
-    my %current_week = (
-        label => sprintf(
-            "%04d %02d : %s ~ %s",
-            ( $dt->week ), # week_year, week_number
-            $dt->clone->truncate( to => 'week' )->strftime('%m/%d'),
-            $dt->clone->truncate( to => 'week' )->add( weeks => 1, seconds => -1 )
-                ->strftime('%m/%d'),
-        ),
-        all        => { total => 0, male => 0, female => 0 },
-        visited    => { total => 0, male => 0, female => 0 },
-        notvisited => { total => 0, male => 0, female => 0 },
-        bestfit    => { total => 0, male => 0, female => 0 },
-        loanee     => { total => 0, male => 0, female => 0 },
-    );
-    my %current_month = (
-        label      => $dt->strftime('%Y-%m'),
-        all        => { total => 0, male => 0, female => 0 },
-        visited    => { total => 0, male => 0, female => 0 },
-        notvisited => { total => 0, male => 0, female => 0 },
-        bestfit => { total => 0, male => 0, female => 0 },
-        loanee  => { total => 0, male => 0, female => 0 },
-    );
-    for (
-        my $i = $today->clone->add( months => -1 )->truncate( to => 'month' );
-        $i <= $today;
-        $i->add( days => 1 )
-        )
-    {
-        my $f = $i->clone->truncate( to => 'day' );
-        my $t = $i->clone->truncate( to => 'day' )->add( days => 1, seconds => -1 );
-
-        my $f_str = $f->strftime('%Y%m%d%H%M%S');
-        my $t_str = $t->strftime('%Y%m%d%H%M%S');
-        my $name  = "day-$f_str-$t_str";
-
-        my $data;
-        if ( $f < $today && $t < $today ) {
-            $data = $self->CACHE->get($name);
-        }
-        elsif ( $f->clone->truncate( to => 'day' ) == $today ) {
-            $self->app->log->info("do not cache and by-pass cache: $name");
-            $data = $today_data;
-        }
-
-        if ( $current_week_start_dt <= $i && $i <= $current_week_end_dt ) {
-            $self->app->log->info("calculationg for this week: $name");
-            $current_week{all}{total}         += $data->{all}{total};
-            $current_week{all}{male}          += $data->{all}{male};
-            $current_week{all}{female}        += $data->{all}{female};
-            $current_week{visited}{total}     += $data->{visited}{total};
-            $current_week{visited}{male}      += $data->{visited}{male};
-            $current_week{visited}{female}    += $data->{visited}{female};
-            $current_week{notvisited}{total}  += $data->{notvisited}{total};
-            $current_week{notvisited}{male}   += $data->{notvisited}{male};
-            $current_week{notvisited}{female} += $data->{notvisited}{female};
-            $current_week{bestfit}{total}     += $data->{bestfit}{total};
-            $current_week{bestfit}{male}      += $data->{bestfit}{male};
-            $current_week{bestfit}{female}    += $data->{bestfit}{female};
-            $current_week{loanee}{total}      += $data->{loanee}{total};
-            $current_week{loanee}{male}       += $data->{loanee}{male};
-            $current_week{loanee}{female}     += $data->{loanee}{female};
-        }
-        if ( $current_month_start_dt <= $i && $i <= $current_month_end_dt ) {
-            $self->app->log->info("calculationg for this month $name");
-            $current_month{all}{total}         += $data->{all}{total};
-            $current_month{all}{male}          += $data->{all}{male};
-            $current_month{all}{female}        += $data->{all}{female};
-            $current_month{visited}{total}     += $data->{visited}{total};
-            $current_month{visited}{male}      += $data->{visited}{male};
-            $current_month{visited}{female}    += $data->{visited}{female};
-            $current_month{notvisited}{total}  += $data->{notvisited}{total};
-            $current_month{notvisited}{male}   += $data->{notvisited}{male};
-            $current_month{notvisited}{female} += $data->{notvisited}{female};
-            $current_month{bestfit}{total}     += $data->{bestfit}{total};
-            $current_month{bestfit}{male}      += $data->{bestfit}{male};
-            $current_month{bestfit}{female}    += $data->{bestfit}{female};
-            $current_month{loanee}{total}      += $data->{loanee}{total};
-            $current_month{loanee}{male}       += $data->{loanee}{male};
-            $current_month{loanee}{female}     += $data->{loanee}{female};
-        }
-    }
-    $count{week}[-1]  = \%current_week  if $no_cache_week;
-    $count{month}[-1] = \%current_month if $no_cache_month;
-
-    $self->render(
-        count   => \%count,
-        dt      => $dt,
-        visitor => \%visitor,
-    );
+    $self->render( dt => $dt, visitor => \%visitor );
 }
 
 =head2 events_seoul
