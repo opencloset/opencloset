@@ -19,7 +19,7 @@
     <div class="container">
       <div id="content">
 
-        <h1><%= title %></h1>
+        <h1>이벤트 통계</h1>
 
         <div class="search">
           <form id="search-form" action="">
@@ -40,6 +40,7 @@
               <tr>
                 <th rowspan="2">월별</th>
                 <th rowspan="2">방문인원</th>
+                <th rowspan="2">일일 평균</th>
                 <th colspan="2">성별</th>
                 <th colspan="3">연령</th>
                 <th rowspan="2">미방문인원</th>
@@ -77,6 +78,7 @@
                 <tr>
                   <td><%= $row->{ym} %></td>
                   <td><%= $row->{total_visited} %></td>
+                  <td><%= sprintf '%.1f', $row->{avg_visited} %></td>
                   <td><%= $row->{total_visited_male} %></td>
                   <td><%= $row->{total_visited_female} %></td>
                   <td><%= $row->{total_visited_age_10} %></td>
@@ -93,6 +95,7 @@
               <tr>
                 <td>합계</td>
                 <td><%= $sum{visited} %></td>
+                <td>-</td>
                 <td><%= $sum{visited_male} %></td>
                 <td><%= $sum{visited_female} %></td>
                 <td><%= $sum{visited_age_10} %></td>

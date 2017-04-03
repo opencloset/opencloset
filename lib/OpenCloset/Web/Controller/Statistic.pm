@@ -1095,6 +1095,7 @@ sub event {
                 { sum => 'unvisited_age_10' },
                 { sum => 'unvisited_age_20' },
                 { sum => 'unvisited_age_30' },
+                { avg => 'visited' }
             ],
             as => [
                 'ym',
@@ -1110,6 +1111,7 @@ sub event {
                 'total_unvisited_age_10',
                 'total_unvisited_age_20',
                 'total_unvisited_age_30',
+                'avg_visited',
             ],
             group_by => \'DATE_FORMAT(`date`, "%Y-%m")',
             order_by => \'DATE_FORMAT(`date`, "%Y-%m") DESC',
