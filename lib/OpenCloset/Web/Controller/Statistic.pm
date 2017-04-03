@@ -958,7 +958,10 @@ sub visitor_ymd {
     }
 
     my $rs = $self->DB->resultset('Visitor')->search(
-        { date => { -between => [ $dt->clone->subtract( years => 1 )->ymd, $dt->ymd ] } },
+        {
+            date  => { -between => [ $dt->clone->subtract( years => 1 )->ymd, $dt->ymd ] },
+            event => undef,
+        },
         {
             select => [
                 \'DATE_FORMAT(`date`, "%Y-%m")',
@@ -1015,7 +1018,10 @@ sub visitor_ymd {
     while ( $from <= $to ) {
         my $end = $from->clone->add( days => 6 );
         my $rs = $self->DB->resultset('Visitor')->search(
-            { date => { -between => [ $from->ymd, $end->ymd ] } },
+            {
+                date  => { -between => [ $from->ymd, $end->ymd ] },
+                event => undef,
+            },
             {
                 select => [
                     { sum => 'reserved' },
