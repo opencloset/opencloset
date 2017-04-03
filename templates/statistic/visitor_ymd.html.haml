@@ -45,53 +45,26 @@
         %th 남
         %th 여
     %tbody
-      - for ( my $i = 0 ; $i <  @{ $count->{day} } ; $i++ ) {
-      -   my $label = $count->{day}[$i]{label};
-      -   my $ymd   = $dt->ymd;
+      - for my $row ( @{ $visitor->{daily} } ) {
         %tr
           %td
-            - if ( $label =~ m/^$ymd/ ) {
-              %span.date
-                %a{ :href => "#{ url_for( '/order' )->query( 'booking_ymd' => $label ) }" }= $label
-            - }
-            - else {
-              %span
-                %a{ :href => "#{ url_for( '/order' )->query( 'booking_ymd' => $label ) }" }= $label
-            - }
-          - if ( $count->{day}[$i] ) {
-            %td= $count->{day}[$i]{all}{total}
-            %td= $count->{day}[$i]{all}{male}
-            %td= $count->{day}[$i]{all}{female}
-            %td= $count->{day}[$i]{visited}{total}
-            %td= $count->{day}[$i]{visited}{male}
-            %td= $count->{day}[$i]{visited}{female}
-            %td= $count->{day}[$i]{notvisited}{total}
-            %td= $count->{day}[$i]{notvisited}{male}
-            %td= $count->{day}[$i]{notvisited}{female}
-            %td= $count->{day}[$i]{bestfit}{total}
-            %td= $count->{day}[$i]{bestfit}{male}
-            %td= $count->{day}[$i]{bestfit}{female}
-            %td= $count->{day}[$i]{loanee}{total}
-            %td= $count->{day}[$i]{loanee}{male}
-            %td= $count->{day}[$i]{loanee}{female}
-          - }
-          - else {
-            %td N/A
-            %td N/A
-            %td N/A
-            %td N/A
-            %td N/A
-            %td N/A
-            %td N/A
-            %td N/A
-            %td N/A
-            %td N/A
-            %td N/A
-            %td N/A
-            %td N/A
-            %td N/A
-            %td N/A
-          - }
+            %span
+              %a{ :href => "#{ url_for( '/order' )->query( 'booking_ymd' => $row->{label} ) }" }= $row->{label}
+          %td= $row->{reserved}
+          %td= $row->{reserved_male}
+          %td= $row->{reserved_female}
+          %td= $row->{visited}
+          %td= $row->{visited_male}
+          %td= $row->{visited_female}
+          %td= $row->{unvisited}
+          %td= $row->{unvisited_male}
+          %td= $row->{unvisited_female}
+          %td= $row->{bestfit}
+          %td= $row->{bestfit_male}
+          %td= $row->{bestfit_female}
+          %td= $row->{rented}
+          %td= $row->{rented_male}
+          %td= $row->{rented_female}
       - }
 
 #status-week
@@ -196,42 +169,22 @@
         %th 남
         %th 여
     %tbody
-      - for ( my $i = 0 ; $i <  @{ $count->{month} } ; $i++ ) {
+      - for my $row ( @{ $visitor->{monthly} } ) {
         %tr
-          - if ( $count->{month}[$i] ) {
-            %td= $count->{month}[$i]{label}
-            %td= $count->{month}[$i]{all}{total}
-            %td= $count->{month}[$i]{all}{male}
-            %td= $count->{month}[$i]{all}{female}
-            %td= $count->{month}[$i]{visited}{total}
-            %td= $count->{month}[$i]{visited}{male}
-            %td= $count->{month}[$i]{visited}{female}
-            %td= $count->{month}[$i]{notvisited}{total}
-            %td= $count->{month}[$i]{notvisited}{male}
-            %td= $count->{month}[$i]{notvisited}{female}
-            %td= $count->{month}[$i]{bestfit}{total}
-            %td= $count->{month}[$i]{bestfit}{male}
-            %td= $count->{month}[$i]{bestfit}{female}
-            %td= $count->{month}[$i]{loanee}{total}
-            %td= $count->{month}[$i]{loanee}{male}
-            %td= $count->{month}[$i]{loanee}{female}
-          - }
-          - else {
-            %td -
-            %td N/A
-            %td N/A
-            %td N/A
-            %td N/A
-            %td N/A
-            %td N/A
-            %td N/A
-            %td N/A
-            %td N/A
-            %td N/A
-            %td N/A
-            %td N/A
-            %td N/A
-            %td N/A
-            %td N/A
-          - }
+          %td= $row->{ym}
+          %td= $row->{total_reserved}
+          %td= $row->{total_reserved_male}
+          %td= $row->{total_reserved_female}
+          %td= $row->{total_visited}
+          %td= $row->{total_visited_male}
+          %td= $row->{total_visited_female}
+          %td= $row->{total_unvisited}
+          %td= $row->{total_unvisited_male}
+          %td= $row->{total_unvisited_female}
+          %td= $row->{total_bestfit}
+          %td= $row->{total_bestfit_male}
+          %td= $row->{total_bestfit_female}
+          %td= $row->{total_rented}
+          %td= $row->{total_rented_male}
+          %td= $row->{total_rented_female}
       - }

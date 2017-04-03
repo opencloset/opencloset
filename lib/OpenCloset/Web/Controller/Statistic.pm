@@ -918,61 +918,94 @@ sub visitor_ymd {
             day       => $3,
         );
     };
+
     unless ($dt) {
         $self->app->log->warn("cannot create datetime object");
         $self->redirect_to( $self->url_for('/stat/visitor') );
         return;
     }
 
-    my $today = try {
-        DateTime->now( time_zone => $self->config->{timezone}, );
-    };
-    unless ($today) {
-        $self->app->log->warn("cannot create datetime object: today");
-        $self->redirect_to( $self->url_for('/stat/visitor') );
-        return;
-    }
-    $today->truncate( to => 'day' );
+    my $today = DateTime->now( time_zone => $self->config->{timezone} );
 
     # -$day_range ~ +$day_range days from now
     my $day_range = 7;
     my %count;
     my $today_data;
-    my $from = $dt->clone->truncate( to => 'day' )->add( days => -$day_range );
-    my $to   = $dt->clone->truncate( to => 'day' )->add( days => $day_range );
-    for ( ; $from <= $to; $from->add( days => 1 ) ) {
-        my $f = $from->clone->truncate( to => 'day' );
-        my $t = $from->clone->truncate( to => 'day' )->add( days => 1, seconds => -1 );
+    my $from = $dt->clone->subtract( days => $day_range );
+    my $to = $dt->clone->add( days => $day_range );
+    my %dow_map = (
+        1 => '월', 2 => '화', 3 => '수', 4 => '목', 5 => '금', 6 => '토',
+        7 => '일'
+    );
 
-        my $f_str = $f->strftime('%Y%m%d%H%M%S');
-        my $t_str = $t->strftime('%Y%m%d%H%M%S');
-        my $name  = "day-$f_str-$t_str";
+    my %visitor;
+    while ( $from <= $to ) {
+        my $rs = $self->DB->resultset('Visitor')->search(
+            {
+                date  => $to->ymd,
+                event => undef
+            },
+            undef
+        );
 
-        my $data;
-        if ( $f < $today && $t < $today ) {
-            $data = $self->CACHE->get($name);
+        while ( my $row = $rs->next ) {
+            my %columns = $row->get_columns;
+            $columns{label} = sprintf( "%s (%s)", $to->ymd, $dow_map{ $to->day_of_week } );
+            push @{ $visitor{daily} ||= [] }, \%columns;
         }
-        elsif ( $f->clone->truncate( to => 'day' ) == $today ) {
-            $self->app->log->info("do not cache and by-pass cache: $name");
-            $data = $self->count_visitor( $f, $t );
-            $today_data = $data;
-        }
-        my $dow = do {
-            use experimental qw( smartmatch );
-            given ( $f->day_of_week ) {
-                "월" when 1;
-                "화" when 2;
-                "수" when 3;
-                "목" when 4;
-                "금" when 5;
-                "토" when 6;
-                "일" when 7;
-                default { q{} }
-            }
-        };
-        $data->{label} = $f->ymd . " ($dow)";
 
-        push @{ $count{day} }, $data;
+        $to->subtract( days => 1 );
+    }
+
+    my $rs = $self->DB->resultset('Visitor')->search(
+        {
+            date => { -between => [ $today->clone->subtract( years => 1 )->ymd, $today->ymd ] }
+        },
+        {
+            select => [
+                \'DATE_FORMAT(`date`, "%Y-%m")',
+                { sum => 'reserved' },
+                { sum => 'reserved_male' },
+                { sum => 'reserved_female' },
+                { sum => 'visited' },
+                { sum => 'visited_male' },
+                { sum => 'visited_female' },
+                { sum => 'unvisited' },
+                { sum => 'unvisited_male' },
+                { sum => 'unvisited_female' },
+                { sum => 'rented' },
+                { sum => 'rented_male' },
+                { sum => 'rented_female' },
+                { sum => 'bestfit' },
+                { sum => 'bestfit_male' },
+                { sum => 'bestfit_female' },
+            ],
+            as => [
+                'ym',
+                'total_reserved',
+                'total_reserved_male',
+                'total_reserved_female',
+                'total_visited',
+                'total_visited_male',
+                'total_visited_female',
+                'total_unvisited',
+                'total_unvisited_male',
+                'total_unvisited_female',
+                'total_rented',
+                'total_rented_male',
+                'total_rented_female',
+                'total_bestfit',
+                'total_bestfit_male',
+                'total_bestfit_female',
+            ],
+            group_by => \'DATE_FORMAT(`date`, "%Y-%m")',
+            order_by => \'DATE_FORMAT(`date`, "%Y-%m") DESC',
+        }
+    );
+
+    while ( my $row = $rs->next ) {
+        my %columns = $row->get_columns;
+        push @{ $visitor{monthly} ||= [] }, \%columns;
     }
 
     # from first to current week of this year
@@ -1122,7 +1155,11 @@ sub visitor_ymd {
     $count{week}[-1]  = \%current_week  if $no_cache_week;
     $count{month}[-1] = \%current_month if $no_cache_month;
 
-    $self->render( count => \%count, dt => $dt, );
+    $self->render(
+        count   => \%count,
+        dt      => $dt,
+        visitor => \%visitor,
+    );
 }
 
 =head2 events_seoul
