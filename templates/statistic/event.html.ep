@@ -1,0 +1,200 @@
+% my $_id = 'stat-events-seoul';
+% title meta_text($_id);
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title><%= title %></title>
+
+    <link rel="stylesheet" href="/components/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/components/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/components/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css">
+    <link rel="stylesheet" href="/components/opencloset.css/dist/css/opencloset.min.css">
+    <link rel="stylesheet" href="/css/screen.css">
+  </head>
+  <body>
+    <div class="container">
+      <div id="content">
+
+        <h1><%= title %></h1>
+
+        <div class="search">
+          <form id="search-form" action="">
+            <div class="input-group">
+              <input id="query" class="form-control" name="" type="text" value="" placeholder="날짜를 고르세요", data-date-format="yyyy-mm-dd" data-date-end-date="0d">
+            </div>
+          </form>
+        </div>
+        <hr>
+
+        <div class="monthly-stat">
+          <h2>
+            월간 방문 인원
+            <small><%= param('event') %></small>
+          </h2>
+          <table class="table table-striped table-bordered table-hover">
+            <thead>
+              <tr>
+                <th rowspan="2">월별</th>
+                <th rowspan="2">방문인원</th>
+                <th colspan="2">성별</th>
+                <th colspan="3">연령</th>
+                <th rowspan="2">미방문인원</th>
+                <th colspan="2">성별</th>
+                <th colspan="3">연령</th>
+              </tr>
+              <tr>
+                <th>남성</th>
+                <th>여성</th>
+                <th>10대</th>
+                <th>20대</th>
+                <th>30대</th>
+                <th>남성</th>
+                <th>여성</th>
+                <th>10대</th>
+                <th>20대</th>
+                <th>30대</th>
+              </tr>
+            </thead>
+            <tbody>
+              % my %sum;
+              % for my $row ( @{ $visitor->{monthly} } ) {
+                % $sum{visited}        += $row->{total_visited};
+                % $sum{visited_male}   += $row->{total_visited_male};
+                % $sum{visited_female} += $row->{total_visited_female};
+                % $sum{visited_age_10} += $row->{total_visited_age_10};
+                % $sum{visited_age_20} += $row->{total_visited_age_20};
+                % $sum{visited_age_30} += $row->{total_visited_age_30};
+                % $sum{unvisited}        += $row->{total_unvisited};
+                % $sum{unvisited_male}   += $row->{total_unvisited_male};
+                % $sum{unvisited_female} += $row->{total_unvisited_female};
+                % $sum{unvisited_age_10} += $row->{total_unvisited_age_10};
+                % $sum{unvisited_age_20} += $row->{total_unvisited_age_20};
+                % $sum{unvisited_age_30} += $row->{total_unvisited_age_30};
+                <tr>
+                  <td><%= $row->{ym} %></td>
+                  <td><%= $row->{total_visited} %></td>
+                  <td><%= $row->{total_visited_male} %></td>
+                  <td><%= $row->{total_visited_female} %></td>
+                  <td><%= $row->{total_visited_age_10} %></td>
+                  <td><%= $row->{total_visited_age_20} %></td>
+                  <td><%= $row->{total_visited_age_30} %></td>
+                  <td><%= $row->{total_unvisited} %></td>
+                  <td><%= $row->{total_unvisited_male} %></td>
+                  <td><%= $row->{total_unvisited_female} %></td>
+                  <td><%= $row->{total_unvisited_age_10} %></td>
+                  <td><%= $row->{total_unvisited_age_20} %></td>
+                  <td><%= $row->{total_unvisited_age_30} %></td>
+                </tr>
+              % }
+              <tr>
+                <td>합계</td>
+                <td><%= $sum{visited} %></td>
+                <td><%= $sum{visited_male} %></td>
+                <td><%= $sum{visited_female} %></td>
+                <td><%= $sum{visited_age_10} %></td>
+                <td><%= $sum{visited_age_20} %></td>
+                <td><%= $sum{visited_age_30} %></td>
+                <td><%= $sum{unvisited} %></td>
+                <td><%= $sum{unvisited_male} %></td>
+                <td><%= $sum{unvisited_female} %></td>
+                <td><%= $sum{unvisited_age_10} %></td>
+                <td><%= $sum{unvisited_age_20} %></td>
+                <td><%= $sum{unvisited_age_30} %></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class='daily-stat collapse-group'>
+          <h2> 일간 방문인원 </h2>
+          <p><a class="btn" href="#">더보기&raquo;</a></p>
+          <div class="collapse">
+            <table class="table table-striped table-bordered table-hover">
+              <thead>
+                <tr>
+                  <th rowspan="2">일별</th>
+                  <th rowspan="2">취업날개 방문인원</th>
+                  <th colspan="2">성별</th>
+                  <th colspan="3">연령</th>
+                  <th rowspan="2">취업날개 미방문인원</th>
+                  <th colspan="2">성별</th>
+                  <th colspan="3">연령</th>
+                </tr>
+                <tr>
+                  <th>남성</th>
+                  <th>여성</th>
+                  <th>10대</th>
+                  <th>20대</th>
+                  <th>30대</th>
+                  <th>남성</th>
+                  <th>여성</th>
+                  <th>10대</th>
+                  <th>20대</th>
+                  <th>30대</th>
+                </tr>
+              </thead>
+              <tbody>
+                % for my $key (keys %sum) {
+                  % delete $sum{$key};
+                % }
+                % for my $row ( @{ $visitor->{daily} } ) {
+                  % $sum{visited}        += $row->{visited};
+                  % $sum{visited_male}   += $row->{visited_male};
+                  % $sum{visited_female} += $row->{visited_female};
+                  % $sum{visited_age_10} += $row->{visited_age_10};
+                  % $sum{visited_age_20} += $row->{visited_age_20};
+                  % $sum{visited_age_30} += $row->{visited_age_30};
+                  % $sum{unvisited}        += $row->{unvisited};
+                  % $sum{unvisited_male}   += $row->{unvisited_male};
+                  % $sum{unvisited_female} += $row->{unvisited_female};
+                  % $sum{unvisited_age_10} += $row->{unvisited_age_10};
+                  % $sum{unvisited_age_20} += $row->{unvisited_age_20};
+                  % $sum{unvisited_age_30} += $row->{unvisited_age_30};
+                  <tr>
+                    <td><%= $row->{date} %></td>
+                    <td><%= $row->{visited} %></td>
+                    <td><%= $row->{visited_male} %></td>
+                    <td><%= $row->{visited_female} %></td>
+                    <td><%= $row->{visited_age_10} %></td>
+                    <td><%= $row->{visited_age_20} %></td>
+                    <td><%= $row->{visited_age_30} %></td>
+                    <td><%= $row->{unvisited} %></td>
+                    <td><%= $row->{unvisited_male} %></td>
+                    <td><%= $row->{unvisited_female} %></td>
+                    <td><%= $row->{unvisited_age_10} %></td>
+                    <td><%= $row->{unvisited_age_20} %></td>
+                    <td><%= $row->{unvisited_age_30} %></td>
+                  </tr>
+                % }
+                <tr>
+                  <td>합계</td>
+                  <td><%= $sum{visited} %></td>
+                  <td><%= $sum{visited_male} %></td>
+                  <td><%= $sum{visited_female} %></td>
+                  <td><%= $sum{visited_age_10} %></td>
+                  <td><%= $sum{visited_age_20} %></td>
+                  <td><%= $sum{visited_age_30} %></td>
+                  <td><%= $sum{unvisited} %></td>
+                  <td><%= $sum{unvisited_male} %></td>
+                  <td><%= $sum{unvisited_female} %></td>
+                  <td><%= $sum{unvisited_age_10} %></td>
+                  <td><%= $sum{unvisited_age_20} %></td>
+                  <td><%= $sum{unvisited_age_30} %></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="/components/jquery/dist/jquery.min.js"></script>
+    <script src="/components/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script src="/components/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js "></script>
+    <script src="/components/bootstrap-datepicker/dist/locales/bootstrap-datepicker.kr.min.js"></script>
+    <script src="/js/stat-events-seoul.js"></script>
+  </body>
+</html>

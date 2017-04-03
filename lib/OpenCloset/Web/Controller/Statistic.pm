@@ -1067,6 +1067,73 @@ sub visitor_ymd {
     $self->render( dt => $dt, visitor => \%visitor );
 }
 
+=head2 event
+
+    GET /stat/events/:event
+
+=cut
+
+sub event {
+    my $self  = shift;
+    my $event = $self->param('event');
+
+    my %visitor;
+    my $rs = $self->DB->resultset('Visitor')->search(
+        { event => $event },
+        {
+            select => [
+                \'DATE_FORMAT(`date`, "%Y-%m")',
+                { sum => 'visited' },
+                { sum => 'visited_male' },
+                { sum => 'visited_female' },
+                { sum => 'visited_age_10' },
+                { sum => 'visited_age_20' },
+                { sum => 'visited_age_30' },
+                { sum => 'unvisited' },
+                { sum => 'unvisited_male' },
+                { sum => 'unvisited_female' },
+                { sum => 'unvisited_age_10' },
+                { sum => 'unvisited_age_20' },
+                { sum => 'unvisited_age_30' },
+            ],
+            as => [
+                'ym',
+                'total_visited',
+                'total_visited_male',
+                'total_visited_female',
+                'total_visited_age_10',
+                'total_visited_age_20',
+                'total_visited_age_30',
+                'total_unvisited',
+                'total_unvisited_male',
+                'total_unvisited_female',
+                'total_unvisited_age_10',
+                'total_unvisited_age_20',
+                'total_unvisited_age_30',
+            ],
+            group_by => \'DATE_FORMAT(`date`, "%Y-%m")',
+            order_by => \'DATE_FORMAT(`date`, "%Y-%m") DESC',
+        }
+    );
+
+    while ( my $row = $rs->next ) {
+        my %columns = $row->get_columns;
+        push @{ $visitor{monthly} ||= [] }, \%columns;
+    }
+
+    $rs = $self->DB->resultset('Visitor')->search(
+        { event => $event },
+        { order_by => { -desc => 'id' } }
+    );
+
+    while ( my $row = $rs->next ) {
+        my %columns = $row->get_columns;
+        push @{ $visitor{daily} ||= [] }, \%columns;
+    }
+
+    $self->render( visitor => \%visitor );
+}
+
 =head2 events_seoul
 
     GET /stat/events/seoul
