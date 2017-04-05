@@ -1131,7 +1131,7 @@ sub event {
 
     $rs = $self->DB->resultset('Visitor')->search(
         { event => $event },
-        { order_by => { -desc => 'id' } }
+        { order_by => { -desc => 'date' } }
     );
 
     while ( my $row = $rs->next ) {
