@@ -1083,6 +1083,9 @@ sub event {
     my $self  = shift;
     my $event = $self->param('event');
 
+    return $self->error( 404, { str => "Not found event: $event" }, 'error/not_found' )
+        unless $self->DB->resultset('Visitor')->search( { event => $event } )->count;
+
     my %visitor;
     my $rs = $self->DB->resultset('Visitor')->search(
         { event => $event },
@@ -1131,7 +1134,7 @@ sub event {
 
     $rs = $self->DB->resultset('Visitor')->search(
         { event => $event },
-        { order_by => { -desc => 'id' } }
+        { order_by => { -desc => 'date' } }
     );
 
     while ( my $row = $rs->next ) {

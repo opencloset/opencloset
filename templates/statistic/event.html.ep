@@ -29,7 +29,6 @@
               <tr>
                 <th rowspan="2">월별</th>
                 <th rowspan="2">방문인원</th>
-                <th rowspan="2">일일 평균</th>
                 <th colspan="2">성별</th>
                 <th colspan="3">연령</th>
                 <th rowspan="2">미방문인원</th>
@@ -53,6 +52,7 @@
               % my %sum;
               % for my $row ( @{ $visitor->{monthly} } ) {
                 % $sum{visited}        += $row->{total_visited};
+                % $sum{avg_visited}    += $row->{avg_visited};
                 % $sum{visited_male}   += $row->{total_visited_male};
                 % $sum{visited_female} += $row->{total_visited_female};
                 % $sum{visited_age_10} += $row->{total_visited_age_10};
@@ -66,8 +66,12 @@
                 % $sum{unvisited_age_30} += $row->{total_unvisited_age_30};
                 <tr>
                   <td><%= $row->{ym} %></td>
-                  <td><%= $row->{total_visited} %></td>
-                  <td><%= sprintf '%.1f', $row->{avg_visited} %></td>
+                  <td>
+                    <%= $row->{total_visited} %>
+                    <br>
+                    운영일(일일평균)
+                    <%= sprintf '%.1f', $row->{avg_visited} %>
+                  </td>
                   <td><%= $row->{total_visited_male} %></td>
                   <td><%= $row->{total_visited_female} %></td>
                   <td><%= $row->{total_visited_age_10} %></td>
@@ -83,19 +87,63 @@
               % }
               <tr>
                 <td>합계</td>
-                <td><%= $sum{visited} %></td>
-                <td>-</td>
-                <td><%= $sum{visited_male} %></td>
-                <td><%= $sum{visited_female} %></td>
-                <td><%= $sum{visited_age_10} %></td>
-                <td><%= $sum{visited_age_20} %></td>
-                <td><%= $sum{visited_age_30} %></td>
+                <td>
+                  <%= $sum{visited} %>
+                  <br>
+                  운영일(일일평균)
+                  <%= sprintf '%.1f', $sum{avg_visited} / @{ $visitor->{monthly} } %>
+                </td>
+                <td>
+                  <%= $sum{visited_male} %>
+                  <br>
+                  (<%= sprintf '%.1f%%', $sum{visited_male} / $sum{visited} * 100 %>)
+                </td>
+                <td>
+                  <%= $sum{visited_female} %>
+                  <br>
+                  (<%= sprintf '%.1f%%', $sum{visited_female} / $sum{visited} * 100 %>)
+                </td>
+                <td>
+                  <%= $sum{visited_age_10} %>
+                  <br>
+                  (<%= sprintf '%.1f%%', $sum{visited_age_10} / $sum{visited} * 100 %>)
+                </td>
+                <td>
+                  <%= $sum{visited_age_20} %>
+                  <br>
+                  (<%= sprintf '%.1f%%', $sum{visited_age_20} / $sum{visited} * 100 %>)
+                </td>
+                <td>
+                  <%= $sum{visited_age_30} %>
+                  <br>
+                  (<%= sprintf '%.1f%%', $sum{visited_age_30} / $sum{visited} * 100 %>)
+                </td>
                 <td><%= $sum{unvisited} %></td>
-                <td><%= $sum{unvisited_male} %></td>
-                <td><%= $sum{unvisited_female} %></td>
-                <td><%= $sum{unvisited_age_10} %></td>
-                <td><%= $sum{unvisited_age_20} %></td>
-                <td><%= $sum{unvisited_age_30} %></td>
+                <td>
+                  <%= $sum{unvisited_male} %>
+                  <br>
+                  (<%= sprintf '%.1f%%', $sum{unvisited_male} / $sum{unvisited} * 100 %>)
+                </td>
+                <td>
+                  <%= $sum{unvisited_female} %>
+                  <br>
+                  (<%= sprintf '%.1f%%', $sum{unvisited_female} / $sum{unvisited} * 100 %>)
+                </td>
+                <td>
+                  <%= $sum{unvisited_age_10} %>
+                  <br>
+                  (<%= sprintf '%.1f%%', $sum{unvisited_age_10} / $sum{unvisited} * 100 %>)
+                </td>
+                <td>
+                  <%= $sum{unvisited_age_20} %>
+                  <br>
+                  (<%= sprintf '%.1f%%', $sum{unvisited_age_20} / $sum{unvisited} * 100 %>)
+                </td>
+                <td>
+                  <%= $sum{unvisited_age_30} %>
+                  <br>
+                  (<%= sprintf '%.1f%%', $sum{unvisited_age_30} / $sum{unvisited} * 100 %>)
+                </td>
               </tr>
             </tbody>
           </table>
