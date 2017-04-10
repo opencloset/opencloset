@@ -1114,7 +1114,7 @@ sub auth {
     }
 
     ## 예약일이 이미 지난날이면 아니됨 최대 오늘까지
-    my $today = DateTime->today;
+    my $today = DateTime->today( time_zone => $self->config->{timezone} );
     my $booking_day = $booking->date->clone->truncate( to => 'day' );
     if ( $today->epoch - $booking_day->epoch > 0 ) {
         $self->error(
