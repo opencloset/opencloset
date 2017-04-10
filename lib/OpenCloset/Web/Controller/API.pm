@@ -12,9 +12,11 @@ use Path::Tiny ();
 use Postcodify;
 use String::Random;
 use Try::Tiny;
+use Mojo::JSON qw/decode_json/;
 
+use OpenCloset::Calculator::LateFee;
 use OpenCloset::Common::Unpaid ();
-use OpenCloset::Constants::Status qw/$LOST $DISCARD/;
+use OpenCloset::Constants::Status qw/$LOST $DISCARD $RETURNED/;
 
 has DB => sub { shift->app->DB };
 
@@ -3101,6 +3103,69 @@ sub api_upload_photo {
     }
 
     $self->render( text => $res->{content} );
+}
+
+=head2 send_vbank_sms
+
+    PUT /api/order/:id/send-vbank-sms
+
+=cut
+
+sub api_send_vbank_sms {
+    my $self = shift;
+    my $id   = $self->param('id');
+
+    my $order = $self->DB->resultset('Order')->find( { id => $id } );
+    return $self->error( 404, { str => "Order not found: $id" } ) unless $order;
+
+    my $status_id = $order->status_id;
+    return $self->error( 400, { str => "Wrong order status($status_id)" } )
+        if $status_id != $RETURNED;
+
+    my $calc     = OpenCloset::Calculator::LateFee->new;
+    my $late_fee = $calc->late_fee($order);
+    return $self->error( 400, { str => "There is no latefee." } ) unless $late_fee;
+
+    my $user      = $order->user;
+    my $user_info = $user->user_info;
+    my $params    = {
+        merchant_uid => $self->merchant_uid( "staff-%d-", $id ),
+        amount       => $late_fee,
+        vbank_due    => time + 86400 * 3,              # 3days
+        vbank_holder => '열린옷장-' . $user->name,
+        vbank_code   => '04',                          # 국민은행
+        name         => sprintf( "미납금#%d", $id ),
+        buyer_name   => $user->name,
+        buyer_email  => $user->email,
+        buyer_tel    => $user_info->phone,
+        buyer_addr   => $user_info->address2,
+        notice_url => $self->url_for("/webhooks/iamport/unpaid")->to_abs->to_string,
+    };
+
+    my ( $log, $error ) = $self->create_vbank( $order, $params );
+    return $self->error( 500, { str => $error } ) unless $log;
+
+    my $data         = decode_json( $log->detail );
+    my $vbank_name   = $data->{response}{vbank_name};
+    my $vbank_num    = $data->{response}{vbank_num};
+    my $vbank_holder = $data->{response}{vbank_holder};
+
+    my $sms_body = sprintf(
+        '[열린옷장] %s님, %d일 연장, %d일 연체로 추가 금액 %s원이 발생하였습니다. 금일 중으로 %s %s(예금주 : %s)으로 입금해주세요. 지정된 금액으로 3일동안 유효한 %s님의 임금전용 가상계좌입니다. 금액과 입금기한에 유의해 주시기 바랍니다',
+        $user->name,
+        $calc->extension_days($order),
+        $calc->overdue_days($order),
+        $self->commify($late_fee),
+        $vbank_name,
+        $vbank_num,
+        $vbank_holder,
+        $user->name,
+    );
+    $sms_body =~ s/, 0일 연장//;
+    $sms_body =~ s/, 0일 연체/으/;
+    $self->sms( $user_info->phone, $sms_body );
+
+    $self->render( json => {} );
 }
 
 1;
