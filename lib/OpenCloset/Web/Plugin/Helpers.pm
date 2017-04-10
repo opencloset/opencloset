@@ -2408,7 +2408,8 @@ sub create_vbank {
         die "Failed to create a new vbank" unless $json;
 
         $data = decode_json($json);
-        $log  = $payment->create_related(
+        $payment->update( { sid => $data->{response}{imp_uid} } );
+        $log = $payment->create_related(
             'payment_logs',
             { status => $data->{response}{status}, detail => $json }
         );
