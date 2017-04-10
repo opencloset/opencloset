@@ -176,6 +176,7 @@ sub _public_routes_staff {
     $r->post('/order/:order_id/extension')->to('order#create_order_extension');
     $r->get('/order/:order_id/extension/success')->to('order#order_extension_success');
     $r->get('/order/:order_id/rental/paper/pdf')->to('order#rental_paper_pdf');
+    $r->post('/order/:id/unpaid/hook')->to('order#update_unpaid_hook');
     $r->get('/stat/events/:event')->to('statistic#event');
 }
 
@@ -309,7 +310,6 @@ sub _private_routes {
     $r->get('/order/:id')->to('order#order');
     $r->post('/order/:id/update')->to('order#update');
     $r->post('/order/:id/coupon')->to('order#create_coupon');
-    $r->post('/order/:id/unpaid/hook')->to('order#update_unpaid_hook');
 
     $r->get('/booking')->to('booking#index');
     $r->get('/booking/:ymd')->to('booking#ymd');
