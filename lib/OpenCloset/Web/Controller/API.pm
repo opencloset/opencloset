@@ -3128,12 +3128,11 @@ sub api_send_vbank_sms {
 
     my $user      = $order->user;
     my $user_info = $user->user_info;
-    my $iamport   = $self->app->iamport;
     my $params    = {
         merchant_uid => $self->merchant_uid( "staff-%d-", $id ),
         amount       => $late_fee,
         vbank_due    => time + 86400 * 3,              # 3days
-        vbank_holder => '열린옷장-',
+        vbank_holder => '열린옷장-' . $user->name,
         vbank_code   => '04',                          # 국민은행
         name         => sprintf( "미납금#%d", $id ),
         buyer_name   => $user->name,
@@ -3143,20 +3142,23 @@ sub api_send_vbank_sms {
         notice_url => $self->url_for("/order/$id/unpaid/hook")->to_abs->to_string,
     };
 
-    my $json = $iamport->create_vbank($params);
-    return $self->error( 500, { str => "Failed to create a new vbank" } ) unless $json;
+    my ( $log, $error ) = $self->create_vbank( $order, $params );
+    return $self->error( 500, { str => $error } ) unless $log;
 
-    my $data     = decode_json($json);
-    my $res      = $data->{response};
+    my $data         = decode_json( $log->detail );
+    my $vbank_name   = $data->{response}{vbank_name};
+    my $vbank_num    = $data->{response}{vbank_num};
+    my $vbank_holder = $data->{response}{vbank_holder};
+
     my $sms_body = sprintf(
         '[열린옷장] %s님, %d일 연장, %d일 연체로 추가 금액 %s원이 발생하였습니다. 금일 중으로 %s %s(예금주 : %s)으로 입금해주세요. 지정된 금액으로 3일동안 유효한 %s님의 임금전용 가상계좌입니다. 금액과 입금기한에 유의해 주시기 바랍니다',
         $user->name,
         $calc->extension_days($order),
         $calc->overdue_days($order),
         $self->commify($late_fee),
-        $res->{vbank_name},
-        $res->{vbank_num},
-        $res->{vbank_holder},
+        $vbank_name,
+        $vbank_num,
+        $vbank_holder,
         $user->name,
     );
     $sms_body =~ s/, 0일 연장//;
