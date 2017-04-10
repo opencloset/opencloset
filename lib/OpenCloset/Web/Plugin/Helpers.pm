@@ -95,7 +95,6 @@ sub register {
     $app->helper( choose_value_by_range    => \&choose_value_by_range );
     $app->helper( mean_status              => \&mean_status );
     $app->helper( booking_list             => \&booking_list );
-    $app->helper( create_vbank             => \&create_vbank );
 }
 
 =head1 HELPERS
@@ -2360,40 +2359,6 @@ sub booking_list {
     }
 
     return @data;
-}
-
-=head2 create_vbank( $tname, $code, $holder, $amount, $due, $order_id )
-
-    my $json = $self->create_vbank('연장비', '04', '홍길동', '22000', time + 86400, 51183);
-
-=cut
-
-sub create_vbank {
-    my ( $self, $tname, $code, $holder, $amount, $limit, $order_id ) = @_;
-
-    my $order =
-        $self->app->DB->resultset('Order')->find( { id => $order_id } );
-    die "order not found\n" unless $order;
-
-    my $user      = $order->user;
-    my $user_info = $user->user_info;
-    my $iamport   = $self->app->iamport;
-
-    my $opt = {
-        merchant_uid => $self->merchant_uid( "staff-%d-", $order->id ),
-        amount       => $amount,
-        vbank_due    => $limit,
-        vbank_holder => $holder,
-        vbank_code   => $code,
-        name         => $tname . "#$order_id",
-        buyer_name   => $user->name,
-        buyer_email  => $user->email,
-        buyer_tel    => $user_info->phone,
-        buyer_addr   => $user_info->address2,
-        notice_url => $self->url_for("/order/$order_id/unpaid/hook")->to_abs->to_string,
-    };
-
-    return $iamport->create_vbank($opt);
 }
 
 1;
