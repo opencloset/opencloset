@@ -129,7 +129,6 @@ $ ->
       data:
         price: 0
       success: (data) ->
-        $tr.remove()
         OpenCloset.alert('success', "전용계좌 발송이 처리되었습니다")
       error: (jqXHR, textStatus) ->
         OpenCloset.alert('danger', "오류가 발생했습니다: #{jqXHR.responseJSON.error.str}")
