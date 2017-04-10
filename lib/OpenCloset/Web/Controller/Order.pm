@@ -10,7 +10,9 @@ use HTTP::Tiny;
 use List::MoreUtils;
 use Try::Tiny;
 
-use OpenCloset::Common::Unpaid qw/unpaid_cond unpaid_attr is_nonpaid/;
+use OpenCloset::Common::Unpaid
+    qw/unpaid_cond unpaid_attr is_nonpaid unpaid2fullpaid/;
+use OpenCloset::Constants qw/%PAY_METHOD_MAP/;
 use OpenCloset::Constants::Category;
 use OpenCloset::Constants::Status;
 
@@ -1266,15 +1268,62 @@ iamport로 부터 전달받는 가상계좌의 완납 hook
 
 sub update_unpaid_hook {
     my $self = shift;
-    my $id   = $self->param('id');
 
-    my $order = $self->DB->resultset('Order')->find( { id => $id } );
-    return $self->error( 404, { str => "Not found order: $id" } ) unless $order;
+    my $v = $self->validation;
+    $v->required("imp_uid");
+    $v->required("merchant_uid");
+    $v->required("status");
 
-    # POST 내용을 확인하고 'paid'이면
-    # $order의 status를 '완납'으로 변경
+    my $sid    = $v->param("imp_uid");
+    my $cid    = $v->param("merchant_uid");
+    my $status = $v->param("status");
 
-    $self->respond_to( html => { status => 200 } );
+    my $payment = $self->DB->resultset("Payment")->find( { sid => $sid } );
+    unless ($payment) {
+        $self->log->warn("Not found payment: sid($sid)");
+        $payment = $self->DB->resultset("Payment")->find( { cid => $cid } );
+        return $self->error( 404, "Not found payment: cid($cid)" ) unless $payment;
+    }
+
+    my $payment_id = $payment->id;
+    my $order      = $payment->order;
+    return $self->error( 404, "Not found order: payment_id($payment_id)" ) unless $order;
+
+    my $payment_log = $payment->payment_logs(
+        {},
+        {
+            order_by => { -desc => "id" },
+            rows     => 1
+        }
+    )->next;
+
+    return $self->error( 404, "Not found payment log: payment_id($payment_id)" )
+        unless $payment_log;
+
+    ## 이후부터는 내부 처리중에 오류가 발생하더라도 완납 처리를 해야함
+    ## 가상계좌(vbank)의 ready -> paid
+    my $last_status = $payment_log->status || '';
+    if ( $last_status eq "ready" && $status eq "paid" ) {
+        ## 미납 -> 완납으로 변경
+        unpaid2fullpaid( $order, $payment->amount, $PAY_METHOD_MAP{ $payment->pay_method } );
+
+        my $iamport = $self->app->iamport;
+        my $json    = $iamport->payment($sid);
+        unless ($json) {
+            $self->log->warn("Failed to get payment info from iamport: sid($sid)");
+            return $self->render( text => '', status => 500 );
+        }
+
+        $payment->create_related(
+            "payment_logs",
+            {
+                status => $status,
+                detail => $json,
+            },
+        );
+    }
+
+    $self->render( text => "OK" );
 }
 
 1;
