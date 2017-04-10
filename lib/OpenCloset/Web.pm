@@ -6,6 +6,7 @@ use version; our $VERSION = qv("v1.8.59");
 use CHI;
 use DateTime;
 
+use Iamport::REST::Client;
 use OpenCloset::Schema;
 use OpenCloset::DB::Plugin::Order::Sale;
 
@@ -32,6 +33,12 @@ has DB => sub {
             %{ $conf->{opts} },
         }
     );
+};
+
+has iamport => sub {
+    my $self = shift;
+    my $conf = $self->config->{iamport};
+    return Iamport::REST::Client->new( key => $conf->{key}, secret => $conf->{secret} );
 };
 
 =head1 METHODS

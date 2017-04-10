@@ -19,7 +19,6 @@ use Parcel::Track;
 use Statistics::Basic;
 use Try::Tiny;
 
-use Iamport::REST::Client;
 use OpenCloset::Calculator::LateFee;
 use OpenCloset::Common::Unpaid ();
 use OpenCloset::Size::Guess;
@@ -2378,13 +2377,10 @@ sub create_vbank {
 
     my $user      = $order->user;
     my $user_info = $user->user_info;
-    my $imp       = Iamport::REST::Client->new(
-        key    => $self->config->{iamport}{key},
-        secret => $self->config->{iamport}{secret}
-    );
+    my $iamport   = $self->app->iamport;
 
     my $opt = {
-        merchant_uid => $self->app->merchant_uid( "staff-%d-", $order->id ),
+        merchant_uid => $self->merchant_uid( "staff-%d-", $order->id ),
         amount       => $amount,
         vbank_due    => $limit,
         vbank_holder => $holder,
@@ -2397,7 +2393,7 @@ sub create_vbank {
         notice_url => $self->url_for("/order/$order_id/unpaid/hook")->to_abs->to_string,
     };
 
-    return $imp->create_vbank($opt);
+    return $iamport->create_vbank($opt);
 }
 
 1;
