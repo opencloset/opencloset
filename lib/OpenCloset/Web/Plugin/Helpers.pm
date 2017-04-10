@@ -2365,11 +2365,7 @@ sub booking_list {
 
 =head2 create_vbank( $tname, $code, $holder, $amount, $due, $order_id )
 
-    my %ret = json_decode(
-        $self->create_vbank(
-            '연장비', '04', '유용빈', '22000',
-            DateTime->now->epoch + 3600, 51183
-        );
+    my $json = $self->create_vbank('연장비', '04', '홍길동', '22000', time + 86400, 51183);
 
 =cut
 
