@@ -13,7 +13,7 @@ use List::MoreUtils qw( zip );
 use List::Util qw/any uniq/;
 use Mojo::ByteStream;
 use Mojo::DOM::HTML;
-use Mojo::JSON qw/encode_json/;
+use Mojo::JSON qw/encode_json decode_json/;
 use Mojo::Redis2;
 use Parcel::Track;
 use Statistics::Basic;
@@ -95,6 +95,7 @@ sub register {
     $app->helper( choose_value_by_range    => \&choose_value_by_range );
     $app->helper( mean_status              => \&mean_status );
     $app->helper( booking_list             => \&booking_list );
+    $app->helper( create_vbank             => \&create_vbank );
 }
 
 =head1 HELPERS
@@ -2359,6 +2360,72 @@ sub booking_list {
     }
 
     return @data;
+}
+
+=head2 create_vbank( $order, \%params )
+
+    my ($payment_log, $error) = $self->create_vbank($order, $amount);
+    my ($payment_log, $error) = $self->create_vbank($order, { merchant_uid => '...', ... });
+
+=cut
+
+sub create_vbank {
+    my ( $self, $order, $params ) = @_;
+
+    return unless $order;
+    return unless $params;
+
+    my $merchant_uid = $params->{merchant_uid};
+    my $amount       = $params->{amount};
+    my $iamport      = $self->app->iamport;
+
+    my ( $json, $data );
+    $json = $iamport->create_prepare( $merchant_uid, $amount );
+    return ( undef, "The payment agency failed to process" ) unless $json;
+
+    $data = decode_json($json);
+    my ( $log, $error ) = try {
+        my $guard   = $self->DB->txn_scope_guard;
+        my $payment = $order->create_related(
+            "payments",
+            {
+                cid        => $merchant_uid,
+                amount     => $amount,
+                pay_method => 'vbank'
+            },
+        );
+
+        die "Failed to create a new payment" unless $payment;
+
+        my $log = $payment->create_related(
+            'payment_logs',
+            { status => $data->{response}{status}, detail => $json }
+        );
+
+        die "Failed to create a new payment_log" unless $log;
+
+        $json = $iamport->create_vbank($params);
+        die "Failed to create a new vbank" unless $json;
+
+        $data = decode_json($json);
+        $payment->update( { sid => $data->{response}{imp_uid} } );
+        $log = $payment->create_related(
+            'payment_logs',
+            { status => $data->{response}{status}, detail => $json }
+        );
+
+        die "Failed to create a new payment_log" unless $log;
+
+        $guard->commit;
+        return $log;
+    }
+    catch {
+        chomp;
+        $self->log->error($_);
+        return ( undef, $_ );
+    };
+
+    return ( $log, $error );
 }
 
 1;
