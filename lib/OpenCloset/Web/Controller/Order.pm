@@ -1258,15 +1258,15 @@ sub create_coupon {
     $self->render( json => { $coupon->get_columns } );
 }
 
-=head2 update_unpaid_hook
+=head2 iamport_unpaid_hook
 
 iamport로 부터 전달받는 가상계좌의 완납 hook
 
-    POST /order/:id/unpaid/hook
+    POST /webhooks/iamport/unpaid
 
 =cut
 
-sub update_unpaid_hook {
+sub iamport_unpaid_hook {
     my $self = shift;
 
     my $v = $self->validation;
