@@ -1,0 +1,81 @@
+- use utf8;
+- my $_id = 'stat-visitor';
+- layout 'default',
+-   page_id     => $_id;
+- title meta_text($_id);
+
+.search
+  %form#search-form
+    .input-group
+      %input#query.form-control{ :placeholder => '날짜를 고르세요', 'data-date-format' => 'yyyy-mm-dd' }
+
+.space-8
+
+#status-day
+  %h2
+    일별
+  .space-8
+
+  %table.table.table-striped.table-bordered.table-hover
+    %thead
+      %tr
+        %th{ :rowspan => "2" } 일
+        %th{ :colspan => "3" } 대여자
+      %tr
+        %th 합
+        %th 남
+        %th 여
+    %tbody
+      - for my $row ( @{ $visitor->{daily} } ) {
+        %tr
+          %td= $row->{label}
+          %td= $row->{rented}
+          %td= $row->{rented_male}
+          %td= $row->{rented_female}
+      - }
+
+#status-week
+  %h2
+    주별 방문자
+  .space-8
+
+  %table.table.table-striped.table-bordered.table-hover
+    %thead
+      %tr
+        %th{ :rowspan => "2" } 주차(시작일 ~ 종료일)
+        %th{ :colspan => "3" } 대여자
+      %tr
+        %th 합
+        %th 남
+        %th 여
+    %tbody
+      - for my $row ( reverse @{ $visitor->{weekly} } ) {
+        %tr
+          %td= $row->{label} || 0
+          %td= $row->{total_rented} || 0
+          %td= $row->{total_rented_male} || 0
+          %td= $row->{total_rented_female} || 0
+      - }
+
+#status-month
+  %h2
+    월별 방문자
+  .space-8
+
+  %table.table.table-striped.table-bordered.table-hover
+    %thead
+      %tr
+        %th{ :rowspan => "2" } 연월
+        %th{ :colspan => "3" } 대여자
+      %tr
+        %th 합
+        %th 남
+        %th 여
+    %tbody
+      - for my $row ( @{ $visitor->{monthly} } ) {
+        %tr
+          %td= $row->{ym}
+          %td= $row->{total_rented}
+          %td= $row->{total_rented_male}
+          %td= $row->{total_rented_female}
+      - }

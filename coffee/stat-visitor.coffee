@@ -4,5 +4,8 @@ $ ->
     autoclose:      true
   ).on( 'changeDate', (e) ->
     ymd = $('#query').prop('value')
-    window.location = "/stat/visitor/#{ymd}"
+    path = location.pathname.split('/')
+    path.pop()
+    path.push(ymd)
+    location.href = path.join('/')
   )
