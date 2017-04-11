@@ -6,6 +6,7 @@ use DateTime;
 use Try::Tiny;
 use List::Util qw/sum/;
 use DateTime::Format::MySQL;
+use DateTime::Format::Strptime;
 
 has DB    => sub { shift->app->DB };
 has CACHE => sub { shift->app->CACHE };
@@ -942,8 +943,9 @@ sub visitor_ymd {
     while ( $from <= $to ) {
         my $rs = $self->DB->resultset('Visitor')->search(
             {
-                date  => $to->ymd,
-                event => undef
+                date   => $to->ymd,
+                event  => undef,
+                online => 0,
             },
             undef
         );
@@ -959,8 +961,9 @@ sub visitor_ymd {
 
     my $rs = $self->DB->resultset('Visitor')->search(
         {
-            date  => { -between => [ $dt->clone->subtract( years => 1 )->ymd, $dt->ymd ] },
-            event => undef,
+            date   => { -between => [ $dt->clone->subtract( years => 1 )->ymd, $dt->ymd ] },
+            event  => undef,
+            online => 0,
         },
         {
             select => [
@@ -1019,8 +1022,9 @@ sub visitor_ymd {
         my $end = $from->clone->add( days => 6 );
         my $rs = $self->DB->resultset('Visitor')->search(
             {
-                date  => { -between => [ $from->ymd, $end->ymd ] },
-                event => undef,
+                date   => { -between => [ $from->ymd, $end->ymd ] },
+                event  => undef,
+                online => 0,
             },
             {
                 select => [
@@ -1056,6 +1060,148 @@ sub visitor_ymd {
                     'total_bestfit',
                     'total_bestfit_male',
                     'total_bestfit_female',
+                ],
+            }
+        );
+
+        while ( my $row = $rs->next ) {
+            my %columns = $row->get_columns;
+            $columns{label} = sprintf( "%s ~ %s", $from->ymd, $end->ymd );
+            push @{ $visitor{weekly} ||= [] }, \%columns;
+        }
+
+        $from = $end;
+        $from->add( days => 1 );
+    }
+
+    $self->render( dt => $dt, visitor => \%visitor );
+}
+
+=head2 visitor_online
+
+    GET /stat/visitor/online
+
+=cut
+
+sub visitor_online {
+    my $self = shift;
+
+    my $today = DateTime->now( time_zone => $self->config->{timezone} );
+    $self->redirect_to( $self->url_for( '/stat/visitor/online/' . $today->ymd ) );
+}
+
+=head2 visitor_online_ymd
+
+    GET /stat/visitor/online/:ymd
+
+=cut
+
+sub visitor_online_ymd {
+    my $self = shift;
+    my $ymd  = $self->param('ymd');
+
+    my $strp = DateTime::Format::Strptime->new(
+        pattern   => '%F',
+        time_zone => 'Asia/Seoul',
+    );
+
+    my $dt = try {
+        $strp->parse_datetime($ymd);
+    }
+    catch {
+        chomp $_;
+        $self->log->error($_);
+        return;
+    };
+
+    return $self->error( 400, { str => "Invalid ymd format: $ymd" } ) unless $dt;
+
+    my $today = DateTime->now( time_zone => $self->config->{timezone} );
+
+    # -$day_range ~ +$day_range days from now
+    my $day_range = 7;
+    my %count;
+    my $today_data;
+    my $from = $dt->clone->subtract( days => $day_range );
+    my $to = $dt->clone->add( days => $day_range );
+    my %dow_map = (
+        1 => '월', 2 => '화', 3 => '수', 4 => '목', 5 => '금', 6 => '토',
+        7 => '일'
+    );
+
+    my %visitor;
+    while ( $from <= $to ) {
+        my $rs = $self->DB->resultset('Visitor')->search(
+            {
+                date   => $to->ymd,
+                event  => undef,
+                online => 1,
+            },
+            undef
+        );
+
+        while ( my $row = $rs->next ) {
+            my %columns = $row->get_columns;
+            $columns{label} = sprintf( "%s (%s)", $to->ymd, $dow_map{ $to->day_of_week } );
+            push @{ $visitor{daily} ||= [] }, \%columns;
+        }
+
+        $to->subtract( days => 1 );
+    }
+
+    my $rs = $self->DB->resultset('Visitor')->search(
+        {
+            date   => { -between => [ $dt->clone->subtract( years => 1 )->ymd, $dt->ymd ] },
+            event  => undef,
+            online => 1,
+        },
+        {
+            select => [
+                \'DATE_FORMAT(`date`, "%Y-%m")',
+                { sum => 'rented' },
+                { sum => 'rented_male' },
+                { sum => 'rented_female' },
+            ],
+            as => [
+                'ym',
+                'total_rented',
+                'total_rented_male',
+                'total_rented_female',
+            ],
+            group_by => \'DATE_FORMAT(`date`, "%Y-%m")',
+            order_by => \'DATE_FORMAT(`date`, "%Y-%m") DESC',
+        }
+    );
+
+    while ( my $row = $rs->next ) {
+        my %columns = $row->get_columns;
+        push @{ $visitor{monthly} ||= [] }, \%columns;
+    }
+
+    ## 7일씩 끊어서 쿼리
+    $from = $dt->clone->subtract( years => 1 );
+    $to = $dt->clone;
+
+    my $dow = $from->day_of_week;
+    $from->add( days => 8 - $dow ) if $dow != 1;
+    while ( $from <= $to ) {
+        my $end = $from->clone->add( days => 6 );
+        my $rs = $self->DB->resultset('Visitor')->search(
+            {
+                date   => { -between => [ $from->ymd, $end->ymd ] },
+                event  => undef,
+                online => 1,
+            },
+            {
+                select => [
+                    { sum => 'rented' },
+                    { sum => 'rented_male' },
+                    { sum => 'rented_female' },
+                ],
+                as => [
+                    'total_rented',
+                    'total_rented_male',
+                    'total_rented_female',
                 ],
             }
         );
