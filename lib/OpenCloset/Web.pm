@@ -341,7 +341,9 @@ sub _private_routes {
     $r->get('/stat/status')->to('statistic#status');
     $r->get('/stat/status/:ymd')->to('statistic#status_ymd');
     $r->get('/stat/visitor')->to('statistic#visitor');
+    $r->get('/stat/visitor/online')->to('statistic#visitor_online');
     $r->get('/stat/visitor/:ymd')->to('statistic#visitor_ymd');
+    $r->get('/stat/visitor/online/:ymd')->to('statistic#visitor_online_ymd');
 
     $r->get('/volunteers')->to('volunteer#index');
 
