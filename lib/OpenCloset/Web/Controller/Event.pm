@@ -21,11 +21,11 @@ C<MberSn> param is ciphertext. it encrypted AES algorithm with ECB mode
 
 =item *
 
-C<MberSn> 별로 연 2회 제한을 두어야 함
+C<MberSn> 별로 연 C<$EVENT_MAX_TICKET>회 제한을 두어야 함
 
 =item *
 
-총 발급횟수가 4000건을 넘지 말아야 함
+총 발급횟수가 10,000건을 넘지 말아야 함
 
 =back
 
@@ -33,6 +33,7 @@ C<MberSn> 별로 연 2회 제한을 두어야 함
 
 our $EVENT_NAME       = 'seoul-2017';
 our $EVENT_MAX_COUPON = 667;
+our $EVENT_MAX_TICKET = 10;
 
 sub seoul {
     my $self = shift;
@@ -44,65 +45,30 @@ sub seoul {
             error => '잘못된 요청입니다 - MberSn 이 없습니다' );
     }
 
-    my $tz = $self->config->{timezone};
-
+    my $tz      = $self->config->{timezone};
+    my $rs      = $self->DB->resultset('Coupon');
+    my $now     = time;
     my $endDate = DateTime->new(
-        year   => 2017, month     => 3, day => 31, hour => 23, minute => 59,
-        second => 59,   time_zone => $tz,
-    );
-
-    my $now = time;
-    ## https://github.com/opencloset/opencloset/issues/1220
-    ## HOTFIX: 임시로 이벤트 기간을 변경
-    # if ( $endDate->epoch < $now ) {
-    #     return $self->render(
-    #         error => '이벤트가 종료되었습니다 - 이벤트 기간 종료' );
-    # }
-
-    my $rs = $self->DB->resultset('Coupon');
-
-    ## HOTFIX: 2017년도 3,4월에는 최대건수와 상관없이 303건까지 허용합니다.
-    # my $used_coupon =
-    #     $rs->search( { desc => { -like => "$EVENT_NAME|%" }, status => 'used' } )->count;
-    # if ( $used_coupon > $EVENT_MAX_COUPON ) {
-    #     return $self->render(
-    #         error => '이벤트가 종료되었습니다 - 발급건수 초과' );
-    # }
-
-    my $april_start = DateTime->new(
         year      => 2017,
-        month     => 4,
-        day       => 1,
-        time_zone => $tz
-    );
-
-    my $april_end = DateTime->new(
-        year      => 2017,
-        month     => 4,
-        day       => 30,
+        month     => 12,
+        day       => 31,
         hour      => 23,
         minute    => 59,
         second    => 59,
-        time_zone => $tz
+        time_zone => $tz,
     );
+    my $today = DateTime->today( time_zone => $tz );
 
-    ## https://github.com/opencloset/opencloset/issues/1218
-    if ( $now > $april_start->epoch && $now < $april_end->epoch ) {
-        ## 2017년도 3월과 4월은 303 명씩 받아야 하지만 3월달에 이미 303 명을 초과했음
-        ## 초과분을 4월달에서 제외함
-        my $MAX   = 303 * 2;                              # 3월 + 4월
-        my $count = $self->DB->resultset('Order')->search(
-            {
-                'me.status_id' => { 'not in' => [ $NOT_VISITED, $RESERVATED ] },
-                'coupon.status' => { -in      => [ 'used',       'reserved', 'provided' ] },
-                'booking.date'  => { -between => [ '2017-03-01', '2017-04-30' ] }
-            },
-            { join => [qw/coupon booking/] }
-        )->count;
+    if ( $endDate->epoch < $now ) {
+        return $self->render(
+            error => '이벤트가 종료되었습니다 - 이벤트 기간 종료' );
+    }
 
-        $self->log->info("april coupon(used+reserved+provided): $count");
-        return $self->render( error => '4월 발급건 수를 초과하였습니다.' )
-            if $count >= $MAX;
+    my $used_coupon =
+        $rs->search( { desc => { -like => "$EVENT_NAME|%" }, status => 'used' } )->count;
+    if ( $used_coupon > $EVENT_MAX_COUPON && $today->month > 4 ) {
+        return $self->render(
+            error => '이벤트가 종료되었습니다 - 발급건수 초과' );
     }
 
     $mbersn = $self->decrypt_mbersn($mbersn);
@@ -127,10 +93,9 @@ sub seoul {
         $self->log->info("$mbersn $status($cnt)");
     }
 
-    ## 이미 2회이상 사용되었음
-    if ( $status{invalid} && $status{invalid} >= 2 ) {
+    if ( $status{invalid} && $status{invalid} >= $EVENT_MAX_TICKET ) {
         return $self->render( error =>
-                '무료대여 대상자가 아닙니다 - 이미 2회 이상 지급 받았습니다'
+                "무료대여 대상자가 아닙니다 - 이미 $EVENT_MAX_TICKET 회 이상 지급 받았습니다"
         );
     }
 
