@@ -849,5 +849,9 @@ $ ->
       success: (data, textStatus, jqXHR) ->
         location.reload()
       error: (jqXHR, textStatus, errorThrown) ->
-        OpenCloset.alert(jqXHR.responseJSON.error.str)
+        unless jqXHR.responseJSON.order
+          return OpenCloset.alert(jqXHR.responseJSON.error.str)
+
+        anchor = "<a href=\"#{jqXHR.responseJSON.order}\">주문서 바로가기</a>"
+        OpenCloset.alert("#{jqXHR.responseJSON.error} #{anchor}")
       complete: (jqXHR, textStatus) ->
