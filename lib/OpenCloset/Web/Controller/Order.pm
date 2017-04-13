@@ -1252,7 +1252,26 @@ sub create_coupon {
 
     my $coupon_code = $self->param('coupon-code');
     my ( $coupon, $error ) = $self->coupon_validate($coupon_code);
-    return $self->error( 400, { str => $error } ) if $error;
+    if ($error) {
+        if ( $error =~ /used/ ) {
+            my $coupon = $self->DB->resultset('Coupon')->find( { code => $coupon_code } );
+            return $self->error( 400, { str => $error } ) unless $coupon;
+
+            my $other = $coupon->orders( undef, { rows => 1 } )->single;
+            return $self->error( 400, { str => $error } ) unless $other;
+
+            my $url = $self->url_for( '/order/' . $other->id );
+            return $self->render(
+                status => 400,
+                json   => {
+                    error => $error,
+                    order => $url->to_abs,
+                }
+            );
+        }
+
+        return $self->error( 400, { str => $error } );
+    }
 
     $self->transfer_order( $coupon, $order );
     $self->render( json => { $coupon->get_columns } );
