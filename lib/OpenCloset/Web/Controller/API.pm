@@ -3139,7 +3139,7 @@ sub api_send_vbank_sms {
         buyer_email  => $user->email,
         buyer_tel    => $user_info->phone,
         buyer_addr   => $user_info->address2,
-        notice_url => $self->url_for("/webhooks/iamport/unpaid")->to_abs->to_string,
+        'notice_url[]' => $self->url_for("/webhooks/iamport/unpaid")->to_abs->to_string,
     };
 
     my ( $log, $error ) = $self->create_vbank( $order, $params );
