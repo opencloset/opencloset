@@ -1,3 +1,7 @@
+v1.9.3
+
+    $ grunt
+
 v1.9.1
 
     $ cd OpenCloset-Schema/
