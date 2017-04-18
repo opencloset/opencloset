@@ -3129,7 +3129,7 @@ sub api_send_vbank_sms {
     my $user      = $order->user;
     my $user_info = $user->user_info;
     my $params    = {
-        merchant_uid => $self->merchant_uid( "staff-%d-", $id ),
+        merchant_uid => OpenCloset::Common::Unpaid::merchant_uid( "staff-%d-", $id ),
         amount       => $late_fee,
         vbank_due    => time + 86400 * 3,              # 3days
         vbank_holder => '열린옷장-' . $user->name,
@@ -3142,7 +3142,8 @@ sub api_send_vbank_sms {
         'notice_url[]' => $self->url_for("/webhooks/iamport/unpaid")->to_abs->to_string,
     };
 
-    my ( $log, $error ) = $self->create_vbank( $order, $params );
+    my ( $log, $error ) =
+        OpenCloset::Common::Unpaid::create_vbank( $self->app->iamport, $order, $params );
     return $self->error( 500, { str => $error } ) unless $log;
 
     my $data         = decode_json( $log->detail );
