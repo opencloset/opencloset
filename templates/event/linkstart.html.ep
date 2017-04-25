@@ -1,0 +1,44 @@
+% title 'LINKStart x 열린옷장';
+% layout 'coupon';
+
+<div class="text-center">
+  <h1>LINKStart x 열린옷장</h1>
+  <p>
+    여러분의 성공적인 취업을 위해 면접정장 대여비용의 30%를 지원합니다.<br>
+    쿠폰번호와 소속대학을 입력하신 후 입력버튼을 누르시면 열린옷장 정장대여서비스를 이용하실 수 있는 방문예약 페이지가 나타납니다.
+  </p>
+</div>
+
+<div class="text-center">
+  <form method="POST" action="<%= url_for('/coupon/validate') %>">
+    <div class="row">
+      <div class="col-md-12">
+        <p class="text-left">쿠폰번호 입력하기</p>
+      </div>
+      <div class="col-md-4">
+        <input name="code" class="form-control input-lg" placeholder="GJ8U" type="text" required>
+      </div>
+      <div class="col-md-4">
+        <input name="code" class="form-control input-lg" placeholder="QY87" type="text" required>
+      </div>
+      <div class="col-md-4">
+        <input name="code" class="form-control input-lg" placeholder="JY9L" type="text" required>
+      </div>
+      <div class="col-md-12">
+        <hr>
+        <p class="text-left">소속 대학 입력하기</p>
+      </div>
+      <div class="col-md-4">
+        <input name="extra" class="form-control input-lg" placeholder="OO대학교" type="text" required>
+      </div>
+
+      <div class="col-md-12 btn-submit">
+        <button type="submit" class="btn btn-success btn-lg btn-block">입력</button>
+      </div>
+    </div>
+  </form>
+
+  % if (my $error = flash('error')) {
+  <div class="alert alert-danger" role="alert"><%= $error %></div>
+  % }
+</div>
