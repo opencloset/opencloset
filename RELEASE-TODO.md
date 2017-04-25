@@ -1,3 +1,7 @@
+    $ cd OpenCloset-Schema/
+    $ mysql < db/alter/124-coupon-extra.sql
+    $ closetpan OpenCloset::Schema    # 0.051
+
 v1.9.4
 
     $ closetpan OpenCloset::Common             # v0.0.17
