@@ -47,7 +47,7 @@ requires 'OpenCloset::Calculator::LateFee',     'v0.2.0';
 requires 'OpenCloset::Common',                  'v0.0.17';
 requires 'OpenCloset::Config',                  '0.002';
 requires 'OpenCloset::DB::Plugin::Order::Sale', '0.001';
-requires 'OpenCloset::Plugin::Helpers',         'v0.0.17';
+requires 'OpenCloset::Plugin::Helpers',         'v0.0.18';
 requires 'OpenCloset::Schema',                  '0.051';
 requires 'OpenCloset::Size::Guess',             '0.003';
 requires 'OpenCloset::Size::Guess::BodyKit',    '0.001';
