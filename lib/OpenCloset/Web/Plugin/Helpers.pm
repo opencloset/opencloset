@@ -1726,7 +1726,12 @@ sub coupon2label {
     $klass = 'label-danger' if $status =~ /(us|discard)ed/;
 
     my $extra = '';
-    $extra = ' ' . $self->commify($price) if $type eq 'default';
+    if ( $type eq 'default' ) {
+        $extra = ' ' . $self->commify($price);
+    }
+    elsif ( $type eq 'rate' ) {
+        $extra = ' ' . "$price%";
+    }
 
     my $html = Mojo::DOM::HTML->new;
     $html->parse(

@@ -376,6 +376,8 @@ sub create {
                 ) or die "failed to create a new order_detail\n";
             }
 
+            $self->discount_order($order);
+
             $order->add_to_order_details(
                 {
                     name        => '배송비',
@@ -411,10 +413,13 @@ sub create {
             #
             # 쿠폰을 사용했다면 결제방법을 입력
             #
-            if ( my $coupon = $order->coupon ) {
+            if ($coupon) {
                 my $type           = $coupon->type;
                 my $price_pay_with = '쿠폰';
-                $price_pay_with .= '+현금' if $type eq 'default';
+                if ( $type eq 'default' or $type eq 'rate' ) {
+                    $price_pay_with .= '+현금';
+                }
+
                 $order->update( { price_pay_with => $price_pay_with } );
             }
 
@@ -1278,6 +1283,7 @@ sub create_coupon {
     }
 
     $self->transfer_order( $coupon, $order );
+    $self->discount_order($order) if $order->status_id == $PAYMENT;
     $self->render( json => { $coupon->get_columns } );
 }
 
