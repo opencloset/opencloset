@@ -14,7 +14,8 @@ use OpenCloset::Common::Unpaid
     qw/unpaid_cond unpaid_attr is_nonpaid unpaid2fullpaid/;
 use OpenCloset::Constants qw/%PAY_METHOD_MAP/;
 use OpenCloset::Constants::Category;
-use OpenCloset::Constants::Status;
+use OpenCloset::Constants::Status
+    qw/$RENTAL $RETURNED $PARTIAL_RETURNED $RETURNING $NOT_VISITED $PAYMENT $NOT_RENTAL $PAYBACK $NO_SIZE $BOXED/;
 
 has DB => sub { shift->app->DB };
 
@@ -274,16 +275,16 @@ sub create {
             die "order not found: $order_params{id}\n" unless $order;
 
             my @invalid = (
-                2,  # 대여중
-                9,  # 반납
-                10, # 부분반납
-                11, # 반납배송중
-                12, # 방문안함
-                19, # 결제대기
-                40, # 대여안함
-                42, # 환불
-                43, # 사이즈없음
-                44, # 포장완료
+                $RENTAL,           # 대여중
+                $RETURNED,         # 반납
+                $PARTIAL_RETURNED, # 부분반납
+                $RETURNING,        # 반납배송중
+                $NOT_VISITED,      # 방문안함
+                $PAYMENT,          # 결제대기
+                $NOT_RENTAL,       # 대여안함
+                $PAYBACK,          # 환불
+                $NO_SIZE,          # 사이즈없음
+                $BOXED,            # 포장완료
             );
             my $status_id = $order->status_id;
             if ( $status_id ~~ @invalid ) {
@@ -294,7 +295,7 @@ sub create {
             #
             # 주문서를 포장완료(44) 상태로 변경
             #
-            $order->update( { status_id => 44 } );
+            $order->update( { status_id => $BOXED } );
 
             #
             # event posting to opencloset/monitor
@@ -324,7 +325,7 @@ sub create {
                 #
                 # 주문서 하부의 모든 의류 항목을 결제대기(19) 상태로 변경
                 #
-                $clothes->update( { status_id => 19 } );
+                $clothes->update( { status_id => $PAYMENT } );
 
                 push(
                     @order_details,
