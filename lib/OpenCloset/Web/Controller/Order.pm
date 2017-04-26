@@ -332,7 +332,7 @@ sub create {
                     {
                         clothes_code     => $clothes->code,
                         clothes_category => $clothes->category,
-                        status_id        => 19
+                        status_id        => $PAYMENT
                         , # 주문서 하부의 모든 의류 항목을 결제대기(19) 상태로 변경
                         name        => $name,
                         price       => $clothes->price,
