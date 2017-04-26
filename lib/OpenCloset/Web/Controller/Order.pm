@@ -176,7 +176,7 @@ sub index {
         last unless $booking_ymd;
 
         unless ( $booking_ymd =~ m/^(\d{4})-(\d{2})-(\d{2})$/ ) {
-            $self->app->log->warn("invalid booking_ymd format: $booking_ymd");
+            $self->log->warn("invalid booking_ymd format: $booking_ymd");
             last;
         }
 
@@ -187,13 +187,13 @@ sub index {
             );
         };
         unless ($dt_start) {
-            $self->app->log->warn("cannot create start datetime object using booking_ymd");
+            $self->log->warn("cannot create start datetime object using booking_ymd");
             last;
         }
 
         my $dt_end = $dt_start->clone->add( hours => 24, seconds => -1 );
         unless ($dt_end) {
-            $self->app->log->warn("cannot create end datetime object using booking_ymd");
+            $self->log->warn("cannot create end datetime object using booking_ymd");
             last;
         }
 
@@ -305,7 +305,7 @@ sub create {
                 $monitor_uri_full,
                 { sender => 'order', order_id => $order_params{id}, from => 18, to => 44 },
             );
-            $self->app->log->warn(
+            $self->log->warn(
                 "Failed to post event to monitor: $monitor_uri_full: $res->{reason}")
                 unless $res->{success};
 
@@ -424,8 +424,8 @@ sub create {
         }
         catch {
             chomp;
-            $self->app->log->error("failed to update the order & create a new order_detail");
-            $self->app->log->error($_);
+            $self->log->error("failed to update the order & create a new order_detail");
+            $self->log->error($_);
             return ( undef, $_ );
         }
     };
@@ -581,7 +581,7 @@ sub update {
     my $name  = $update_params{name};
     my $value = $update_params{value};
     my $pk    = $update_params{pk};
-    $self->app->log->info("order update: $name.$value");
+    $self->log->info("order update: $name.$value");
 
     #
     # update column
@@ -590,7 +590,7 @@ sub update {
         my $detail = $order->order_details( { id => $pk } )->next;
         if ($detail) {
             unless ( $detail->$name eq $value ) {
-                $self->app->log->info(
+                $self->log->info(
                     sprintf(
                         "  order_detail.$name %d [%s] -> [%s]",
                         $detail->id,
@@ -610,7 +610,7 @@ sub update {
                     #
                     # update order.status_id
                     #
-                    $self->app->log->info(
+                    $self->log->info(
                         sprintf(
                             "  order.status: %d [%s] -> [%s]",
                             $order->id,
@@ -645,7 +645,7 @@ sub update {
                                 }
                             );
 
-                            $self->app->log->error("Failed to create a new SMS: $msg") unless $sms;
+                            $self->log->error("Failed to create a new SMS: $msg") unless $sms;
                         }
 
                         #
@@ -718,7 +718,7 @@ sub update {
                                     }
                                 );
 
-                                $self->app->log->debug(
+                                $self->log->debug(
                                     sprintf(
                                         "donation message: order(%d), donation(%d), clothes(%s)",
                                         $order->id,
@@ -727,10 +727,10 @@ sub update {
                                     )
                                 );
 
-                                $self->app->log->error("Failed to create a new SMS: $msg") unless $sms;
+                                $self->log->error("Failed to create a new SMS: $msg") unless $sms;
                             }
                             else {
-                                $self->app->log->info( "no donation message to send SMS for order: " . $order->id );
+                                $self->log->info( "no donation message to send SMS for order: " . $order->id );
                             }
                         }
                     }
@@ -752,7 +752,7 @@ sub update {
                 #
                 for my $clothes ( $order->clothes ) {
                     unless ( $clothes->status_id == $value ) {
-                        $self->app->log->info(
+                        $self->log->info(
                             sprintf(
                                 "  clothes.status: [%s] [%s] -> [%s]",
                                 $clothes->code,
@@ -771,7 +771,7 @@ sub update {
                     next unless $order_detail->clothes;
 
                     unless ( $order_detail->status_id == $value ) {
-                        $self->app->log->info(
+                        $self->log->info(
                             sprintf(
                                 "  order_detail.status: %d [%s] -> [%s]",
                                 $order_detail->id,
@@ -786,13 +786,13 @@ sub update {
                 $guard->commit;
             }
             catch {
-                $self->app->log->error("failed to update status of the order & clothes");
-                $self->app->log->error($_);
+                $self->log->error("failed to update status of the order & clothes");
+                $self->log->error($_);
             };
         }
         else {
             unless ( $order->$name eq $value ) {
-                $self->app->log->info(
+                $self->log->info(
                     sprintf(
                         "  order.$name: %d %s -> %s", $order->id, $order->$name // 'N/A', $value // 'N/A',
                     ),
