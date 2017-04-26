@@ -349,9 +349,12 @@ sub create {
                 after                 => 0,
                 rented_without_coupon => 0,
             };
-            if ( $self->config->{sale}{enable} ) {
+
+            ## 쿠폰이 사용된 주문서는 3회 이상 할인에서 제외한다.
+            my $coupon = $order->coupon;
+            if ( !$coupon and $self->config->{sale}{enable} ) {
                 $sale_price = $order->sale_multi_times_rental( \@order_details );
-                $self->app->log->debug(
+                $self->log->debug(
                     sprintf(
                         "order %d: %d rented without coupon",
                         $order->id,
