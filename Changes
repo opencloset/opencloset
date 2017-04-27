@@ -1,3 +1,6 @@
+  - /events/linkstart 이벤트 페이지 추가 (#1231)
+  - 비율타입(N%)의 쿠폰을 지원 (#1231)
+
 v1.9.4    Tue, 18 Apr 2017 17:07:27 +0900
   - OpenCloset::Common::Unpaid 의 create_vbank 를 사용 (#620)
 
