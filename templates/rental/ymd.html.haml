@@ -142,7 +142,7 @@
                   %span.label.label-default.label-category{:data-category => "#{$c}"}= $OpenCloset::Constants::Category::LABEL_MAP{$c}
                 - }
               - }
-              - my $cnt = grep { $categories{$_} == 1 } keys %categories;
+              - my $cnt = grep { defined $categories{$_} ? $categories{$_} == 1 : undef } keys %categories;
               %span.badge.category-cnt= $cnt
         - }
 
