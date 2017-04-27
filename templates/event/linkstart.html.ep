@@ -2,7 +2,11 @@
 % layout 'coupon';
 
 <div class="text-center">
-  <h1>LINKStart x 열린옷장</h1>
+  <h1>
+    <img src="<%= url_for('/imgs/linkstart.png') %>" alt="linkstart" class="img-rounded" width="150">
+    x
+    <img src="<%= url_for('/imgs/opencloset_CI.png') %>" alt="opencloset" class="img-rounded" width="150">
+  </h1>
   <p>
     여러분의 성공적인 취업을 위해 면접정장 대여비용의 30%를 지원합니다.<br>
     쿠폰번호와 소속대학을 입력하신 후 입력버튼을 누르시면 열린옷장 정장대여서비스를 이용하실 수 있는 방문예약 페이지가 나타납니다.
