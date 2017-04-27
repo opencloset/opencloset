@@ -263,11 +263,9 @@ $ ->
     price       = parseInt $("#order-detail-price-#{ order_detail_id }").data('value')
 
     return if is_pre_paid
+    return unless is_clothes
 
-    if is_clothes
-      final_price = price + price * 0.2 * day
-    else
-      final_price = price * day
+    final_price = price + price * 0.2 * day
     $( "#order-detail-final-price-#{ order_detail_id }" ).editable 'setValue', final_price
     $( "#order-detail-final-price-#{ order_detail_id }" ).editable 'submit'
 
