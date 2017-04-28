@@ -27,16 +27,19 @@ sub validate {
     my $v = $self->validation;
 
     $v->required('code');
+    $v->optional('extra');
     if ( $v->has_error ) {
         $self->flash( error => 'coupon 코드를 입력해주세요' );
         return $self->redirect_to('/coupon');
     }
 
+    my $extra = $v->param('extra');
     my $codes = $v->every_param('code');
-    my $code = join( '-', @$codes );
+    my $code  = join( '-', @$codes );
 
     my ( $coupon, $err ) = $self->coupon_validate($code);
     if ($coupon) {
+        $coupon->update( { extra => $extra } ) if $extra;
         $self->session( coupon_code => $coupon->code );
         $self->redirect_to('/visit');
     }

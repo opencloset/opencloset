@@ -14,7 +14,8 @@ use OpenCloset::Common::Unpaid
     qw/unpaid_cond unpaid_attr is_nonpaid unpaid2fullpaid/;
 use OpenCloset::Constants qw/%PAY_METHOD_MAP/;
 use OpenCloset::Constants::Category;
-use OpenCloset::Constants::Status;
+use OpenCloset::Constants::Status
+    qw/$RENTAL $RETURNED $PARTIAL_RETURNED $RETURNING $NOT_VISITED $PAYMENT $NOT_RENTAL $PAYBACK $NO_SIZE $BOXED/;
 
 has DB => sub { shift->app->DB };
 
@@ -175,7 +176,7 @@ sub index {
         last unless $booking_ymd;
 
         unless ( $booking_ymd =~ m/^(\d{4})-(\d{2})-(\d{2})$/ ) {
-            $self->app->log->warn("invalid booking_ymd format: $booking_ymd");
+            $self->log->warn("invalid booking_ymd format: $booking_ymd");
             last;
         }
 
@@ -186,13 +187,13 @@ sub index {
             );
         };
         unless ($dt_start) {
-            $self->app->log->warn("cannot create start datetime object using booking_ymd");
+            $self->log->warn("cannot create start datetime object using booking_ymd");
             last;
         }
 
         my $dt_end = $dt_start->clone->add( hours => 24, seconds => -1 );
         unless ($dt_end) {
-            $self->app->log->warn("cannot create end datetime object using booking_ymd");
+            $self->log->warn("cannot create end datetime object using booking_ymd");
             last;
         }
 
@@ -274,16 +275,16 @@ sub create {
             die "order not found: $order_params{id}\n" unless $order;
 
             my @invalid = (
-                2,  # 대여중
-                9,  # 반납
-                10, # 부분반납
-                11, # 반납배송중
-                12, # 방문안함
-                19, # 결제대기
-                40, # 대여안함
-                42, # 환불
-                43, # 사이즈없음
-                44, # 포장완료
+                $RENTAL,           # 대여중
+                $RETURNED,         # 반납
+                $PARTIAL_RETURNED, # 부분반납
+                $RETURNING,        # 반납배송중
+                $NOT_VISITED,      # 방문안함
+                $PAYMENT,          # 결제대기
+                $NOT_RENTAL,       # 대여안함
+                $PAYBACK,          # 환불
+                $NO_SIZE,          # 사이즈없음
+                $BOXED,            # 포장완료
             );
             my $status_id = $order->status_id;
             if ( $status_id ~~ @invalid ) {
@@ -294,7 +295,7 @@ sub create {
             #
             # 주문서를 포장완료(44) 상태로 변경
             #
-            $order->update( { status_id => 44 } );
+            $order->update( { status_id => $BOXED } );
 
             #
             # event posting to opencloset/monitor
@@ -304,7 +305,7 @@ sub create {
                 $monitor_uri_full,
                 { sender => 'order', order_id => $order_params{id}, from => 18, to => 44 },
             );
-            $self->app->log->warn(
+            $self->log->warn(
                 "Failed to post event to monitor: $monitor_uri_full: $res->{reason}")
                 unless $res->{success};
 
@@ -324,14 +325,14 @@ sub create {
                 #
                 # 주문서 하부의 모든 의류 항목을 결제대기(19) 상태로 변경
                 #
-                $clothes->update( { status_id => 19 } );
+                $clothes->update( { status_id => $PAYMENT } );
 
                 push(
                     @order_details,
                     {
                         clothes_code     => $clothes->code,
                         clothes_category => $clothes->category,
-                        status_id        => 19
+                        status_id        => $PAYMENT
                         , # 주문서 하부의 모든 의류 항목을 결제대기(19) 상태로 변경
                         name        => $name,
                         price       => $clothes->price,
@@ -348,9 +349,12 @@ sub create {
                 after                 => 0,
                 rented_without_coupon => 0,
             };
-            if ( $self->config->{sale}{enable} ) {
+
+            ## 쿠폰이 사용된 주문서는 3회 이상 할인에서 제외한다.
+            my $coupon = $order->coupon;
+            if ( !$coupon and $self->config->{sale}{enable} ) {
                 $sale_price = $order->sale_multi_times_rental( \@order_details );
-                $self->app->log->debug(
+                $self->log->debug(
                     sprintf(
                         "order %d: %d rented without coupon",
                         $order->id,
@@ -371,6 +375,8 @@ sub create {
                     }
                 ) or die "failed to create a new order_detail\n";
             }
+
+            $self->discount_order($order);
 
             $order->add_to_order_details(
                 {
@@ -407,10 +413,13 @@ sub create {
             #
             # 쿠폰을 사용했다면 결제방법을 입력
             #
-            if ( my $coupon = $order->coupon ) {
+            if ($coupon) {
                 my $type           = $coupon->type;
                 my $price_pay_with = '쿠폰';
-                $price_pay_with .= '+현금' if $type eq 'default';
+                if ( $type eq 'default' or $type eq 'rate' ) {
+                    $price_pay_with .= '+현금';
+                }
+
                 $order->update( { price_pay_with => $price_pay_with } );
             }
 
@@ -420,8 +429,8 @@ sub create {
         }
         catch {
             chomp;
-            $self->app->log->error("failed to update the order & create a new order_detail");
-            $self->app->log->error($_);
+            $self->log->error("failed to update the order & create a new order_detail");
+            $self->log->error($_);
             return ( undef, $_ );
         }
     };
@@ -577,7 +586,7 @@ sub update {
     my $name  = $update_params{name};
     my $value = $update_params{value};
     my $pk    = $update_params{pk};
-    $self->app->log->info("order update: $name.$value");
+    $self->log->info("order update: $name.$value");
 
     #
     # update column
@@ -586,7 +595,7 @@ sub update {
         my $detail = $order->order_details( { id => $pk } )->next;
         if ($detail) {
             unless ( $detail->$name eq $value ) {
-                $self->app->log->info(
+                $self->log->info(
                     sprintf(
                         "  order_detail.$name %d [%s] -> [%s]",
                         $detail->id,
@@ -606,7 +615,7 @@ sub update {
                     #
                     # update order.status_id
                     #
-                    $self->app->log->info(
+                    $self->log->info(
                         sprintf(
                             "  order.status: %d [%s] -> [%s]",
                             $order->id,
@@ -641,7 +650,7 @@ sub update {
                                 }
                             );
 
-                            $self->app->log->error("Failed to create a new SMS: $msg") unless $sms;
+                            $self->log->error("Failed to create a new SMS: $msg") unless $sms;
                         }
 
                         #
@@ -714,7 +723,7 @@ sub update {
                                     }
                                 );
 
-                                $self->app->log->debug(
+                                $self->log->debug(
                                     sprintf(
                                         "donation message: order(%d), donation(%d), clothes(%s)",
                                         $order->id,
@@ -723,10 +732,10 @@ sub update {
                                     )
                                 );
 
-                                $self->app->log->error("Failed to create a new SMS: $msg") unless $sms;
+                                $self->log->error("Failed to create a new SMS: $msg") unless $sms;
                             }
                             else {
-                                $self->app->log->info( "no donation message to send SMS for order: " . $order->id );
+                                $self->log->info( "no donation message to send SMS for order: " . $order->id );
                             }
                         }
                     }
@@ -748,7 +757,7 @@ sub update {
                 #
                 for my $clothes ( $order->clothes ) {
                     unless ( $clothes->status_id == $value ) {
-                        $self->app->log->info(
+                        $self->log->info(
                             sprintf(
                                 "  clothes.status: [%s] [%s] -> [%s]",
                                 $clothes->code,
@@ -767,7 +776,7 @@ sub update {
                     next unless $order_detail->clothes;
 
                     unless ( $order_detail->status_id == $value ) {
-                        $self->app->log->info(
+                        $self->log->info(
                             sprintf(
                                 "  order_detail.status: %d [%s] -> [%s]",
                                 $order_detail->id,
@@ -782,13 +791,13 @@ sub update {
                 $guard->commit;
             }
             catch {
-                $self->app->log->error("failed to update status of the order & clothes");
-                $self->app->log->error($_);
+                $self->log->error("failed to update status of the order & clothes");
+                $self->log->error($_);
             };
         }
         else {
             unless ( $order->$name eq $value ) {
-                $self->app->log->info(
+                $self->log->info(
                     sprintf(
                         "  order.$name: %d %s -> %s", $order->id, $order->$name // 'N/A', $value // 'N/A',
                     ),
@@ -1274,6 +1283,7 @@ sub create_coupon {
     }
 
     $self->transfer_order( $coupon, $order );
+    $self->discount_order($order) if $order->status_id == $PAYMENT;
     $self->render( json => { $coupon->get_columns } );
 }
 

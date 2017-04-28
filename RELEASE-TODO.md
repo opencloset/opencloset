@@ -1,3 +1,12 @@
+v1.9.5
+
+    $ cd OpenCloset-Schema/
+    $ mysql < db/alter/124-coupon-extra.sql
+    $ mysql < db/alter/126-visitor-rate-stat.sql
+    $ closetpan OpenCloset::Schema             # 0.052
+    $ closetpan OpenCloset::Plugin::Helpers    # v0.0.18
+    $ grunt
+
 v1.9.4
 
     $ closetpan OpenCloset::Common             # v0.0.17

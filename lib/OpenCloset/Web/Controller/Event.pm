@@ -136,4 +136,12 @@ sub _issue_coupon {
     return $coupon;
 }
 
+=head2 linkstart
+
+    GET /events/linkstart
+
+=cut
+
+sub linkstart { }
+
 1;
