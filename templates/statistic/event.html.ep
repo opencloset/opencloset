@@ -157,10 +157,10 @@
               <thead>
                 <tr>
                   <th rowspan="2">일별</th>
-                  <th rowspan="2">취업날개 방문인원</th>
+                  <th rowspan="2">방문인원</th>
                   <th colspan="2">성별</th>
                   <th colspan="3">연령</th>
-                  <th rowspan="2">취업날개 미방문인원</th>
+                  <th rowspan="2">미방문인원</th>
                   <th colspan="2">성별</th>
                   <th colspan="3">연령</th>
                 </tr>
