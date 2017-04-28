@@ -1,3 +1,5 @@
+v1.9.5
+
     $ cd OpenCloset-Schema/
     $ mysql < db/alter/124-coupon-extra.sql
     $ mysql < db/alter/126-visitor-rate-stat.sql
