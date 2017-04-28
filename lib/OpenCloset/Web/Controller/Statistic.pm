@@ -1232,6 +1232,8 @@ sub event {
     return $self->error( 404, { str => "Not found event: $event" }, 'error/not_found' )
         unless $self->DB->resultset('Visitor')->search( { event => $event } )->count;
 
+    $self->stash( rate => 1 ) if $event eq 'linkstart';
+
     my %visitor;
     my $rs = $self->DB->resultset('Visitor')->search(
         { event => $event },
@@ -1244,6 +1246,9 @@ sub event {
                 { sum => 'visited_age_10' },
                 { sum => 'visited_age_20' },
                 { sum => 'visited_age_30' },
+                { sum => 'visited_rate_30' },
+                { sum => 'visited_rate_30_sum' },
+                { sum => 'visited_rate_30_discount' },
                 { sum => 'unvisited' },
                 { sum => 'unvisited_male' },
                 { sum => 'unvisited_female' },
@@ -1260,6 +1265,9 @@ sub event {
                 'total_visited_age_10',
                 'total_visited_age_20',
                 'total_visited_age_30',
+                'total_visited_rate_30',
+                'total_visited_rate_30_sum',
+                'total_visited_rate_30_discount',
                 'total_unvisited',
                 'total_unvisited_male',
                 'total_unvisited_female',

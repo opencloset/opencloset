@@ -34,6 +34,10 @@
                 <th rowspan="2">미방문인원</th>
                 <th colspan="2">성별</th>
                 <th colspan="3">연령</th>
+                % if ($rate) {
+                  <th rowspan="2">주문서금액</th>
+                  <th rowspan="2">30% 할인금액</th>
+                % }
               </tr>
               <tr>
                 <th>남성</th>
@@ -58,6 +62,11 @@
                 % $sum{visited_age_10} += $row->{total_visited_age_10};
                 % $sum{visited_age_20} += $row->{total_visited_age_20};
                 % $sum{visited_age_30} += $row->{total_visited_age_30};
+
+                % $sum{visited_rate_30}          += $row->{total_visited_rate_30};
+                % $sum{visited_rate_30_sum}      += $row->{total_visited_rate_30_sum};
+                % $sum{visited_rate_30_discount} += $row->{total_visited_rate_30_discount};
+
                 % $sum{unvisited}        += $row->{total_unvisited};
                 % $sum{unvisited_male}   += $row->{total_unvisited_male};
                 % $sum{unvisited_female} += $row->{total_unvisited_female};
@@ -83,6 +92,10 @@
                   <td><%= $row->{total_unvisited_age_10} %></td>
                   <td><%= $row->{total_unvisited_age_20} %></td>
                   <td><%= $row->{total_unvisited_age_30} %></td>
+                  % if ($rate) {
+                    <td><%= commify $row->{total_visited_rate_30_sum} %></td>
+                    <td><%= commify $row->{total_visited_rate_30_discount} %></td>
+                  % }
                 </tr>
               % }
               <tr>
@@ -95,55 +108,83 @@
                 </td>
                 <td>
                   <%= $sum{visited_male} %>
-                  <br>
-                  (<%= sprintf '%.1f%%', $sum{visited_male} / $sum{visited} * 100 %>)
+                  % if ($sum{visited}) {
+                    <br>
+                    (<%= sprintf '%.1f%%', $sum{visited_male} / $sum{visited} * 100 %>)
+                  % }
                 </td>
                 <td>
                   <%= $sum{visited_female} %>
-                  <br>
-                  (<%= sprintf '%.1f%%', $sum{visited_female} / $sum{visited} * 100 %>)
+                  % if ($sum{visited}) {
+                    <br>
+                    (<%= sprintf '%.1f%%', $sum{visited_female} / $sum{visited} * 100 %>)
+                  % }
                 </td>
                 <td>
                   <%= $sum{visited_age_10} %>
-                  <br>
-                  (<%= sprintf '%.1f%%', $sum{visited_age_10} / $sum{visited} * 100 %>)
+                  % if ($sum{visited}) {
+                    <br>
+                    (<%= sprintf '%.1f%%', $sum{visited_age_10} / $sum{visited} * 100 %>)
+                  % }
                 </td>
                 <td>
                   <%= $sum{visited_age_20} %>
-                  <br>
-                  (<%= sprintf '%.1f%%', $sum{visited_age_20} / $sum{visited} * 100 %>)
+                  % if ($sum{visited}) {
+                    <br>
+                    (<%= sprintf '%.1f%%', $sum{visited_age_20} / $sum{visited} * 100 %>)
+                  % }
                 </td>
                 <td>
                   <%= $sum{visited_age_30} %>
-                  <br>
-                  (<%= sprintf '%.1f%%', $sum{visited_age_30} / $sum{visited} * 100 %>)
+                  % if ($sum{visited}) {
+                    <br>
+                    (<%= sprintf '%.1f%%', $sum{visited_age_30} / $sum{visited} * 100 %>)
+                  % }
                 </td>
                 <td><%= $sum{unvisited} %></td>
                 <td>
                   <%= $sum{unvisited_male} %>
-                  <br>
-                  (<%= sprintf '%.1f%%', $sum{unvisited_male} / $sum{unvisited} * 100 %>)
+                  % if ($sum{unvisited}) {
+                    <br>
+                    (<%= sprintf '%.1f%%', $sum{unvisited_male} / $sum{unvisited} * 100 %>)
+                  % }
                 </td>
                 <td>
                   <%= $sum{unvisited_female} %>
-                  <br>
-                  (<%= sprintf '%.1f%%', $sum{unvisited_female} / $sum{unvisited} * 100 %>)
+                  % if ($sum{unvisited}) {
+                    <br>
+                    (<%= sprintf '%.1f%%', $sum{unvisited_female} / $sum{unvisited} * 100 %>)
+                  % }
                 </td>
                 <td>
                   <%= $sum{unvisited_age_10} %>
-                  <br>
-                  (<%= sprintf '%.1f%%', $sum{unvisited_age_10} / $sum{unvisited} * 100 %>)
+                  % if ($sum{unvisited}) {
+                    <br>
+                    (<%= sprintf '%.1f%%', $sum{unvisited_age_10} / $sum{unvisited} * 100 %>)
+                  % }
                 </td>
                 <td>
                   <%= $sum{unvisited_age_20} %>
-                  <br>
-                  (<%= sprintf '%.1f%%', $sum{unvisited_age_20} / $sum{unvisited} * 100 %>)
+                  % if ($sum{unvisited}) {
+                    <br>
+                    (<%= sprintf '%.1f%%', $sum{unvisited_age_20} / $sum{unvisited} * 100 %>)
+                  % }
                 </td>
                 <td>
                   <%= $sum{unvisited_age_30} %>
-                  <br>
-                  (<%= sprintf '%.1f%%', $sum{unvisited_age_30} / $sum{unvisited} * 100 %>)
+                  % if ($sum{unvisited}) {
+                    <br>
+                    (<%= sprintf '%.1f%%', $sum{unvisited_age_30} / $sum{unvisited} * 100 %>)
+                  % }
                 </td>
+                % if ($rate) {
+                  <td>
+                    %= commify $sum{visited_rate_30_sum}
+                  </td>
+                  <td>
+                    %= commify $sum{visited_rate_30_discount}
+                  </td>
+                % }
               </tr>
             </tbody>
           </table>
@@ -163,6 +204,10 @@
                   <th rowspan="2">미방문인원</th>
                   <th colspan="2">성별</th>
                   <th colspan="3">연령</th>
+                  % if ($rate) {
+                    <th rowspan="2">주문서금액</th>
+                    <th rowspan="2">30% 할인금액</th>
+                  % }
                 </tr>
                 <tr>
                   <th>남성</th>
@@ -188,6 +233,11 @@
                   % $sum{visited_age_10} += $row->{visited_age_10};
                   % $sum{visited_age_20} += $row->{visited_age_20};
                   % $sum{visited_age_30} += $row->{visited_age_30};
+
+                  % $sum{visited_rate_30}          += $row->{visited_rate_30};
+                  % $sum{visited_rate_30_sum}      += $row->{visited_rate_30_sum};
+                  % $sum{visited_rate_30_discount} += $row->{visited_rate_30_discount};
+
                   % $sum{unvisited}        += $row->{unvisited};
                   % $sum{unvisited_male}   += $row->{unvisited_male};
                   % $sum{unvisited_female} += $row->{unvisited_female};
@@ -208,6 +258,10 @@
                     <td><%= $row->{unvisited_age_10} %></td>
                     <td><%= $row->{unvisited_age_20} %></td>
                     <td><%= $row->{unvisited_age_30} %></td>
+                    % if ($rate) {
+                      <td><%= commify $row->{visited_rate_30_sum} %></td>
+                      <td><%= commify $row->{visited_rate_30_discount} %></td>
+                    % }
                   </tr>
                 % }
                 <tr>
@@ -224,6 +278,10 @@
                   <td><%= $sum{unvisited_age_10} %></td>
                   <td><%= $sum{unvisited_age_20} %></td>
                   <td><%= $sum{unvisited_age_30} %></td>
+                  % if ($rate) {
+                    <td><%= commify $sum{visited_rate_30_sum} %></td>
+                    <td><%= commify $sum{visited_rate_30_discount} %></td>
+                  % }
                 </tr>
               </tbody>
             </table>
