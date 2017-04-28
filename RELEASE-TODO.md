@@ -1,6 +1,7 @@
     $ cd OpenCloset-Schema/
     $ mysql < db/alter/124-coupon-extra.sql
-    $ closetpan OpenCloset::Schema             # 0.051
+    $ mysql < db/alter/126-visitor-rate-stat.sql
+    $ closetpan OpenCloset::Schema             # 0.052
     $ closetpan OpenCloset::Plugin::Helpers    # v0.0.18
     $ grunt
 
