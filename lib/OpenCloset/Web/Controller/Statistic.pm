@@ -1232,7 +1232,8 @@ sub event {
     return $self->error( 404, { str => "Not found event: $event" }, 'error/not_found' )
         unless $self->DB->resultset('Visitor')->search( { event => $event } )->count;
 
-    $self->stash( rate => 1 ) if $event eq 'linkstart';
+    my $is_rate;
+    $is_rate = 1 if $event eq 'linkstart';
 
     my %visitor;
     my $rs = $self->DB->resultset('Visitor')->search(
@@ -1296,7 +1297,7 @@ sub event {
         push @{ $visitor{daily} ||= [] }, \%columns;
     }
 
-    $self->render( visitor => \%visitor );
+    $self->render( visitor => \%visitor, rate => $is_rate );
 }
 
 1;
