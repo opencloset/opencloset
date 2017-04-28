@@ -145,7 +145,7 @@ my %BOOKING_SLOT = (
             'stat-clothes-rent'   => { text => '대여 회전율',           icon => q{},         desc => '옷의 대여일 및 대여 회전율을 보여줍니다.',                       link => '/stat/clothes/rent'   },
             'stat-status'         => { text => '상태',                  icon => q{},         desc => '주문서의 상태별 처리 시간을 보여줍니다.',                        link => '/stat/status'         },
             'stat-visitor'        => { text => '방문자',                icon => q{},         desc => '일/주/월 별 방문자 정보',                                        link => '/stat/visitor'        },
-            'stat-events-seoul'   => { text => '취업날개 이벤트',       icon => q{},         desc => '취업날개 이벤트 이용현황',                                       link => '/stat/events/seoul'   },
+            'stat-events-seoul'   => { text => '이벤트 이용현황',       icon => q{},         desc => '취업날개 이벤트 이용현황',                                       link => '/stat/events/seoul-2017'   },
             'size-guess'          => { text => '신체 치수 예측',        icon => 'info',      desc => '키와 몸무게로 신체 치수를 예측합니다.',                          link => '/size/guess' },
             'user-id-search-clothes'      => { text => '의류검색',      icon => 'search',    desc => '신체치수로 잘 맞을 의류를 검색합니다.',                          link => '#' },
             'donation-list'      => { text => '기증신청목록',           icon => q{},         desc => '기증신청서 목록 입니다',                                         link => 'https://donation.theopencloset.net/forms' },
