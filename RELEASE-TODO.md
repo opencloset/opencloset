@@ -1,3 +1,7 @@
+v1.9.7
+
+    $ closetpan OpenCloset::Common    # v0.1.0
+
 v1.9.5
 
     $ cd OpenCloset-Schema/

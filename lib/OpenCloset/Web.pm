@@ -1,7 +1,7 @@
 package OpenCloset::Web;
 use Mojo::Base 'Mojolicious';
 
-use version; our $VERSION = qv("v1.9.6");
+use version; our $VERSION = qv("v1.9.7");
 
 use CHI;
 use DateTime;
@@ -77,6 +77,8 @@ sub startup {
     $self->sessions->cookie_domain( $self->defaults->{cookie_domain} );
     $self->sessions->cookie_name('opencloset');
     $self->sessions->default_expiration(86400);
+
+    push @{ $self->commands->namespaces }, 'OpenCloset::Web::Command';
 }
 
 =head2 _authentication
