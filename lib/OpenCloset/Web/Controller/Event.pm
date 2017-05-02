@@ -64,12 +64,12 @@ sub seoul {
             error => '이벤트가 종료되었습니다 - 이벤트 기간 종료' );
     }
 
-    my $used_coupon =
-        $rs->search( { desc => { -like => "$EVENT_NAME|%" }, status => 'used' } )->count;
-    if ( $used_coupon > $EVENT_MAX_COUPON && $today->month > 4 ) {
-        return $self->render(
-            error => '이벤트가 종료되었습니다 - 발급건수 초과' );
-    }
+    # my $used_coupon =
+    #     $rs->search( { desc => { -like => "$EVENT_NAME|%" }, status => 'used' } )->count;
+    # if ( $used_coupon > $EVENT_MAX_COUPON && $today->month > 4 ) {
+    #     return $self->render(
+    #         error => '이벤트가 종료되었습니다 - 발급건수 초과' );
+    # }
 
     $mbersn = $self->decrypt_mbersn($mbersn);
     unless ($mbersn) {
