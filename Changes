@@ -5,6 +5,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ## [Unreleased]
 
 ### Changed
+- underscore.js 를 bower 에서 설치
 - template/layouts/default/*.haml 을 ep 로 변경
 - 시간표에서 취업날개 쿠폰 라벨을 수정 (#1249)
 

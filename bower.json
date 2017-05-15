@@ -30,6 +30,7 @@
     "dropzone": "^4.3.0",
     "handlebars": "^4.0.5",
     "typeahead.js": "^0.11.1",
-    "moment": "~2.16.0"
+    "moment": "~2.16.0",
+    "underscore": "^1.8.3"
   }
 }

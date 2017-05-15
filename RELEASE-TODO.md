@@ -1,3 +1,5 @@
+    $ bower install
+
 v1.9.7
 
     $ closetpan OpenCloset::Common    # v0.1.0
