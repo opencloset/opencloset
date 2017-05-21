@@ -57,12 +57,12 @@ sub _update_inetpia {
                 );
                 if ( $res->{success} ) {
                     my $msg =
-                        "api call to dressfree.net success: rent_num($coupon), rent_date($ymd), rent_time($hms)";
+                        "api call to dressfree.net success: rent_num($rent_num), rent_date($ymd), rent_time($hms)";
                     $self->app->log->info($msg);
                 }
                 else {
                     my $msg =
-                        "api call to dressfree.net failed: rent_num($coupon), rent_date($ymd), rent_time($hms)";
+                        "api call to dressfree.net failed: rent_num($rent_num), rent_date($ymd), rent_time($hms)";
                     $self->app->log->warn($msg);
                 }
             }
