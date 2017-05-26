@@ -1,7 +1,7 @@
 package OpenCloset::Web;
 use Mojo::Base 'Mojolicious';
 
-use version; our $VERSION = qv("v1.9.8");
+use version; our $VERSION = qv("v1.9.9");
 
 use CHI;
 use DateTime;
@@ -179,7 +179,6 @@ sub _public_routes_staff {
     $r->get('/order/:order_id/extension/success')->to('order#order_extension_success');
     $r->get('/order/:order_id/rental/paper/pdf')->to('order#rental_paper_pdf');
     $r->post('/webhooks/iamport/unpaid')->to('order#iamport_unpaid_hook');
-    $r->get('/stat/events/:event')->to('statistic#event');
 }
 
 =head2 _public_routes_visit
@@ -347,6 +346,7 @@ sub _private_routes {
     $r->get('/stat/visitor/online')->to('statistic#visitor_online');
     $r->get('/stat/visitor/:ymd')->to('statistic#visitor_ymd');
     $r->get('/stat/visitor/online/:ymd')->to('statistic#visitor_online_ymd');
+    $r->get('/stat/events/:event')->to('statistic#event');
 
     $r->get('/volunteers')->to('volunteer#index');
 

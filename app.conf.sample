@@ -236,6 +236,12 @@ my %BOOKING_SLOT = (
         aelog => 'filter=debug:log=stderr',
     },
 
+    'opencloset-cron-visitor.pl' => {
+        port  => 8006,
+        delay => 10,
+        aelog => 'filter=debug:log=stderr',
+    },
+
     #
     # SMS
     #
