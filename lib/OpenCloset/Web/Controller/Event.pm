@@ -40,6 +40,15 @@ sub seoul {
     my $mbersn = lc( $self->param('MberSn') || '' );
     $self->stash( error => '' ); # prevent template error
 
+    {
+        my $msg =
+            q{서울시 취업날개 서비스의 개편으로 2017년 5월 22일부터 열린옷장에서 제공하는 기존 접속 방법으로는 서비스를 이용할 수 없게되었습니다.}
+            . q{ 취업날개 예약과 관련한 자세한 내용은 서울시 일자리포털에 문의해주세요.}
+            . q{ Tel. 02-2133-5439 / 02-768-8851}
+            . q{ E-mail. aman84@seoul.go.kr};
+        return $self->render( error => $msg );
+    }
+
     unless ($mbersn) {
         return $self->render(
             error => '잘못된 요청입니다 - MberSn 이 없습니다' );

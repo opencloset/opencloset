@@ -2,6 +2,7 @@ package OpenCloset::Web::Controller::Booking;
 use Mojo::Base 'Mojolicious::Controller';
 
 use DateTime;
+use HTTP::Tiny;
 use Try::Tiny;
 
 has DB => sub { shift->app->DB };
@@ -19,6 +20,54 @@ sub index {
 
     my $dt_today = DateTime->now( time_zone => $self->config->{timezone} );
     $self->redirect_to( $self->url_for( '/booking/' . $dt_today->ymd ) );
+}
+
+#
+# GH #1244
+#
+#   서울시청 일자리정책에 신규 예약 시스템과 연동
+#   http://dressfree.net/theopencloset/api_rentRcv.php
+#   rent_num - 예약코드
+#   rent_date - 예약일(yyyy-mm-dd)
+#   rent_time - 예약시간(HH:MM)
+#
+sub _update_inetpia {
+    my ( $self, $order ) = @_;
+    if ( my $coupon = $order->coupon ) {
+        my $desc = $coupon->desc || '';
+        if ( $desc =~ m/^(seoul-2017-2)\|(\d{12}-\d{3})\|(.*)$/ ) {
+            my $coupon_type = $1;
+            my $rent_num    = $2;
+            my $mbersn      = $3;
+
+            if ( $order->booking ) {
+                my $dt = $order->booking->date;
+                $dt->set_time_zone( $self->config->{timezone} );
+                my $ymd = $dt->ymd;
+                my $hms = $dt->hms;
+
+                my $http = HTTP::Tiny->new( timeout => 1 );
+                my $res = $http->post_form(
+                    "https://dressfree.net/theopencloset/api_rentRcv.php",
+                    {
+                        rent_num  => $rent_num,
+                        rent_date => $ymd,
+                        rent_time => $hms,
+                    },
+                );
+                if ( $res->{success} ) {
+                    my $msg =
+                        "api call to dressfree.net success: rent_num($rent_num), rent_date($ymd), rent_time($hms)";
+                    $self->app->log->info($msg);
+                }
+                else {
+                    my $msg =
+                        "api call to dressfree.net failed: rent_num($rent_num), rent_date($ymd), rent_time($hms)";
+                    $self->app->log->warn($msg);
+                }
+            }
+        }
+    }
 }
 
 =head2 visit
@@ -235,6 +284,8 @@ sub visit {
                                 text => $msg,
                             }
                         ) or $self->app->log->warn("failed to create a new sms: $msg");
+
+                        $self->_update_inetpia($order_obj);
                     }
                 }
                 else {
@@ -303,6 +354,8 @@ sub visit {
                             }
                         }
                     }
+
+                    $self->_update_inetpia($order_obj);
                 }
             }
             else {
