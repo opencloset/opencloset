@@ -1,3 +1,12 @@
+# Change Log
+
+The format is based on [Keep a Changelog](http://keepachangelog.com/).
+
+## [Unreleased]
+
+### Changed
+- 시간표에서 취업날개 쿠폰 라벨을 수정 (#1249)
+
 v1.9.9    Fri, 26 May 2017 11:35:27 +0900
   - 서울시청 일자리정책에 신규 예약 시스템과 연동 (#1244)
 

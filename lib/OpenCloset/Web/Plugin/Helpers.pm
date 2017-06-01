@@ -1696,10 +1696,11 @@ sub is_nonpaid {
 =cut
 
 my %COUPON_EVENT_NAME_MAP = (
-    seoul        => '취업날개',
-    gwanak       => '관악고용',
-    '10bob'      => '십시일밥',
-    'seoul-2017' => '취업날개'
+    seoul          => '취업날개',
+    gwanak         => '관악고용',
+    '10bob'        => '십시일밥',
+    'seoul-2017'   => '취업날개',
+    'seoul-2017-2' => '취업날개'
 );
 
 our %COUPON_STATUS_MAP = (
