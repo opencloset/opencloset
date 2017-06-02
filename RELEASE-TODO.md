@@ -1,4 +1,5 @@
     $ bower install
+    $ grunt
 
 v1.9.7
 
