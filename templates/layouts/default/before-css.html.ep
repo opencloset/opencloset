@@ -6,7 +6,6 @@
 <![endif]-->
 <link href="/lib/prettify/css/prettify.css" rel="stylesheet">
 <link href="/components/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css" rel="stylesheet">
-<link href="/components/bootstrap-datepicker/dist/locales/bootstrap-datepicker.ko.min.js" rel="stylesheet">
 <link href="/lib/select2/select2.css" rel="stylesheet">
 <link href="/components/chosen/chosen.css" rel="stylesheet">
 <link href="/components/facebox/src/facebox.css" rel="stylesheet">

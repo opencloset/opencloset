@@ -21,8 +21,8 @@
     <script src="/components/underscore/underscore-min.js"></script>
 
     <!-- datepicker -->
-    <script src="/lib/datepicker/js/bootstrap-datepicker.js"></script>
-    <script src="/lib/datepicker/js/locales/bootstrap-datepicker.kr.js"></script>
+    <script src="/components/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js"></script>
+    <script src="/components/bootstrap-datepicker/dist/locales/bootstrap-datepicker.ko.min.js"></script>
 
     <!-- select2 -->
     <script src="/lib/select2/select2.min.js"></script>
