@@ -18,18 +18,21 @@
     "tests"
   ],
   "dependencies": {
-    "mousetrap": "~1.5.2",
     "bootstrap": "~3.3.6",
     "jquery": "~2.1.4",
     "font-awesome": "~4.5.0",
     "bootstrap-validator": "~0.9.0",
     "jquery-mask-plugin": "jQuery-Mask-Plugin#~1.13.4",
-    "bootstrap-datepicker": "~1.5.0",
     "pdfmake": "~0.1.25",
     "opencloset.css": "https://github.com/opencloset/opencloset.css.git#^1.0.4",
     "dropzone": "^4.3.0",
     "handlebars": "^4.0.5",
     "typeahead.js": "^0.11.1",
-    "moment": "~2.16.0"
+    "moment": "~2.16.0",
+    "underscore": "^1.8.3",
+    "bootstrap-datepicker": "^1.6.4",
+    "chosen": "^1.7.0",
+    "facebox": "*",
+    "bootbox.js": "bootbox#^4.4.0"
   }
 }

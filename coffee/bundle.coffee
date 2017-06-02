@@ -12,8 +12,8 @@ $ ->
   #
   # facebox settings
   #
-  $.facebox.settings.loadingImage = '/lib/facebox/loading.gif'
-  $.facebox.settings.closeImage = '/lib/facebox/closelabel.png'
+  $.facebox.settings.loadingImage = '/components/facebox/src/loading.gif'
+  $.facebox.settings.closeImage   = '/components/facebox/src/closelabel.png'
 
   #
   # common fuction for OpenCloset
