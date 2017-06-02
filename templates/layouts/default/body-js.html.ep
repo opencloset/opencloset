@@ -37,9 +37,6 @@
     <!-- bootbox -->
     <script src="/components/bootbox.js/bootbox.js"></script>
 
-    <!-- mousetrap -->
-    <script src="/components/mousetrap/mousetrap.min.js"></script>
-
     <!-- bundle -->
     <script src="/js/bundle.js"></script>
 
