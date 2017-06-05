@@ -4,6 +4,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [v1.9.10] - Mon, 05 Jun 2017 17:51:44 +0900
 ### Changed
 - 예약화면에 취업날개 서비스 안내 (#1239)
 - 예약화면에 footer 를 추가
