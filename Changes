@@ -4,6 +4,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [v1.9.11] - Mon, 05 Jun 2017 18:27:16 +0900
 ### Added
 - /events/linkstart/stat 통계화면 추가 (#1258)
 
