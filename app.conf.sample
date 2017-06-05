@@ -242,6 +242,12 @@ my %BOOKING_SLOT = (
         aelog => 'filter=debug:log=stderr',
     },
 
+    'opencloset-cron-event.pl' => {
+        port  => 8007,
+        delay => 10,
+        aelog => 'filter=debug:log=stderr',
+    },
+
     #
     # SMS
     #
@@ -384,5 +390,10 @@ my %BOOKING_SLOT = (
     iamport => {
         key    => $ENV{OPENCLOSET_IAMPORT_API_KEY},
         secret => $ENV{OPENCLOSET_IAMPORT_API_SECRET},
+    },
+    ## opencloset-cron-event.pl 에서 사용됩니다.
+    freedress => {
+        username => $ENV{OPENCLOSET_FREEDRESS_USERNAME},
+        password => $ENV{OPENCLOSET_FREEDRESS_PASSWORD},
     },
 };
