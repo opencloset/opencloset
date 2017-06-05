@@ -22,6 +22,7 @@ my ( $next_version, $current_version ) = next_version();
 update_version( $_, $current_version, $next_version )
     for qw{ README.md lib/OpenCloset/Web.pm };
 update_changes( "Changes", $current_version, $next_version );
+update_releasetodo( "RELEASE-TODO.md", $next_version );
 git_add_commit(@FILES);
 
 sub clear_files {
@@ -80,4 +81,13 @@ sub next_version {
     my $next_version = Version::Next::next_version($latest_version);
 
     return ( $next_version, $latest_version );
+}
+
+sub update_releasetodo {
+    my ( $file, $new_ver ) = @_;
+
+    my $path    = path($file);
+    my $content = $path->slurp_utf8;
+
+    $path->spew_utf8( "$new_ver\n\n", $content );
 }
