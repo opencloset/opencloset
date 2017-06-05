@@ -1,11 +1,10 @@
-% use utf8;
 <!-- theme -->
-    <link rel="stylesheet" href="/theme/<%= $theme %>/css/<%= $theme %>-fonts.css" />
-    <link rel="stylesheet" href="/theme/<%= $theme %>/css/<%= $theme %>.min.css" />
-    <link rel="stylesheet" href="/theme/<%= $theme %>/css/<%= $theme %>-rtl.min.css" />
-    <link rel="stylesheet" href="/theme/<%= $theme %>/css/<%= $theme %>-skins.min.css" />
-    <link rel="stylesheet" href="/theme/<%= $theme %>/css/<%= $theme %>-chosen.css" />
-    <!--[if lte IE 8]>
-      <link rel="stylesheet" href="/theme/<%= $theme %>/css/<%= $theme %>-ie.min.css" />
-    <![endif]-->
-    <script src="/theme/<%= $theme %>/js/<%= $theme %>-extra.min.js"></script>
+<link rel="stylesheet" href="/theme/<%= $theme %>/css/<%= $theme %>-fonts.css">
+<link rel="stylesheet" href="/theme/<%= $theme %>/css/<%= $theme %>.min.css">
+<link rel="stylesheet" href="/theme/<%= $theme %>/css/<%= $theme %>-rtl.min.css">
+<link rel="stylesheet" href="/theme/<%= $theme %>/css/<%= $theme %>-skins.min.css">
+<link rel="stylesheet" href="/theme/<%= $theme %>/css/<%= $theme %>-chosen.css">
+<!--[if lte IE 8]>
+  <link rel="stylesheet" href="/theme/<%= $theme %>/css/<%= $theme %>-ie.min.css">
+<![endif]-->
+<script src="/theme/<%= $theme %>/js/<%= $theme %>-extra.min.js"></script>

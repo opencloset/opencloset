@@ -42,7 +42,7 @@
 % my $return_memo = $order->return_memo;
 % my $event       = $coupon ? $coupon->desc : '';
 % ($event) = split(/\|/, $event) if $event;
-% my %EVENT_NAME_MAP = (seoul => '취업날개', gwanak => '관악고용', '10bob' => '십시일밥', 'seoul-2017' => '취업날개');
+% my %EVENT_NAME_MAP = (seoul => '취업날개', gwanak => '관악고용', '10bob' => '십시일밥', 'seoul-2017' => '취업날개', 'seoul-2017-2' => '취업날개');
 <div class="people-box" data-target="<%= $alert_target %>" data-order-id="<%= $order->id %>" data-ymd="<%= $dt_start->ymd %>">
   <div class="widget-box">
     <div class="widget-header">

@@ -1,0 +1,9 @@
+<!-- css-page -->
+% my @include_csses = @$csses;
+% for my $css (@include_csses) {
+  % if ($css =~ m{^(https?://|/)}) {
+    <link href="<%= $css %>" rel="stylesheet">
+  % } else {
+    <link href="/css/<%= $css %>" rel="stylesheet">
+  % }
+% }

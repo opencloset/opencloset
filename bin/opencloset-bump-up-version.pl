@@ -15,6 +15,7 @@ my @FILES = qw(
     Changes
     README.md
     lib/OpenCloset/Web.pm
+    RELEASE-TODO.md
 );
 
 clear_files(@FILES);
@@ -22,6 +23,7 @@ my ( $next_version, $current_version ) = next_version();
 update_version( $_, $current_version, $next_version )
     for qw{ README.md lib/OpenCloset/Web.pm };
 update_changes( "Changes", $current_version, $next_version );
+update_releasetodo( "RELEASE-TODO.md", $next_version );
 git_add_commit(@FILES);
 
 sub clear_files {
@@ -33,15 +35,15 @@ sub clear_files {
 sub git_add_commit {
     my @files = @_;
 
-    system( "git", "add", @files );
-    system( "git", "diff", "--staged" );
+    system( "git", "add",    @files );
+    system( "git", "diff",   "--staged" );
     system( "git", "commit", "-m", "Bump up version" );
 }
 
 sub update_changes {
     my ( $file, $old_ver, $new_ver ) = @_;
 
-    my $path = path($file);
+    my $path    = path($file);
     my $content = $path->slurp_utf8;
 
     my $date;
@@ -51,15 +53,14 @@ sub update_changes {
         chomp $date;
     }
 
-    my $new_line = sprintf "%-10s%s\n", $new_ver, $date;
-
-    $path->spew_utf8( $new_line, $content );
+    $content =~ s{## \[Unreleased\]\n}{## \[Unreleased\]\n\n## [$new_ver] - $date};
+    $path->spew_utf8($content);
 }
 
 sub update_version {
     my ( $file, $old_ver, $new_ver ) = @_;
 
-    my $path = path($file);
+    my $path    = path($file);
     my $content = $path->slurp_utf8;
     $content =~ s/$old_ver/$new_ver/gms;
     $path->spew_utf8($content);
@@ -81,4 +82,13 @@ sub next_version {
     my $next_version = Version::Next::next_version($latest_version);
 
     return ( $next_version, $latest_version );
+}
+
+sub update_releasetodo {
+    my ( $file, $new_ver ) = @_;
+
+    my $path    = path($file);
+    my $content = $path->slurp_utf8;
+
+    $path->spew_utf8( "$new_ver\n\n", $content );
 }

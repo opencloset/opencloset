@@ -1,0 +1,5 @@
+<!-- JS -->
+<!--[if IE 9]>
+  <script src="/lib/html5shiv/html5shiv.js"></script>
+  <script src="/lib/respond/respond.min.js"></script>
+<![endif]-->
