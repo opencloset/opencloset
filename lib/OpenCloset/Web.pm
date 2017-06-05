@@ -1,7 +1,7 @@
 package OpenCloset::Web;
 use Mojo::Base 'Mojolicious';
 
-use version; our $VERSION = qv("v1.9.10");
+use version; our $VERSION = qv("v1.9.11");
 
 use CHI;
 use DateTime;
@@ -196,6 +196,7 @@ sub _public_routes_visit {
 
     $r->get('/events/seoul')->to('event#seoul');
     $r->get('/events/linkstart')->to('event#linkstart');
+    $r->get('/events/:event/stat')->to('statistic#event');
 
     ## easy cancel order and update booking.date
     my $auth = $r->under('/order/:id')->to('order#auth');
