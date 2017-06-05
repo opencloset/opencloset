@@ -33,15 +33,15 @@ sub clear_files {
 sub git_add_commit {
     my @files = @_;
 
-    system( "git", "add", @files );
-    system( "git", "diff", "--staged" );
+    system( "git", "add",    @files );
+    system( "git", "diff",   "--staged" );
     system( "git", "commit", "-m", "Bump up version" );
 }
 
 sub update_changes {
     my ( $file, $old_ver, $new_ver ) = @_;
 
-    my $path = path($file);
+    my $path    = path($file);
     my $content = $path->slurp_utf8;
 
     my $date;
@@ -59,7 +59,7 @@ sub update_changes {
 sub update_version {
     my ( $file, $old_ver, $new_ver ) = @_;
 
-    my $path = path($file);
+    my $path    = path($file);
     my $content = $path->slurp_utf8;
     $content =~ s/$old_ver/$new_ver/gms;
     $path->spew_utf8($content);
