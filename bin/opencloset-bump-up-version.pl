@@ -15,6 +15,7 @@ my @FILES = qw(
     Changes
     README.md
     lib/OpenCloset/Web.pm
+    RELEASE-TODO.md
 );
 
 clear_files(@FILES);
