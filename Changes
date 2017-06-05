@@ -4,6 +4,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Added
+- /events/linkstart/stat 통계화면 추가 (#1258)
+
 ## [v1.9.10] - Mon, 05 Jun 2017 17:51:44 +0900
 ### Changed
 - 예약화면에 취업날개 서비스 안내 (#1239)
