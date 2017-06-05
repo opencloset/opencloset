@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ## [Unreleased]
 
 ### Changed
+- 예약화면에 취업날개 서비스 안내 (#1239)
+- 예약화면에 footer 를 추가
 - public/lib 의 대체가능한 bower package 를 사용 (#1243)
 - template/layouts/default/*.haml 을 ep 로 변경
 - 시간표에서 취업날개 쿠폰 라벨을 수정 (#1249)
