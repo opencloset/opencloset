@@ -38,6 +38,7 @@
           </div>
         </div>
       </div>
+      %= footer
     </div>
     %= include 'layouts/default/body-js'
     %= include 'layouts/default/body-js-theme'
