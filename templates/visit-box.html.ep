@@ -107,24 +107,22 @@
                         </fieldset>
                       </form>
 
-                      <div class="space-6"></div>
-
-                      <div class="clearfix">
-                        <a class="width-100 pull-right btn btn-sm btn-yellow" href="https://www.theopencloset.net">
-                          <i class="icon-home"></i>
-                          <span> 열린옷장 홈페이지로 돌아가기 </span>
-                        </a>
+                      <hr>
+                      <div class="clearfix well-sm event-wings">
+                        <p>서울시와 열린옷장이 함께 하는</p>
+                        <h4 class="text-center">
+                          정장무료대여 - 취업날개서비스
+                        </h4>
+                        <ul>
+                          <li>
+                            대상: 고등학교 졸업예정자 ~ 만 34세 주소지가 서울인 청년
+                          </li>
+                          <li>
+                            혜택: 1인 10회 무료대여 가능
+                          </li>
+                        </ul>
+                        <a href="http://job.seoul.go.kr/www/add_service/openChothesChest.do?method=selectOpenChothesChest" class="btn btn-success btn-sm btn-block" target="_blank">취업날개 서비스 예약하러 가기</a>
                       </div>
-                      
-                      <div class="space-6"></div>
-
-                      <div class="clearfix">
-                        <a class="width-100 pull-right btn btn-sm btn-success" href="http://blog.theopencloset.net/220614995880" target="_blank">
-                          <i class="icon-hand-up"></i>
-                          <span> 예약 가이드 보러가기 </span>
-                        </a>
-                      </div>
-
                     </div>
                   </div><!-- /widget-body -->
                 </div><!-- /visit-box -->
