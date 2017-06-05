@@ -51,9 +51,8 @@ sub update_changes {
         chomp $date;
     }
 
-    my $new_line = sprintf "%-10s%s\n", $new_ver, $date;
-
-    $path->spew_utf8( $new_line, $content );
+    $content =~ s{## \[Unreleased\]\n}{## \[Unreleased\]\n\n## [$new_ver] - $date};
+    $path->spew_utf8($content);
 }
 
 sub update_version {
