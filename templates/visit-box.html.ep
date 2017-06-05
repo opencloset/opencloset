@@ -110,7 +110,7 @@
                       <hr>
                       <div class="clearfix well-sm event-wings">
                         <p>서울시와 열린옷장이 함께 하는</p>
-                        <h4>
+                        <h4 class="text-center">
                           정장무료대여 - 취업날개서비스
                         </h4>
                         <ul>
@@ -123,11 +123,6 @@
                         </ul>
                         <a href="http://job.seoul.go.kr/www/add_service/openChothesChest.do?method=selectOpenChothesChest" class="btn btn-success btn-sm btn-block" target="_blank">취업날개 서비스 예약하러 가기</a>
                       </div>
-
-                      <div class="clearfix">
-                        %= footer
-                      </div>
-
                     </div>
                   </div><!-- /widget-body -->
                 </div><!-- /visit-box -->
