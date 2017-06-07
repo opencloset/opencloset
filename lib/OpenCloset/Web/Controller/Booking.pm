@@ -231,9 +231,11 @@ sub visit {
             #
             my $order_obj = $self->DB->resultset('Order')->find($order);
             if ($order_obj) {
-                my $msg = sprintf(
-                    "%s님 %s 방문 예약이 취소되었습니다.",
-                    $user->name, $order_obj->booking->date->strftime('%m월 %d일 %H시 %M분'),
+                my $msg = $self->render_to_string(
+                    "sms/booking-cancel",
+                    format   => 'txt',
+                    name     => $user->name,
+                    datetime => $order_obj->booking->date->strftime('%m월 %d일 %H시 %M분'),
                 );
                 $self->DB->resultset('SMS')->create(
                     {
