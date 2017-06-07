@@ -3,6 +3,9 @@
 The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## [Unreleased]
+### Removed
+- 봉사활동과 관련된 기능 삭제(volunteer 서비스로 이관)
+
 ### Changed
 - 컨트롤러에 있던 SMS 내용을 template 으로 옮김 (#1262)
 
