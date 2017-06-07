@@ -231,9 +231,11 @@ sub visit {
             #
             my $order_obj = $self->DB->resultset('Order')->find($order);
             if ($order_obj) {
-                my $msg = sprintf(
-                    "%s님 %s 방문 예약이 취소되었습니다.",
-                    $user->name, $order_obj->booking->date->strftime('%m월 %d일 %H시 %M분'),
+                my $msg = $self->render_to_string(
+                    "sms/booking-cancel",
+                    format   => 'txt',
+                    name     => $user->name,
+                    datetime => $order_obj->booking->date->strftime('%m월 %d일 %H시 %M분'),
                 );
                 $self->DB->resultset('SMS')->create(
                     {
@@ -273,9 +275,11 @@ sub visit {
                             $order_obj->update( { booking_id => $booking } );
                         }
 
-                        my $msg = sprintf(
-                            "%s님 %s으로 방문 예약이 변경되었습니다.",
-                            $user->name, $order_obj->booking->date->strftime('%m월 %d일 %H시 %M분'),
+                        my $msg = $self->render_to_string(
+                            "sms/booking-datetime-update",
+                            format   => 'txt',
+                            name     => $user->name,
+                            datetime => $order_obj->booking->date->strftime('%m월 %d일 %H시 %M분'),
                         );
                         $self->DB->resultset('SMS')->create(
                             {
@@ -308,23 +312,13 @@ sub visit {
                     );
                     if ($order_obj) {
                         my $user_info = $user->user_info;
-                        my $msg       = sprintf(
-                            qq{%s님 %s으로 방문 예약이 완료되었습니다.
-<열린옷장 위치안내>
-서울특별시 광진구 아차산로 213 국민은행, 건대입구역 1번 출구로 나오신 뒤 오른쪽으로 꺾어 150M 가량 직진하시면 1층에 국민은행이 있는 건물 5층으로 올라오시면 됩니다. (도보로 약 3분 소요)
-지도 안내: https://goo.gl/UuJyrx
-
-예약시간 변경/취소는 %s 에서 가능합니다.
-
-1. 지각은 NO!
-꼭 예약 시간에 방문해주세요. 예약한 시간에 방문하지 못한 경우, 정시에 방문한 대여자를 먼저 안내하기 때문에 늦거나 일찍 온 시간만큼 대기시간이 길어집니다.
-
-2. 노쇼(no show)금지
-열린옷장은 하루에 방문 가능한 예약 인원이 정해져 있습니다. 방문이 어려운 경우 다른 분을 위해 반드시 '예약취소' 해주세요. 예약취소는 세 시간 전까지 가능합니다.},
-                            $user->name,
-                            $order_obj->booking->date->strftime('%m월 %d일 %H시 %M분'),
-                            $self->url_for( '/order/' . $order_obj->id . '/booking/edit' )
-                                ->query( phone => substr( $user_info->phone, -4 ) )->to_abs,
+                        my $msg       = $self->render_to_string(
+                            'sms/order-reserved-1',
+                            format   => 'txt',
+                            name     => $user->name,
+                            datetime => $order_obj->booking->date->strftime('%m월 %d일 %H시 %M분'),
+                            edit_url => $self->url_for( '/order/' . $order_obj->id . '/booking/edit' )
+                                ->query( phone => substr( $user_info->phone, -4 ) )->to_abs
                         );
 
                         my $from = $self->config->{sms}{ $self->config->{sms}{driver} }{_from};
@@ -342,8 +336,11 @@ sub visit {
                         if ( my $coupon = $order_obj->coupon ) {
                             my $desc = $coupon->desc || '';
                             if ( $desc =~ m/^seoul/ ) {
-                                my $msg =
-                                    "[열린옷장] 취업날개 서비스(면접정장 무료대여)는 주민등록상 '서울시'에 거주 중인 만18세 ~ 34세를 대상으로 합니다. 현장에서 이용조건의 증명이 불가능할 경우 무료 대여가 되지 않습니다. 따라서, 주소와 나이를 증명할 수 있는 신분증(주민등록증, 운전면허증)을 반드시 지참해주시기 바랍니다. 이용조건 증명을 할 수 있는 신분증이 없는 경우 본 서비스를 이용할 수 없다는 점을 거듭 안내드립니다. 감사합니다.";
+                                my $msg = $self->render_to_string(
+                                    'sms/employment-wing',
+                                    format => 'txt',
+                                );
+
                                 $self->DB->resultset('SMS')->create(
                                     {
                                         to   => $user->user_info->phone,
