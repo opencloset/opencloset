@@ -74,7 +74,6 @@ sub register {
     $app->helper( get_nearest_booked_order => \&get_nearest_booked_order );
     $app->helper( convert_sec_to_locale    => \&convert_sec_to_locale );
     $app->helper( convert_sec_to_hms       => \&convert_sec_to_hms );
-    $app->helper( phone_format             => \&phone_format );
     $app->helper( user_avg_diff            => \&user_avg_diff );
     $app->helper( user_avg2                => \&user_avg2 );
     $app->helper( count_visitor            => \&count_visitor );
@@ -1408,19 +1407,6 @@ sub convert_sec_to_hms {
     );
 
     return $hms;
-}
-
-=head2 phone_format( $phone )
-
-=cut
-
-sub phone_format {
-    my ( $self, $phone ) = @_;
-    return $phone if $phone !~ m/^[0-9]{10,11}$/;
-
-    $phone =~ s/(\d{3})(\d{4})/$1-$2/;
-    $phone =~ s/(\d{4})(\d{3,4})/$1-$2/;
-    return $phone;
 }
 
 =head2 user_avg_diff( $user )
