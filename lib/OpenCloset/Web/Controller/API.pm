@@ -3151,16 +3151,16 @@ sub api_send_vbank_sms {
     my $vbank_num    = $data->{response}{vbank_num};
     my $vbank_holder = $data->{response}{vbank_holder};
 
-    my $sms_body = sprintf(
-        '[열린옷장] %s님, %d일 연장, %d일 연체로 추가 금액 %s원이 발생하였습니다. 금일 중으로 %s %s(예금주 : %s)으로 입금해주세요. 지정된 금액으로 3일동안 유효한 %s님의 임금전용 가상계좌입니다. 금액과 입금기한에 유의해 주시기 바랍니다',
-        $user->name,
-        $calc->extension_days($order),
-        $calc->overdue_days($order),
-        $self->commify($late_fee),
-        $vbank_name,
-        $vbank_num,
-        $vbank_holder,
-        $user->name,
+    my $sms_body = $self->render_to_string(
+        "sms/latefee",
+        format       => 'txt',
+        name         => $user->name,
+        ext_days     => $calc->extension_days($order),
+        overdue_days => $calc->overdue_days($order),
+        late_fee     => $self->commify($late_fee),
+        vbank_name   => $vbank_name,
+        vbank_num    => $vbank_num,
+        vbank_holder => $vbank_holder,
     );
     $sms_body =~ s/, 0일 연장//;
     $sms_body =~ s/, 0일 연체/으/;
