@@ -273,9 +273,11 @@ sub visit {
                             $order_obj->update( { booking_id => $booking } );
                         }
 
-                        my $msg = sprintf(
-                            "%s님 %s으로 방문 예약이 변경되었습니다.",
-                            $user->name, $order_obj->booking->date->strftime('%m월 %d일 %H시 %M분'),
+                        my $msg = $self->render_to_string(
+                            "sms/booking-datetime-update",
+                            format   => 'txt',
+                            name     => $user->name,
+                            datetime => $order_obj->booking->date->strftime('%m월 %d일 %H시 %M분'),
                         );
                         $self->DB->resultset('SMS')->create(
                             {
