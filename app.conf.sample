@@ -391,9 +391,4 @@ my %BOOKING_SLOT = (
         key    => $ENV{OPENCLOSET_IAMPORT_API_KEY},
         secret => $ENV{OPENCLOSET_IAMPORT_API_SECRET},
     },
-    ## opencloset-cron-event.pl 에서 사용됩니다.
-    freedress => {
-        username => $ENV{OPENCLOSET_FREEDRESS_USERNAME},
-        password => $ENV{OPENCLOSET_FREEDRESS_PASSWORD},
-    },
 };
