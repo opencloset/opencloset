@@ -5,6 +5,8 @@ use DateTime;
 use HTTP::Tiny;
 use Try::Tiny;
 
+use OpenCloset::Events::EmploymentWing;
+
 has DB => sub { shift->app->DB };
 
 =head1 METHODS
@@ -273,6 +275,29 @@ sub visit {
                             # 변경한 예약 정보가 기존 정보와 다를 경우 갱신함
                             #
                             $order_obj->update( { booking_id => $booking } );
+
+                            if ( my $coupon = $order->coupon ) {
+                                #
+                                # https://github.com/opencloset/opencloset/issues/1256
+                                # 예약일시가 변경되면 취업날개 서비스에 반영해준다
+                                #
+                                my $desc = $coupon->desc;
+                                my ( $name, $rent_num, $mbersn ) = split /\|/, $desc;
+                                if ( $name eq 'seoul-2017-2' ) {
+                                    my $client   = OpenCloset::Events::EmploymentWing->new;
+                                    my $datetime = $self->DB->resultset('Booking')->find( { id => $booking } )->date;
+                                    my $success  = $client->update_booking_datetime( $rent_num, $datetime );
+                                    unless ($success) {
+                                        my $order_id = $order->id;
+                                        $self->log->error(
+                                            sprintf(
+                                                "Failed to update booking_datetime to seoul-2017 event: rent_num(%s), order_id(%d), datetime(%s)",
+                                                $rent_num, $order->id, $datetime->datetime
+                                            )
+                                        );
+                                    }
+                                }
+                            }
                         }
 
                         my $msg = $self->render_to_string(

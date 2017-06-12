@@ -1226,8 +1226,9 @@ sub visitor_online_ymd {
 =cut
 
 sub event {
-    my $self  = shift;
-    my $event = $self->param('event');
+    my $self   = shift;
+    my $event  = $self->param('event');
+    my $online = $self->param('online');
 
     return $self->error( 404, { str => "Not found event: $event" }, 'error/not_found' )
         unless $self->DB->resultset('Visitor')->search( { event => $event } )->count;
@@ -1236,8 +1237,13 @@ sub event {
     $is_rate = 1 if $event eq 'linkstart';
 
     my %visitor;
+    my $cond = { event => $event };
+    if ( defined $online ) {
+        $cond->{online} = $online ? 1 : 0;
+    }
+
     my $rs = $self->DB->resultset('Visitor')->search(
-        { event => $event },
+        $cond,
         {
             select => [
                 \'DATE_FORMAT(`date`, "%Y-%m")',
@@ -1288,7 +1294,7 @@ sub event {
     }
 
     $rs = $self->DB->resultset('Visitor')->search(
-        { event => $event },
+        $cond,
         { order_by => { -desc => 'date' } }
     );
 
