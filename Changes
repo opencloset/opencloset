@@ -3,6 +3,8 @@
 The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## [Unreleased]
+
+## [v1.9.12] - Mon, 12 Jun 2017 14:29:46 +0900
 ### Removed
 - 봉사활동과 관련된 기능 삭제(volunteer 서비스로 이관)
 

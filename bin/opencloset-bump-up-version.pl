@@ -53,7 +53,7 @@ sub update_changes {
         chomp $date;
     }
 
-    $content =~ s{## \[Unreleased\]\n}{## \[Unreleased\]\n\n## [$new_ver] - $date};
+    $content =~ s{## \[Unreleased\]\n}{## \[Unreleased\]\n\n## [$new_ver] - $date\n};
     $path->spew_utf8($content);
 }
 
