@@ -4,6 +4,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Changed
+- 오프라인/온라인별 이벤트 통계를 볼 수 있도록 함 (#1256)
+
 ## [v1.9.12] - Mon, 12 Jun 2017 14:29:46 +0900
 ### Removed
 - 봉사활동과 관련된 기능 삭제(volunteer 서비스로 이관)
