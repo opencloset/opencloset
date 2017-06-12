@@ -4,6 +4,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [v1.9.12] - Mon, 12 Jun 2017 14:29:46 +0900
+### Removed
+- 봉사활동과 관련된 기능 삭제(volunteer 서비스로 이관)
+
+### Changed
+- 예약일시가 변경되면 취업날개 서비스에 반영하도록 함 (#1256)
+- 컨트롤러에 있던 SMS 내용을 template 으로 옮김 (#1262)
+
 ## [v1.9.11] - Mon, 05 Jun 2017 18:27:16 +0900
 ### Added
 - /events/linkstart/stat 통계화면 추가 (#1258)

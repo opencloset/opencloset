@@ -1,3 +1,8 @@
+v1.9.12
+
+    $ grunt
+    $ closetpan OpenCloset::Events::EmploymentWing
+
 v1.9.11
 
 v1.9.10

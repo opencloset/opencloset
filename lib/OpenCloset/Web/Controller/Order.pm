@@ -16,6 +16,7 @@ use OpenCloset::Constants qw/%PAY_METHOD_MAP/;
 use OpenCloset::Constants::Category;
 use OpenCloset::Constants::Status
     qw/$RENTAL $RETURNED $PARTIAL_RETURNED $RETURNING $NOT_VISITED $PAYMENT $NOT_RENTAL $PAYBACK $NO_SIZE $BOXED/;
+use OpenCloset::Events::EmploymentWing;
 
 has DB => sub { shift->app->DB };
 
@@ -1237,6 +1238,27 @@ sub update_booking {
             booking_id => $booking_id,
         }
     );
+
+    ## https://github.com/opencloset/opencloset/issues/1256
+    ## 예약일시가 변경되면 취업날개 서비스에 반영해준다
+    if ( my $coupon = $order->coupon ) {
+        my $desc = $coupon->desc;
+        my ( $name, $rent_num, $mbersn ) = split /\|/, $desc;
+        if ( $name eq 'seoul-2017-2' ) {
+            my $client   = OpenCloset::Events::EmploymentWing->new;
+            my $datetime = $self->DB->resultset('Booking')->find( { id => $booking_id } )->date;
+            my $success  = $client->update_booking_datetime( $rent_num, $datetime );
+            unless ($success) {
+                my $order_id = $order->id;
+                $self->log->error(
+                    sprintf(
+                        "Failed to update booking_datetime to seoul-2017 event: rent_num(%s), order_id(%d), datetime(%s)",
+                        $rent_num, $order->id, $datetime->datetime
+                    )
+                );
+            }
+        }
+    }
 
     $self->flash( alert => '예약시간이 변경되었습니다.' );
     $self->render( json => $self->flatten_booking( $order->booking ) );
