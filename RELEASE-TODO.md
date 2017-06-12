@@ -1,4 +1,5 @@
     $ grunt
+    $ closetpan OpenCloset::Events::EmploymentWing
 
 v1.9.11
 
