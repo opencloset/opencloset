@@ -1221,7 +1221,8 @@ sub visitor_online_ymd {
 
 =head2 event
 
-    GET /stat/events/:event
+    GET /stat/events/:event    # private
+    GET /events/:event/stat    # public
 
 =cut
 
@@ -1295,7 +1296,46 @@ sub event {
 
     $rs = $self->DB->resultset('Visitor')->search(
         $cond,
-        { order_by => { -desc => 'date' } }
+        {
+            select => [
+                'date',
+                { sum => 'visited' },
+                { sum => 'visited_male' },
+                { sum => 'visited_female' },
+                { sum => 'visited_age_10' },
+                { sum => 'visited_age_20' },
+                { sum => 'visited_age_30' },
+                { sum => 'visited_rate_30' },
+                { sum => 'visited_rate_30_sum' },
+                { sum => 'visited_rate_30_discount' },
+                { sum => 'unvisited' },
+                { sum => 'unvisited_male' },
+                { sum => 'unvisited_female' },
+                { sum => 'unvisited_age_10' },
+                { sum => 'unvisited_age_20' },
+                { sum => 'unvisited_age_30' },
+            ],
+            as => [
+                'date',
+                'visited',
+                'visited_male',
+                'visited_female',
+                'visited_age_10',
+                'visited_age_20',
+                'visited_age_30',
+                'visited_rate_30',
+                'visited_rate_30_sum',
+                'visited_rate_30_discount',
+                'unvisited',
+                'unvisited_male',
+                'unvisited_female',
+                'unvisited_age_10',
+                'unvisited_age_20',
+                'unvisited_age_30',
+            ],
+            group_by => 'date',
+            order_by => { -desc => 'date' },
+        }
     );
 
     while ( my $row = $rs->next ) {
