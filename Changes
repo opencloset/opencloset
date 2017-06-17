@@ -4,6 +4,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [v1.9.15] - Sat, 17 Jun 2017 16:22:11 +0900
+
 ### Changed
 - 대여목적의 웨딩촬영을 사진촬영으로 변경 (#1241)
 
