@@ -4,6 +4,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [v1.9.15] - Sat, 17 Jun 2017 16:22:11 +0900
+
+### Changed
+- 대여목적의 웨딩촬영을 사진촬영으로 변경 (#1241)
+
 ## [v1.9.14] - Tue, 13 Jun 2017 12:54:34 +0900
 ### Fixed
 - 오프라인/온라인별 이벤트 통계 일간 방문인원 날짜 중복 오류 해결 (#1256)
