@@ -343,6 +343,30 @@ sub create {
             }
 
             #
+            # 사용자의 구두 사이즈와 주문서의 구두사이즈가 다를 경우, 사용자의 구두 사이즈를 변경함 (#1251)
+            #
+            my ($shoes_code) = grep { m/^0?A/ } @{ $order_detail_params{clothes_code} };
+            if ($shoes_code) {
+                my $shoes = $self->DB->resultset('Clothes')->find( { code => $shoes_code } );
+                if ($shoes) {
+                    my $user_info = $order->user->user_info;
+                    my $foot      = $user_info->foot;
+                    my $length    = $shoes->length;
+                    if ( $foot and $length and $foot != $length ) {
+                        $user_info->update( { foot => $length } );
+                        $self->log->info(
+                            sprintf(
+                                "Update user_info.foot(%d) to shoes.length(%d): order(%d)",
+                                $foot,
+                                $length,
+                                $order->id
+                            )
+                        );
+                    }
+                }
+            }
+
+            #
             # GH #790: 3회째 대여자 부터 대여자의 부담을 줄이기 위해 비용을 할인함
             #
             my $sale_price = {

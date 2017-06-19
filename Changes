@@ -3,6 +3,8 @@
 The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## [Unreleased]
+### Changed
+- 포장완료시 사용자의 발크기를 주문서에 동기화 (#1251)
 
 ## [v1.9.15] - Sat, 17 Jun 2017 16:22:11 +0900
 
