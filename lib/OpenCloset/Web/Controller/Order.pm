@@ -15,7 +15,7 @@ use OpenCloset::Common::Unpaid
 use OpenCloset::Constants qw/%PAY_METHOD_MAP/;
 use OpenCloset::Constants::Category;
 use OpenCloset::Constants::Status
-    qw/$RENTAL $RETURNED $PARTIAL_RETURNED $RETURNING $NOT_VISITED $PAYMENT $NOT_RENTAL $PAYBACK $NO_SIZE $BOXED/;
+    qw/$RENTAL $RETURNED $PARTIAL_RETURNED $RETURNING $NOT_VISITED $PAYMENT $NOT_RENTAL $PAYBACK $NO_SIZE $BOX $BOXED/;
 use OpenCloset::Events::EmploymentWing;
 
 has DB => sub { shift->app->DB };
@@ -304,7 +304,7 @@ sub create {
             my $monitor_uri_full = $self->config->{monitor_uri} . "/events";
             my $res = HTTP::Tiny->new( timeout => 1 )->post_form(
                 $monitor_uri_full,
-                { sender => 'order', order_id => $order_params{id}, from => 18, to => 44 },
+                { sender => 'order', order_id => $order_params{id}, from => $BOX, to => $BOXED },
             );
             $self->log->warn(
                 "Failed to post event to monitor: $monitor_uri_full: $res->{reason}")
