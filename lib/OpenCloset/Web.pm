@@ -289,6 +289,8 @@ sub _private_routes {
 
     $api->post('/photos')->to('API#api_upload_photo');
 
+    $api->get('/latefee/:order_id')->to('API#api_latefee');
+
     $r->get('/')->to('root#index');
 
     $r->get('/tag')->to('tag#index');
