@@ -3169,38 +3169,4 @@ sub api_send_vbank_sms {
     $self->render( json => {} );
 }
 
-=head2 api_latefee
-
-    GET /api/latefee/:order_id
-
-=cut
-
-sub api_latefee {
-    my $self     = shift;
-    my $order_id = $self->param('order_id');
-
-    my $order = $self->get_order( { id => $order_id } );
-    return $self->error( 404, { str => "Order not found: $order_id" } ) unless $order;
-
-    my $calc         = OpenCloset::Calculator::LateFee->new;
-    my $ext_days     = $calc->extension_days($order);
-    my $ext_fee      = $calc->extension_fee($order);
-    my $overdue_days = $calc->overdue_days($order);
-    my $overdue_fee  = $calc->overdue_fee($order);
-
-    $self->render(
-        json => {
-            extension => {
-                days => $ext_days,
-                fee  => $ext_fee,
-            },
-            overdue => {
-                days => $overdue_days,
-                fee  => $overdue_fee,
-            },
-            late_fee => $ext_fee + $overdue_fee,
-        }
-    );
-}
-
 1;
