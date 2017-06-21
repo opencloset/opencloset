@@ -4,7 +4,10 @@ use Mojo::Base 'Mojolicious::Controller';
 use DateTime;
 use HTTP::Tiny;
 use Try::Tiny;
+use Mojo::JSON qw/decode_json/;
 
+use OpenCloset::Calculator::LateFee;
+use OpenCloset::Common::Unpaid ();
 use OpenCloset::Events::EmploymentWing;
 
 has DB => sub { shift->app->DB };
@@ -384,6 +387,75 @@ sub visit {
                 my $error_msg = "유효하지 않은 정보입니다: " . $self->stash('error');
                 $self->app->log->warn($error_msg);
                 $self->stash( alert => $error_msg );
+            }
+        }
+    }
+    elsif ( $type eq 'visit-info' ) {
+        #
+        # GH #1197
+        #
+        # 미납(unpaid):  order.late_fee_pay_with = '미납' OR order.compensation_pay_with = '미납'
+        # 불납(nonpaid): order_detail.stage = 4
+        my $unpaid_order = $self->DB->resultset('Order')->search(
+            {
+                user_id => $user->id,
+                -or     => [
+                    { late_fee_pay_with     => '미납' },
+                    { compensation_pay_with => '미납' },
+                ]
+            },
+            {
+                rows     => 1,
+                order_by => { -desc => 'id' }
+            }
+        )->single;
+
+        if ($unpaid_order) {
+            my $calc        = OpenCloset::Calculator::LateFee->new;
+            my $late_fee    = $calc->late_fee($unpaid_order);
+            my $rental_date = $unpaid_order->rental_date;
+            my $user_info   = $user->user_info;
+            my $params      = {
+                merchant_uid =>
+                    OpenCloset::Common::Unpaid::merchant_uid( "staff-%d-", $unpaid_order->id ),
+                amount       => $late_fee,
+                vbank_due    => time + 86400 * 3,                            # 3days
+                vbank_holder => '열린옷장-' . $user->name,
+                vbank_code   => '04',                                        # 국민은행
+                name         => sprintf( "미납금#%d", $unpaid_order->id ),
+                buyer_name   => $user->name,
+                buyer_email  => $user->email,
+                buyer_tel    => $user_info->phone,
+                buyer_addr   => $user_info->address2 || '',
+                'notice_url[]' => $self->url_for("/webhooks/iamport/unpaid")->to_abs->to_string,
+            };
+
+            my ( $log, $error ) =
+                OpenCloset::Common::Unpaid::create_vbank( $self->app->iamport, $unpaid_order,
+                $params );
+
+            if ($log) {
+                my $data         = decode_json( $log->detail );
+                my $vbank_name   = $data->{response}{vbank_name};
+                my $vbank_num    = $data->{response}{vbank_num};
+                my $vbank_holder = $data->{response}{vbank_holder};
+                my $msg          = $self->render_to_string(
+                    "sms/unpaid-on-booking",
+                    format       => 'txt',
+                    name         => $user->name,
+                    rental_date  => $rental_date->strftime('%Y년 %m월 %d일'),
+                    late_fee     => $self->commify($late_fee),
+                    vbank_name   => $vbank_name,
+                    vbank_num    => $vbank_num,
+                    vbank_holder => $vbank_holder,
+                );
+
+                chomp $msg;
+                $self->sms( $user_info->phone, $msg );
+                $self->stash( unpaid => $msg );
+            }
+            else {
+                $self->log->error("Failed to create vbank: $error");
             }
         }
     }

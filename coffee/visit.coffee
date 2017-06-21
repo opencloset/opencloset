@@ -556,3 +556,5 @@ $ ->
       error: (jqXHR, textStatus, errorThrown) ->
         # user not found(404) is fine
       complete: (jqXHR, textStatus) ->
+
+  $('#unpaid-modal').modal('show')

@@ -247,6 +247,25 @@
                   </div><!-- /widget-body -->
                 </div><!-- /visit-info-box -->
 
+                % if ($unpaid) {
+                  <div id="unpaid-modal" class="modal" tabindex="-1" role="dialog">
+                    <div class="modal-dialog" role="document">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                          <h4 class="modal-title">미납금 안내</h4>
+                        </div>
+                        <div class="modal-body">
+                          <p><%= $unpaid %></p>
+                        </div>
+                        <div class="modal-footer">
+                          <button type="button" class="btn btn-default" data-dismiss="modal">닫기</button>
+                        </div>
+                      </div><!-- /.modal-content -->
+                    </div><!-- /.modal-dialog -->
+                  </div><!-- /.modal -->
+                % }
+
                 <div id="modal-booking" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="bookingModalLabel" aria-hidden="true">
                   <div class="modal-dialog">
                     <div class="modal-content">
