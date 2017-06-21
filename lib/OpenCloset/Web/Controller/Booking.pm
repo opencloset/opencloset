@@ -410,6 +410,7 @@ sub visit {
             }
         )->single;
 
+        my $unpaid_msg = '';
         if ($unpaid_order) {
             my $calc        = OpenCloset::Calculator::LateFee->new;
             my $late_fee    = $calc->late_fee($unpaid_order);
@@ -430,9 +431,10 @@ sub visit {
                 'notice_url[]' => $self->url_for("/webhooks/iamport/unpaid")->to_abs->to_string,
             };
 
-            my ( $log, $error ) =
-                OpenCloset::Common::Unpaid::create_vbank( $self->app->iamport, $unpaid_order,
-                $params );
+            my ( $log, $error ) = OpenCloset::Common::Unpaid::create_vbank(
+                $self->app->iamport, $unpaid_order,
+                $params
+            );
 
             if ($log) {
                 my $data         = decode_json( $log->detail );
@@ -452,12 +454,14 @@ sub visit {
 
                 chomp $msg;
                 $self->sms( $user_info->phone, $msg );
-                $self->stash( unpaid => $msg );
+                $unpaid_msg = $msg;
             }
             else {
                 $self->log->error("Failed to create vbank: $error");
             }
         }
+
+        $self->stash( unpaid_msg => $unpaid_msg );
     }
 
     $self->stash(
