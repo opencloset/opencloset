@@ -15,7 +15,7 @@ use OpenCloset::Common::Unpaid
 use OpenCloset::Constants qw/%PAY_METHOD_MAP/;
 use OpenCloset::Constants::Category;
 use OpenCloset::Constants::Status
-    qw/$RENTAL $RETURNED $PARTIAL_RETURNED $RETURNING $NOT_VISITED $PAYMENT $NOT_RENTAL $PAYBACK $NO_SIZE $BOXED/;
+    qw/$RENTAL $RETURNED $PARTIAL_RETURNED $RETURNING $NOT_VISITED $PAYMENT $NOT_RENTAL $PAYBACK $NO_SIZE $BOX $BOXED/;
 use OpenCloset::Events::EmploymentWing;
 
 has DB => sub { shift->app->DB };
@@ -304,7 +304,7 @@ sub create {
             my $monitor_uri_full = $self->config->{monitor_uri} . "/events";
             my $res = HTTP::Tiny->new( timeout => 1 )->post_form(
                 $monitor_uri_full,
-                { sender => 'order', order_id => $order_params{id}, from => 18, to => 44 },
+                { sender => 'order', order_id => $order_params{id}, from => $BOX, to => $BOXED },
             );
             $self->log->warn(
                 "Failed to post event to monitor: $monitor_uri_full: $res->{reason}")
@@ -340,6 +340,30 @@ sub create {
                         final_price => $clothes->price,
                     },
                 );
+            }
+
+            #
+            # 사용자의 구두 사이즈와 주문서의 구두사이즈가 다를 경우, 사용자의 구두 사이즈를 변경함 (#1251)
+            #
+            my ($shoes_code) = grep { m/^0?A/ } @{ $order_detail_params{clothes_code} };
+            if ($shoes_code) {
+                my $shoes = $self->DB->resultset('Clothes')->find( { code => $shoes_code } );
+                if ($shoes) {
+                    my $user_info = $order->user->user_info;
+                    my $foot      = $user_info->foot;
+                    my $length    = $shoes->length;
+                    if ( $foot and $length and $foot != $length ) {
+                        $user_info->update( { foot => $length } );
+                        $self->log->info(
+                            sprintf(
+                                "Update user_info.foot(%d) to shoes.length(%d): order(%d)",
+                                $foot,
+                                $length,
+                                $order->id
+                            )
+                        );
+                    }
+                }
             }
 
             #
