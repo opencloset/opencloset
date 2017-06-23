@@ -428,7 +428,9 @@ sub visit {
                 buyer_email  => $user->email,
                 buyer_tel    => $user_info->phone,
                 buyer_addr   => $user_info->address2 || '',
-                'notice_url[]' => $self->url_for("/webhooks/iamport/unpaid")->to_abs->to_string,
+                'notice_url[]' =>
+                    $self->url_for("https://staff.theopencloset.net/webhooks/iamport/unpaid")
+                    ->to_abs->to_string,
             };
 
             my ( $log, $error ) = OpenCloset::Common::Unpaid::create_vbank(
