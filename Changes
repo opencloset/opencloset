@@ -4,6 +4,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Fixed
+- 미납금 가상계좌 콜백 주소를 visit 가 아닌 staff 로 설정 (#1197)
+
 ## [v1.9.16] - Fri, 23 Jun 2017 12:06:15 +0900
 ### Added
 - 미납금이 남아있는 사용자가 방문예약을 할때에 가상계좌를 만들어서 안내 (#1197)
