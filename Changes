@@ -5,6 +5,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ## [Unreleased]
 ### Added
 - 미납금이 남아있는 사용자가 방문예약을 할때에 가상계좌를 만들어서 안내 (#1197)
+- 폐기장소에 `비전`을 추가 (#1273)
 
 ### Changed
 - 포장완료시 사용자의 발크기를 주문서에 동기화 (#1251)
