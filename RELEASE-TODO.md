@@ -1,3 +1,5 @@
+v1.9.16
+
     $ closetpan OpenCloset::Calculator::LateFee    # v0.2.2
     $ grunt
 
