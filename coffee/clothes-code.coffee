@@ -63,6 +63,7 @@ $ ->
         params.source  = [
           { value: '옷캔', text: '옷캔' },
           { value: '비백', text: '비백' },
+          { value: '비전', text: '비전' },
           { value: '재활용불가', text: '재활용불가' }
         ]
         params.display = (value) ->
