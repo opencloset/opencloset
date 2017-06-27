@@ -1,3 +1,5 @@
+    $ closetpan OpenCloset::Calculator::LateFee    # v0.2.3
+
 v1.9.17
 
 v1.9.16
