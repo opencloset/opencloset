@@ -4,6 +4,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [v1.9.18] - Tue, 27 Jun 2017 18:18:08 +0900
+
 ### Fixed
 - 취업날개 대상자의 경우 연장료가 0원으로 계산되는 버그 수정 (#1275)
 
