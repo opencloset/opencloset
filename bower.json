@@ -33,6 +33,8 @@
     "bootstrap-datepicker": "^1.6.4",
     "chosen": "^1.7.0",
     "facebox": "*",
-    "bootbox.js": "bootbox#^4.4.0"
+    "bootbox.js": "bootbox#^4.4.0",
+    "x-editable": "^1.5.1",
+    "growl": "^1.3.2"
   }
 }

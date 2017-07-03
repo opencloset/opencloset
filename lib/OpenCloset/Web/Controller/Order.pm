@@ -10,6 +10,7 @@ use HTTP::Tiny;
 use List::MoreUtils;
 use Try::Tiny;
 
+use OpenCloset::Calculator::LateFee;
 use OpenCloset::Common::Unpaid
     qw/unpaid_cond unpaid_attr is_nonpaid unpaid2fullpaid/;
 use OpenCloset::Constants qw/%PAY_METHOD_MAP/;
@@ -583,6 +584,43 @@ sub order {
         detail_clothes => $detail_clothes,
         detail_others  => $detail_others,
         used_coupons   => $used_coupons,
+    );
+}
+
+=head2 detail
+
+    GET /orders/:id
+
+=cut
+
+sub detail {
+    my $self = shift;
+    my $id   = $self->param('id');
+
+    my $order = $self->get_order( { id => $id } );
+    return unless $order;
+
+    my $user      = $order->user;
+    my $user_info = $user->user_info;
+
+    my $today = DateTime->today( time_zone => $self->config->{timezone} );
+    my @staff = $self->DB->resultset('User')->search(
+        { 'user_info.staff' => 1 },
+        { join              => 'user_info' }
+    );
+
+    my $calc     = OpenCloset::Calculator::LateFee->new;
+    my $price    = $calc->price($order);
+    my $discount = $calc->discount_price($order);
+
+    $self->render(
+        order     => $order,
+        user      => $user,
+        user_info => $user_info,
+        staff     => \@staff,
+        today     => $today,
+        price     => $price,
+        discount  => $discount,
     );
 }
 

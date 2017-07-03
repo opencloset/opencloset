@@ -1,0 +1,306 @@
+% my $_id = 'order-detail';
+% layout 'default',
+%   page_id     => $_id,
+%   active_id   => 'order',
+%   breadcrumbs => [
+%     { text => meta_text('order'), link => url_for( meta_link('order') ) },
+%     { text => meta_text($_id) },
+%   ],
+%   jses => [
+%     '/components/growl/javascripts/jquery.growl.js'
+%   ],
+%   csses => [
+%     '/components/growl/stylesheets/jquery.growl.css'
+%   ];
+% title meta_text($_id);
+
+<div class="row">
+  <div class="col-md-6">
+    <div class="alert alert-info" role="alert">
+      <strong>주문서 정보</strong>
+    </div>
+    <table class="table table-hover table-striped">
+      <tbody>
+        <tr>
+          <th>상태</th>
+          <td>
+            % if (my $status = $order->status) {
+              <span class="order-status label" data-order-status="<%= $status->name %>">
+                %= $status->name
+              </span>
+            % }
+          </td>
+        </tr>
+        <tr>
+          <th>상위 주문서</th>
+          <td></td>
+        </tr>
+        <tr>
+          <th>하위 주문서</th>
+          <td></td>
+        </tr>
+        <tr>
+          <th>주문서 종류</th>
+          <td>
+            %= $order->online ? 'online' : 'offline'
+          </td>
+        </tr>
+        <tr>
+          <th>담당자</th>
+          <td>
+            <select name="staff_id" class="chosen-select" data-label="담당자" data-update-url="<%= url_for('/api/order/' . $order->id) %>">
+              % my $staff_id = $order->staff_id || $self->current_user->id;
+              % for my $staff (@$staff) {
+                <option value="<%= $staff->id %>"<%= $staff_id == $staff->id ? ' selected' : '' %>><%= $staff->name %></option>
+              % }
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <th>대여 기간</th>
+          <td>
+            <select name="additional_day" class="chosen-select" data-label="대여 기간" data-update-url="<%= url_for('/api/order/' . $order->id) %>">
+              % for my $i (0..30) {
+                <option value="<%= $i %>"<%= $order->additional_day == $i ? ' selected' : '' %>>
+                  <%= $i + 3 %>박 <%= $i + 4 %>일 
+                </option>
+              % }
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <th>대여일</th>
+          <td>
+            % if (my $rental_date = $order->rental_date) {
+              %= $rental_date->ymd
+            % } else {
+              <span class="text-muted">
+                %= $today->ymd
+                <small>오늘</small>
+              </span>
+            % }
+          </td>
+        </tr>
+        <tr>
+          <th>반납 예정일</th>
+          <td>
+            % if (my $target_date = $order->target_date) {
+              %= $target_date->ymd
+            % }
+          </td>
+        </tr>
+        <tr>
+          <th>반납일</th>
+          <td>
+            % if (my $return_date = $order->return_date) {
+              %= $return_date->ymd
+            % }
+          </td>
+        </tr>
+        <tr>
+          <th>결제방법</th>
+          <td>
+            <select name="price_pay_with" class="chosen-select" data-label="결제방법" data-update-url="<%= url_for('/api/order/' . $order->id) %>">
+              % my $price_pay_with = $order->price_pay_with || '';
+              % for my $pay_with (qw/현금 카드 계좌이체 현금영수증 세금계산서 미납 쿠폰 쿠폰+현금 쿠폰+카드/) {
+                <option value="<%= $pay_with %>"<%= $price_pay_with eq $pay_with ? ' selected' : '' %>>
+                  %= $pay_with
+                </option>
+              % }
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <th>기존총액(원)</th>
+          <td>
+            <samp><%= commify($price) %></samp>
+          </td>
+        </tr>
+        <tr>
+          <th>할인금액(원)</th>
+          <td>
+            <samp><%= commify(abs($discount)) %></samp>
+          </td>
+        </tr>
+        <tr>
+          <th>대여비(원)</th>
+          <td>
+            <strong class="text-danger">
+              <samp><%= commify($price + $discount) %></samp>
+            </strong>
+          </td>
+        </tr>
+        <tr>
+          <th>
+            % if (my $url = tracking_url($order)) {
+              <a id="order-tracking-url" href="<%= $url %>" target="_blank">
+                <i class="fa fa-external-link" aria-hidden="true"></i>
+                반납방법
+              </a>
+            % } else {
+              반납방법
+            % }
+          </th>
+          <td>
+            <select name="return_method" class="chosen-select" data-label="반납방법" data-update-url="<%= url_for('/api/order/' . $order->id) %>">
+              % my $return_method = $order->return_method || '';
+              % for my $method (qw/방문반납 CJ대한통운 KGB 동부 롯데 옐로우캡 우체국 한진/) {
+                <option value="<%= $method %>"<%= $return_method =~ m/$method/ ? ' selected' : '' %>>
+                  %= $method
+                </option>
+              % }
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <th>최종 연체/연장료</th>
+          <td></td>
+        </tr>
+        <tr>
+          <th>최종 배상비</th>
+          <td></td>
+        </tr>
+        <tr>
+          <th>연체문자전송</th>
+          <td>
+            % if ($order->ignore_sms) {
+              <button id="btn-ignore-sms" class="btn btn-xs btn-default" data-update-url="<%= url_for('/api/order/' . $order->id) %>">off</button>
+            % } else {
+              <button id="btn-ignore-sms" class="btn btn-xs btn-success" data-update-url="<%= url_for('/api/order/' . $order->id) %>">on</button>
+            % }
+          </td>
+        </tr>
+        <tr>
+          <th>주문 신체 치수</th>
+          <td>
+            <div>
+              <div class="btn-group btn-group-xs">
+                <button type="button" class="btn btn-success" title="height"><%= $order->height || '-' %></button>
+                <button type="button" class="btn btn-success" title="weight"><%= $order->weight || '-' %></button>
+              </div>
+            </div>
+            
+            <div>
+              <div class="btn-group btn-group-xs">
+                % for my $part (qw/bust waist hip topbelly belly/) {
+                  <button type="button" class="btn btn-info" title="<%= $part %>"><%= $order->$part || '-' %></button>
+                % }
+              </div>
+            </div>
+
+            <div>
+              <div class="btn-group btn-group-xs">
+                % for my $part (qw/thigh arm leg knee foot/) {
+                  <button type="button" class="btn btn-warning" title="<%= $part %>"><%= $order->$part || '-' %></button>
+                % }
+              </div>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="col-md-6">
+    <div class="alert alert-success" role="alert">
+      <strong>대여자 정보</strong>
+    </div>
+    <table class="table table-hover table-striped">
+      <tr>
+        <th>이름</th>
+        <td><%= $user->name %></td>
+      </tr>
+      <tr>
+        <th>착용 날짜</th>
+        <td>
+          % if (my $wearon_date = $order->wearon_date) {
+            %= $wearon_date->ymd
+          % }
+        </td>
+      </tr>
+      <tr>
+        <th>대여 목적</th>
+        <td>
+          %= $user_info->purpose || ''
+        </td>
+      </tr>
+      <tr>
+        <th>상세 대여 목적</th>
+        <td>
+          %= $user_info->purpose2 || ''
+        </td>
+      </tr>
+      <tr>
+        <th>방문 예약일</th>
+        <td>
+          % if (my $booking = $order->booking) {
+            %= $booking->date->strftime('%Y-%m-%d %H:%M')
+          % }
+        </td>
+      </tr>
+      <tr>
+        <th>반납 희망일</th>
+        <td>
+          % if (my $user_target_date = $order->user_target_date) {
+            <input id="datepicker-user-target-date" data-provide="datepicker" data-date-format="yyyy-mm-dd" data-update-url="<%= url_for('/api/order/' . $order->id) %>" value="<%= $user_target_date->ymd %>">
+          % } else {
+            <input id="datepicker-user-target-date" data-provide="datepicker" data-date-format="yyyy-mm-dd" data-update-url="<%= url_for('/api/order/' . $order->id) %>">
+          % }
+        </td>
+      </tr>
+      <tr>
+        <th>전자우편</th>
+        <td>
+          <a href="mailto: <%= $user->email %>"><%= $user->email %></a>
+        </td>
+      </tr>
+      <tr>
+        <th>전화번호</th>
+        <td>
+          <samp>
+            %= $user_info->phone
+          </samp>
+        </td>
+      </tr>
+      <tr>
+        <th>주소</th>
+        <td>
+          <address>
+            %= $user_info->address2
+          </address>
+        </td>
+      </tr>
+      <tr>
+        <th>어울림</th>
+        <td>
+        </td>
+      </tr>
+      <tr>
+        <th>신체 치수</th>
+        <td>
+          <div>
+            <div class="btn-group btn-group-xs">
+              <button type="button" class="btn btn-success" title="height"><%= $user_info->height || '-' %></button>
+              <button type="button" class="btn btn-success" title="weight"><%= $user_info->weight || '-' %></button>
+            </div>
+          </div>
+          
+          <div>
+            <div class="btn-group btn-group-xs">
+              % for my $part (qw/bust waist hip topbelly belly/) {
+                <button type="button" class="btn btn-info" title="<%= $part %>"><%= $user_info->$part || '-' %></button>
+              % }
+            </div>
+          </div>
+
+          <div>
+            <div class="btn-group btn-group-xs">
+              % for my $part (qw/thigh arm leg knee foot/) {
+                <button type="button" class="btn btn-warning" title="<%= $part %>"><%= $user_info->$part || '-' %></button>
+              % }
+            </div>
+          </div>
+        </td>
+      </tr>
+    </table>
+  </div>
+</div>

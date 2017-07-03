@@ -4,6 +4,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Added
+- 새로운 주문서 상세 페이지 추가 (#1277)
+
 ### Changed
 - alert box 를 사라지지 않도록 함
 

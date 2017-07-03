@@ -314,6 +314,8 @@ sub _private_routes {
     $r->post('/order/:id/update')->to('order#update');
     $r->post('/order/:id/coupon')->to('order#create_coupon');
 
+    $r->get('/orders/:id')->to('order#detail');
+
     $r->get('/booking')->to('booking#index');
     $r->get('/booking/:ymd')->to('booking#ymd');
     $r->get('/booking/:ymd/open')->to('booking#open');
