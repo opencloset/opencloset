@@ -203,6 +203,13 @@
   <div class="col-md-6">
     <div class="alert alert-success" role="alert">
       <strong>대여자 정보</strong>
+      % if ($extra->{count}) {
+        %= $extra->{count} . '회 대여'
+      % }
+      % if ($extra->{delta}) {
+        -
+        %= $extra->{delta}->delta_days . '일 지남'
+      % }
     </div>
     <table class="table table-hover table-striped">
       <tr>

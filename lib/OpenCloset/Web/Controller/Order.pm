@@ -613,6 +613,23 @@ sub detail {
     my $price    = $calc->price($order);
     my $discount = $calc->discount_price($order);
 
+    my $orders = $user->orders(
+        { status_id => $RETURNED, parent_id => undef },
+        { order_by => { -desc => 'return_date' } },
+    );
+
+    my $extra = { count => 0, delta => undef };
+    if ( my $count = $orders->count ) {
+        $extra->{count} = $count;
+        my $last         = $orders->first;
+        my $booking      = $order->booking;
+        my $last_booking = $last->booking;
+        if ( $booking and $last_booking ) {
+            my $days = $booking->date->delta_days( $last_booking->date );
+            $extra->{delta} = $days;
+        }
+    }
+
     $self->render(
         order     => $order,
         user      => $user,
@@ -621,6 +638,7 @@ sub detail {
         today     => $today,
         price     => $price,
         discount  => $discount,
+        extra     => $extra,
     );
 }
 
