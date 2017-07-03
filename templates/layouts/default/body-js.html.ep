@@ -40,11 +40,6 @@
     <!-- bundle -->
     <script src="/js/bundle.js"></script>
 
-    <!-- remove alert box after 5 sec -->
-    <script type="text/javascript">
-      setTimeout( function() { $(".alert").remove() }, 8000 );
-    </script>
-
     % if ($google_analytics) {
     <!-- Google Analytics -->
     <script>

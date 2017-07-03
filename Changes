@@ -4,6 +4,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Changed
+- alert box 를 사라지지 않도록 함
+
 ## [v1.9.18] - Tue, 27 Jun 2017 18:18:08 +0900
 
 ### Fixed
