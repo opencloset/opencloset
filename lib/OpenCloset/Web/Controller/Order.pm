@@ -630,6 +630,11 @@ sub detail {
         }
     }
 
+    my $details = $order->order_details(
+        undef,
+        { order_by => { -desc => [ 'price', 'clothes_code' ] } }
+    );
+
     $self->render(
         order     => $order,
         user      => $user,
@@ -639,6 +644,7 @@ sub detail {
         price     => $price,
         discount  => $discount,
         visited   => $visited,
+        details   => $details,
     );
 }
 
