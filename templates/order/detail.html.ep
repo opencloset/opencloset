@@ -14,6 +14,11 @@
 %   ];
 % title meta_text($_id);
 
+% if (my $memo = $order->return_memo) {
+  <p>반납 확인 메모 4F</p>
+  <pre><%= $memo %></pre>
+% }
+
 <div class="row">
   <div class="col-md-6">
     <table class="table table-hover table-striped">
@@ -259,7 +264,7 @@
           % if (my $user_target_date = $order->user_target_date) {
             <input id="datepicker-user-target-date" data-date-format="yyyy-mm-dd" data-update-url="<%= url_for('/api/order/' . $order->id) %>" value="<%= $user_target_date->ymd %>">
           % } else {
-            <input id="datepicker-user-target-date" data-provide="datepicker" data-date-format="yyyy-mm-dd" data-update-url="<%= url_for('/api/order/' . $order->id) %>">
+            <input id="datepicker-user-target-date" data-date-format="yyyy-mm-dd" data-update-url="<%= url_for('/api/order/' . $order->id) %>">
           % }
         </td>
       </tr>
@@ -394,6 +399,77 @@
     % }
   </tbody>
 </table>
+
+<hr>
+
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">
+      <button class="btn btn-default btn-xs btn-edit" data-target-id="form-order-desc" type="button">
+        <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
+      </button>
+      주문서 메모 5F
+    </h3>
+  </div>
+  <div class="panel-body">
+    % if (my $desc = $order->desc) {
+      <pre><%= $desc %></pre>
+    % }
+    <form id="form-order-desc" class="hide" action="<%= url_for('/api/order/' . $order->id) %>">
+      <div class="form-group">
+        <textarea id="textarea-order-desc" name="desc" rows="10" class="form-control" placeholder="주문서 메모 5F"><%= $order->desc || '' %></textarea>
+      </div>
+      <button class="btn btn-primary" type="submit">입력</button>
+      <button class="btn btn-danger btn-cancel" type="button">취소</button>
+    </form>
+  </div>
+</div>
+
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">
+      <button class="btn btn-default btn-xs btn-edit" data-target-id="form-order-message" type="button">
+        <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
+      </button>
+      대여 메세지
+    </h3>
+  </div>
+  <div class="panel-body">
+    % if (my $message = $order->message) {
+      <pre><%= $message %></pre>
+    % }
+    <form id="form-order-message" class="hide" action="<%= url_for('/api/order/' . $order->id) %>">
+      <div class="form-group">
+        <textarea id="textarea-order-message" name="message" rows="10" class="form-control" placeholder="대여 메세지"><%= $order->message || '' %></textarea>
+      </div>
+      <button class="btn btn-primary" type="submit">입력</button>
+      <button class="btn btn-danger btn-cancel" type="button">취소</button>
+    </form>
+  </div>
+</div>
+
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">
+      <button class="btn btn-default btn-xs btn-edit" data-target-id="form-order-return_memo" type="button">
+        <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
+      </button>
+      반납 확인 메모 4F
+    </h3>
+  </div>
+  <div class="panel-body">
+    % if (my $return_memo = $order->return_memo) {
+      <pre><%= $return_memo %></pre>
+    % }
+    <form id="form-order-return_memo" class="hide" action="<%= url_for('/api/order/' . $order->id) %>">
+      <div class="form-group">
+        <textarea id="textarea-order-return_memo" name="return_memo" rows="10" class="form-control" placeholder="반납 확인 메모 4F"><%= $order->return_memo || '' %></textarea>
+      </div>
+      <button class="btn btn-primary" type="submit">입력</button>
+      <button class="btn btn-danger btn-cancel" type="button">취소</button>
+    </form>
+  </div>
+</div>
 
 <hr>
 

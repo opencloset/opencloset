@@ -54,3 +54,23 @@ $ ->
       error: (jqXHR, textStatus, errorThrown) ->
         $.growl.error({ message: jqXHR.responseJSON.error })
       complete: (jqXHR, textStatus) ->
+
+  $('.btn-edit').click (e) ->
+    target = $(@).data('target-id')
+    $("##{target}").toggleClass('hide')
+
+  $('.btn-cancel').click (e) ->
+    $(@).closest('form').toggleClass('hide')
+
+  $('.panel-body').on 'submit', 'form', (e) ->
+    e.preventDefault()
+    url = $(@).prop('action')
+    $.ajax url,
+      type: 'PUT'
+      dataType: 'json'
+      data: $(@).serialize()
+      success: (data, textStatus, jqXHR) ->
+        location.reload()
+      error: (jqXHR, textStatus, errorThrown) ->
+        $.growl.error({ message: jqXHR.responseJSON.error })
+      complete: (jqXHR, textStatus) ->
