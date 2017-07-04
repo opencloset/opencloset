@@ -1,3 +1,4 @@
+$.fn.editable.defaults.mode = 'inline'
 $ ->
   $(".chosen-select").chosen({ width: '50%' }).change (e) ->
     $this = $(@)
@@ -74,3 +75,5 @@ $ ->
       error: (jqXHR, textStatus, errorThrown) ->
         $.growl.error({ message: jqXHR.responseJSON.error })
       complete: (jqXHR, textStatus) ->
+
+  $('.editable').editable()

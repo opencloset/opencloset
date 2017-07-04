@@ -1,3 +1,4 @@
+% use OpenCloset::Constants::Status qw/$PAYMENT/;
 % my $_id = 'order-detail';
 % layout 'default',
 %   page_id     => $_id,
@@ -7,9 +8,11 @@
 %     { text => meta_text($_id) },
 %   ],
 %   jses => [
+%     '/lib/bootstrap3-editable/js/bootstrap-editable.min.js',
 %     '/components/growl/javascripts/jquery.growl.js'
 %   ],
 %   csses => [
+%     '/lib/bootstrap3-editable/css/bootstrap-editable.css',
 %     '/components/growl/stylesheets/jquery.growl.css'
 %   ];
 % title meta_text($_id);
@@ -380,20 +383,54 @@
           % }
         </td>
         <td>
-          <samp>
-            %= commify $detail->price
-          </samp>
+          <a
+            href="#"
+            id="order-detail-price-<%= $detail->id %>"
+            class="order-detail-price editable"
+            data-disabled="<%= $order->status_id != $PAYMENT ? 'true' : 'false' %>"
+            data-showbuttons="true"
+            data-type="text"
+            data-emptytext="0"
+            data-value="<%= commify($detail->price || 0) %>"
+            data-url="<%= url_for('/order/' . $order->id . '/update') %>"
+            data-pk="<%= $detail->id %>"
+            data-name="detail-price"
+            data-is-clothes="<%= $clothes ? 'true' : 'false' %>"
+            data-is-pre-paid="<%= $detail->name eq '이전 주문 납부' ? 'true' : 'false' %>">
+          </a>원
         </td>
         <td>
           %= sprintf('%d박 %d일', 3 + $order->additional_day, 4 + $order->additional_day)
         </td>
         <td>
-          <samp>
-            %= commify $detail->final_price
-          </samp>
+          <a
+            href="#"
+            id="order-detail-final-price-<%= $detail->id %>"
+            class="order-detail-final-price editable"
+            data-disabled="<%= $order->status_id != $PAYMENT ? 'true' : 'false' %>"
+            data-showbuttons="true"
+            data-type="text"
+            data-emptytext="0"
+            data-value="<%= commify($detail->final_price || 0) %>"
+            data-url="<%= url_for('/order/' . $order->id . '/update') %>"
+            data-pk="<%= $detail->id %>"
+            data-name="detail-final_price"
+            data-is-clothes="<%= $clothes ? 'true' : 'false' %>"
+            data-is-pre-paid="<%= $detail->name eq '이전 주문 납부' ? 'true' : 'false' %>">
+          </a>원
         </td>
         <td>
-          %= $detail->desc || ''
+          <a
+            href="#"
+            id="order-detail-desc-<%= $detail->id %>"
+            class="order-detail editable"
+            data-showbuttons="true"
+            data-type="text"
+            data-emptytext="비어있음"
+            data-value="<%= $detail->desc || '' %>"
+            data-url="<%= url_for('/order/' . $order->id . '/update') %>"
+            data-pk="<%= $detail->id %>"
+            data-name="detail-desc"></a>
         </td>
       </tr>
     % }
