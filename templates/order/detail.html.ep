@@ -17,7 +17,7 @@
 <div class="row">
   <div class="col-md-6">
     <div class="alert alert-info" role="alert">
-      <strong>주문서 정보</strong>
+      주문서 정보
     </div>
     <table class="table table-hover table-striped">
       <tbody>
@@ -202,13 +202,17 @@
   </div>
   <div class="col-md-6">
     <div class="alert alert-success" role="alert">
-      <strong>대여자 정보</strong>
-      % if ($extra->{count}) {
-        %= $extra->{count} . '회 대여'
+      대여자 정보
+      % if ($visited->{count}) {
+        <strong>
+          %= $visited->{count} . '회 대여'
+        </strong>
       % }
-      % if ($extra->{delta}) {
+      % if ($visited->{delta}) {
         -
-        %= $extra->{delta}->delta_days . '일 지남'
+        <strong>
+          %= $visited->{delta}->delta_days . '일 지남'
+        </strong>
       % }
     </div>
     <table class="table table-hover table-striped">
@@ -311,3 +315,7 @@
     </table>
   </div>
 </div>
+
+<hr>
+
+%= include 'partials/status-log-analyze', order => $order;
