@@ -19,6 +19,10 @@
     <table class="table table-hover table-striped">
       <tbody>
         <tr>
+          <th>번호</th>
+          <td><%= $order->id %></td>
+        </tr>
+        <tr>
           <th>상태</th>
           <td>
             % if (my $status = $order->status) {
@@ -39,7 +43,9 @@
         <tr>
           <th>주문서 종류</th>
           <td>
-            %= $order->online ? 'online' : 'offline'
+            <span class="label label-<%= $order->online ? 'success' : 'default' %>">
+              %= $order->online ? 'online' : 'offline'
+            </span>
           </td>
         </tr>
         <tr>
@@ -97,7 +103,8 @@
         <tr>
           <th>결제방법</th>
           <td>
-            <select name="price_pay_with" class="chosen-select" data-label="결제방법" data-update-url="<%= url_for('/api/order/' . $order->id) %>">
+            <select name="price_pay_with" class="chosen-select" data-placeholder="결제방법" data-update-url="<%= url_for('/api/order/' . $order->id) %>">
+              <option value=""></option>
               % my $price_pay_with = $order->price_pay_with || '';
               % for my $pay_with (qw/현금 카드 계좌이체 현금영수증 세금계산서 미납 쿠폰 쿠폰+현금 쿠폰+카드/) {
                 <option value="<%= $pay_with %>"<%= $price_pay_with eq $pay_with ? ' selected' : '' %>>
@@ -139,7 +146,8 @@
             % }
           </th>
           <td>
-            <select name="return_method" class="chosen-select" data-label="반납방법" data-update-url="<%= url_for('/api/order/' . $order->id) %>">
+            <select name="return_method" class="chosen-select" data-placeholder="반납방법" data-update-url="<%= url_for('/api/order/' . $order->id) %>">
+              <option value=""></option>
               % my $return_method = $order->return_method || '';
               % for my $method (qw/방문반납 CJ대한통운 KGB 동부 롯데 옐로우캡 우체국 한진/) {
                 <option value="<%= $method %>"<%= $return_method =~ m/$method/ ? ' selected' : '' %>>
@@ -315,11 +323,40 @@
 
 <hr>
 
+<div>
+  <div class="btn-group" role="group">
+    <a class="btn btn-info" href="<%= url_for('/order/' . $order->id . '/rental/paper/pdf') %>" role="button">
+      <i class="fa fa-file-pdf-o" aria-hidden="true"></i>
+      정장 반납 안내 출력
+    </a>
+
+    <button type="button" class="btn btn-success">
+      <i class="fa fa-check" aria-hidden="true"></i>
+      주문확정
+    </button>
+  </div>
+
+  <button class="btn btn-default pull-right">
+    <i class="fa fa-repeat" aria-hidden="true"></i>
+    새로주문
+  </button>
+</div>
+
+<hr>
+
+% if ($suit) {
+  <p class="help-block">
+    <i class="fa fa-info-circle" aria-hidden="true"></i>
+    셋트 대여입니다.
+    %= clothes2link($suit_top, { with_status => 1 })
+    %= clothes2link($suit_bottom, { with_status => 1 })
+  </p>
+% }
+
 <table class="table table-striped table-bordered table-hover">
   <thead>
     <tr>
       <th>항목</th>
-      <th>상태</th>
       <th>대여 가격</th>
       <th>기간</th>
       <th>소계</th>
@@ -332,16 +369,9 @@
       <tr>
         <td>
           % if ($clothes) {
-            %= clothes2link($clothes, { text => $detail->name })
+            %= clothes2link($clothes, { with_status => 1, text => $detail->name })
           % } else {
             %= $detail->name
-          % }
-        </td>
-        <td>
-          % if (my $status = $detail->status) {
-            <span class="order-status label" data-order-status="<%= $status->name %>">
-              %= $status->name
-            </span>
           % }
         </td>
         <td>

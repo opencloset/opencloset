@@ -635,16 +635,45 @@ sub detail {
         { order_by => { -desc => [ 'price', 'clothes_code' ] } }
     );
 
+    my ( $top, $bottom, $suit );
+    while ( my $detail = $details->next ) {
+        my $clothes = $detail->clothes;
+        next unless $clothes;
+
+        my $category = $clothes->category;
+        if ( $category eq $JACKET ) {
+            $top = $clothes;
+        }
+        elsif ( "$PANTS $SKIRT" =~ m/\b$category\b/ ) {
+            $bottom = $clothes;
+        }
+
+        last if $top and $bottom;
+    }
+    $details->reset;
+
+    if ( $top and $bottom ) {
+        $suit = $self->DB->resultset('Suit')->find(
+            {
+                code_top    => $top->code,
+                code_bottom => $bottom->code
+            }
+        );
+    }
+
     $self->render(
-        order     => $order,
-        user      => $user,
-        user_info => $user_info,
-        staff     => \@staff,
-        today     => $today,
-        price     => $price,
-        discount  => $discount,
-        visited   => $visited,
-        details   => $details,
+        order       => $order,
+        user        => $user,
+        user_info   => $user_info,
+        staff       => \@staff,
+        today       => $today,
+        price       => $price,
+        discount    => $discount,
+        visited     => $visited,
+        details     => $details,
+        suit        => $suit,
+        suit_top    => $top,
+        suit_bottom => $bottom,
     );
 }
 
