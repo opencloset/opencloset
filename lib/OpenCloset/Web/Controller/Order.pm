@@ -630,10 +630,7 @@ sub detail {
         }
     }
 
-    my $details = $order->order_details(
-        undef,
-        { order_by => { -desc => [ 'price', 'clothes_code' ] } }
-    );
+    my $details = $order->order_details;
 
     my ( $top, $bottom, $suit );
     while ( my $detail = $details->next ) {
