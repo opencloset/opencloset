@@ -28,7 +28,11 @@
       <tbody>
         <tr>
           <th>번호</th>
-          <td><%= $order->id %></td>
+          <td>
+            <samp>
+              %= $order->id
+            </samp>
+          </td>
         </tr>
         <tr>
           <th>상태</th>
@@ -82,21 +86,25 @@
         <tr>
           <th>대여일</th>
           <td>
-            % if (my $rental_date = $order->rental_date) {
-              %= $rental_date->ymd
-            % } else {
-              <span class="text-muted">
-                %= $today->ymd
-                <small>오늘</small>
-              </span>
-            % }
+            <samp>
+              % if (my $rental_date = $order->rental_date) {
+                %= $rental_date->ymd
+              % } else {
+                <span class="text-muted">
+                  %= $today->ymd
+                  <small>오늘</small>
+                </span>
+              % }
+            </samp>
           </td>
         </tr>
         <tr>
           <th>반납 예정일</th>
           <td>
             % if (my $target_date = $order->target_date) {
-              %= $target_date->ymd
+              <samp>
+                %= $target_date->ymd
+              </samp>
             % }
           </td>
         </tr>
@@ -237,7 +245,9 @@
         <th>착용 날짜</th>
         <td>
           % if (my $wearon_date = $order->wearon_date) {
-            %= $wearon_date->ymd
+            <samp>
+              %= $wearon_date->ymd
+            </samp>
           % }
         </td>
       </tr>
@@ -257,7 +267,9 @@
         <th>방문 예약일</th>
         <td>
           % if (my $booking = $order->booking) {
-            %= $booking->date->strftime('%Y-%m-%d %H:%M')
+            <samp>
+              %= $booking->date->strftime('%Y-%m-%d %H:%M')
+            </samp>
           % }
         </td>
       </tr>
