@@ -3,7 +3,7 @@ $ ->
   $(".chosen-select").chosen({ width: '50%' }).change (e) ->
     $this = $(@)
     name  = $this.closest('select').prop('name')
-    label = $this.data('label')
+    label = $this.data('placeholder')
     val   = $this.val()
     url   = $this.data('update-url')
 

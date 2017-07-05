@@ -63,7 +63,7 @@
         <tr>
           <th>담당자</th>
           <td>
-            <select name="staff_id" class="chosen-select" data-label="담당자" data-update-url="<%= url_for('/api/order/' . $order->id) %>">
+            <select name="staff_id" class="chosen-select" data-placeholder="담당자" data-update-url="<%= url_for('/api/order/' . $order->id) %>">
               % my $staff_id = $order->staff_id || $self->current_user->id;
               % for my $staff (@$staff) {
                 <option value="<%= $staff->id %>"<%= $staff_id == $staff->id ? ' selected' : '' %>><%= $staff->name %></option>
@@ -74,7 +74,7 @@
         <tr>
           <th>대여 기간</th>
           <td>
-            <select name="additional_day" class="chosen-select" data-label="대여 기간" data-update-url="<%= url_for('/api/order/' . $order->id) %>">
+            <select name="additional_day" class="chosen-select" data-placeholder="대여 기간" data-update-url="<%= url_for('/api/order/' . $order->id) %>">
               % for my $i (0..30) {
                 <option value="<%= $i %>"<%= $order->additional_day == $i ? ' selected' : '' %>>
                   <%= $i + 3 %>박 <%= $i + 4 %>일 
