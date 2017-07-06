@@ -625,8 +625,7 @@ sub detail {
         my $booking      = $order->booking;
         my $last_booking = $last->booking;
         if ( $booking and $last_booking ) {
-            my $days = $booking->date->delta_days( $last_booking->date );
-            $visited->{delta} = $days;
+            $visited->{last} = $last_booking->date;
         }
     }
 

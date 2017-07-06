@@ -77,3 +77,4 @@ $ ->
       complete: (jqXHR, textStatus) ->
 
   $('.editable').editable()
+  $('time.timeago').timeago()

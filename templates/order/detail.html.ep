@@ -9,7 +9,9 @@
 %   ],
 %   jses => [
 %     '/lib/bootstrap3-editable/js/bootstrap-editable.min.js',
-%     '/components/growl/javascripts/jquery.growl.js'
+%     '/components/growl/javascripts/jquery.growl.js',
+%     '/components/jquery-timeago/jquery.timeago.js',
+%     '/components/jquery-timeago/locales/jquery.timeago.ko.js'
 %   ],
 %   csses => [
 %     '/lib/bootstrap3-editable/css/bootstrap-editable.css',
@@ -86,16 +88,16 @@
         <tr>
           <th>대여일</th>
           <td>
-            <samp>
-              % if (my $rental_date = $order->rental_date) {
+            % if (my $rental_date = $order->rental_date) {
+              <samp>
                 %= $rental_date->ymd
-              % } else {
-                <span class="text-muted">
-                  %= $today->ymd
-                  <small>오늘</small>
-                </span>
-              % }
-            </samp>
+              </samp>
+            % } else {
+              <samp class="text-muted">
+                %= $today->ymd
+                <small>오늘</small>
+              </samp>
+            % }
           </td>
         </tr>
         <tr>
@@ -112,7 +114,9 @@
           <th>반납일</th>
           <td>
             % if (my $return_date = $order->return_date) {
-              %= $return_date->ymd
+              <samp>
+                %= $return_date->ymd
+              </samp>
             % }
           </td>
         </tr>
@@ -228,16 +232,18 @@
         <td><%= $user->name %></td>
       </tr>
       <tr>
-        <th>대여이력</th>
+        <th>대여 이력</th>
         <td>
           % if ($visited->{count}) {
             <strong>
               %= $visited->{count} . '회 대여'
             </strong>
           % }
-          % if ($visited->{delta}) {
+          % if ($visited->{last}) {
             -
-            %= $visited->{delta}->delta_days . '일 지남'
+            <time class="timeago" datetime="<%= $visited->{last}->strftime('%FT%T%z') %>">
+              %= $visited->{last}
+            </time>
           % }
         </td>
       </tr>
