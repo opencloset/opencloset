@@ -399,22 +399,24 @@
 <hr>
 
 <div>
-  <div class="btn-group" role="group">
-    <a class="btn btn-info" href="<%= url_for('/order/' . $order->id . '/rental/paper/pdf') %>" role="button">
-      <i class="fa fa-file-pdf-o" aria-hidden="true"></i>
-      정장 반납 안내 출력
-    </a>
+  <form action="<%= url_for('/orders/' . $order->id . '/rental') %>" method="POST">
+    <div class="btn-group" role="group">
+      <a class="btn btn-info" href="<%= url_for('/order/' . $order->id . '/rental/paper/pdf') %>" role="button">
+        <i class="fa fa-file-pdf-o" aria-hidden="true"></i>
+        정장 반납 안내 출력
+      </a>
 
-    <button type="button" class="btn btn-success">
-      <i class="fa fa-check" aria-hidden="true"></i>
-      주문확정
+      <button type="submit" class="btn btn-success">
+        <i class="fa fa-check" aria-hidden="true"></i>
+        주문확정
+      </button>
+    </div>
+
+    <button type="button" class="btn btn-default pull-right">
+      <i class="fa fa-repeat" aria-hidden="true"></i>
+      새로주문
     </button>
-  </div>
-
-  <button class="btn btn-default pull-right">
-    <i class="fa fa-repeat" aria-hidden="true"></i>
-    새로주문
-  </button>
+  </form>
 </div>
 
 <hr>
