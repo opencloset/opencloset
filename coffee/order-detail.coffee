@@ -1,11 +1,12 @@
 $.fn.editable.defaults.mode = 'inline'
 $ ->
   $(".chosen-select").chosen({ width: '50%' }).change (e) ->
-    $this = $(@)
-    name  = $this.closest('select').prop('name')
-    label = $this.data('placeholder')
-    val   = $this.val()
-    url   = $this.data('update-url')
+    $this  = $(@)
+    name   = $this.closest('select').prop('name')
+    label  = $this.data('placeholder')
+    val    = $this.val()
+    url    = $this.data('update-url')
+    reload = $this.data('reload')
 
     param = {}
     param[name] = val
@@ -19,6 +20,7 @@ $ ->
       error: (jqXHR, textStatus, errorThrown) ->
         $.growl.error({ message: jqXHR.responseJSON.error })
       complete: (jqXHR, textStatus) ->
+        location.reload() if reload
 
   $('#btn-ignore-sms:not(.disabled)').click ->
     $this = $(@)

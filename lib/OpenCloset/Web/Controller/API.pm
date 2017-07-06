@@ -595,7 +595,13 @@ sub api_update_order {
         [ order_detail_desc         => 'desc' ],
     );
 
-    my $order = $self->update_order( \%order_params, \%order_detail_params );
+    my $order = $self->get_order( { id => $order_params{id} } );
+    return unless $order;
+
+    my $days = $order_params{additional_day};
+    $self->app->api->additional_day( $order, $days ) if defined $days;
+
+    $order = $self->update_order( \%order_params, \%order_detail_params );
     return unless $order;
 
     #

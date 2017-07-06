@@ -1,3 +1,4 @@
+    $ closetpan OpenCloset::API
     $ bower install
     $ grunt
 

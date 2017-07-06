@@ -7,8 +7,10 @@ use CHI;
 use DateTime;
 
 use Iamport::REST::Client;
+
 use OpenCloset::Schema;
 use OpenCloset::DB::Plugin::Order::Sale;
+use OpenCloset::API::Order;
 
 has CACHE => sub {
     my $self  = shift;
@@ -39,6 +41,11 @@ has iamport => sub {
     my $self = shift;
     my $conf = $self->config->{iamport};
     return Iamport::REST::Client->new( key => $conf->{key}, secret => $conf->{secret} );
+};
+
+has api => sub {
+    my $self = shift;
+    return OpenCloset::API::Order->new( schema => $self->DB );
 };
 
 =head1 METHODS

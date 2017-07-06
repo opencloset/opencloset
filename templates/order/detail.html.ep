@@ -76,7 +76,7 @@
         <tr>
           <th>대여 기간</th>
           <td>
-            <select name="additional_day" class="chosen-select" data-placeholder="대여 기간" data-update-url="<%= url_for('/api/order/' . $order->id) %>">
+            <select name="additional_day" class="chosen-select" data-placeholder="대여 기간" data-update-url="<%= url_for('/api/order/' . $order->id) %>" data-reload="1">
               % for my $i (0..30) {
                 <option value="<%= $i %>"<%= $order->additional_day == $i ? ' selected' : '' %>>
                   <%= $i + 3 %>박 <%= $i + 4 %>일 
@@ -542,7 +542,7 @@
       <div class="form-group">
         <textarea id="textarea-order-desc" name="desc" rows="10" class="form-control" placeholder="주문서 메모 5F"><%= $order->desc || '' %></textarea>
       </div>
-      <button class="btn btn-primary" type="submit">입력</button>
+      <button class="btn btn-success" type="submit">저장</button>
       <button class="btn btn-danger btn-cancel" type="button">취소</button>
     </form>
   </div>
@@ -565,7 +565,7 @@
       <div class="form-group">
         <textarea id="textarea-order-message" name="message" rows="10" class="form-control" placeholder="대여 메세지"><%= $order->message || '' %></textarea>
       </div>
-      <button class="btn btn-primary" type="submit">입력</button>
+      <button class="btn btn-success" type="submit">저장</button>
       <button class="btn btn-danger btn-cancel" type="button">취소</button>
     </form>
   </div>
@@ -588,7 +588,7 @@
       <div class="form-group">
         <textarea id="textarea-order-return_memo" name="return_memo" rows="10" class="form-control" placeholder="반납 확인 메모 4F"><%= $order->return_memo || '' %></textarea>
       </div>
-      <button class="btn btn-primary" type="submit">입력</button>
+      <button class="btn btn-success" type="submit">저장</button>
       <button class="btn btn-danger btn-cancel" type="button">취소</button>
     </form>
   </div>
