@@ -314,6 +314,7 @@ sub _private_routes {
     $r->get('/rental/:ymd')->to('rental#ymd');
     $r->get('/rental/:ymd/search')->to('rental#search');
     $r->get('/rental/order/:order_id')->to('rental#order');
+    $r->post('/orders/:id/rental')->to('rental#payment2rental');
 
     $r->get('/order')->to('order#index');
     $r->post('/order')->to('order#create');
