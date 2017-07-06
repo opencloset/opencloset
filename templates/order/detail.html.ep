@@ -415,7 +415,7 @@
   </p>
 % }
 
-<table class="table table-striped table-bordered table-hover">
+<table class="table table-bordered table-hover">
   <thead>
     <tr>
       <th>항목</th>
@@ -426,52 +426,69 @@
     </tr>
   </thead>
   <tbody>
+    % my %sum;
     % while (my $detail = $details->next) {
+      % $sum{price} += $detail->price;
+      % $sum{final_price} += $detail->final_price;
       % my $clothes = $detail->clothes;
       <tr>
-        <td>
+        <td class="order-detail-stage order-detail-stage-<%= $detail->stage %>">
           % if ($clothes) {
             %= clothes2link($clothes, { with_status => 1, text => $detail->name })
           % } else {
             %= $detail->name
           % }
         </td>
-        <td>
-          <a
-            href="#"
-            id="order-detail-price-<%= $detail->id %>"
-            class="order-detail-price editable"
-            data-disabled="<%= $order->status_id != $PAYMENT ? 'true' : 'false' %>"
-            data-showbuttons="true"
-            data-type="text"
-            data-emptytext="0"
-            data-value="<%= commify($detail->price || 0) %>"
-            data-url="<%= url_for('/order/' . $order->id . '/update') %>"
-            data-pk="<%= $detail->id %>"
-            data-name="detail-price"
-            data-is-clothes="<%= $clothes ? 'true' : 'false' %>"
-            data-is-pre-paid="<%= $detail->name eq '이전 주문 납부' ? 'true' : 'false' %>">
-          </a>원
+        <td class="text-right">
+          <samp>
+            <a
+              href="#"
+              id="order-detail-price-<%= $detail->id %>"
+              class="order-detail-price editable"
+              data-disabled="<%= $order->status_id != $PAYMENT ? 'true' : 'false' %>"
+              data-showbuttons="true"
+              data-type="text"
+              data-emptytext="0"
+              data-value="<%= commify($detail->price || 0) %>"
+              data-url="<%= url_for('/order/' . $order->id . '/update') %>"
+              data-pk="<%= $detail->id %>"
+              data-name="detail-price"
+              data-is-clothes="<%= $clothes ? 'true' : 'false' %>"
+              data-is-pre-paid="<%= $detail->name eq '이전 주문 납부' ? 'true' : 'false' %>">
+            </a>
+          </samp>
         </td>
-        <td>
-          %= sprintf('%d박 %d일', 3 + $order->additional_day, 4 + $order->additional_day)
+        <td class="text-right">
+          % if ($detail->stage == 0) {
+            %= sprintf('%d박 %d일(+%d일)', 3 + $order->additional_day, 4 + $order->additional_day, $order->additional_day)
+          % }
+
+          % if ($detail->name eq '연장료') {
+            %= calc_extension_days($order)
+          % }
+
+          % if ($detail->name eq '연체료') {
+            %= calc_overdue_days($order)
+          % }
         </td>
-        <td>
-          <a
-            href="#"
-            id="order-detail-final-price-<%= $detail->id %>"
-            class="order-detail-final-price editable"
-            data-disabled="<%= $order->status_id != $PAYMENT ? 'true' : 'false' %>"
-            data-showbuttons="true"
-            data-type="text"
-            data-emptytext="0"
-            data-value="<%= commify($detail->final_price || 0) %>"
-            data-url="<%= url_for('/order/' . $order->id . '/update') %>"
-            data-pk="<%= $detail->id %>"
-            data-name="detail-final_price"
-            data-is-clothes="<%= $clothes ? 'true' : 'false' %>"
-            data-is-pre-paid="<%= $detail->name eq '이전 주문 납부' ? 'true' : 'false' %>">
-          </a>원
+        <td class="text-right">
+          <samp>
+            <a
+              href="#"
+              id="order-detail-final-price-<%= $detail->id %>"
+              class="order-detail-final-price editable"
+              data-disabled="<%= $order->status_id != $PAYMENT ? 'true' : 'false' %>"
+              data-showbuttons="true"
+              data-type="text"
+              data-emptytext="0"
+              data-value="<%= commify($detail->final_price || 0) %>"
+              data-url="<%= url_for('/order/' . $order->id . '/update') %>"
+              data-pk="<%= $detail->id %>"
+              data-name="detail-final_price"
+              data-is-clothes="<%= $clothes ? 'true' : 'false' %>"
+              data-is-pre-paid="<%= $detail->name eq '이전 주문 납부' ? 'true' : 'false' %>">
+            </a>
+          </samp>
         </td>
         <td>
           <a
@@ -488,6 +505,21 @@
         </td>
       </tr>
     % }
+    <tr>
+      <td>합계</td>
+      <td class="text-right">
+        <samp>
+          %= commify $sum{price}
+        </samp>
+      </td>
+      <td class="text-right">-</td>
+      <td class="text-right">
+        <samp>
+          %= commify $sum{final_price}
+        </samp>
+      </td>
+      <td>-</td>
+    </tr>
   </tbody>
 </table>
 
