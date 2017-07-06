@@ -179,11 +179,47 @@
         </tr>
         <tr>
           <th>최종 연체/연장료</th>
-          <td></td>
+          <td>
+            % if (my $late_fee = calc_late_fee($order)) {
+              <div>
+                <samp>
+                  %= commify $late_fee
+                </samp>
+              </div>
+              % my $late_fee_pay_with = $order->late_fee_pay_with || '';
+              <select name="late_fee_pay_with" class="chosen-select" data-placeholder="연체/연장료 결제 방법" data-update-url="<%= url_for('/api/order/' . $order->id) %>">
+                % for my $pay_with (qw/현금 카드 계좌이체 현금영수증 세금계산서 미납 쿠폰 쿠폰+현금 쿠폰+카드/) {
+                  <option value="<%= $pay_with %>"<%= $late_fee_pay_with eq $pay_with ? ' selected' : '' %>>
+                    %= $pay_with
+                  </option>
+                % }
+              </select>
+            % } else {
+              해당사항없음
+            % }
+          </td>
         </tr>
         <tr>
           <th>최종 배상비</th>
-          <td></td>
+          <td>
+            % if (my $detail = $order->order_details({ name => '배상비' })->next) {
+              <div>
+                <samp>
+                  %= commify $detail->final_price
+                </samp>
+              </div>
+              % my $compensation_pay_with = $order->compensation_pay_with || '';
+              <select name="compensation_pay_with" class="chosen-select" data-placeholder="배상비 결제 방법" data-update-url="<%= url_for('/api/order/' . $order->id) %>">
+                % for my $pay_with (qw/현금 카드 계좌이체 현금영수증 세금계산서 미납 쿠폰 쿠폰+현금 쿠폰+카드/) {
+                  <option value="<%= $pay_with %>"<%= $compensation_pay_with eq $pay_with ? ' selected' : '' %>>
+                    %= $pay_with
+                  </option>
+                % }
+              </select>
+            % } else {
+              해당사항없음
+            % }
+          </td>
         </tr>
         <tr>
           <th>연체문자전송</th>
