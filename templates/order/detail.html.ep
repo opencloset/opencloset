@@ -19,6 +19,18 @@
 %   ];
 % title meta_text($_id);
 
+% if (my $success = flash 'success') {
+  <div class="alert alert-success">
+    %= $success
+  </div>
+% }
+
+% if (my $error = flash 'error') {
+  <div class="alert alert-success">
+    %= $error;
+  </div>
+% }
+
 % if (my $memo = $order->return_memo) {
   <p>반납 확인 메모 4F</p>
   <pre><%= $memo %></pre>
@@ -261,6 +273,7 @@
       </tbody>
     </table>
   </div>
+
   <div class="col-md-6">
     <table class="table table-hover table-striped">
       <tr>
