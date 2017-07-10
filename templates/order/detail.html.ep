@@ -401,7 +401,7 @@
 <div>
   <form action="<%= url_for('/orders/' . $order->id . '/rental') %>" method="POST">
     <div class="btn-group" role="group">
-      <a class="btn btn-info" href="<%= url_for('/order/' . $order->id . '/rental/paper/pdf') %>" role="button">
+      <a class="btn btn-info" href="<%= url_for('/order/' . $order->id . '/rental/paper/pdf') %>" target="_blank">
         <i class="fa fa-file-pdf-o" aria-hidden="true"></i>
         정장 반납 안내 출력
       </a>
