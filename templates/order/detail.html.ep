@@ -149,21 +149,26 @@
         <tr>
           <th>기존총액(원)</th>
           <td>
-            <samp><%= commify($price) %></samp>
+            <samp><%= commify($price->{origin}) %></samp>
           </td>
         </tr>
         <tr>
           <th>할인금액(원)</th>
           <td>
-            <samp><%= commify(abs($discount)) %></samp>
+            <samp><%= commify(abs($price->{discount})) %></samp>
           </td>
         </tr>
         <tr>
           <th>대여비(원)</th>
           <td>
             <strong class="text-danger">
-              <samp><%= commify($price + $discount) %></samp>
+              <samp><%= commify($price->{rental}) %></samp>
             </strong>
+            <small class="rental-price-ext-days">
+              % if (my $days = $order->additional_day) {
+                %= sprintf('%d일 연장', $days)
+              % }
+            </small>
           </td>
         </tr>
         <tr>
@@ -190,13 +195,16 @@
           </td>
         </tr>
         <tr>
-          <th>최종 연체/연장료</th>
+          <th>
+            연체/연장료
+            % if ($late_fee) {
+              <i class="fa fa-info-circle" aria-hidden="true" data-toggle="tooltip" title="<%= $extension_days %>일 연장(<%= commify($extension_fee) %>) + <%= $overdue_days %>일 연체(<%= commify($overdue_fee) %>)"></i>
+            % }
+          </th>
           <td>
-            % if (my $late_fee = calc_late_fee($order)) {
+            % if ($late_fee) {
               <div>
-                <samp>
-                  %= commify $late_fee
-                </samp>
+                <samp><%= commify($late_fee) %></samp>
               </div>
               % my $late_fee_pay_with = $order->late_fee_pay_with || '';
               <select name="late_fee_pay_with" class="chosen-select" data-placeholder="연체/연장료 결제 방법" data-update-url="<%= url_for('/api/order/' . $order->id) %>">
@@ -425,8 +433,8 @@
   <p class="help-block">
     <i class="fa fa-info-circle" aria-hidden="true"></i>
     셋트 대여입니다.
-    %= clothes2link($suit_top, { with_status => 1 })
-    %= clothes2link($suit_bottom, { with_status => 1 })
+    %= clothes2link($suit->{top}, { with_status => 1 })
+    %= clothes2link($suit->{bottom}, { with_status => 1 })
   </p>
 % }
 
@@ -479,11 +487,11 @@
           % }
 
           % if ($detail->name eq '연장료') {
-            %= calc_extension_days($order)
+            %= $extension_days
           % }
 
           % if ($detail->name eq '연체료') {
-            %= calc_overdue_days($order)
+            %= $overdue_days
           % }
         </td>
         <td class="text-right">

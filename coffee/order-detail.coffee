@@ -80,3 +80,4 @@ $ ->
 
   $('.editable').editable()
   $('time.timeago').timeago()
+  $('[data-toggle="tooltip"]').tooltip()

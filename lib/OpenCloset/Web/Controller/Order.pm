@@ -609,19 +609,27 @@ sub detail {
         { join              => 'user_info' }
     );
 
-    my $calc     = OpenCloset::Calculator::LateFee->new;
-    my $price    = $calc->price($order);
-    my $discount = $calc->discount_price($order);
+    my $calc  = OpenCloset::Calculator::LateFee->new;
+    my $price = {
+        origin   => $calc->price($order),
+        discount => $calc->discount_price($order),
+        rental   => $calc->rental_price($order),
+    };
 
-    my $orders = $user->orders(
+    my $overdue_days   = $calc->overdue_days($order);
+    my $overdue_fee    = $calc->overdue_fee($order);
+    my $extension_days = $calc->extension_days($order);
+    my $extension_fee  = $calc->extension_fee($order);
+
+    my $returned = $user->orders(
         { status_id => $RETURNED, parent_id => undef },
         { order_by => { -desc => 'return_date' } },
     );
 
     my $visited = { count => 0, delta => undef };
-    if ( my $count = $orders->count ) {
+    if ( my $count = $returned->count ) {
         $visited->{count} = $count;
-        my $last         = $orders->first;
+        my $last         = $returned->first;
         my $booking      = $order->booking;
         my $last_booking = $last->booking;
         if ( $booking and $last_booking ) {
@@ -649,27 +657,25 @@ sub detail {
     $details->reset;
 
     if ( $top and $bottom ) {
-        $suit = $self->DB->resultset('Suit')->find(
-            {
-                code_top    => $top->code,
-                code_bottom => $bottom->code
-            }
-        );
+        $suit->{top}    = $top;
+        $suit->{bottom} = $bottom;
     }
 
     $self->render(
-        order       => $order,
-        user        => $user,
-        user_info   => $user_info,
-        staff       => \@staff,
-        today       => $today,
-        price       => $price,
-        discount    => $discount,
-        visited     => $visited,
-        details     => $details,
-        suit        => $suit,
-        suit_top    => $top,
-        suit_bottom => $bottom,
+        order          => $order,
+        user           => $user,
+        user_info      => $user_info,
+        staff          => \@staff,
+        today          => $today,
+        price          => $price,
+        visited        => $visited,
+        details        => $details,
+        suit           => $suit,
+        overdue_days   => $overdue_days,
+        overdue_fee    => $overdue_fee,
+        extension_days => $extension_days,
+        extension_fee  => $extension_fee,
+        late_fee       => $overdue_fee + $extension_fee,
     );
 }
 
