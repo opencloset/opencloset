@@ -315,6 +315,7 @@ sub _private_routes {
     $r->get('/rental/:ymd/search')->to('rental#search');
     $r->get('/rental/order/:order_id')->to('rental#order');
     $r->post('/orders/:id/rental')->to('rental#payment2rental');
+    $r->post('/orders/:id/returned')->to('rental#rental2returned');
 
     $r->get('/order')->to('order#index');
     $r->post('/order')->to('order#create');
@@ -323,6 +324,7 @@ sub _private_routes {
     $r->post('/order/:id/coupon')->to('order#create_coupon');
 
     $r->get('/orders/:id')->to('order#detail');
+    $r->get('/orders/:id/late_fee')->to('order#late_fee');
 
     $r->get('/booking')->to('booking#index');
     $r->get('/booking/:ymd')->to('booking#ymd');

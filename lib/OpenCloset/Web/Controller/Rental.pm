@@ -2,6 +2,7 @@ package OpenCloset::Web::Controller::Rental;
 use Mojo::Base 'Mojolicious::Controller';
 
 use DateTime;
+use DateTime::Format::Strptime;
 use Try::Tiny;
 use OpenCloset::Constants::Status
     qw/$REPAIR $BOX $FITTING_ROOM1 $FITTING_ROOM20 $RESERVATED/;
@@ -283,6 +284,49 @@ sub payment2rental {
 
     unless ($success) {
         my $err = "payment2rental failed: order_id($id)";
+        $self->log->error($err);
+        $self->flash( error => $err );
+    }
+    else {
+        $self->flash( success => '정상적으로 처리되었습니다.' );
+    }
+
+    $self->redirect_to("/orders/$id");
+}
+
+=head2 rental2returned
+
+    POST /orders/:id/returned
+
+=cut
+
+sub rental2returned {
+    my $self = shift;
+    my $id   = $self->param('id');
+
+    my $order = $self->DB->resultset('Order')->find( { id => $id } );
+    return $self->error( 404, { str => "Order not found: $id" } ) unless $order;
+
+    my $v = $self->validation;
+    $v->optional('return_date')->like(qr/^\d{4}-\d{2}-\d{2}$/);
+    return $self->error( 400, { str => "Wrong return_date format: yyyy-mm-dd" } )
+        if $v->has_error;
+
+    my $return_date = $v->param('return_date');
+    if ($return_date) {
+        my $strp = DateTime::Format::Strptime->new(
+            pattern   => '%F',
+            time_zone => $self->config->{timezone},
+        );
+
+        $return_date = $strp->parse_datetime($return_date);
+    }
+
+    my $success =
+        $self->app->api->rental2returned( $order, return_date => $return_date );
+
+    unless ($success) {
+        my $err = "rental2returned failed: order_id($id)";
         $self->log->error($err);
         $self->flash( error => $err );
     }

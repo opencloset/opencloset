@@ -81,3 +81,54 @@ $ ->
   $('.editable').editable()
   $('time.timeago').timeago()
   $('[data-toggle="tooltip"]').tooltip()
+  $('#calc-date').datepicker
+    language: 'ko'
+    autoclose: true
+    todayHighlight: true
+  .on 'changeDate', (e) ->
+    val = $(@).datepicker('getFormattedDate')
+    $('#form-returned input[name=return_date]').val(val)
+
+    url = $(@).data('fetch-url')
+    $.ajax "#{url}?return_date=#{val}",
+      type: 'GET'
+      dataType: 'json'
+      success: (data, textStatus, jqXHR) ->
+        $('#late-fee-tip').attr('data-original-title', data.formatted.tip).tooltip('fixTitle')
+        $('#late-fee').text(data.formatted.late_fee)
+        $.growl.notice({ title: "알림", message: " 연체/연장료가 수정되었습니다." })
+      error: (jqXHR, textStatus, errorThrown) ->
+        $.growl.error({ message: jqXHR.responseJSON.error })
+      complete: (jqXHR, textStatus) ->
+
+  $('.order-detail-stage').on 'click', '.fa-square-o,.fa-check-square-o', (e) ->
+    $(@).toggleClass('fa-square-o')
+    $(@).toggleClass('fa-check-square-o')
+
+    checked   = $('#table-order-details .fa-check-square-o').length
+    unchecked = $('#table-order-details .fa-square-o').length
+
+    if unchecked and checked
+      $('#btn-return-partial').removeClass('disabled')
+      $('#btn-return-all').addClass('disabled')
+    else if unchecked
+      $('#btn-return-partial').addClass('disabled')
+      $('#btn-return-all').addClass('disabled')
+    else
+      $('#btn-return-partial').addClass('disabled')
+      $('#btn-return-all').removeClass('disabled')
+
+  $('#form-clothes-code').submit (e) ->
+    e.preventDefault()
+
+    $input = $('#input-code')
+    code = $input.val()
+    $input.val('')
+    return unless code
+
+    code = code.toUpperCase()
+    $("#clothes-code-#{code} .fa").trigger('click')
+
+  $('#btn-return-all').click (e) ->
+    return if $(@).hasClass('disabled')
+    $('#form-returned').submit()

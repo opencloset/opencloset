@@ -1,4 +1,4 @@
-% use OpenCloset::Constants::Status qw/$PAYMENT/;
+% use OpenCloset::Constants::Status qw/$RENTAL $PAYMENT $BOXED/;
 % my $_id = 'order-detail';
 % layout 'default',
 %   page_id     => $_id,
@@ -158,10 +158,10 @@
             <samp><%= commify(abs($price->{discount})) %></samp>
           </td>
         </tr>
-        <tr>
+        <tr class="success">
           <th>대여비(원)</th>
           <td>
-            <strong class="text-danger">
+            <strong>
               <samp><%= commify($price->{rental}) %></samp>
             </strong>
             <small class="rental-price-ext-days">
@@ -194,51 +194,45 @@
             </select>
           </td>
         </tr>
-        <tr>
+        <tr class="danger">
           <th>
             연체/연장료
             % if ($late_fee) {
-              <i class="fa fa-info-circle" aria-hidden="true" data-toggle="tooltip" title="<%= $extension_days %>일 연장(<%= commify($extension_fee) %>) + <%= $overdue_days %>일 연체(<%= commify($overdue_fee) %>)"></i>
+              <i id="late-fee-tip" class="fa fa-info-circle" aria-hidden="true" data-toggle="tooltip" title="<%= $extension_days %>일 연장(<%= commify($extension_fee) %>) + <%= $overdue_days %>일 연체(<%= commify($overdue_fee) %>)"></i>
             % }
           </th>
           <td>
             % if ($late_fee) {
               <div>
-                <samp><%= commify($late_fee) %></samp>
+                <strong>
+                  <samp id="late-fee"><%= commify($late_fee) %></samp>
+                </strong>
               </div>
-              % my $late_fee_pay_with = $order->late_fee_pay_with || '';
-              <select name="late_fee_pay_with" class="chosen-select" data-placeholder="연체/연장료 결제 방법" data-update-url="<%= url_for('/api/order/' . $order->id) %>">
-                % for my $pay_with (qw/현금 카드 계좌이체 현금영수증 세금계산서 미납 쿠폰 쿠폰+현금 쿠폰+카드/) {
-                  <option value="<%= $pay_with %>"<%= $late_fee_pay_with eq $pay_with ? ' selected' : '' %>>
-                    %= $pay_with
-                  </option>
-                % }
-              </select>
             % } else {
               해당사항없음
             % }
           </td>
         </tr>
         <tr>
-          <th>최종 배상비</th>
+          <th>연체/연장료 결제방법</th>
           <td>
-            % if (my $detail = $order->order_details({ name => '배상비' })->next) {
-              <div>
-                <samp>
-                  %= commify $detail->final_price
-                </samp>
-              </div>
-              % my $compensation_pay_with = $order->compensation_pay_with || '';
-              <select name="compensation_pay_with" class="chosen-select" data-placeholder="배상비 결제 방법" data-update-url="<%= url_for('/api/order/' . $order->id) %>">
-                % for my $pay_with (qw/현금 카드 계좌이체 현금영수증 세금계산서 미납 쿠폰 쿠폰+현금 쿠폰+카드/) {
-                  <option value="<%= $pay_with %>"<%= $compensation_pay_with eq $pay_with ? ' selected' : '' %>>
+            % if ($late_fee) {
+              % my $late_fee_pay_with = $order->late_fee_pay_with || '';
+              <select name="late_fee_pay_with" class="chosen-select" data-placeholder="연체/연장료 결제 방법" data-update-url="<%= url_for('/api/order/' . $order->id) %>">
+                <option value=""></option>
+                % for my $pay_with (qw/현금 카드 계좌이체 현금영수증 세금계산서 미납/) {
+                  <option value="<%= $pay_with %>"<%= $late_fee_pay_with eq $pay_with ? ' selected' : '' %>>
                     %= $pay_with
                   </option>
                 % }
               </select>
-            % } else {
-              해당사항없음
             % }
+          </td>
+        </tr>
+        <tr>
+          <th>택배발송/반납일</th>
+          <td>
+            <input id="calc-date" data-date-format="yyyy-mm-dd" data-fetch-url="<%= url_for('/orders/' . $order->id . '/late_fee') %>" data-date-end-date="0d" type="text" name="return_date" value="<%= $today->ymd %>">
           </td>
         </tr>
         <tr>
@@ -407,8 +401,9 @@
 <hr>
 
 <div>
-  <form action="<%= url_for('/orders/' . $order->id . '/rental') %>" method="POST">
-    <div class="btn-group" role="group">
+  % my $status_id = $order->status_id;
+  % if ("$PAYMENT $BOXED" =~ m/\b$status_id\b/) {
+    <form class="form-inline" action="<%= url_for('/orders/' . $order->id . '/rental') %>" method="POST">
       <a class="btn btn-info" href="<%= url_for('/order/' . $order->id . '/rental/paper/pdf') %>" target="_blank">
         <i class="fa fa-file-pdf-o" aria-hidden="true"></i>
         정장 반납 안내 출력
@@ -416,15 +411,30 @@
 
       <button type="submit" class="btn btn-success">
         <i class="fa fa-check" aria-hidden="true"></i>
-        주문확정
+        주문 확정
       </button>
-    </div>
+    </form>
+  % }
 
-    <button type="button" class="btn btn-default pull-right">
-      <i class="fa fa-repeat" aria-hidden="true"></i>
-      새로주문
-    </button>
-  </form>
+  % if ($status_id == $RENTAL) {
+    <form id="form-returned" action="<%= url_for('/orders/' . $order->id . '/returned') %>" method="POST">
+      <input name="return_date" type="hidden" value="">
+    </form>
+
+    <h4>
+      <i class="fa fa-barcode fa-fw" aria-hidden="true"></i>
+      의류코드입력
+    </h4>
+
+    <form id="form-clothes-code" class="form-inline clothes-code">
+      <div class="form-group">
+        <input id="input-code" type="text" name="code" class="form-control" placeholder="의류코드" autofocus>
+      </div>
+      <button type="submit" class="btn btn-primary btn-sm">검색</button>
+      <button id="btn-return-all" class="btn btn-success btn-sm disabled" type="button">전체반납</button>
+      <button id="btn-return-partial" class="btn btn-warning btn-sm disabled" type="button">부분반납</button>
+    </form>
+  % }
 </div>
 
 <hr>
@@ -433,12 +443,12 @@
   <p class="help-block">
     <i class="fa fa-info-circle" aria-hidden="true"></i>
     셋트 대여입니다.
-    %= clothes2link($suit->{top}, { with_status => 1 })
+    %= clothes2link($suit->{top},    { with_status => 1 })
     %= clothes2link($suit->{bottom}, { with_status => 1 })
   </p>
 % }
 
-<table class="table table-bordered table-hover">
+<table id="table-order-details" class="table table-bordered table-hover">
   <thead>
     <tr>
       <th>항목</th>
@@ -457,6 +467,9 @@
       <tr>
         <td class="order-detail-stage order-detail-stage-<%= $detail->stage %>">
           % if ($clothes) {
+            <span id="clothes-code-<%= substr($clothes->code, 1) %>">
+              <i class="fa fa-square-o fa-fw" aria-hidden="true"></i>
+            </span>
             %= clothes2link($clothes, { with_status => 1, text => $detail->name })
           % } else {
             %= $detail->name

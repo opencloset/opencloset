@@ -679,6 +679,51 @@ sub detail {
     );
 }
 
+=head2 late_fee
+
+    GET /orders/:id/late_fee?return_date=yyyy-mm-dd
+
+=cut
+
+sub late_fee {
+    my $self = shift;
+    my $id   = $self->param('id');
+
+    my $order = $self->get_order( { id => $id } );
+    return unless $order;
+
+    my $v = $self->validation;
+    $v->optional('return_date')->like(qr/^\d{4}-\d{2}-\d{2}$/);
+    return $self->error( 400, { str => "Wrong return_date format: yyyy-mm-dd" } )
+        if $v->has_error;
+
+    my $return_date = $v->param('return_date');
+    $return_date .= 'T00:00:00' if $return_date;
+
+    my $calc           = OpenCloset::Calculator::LateFee->new;
+    my $overdue_days   = $calc->overdue_days( $order, $return_date );
+    my $overdue_fee    = $calc->overdue_fee( $order, $return_date );
+    my $extension_days = $calc->extension_days( $order, $return_date );
+    my $extension_fee  = $calc->extension_fee( $order, $return_date );
+
+    $self->render(
+        json => {
+            late_fee       => $overdue_fee + $extension_fee,
+            overdue_days   => $overdue_days,
+            overdue_fee    => $overdue_fee,
+            extension_days => $extension_days,
+            extension_fee  => $extension_fee,
+            formatted      => {
+                late_fee => $self->commify( $overdue_fee + $extension_fee ),
+                tip      => sprintf(
+                    "%d일 연장(%s) + %d일 연체(%s)", $extension_days,
+                    $self->commify($extension_fee), $overdue_days, $self->commify($overdue_fee)
+                )
+            }
+        }
+    );
+}
+
 =head2 update
 
     POST /order/:id/update
