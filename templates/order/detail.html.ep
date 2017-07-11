@@ -168,7 +168,7 @@
             </strong>
             <small class="rental-price-ext-days">
               % if (my $days = $order->additional_day) {
-                %= sprintf('%d일 연장', $days)
+                %= sprintf('%d일 연장: %s', $days, $self->commify($price->{rental} - ($price->{origin} + $price->{discount})))
               % }
             </small>
           </td>
