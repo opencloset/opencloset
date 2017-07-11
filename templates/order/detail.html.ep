@@ -132,7 +132,7 @@
             % if (my $target_date = $order->target_date) {
               <input name="target_date" id="datepicker-target-date" data-date-format="yyyy-mm-dd" data-update-url="<%= url_for('/api/order/' . $order->id) %>" placeholder="반납 예정일" value="<%= $target_date->ymd %>">
             % } else {
-              <input id="datepicker-target-date" data-date-format="yyyy-mm-dd" data-update-url="<%= url_for('/api/order/' . $order->id) %>" placeholder="반납 예정일">
+              <input name="target_date" id="datepicker-target-date" data-date-format="yyyy-mm-dd" data-update-url="<%= url_for('/api/order/' . $order->id) %>" placeholder="반납 예정일">
             % }
           </td>
         </tr>
@@ -371,7 +371,7 @@
           % if (my $user_target_date = $order->user_target_date) {
             <input name="user_target_date" id="datepicker-user-target-date" data-date-format="yyyy-mm-dd" data-update-url="<%= url_for('/api/order/' . $order->id) %>" placeholder="반납 희망일" value="<%= $user_target_date->ymd %>">
           % } else {
-            <input id="datepicker-user-target-date" data-date-format="yyyy-mm-dd" data-update-url="<%= url_for('/api/order/' . $order->id) %>" placeholder="반납 희망일">
+            <input name="user_target_date" id="datepicker-user-target-date" data-date-format="yyyy-mm-dd" data-update-url="<%= url_for('/api/order/' . $order->id) %>" placeholder="반납 희망일">
           % }
         </td>
       </tr>
