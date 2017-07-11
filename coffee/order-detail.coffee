@@ -159,3 +159,20 @@ $ ->
     discount = $(@).val() or 0
     late_fee = late_fee - discount
     $('#late-fee').html(OpenCloset.commify(late_fee))
+
+  $('#form-coupon-code').on 'submit', (e) ->
+    e.preventDefault()
+    $form = $(@)
+    $.ajax $form.prop('action'),
+      type: 'POST'
+      dataType: 'json'
+      data: $form.serialize()
+      success: (data, textStatus, jqXHR) ->
+        location.reload()
+      error: (jqXHR, textStatus, errorThrown) ->
+        unless jqXHR.responseJSON.order
+          return $.growl.error({ message: jqXHR.responseJSON.error.str })
+
+        anchor = "<a href=\"#{jqXHR.responseJSON.order}\">주문서 바로가기</a>"
+        OpenCloset.alert("#{jqXHR.responseJSON.error} #{anchor}")
+      complete: (jqXHR, textStatus) ->

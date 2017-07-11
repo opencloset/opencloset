@@ -147,13 +147,7 @@
           </td>
         </tr>
         <tr>
-          <th>
-            결제방법
-            <br>
-            % if (my $coupon = $order->coupon) {
-              %= coupon2label($coupon)
-            % }
-          </th>
+          <th>결제방법</th>
           <td>
             <select name="price_pay_with" class="chosen-select" data-placeholder="결제방법" data-update-url="<%= url_for('/api/order/' . $order->id) %>">
               <option value=""></option>
@@ -164,6 +158,23 @@
                 </option>
               % }
             </select>
+          </td>
+        </tr>
+        <tr>
+          <th>쿠폰</th>
+          <td>
+            % if (my $coupon = $order->coupon) {
+              %= coupon2label($coupon)
+            % } else {
+              <form id="form-coupon-code" class="form-inline" action="<%= url_for('/order/' . $order->id . '/coupon') %>" method="POST">
+                <div class="input-group">
+                  <input id="input-coupon-code" class="form-control input-sm" name="coupon-code" type="text" placeholder="쿠폰코드">
+                  <span class="input-group-btn">
+                    <button class="btn btn-xs btn-default" type="submit">입력</button>
+                  </span>
+                </div>
+              </form>
+            % }
           </td>
         </tr>
         <tr>
