@@ -133,8 +133,13 @@ $ ->
     return if $(@).hasClass('disabled')
     discount = $('#form-late-fee-discount input[name=late_fee_discount]').val()
     $('#form-returned input[name=late_fee_discount]').val(discount)
+    ignore = if $('#toggle-ignore-sms').prop('checked') then '1' else '0'
+    $('#form-returned input[name=ignore_sms]').val(ignore)
     $('#form-returned').submit()
 
   $('#btn-late-fee-discount').click (e) ->
     late_fee = $('#late-fee').data('late-fee')
     $(@).parent().find('input[name=late_fee_discount]').val(late_fee)
+
+  $('#toggle-ignore-sms').change ->
+    val = if $(@).prop('checked') then '1' else '0'

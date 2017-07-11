@@ -11,11 +11,13 @@
 %     '/lib/bootstrap3-editable/js/bootstrap-editable.min.js',
 %     '/components/growl/javascripts/jquery.growl.js',
 %     '/components/jquery-timeago/jquery.timeago.js',
-%     '/components/jquery-timeago/locales/jquery.timeago.ko.js'
+%     '/components/jquery-timeago/locales/jquery.timeago.ko.js',
+%     '/components/bootstrap-toggle/js/bootstrap-toggle.min.js'
 %   ],
 %   csses => [
 %     '/lib/bootstrap3-editable/css/bootstrap-editable.css',
-%     '/components/growl/stylesheets/jquery.growl.css'
+%     '/components/growl/stylesheets/jquery.growl.css',
+%     '/components/bootstrap-toggle/css/bootstrap-toggle.min.css'
 %   ];
 % title meta_text($_id);
 
@@ -435,11 +437,13 @@
     <form id="form-returned" action="<%= url_for('/orders/' . $order->id . '/returned') %>" method="POST">
       <input name="return_date" type="hidden" value="">
       <input name="late_fee_discount" type="hidden" value="">
+      <input name="ignore_sms" type="hidden" value="1">
     </form>
 
     <h4>
       <i class="fa fa-barcode fa-fw" aria-hidden="true"></i>
       의류코드입력
+      <input id="toggle-ignore-sms" checked data-toggle="toggle" data-on="반납문자" data-off="off" data-onstyle="success" data-size="mini" type="checkbox">
     </h4>
 
     <form id="form-clothes-code" class="form-inline clothes-code">
