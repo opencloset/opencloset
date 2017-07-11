@@ -95,7 +95,7 @@ $ ->
       dataType: 'json'
       success: (data, textStatus, jqXHR) ->
         $('#late-fee-tip').attr('data-original-title', data.formatted.tip).tooltip('fixTitle')
-        $('#late-fee').text(data.formatted.late_fee)
+        $('#late-fee').text(data.formatted.late_fee).data('late-fee', data.late_fee)
         $.growl.notice({ title: "알림", message: " 연체/연장료가 수정되었습니다." })
       error: (jqXHR, textStatus, errorThrown) ->
         $.growl.error({ message: jqXHR.responseJSON.error })
@@ -131,4 +131,10 @@ $ ->
 
   $('#btn-return-all').click (e) ->
     return if $(@).hasClass('disabled')
+    discount = $('#form-late-fee-discount input[name=late_fee_discount]').val()
+    $('#form-returned input[name=late_fee_discount]').val(discount)
     $('#form-returned').submit()
+
+  $('#btn-late-fee-discount').click (e) ->
+    late_fee = $('#late-fee').data('late-fee')
+    $(@).parent().find('input[name=late_fee_discount]').val(late_fee)
