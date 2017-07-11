@@ -766,7 +766,13 @@ sub update {
                         $value // 'N/A',
                     ),
                 );
-                $detail->update( { $name => $value } );
+
+                if ( $name eq 'price' ) {
+                    $self->app->detail_api->update_price( $detail, $value );
+                }
+                else {
+                    $detail->update( { $name => $value } );
+                }
             }
         }
     }

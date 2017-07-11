@@ -11,6 +11,7 @@ use Iamport::REST::Client;
 use OpenCloset::Schema;
 use OpenCloset::DB::Plugin::Order::Sale;
 use OpenCloset::API::Order;
+use OpenCloset::API::OrderDetail;
 
 has CACHE => sub {
     my $self  = shift;
@@ -46,6 +47,11 @@ has iamport => sub {
 has api => sub {
     my $self = shift;
     return OpenCloset::API::Order->new( schema => $self->DB );
+};
+
+has detail_api => sub {
+    my $self = shift;
+    return OpenCloset::API::OrderDetail->new( schema => $self->DB );
 };
 
 =head1 METHODS

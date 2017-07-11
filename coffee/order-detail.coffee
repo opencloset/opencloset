@@ -146,6 +146,13 @@ $ ->
   $('#btn-late-fee-discount').click (e) ->
     late_fee = $('#late-fee').data('late-fee')
     $(@).parent().find('input[name=late_fee_discount]').val(late_fee)
+    $('#late-fee').html('0')
 
   $('#toggle-ignore-sms').change ->
     val = if $(@).prop('checked') then '1' else '0'
+
+  $('#form-late-fee-discount input[name=late_fee_discount]').on 'change', (e) ->
+    late_fee = $('#late-fee').data('late-fee')
+    discount = $(@).val() or 0
+    late_fee = late_fee - discount
+    $('#late-fee').html(OpenCloset.commify(late_fee))
