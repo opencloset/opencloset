@@ -41,19 +41,25 @@ $ ->
       complete: (jqXHR, textStatus) ->
         $this.removeClass('disabled')
 
-  $('#datepicker-user-target-date').datepicker
+  $('#datepicker-target-date,#datepicker-user-target-date').datepicker
     language: 'ko'
     autoclose: true
     todayHighlight: true
   .on 'changeDate', (e) ->
-    val = $(@).datepicker('getFormattedDate')
-    url = $(@).data('update-url')
+    name  = $(@).prop('name')
+    label = $(@).prop('placeholder')
+    val   = $(@).datepicker('getFormattedDate')
+    url   = $(@).data('update-url')
+
+    data = {}
+    data[name] = val
+
     $.ajax url,
       type: 'PUT'
       dataType: 'json'
-      data: { user_target_date: val }
+      data: data
       success: (data, textStatus, jqXHR) ->
-        $.growl.notice({ title: "알림", message: "반납희망일이 수정되었습니다." })
+        $.growl.notice({ title: "알림", message: "#{label}이 수정되었습니다." })
       error: (jqXHR, textStatus, errorThrown) ->
         $.growl.error({ message: jqXHR.responseJSON.error })
       complete: (jqXHR, textStatus) ->
