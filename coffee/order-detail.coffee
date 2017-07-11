@@ -85,6 +85,9 @@ $ ->
       complete: (jqXHR, textStatus) ->
 
   $('.editable').editable()
+  $('.editable').on 'save', (e, params) ->
+    location.reload()
+
   $('time.timeago').timeago()
   $('[data-toggle="tooltip"]').tooltip()
   $('#calc-date').datepicker

@@ -497,25 +497,29 @@
         </td>
         <td class="text-right">
           <samp>
-            <a
-              href="#"
-              id="order-detail-price-<%= $detail->id %>"
-              class="order-detail-price editable"
-              data-disabled="<%= $order->status_id != $PAYMENT ? 'true' : 'false' %>"
-              data-showbuttons="true"
-              data-type="text"
-              data-emptytext="0"
-              data-value="<%= commify($detail->price || 0) %>"
-              data-url="<%= url_for('/order/' . $order->id . '/update') %>"
-              data-pk="<%= $detail->id %>"
-              data-name="detail-price"
-              data-is-clothes="<%= $clothes ? 'true' : 'false' %>"
-              data-is-pre-paid="<%= $detail->name eq '이전 주문 납부' ? 'true' : 'false' %>">
-            </a>
+            % if ($detail->stage == 0 and $clothes) {
+              <a
+                href="#"
+                id="order-detail-price-<%= $detail->id %>"
+                class="order-detail-price editable"
+                data-disabled="<%= $order->status_id != $PAYMENT ? 'true' : 'false' %>"
+                data-showbuttons="true"
+                data-type="text"
+                data-emptytext="0"
+                data-value="<%= commify($detail->price || 0) %>"
+                data-url="<%= url_for('/order/' . $order->id . '/update') %>"
+                data-pk="<%= $detail->id %>"
+                data-name="detail-price"
+                data-is-clothes="<%= $clothes ? 'true' : 'false' %>"
+                data-is-pre-paid="<%= $detail->name eq '이전 주문 납부' ? 'true' : 'false' %>">
+              </a>
+            % } else {
+              %= commify($detail->price)
+            % }
           </samp>
         </td>
         <td class="text-right">
-          % if ($detail->stage == 0) {
+          % if ($detail->stage == 0 and $clothes) {
             %= sprintf('%d박 %d일(+%d일)', 3 + $order->additional_day, 4 + $order->additional_day, $order->additional_day)
           % }
 
