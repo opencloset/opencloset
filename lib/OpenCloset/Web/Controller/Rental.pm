@@ -309,10 +309,12 @@ sub rental2returned {
 
     my $v = $self->validation;
     $v->optional('return_date')->like(qr/^\d{4}-\d{2}-\d{2}$/);
+    $v->optional('late_fee_discount');
     return $self->error( 400, { str => "Wrong return_date format: yyyy-mm-dd" } )
         if $v->has_error;
 
-    my $return_date = $v->param('return_date');
+    my $return_date       = $v->param('return_date');
+    my $late_fee_discount = $v->param('late_fee_discount');
     if ($return_date) {
         my $strp = DateTime::Format::Strptime->new(
             pattern   => '%F',
@@ -322,8 +324,11 @@ sub rental2returned {
         $return_date = $strp->parse_datetime($return_date);
     }
 
-    my $success =
-        $self->app->api->rental2returned( $order, return_date => $return_date );
+    my $success = $self->app->api->rental2returned(
+        $order,
+        return_date       => $return_date,
+        late_fee_discount => $late_fee_discount
+    );
 
     unless ($success) {
         my $err = "rental2returned failed: order_id($id)";
