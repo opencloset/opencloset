@@ -147,7 +147,13 @@
           </td>
         </tr>
         <tr>
-          <th>결제방법</th>
+          <th>
+            결제방법
+            <br>
+            % if (my $coupon = $order->coupon) {
+              %= coupon2label($coupon)
+            % }
+          </th>
           <td>
             <select name="price_pay_with" class="chosen-select" data-placeholder="결제방법" data-update-url="<%= url_for('/api/order/' . $order->id) %>">
               <option value=""></option>
