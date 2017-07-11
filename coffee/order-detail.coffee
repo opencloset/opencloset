@@ -146,6 +146,22 @@ $ ->
     $('#form-returned input[name=ignore_sms]').val(ignore)
     $('#form-returned').submit()
 
+  $('#btn-return-partial').click (e) ->
+    return if $(@).hasClass('disabled')
+    discount = $('#form-late-fee-discount input[name=late_fee_discount]').val()
+    $('#form-returned input[name=late_fee_discount]').val(discount)
+    ignore = if $('#toggle-ignore-sms').prop('checked') then '1' else '0'
+    $('#form-returned input[name=ignore_sms]').val(ignore)
+
+    $('#table-order-details .order-detail-stage .fa-check-square-o').each (i, el) ->
+      code = $(el).parent().data('code')
+      $('<input>').attr
+        type: 'hidden'
+        name: 'codes'
+        value: code
+      .appendTo('#form-returned')
+    $('#form-returned').submit()
+
   $('#btn-late-fee-discount').click (e) ->
     late_fee = $('#late-fee').data('late-fee')
     $(@).parent().find('input[name=late_fee_discount]').val(late_fee)

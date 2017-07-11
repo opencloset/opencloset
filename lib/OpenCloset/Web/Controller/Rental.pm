@@ -311,12 +311,14 @@ sub rental2returned {
     $v->optional('return_date')->like(qr/^\d{4}-\d{2}-\d{2}$/);
     $v->optional('late_fee_discount');
     $v->optional('ignore_sms');
+    $v->optional('codes');
     return $self->error( 400, { str => "Wrong return_date format: yyyy-mm-dd" } )
         if $v->has_error;
 
     my $return_date       = $v->param('return_date');
     my $late_fee_discount = $v->param('late_fee_discount');
     my $ignore_sms        = $v->param('ignore_sms');
+    my $codes             = $v->every_param('codes');
 
     if ($return_date) {
         my $strp = DateTime::Format::Strptime->new(
@@ -330,11 +332,24 @@ sub rental2returned {
     my $api = $self->app->api;
     $api->{sms} = 0 unless $ignore_sms;
 
-    my $success = $api->rental2returned(
-        $order,
-        return_date       => $return_date,
-        late_fee_discount => $late_fee_discount
-    );
+    my $success;
+    if (@$codes) {
+        ## 부분반납
+        $success = $api->rental2partial_returned(
+            $order,
+            $codes,
+            return_date       => $return_date,
+            late_fee_discount => $late_fee_discount
+        );
+    }
+    else {
+        ## 전체반납
+        $success = $api->rental2returned(
+            $order,
+            return_date       => $return_date,
+            late_fee_discount => $late_fee_discount
+        );
+    }
 
     $api->{sms} = 1;
 

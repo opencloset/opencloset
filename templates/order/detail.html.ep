@@ -516,7 +516,7 @@
       <tr>
         <td class="order-detail-stage order-detail-stage-<%= $detail->stage %>">
           % if ($clothes) {
-            <span id="clothes-code-<%= substr($clothes->code, 1) %>">
+            <span id="clothes-code-<%= substr($clothes->code, 1) %>" data-code="<%= $clothes->code %>">
               <i class="fa fa-square-o fa-fw" aria-hidden="true"></i>
             </span>
             %= clothes2link($clothes, { with_status => 1, text => $detail->name })
