@@ -170,6 +170,10 @@ $ ->
   $('#toggle-ignore-sms').change ->
     val = if $(@).prop('checked') then '1' else '0'
 
+  $('#form-late-fee-discount').submit (e) ->
+    e.preventDefault()
+    $(@).find('input[name=late_fee_discount]').trigger('change')
+
   $('#form-late-fee-discount input[name=late_fee_discount]').on 'change', (e) ->
     late_fee = $('#late-fee').data('late-fee')
     discount = $(@).val() or 0
