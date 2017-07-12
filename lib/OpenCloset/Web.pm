@@ -322,6 +322,7 @@ sub _private_routes {
     $r->get('/rental/order/:order_id')->to('rental#order');
     $r->post('/orders/:id/rental')->to('rental#payment2rental');
     $r->post('/orders/:id/returned')->to('rental#rental2returned');
+    $r->post('/orders/:id/payback')->to('rental#rental2payback');
 
     $r->get('/order')->to('order#index');
     $r->post('/order')->to('order#create');

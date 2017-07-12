@@ -487,6 +487,7 @@
       <button type="submit" class="btn btn-primary btn-sm">검색</button>
       <button id="btn-return-all" class="btn btn-success btn-sm disabled" type="button">전체반납</button>
       <button id="btn-return-partial" class="btn btn-warning btn-sm disabled" type="button">부분반납</button>
+      <button id="btn-refund" class="btn btn-default btn-sm pull-right" type="button" data-toggle="modal" data-target="#modal-refund">환불</button>
     </form>
   % }
 </div>
@@ -691,3 +692,46 @@
 <hr>
 
 %= include 'partials/status-log-analyze', order => $order;
+
+<div id="modal-refund" class="modal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <form role="form" class="form-horizontal" action="<%= url_for('/orders/' . $order->id . '/payback') %>" method="POST">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title" id="refundModalLabel">
+            환불을 진행하시겠습니까?
+          </h4>
+        </div>
+        <div class="modal-body" style="height: 300px; overflow-y: auto;">
+          <div>
+            환불 수수료가 있을 경우 총액에서 수수료 금액을 제외한 금액을 고객에게 환불합니다.
+          </div>
+          <div class="space-12"></div>
+          <div class="form-group">
+            <label for="order-refund-total" class="col-sm-3 control-label no-padding-right"> 주문서 총액 </label>
+
+            <div class="col-sm-9">
+              <input type="text" class="col-xs-10 col-sm-5 order-price-input" placeholder="주문서 총액" id="order-refund-total" value="<%= $price->{rental} %>" readonly>
+            </div>
+          </div>
+
+          <div class="space-4"></div>
+
+          <div class="form-group">
+            <label for="order-refund-charge" class="col-sm-3 control-label no-padding-right"> 환불 수수료 </label>
+
+            <div class="col-sm-9">
+              <input type="text" name="charge" class="col-xs-10 col-sm-5" placeholder="환불 수수료" value="0">
+            </div>
+          </div>
+          <div id="order-refund-error"></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">취소</button>
+          <button id="btn-refund-modal-ok" type="submit" class="btn btn-primary">확인</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

@@ -377,4 +377,31 @@ sub rental2returned {
     $self->redirect_to("/orders/$id");
 }
 
+=head2 rental2payback
+
+    POST /orders/:id/payback
+
+=cut
+
+sub rental2payback {
+    my $self   = shift;
+    my $id     = $self->param('id');
+    my $charge = $self->param('charge');
+
+    my $order = $self->DB->resultset('Order')->find( { id => $id } );
+    return $self->error( 404, { str => "Order not found: $id" } ) unless $order;
+
+    my $success = $self->app->api->rental2payback( $order, $charge );
+    unless ($success) {
+        my $err = "rental2payback failed: order_id($id)";
+        $self->log->error($err);
+        $self->flash( error => $err );
+    }
+    else {
+        $self->flash( success => '정상적으로 처리되었습니다.' );
+    }
+
+    $self->redirect_to("/orders/$id");
+}
+
 1;
