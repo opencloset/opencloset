@@ -192,3 +192,10 @@ $ ->
         anchor = "<a href=\"#{jqXHR.responseJSON.order}\">주문서 바로가기</a>"
         OpenCloset.alert("#{jqXHR.responseJSON.error} #{anchor}")
       complete: (jqXHR, textStatus) ->
+
+  $('#btn-rental-reset').click (e) ->
+    e.preventDefault()
+    return unless confirm '정말 새로 주문하시겠습니까?'
+    $form = $(@).closest('form')
+    $form.find('#rental-reset').val('1')
+    $form.submit()

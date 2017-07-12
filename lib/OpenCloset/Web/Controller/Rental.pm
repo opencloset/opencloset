@@ -274,16 +274,28 @@ sub order {
 =cut
 
 sub payment2rental {
-    my $self = shift;
-    my $id   = $self->param('id');
+    my $self  = shift;
+    my $id    = $self->param('id');
+    my $reset = $self->param('reset');
 
     my $order = $self->DB->resultset('Order')->find( { id => $id } );
     return $self->error( 404, { str => "Order not found: $id" } ) unless $order;
 
-    my $success = $self->app->api->payment2rental($order);
+    my ( $success, $method, $redirect );
+    my $api = $self->app->api;
+    if ($reset) {
+        $method   = 'payment2box';
+        $redirect = $self->url_for('/rental');
+        $success  = $api->payment2box($order);
+    }
+    else {
+        $method   = 'payment2rental';
+        $redirect = $self->url_for("/orders/$id");
+        $success  = $api->payment2rental($order);
+    }
 
     unless ($success) {
-        my $err = "payment2rental failed: order_id($id)";
+        my $err = "$method failed: order_id($id)";
         $self->log->error($err);
         $self->flash( error => $err );
     }
@@ -291,7 +303,7 @@ sub payment2rental {
         $self->flash( success => '정상적으로 처리되었습니다.' );
     }
 
-    $self->redirect_to("/orders/$id");
+    $self->redirect_to($redirect);
 }
 
 =head2 rental2returned

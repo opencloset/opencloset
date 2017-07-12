@@ -450,6 +450,7 @@
   % my $status_id = $order->status_id;
   % if ("$PAYMENT $BOXED" =~ m/\b$status_id\b/) {
     <form class="form-inline" action="<%= url_for('/orders/' . $order->id . '/rental') %>" method="POST">
+      <input id="rental-reset" name="reset" type="hidden" value="">
       <a class="btn btn-info" href="<%= url_for('/order/' . $order->id . '/rental/paper/pdf') %>" target="_blank">
         <i class="fa fa-file-pdf-o" aria-hidden="true"></i>
         정장 반납 안내 출력
@@ -458,6 +459,10 @@
       <button type="submit" class="btn btn-success">
         <i class="fa fa-check" aria-hidden="true"></i>
         주문 확정
+      </button>
+
+      <button id="btn-rental-reset" type="submit" class="btn btn-default">
+        새로 주문
       </button>
     </form>
   % }
@@ -598,13 +603,13 @@
       <td>합계</td>
       <td class="text-right">
         <samp>
-          %= commify $sum{price}
+          %= commify($sum{price} || 0)
         </samp>
       </td>
       <td class="text-right">-</td>
       <td class="text-right">
         <samp>
-          %= commify $sum{final_price}
+          %= commify($sum{final_price} || 0)
         </samp>
       </td>
       <td>-</td>
