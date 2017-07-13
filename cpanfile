@@ -44,7 +44,7 @@ requires 'experimental';
 # from opencloset cpan
 requires 'Iamport::REST::Client';
 requires 'OpenCloset::API';
-requires 'OpenCloset::Calculator::LateFee',     'v0.2.3';
+requires 'OpenCloset::Calculator::LateFee',     'v0.3.0';
 requires 'OpenCloset::Common',                  'v0.1.0';
 requires 'OpenCloset::Config',                  '0.002';
 requires 'OpenCloset::DB::Plugin::Order::Sale', '0.001';
