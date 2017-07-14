@@ -632,7 +632,7 @@
 
 <hr>
 
-<div class="panel panel-default">
+<div class="panel panel-info">
   <div class="panel-heading">
     <h3 class="panel-title">
       <button class="btn btn-default btn-xs btn-edit" data-target-id="form-order-desc" type="button">
@@ -655,7 +655,7 @@
   </div>
 </div>
 
-<div class="panel panel-default">
+<div class="panel panel-success">
   <div class="panel-heading">
     <h3 class="panel-title">
       <button class="btn btn-default btn-xs btn-edit" data-target-id="form-order-message" type="button">
@@ -678,7 +678,7 @@
   </div>
 </div>
 
-<div class="panel panel-default">
+<div class="panel panel-warning">
   <div class="panel-heading">
     <h3 class="panel-title">
       <button class="btn btn-default btn-xs btn-edit" data-target-id="form-order-return_memo" type="button">
