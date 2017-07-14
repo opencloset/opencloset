@@ -103,6 +103,7 @@
           <th>대여 기간</th>
           <td>
             <select name="additional_day" class="chosen-select" data-placeholder="대여 기간" data-update-url="<%= url_for('/api/order/' . $order->id) %>" data-reload="1">
+              <option value=""></option>
               % for my $i (0..30) {
                 <option value="<%= $i %>"<%= $order->additional_day == $i ? ' selected' : '' %>>
                   <%= $i + 3 %>박 <%= $i + 4 %>일 
