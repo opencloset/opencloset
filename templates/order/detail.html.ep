@@ -359,7 +359,7 @@
       <tr>
         <th>착용 날짜</th>
         <td>
-          % if (my $wearon_date = $order->wearon_date) {
+          % if (my $wearon_date = $user_info->wearon_date) {
             <samp>
               %= $wearon_date->ymd
             </samp>
