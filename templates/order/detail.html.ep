@@ -91,25 +91,35 @@
         <tr>
           <th>담당자</th>
           <td>
-            <select name="staff_id" class="chosen-select" data-placeholder="담당자" data-update-url="<%= url_for('/api/order/' . $order->id) %>">
-              % my $staff_id = $order->staff_id || $self->current_user->id;
-              % for my $staff (@$staff) {
-                <option value="<%= $staff->id %>"<%= $staff_id == $staff->id ? ' selected' : '' %>><%= $staff->name %></option>
+            % if ($order->status_id == $PAYMENT or $order->status_id == $RENTAL) {
+              <select name="staff_id" class="chosen-select" data-placeholder="담당자" data-update-url="<%= url_for('/api/order/' . $order->id) %>">
+                % my $staff_id = $order->staff_id || $self->current_user->id;
+                % for my $staff (@$staff) {
+                  <option value="<%= $staff->id %>"<%= $staff_id == $staff->id ? ' selected' : '' %>><%= $staff->name %></option>
+                % }
+              </select>
+            % } else {
+              % if (my $staff = $order->staff) {
+                %= $staff->name
               % }
-            </select>
+            % }
           </td>
         </tr>
         <tr>
           <th>대여 기간</th>
           <td>
-            <select name="additional_day" class="chosen-select" data-placeholder="대여 기간" data-update-url="<%= url_for('/api/order/' . $order->id) %>" data-reload="1">
-              <option value=""></option>
-              % for my $i (0..30) {
-                <option value="<%= $i %>"<%= $order->additional_day == $i ? ' selected' : '' %>>
-                  <%= $i + 3 %>박 <%= $i + 4 %>일 
-                </option>
-              % }
-            </select>
+            % if ($order->status_id == $PAYMENT or $order->status_id == $RENTAL) {
+              <select name="additional_day" class="chosen-select" data-placeholder="대여 기간" data-update-url="<%= url_for('/api/order/' . $order->id) %>" data-reload="1">
+                <option value=""></option>
+                % for my $i (0..30) {
+                  <option value="<%= $i %>"<%= $order->additional_day == $i ? ' selected' : '' %>>
+                    <%= $i + 3 %>박 <%= $i + 4 %>일
+                  </option>
+                % }
+              </select>
+            % } else {
+              %= sprintf("%d박 %d일", 3 + $order->additional_day, 4 + $order->additional_day)
+            % }
           </td>
         </tr>
         <tr>
@@ -120,20 +130,32 @@
                 %= $rental_date->ymd
               </samp>
             % } else {
-              <samp class="text-muted">
-                %= $today->ymd
-                <small>오늘</small>
-              </samp>
+              <time>
+                <samp class="text-muted">
+                  %= $today->ymd
+                  <small>오늘</small>
+                </samp>
+              </time>
             % }
           </td>
         </tr>
         <tr>
           <th>반납 예정일</th>
           <td>
-            % if (my $target_date = $order->target_date) {
-              <input name="target_date" id="datepicker-target-date" data-date-format="yyyy-mm-dd" data-update-url="<%= url_for('/api/order/' . $order->id) %>" placeholder="반납 예정일" value="<%= $target_date->ymd %>">
+            % if ($order->status_id == $PAYMENT or $order->status_id == $RENTAL) {
+              % if (my $target_date = $order->target_date) {
+                <input name="target_date" id="datepicker-target-date" data-date-format="yyyy-mm-dd" data-update-url="<%= url_for('/api/order/' . $order->id) %>" placeholder="반납 예정일" value="<%= $target_date->ymd %>">
+              % } else {
+                <input name="target_date" id="datepicker-target-date" data-date-format="yyyy-mm-dd" data-update-url="<%= url_for('/api/order/' . $order->id) %>" placeholder="반납 예정일">
+              % }
             % } else {
-              <input name="target_date" id="datepicker-target-date" data-date-format="yyyy-mm-dd" data-update-url="<%= url_for('/api/order/' . $order->id) %>" placeholder="반납 예정일">
+              % if (my $target_date = $order->target_date) {
+                <time>
+                  <samp>
+                    %= $target_date->ymd
+                  </samp>
+                </time>
+              % }
             % }
           </td>
         </tr>
@@ -142,7 +164,9 @@
           <td>
             % if (my $return_date = $order->return_date) {
               <samp>
-                %= $return_date->ymd
+                <time>
+                  %= $return_date->ymd
+                </time>
               </samp>
             % }
           </td>
@@ -150,15 +174,19 @@
         <tr>
           <th>결제방법</th>
           <td>
-            <select name="price_pay_with" class="chosen-select" data-placeholder="결제방법" data-update-url="<%= url_for('/api/order/' . $order->id) %>">
-              <option value=""></option>
-              % my $price_pay_with = $order->price_pay_with || '';
-              % for my $pay_with (qw/현금 카드 계좌이체 현금영수증 세금계산서 미납 쿠폰 쿠폰+현금 쿠폰+카드/) {
-                <option value="<%= $pay_with %>"<%= $price_pay_with eq $pay_with ? ' selected' : '' %>>
-                  %= $pay_with
-                </option>
-              % }
-            </select>
+            % if ($order->status_id == $PAYMENT or $order->status_id == $RENTAL) {
+              <select name="price_pay_with" class="chosen-select" data-placeholder="결제방법" data-update-url="<%= url_for('/api/order/' . $order->id) %>">
+                <option value=""></option>
+                % my $price_pay_with = $order->price_pay_with || '';
+                % for my $pay_with (qw/현금 카드 계좌이체 현금영수증 세금계산서 미납 쿠폰 쿠폰+현금 쿠폰+카드/) {
+                  <option value="<%= $pay_with %>"<%= $price_pay_with eq $pay_with ? ' selected' : '' %>>
+                    %= $pay_with
+                  </option>
+                % }
+              </select>
+            % } else {
+              %= $order->price_pay_with || ''
+            % }
           </td>
         </tr>
         <tr>
@@ -391,10 +419,20 @@
       <tr>
         <th>반납 희망일</th>
         <td>
-          % if (my $user_target_date = $order->user_target_date) {
-            <input name="user_target_date" id="datepicker-user-target-date" data-date-format="yyyy-mm-dd" data-update-url="<%= url_for('/api/order/' . $order->id) %>" placeholder="반납 희망일" value="<%= $user_target_date->ymd %>">
+          % if ($order->status_id == $PAYMENT or $order->status_id == $RENTAL) {
+            % if (my $user_target_date = $order->user_target_date) {
+              <input name="user_target_date" id="datepicker-user-target-date" data-date-format="yyyy-mm-dd" data-update-url="<%= url_for('/api/order/' . $order->id) %>" placeholder="반납 희망일" value="<%= $user_target_date->ymd %>">
+            % } else {
+              <input name="user_target_date" id="datepicker-user-target-date" data-date-format="yyyy-mm-dd" data-update-url="<%= url_for('/api/order/' . $order->id) %>" placeholder="반납 희망일">
+            % }
           % } else {
-            <input name="user_target_date" id="datepicker-user-target-date" data-date-format="yyyy-mm-dd" data-update-url="<%= url_for('/api/order/' . $order->id) %>" placeholder="반납 희망일">
+            % if (my $user_target_date = $order->user_target_date) {
+              <time>
+                <samp>
+                  %= $user_target_date->ymd
+                </samp>
+              </time>
+            % }
           % }
         </td>
       </tr>
