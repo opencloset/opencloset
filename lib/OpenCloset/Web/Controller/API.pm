@@ -16,7 +16,7 @@ use Mojo::JSON qw/decode_json/;
 
 use OpenCloset::Calculator::LateFee;
 use OpenCloset::Common::Unpaid ();
-use OpenCloset::Constants::Status qw/$LOST $DISCARD $RETURNED/;
+use OpenCloset::Constants::Status qw/$LOST $DISCARD $RETURNED $PAYMENT/;
 
 has DB => sub { shift->app->DB };
 
@@ -598,10 +598,18 @@ sub api_update_order {
     my $order = $self->get_order( { id => $order_params{id} } );
     return unless $order;
 
-    my $days = $order_params{additional_day};
-    $self->app->api->additional_day( $order, $days ) if defined $days;
+    my $days      = $order_params{additional_day};
+    my $status_id = $order_params{status_id};
+    if ( defined $days ) {
+        $self->app->api->additional_day( $order, $days );
+    }
+    elsif ( $status_id and $status_id == $PAYMENT ) {
+        $self->app->api->boxed2payment($order);
+    }
+    else {
+        $order = $self->update_order( \%order_params, \%order_detail_params );
+    }
 
-    $order = $self->update_order( \%order_params, \%order_detail_params );
     return unless $order;
 
     #
