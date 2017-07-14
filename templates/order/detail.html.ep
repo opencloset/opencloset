@@ -553,7 +553,7 @@
   </p>
 % }
 
-<table id="table-order-details" class="table table-bordered table-hover">
+<table id="table-order-details" class="table table-bordered table-hover table-striped table-condensed">
   <thead>
     <tr>
       <th>항목</th>
