@@ -626,9 +626,16 @@ sub detail {
         { order_by => { -desc => 'return_date' } },
     );
 
-    my $visited = { count => 0, delta => undef };
+    my $visited = { count => 0, delta => undef, coupon => 0 };
     if ( my $count = $returned->count ) {
-        $visited->{count} = $count;
+        $visited->{count}  = $count;
+        $visited->{coupon} = $returned->search(
+            {
+                coupon_id       => { '!=' => undef },
+                'coupon.status' => 'used'
+            },
+            { join => 'coupon' }
+        );
         my $last         = $returned->first;
         my $booking      = $order->booking;
         my $last_booking = $last->booking;

@@ -162,7 +162,14 @@
           </td>
         </tr>
         <tr>
-          <th>쿠폰</th>
+          <th>
+            쿠폰
+            % if (my $count = $visited->{coupon}) {
+              <small>
+                <%= $count %>회 사용
+              </small>
+            % }
+          </th>
           <td>
             % if (my $coupon = $order->coupon) {
               %= coupon2label($coupon)
