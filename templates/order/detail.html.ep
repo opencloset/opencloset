@@ -327,7 +327,11 @@
     <table class="table table-hover table-striped table-condensed">
       <tr>
         <th>이름</th>
-        <td><%= $user->name %></td>
+        <td>
+          <a href="<%= url_for('/user/' . $user->id) %>">
+            <%= $user->name %>
+          </a>
+        </td>
       </tr>
       <tr>
         <th>대여 이력</th>
