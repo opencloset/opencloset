@@ -447,8 +447,11 @@
       <tr>
         <th>전화번호</th>
         <td>
+          <i class="fa fa-mobile" aria-hidden="true"></i>
           <samp>
-            %= $user_info->phone
+            <a href="<%= url_for('/sms')->query(to => $user_info->phone) %>" target="_blank">
+              %= $user_info->phone
+            </a>
           </samp>
         </td>
       </tr>
