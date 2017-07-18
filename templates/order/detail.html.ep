@@ -364,7 +364,7 @@
         <th>이름</th>
         <td>
           <a href="<%= url_for('/user/' . $user->id) %>">
-            <i class="fa fa-female" aria-hidden="true"></i>
+            <i class="fa fa-<%= $user_info->gender %>" aria-hidden="true"></i>
             <%= $user->name %>
             <small title="나이"><%= age($user_info->birth) %></small>
           </a>
