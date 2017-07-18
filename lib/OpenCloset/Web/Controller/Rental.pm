@@ -289,9 +289,14 @@ sub payment2rental {
         $success  = $api->payment2box($order);
     }
     else {
-        $method   = 'payment2rental';
         $redirect = $self->url_for("/orders/$id");
-        $success  = $api->payment2rental($order);
+        unless ( $order->price_pay_with ) {
+            $self->flash( error => '결제방법을 선택해주세요.' );
+            return $self->redirect_to($redirect);
+        }
+
+        $method  = 'payment2rental';
+        $success = $api->payment2rental($order);
     }
 
     unless ($success) {
