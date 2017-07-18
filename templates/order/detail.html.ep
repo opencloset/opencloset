@@ -54,7 +54,7 @@
           <th>상태</th>
           <td>
             % if (my $status = $order->status) {
-              <span class="order-status label" data-order-status="<%= $status->name %>">
+              <span class="order-status order-status-<%= $status->id %> label" data-order-status="<%= $status->name %>">
                 %= $status->name
               </span>
             % }

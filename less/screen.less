@@ -1241,3 +1241,21 @@ small.rental-price-ext-days {
 #modal-refund input {
     text-align: right;
 }
+.label.order-status {
+    // 대여가능
+    &.order-status-1 {
+        background-color: #87b87f !important;
+    }
+    // 대여중
+    &.order-status-2 {
+        background-color: #d15b47 !important;
+    }
+    // 부분반납, 반납배송중, 방문안함, 방문
+    &.order-status-10,&.order-status-11,&.order-status-12,&.order-status-13 {
+        background-color: #ffb752 !important;
+    }
+    // 방문예약,배송예약
+    &.order-status-14,&.order-status-15 {
+        background-color: #428bca !important;
+    }
+}
