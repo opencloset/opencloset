@@ -22,25 +22,6 @@ $ ->
       complete: (jqXHR, textStatus) ->
         location.reload() if reload
 
-  $('#btn-ignore-sms:not(.disabled)').click ->
-    $this = $(@)
-    $this.addClass('disabled')
-
-    $this.toggleClass('btn-default btn-success')
-    ignore_sms = if $this.hasClass('btn-success') then 0 else 1
-    $this.text if ignore_sms then 'off' else 'on'
-    url = $this.data('update-url')
-    $.ajax url,
-      type: 'PUT'
-      dataType: 'json'
-      data: { ignore_sms: ignore_sms }
-      success: (data, textStatus, jqXHR) ->
-        $.growl.notice({ title: "알림", message: "연체문자전송이 수정되었습니다." })
-      error: (jqXHR, textStatus, errorThrown) ->
-        $.growl.error({ message: jqXHR.responseJSON.error })
-      complete: (jqXHR, textStatus) ->
-        $this.removeClass('disabled')
-
   $('#datepicker-target-date,#datepicker-user-target-date').datepicker
     language: 'ko'
     autoclose: true
@@ -140,19 +121,10 @@ $ ->
 
   $('#btn-return-all').click (e) ->
     return if $(@).hasClass('disabled')
-    discount = $('#form-late-fee-discount input[name=late_fee_discount]').val()
-    $('#form-returned input[name=late_fee_discount]').val(discount)
-    ignore = if $('#toggle-ignore-sms').prop('checked') then '1' else '0'
-    $('#form-returned input[name=ignore_sms]').val(ignore)
     $('#form-returned').submit()
 
   $('#btn-return-partial').click (e) ->
     return if $(@).hasClass('disabled')
-    discount = $('#form-late-fee-discount input[name=late_fee_discount]').val()
-    $('#form-returned input[name=late_fee_discount]').val(discount)
-    ignore = if $('#toggle-ignore-sms').prop('checked') then '1' else '0'
-    $('#form-returned input[name=ignore_sms]').val(ignore)
-
     $('#table-order-details .order-detail-stage .fa-check-square-o').each (i, el) ->
       code = $(el).parent().data('code')
       $('<input>').attr
@@ -160,6 +132,7 @@ $ ->
         name: 'codes'
         value: code
       .appendTo('#form-returned')
+
     $('#form-returned').submit()
 
   $('#btn-late-fee-discount').click (e) ->
@@ -168,7 +141,8 @@ $ ->
     $('#late-fee').html('0')
 
   $('#toggle-ignore-sms').change ->
-    val = if $(@).prop('checked') then '1' else '0'
+    ignore = if $(@).prop('checked') then '1' else '0'
+    $('#form-returned input[name=ignore_sms]').val(ignore)
 
   $('#form-late-fee-discount').submit (e) ->
     e.preventDefault()
@@ -179,6 +153,7 @@ $ ->
     discount = $(@).val() or 0
     late_fee = late_fee - discount
     $('#late-fee').html(OpenCloset.commify(late_fee))
+    $('#form-returned input[name=late_fee_discount]').val(discount)
 
   $('#form-coupon-code').on 'submit', (e) ->
     e.preventDefault()
@@ -203,3 +178,26 @@ $ ->
     $form = $(@).closest('form')
     $form.find('#rental-reset').val('1')
     $form.submit()
+
+  $('[data-toggle="tooltip"]').tooltip()
+  $('.action-toggle input[data-toggle="toggle"]').on 'change', (e) ->
+    $this = $(@)
+    name  = $this.prop('name')
+    url   = $this.data('update-url')
+    label = $this.data('on')
+
+    return unless name
+    return unless url
+
+    data = {}
+    checked = $this.prop('checked')
+    data[name] = if checked then '1' else '0'
+
+    $.ajax url,
+      type: 'PUT'
+      dataType: 'json'
+      data: data
+      success: (data, textStatus, jqXHR) ->
+        $.growl.notice({ title: "알림", message: "#{label}이(가) 수정되었습니다." })
+      error: (jqXHR, textStatus, errorThrown) ->
+        $.growl.error({ message: jqXHR.responseJSON.error })
