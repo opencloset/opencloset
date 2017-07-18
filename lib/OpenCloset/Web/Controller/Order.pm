@@ -421,7 +421,10 @@ sub detail {
     my $today = DateTime->today( time_zone => $self->config->{timezone} );
     my @staff = $self->DB->resultset('User')->search(
         { 'user_info.staff' => 1 },
-        { join              => 'user_info' }
+        {
+            join     => 'user_info',
+            order_by => 'name'
+        }
     );
 
     my $calc  = OpenCloset::Calculator::LateFee->new;
