@@ -79,7 +79,7 @@
         </p>
         <div class="hr hr12 dotted"></div>
         <p>
-          <a href="<%= url_for( '/order/' . $order->id ) %>"> 주문서 </a>
+          <a href="<%= url_for( '/orders/' . $order->id ) %>"> 주문서 </a>
           -
           <span class="editable order-status" data-value="<%= $order->status_id %>"> </span>
         </p>
