@@ -91,7 +91,7 @@
         <tr>
           <th>담당자</th>
           <td>
-            % if ($order->status_id == $PAYMENT or $order->status_id == $RENTAL) {
+            % if ($order->status_id == $PAYMENT) {
               <select name="staff_id" class="chosen-select" data-placeholder="담당자" data-update-url="<%= url_for('/api/order/' . $order->id) %>">
                 % my $staff_id = $order->staff_id || $self->current_user->id;
                 % for my $staff (@$staff) {
@@ -108,7 +108,7 @@
         <tr>
           <th>대여 기간</th>
           <td>
-            % if ($order->status_id == $PAYMENT or $order->status_id == $RENTAL) {
+            % if ($order->status_id == $PAYMENT) {
               <select name="additional_day" class="chosen-select" data-placeholder="대여 기간" data-update-url="<%= url_for('/api/order/' . $order->id) %>" data-reload="1">
                 <option value=""></option>
                 % for my $i (0..30) {
@@ -142,7 +142,7 @@
         <tr>
           <th>반납 예정일</th>
           <td>
-            % if ($order->status_id == $PAYMENT or $order->status_id == $RENTAL) {
+            % if ($order->status_id == $PAYMENT) {
               % if (my $target_date = $order->target_date) {
                 <input name="target_date" id="datepicker-target-date" data-date-format="yyyy-mm-dd" data-update-url="<%= url_for('/api/order/' . $order->id) %>" placeholder="반납 예정일" value="<%= $target_date->ymd %>">
               % } else {
@@ -174,7 +174,7 @@
         <tr>
           <th>결제방법</th>
           <td>
-            % if ($order->status_id == $PAYMENT or $order->status_id == $RENTAL) {
+            % if ($order->status_id == $PAYMENT) {
               <select name="price_pay_with" class="chosen-select" data-placeholder="결제방법" data-update-url="<%= url_for('/api/order/' . $order->id) %>">
                 <option value=""></option>
                 % my $price_pay_with = $order->price_pay_with || '';
