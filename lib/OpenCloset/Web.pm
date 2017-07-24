@@ -7,8 +7,11 @@ use CHI;
 use DateTime;
 
 use Iamport::REST::Client;
+
 use OpenCloset::Schema;
 use OpenCloset::DB::Plugin::Order::Sale;
+use OpenCloset::API::Order;
+use OpenCloset::API::OrderDetail;
 
 has CACHE => sub {
     my $self  = shift;
@@ -39,6 +42,16 @@ has iamport => sub {
     my $self = shift;
     my $conf = $self->config->{iamport};
     return Iamport::REST::Client->new( key => $conf->{key}, secret => $conf->{secret} );
+};
+
+has api => sub {
+    my $self = shift;
+    return OpenCloset::API::Order->new( schema => $self->DB );
+};
+
+has detail_api => sub {
+    my $self = shift;
+    return OpenCloset::API::OrderDetail->new( schema => $self->DB );
 };
 
 =head1 METHODS
@@ -307,12 +320,18 @@ sub _private_routes {
     $r->get('/rental/:ymd')->to('rental#ymd');
     $r->get('/rental/:ymd/search')->to('rental#search');
     $r->get('/rental/order/:order_id')->to('rental#order');
+    $r->post('/orders/:id/rental')->to('rental#payment2rental');
+    $r->post('/orders/:id/returned')->to('rental#rental2returned');
+    $r->post('/orders/:id/payback')->to('rental#rental2payback');
 
     $r->get('/order')->to('order#index');
     $r->post('/order')->to('order#create');
     $r->get('/order/:id')->to('order#order');
     $r->post('/order/:id/update')->to('order#update');
     $r->post('/order/:id/coupon')->to('order#create_coupon');
+
+    $r->get('/orders/:id')->to('order#detail');
+    $r->get('/orders/:id/late_fee')->to('order#late_fee');
 
     $r->get('/booking')->to('booking#index');
     $r->get('/booking/:ymd')->to('booking#ymd');

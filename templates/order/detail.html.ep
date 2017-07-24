@@ -1,0 +1,826 @@
+% use OpenCloset::Constants::Status qw/$RENTAL $PAYMENT $BOXED/;
+% my $_id = 'order-detail';
+% layout 'default',
+%   page_id     => $_id,
+%   active_id   => 'order',
+%   breadcrumbs => [
+%     { text => meta_text('order'), link => url_for( meta_link('order') ) },
+%     { text => meta_text($_id) },
+%   ],
+%   jses => [
+%     '/lib/bootstrap3-editable/js/bootstrap-editable.min.js',
+%     '/components/growl/javascripts/jquery.growl.js',
+%     '/components/jquery-timeago/jquery.timeago.js',
+%     '/components/jquery-timeago/locales/jquery.timeago.ko.js',
+%     '/components/bootstrap-toggle/js/bootstrap-toggle.min.js'
+%   ],
+%   csses => [
+%     '/lib/bootstrap3-editable/css/bootstrap-editable.css',
+%     '/components/growl/stylesheets/jquery.growl.css',
+%     '/components/bootstrap-toggle/css/bootstrap-toggle.min.css'
+%   ];
+% title meta_text($_id);
+
+% if (my $success = flash 'success') {
+  <div class="alert alert-success">
+    %= $success
+  </div>
+% }
+
+% if (my $error = flash 'error') {
+  <div class="alert alert-danger">
+    %= $error;
+  </div>
+% }
+
+% if (my $memo = $order->return_memo) {
+  <p>반납 확인 메모 4F</p>
+  <pre><%= $memo %></pre>
+% }
+
+<div class="row">
+  <div class="col-md-6">
+    <table class="table table-hover table-striped table-condensed">
+      <tbody>
+        <tr>
+          <th>번호</th>
+          <td>
+            <samp>
+              %= $order->id
+            </samp>
+          </td>
+        </tr>
+        <tr>
+          <th>상태</th>
+          <td>
+            % if (my $status = $order->status) {
+              <span class="order-status order-status-<%= $status->id %> label" data-order-status="<%= $status->name %>">
+                %= $status->name
+              </span>
+            % }
+          </td>
+        </tr>
+        % if (my $parent = $order->parent) {
+          <tr>
+            <th>상위 주문서</th>
+            <td>
+              <a href="<%= url_for('/orders/' . $parent->id) %>"><%= $parent->id %></a>
+            </td>
+          </tr>
+        % }
+
+        % my $children = $order->orders;
+        % if ($children->count) {
+          <tr>
+            <th>하위 주문서</th>
+            <td>
+              % while (my $child = $children->next) {
+                <a href="<%= url_for('/orders/' . $child->id) %>"><%= $child->id %></a>
+              % }
+            </td>
+          </tr>
+        % }
+        <tr>
+          <th>주문서 종류</th>
+          <td>
+            <span class="label label-<%= $order->online ? 'success' : 'default' %>">
+              %= $order->online ? 'online' : 'offline'
+            </span>
+          </td>
+        </tr>
+        <tr>
+          <th>담당자</th>
+          <td>
+            % if ($order->status_id == $PAYMENT) {
+              <select name="staff_id" class="chosen-select" data-placeholder="담당자" data-update-url="<%= url_for('/api/order/' . $order->id) %>">
+                % my $staff_id = $order->staff_id || $self->current_user->id;
+                % for my $staff (@$staff) {
+                  <option value="<%= $staff->id %>"<%= $staff_id == $staff->id ? ' selected' : '' %>><%= $staff->name %></option>
+                % }
+              </select>
+            % } else {
+              % if (my $staff = $order->staff) {
+                %= $staff->name
+              % }
+            % }
+          </td>
+        </tr>
+        <tr>
+          <th>대여 기간</th>
+          <td>
+            % if ($order->status_id == $PAYMENT) {
+              <select name="additional_day" class="chosen-select" data-placeholder="대여 기간" data-update-url="<%= url_for('/api/order/' . $order->id) %>" data-reload="1">
+                <option value=""></option>
+                % for my $i (0..30) {
+                  <option value="<%= $i %>"<%= $order->additional_day == $i ? ' selected' : '' %>>
+                    <%= $i + 3 %>박 <%= $i + 4 %>일
+                  </option>
+                % }
+              </select>
+            % } else {
+              %= sprintf("%d박 %d일", 3 + $order->additional_day, 4 + $order->additional_day)
+            % }
+          </td>
+        </tr>
+        <tr>
+          <th>대여일</th>
+          <td>
+            % if (my $rental_date = $order->rental_date) {
+              <samp>
+                %= $rental_date->ymd
+              </samp>
+            % } else {
+              <time>
+                <samp class="text-muted">
+                  %= $today->ymd
+                  <small>오늘</small>
+                </samp>
+              </time>
+            % }
+          </td>
+        </tr>
+        <tr>
+          <th>반납 예정일</th>
+          <td>
+            % if ($order->status_id == $PAYMENT) {
+              % if (my $target_date = $order->target_date) {
+                <input name="target_date" id="datepicker-target-date" data-date-format="yyyy-mm-dd" data-update-url="<%= url_for('/api/order/' . $order->id) %>" placeholder="반납 예정일" value="<%= $target_date->ymd %>">
+              % } else {
+                <input name="target_date" id="datepicker-target-date" data-date-format="yyyy-mm-dd" data-update-url="<%= url_for('/api/order/' . $order->id) %>" placeholder="반납 예정일">
+              % }
+            % } else {
+              % if (my $target_date = $order->target_date) {
+                <time>
+                  <samp>
+                    %= $target_date->ymd
+                  </samp>
+                </time>
+              % }
+            % }
+          </td>
+        </tr>
+        <tr>
+          <th>반납일</th>
+          <td>
+            % if (my $return_date = $order->return_date) {
+              <samp>
+                <time>
+                  %= $return_date->ymd
+                </time>
+              </samp>
+            % }
+          </td>
+        </tr>
+        <tr>
+          <th>결제방법</th>
+          <td>
+            % if ($order->status_id == $PAYMENT) {
+              <select name="price_pay_with" class="chosen-select" data-placeholder="결제방법" data-update-url="<%= url_for('/api/order/' . $order->id) %>">
+                <option value=""></option>
+                % my $price_pay_with = $order->price_pay_with || '';
+                % for my $pay_with (qw/현금 카드 계좌이체 현금영수증 세금계산서 미납 쿠폰 쿠폰+현금 쿠폰+카드/) {
+                  <option value="<%= $pay_with %>"<%= $price_pay_with eq $pay_with ? ' selected' : '' %>>
+                    %= $pay_with
+                  </option>
+                % }
+              </select>
+            % } else {
+              %= $order->price_pay_with || ''
+            % }
+          </td>
+        </tr>
+        <tr>
+          <th>
+            쿠폰
+            % if (my $count = $visited->{coupon}) {
+              <small>
+                <%= $count %>회 사용
+              </small>
+            % }
+          </th>
+          <td>
+            % if (my $coupon = $order->coupon) {
+              %= coupon2label($coupon)
+            % } else {
+              <form id="form-coupon-code" class="form-inline" action="<%= url_for('/order/' . $order->id . '/coupon') %>" method="POST">
+                <div class="input-group">
+                  <input id="input-coupon-code" class="form-control input-sm" name="coupon-code" type="text" placeholder="쿠폰코드">
+                  <span class="input-group-btn">
+                    <button class="btn btn-xs btn-default" type="submit">입력</button>
+                  </span>
+                </div>
+              </form>
+            % }
+          </td>
+        </tr>
+        <tr>
+          <th>기존총액(원)</th>
+          <td>
+            <samp><%= commify($price->{origin}) %></samp>
+          </td>
+        </tr>
+        <tr>
+          <th>할인금액(원)</th>
+          <td>
+            <samp><%= commify(abs($price->{discount})) %></samp>
+          </td>
+        </tr>
+        <tr>
+          <th>대여비(원)</th>
+          <td>
+            <strong>
+              <samp><%= commify($price->{rental}) %></samp>
+            </strong>
+            <small class="rental-price-ext-days">
+              % if (my $days = $order->additional_day) {
+                %= sprintf('%d일 연장: %s', $days, $self->commify($price->{rental} - ($price->{origin} + $price->{discount})))
+              % }
+            </small>
+          </td>
+        </tr>
+        <tr>
+          <th>
+            % if (my $url = tracking_url($order)) {
+              <a id="order-tracking-url" href="<%= $url %>" target="_blank">
+                <i class="fa fa-external-link" aria-hidden="true"></i>
+                반납방법
+              </a>
+            % } else {
+              반납방법
+            % }
+          </th>
+          <td>
+            <select name="return_method" class="chosen-select" data-placeholder="반납방법" data-update-url="<%= url_for('/api/order/' . $order->id) %>">
+              <option value=""></option>
+              % my $return_method = $order->return_method || '';
+              % for my $method (qw/방문반납 CJ대한통운 KGB 동부 롯데 옐로우캡 우체국 한진/) {
+                <option value="<%= $method %>"<%= $return_method =~ m/$method/ ? ' selected' : '' %>>
+                  %= $method
+                </option>
+              % }
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <th>
+            연체/연장료
+            % if ($late_fee) {
+              <i id="late-fee-tip" class="fa fa-info-circle" aria-hidden="true" data-toggle="tooltip" title="<%= $extension_days %>일 연장(<%= commify($extension_fee) %>) + <%= $overdue_days %>일 연체(<%= commify($overdue_fee) %>)"></i>
+            % }
+          </th>
+          <td>
+            % if ($late_fee) {
+              <div>
+                <strong>
+                  <samp id="late-fee" data-late-fee="<%= $late_fee %>"><%= commify($late_fee) %></samp>
+                </strong>
+              </div>
+            % } else {
+              해당사항없음
+            % }
+          </td>
+        </tr>
+        <tr>
+          <th>연체/연장료 결제방법</th>
+          <td>
+            % if ($late_fee) {
+              % my $late_fee_pay_with = $order->late_fee_pay_with || '';
+              <select name="late_fee_pay_with" class="chosen-select" data-placeholder="연체/연장료 결제 방법" data-update-url="<%= url_for('/api/order/' . $order->id) %>">
+                <option value=""></option>
+                % for my $pay_with (qw/현금 카드 계좌이체 현금영수증 세금계산서 미납/) {
+                  <option value="<%= $pay_with %>"<%= $late_fee_pay_with eq $pay_with ? ' selected' : '' %>>
+                    %= $pay_with
+                  </option>
+                % }
+              </select>
+            % } else {
+              해당사항없음
+            % }
+          </td>
+        </tr>
+        <tr>
+          <th>연체/연장료 에누리</th>
+          <td>
+            % if ($late_fee) {
+              <form id="form-late-fee-discount" class="form-inline">
+                <input type="text" name="late_fee_discount" class="form-control" placeholder="연체/연장료 에누리">
+                <button id="btn-late-fee-discount" type="button" class="btn btn-default btn-sm">전체 에누리</button>
+              </form>
+            % } else {
+              해당사항없음
+            % }
+          </td>
+        </tr>
+        <tr>
+          <th>택배발송/반납일</th>
+          <td>
+            <input id="calc-date" data-date-format="yyyy-mm-dd" data-fetch-url="<%= url_for('/orders/' . $order->id . '/late_fee') %>" data-date-end-date="0d" type="text" name="return_date" value="<%= $today->ymd %>">
+          </td>
+        </tr>
+        <tr>
+          <th>
+            <i class="fa fa-toggle-on" aria-hidden="true"></i>
+          </th>
+          <td class="action-toggle">
+            <input
+              name="ignore_sms"
+              id="toggle-ignore-latefee-sms"
+              data-toggle="toggle"
+              data-on="연체문자안보냄"
+              data-off="연체문자보냄"
+              data-width="100"
+              data-onstyle="success"
+              data-size="mini"
+              data-update-url="<%= url_for('/api/order/' . $order->id) %>"
+              type="checkbox"
+              <%= $order->ignore_sms ? 'checked' : '' %>>
+            <input
+              name="bestfit"
+              id="toggle-bestfit"
+              data-toggle="toggle"
+              data-on="Bestfit"
+              data-off="보통"
+              data-width="100"
+              data-onstyle="success"
+              data-size="mini"
+              data-update-url="<%= url_for('/api/order/' . $order->id) %>"
+              type="checkbox"
+              <%= $order->bestfit ? 'checked' : '' %>>
+            <input
+              name="ignore"
+              id="toggle-ignore-search-engine"
+              data-toggle="toggle"
+              data-on="검색에 제외"
+              data-off="검색에 포함"
+              data-width="100"
+              data-onstyle="success"
+              data-size="mini"
+              data-update-url="<%= url_for('/api/order/' . $order->id) %>"
+              type="checkbox"
+              <%= $order->ignore ? 'checked' : '' %>>
+
+            <p class="help-block">
+              <small>
+                대리인이나 단체대여, 부정확한 치수측정등은 검색결과에 좋지 않은 영향을 줍니다.
+              </small>
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <th>주문 신체 치수</th>
+          <td>
+            <div>
+              <div class="btn-group btn-group-xs">
+                <button type="button" class="btn btn-success" title="height"><%= $order->height || '-' %></button>
+                <button type="button" class="btn btn-success" title="weight"><%= $order->weight || '-' %></button>
+              </div>
+            </div>
+            
+            <div>
+              <div class="btn-group btn-group-xs">
+                % for my $part (qw/bust waist hip topbelly belly/) {
+                  <button type="button" class="btn btn-info" title="<%= $part %>"><%= $order->$part || '-' %></button>
+                % }
+              </div>
+            </div>
+
+            <div>
+              <div class="btn-group btn-group-xs">
+                % for my $part (qw/thigh arm leg knee foot/) {
+                  <button type="button" class="btn btn-warning" title="<%= $part %>"><%= $order->$part || '-' %></button>
+                % }
+              </div>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="col-md-6">
+    <table class="table table-hover table-striped table-condensed">
+      <tr>
+        <th>이름</th>
+        <td>
+          <a href="<%= url_for('/user/' . $user->id) %>">
+            <i class="fa fa-<%= $user_info->gender %>" aria-hidden="true"></i>
+            <%= $user->name %>
+            <small title="나이"><%= age($user_info->birth) %></small>
+          </a>
+        </td>
+      </tr>
+      <tr>
+        <th>대여 이력</th>
+        <td>
+          % if ($visited->{count}) {
+            <strong>
+              %= $visited->{count} . '회 대여'
+            </strong>
+          % }
+          % if ($visited->{last}) {
+            -
+            <time class="timeago" datetime="<%= $visited->{last}->strftime('%FT%T%z') %>">
+              %= $visited->{last}
+            </time>
+          % }
+        </td>
+      </tr>
+      <tr>
+        <th>착용 날짜</th>
+        <td>
+          % if (my $wearon_date = $user_info->wearon_date) {
+            <samp>
+              %= $wearon_date->ymd
+            </samp>
+          % }
+        </td>
+      </tr>
+      <tr>
+        <th>대여 목적</th>
+        <td>
+          %= $user_info->purpose || ''
+        </td>
+      </tr>
+      <tr>
+        <th>상세 대여 목적</th>
+        <td>
+          %= $user_info->purpose2 || ''
+        </td>
+      </tr>
+      <tr>
+        <th>방문 예약일</th>
+        <td>
+          % if (my $booking = $order->booking) {
+            <samp>
+              %= $booking->date->strftime('%Y-%m-%d %H:%M')
+            </samp>
+          % }
+        </td>
+      </tr>
+      <tr>
+        <th>반납 희망일</th>
+        <td>
+          % if ($order->status_id == $PAYMENT or $order->status_id == $RENTAL) {
+            % if (my $user_target_date = $order->user_target_date) {
+              <input name="user_target_date" id="datepicker-user-target-date" data-date-format="yyyy-mm-dd" data-update-url="<%= url_for('/api/order/' . $order->id) %>" placeholder="반납 희망일" value="<%= $user_target_date->ymd %>">
+            % } else {
+              <input name="user_target_date" id="datepicker-user-target-date" data-date-format="yyyy-mm-dd" data-update-url="<%= url_for('/api/order/' . $order->id) %>" placeholder="반납 희망일">
+            % }
+          % } else {
+            % if (my $user_target_date = $order->user_target_date) {
+              <time>
+                <samp>
+                  %= $user_target_date->ymd
+                </samp>
+              </time>
+            % }
+          % }
+        </td>
+      </tr>
+      <tr>
+        <th>전자우편</th>
+        <td>
+          <a href="mailto: <%= $user->email %>"><%= $user->email %></a>
+        </td>
+      </tr>
+      <tr>
+        <th>전화번호</th>
+        <td>
+          <i class="fa fa-mobile" aria-hidden="true"></i>
+          <samp>
+            <a href="<%= url_for('/sms')->query(to => $user_info->phone) %>" target="_blank">
+              %= $user_info->phone
+            </a>
+          </samp>
+        </td>
+      </tr>
+      <tr>
+        <th>주소</th>
+        <td>
+          <address>
+            %= $user_info->address2
+          </address>
+        </td>
+      </tr>
+      <tr>
+        <th>신체 치수</th>
+        <td>
+          <div>
+            <div class="btn-group btn-group-xs">
+              <button type="button" class="btn btn-success" title="height"><%= $user_info->height || '-' %></button>
+              <button type="button" class="btn btn-success" title="weight"><%= $user_info->weight || '-' %></button>
+            </div>
+          </div>
+          
+          <div>
+            <div class="btn-group btn-group-xs">
+              % for my $part (qw/bust waist hip topbelly belly/) {
+                <button type="button" class="btn btn-info" title="<%= $part %>"><%= $user_info->$part || '-' %></button>
+              % }
+            </div>
+          </div>
+
+          <div>
+            <div class="btn-group btn-group-xs">
+              % for my $part (qw/thigh arm leg knee foot/) {
+                <button type="button" class="btn btn-warning" title="<%= $part %>"><%= $user_info->$part || '-' %></button>
+              % }
+            </div>
+          </div>
+        </td>
+      </tr>
+    </table>
+  </div>
+</div>
+
+<hr>
+
+<div>
+  % my $status_id = $order->status_id;
+  % if ("$PAYMENT $BOXED" =~ m/\b$status_id\b/) {
+    <form class="form-inline" action="<%= url_for('/orders/' . $order->id . '/rental') %>" method="POST">
+      <input id="rental-reset" name="reset" type="hidden" value="">
+      <a class="btn btn-info" href="<%= url_for('/order/' . $order->id . '/rental/paper/pdf') %>" target="_blank">
+        <i class="fa fa-file-pdf-o" aria-hidden="true"></i>
+        정장 반납 안내 출력
+      </a>
+
+      <button type="submit" class="btn btn-success">
+        <i class="fa fa-check" aria-hidden="true"></i>
+        주문 확정
+      </button>
+
+      <button id="btn-rental-reset" type="submit" class="btn btn-default">
+        새로 주문
+      </button>
+    </form>
+  % }
+
+  % if ($status_id == $RENTAL) {
+    <form id="form-returned" action="<%= url_for('/orders/' . $order->id . '/returned') %>" method="POST">
+      <input name="return_date" type="hidden" value="">
+      <input name="late_fee_discount" type="hidden" value="">
+      <input name="ignore_sms" type="hidden" value="1">
+    </form>
+
+    <h4>
+      <i class="fa fa-barcode fa-fw" aria-hidden="true"></i>
+      의류코드입력
+      <input id="toggle-ignore-sms" checked data-toggle="toggle" data-on="반납문자" data-off="off" data-onstyle="success" data-size="mini" type="checkbox">
+    </h4>
+
+    <form id="form-clothes-code" class="form-inline clothes-code">
+      <div class="form-group">
+        <input id="input-code" type="text" name="code" class="form-control" placeholder="의류코드" autofocus>
+      </div>
+      <button type="submit" class="btn btn-primary btn-sm">검색</button>
+      <button id="btn-return-all" class="btn btn-success btn-sm disabled" type="button">전체반납</button>
+      <button id="btn-return-partial" class="btn btn-warning btn-sm disabled" type="button">부분반납</button>
+      <button id="btn-refund" class="btn btn-default btn-sm pull-right" type="button" data-toggle="modal" data-target="#modal-refund">환불</button>
+    </form>
+  % }
+</div>
+
+<hr>
+
+% if ($suit) {
+  <p class="help-block">
+    <i class="fa fa-info-circle" aria-hidden="true"></i>
+    셋트 대여입니다.
+    %= clothes2link($suit->{top},    { with_status => 1 })
+    %= clothes2link($suit->{bottom}, { with_status => 1 })
+  </p>
+% }
+
+<table id="table-order-details" class="table table-bordered table-hover table-striped table-condensed">
+  <thead>
+    <tr>
+      <th>항목</th>
+      <th>대여 가격</th>
+      <th>기간</th>
+      <th>소계</th>
+      <th>기타</th>
+    </tr>
+  </thead>
+  <tbody>
+    % my %sum;
+    % while (my $detail = $details->next) {
+      % $sum{price} += $detail->price;
+      % $sum{final_price} += $detail->final_price;
+      % my $clothes = $detail->clothes;
+      <tr>
+        <td class="order-detail-stage order-detail-stage-<%= $detail->stage %>">
+          % if ($clothes) {
+            <span id="clothes-code-<%= substr($clothes->code, 1) %>" data-code="<%= $clothes->code %>">
+              <i class="fa fa-square-o fa-fw" aria-hidden="true"></i>
+            </span>
+            %= clothes2link($clothes, { with_status => 1, text => $detail->name })
+          % } else {
+            %= $detail->name
+          % }
+        </td>
+        <td class="text-right">
+          <samp>
+            % if ($detail->stage == 0 and $clothes) {
+              <a
+                href="#"
+                id="order-detail-price-<%= $detail->id %>"
+                class="order-detail-price editable"
+                data-disabled="<%= $order->status_id != $PAYMENT ? 'true' : 'false' %>"
+                data-showbuttons="true"
+                data-type="text"
+                data-emptytext="0"
+                data-value="<%= commify($detail->price || 0) %>"
+                data-url="<%= url_for('/order/' . $order->id . '/update') %>"
+                data-pk="<%= $detail->id %>"
+                data-name="detail-price"
+                data-is-clothes="<%= $clothes ? 'true' : 'false' %>"
+                data-is-pre-paid="<%= $detail->name eq '이전 주문 납부' ? 'true' : 'false' %>">
+              </a>
+            % } else {
+              %= commify($detail->price)
+            % }
+          </samp>
+        </td>
+        <td class="text-right">
+          % if ($detail->stage == 0 and $clothes) {
+            %= sprintf('%d박 %d일(+%d일)', 3 + $order->additional_day, 4 + $order->additional_day, $order->additional_day)
+          % }
+
+          % if ($detail->name eq '연장료') {
+            %= $extension_days
+          % }
+
+          % if ($detail->name eq '연체료') {
+            %= $overdue_days
+          % }
+        </td>
+        <td class="text-right">
+          <samp>
+            <a
+              href="#"
+              id="order-detail-final-price-<%= $detail->id %>"
+              class="order-detail-final-price editable"
+              data-disabled="<%= $order->status_id != $PAYMENT ? 'true' : 'false' %>"
+              data-showbuttons="true"
+              data-type="text"
+              data-emptytext="0"
+              data-value="<%= commify($detail->final_price || 0) %>"
+              data-url="<%= url_for('/order/' . $order->id . '/update') %>"
+              data-pk="<%= $detail->id %>"
+              data-name="detail-final_price"
+              data-is-clothes="<%= $clothes ? 'true' : 'false' %>"
+              data-is-pre-paid="<%= $detail->name eq '이전 주문 납부' ? 'true' : 'false' %>">
+            </a>
+          </samp>
+        </td>
+        <td>
+          <a
+            href="#"
+            id="order-detail-desc-<%= $detail->id %>"
+            class="order-detail editable"
+            data-showbuttons="true"
+            data-type="text"
+            data-emptytext="비어있음"
+            data-value="<%= $detail->desc || '' %>"
+            data-url="<%= url_for('/order/' . $order->id . '/update') %>"
+            data-pk="<%= $detail->id %>"
+            data-name="detail-desc"></a>
+        </td>
+      </tr>
+    % }
+    <tr>
+      <td>합계</td>
+      <td class="text-right">
+        <samp>
+          %= commify($sum{price} || 0)
+        </samp>
+      </td>
+      <td class="text-right">-</td>
+      <td class="text-right">
+        <samp>
+          %= commify($sum{final_price} || 0)
+        </samp>
+      </td>
+      <td>-</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr>
+
+<div class="panel panel-info">
+  <div class="panel-heading">
+    <h3 class="panel-title">
+      <button class="btn btn-default btn-xs btn-edit" data-target-id="form-order-desc" type="button">
+        <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
+      </button>
+      주문서 메모 5F
+    </h3>
+  </div>
+  <div class="panel-body">
+    % if (my $desc = $order->desc) {
+      <pre><%= $desc %></pre>
+    % }
+    <form id="form-order-desc" class="hide" action="<%= url_for('/api/order/' . $order->id) %>">
+      <div class="form-group">
+        <textarea id="textarea-order-desc" name="desc" rows="10" class="form-control" placeholder="주문서 메모 5F"><%= $order->desc || '' %></textarea>
+      </div>
+      <button class="btn btn-success" type="submit">저장</button>
+      <button class="btn btn-danger btn-cancel" type="button">취소</button>
+    </form>
+  </div>
+</div>
+
+<div class="panel panel-success">
+  <div class="panel-heading">
+    <h3 class="panel-title">
+      <button class="btn btn-default btn-xs btn-edit" data-target-id="form-order-message" type="button">
+        <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
+      </button>
+      대여 메세지
+    </h3>
+  </div>
+  <div class="panel-body">
+    % if (my $message = $order->message) {
+      <pre><%= $message %></pre>
+    % }
+    <form id="form-order-message" class="hide" action="<%= url_for('/api/order/' . $order->id) %>">
+      <div class="form-group">
+        <textarea id="textarea-order-message" name="message" rows="10" class="form-control" placeholder="대여 메세지"><%= $order->message || '' %></textarea>
+      </div>
+      <button class="btn btn-success" type="submit">저장</button>
+      <button class="btn btn-danger btn-cancel" type="button">취소</button>
+    </form>
+  </div>
+</div>
+
+<div class="panel panel-warning">
+  <div class="panel-heading">
+    <h3 class="panel-title">
+      <button class="btn btn-default btn-xs btn-edit" data-target-id="form-order-return_memo" type="button">
+        <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
+      </button>
+      반납 확인 메모 4F
+    </h3>
+  </div>
+  <div class="panel-body">
+    % if (my $return_memo = $order->return_memo) {
+      <pre><%= $return_memo %></pre>
+    % }
+    <form id="form-order-return_memo" class="hide" action="<%= url_for('/api/order/' . $order->id) %>">
+      <div class="form-group">
+        <textarea id="textarea-order-return_memo" name="return_memo" rows="10" class="form-control" placeholder="반납 확인 메모 4F"><%= $order->return_memo || '' %></textarea>
+      </div>
+      <button class="btn btn-success" type="submit">저장</button>
+      <button class="btn btn-danger btn-cancel" type="button">취소</button>
+    </form>
+  </div>
+</div>
+
+<hr>
+
+%= include 'partials/status-log-analyze', order => $order;
+
+<div id="modal-refund" class="modal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <form role="form" class="form-horizontal" action="<%= url_for('/orders/' . $order->id . '/payback') %>" method="POST">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title" id="refundModalLabel">
+            환불을 진행하시겠습니까?
+          </h4>
+        </div>
+        <div class="modal-body" style="height: 300px; overflow-y: auto;">
+          <div>
+            환불 수수료가 있을 경우 총액에서 수수료 금액을 제외한 금액을 고객에게 환불합니다.
+          </div>
+          <div class="space-12"></div>
+          <div class="form-group">
+            <label for="order-refund-total" class="col-sm-3 control-label no-padding-right"> 주문서 총액 </label>
+
+            <div class="col-sm-9">
+              <input type="text" class="col-xs-10 col-sm-5 order-price-input" placeholder="주문서 총액" id="order-refund-total" value="<%= $price->{rental} %>" readonly>
+            </div>
+          </div>
+
+          <div class="space-4"></div>
+
+          <div class="form-group">
+            <label for="order-refund-charge" class="col-sm-3 control-label no-padding-right"> 환불 수수료 </label>
+
+            <div class="col-sm-9">
+              <input type="text" name="charge" class="col-xs-10 col-sm-5" placeholder="환불 수수료" value="0">
+            </div>
+          </div>
+          <div id="order-refund-error"></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">취소</button>
+          <button id="btn-refund-modal-ok" type="submit" class="btn btn-primary">확인</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

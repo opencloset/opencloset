@@ -10,6 +10,7 @@ use HTTP::Tiny;
 use List::MoreUtils;
 use Try::Tiny;
 
+use OpenCloset::Calculator::LateFee;
 use OpenCloset::Common::Unpaid
     qw/unpaid_cond unpaid_attr is_nonpaid unpaid2fullpaid/;
 use OpenCloset::Constants qw/%PAY_METHOD_MAP/;
@@ -264,202 +265,17 @@ sub create {
         }
     }
 
-    my ( $order, $error ) = do {
-        my $guard = $self->DB->txn_scope_guard;
-        try {
-            use experimental qw( smartmatch );
+    my $order = $self->DB->resultset('Order')->find( $order_params{id} );
+    return $self->error( 404, { str => "Order not found: $order_params{id}" } )
+        unless $order;
 
-            #
-            # find order
-            #
-            my $order = $self->DB->resultset('Order')->find( $order_params{id} );
-            die "order not found: $order_params{id}\n" unless $order;
+    my $success =
+        $self->app->api->box2boxed( $order, $order_detail_params{clothes_code} );
 
-            my @invalid = (
-                $RENTAL,           # 대여중
-                $RETURNED,         # 반납
-                $PARTIAL_RETURNED, # 부분반납
-                $RETURNING,        # 반납배송중
-                $NOT_VISITED,      # 방문안함
-                $PAYMENT,          # 결제대기
-                $NOT_RENTAL,       # 대여안함
-                $PAYBACK,          # 환불
-                $NO_SIZE,          # 사이즈없음
-                $BOXED,            # 포장완료
-            );
-            my $status_id = $order->status_id;
-            if ( $status_id ~~ @invalid ) {
-                my $status = $self->DB->resultset('Status')->find($status_id)->name;
-                die "이미 $status 인 주문서 입니다.\n";
-            }
-
-            #
-            # 주문서를 포장완료(44) 상태로 변경
-            #
-            $order->update( { status_id => $BOXED } );
-
-            #
-            # event posting to opencloset/monitor
-            #
-            my $monitor_uri_full = $self->config->{monitor_uri} . "/events";
-            my $res = HTTP::Tiny->new( timeout => 1 )->post_form(
-                $monitor_uri_full,
-                { sender => 'order', order_id => $order_params{id}, from => $BOX, to => $BOXED },
-            );
-            $self->log->warn(
-                "Failed to post event to monitor: $monitor_uri_full: $res->{reason}")
-                unless $res->{success};
-
-            my @order_details;
-            for ( my $i = 0; $i < @{ $order_detail_params{clothes_code} }; ++$i ) {
-                my $clothes_code = $order_detail_params{clothes_code}[$i];
-                my $clothes = $self->DB->resultset('Clothes')->find( { code => $clothes_code } );
-
-                die "clothes not found: $clothes_code\n" unless $clothes;
-
-                my $name = join(
-                    q{ - },
-                    $self->trim_clothes_code($clothes),
-                    $self->config->{category}{ $clothes->category }{str},
-                );
-
-                #
-                # 주문서 하부의 모든 의류 항목을 결제대기(19) 상태로 변경
-                #
-                $clothes->update( { status_id => $PAYMENT } );
-
-                push(
-                    @order_details,
-                    {
-                        clothes_code     => $clothes->code,
-                        clothes_category => $clothes->category,
-                        status_id        => $PAYMENT
-                        , # 주문서 하부의 모든 의류 항목을 결제대기(19) 상태로 변경
-                        name        => $name,
-                        price       => $clothes->price,
-                        final_price => $clothes->price,
-                    },
-                );
-            }
-
-            #
-            # 사용자의 구두 사이즈와 주문서의 구두사이즈가 다를 경우, 사용자의 구두 사이즈를 변경함 (#1251)
-            #
-            my ($shoes_code) = grep { m/^0?A/ } @{ $order_detail_params{clothes_code} };
-            if ($shoes_code) {
-                my $shoes = $self->DB->resultset('Clothes')->find( { code => $shoes_code } );
-                if ($shoes) {
-                    my $user_info = $order->user->user_info;
-                    my $foot      = $user_info->foot;
-                    my $length    = $shoes->length;
-                    if ( $foot and $length and $foot != $length ) {
-                        $user_info->update( { foot => $length } );
-                        $self->log->info(
-                            sprintf(
-                                "Update user_info.foot(%d) to shoes.length(%d): order(%d)",
-                                $foot,
-                                $length,
-                                $order->id
-                            )
-                        );
-                    }
-                }
-            }
-
-            #
-            # GH #790: 3회째 대여자 부터 대여자의 부담을 줄이기 위해 비용을 할인함
-            #
-            my $sale_price = {
-                before                => 0,
-                after                 => 0,
-                rented_without_coupon => 0,
-            };
-
-            ## 쿠폰이 사용된 주문서는 3회 이상 할인에서 제외한다.
-            my $coupon = $order->coupon;
-            if ( !$coupon and $self->config->{sale}{enable} ) {
-                $sale_price = $order->sale_multi_times_rental( \@order_details );
-                $self->log->debug(
-                    sprintf(
-                        "order %d: %d rented without coupon",
-                        $order->id,
-                        $sale_price->{rented_without_coupon},
-                    )
-                );
-            }
-
-            for my $order_detail (@order_details) {
-                $order->add_to_order_details(
-                    {
-                        clothes_code => $order_detail->{clothes_code},
-                        status_id    => $order_detail->{status_id},
-                        name         => $order_detail->{name},
-                        price        => $order_detail->{price},
-                        final_price  => $order_detail->{final_price},
-                        desc         => $order_detail->{desc},
-                    }
-                ) or die "failed to create a new order_detail\n";
-            }
-
-            $self->discount_order($order);
-
-            $order->add_to_order_details(
-                {
-                    name        => '배송비',
-                    price       => 0,
-                    final_price => 0,
-                }
-            ) or die "failed to create a new order_detail for delivery_fee\n";
-
-            $order->add_to_order_details(
-                {
-                    name        => '에누리',
-                    price       => 0,
-                    final_price => 0,
-                }
-            ) or die "failed to create a new order_detail for discount\n";
-
-            if ( $sale_price->{before} != $sale_price->{after} ) {
-                my $sale = $self->DB->resultset("Sale")->find( { name => "3times" } );
-                my $clothes_tag = $self->DB->resultset("OrderSale")->create(
-                    {
-                        order_id => $order->id,
-                        sale_id  => $sale->id,
-                    }
-                );
-
-                my $desc = sprintf(
-                    "기존 대여료: %s원, 할인 금액 %s원",
-                    $self->commify( $sale_price->{before} ),
-                    $self->commify( $sale_price->{before} - $sale_price->{after} ),
-                );
-            }
-
-            #
-            # 쿠폰을 사용했다면 결제방법을 입력
-            #
-            if ($coupon) {
-                my $type           = $coupon->type;
-                my $price_pay_with = '쿠폰';
-                if ( $type eq 'default' or $type eq 'rate' ) {
-                    $price_pay_with .= '+현금';
-                }
-
-                $order->update( { price_pay_with => $price_pay_with } );
-            }
-
-            $guard->commit;
-
-            return $order;
-        }
-        catch {
-            chomp;
-            $self->log->error("failed to update the order & create a new order_detail");
-            $self->log->error($_);
-            return ( undef, $_ );
-        }
-    };
-    return $self->error( 500, { str => $error } ) unless $order;
+    return $self->error(
+        500,
+        { str => "Failed to update order status from BOX to BOXED" }
+    ) unless $success;
 
     #
     # response
@@ -586,6 +402,153 @@ sub order {
     );
 }
 
+=head2 detail
+
+    GET /orders/:id
+
+=cut
+
+sub detail {
+    my $self = shift;
+    my $id   = $self->param('id');
+
+    my $order = $self->get_order( { id => $id } );
+    return unless $order;
+
+    my $user      = $order->user;
+    my $user_info = $user->user_info;
+
+    my $today = DateTime->today( time_zone => $self->config->{timezone} );
+    my @staff = $self->DB->resultset('User')->search(
+        { 'user_info.staff' => 1 },
+        {
+            join     => 'user_info',
+            order_by => 'name'
+        }
+    );
+
+    my $calc  = OpenCloset::Calculator::LateFee->new;
+    my $price = {
+        origin   => $calc->price($order),
+        discount => $calc->discount_price($order),
+        rental   => $calc->rental_price($order),
+    };
+
+    my $overdue_days   = $calc->overdue_days($order);
+    my $overdue_fee    = $calc->overdue_fee($order);
+    my $extension_days = $calc->extension_days($order);
+    my $extension_fee  = $calc->extension_fee($order);
+
+    my $returned = $user->orders(
+        { status_id => $RETURNED, parent_id => undef },
+        { order_by => { -desc => 'return_date' } },
+    );
+
+    my $visited = { count => 0, delta => undef, coupon => 0 };
+    if ( my $count = $returned->count ) {
+        $visited->{count}  = $count;
+        $visited->{coupon} = $returned->search(
+            {
+                coupon_id       => { '!=' => undef },
+                'coupon.status' => 'used'
+            },
+            { join => 'coupon' }
+        );
+        my $last         = $returned->first;
+        my $booking      = $order->booking;
+        my $last_booking = $last->booking;
+        if ( $booking and $last_booking ) {
+            $visited->{last} = $last_booking->date;
+        }
+    }
+
+    my $details = $order->order_details;
+
+    my ( $top, $bottom, $suit );
+    while ( my $detail = $details->next ) {
+        my $clothes = $detail->clothes;
+        next unless $clothes;
+
+        my $category = $clothes->category;
+        if ( $category eq $JACKET ) {
+            $top = $clothes;
+        }
+        elsif ( "$PANTS $SKIRT" =~ m/\b$category\b/ ) {
+            $bottom = $clothes;
+        }
+
+        last if $top and $bottom;
+    }
+    $details->reset;
+
+    if ( $top and $bottom ) {
+        $suit->{top}    = $top;
+        $suit->{bottom} = $bottom;
+    }
+
+    $self->render(
+        order          => $order,
+        user           => $user,
+        user_info      => $user_info,
+        staff          => \@staff,
+        today          => $today,
+        price          => $price,
+        visited        => $visited,
+        details        => $details,
+        suit           => $suit,
+        overdue_days   => $overdue_days,
+        overdue_fee    => $overdue_fee,
+        extension_days => $extension_days,
+        extension_fee  => $extension_fee,
+        late_fee       => $overdue_fee + $extension_fee,
+    );
+}
+
+=head2 late_fee
+
+    GET /orders/:id/late_fee?return_date=yyyy-mm-dd
+
+=cut
+
+sub late_fee {
+    my $self = shift;
+    my $id   = $self->param('id');
+
+    my $order = $self->get_order( { id => $id } );
+    return unless $order;
+
+    my $v = $self->validation;
+    $v->optional('return_date')->like(qr/^\d{4}-\d{2}-\d{2}$/);
+    return $self->error( 400, { str => "Wrong return_date format: yyyy-mm-dd" } )
+        if $v->has_error;
+
+    my $return_date = $v->param('return_date');
+    $return_date .= 'T00:00:00' if $return_date;
+
+    my $calc           = OpenCloset::Calculator::LateFee->new;
+    my $overdue_days   = $calc->overdue_days( $order, $return_date );
+    my $overdue_fee    = $calc->overdue_fee( $order, $return_date );
+    my $extension_days = $calc->extension_days( $order, $return_date );
+    my $extension_fee  = $calc->extension_fee( $order, $return_date );
+
+    $self->render(
+        json => {
+            late_fee       => $overdue_fee + $extension_fee,
+            overdue_days   => $overdue_days,
+            overdue_fee    => $overdue_fee,
+            extension_days => $extension_days,
+            extension_fee  => $extension_fee,
+            formatted      => {
+                late_fee => $self->commify( $overdue_fee + $extension_fee ),
+                tip      => sprintf(
+                    "%d일 연장(%s) + %d일 연체(%s)", $extension_days,
+                    $self->commify($extension_fee), $overdue_days, $self->commify($overdue_fee)
+                )
+            }
+        }
+    );
+}
+
 =head2 update
 
     POST /order/:id/update
@@ -628,7 +591,13 @@ sub update {
                         $value // 'N/A',
                     ),
                 );
-                $detail->update( { $name => $value } );
+
+                if ( $name eq 'price' ) {
+                    $self->app->detail_api->update_price( $detail, $value );
+                }
+                else {
+                    $detail->update( { $name => $value } );
+                }
             }
         }
     }

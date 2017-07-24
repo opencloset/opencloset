@@ -123,6 +123,7 @@ my %BOOKING_SLOT = (
             'new-clothes'         => { text => '새 옷',                 icon => 'gift',      desc => '새 옷을 기증 받으셨나요?',                    },
             'order'               => { text => '주문서',                icon => 'file',      desc => '지금까지 대여해간 주문서 목록입니다.', link => '/order' },
             'order-id'            => { text => '주문 내역',             icon => q{},         desc => '주문서 내역입니다.',        link => '#' },
+            'order-detail'        => { text => '주문 내역',             icon => q{},         desc => '주문서 내역입니다.',        link => '#' },
             'user'                => { text => '사용자',                icon => 'user',      desc => '사용자 목록입니다.',        link => '/user',           },
             'user-id'             => { text => '사용자 정보',           icon => 'user',      desc => '사용자 정보입니다.',        link => '#'        },
             'clothes'             => { text => '의류',                  icon => 'female',    desc => '의류 목록입니다.',          link => '/clothes' },

@@ -1,0 +1,99 @@
+% my %analyze = $order->analyze_order_status_logs;
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">
+      <i class="fa fa-clock-o" aria-hidden="true"></i>
+      <a href="#panel-status-timestamp" data-toggle="collapse">상태별 시각</a>
+    </h3>
+  </div>
+  <div id="panel-status-timestamp" class="panel-collapse collapse">
+    <div class="panel-body">
+      <table class="table table-striped table-bordered table-hover">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>상태</th>
+            <th>시점</th>
+            <th>처리 시간</th>
+          </tr>
+        </thead>
+        <tbody>
+          % for (my $i = 0; $i < @{ $analyze{logs} }; $i++) {
+            % my $log = $analyze{logs}[$i];
+            <tr>
+              <td><%= $i + 1 %></td>
+              <td>
+                %= $log->{status}
+              </td>
+              <td>
+                %= $log->{timestamp}->strftime('%m월 %d일 %H시 %M분')
+              </td>
+              <td>
+                % if (my $delta = $log->{delta}) {
+                  %= convert_sec_to_locale($delta)
+                % } else {
+                  0
+                % }
+              </td>
+            </tr>
+          % }
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">
+      <i class="fa fa-clock-o" aria-hidden="true"></i>
+      <a href="#panel-status-elapsed" data-toggle="collapse">상태별 소요 시간</a>
+    </h3>
+  </div>
+  <div id="panel-status-elapsed" class="panel-collapse collapse">
+    <div class="panel-body">
+      <table class="table table-striped table-bordered table-hover">
+        <thead>
+          <tr>
+            <th>상태</th>
+            <th>처리 시간</th>
+            <th>비율</th>
+          </tr>
+        </thead>
+        <tbody>
+          % my @statuses = qw/대기 치수측정 의류준비 탈의 포장 수선 결제/;
+          % my $total = 0;
+          % map { $total += $analyze{elapsed_time}{$_} || 0 } @statuses;
+          % for my $status (@statuses) {
+            % my $elapsed = $analyze{elapsed_time}{$status};
+            % next unless $elapsed;
+            <tr>
+              <td>
+                %= $status
+              </td>
+              <td>
+                %= convert_sec_to_locale($elapsed)
+              </td>
+              <td>
+                <samp>
+                  %= sprintf('%.1f%%', $elapsed / $total * 100);
+                </samp>
+              </td>
+            </tr>
+          % }
+          <tr>
+            <td>총 처리시간</td>
+            <td>
+              %= convert_sec_to_locale($total)
+            </td>
+            <td>
+              <samp>
+                %= sprintf('%.1f%%', 100);
+              </samp>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
