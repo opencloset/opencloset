@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Added
 - 주문서에 미납/불납을 표시 (#1289)
+- 합격 토글버튼 추가 (#1286)
 
 ### Fixed
 - 연체/연장료가 있을때에만 연체/연장료 지불방법을 강제함 (#1287)

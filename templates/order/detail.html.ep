@@ -324,7 +324,6 @@
           <td class="action-toggle">
             <input
               name="ignore_sms"
-              id="toggle-ignore-latefee-sms"
               data-toggle="toggle"
               data-on="연체문자안보냄"
               data-off="연체문자보냄"
@@ -336,7 +335,6 @@
               <%= $order->ignore_sms ? 'checked' : '' %>>
             <input
               name="bestfit"
-              id="toggle-bestfit"
               data-toggle="toggle"
               data-on="Bestfit"
               data-off="보통"
@@ -348,7 +346,6 @@
               <%= $order->bestfit ? 'checked' : '' %>>
             <input
               name="ignore"
-              id="toggle-ignore-search-engine"
               data-toggle="toggle"
               data-on="검색에 제외"
               data-off="검색에 포함"
@@ -358,6 +355,17 @@
               data-update-url="<%= url_for('/api/order/' . $order->id) %>"
               type="checkbox"
               <%= $order->ignore ? 'checked' : '' %>>
+            <input
+              name="pass"
+              data-toggle="toggle"
+              data-on="합격"
+              data-off="합격여부"
+              data-width="100"
+              data-onstyle="success"
+              data-size="mini"
+              data-update-url="<%= url_for('/api/order/' . $order->id) %>"
+              type="checkbox"
+              <%= $order->pass ? 'checked' : '' %>>
 
             <p class="help-block">
               <small>
