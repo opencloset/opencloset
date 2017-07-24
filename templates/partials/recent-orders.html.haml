@@ -28,7 +28,7 @@
                                   %div
                                     %img.pull-left{ :alt => "#{ $order->user->name }'s avatar", :src => '#{ get_gravatar( $order->user, 36, https => 1 ) }' }
                                     %a{ :href => "#{ url_for( '/user/' . $order->user->id ) }" }= $order->user->name
-                                    %a.order-badge{ :href => "/order/#{ $order->id }" }
+                                    %a.order-badge{ :href => "/orders/#{ $order->id }" }
                                       - if ( $order->rental_date && $order->target_date ) {
                                         %span.label.label-info.arrowed-right.arrowed-in
                                           %strong 주문서

@@ -20,7 +20,7 @@ $ ->
       error: (jqXHR, textStatus, errorThrown) ->
         $.growl.error({ message: jqXHR.responseJSON.error })
       complete: (jqXHR, textStatus) ->
-        location.reload() if reload
+        location.reload(true) if reload
 
   $('#datepicker-target-date,#datepicker-user-target-date').datepicker
     language: 'ko'
