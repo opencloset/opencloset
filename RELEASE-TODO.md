@@ -1,3 +1,5 @@
+v1.10.0
+
     $ closetpan OpenCloset::API
     $ closetpan OpenCloset::Calculator::LateFee     # v0.3.0
     $ closetpan OpenCloset::DB::Plugin::Order::Sale # v0.002
