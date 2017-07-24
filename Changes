@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## [v1.10.0] - Mon, 24 Jul 2017 13:04:07 +0900
 
+### Fixed
+- 결제시 담당자가 비어있을 경우 현재 로그인된 계정으로 설정 (#1283)
+
 ### Added
 - 새로운 주문서 상세 페이지 추가 (#1277)
 

@@ -281,6 +281,12 @@ sub payment2rental {
     my $order = $self->DB->resultset('Order')->find( { id => $id } );
     return $self->error( 404, { str => "Order not found: $id" } ) unless $order;
 
+    unless ( $order->staff_id ) {
+        my $user      = $self->current_user;
+        my $user_info = $user->user_info;
+        $order->update( { staff_id => $user->id } ) if $user_info->staff;
+    }
+
     my ( $success, $method, $redirect );
     my $api = $self->app->api;
     if ($reset) {
