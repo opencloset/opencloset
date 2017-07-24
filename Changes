@@ -4,6 +4,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Fixed
+- 연체/연장료가 있을때에만 연체/연장료 지불방법을 강제함 (#1287)
+  - 타이는 0원 이라서 연체/연장일이 있더라도 연체/연장료는 0원
+
 ## [v1.10.0] - Mon, 24 Jul 2017 13:04:07 +0900
 
 ### Fixed
