@@ -444,6 +444,20 @@ sub detail {
         { order_by => { -desc => 'return_date' } },
     );
 
+    my ( $unpaid, $nonpaid );
+    my $orders = $user->orders;
+    while ( my $row = $orders->next ) {
+        my $late_fee_pay_with     = $order->late_fee_pay_with     || '';
+        my $compensation_pay_with = $order->compensation_pay_with || '';
+
+        if ( $late_fee_pay_with =~ /미납/ || $compensation_pay_with =~ /미납/ ) {
+            $unpaid = 1;
+        }
+
+        $nonpaid = is_nonpaid($row);
+        last if $unpaid and $nonpaid;
+    }
+
     my $visited = { count => 0, delta => undef, coupon => 0 };
     if ( my $count = $returned->count ) {
         $visited->{count}  = $count;
@@ -501,6 +515,8 @@ sub detail {
         extension_days => $extension_days,
         extension_fee  => $extension_fee,
         late_fee       => $overdue_fee + $extension_fee,
+        unpaid         => $unpaid,
+        nonpaid        => $nonpaid,
     );
 }
 
