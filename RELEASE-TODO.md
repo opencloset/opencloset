@@ -1,3 +1,5 @@
+    $ closetpan OpenCloset::API    # v0.0.3
+
 v1.10.0
 
     $ closetpan OpenCloset::API
