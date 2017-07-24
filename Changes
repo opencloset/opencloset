@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ### Fixed
 - 연체/연장료가 있을때에만 연체/연장료 지불방법을 강제함 (#1287)
   - 타이는 0원 이라서 연체/연장일이 있더라도 연체/연장료는 0원
+- 대여기간을 변경하면 반납예정일을 수정 (#1288)
 
 ### Changed
 - 사용자정보에서 최근주문서 링크를 /orders/:id 로 변경 (#1291)
