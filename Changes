@@ -8,6 +8,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 - 연체/연장료가 있을때에만 연체/연장료 지불방법을 강제함 (#1287)
   - 타이는 0원 이라서 연체/연장일이 있더라도 연체/연장료는 0원
 
+### Changed
+- 사용자정보에서 최근주문서 링크를 /orders/:id 로 변경 (#1291)
+
 ## [v1.10.0] - Mon, 24 Jul 2017 13:04:07 +0900
 
 ### Fixed
