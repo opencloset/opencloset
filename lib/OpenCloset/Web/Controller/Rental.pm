@@ -2,6 +2,7 @@ package OpenCloset::Web::Controller::Rental;
 use Mojo::Base 'Mojolicious::Controller';
 
 use DateTime;
+use DateTime::Format::Strptime;
 use Try::Tiny;
 use OpenCloset::Constants::Status
     qw/$REPAIR $BOX $FITTING_ROOM1 $FITTING_ROOM20 $RESERVATED/;
@@ -264,6 +265,148 @@ sub order {
             had_repair => $had_repair,
         }
     );
+}
+
+=head2 payment2rental
+
+    POST /orders/:id/rental
+
+=cut
+
+sub payment2rental {
+    my $self  = shift;
+    my $id    = $self->param('id');
+    my $reset = $self->param('reset');
+
+    my $order = $self->DB->resultset('Order')->find( { id => $id } );
+    return $self->error( 404, { str => "Order not found: $id" } ) unless $order;
+
+    my ( $success, $method, $redirect );
+    my $api = $self->app->api;
+    if ($reset) {
+        $method   = 'payment2box';
+        $redirect = $self->url_for('/rental');
+        $success  = $api->payment2box($order);
+    }
+    else {
+        $redirect = $self->url_for("/orders/$id");
+        unless ( $order->price_pay_with ) {
+            $self->flash( error => '결제방법을 선택해주세요.' );
+            return $self->redirect_to($redirect);
+        }
+
+        $method  = 'payment2rental';
+        $success = $api->payment2rental($order);
+    }
+
+    unless ($success) {
+        my $err = "$method failed: order_id($id)";
+        $self->log->error($err);
+        $self->flash( error => $err );
+    }
+    else {
+        $self->flash( success => '정상적으로 처리되었습니다.' );
+    }
+
+    $self->redirect_to($redirect);
+}
+
+=head2 rental2returned
+
+    POST /orders/:id/returned
+
+=cut
+
+sub rental2returned {
+    my $self = shift;
+    my $id   = $self->param('id');
+
+    my $order = $self->DB->resultset('Order')->find( { id => $id } );
+    return $self->error( 404, { str => "Order not found: $id" } ) unless $order;
+
+    my $v = $self->validation;
+    $v->optional('return_date')->like(qr/^\d{4}-\d{2}-\d{2}$/);
+    $v->optional('late_fee_discount');
+    $v->optional('ignore_sms');
+    $v->optional('codes');
+    return $self->error( 400, { str => "Wrong return_date format: yyyy-mm-dd" } )
+        if $v->has_error;
+
+    my $return_date       = $v->param('return_date');
+    my $late_fee_discount = $v->param('late_fee_discount');
+    my $ignore_sms        = $v->param('ignore_sms');
+    my $codes             = $v->every_param('codes');
+
+    if ($return_date) {
+        my $strp = DateTime::Format::Strptime->new(
+            pattern   => '%F',
+            time_zone => $self->config->{timezone},
+        );
+
+        $return_date = $strp->parse_datetime($return_date);
+    }
+
+    my $api = $self->app->api;
+    $api->{sms} = 0 unless $ignore_sms;
+
+    my $success;
+    if (@$codes) {
+        ## 부분반납
+        $success = $api->rental2partial_returned(
+            $order,
+            $codes,
+            return_date       => $return_date,
+            late_fee_discount => $late_fee_discount
+        );
+    }
+    else {
+        ## 전체반납
+        $success = $api->rental2returned(
+            $order,
+            return_date       => $return_date,
+            late_fee_discount => $late_fee_discount
+        );
+    }
+
+    $api->{sms} = 1;
+
+    unless ($success) {
+        my $err = "rental2returned failed: order_id($id)";
+        $self->log->error($err);
+        $self->flash( error => $err );
+    }
+    else {
+        $self->flash( success => '정상적으로 처리되었습니다.' );
+    }
+
+    $self->redirect_to("/orders/$id");
+}
+
+=head2 rental2payback
+
+    POST /orders/:id/payback
+
+=cut
+
+sub rental2payback {
+    my $self   = shift;
+    my $id     = $self->param('id');
+    my $charge = $self->param('charge');
+
+    my $order = $self->DB->resultset('Order')->find( { id => $id } );
+    return $self->error( 404, { str => "Order not found: $id" } ) unless $order;
+
+    my $success = $self->app->api->rental2payback( $order, $charge );
+    unless ($success) {
+        my $err = "rental2payback failed: order_id($id)";
+        $self->log->error($err);
+        $self->flash( error => $err );
+    }
+    else {
+        $self->flash( success => '정상적으로 처리되었습니다.' );
+    }
+
+    $self->redirect_to("/orders/$id");
 }
 
 1;

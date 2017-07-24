@@ -121,12 +121,12 @@
             - if ($order->get_column('online')) {
               %i.icon-circle.text-success{:title => 'online'}
             - }
-            %a{ :href => "#{url_for('/order/' . $order->id)}" }= $order->id
+            %a{ :href => "#{url_for('/orders/' . $order->id)}" }= $order->id
           %td
             - if ($status eq '포장완료' && $order->does_wear) {
               %p 입고감
             - }
-            %a{ :href => "#{url_for('/order/' . $order->id)}" }
+            %a{ :href => "#{url_for('/orders/' . $order->id)}" }
               %span.label.order-status{ 'data-order-status' => "#{$status}" }= $status || '상태없음'
               - if ($status eq '포장완료') {
                 %span

@@ -1206,7 +1206,7 @@ p span.return-memo {
     font-size: 2em;
     color: red;
 }
-input#clothes-id,#input-coupon-code {
+input#clothes-id,#input-coupon-code,#input-code {
     text-transform: uppercase;
     ime-mode: disabled;
 }
@@ -1219,4 +1219,43 @@ input#clothes-id,#input-coupon-code {
 }
 .login-layout .widget-box {
     position: relative;
+}
+.order-detail-stage-0 {
+    background-color: #ffffe6;
+}
+.order-detail-stage-1 {
+    background-color: #e6ffe6;
+}
+.order-detail-stage-2 {
+    background-color: #e6ffff;
+}
+.order-detail-stage-3 {
+    background-color: #ffe6e6;
+}
+small.rental-price-ext-days {
+    padding-left: 2em;
+}
+.order-detail-stage .fa {
+    cursor: pointer;
+}
+#modal-refund input {
+    text-align: right;
+}
+.label.order-status {
+    // 대여가능
+    &.order-status-1 {
+        background-color: #87b87f !important;
+    }
+    // 대여중
+    &.order-status-2 {
+        background-color: #d15b47 !important;
+    }
+    // 부분반납, 반납배송중, 방문안함, 방문
+    &.order-status-10,&.order-status-11,&.order-status-12,&.order-status-13 {
+        background-color: #ffb752 !important;
+    }
+    // 방문예약,배송예약
+    &.order-status-14,&.order-status-15 {
+        background-color: #428bca !important;
+    }
 }

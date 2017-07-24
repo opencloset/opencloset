@@ -1,3 +1,12 @@
+v1.10.0
+
+    $ closetpan OpenCloset::API
+    $ closetpan OpenCloset::Calculator::LateFee     # v0.3.0
+    $ closetpan OpenCloset::DB::Plugin::Order::Sale # v0.002
+    $ closetpan OpenCloset::Plugin::Helpers         # v0.0.22
+    $ bower install
+    $ grunt
+
 v1.9.18
 
     $ closetpan OpenCloset::Calculator::LateFee    # v0.2.3
