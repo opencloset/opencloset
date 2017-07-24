@@ -620,6 +620,7 @@
   <thead>
     <tr>
       <th>항목</th>
+      <th>상태</th>
       <th>대여 가격</th>
       <th>기간</th>
       <th>소계</th>
@@ -638,9 +639,16 @@
             <span id="clothes-code-<%= substr($clothes->code, 1) %>" data-code="<%= $clothes->code %>">
               <i class="fa fa-square-o fa-fw" aria-hidden="true"></i>
             </span>
-            %= clothes2link($clothes, { with_status => 1, text => $detail->name })
+            %= clothes2link($clothes, { text => $detail->name })
           % } else {
             %= $detail->name
+          % }
+        </td>
+        <td>
+          % if ($clothes) {
+            <span class="label order-status order-status-<%= $detail->status_id %>">
+              %= $OpenCloset::Constants::Status::LABEL_MAP{$detail->status_id}
+            </span>
           % }
         </td>
         <td class="text-right">
