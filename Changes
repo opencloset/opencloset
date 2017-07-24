@@ -4,6 +4,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Added
+- 주문서에 미납/불납을 표시 (#1289)
+
 ### Fixed
 - 연체/연장료가 있을때에만 연체/연장료 지불방법을 강제함 (#1287)
   - 타이는 0원 이라서 연체/연장일이 있더라도 연체/연장료는 0원

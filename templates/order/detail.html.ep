@@ -407,6 +407,22 @@
             <%= $user->name %>
             <small title="나이"><%= age($user_info->birth) %></small>
           </a>
+          % if ($unpaid) {
+            <a href="<%= url_for('/order')->query(q => $user->name, booking_ymd => 'all', status => 'unpaid') %>">
+              <span class="label label-warning">
+                <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
+                미납
+              </span>
+            </a>
+          % }
+          % if ($nonpaid) {
+            <a href="<%= url_for('/order')->query(q => $user->name, booking_ymd => 'all', status => 'nonpaid') %>">
+              <span class="label label-danger">
+                <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
+                불납
+              </span>
+            </a>
+          % }
         </td>
       </tr>
       <tr>
