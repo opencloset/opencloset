@@ -1705,8 +1705,8 @@ sub coupon2label {
     my $status = $coupon->status || '';
     my $price  = $coupon->price;
     my $title  = sprintf( "%d(%s)", $coupon->id, $coupon->code );
-    my $event  = $coupon ? $coupon->desc : '';
-    ($event) = split( /\|/, $event ) if $event;
+    my $desc   = $coupon->desc || 'unknown';
+    my ( $event, $rent_num, $mbersn ) = split( /\|/, $desc );
     $event = $COUPON_EVENT_NAME_MAP{$event} || $event;
 
     my $klass = 'label-info';
@@ -1721,9 +1721,18 @@ sub coupon2label {
     }
 
     my $html = Mojo::DOM::HTML->new;
-    $html->parse(
-        qq{<span class="label $klass" title="$title">$COUPON_STATUS_MAP{$status} 쿠폰($event)$extra</span>}
-    );
+    if ( $event eq '취업날개' ) {
+        $html->parse(
+            qq{<a href="http://dressfree.net/service/admin_3_v.php?rent_num=$rent_num" target="_blank">
+  <span class="label $klass" title="$title">$COUPON_STATUS_MAP{$status} 쿠폰($event)$extra</span>
+</a>}
+        );
+    }
+    else {
+        $html->parse(
+            qq{<span class="label $klass" title="$title">$COUPON_STATUS_MAP{$status} 쿠폰($event)$extra</span>}
+        );
+    }
 
     my $tree = $html->tree;
     return Mojo::ByteStream->new( Mojo::DOM::HTML::_render($tree) );

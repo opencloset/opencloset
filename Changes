@@ -4,6 +4,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Added
+- 취업날개 쿠폰에 취업날개 상세 링크 추가 (#1292)
+
 ## [v1.10.1] - Mon, 24 Jul 2017 23:07:58 +0900
 
 ### Added
