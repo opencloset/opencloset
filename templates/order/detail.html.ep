@@ -723,6 +723,7 @@
     % }
     <tr>
       <td>합계</td>
+      <td></td>
       <td class="text-right">
         <samp>
           %= commify($sum{price} || 0)
