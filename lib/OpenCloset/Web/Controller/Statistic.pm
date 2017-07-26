@@ -1346,4 +1346,65 @@ sub event {
     $self->render( visitor => \%visitor, rate => $is_rate );
 }
 
+=head2 create_event
+
+    POST /stat/events/:event
+
+=cut
+
+sub create_event {
+    my $self  = shift;
+    my $event = $self->param('event');
+
+    my $v = $self->validation;
+
+    $v->required('date')->like(qr/^\d{4}-\d{2}-\d{2}$/);
+    $v->optional('online');
+    $v->optional('visited_male');
+    $v->optional('visited_female');
+    $v->optional('visited_age_10');
+    $v->optional('visited_age_20');
+    $v->optional('visited_age_30');
+
+    return $self->error( 400, { str => "Parameter validation failed" } )
+        if $v->has_error;
+
+    my $date   = $v->param('date');
+    my $online = $v->param('online');
+
+    my $visitor = $self->DB->resultset('Visitor')
+        ->find_or_create( { date => $date, event => $event, online => $online } );
+
+    return $self->error( 500, { str => 'Failed to find or create a visitor for stat' } )
+        unless $visitor;
+
+    my %columns = $visitor->get_columns;
+    $columns{visited}        ||= 0;
+    $columns{visited_male}   ||= 0;
+    $columns{visited_female} ||= 0;
+    $columns{visited_age_10} ||= 0;
+    $columns{visited_age_20} ||= 0;
+    $columns{visited_age_30} ||= 0;
+
+    my $visited_male   = $v->param('visited_male')   || 0;
+    my $visited_female = $v->param('visited_female') || 0;
+    my $visited_age_10 = $v->param('visited_age_10') || 0;
+    my $visited_age_20 = $v->param('visited_age_20') || 0;
+    my $visited_age_30 = $v->param('visited_age_30') || 0;
+
+    $visitor->update(
+        {
+            visited        => $columns{visited} + $visited_male + $visited_female,
+            visited_male   => $columns{visited_male} + $visited_male,
+            visited_female => $columns{visited_female} + $visited_female,
+            visited_age_10 => $columns{visited_age_10} + $visited_age_10,
+            visited_age_20 => $columns{visited_age_20} + $visited_age_20,
+            visited_age_30 => $columns{visited_age_30} + $visited_age_30,
+        }
+    );
+
+    %columns = $visitor->get_columns;
+    return $self->render( json => \%columns );
+}
+
 1;

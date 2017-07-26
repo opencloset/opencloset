@@ -4,6 +4,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Added
+- 취업날개 통계에 영향을 주는 연장하기 버튼을 추가 (#1294)
+
 ## [v1.10.2] - Tue, 25 Jul 2017 11:58:57 +0900
 
 ### Added
