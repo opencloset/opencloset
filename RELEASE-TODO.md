@@ -1,3 +1,5 @@
+v1.10.3
+
     $ grunt
     $ closetpan OpenCloset::Cron::Visitor
     $ ubic restart opencloset.cron.visitor
