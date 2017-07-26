@@ -201,6 +201,39 @@
           <td>
             % if (my $coupon = $order->coupon) {
               %= coupon2label($coupon)
+              % if (my $booking = $order->booking and $coupon->desc =~ m/^seoul-2017/) {
+                % if ($booking->date >= $today) {
+                  <div class="dropdown dropdown-inline jobwing-actions">
+                    <button class="btn btn-default btn-xs dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                      연장하기
+                      <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu">
+                      % my $age = int(age($user_info->birth) / 10) * 10;
+                      % for my $n (1 .. 5, -1) {
+                        % my $url = url_for('/stat/events/extra-seoul-2017')->query(date => $booking->date->ymd, online => $order->online, 'visited_' . $user_info->gender => $n);
+                        % if ($age >= 10 and $age <= 30) {
+                          % $url = $url->query([ 'visited_age_' . $age => $n ]);
+                        % }
+                        % if ($n > 0) {
+                          <li>
+                            <a href="<%= $url %>" class="btn-jobwing"><%= $n %>회 연장</a>
+                          </li>
+                        % } else {
+                          <li role="separator" class="divider"></li>
+                          <li>
+                            <a href="<%= $url %>" class="btn-jobwing"><%= $n * -1 %>회 취소</a>
+                          </li>
+                        % }
+                      % }
+                      <li role="separator" class="divider"></li>
+                      <li>
+                        <a href="<%= url_for('/stat/events/extra-seoul-2017') %>" target="_blank">통계보기</a>
+                      </li>
+                    </ul>
+                  </div>
+                % }
+              % }
             % } else {
               <form id="form-coupon-code" class="form-inline" action="<%= url_for('/order/' . $order->id . '/coupon') %>" method="POST">
                 <div class="input-group">
@@ -723,6 +756,7 @@
     % }
     <tr>
       <td>합계</td>
+      <td></td>
       <td class="text-right">
         <samp>
           %= commify($sum{price} || 0)

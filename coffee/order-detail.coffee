@@ -201,3 +201,14 @@ $ ->
         $.growl.notice({ title: "알림", message: "#{label}이(가) 수정되었습니다." })
       error: (jqXHR, textStatus, errorThrown) ->
         $.growl.error({ message: jqXHR.responseJSON.error })
+
+  $('.jobwing-actions .dropdown-menu a.btn-jobwing').click (e) ->
+    e.preventDefault()
+
+    $.ajax $(@).prop('href'),
+      type: 'POST'
+      dataType: 'json'
+      success: (data, textStatus, jqXHR) ->
+        $.growl.notice({ title: "연장신청 되었습니다.", message: "취업날개 서비스에서 연장하기 버튼을 눌러주세요." })
+      error: (jqXHR, textStatus, errorThrown) ->
+        $.growl.error({ message: jqXHR.responseJSON.error })
