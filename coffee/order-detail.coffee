@@ -209,6 +209,25 @@ $ ->
       type: 'POST'
       dataType: 'json'
       success: (data, textStatus, jqXHR) ->
-        $.growl.notice({ title: "연장신청 되었습니다.", message: "취업날개 서비스에서 연장하기 버튼을 눌러주세요." })
+        $.growl.notice({ title: "연장신청 되었습니다.", message: "취업날개 서비스에서 연장횟수를 확인해주세요." })
+
+        n = parseInt($(@).data('qty'))
+        $('#datepicker-user-target-date').datepicker('setDate', "+#{(n + 1) * 3}d")
+
+        if $('#datepicker-target-date').length
+          $('#datepicker-target-date').datepicker('setDate', "+#{(n + 1) * 3}d")
+        else
+          order_id = $.trim($('#order-id').text())
+          user_target_date = $('#datepicker-user-target-date').datepicker('getFormattedDate')
+          $.ajax "/api/order/#{order_id}",
+            type: 'PUT'
+            dataType: 'json'
+            data: { target_date: user_target_date }
+            success: (data, textStatus, jqXHR) ->
+              location.reload()
+            error: (jqXHR, textStatus, errorThrown) ->
+              $.growl.error({ message: jqXHR.responseJSON.error })
+            complete: (jqXHR, textStatus) ->
+
       error: (jqXHR, textStatus, errorThrown) ->
         $.growl.error({ message: jqXHR.responseJSON.error })
