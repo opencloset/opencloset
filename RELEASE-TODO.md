@@ -1,3 +1,7 @@
+    $ grunt
+    $ closetpan OpenCloset::Events::EmploymentWing    # v0.0.3
+    # Configure `dressfree` at app.conf
+
 v1.10.3
 
     $ grunt

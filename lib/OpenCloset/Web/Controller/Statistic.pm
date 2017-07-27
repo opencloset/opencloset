@@ -8,6 +8,8 @@ use List::Util qw/sum/;
 use DateTime::Format::MySQL;
 use DateTime::Format::Strptime;
 
+use OpenCloset::Events::EmploymentWing;
+
 has DB    => sub { shift->app->DB };
 has CACHE => sub { shift->app->CACHE };
 
@@ -1365,6 +1367,7 @@ sub create_event {
     $v->optional('visited_age_10');
     $v->optional('visited_age_20');
     $v->optional('visited_age_30');
+    $v->optional('order_id');
 
     return $self->error( 400, { str => "Parameter validation failed" } )
         if $v->has_error;
@@ -1402,6 +1405,24 @@ sub create_event {
             visited_age_30 => $columns{visited_age_30} + $visited_age_30,
         }
     );
+
+    if ( my $order_id = $v->param('order_id') ) {
+        my $order = $self->DB->resultset('Order')->find( { id => $order_id } );
+        if ( $order and $order->coupon_id ) {
+            my $coupon = $order->coupon;
+            my $desc = $coupon->desc || 'unknown';
+            my ( $event, $rent_num, $mbersn ) = split( /\|/, $desc );
+
+            my $n      = $visited_male + $visited_female;
+            my $dressfree = $self->config->{dressfree};
+            my $client = OpenCloset::Events::EmploymentWing->new(
+                username => $dressfree->{username},
+                password => $dressfree->{password},
+            );
+
+            $client->extend_period( $rent_num, $n, sprintf( '대여기간 +%dd', $n * 3 ) );
+        }
+    }
 
     %columns = $visitor->get_columns;
     return $self->render( json => \%columns );
