@@ -4,6 +4,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [v1.10.4] - Thu, 27 Jul 2017 18:14:39 +0900
+
 ### Changed
 - 연장하기 버튼을 누르면 취업날개 서비스에도 반영 (#1294)
 - 연장하기 버튼을 누르면 반납희망일과 반납예정일도 변경 (#1294)
