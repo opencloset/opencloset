@@ -392,4 +392,8 @@ my %BOOKING_SLOT = (
         key    => $ENV{OPENCLOSET_IAMPORT_API_KEY},
         secret => $ENV{OPENCLOSET_IAMPORT_API_SECRET},
     },
+    dressfree => {
+        username => $ENV{OPENCLOSET_DRESSFREE_USERNAME} || '',
+        password => $ENV{OPENCLOSET_DRESSFREE_PASSWORD} || '',
+    }
 };
