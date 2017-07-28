@@ -4,6 +4,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Fixed
+- 연장하기 버튼을 눌렀을때 반납 희망일과 반납 예정일이 제멋대로 바뀌는 버그 수정
+
 ## [v1.10.4] - Thu, 27 Jul 2017 18:14:39 +0900
 
 ### Changed

@@ -204,18 +204,19 @@ $ ->
 
   $('.jobwing-actions .dropdown-menu a.btn-jobwing').click (e) ->
     e.preventDefault()
+    $this = $(@)
 
-    $.ajax $(@).prop('href'),
+    $.ajax $this.prop('href'),
       type: 'POST'
       dataType: 'json'
       success: (data, textStatus, jqXHR) ->
         $.growl.notice({ title: "연장신청 되었습니다.", message: "취업날개 서비스에서 연장횟수를 확인해주세요." })
 
-        n = parseInt($(@).data('qty'))
-        $('#datepicker-user-target-date').datepicker('setDate', "+#{(n + 1) * 3}d")
+        n = parseInt($this.data('qty'))
+        $('#datepicker-user-target-date').datepicker('setDate', "+#{n * 4}d")
 
         if $('#datepicker-target-date').length
-          $('#datepicker-target-date').datepicker('setDate', "+#{(n + 1) * 3}d")
+          $('#datepicker-target-date').datepicker('setDate', "+#{n * 4}d")
         else
           order_id = $.trim($('#order-id').text())
           user_target_date = $('#datepicker-user-target-date').datepicker('getFormattedDate')
