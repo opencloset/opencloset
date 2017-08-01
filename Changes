@@ -4,6 +4,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Changed
+- 취업날개 예약시간 변경 api 호출 실패시 retry x 3
+
 ## [v1.10.6] - Tue, 01 Aug 2017 16:04:14 +0900
 
 ### Fixed

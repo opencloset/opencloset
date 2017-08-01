@@ -51,24 +51,29 @@ sub _update_inetpia {
                 my $ymd = $dt->ymd;
                 my $hms = $dt->hms;
 
-                my $http = HTTP::Tiny->new( timeout => 1 );
-                my $res = $http->post_form(
-                    "https://dressfree.net/theopencloset/api_rentRcv.php",
-                    {
-                        rent_num  => $rent_num,
-                        rent_date => $ymd,
-                        rent_time => $hms,
-                    },
-                );
-                if ( $res->{success} ) {
-                    my $msg =
-                        "api call to dressfree.net success: rent_num($rent_num), rent_date($ymd), rent_time($hms)";
-                    $self->app->log->info($msg);
-                }
-                else {
-                    my $msg =
-                        "api call to dressfree.net failed: rent_num($rent_num), rent_date($ymd), rent_time($hms)";
-                    $self->app->log->warn($msg);
+                my $retry     = 0;
+                my $MAX_RETRY = 3;
+                my $http      = HTTP::Tiny->new( timeout => 1 );
+                while ( $retry++ < $MAX_RETRY ) {
+                    my $res = $http->post_form(
+                        "https://dressfree.net/theopencloset/api_rentRcv.php",
+                        {
+                            rent_num  => $rent_num,
+                            rent_date => $ymd,
+                            rent_time => $hms,
+                        },
+                    );
+                    if ( $res->{success} ) {
+                        my $msg =
+                            "api call to dressfree.net success: rent_num($rent_num), rent_date($ymd), rent_time($hms)";
+                        $self->app->log->info($msg);
+                        last;
+                    }
+                    else {
+                        my $msg =
+                            "api call to dressfree.net failed: rent_num($rent_num), rent_date($ymd), rent_time($hms)";
+                        $self->app->log->warn($msg);
+                    }
                 }
             }
         }
