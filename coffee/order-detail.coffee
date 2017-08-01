@@ -138,6 +138,7 @@ $ ->
   $('#btn-late-fee-discount').click (e) ->
     late_fee = $('#late-fee').data('late-fee')
     $(@).parent().find('input[name=late_fee_discount]').val(late_fee)
+    $('#form-returned input[name=late_fee_discount]').val(late_fee)
     $('#late-fee').html('0')
 
   $('#toggle-ignore-sms').change ->
