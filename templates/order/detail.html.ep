@@ -277,7 +277,7 @@
             <select name="return_method" class="chosen-select" data-placeholder="반납방법" data-update-url="<%= url_for('/api/order/' . $order->id) %>">
               <option value=""></option>
               % my $return_method = $order->return_method || '';
-              % for my $method (qw/방문반납 CJ대한통운 KGB 동부 롯데 옐로우캡 우체국 한진/) {
+              % for my $method (qw/방문반납 CJ대한통운 CSVnet편의점 KGB 동부 로젠 롯데 옐로우캡 우체국 한진 기타/) {
                 <option value="<%= $method %>"<%= $return_method =~ m/$method/ ? ' selected' : '' %>>
                   %= $method
                 </option>
