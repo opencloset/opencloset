@@ -9,6 +9,7 @@ use Mojo::JSON qw/decode_json/;
 use OpenCloset::Calculator::LateFee;
 use OpenCloset::Common::Unpaid ();
 use OpenCloset::Events::EmploymentWing;
+use OpenCloset::Constants::Status qw/$RESERVATED/;
 
 has DB => sub { shift->app->DB };
 
@@ -111,6 +112,8 @@ sub visit {
     my $purpose2      = $self->param('purpose2');
     my $pre_category  = $self->param('pre_category');
     my $pre_color     = $self->param('pre_color');
+    my $agent         = $self->param('agent') || 0;
+    my $agent_qty     = $self->param('agent-quantity') || 1;
 
     $self->app->log->debug("type: $type");
     $self->app->log->debug("name: $name");
@@ -134,6 +137,8 @@ sub visit {
     $self->app->log->debug("purpose2: $purpose2");
     $self->app->log->debug("pre_category: $pre_category");
     $self->app->log->debug("pre_color: $pre_color");
+    $self->app->log->debug("agent: $agent");
+    $self->app->log->debug("agent-quantity: $agent_qty");
 
     #
     # validate name
@@ -338,11 +343,13 @@ sub visit {
                     my $order_obj = $user->create_related(
                         'orders',
                         {
-                            status_id  => 14,        # 방문예약: status 테이블 참조
+                            status_id  => $RESERVATED,
                             booking_id => $booking,
                             coupon_id  => $coupon_id,
+                            agent      => $agent,
                         }
                     );
+
                     if ($order_obj) {
                         my $user_info = $user->user_info;
                         my $msg       = $self->render_to_string(
@@ -386,6 +393,15 @@ sub visit {
                     }
 
                     $self->_update_inetpia($order_obj);
+
+                    #
+                    # 대리인을 통한 대여일때는 대리인의 신체치수 입력화면으로 이동
+                    #
+                    if ( $order_obj and $order_obj->agent ) {
+                        my $id = $order_obj->id;
+                        $self->session( agent_quantity => $agent_qty );
+                        return $self->redirect_to("/orders/$id/agent");
+                    }
                 }
             }
             else {

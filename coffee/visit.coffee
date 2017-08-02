@@ -558,3 +558,16 @@ $ ->
       complete: (jqXHR, textStatus) ->
 
   $('#unpaid-modal').modal('show')
+
+  $("#select-agent-quantity").chosen
+    width: "100%"
+    disable_search_threshold: 20
+
+  $("#select-agent").chosen
+    width: "100%"
+    disable_search_threshold: 10
+  .change ->
+    if $(@).val() is "1"
+      $('#block-agent-quantity').removeClass('hidden')
+    else
+      $('#block-agent-quantity').addClass('hidden')
