@@ -211,6 +211,9 @@ sub _public_routes_visit {
     $r->get('/events/linkstart')->to('event#linkstart');
     $r->get('/events/:event/stat')->to('statistic#event');
 
+    $r->get('/orders/:id/agent')->to('agent#add');
+    $r->post('/orders/:id/agent')->to('agent#create');
+
     ## easy cancel order and update booking.date
     my $auth = $r->under('/order/:id')->to('order#auth');
     $auth->get('/cancel')->to('order#cancel_form');

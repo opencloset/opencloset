@@ -1,0 +1,129 @@
+% layout 'common';
+% title '대리인 정보를 입력해주세요';
+% my @err;
+
+<div class="page-header">
+  <h2>
+    <i class="fa fa-archive text-primary" aria-hidden="true"></i>
+    <a href="<%= url_for('/visit') %>">열린옷장</a>
+    <small><%= title %></small>
+  </h2>
+</div>
+
+<p>
+  <strong>TODO</strong>
+  여기에 왜 대리인 대여를 하려면 신체치수를 입력해야 하는지 설명
+</p>
+<p><%= $quantity %>명의 신체치수 정보를 각각 입력해주세요.</p>
+
+<form action="<%= url_for('/orders/' . $order->id . '/agent') %>" method="POST">
+  % for my $i (1 .. $quantity) {
+    % @err = @{ $error->{gender} || [] };
+    <div class="form-group<%= @err ? ' has-error' : '' %>">
+      <label class="radio-inline">
+        <input type="radio" name="gender" value="male">
+        <i class="fa fa-male" aria-hidden="true"></i>
+        남성
+      </label>
+
+      <label class="radio-inline">
+        <input type="radio" name="gender" value="female">
+        <i class="fa fa-female" aria-hidden="true"></i>
+        여성
+      </label>
+      <div class="help-block with-errors">
+        % if (@err) {
+          <ul class="list-unstyled">
+            % for my $err (@err) {
+              <li><%= $err %></li>
+            % }
+          </ul>
+        % }
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>이름</label>
+      <input type="text" name="label" class="form-control" placeholder="이름">
+    </div>
+
+    <div class="form-group">
+      <label>키</label>
+      <input type="text" name="height" class="form-control" placeholder="키 cm">
+    </div>
+
+    <div class="form-group">
+      <label>몸무게</label>
+      <input type="text" name="weight" class="form-control" placeholder="몸무게 kg">
+    </div>
+
+    <div class="form-group">
+      <label>목둘레</label>
+      <input type="text" name="neck" class="form-control" placeholder="목둘레 cm">
+    </div>
+
+    <div class="form-group">
+      <label>가슴둘레</label>
+      <input type="text" name="bust" class="form-control" placeholder="가슴둘레 cm">
+    </div>
+
+    <div class="form-group">
+      <label>허리둘레</label>
+      <input type="text" name="waist" class="form-control" placeholder="허리둘레 cm">
+    </div>
+
+    <div class="form-group">
+      <label>엉덩이둘레</label>
+      <input type="text" name="hip" class="form-control" placeholder="엉덩이둘레 cm">
+    </div>
+
+    <div class="form-group">
+      <label>윗배둘레</label>
+      <input type="text" name="topbelly" class="form-control" placeholder="윗배둘레 cm">
+    </div>
+
+    <div class="form-group">
+      <label>배꼽둘레</label>
+      <input type="text" name="belly" class="form-control" placeholder="배꼽둘레 cm">
+    </div>
+
+    <div class="form-group">
+      <label>허벅지둘레</label>
+      <input type="text" name="thigh" class="form-control" placeholder="허벅지둘레 cm">
+    </div>
+
+    <div class="form-group">
+      <label>팔길이</label>
+      <input type="text" name="arm" class="form-control" placeholder="팔길이 cm">
+    </div>
+
+    <div class="form-group">
+      <label>다리길이</label>
+      <input type="text" name="leg" class="form-control" placeholder="다리길이 cm">
+    </div>
+
+    <div class="form-group">
+      <label>무릎길이</label>
+      <input type="text" name="knee" class="form-control" placeholder="무릎길이 cm">
+    </div>
+
+    <div class="form-group">
+      <label>구두사이즈</label>
+      <input type="text" name="foot" class="form-control" placeholder="구두사이즈 cm">
+    </div>
+
+    <div class="form-group">
+      <label>바지길이</label>
+      <input type="text" name="pants" class="form-control" placeholder="바지길이 cm">
+    </div>
+
+    <div class="form-group">
+      <label>스커트둘레</label>
+      <input type="text" name="skirt" class="form-control" placeholder="스커트둘레 cm">
+    </div>
+
+    <hr>
+  % }
+
+  <button type="submit" class="btn btn-primary">완료</button>
+</form>
