@@ -1,6 +1,5 @@
 % layout 'common';
 % title '대리인 정보를 입력해주세요';
-% my @err;
 
 <div class="page-header">
   <h2>
@@ -18,8 +17,7 @@
 
 <form action="<%= url_for('/orders/' . $order->id . '/agent') %>" method="POST">
   % for my $i (1 .. $quantity) {
-    % @err = @{ $error->{gender} || [] };
-    <div class="form-group<%= @err ? ' has-error' : '' %>">
+    <div class="form-group">
       <label class="radio-inline">
         <input type="radio" name="gender" value="male">
         <i class="fa fa-male" aria-hidden="true"></i>
@@ -31,15 +29,6 @@
         <i class="fa fa-female" aria-hidden="true"></i>
         여성
       </label>
-      <div class="help-block with-errors">
-        % if (@err) {
-          <ul class="list-unstyled">
-            % for my $err (@err) {
-              <li><%= $err %></li>
-            % }
-          </ul>
-        % }
-      </div>
     </div>
 
     <div class="form-group">

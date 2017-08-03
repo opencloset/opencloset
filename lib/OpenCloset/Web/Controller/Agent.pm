@@ -1,8 +1,6 @@
 package OpenCloset::Web::Controller::Agent;
 use Mojo::Base 'Mojolicious::Controller';
 
-use Data::Dump;
-
 has DB => sub { shift->app->DB };
 
 =head1 METHODS
@@ -27,9 +25,7 @@ sub add {
 
     ## redirect from booking#visit
     my $qty = $self->session('agent_quantity') || 1;
-    my $error = $self->flash('error');
-    dd $error;
-    $self->render( order => $order, quantity => $qty, error => $error );
+    $self->render( order => $order, quantity => $qty );
 }
 
 =head2 create
@@ -70,10 +66,7 @@ sub create {
     $v->optional('skirt');
 
     if ( $v->has_error ) {
-        my $errors = {};
-        my $failed = $v->failed;
-        map { $errors->{$_} = $v->error($_) } @$failed;
-        $self->flash( error => $errors );
+        ## TODO: 에러안내
         return $self->redirect_to( $self->url_for );
     }
 
@@ -81,11 +74,6 @@ sub create {
     my $label  = $self->every_param('label');
     my $height = $self->every_param('height');
     my $weight = $self->every_param('weight');
-
-    dd $gender;
-    dd $label;
-    dd $height;
-    dd $weight;
 
     return $self->redirect_to( $self->url_for );
 }
