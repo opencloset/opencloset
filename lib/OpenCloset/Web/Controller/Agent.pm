@@ -48,6 +48,7 @@ sub create {
 
     my $v = $self->validation;
     $v->required('gender')->like(qr/^(fe)?male$/);
+    $v->optional('pre_category');
     $v->required('label');
     $v->required('height');
     $v->required('weight');

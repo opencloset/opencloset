@@ -1,5 +1,9 @@
 % layout 'common';
-% title '대리인 정보를 입력해주세요';
+% title '대리인 정보를 입력해주세요', jses => [
+%   '/components/chosen/chosen.jquery.js',
+%   '/js/orders-agent.js'
+% ], csses => ['/components/chosen/chosen.css'];
+% use OpenCloset::Constants::Category;
 
 <div class="page-header">
   <h2>
@@ -10,8 +14,7 @@
 </div>
 
 <p>
-  <strong>TODO</strong>
-  여기에 왜 대리인 대여를 하려면 신체치수를 입력해야 하는지 설명
+  실제 착용자의 사이즈를 줄자로 측정하여 정확히 입력해 주세요. 일반적인 사이즈 호칭 (예&gt; <samp>95</samp>, <samp>100</samp> 이나 <samp>55</samp>, <samp>66</samp>)으로 의류를 대여하는 경우 착용시 의류의 사이즈가 맞지 않을 가능성이 상당히 높습니다. 특히 면접, 결혼식과 같이 중요한 일정을 앞두고 계신 분이거나 체형이 특별한 경우에는 반드시 실제 착용자의 현재 사이즈를 새로 측정하여 입력해주세요.
 </p>
 <p><%= $quantity %>명의 신체치수 정보를 각각 입력해주세요.</p>
 
@@ -30,6 +33,15 @@
         여성
       </label>
     </div>
+
+    % my $pre_category = $order->pre_category || '';
+    % my @categories = split /,/, $pre_category;
+    <select multiple class="form-control chosen-select" name="pre_category" data-placeholder="대여품목">
+      <option value=""></option>
+      % for my $c ($JACKET, $PANTS, $SHIRT, $TIE, $SHOES, $BELT, $SKIRT, $BLOUSE) {
+        <option value="<%= $c %>"<%= "@categories" =~ m/$c/ ? ' selected' : '' %>><%= $OpenCloset::Constants::Category::LABEL_MAP{$c} %></option>
+      % }
+    </select>
 
     <div class="form-group">
       <label>이름</label>
