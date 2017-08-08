@@ -1,8 +1,12 @@
 % layout 'common';
 % title '대리인 정보를 입력해주세요', jses => [
 %   '/components/chosen/chosen.jquery.js',
+%   '/components/growl/javascripts/jquery.growl.js',
 %   '/js/orders-agent.js'
-% ], csses => ['/components/chosen/chosen.css'];
+% ], csses => [
+%   '/components/chosen/chosen.css',
+%   '/components/growl/stylesheets/jquery.growl.css'
+% ];
 % use OpenCloset::Constants::Category;
 
 <div class="page-header">
@@ -12,6 +16,62 @@
     <small><%= title %></small>
   </h2>
 </div>
+
+% if (my $error = flash('alert_error')) {
+  <div class="alert alert-danger" role="alert">
+    %= $error
+  </div>
+% }
+
+% if ($agents->count) {
+  <table class="table">
+    <thead>
+      <tr>
+        <th>이름</th>
+        <th>성별</th>
+        <th>대여품목</th>
+        <th>키</th>
+        <th>몸무게</th>
+        <th>가슴</th>
+        <th>허리</th>
+        <th>배꼽</th>
+        <th>엉덩이</th>
+        <th>허벅지</th>
+        <th>구두사이즈</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      % while (my $agent = $agents->next) {
+        <tr>
+          <td><%= $agent->label || '' %></td>
+          <td>
+            % my $gender = $agent->gender;
+            <i class="fa fa-<%= $gender %>" aria-hidden="true"></i>
+          </td>
+          <td>
+            % my @temp = split /,/, $agent->pre_category;
+            % my @categories = map { $OpenCloset::Constants::Category::LABEL_MAP{$_} } @temp;
+            <small>
+              %= join(', ', @categories)
+            </small>
+          </td>
+          <td><samp><%= $agent->height || '-' %></samp></td>
+          <td><samp><%= $agent->weight || '-' %></samp></td>
+          <td><samp><%= $agent->bust || '-' %></samp></td>
+          <td><samp><%= $agent->waist || '-' %></samp></td>
+          <td><samp><%= $agent->belly || '-' %></samp></td>
+          <td><samp><%= $agent->hip || '-' %></samp></td>
+          <td><samp><%= $agent->thigh || '-' %></samp></td>
+          <td><samp><%= $agent->foot || '-' %></samp></td>
+          <td>
+            <button class="btn btn-xs btn-danger btn-remove" type="button" data-id="<%= $agent->id %>">다시입력</button>
+          </td>
+        </tr>
+      % }
+    </tbody>
+  </table>
+% }
 
 <p><%= $quantity %>명의 신체치수 정보를 각각 입력해주세요.</p>
 <p class="help-block">
@@ -174,7 +234,7 @@
 
   <div class="form-group">
     <div class="col-sm-offset-1 col-sm-11">
-      <button type="submit" class="btn btn-success">완료</button>
+      <button type="submit" class="btn btn-success">추가</button>
     </div>
   </div>
 </form>

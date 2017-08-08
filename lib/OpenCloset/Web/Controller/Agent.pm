@@ -1,6 +1,8 @@
 package OpenCloset::Web::Controller::Agent;
 use Mojo::Base 'Mojolicious::Controller';
 
+use OpenCloset::Constants::Measurement ();
+
 has DB => sub { shift->app->DB };
 
 =head1 METHODS
@@ -25,7 +27,8 @@ sub add {
 
     ## redirect from booking#visit
     my $qty = $self->session('agent_quantity') || 1;
-    $self->render( order => $order, quantity => $qty );
+    my $agents = $order->order_agents;
+    $self->render( order => $order, quantity => $qty, agents => $agents );
 }
 
 =head2 create
@@ -47,34 +50,56 @@ sub create {
     ) unless $order->agent;
 
     my $v = $self->validation;
-    $v->required('gender')->like(qr/^(fe)?male$/);
+    $v->optional('label');
+    $v->optional('gender')->in(qw/male female/);
     $v->optional('pre_category');
-    $v->required('label');
-    $v->required('height');
-    $v->required('weight');
-    $v->optional('neck');
-    $v->optional('bust');
-    $v->optional('waist');
-    $v->optional('hip');
-    $v->optional('topbelly');
-    $v->optional('belly');
-    $v->optional('thigh');
-    $v->optional('arm');
-    $v->optional('leg');
-    $v->optional('knee');
-    $v->optional('pants');
-    $v->optional('foot');
-    $v->optional('skirt');
+    $v->optional('height')->size( 3, 3 );
+    $v->optional('weight')->size( 2, 3 );
+    $v->optional('neck')->size( 2, 2 );
+    $v->optional('bust')->size( 2, 3 );
+    $v->optional('waist')->size( 2, 3 );
+    $v->optional('hip')->size( 2, 3 );
+    $v->optional('topbelly')->size( 2, 3 );
+    $v->optional('belly')->size( 2, 3 );
+    $v->optional('thigh')->size( 2, 3 );
+    $v->optional('arm')->size( 2, 3 );
+    $v->optional('leg')->size( 2, 3 );
+    $v->optional('knee')->size( 2, 3 );
+    $v->optional('foot')->size( 3, 3 );
+    $v->optional('pants')->size( 3, 3 );
+    $v->optional('skirt')->size( 3, 3 );
 
     if ( $v->has_error ) {
-        ## TODO: 에러안내
-        return $self->redirect_to( $self->url_for );
+        my $failed = $v->failed;
+        my @names = map { $OpenCloset::Constants::Measurement::LABEL_MAP{$_} } @$failed;
+        $self->flash( alert_error => "잘못된 입력 값이 있습니다: @names" );
+        return $self->redirect_to;
     }
 
-    my $gender = $self->every_param('gender');
-    my $label  = $self->every_param('label');
-    my $height = $self->every_param('height');
-    my $weight = $self->every_param('weight');
+    my $category = $self->every_param('pre_category');
+    my $row      = $self->DB->resultset('OrderAgent')->create(
+        {
+            order_id     => $order->id,
+            label        => $self->param('label'),
+            gender       => $self->param('gender'),
+            pre_category => join( ',', @$category ),
+            height       => $self->param('height') || 0,
+            weight       => $self->param('weight') || 0,
+            neck         => $self->param('neck') || 0,
+            bust         => $self->param('bust') || 0,
+            waist        => $self->param('waist') || 0,
+            hip          => $self->param('hip') || 0,
+            topbelly     => $self->param('topbelly') || 0,
+            belly        => $self->param('belly') || 0,
+            thigh        => $self->param('thigh') || 0,
+            arm          => $self->param('arm') || 0,
+            leg          => $self->param('leg') || 0,
+            knee         => $self->param('knee') || 0,
+            foot         => $self->param('foot') || 0,
+            pants        => $self->param('pants') || 0,
+            skirt        => $self->param('skirt') || 0,
+        }
+    );
 
     return $self->redirect_to( $self->url_for );
 }
