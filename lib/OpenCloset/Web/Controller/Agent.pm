@@ -104,4 +104,34 @@ sub create {
     return $self->redirect_to( $self->url_for );
 }
 
+=head2 delete
+
+    DELETE /orders/:id/agent?agent_id=xxx
+
+=cut
+
+sub delete {
+    my $self = shift;
+    my $id   = $self->param('id');
+
+    my $order = $self->DB->resultset('Order')->find( { id => $id } );
+    return $self->error( 404, { str => "Order not found: $id" } ) unless $order;
+    return $self->error(
+        400,
+        { str => "대리인 대여 주문서가 아닙니다." },
+        'error/bad_request'
+    ) unless $order->agent;
+
+    my $agent_id = $self->param('agent_id');
+    return $self->error( 400, { str => "agent_id parameter is required" } )
+        unless $agent_id;
+
+    my $agent = $order->order_agents( { id => $agent_id } )->next;
+    return $self->error( 404, { str => "Agent info Not found: $agent_id" } )
+        unless $agent;
+
+    $agent->delete;
+    $self->render( json => {} );
+}
+
 1;

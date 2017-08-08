@@ -213,6 +213,7 @@ sub _public_routes_visit {
 
     $r->get('/orders/:id/agent')->to('agent#add');
     $r->post('/orders/:id/agent')->to('agent#create');
+    $r->delete('/orders/:id/agent')->to('agent#delete');
 
     ## easy cancel order and update booking.date
     my $auth = $r->under('/order/:id')->to('order#auth');
