@@ -86,7 +86,9 @@
     csv 파일
   </a>
   을 작성해서
-  <button class="btn btn-success btn-xs" type="button">업로드</button>
+  <label class="btn btn-default btn-success btn-xs btn-file">
+    업로드 <input id="input-upload-csv" type="file" style="display: none;">
+  </label>
   해주세요.
 </p>
 

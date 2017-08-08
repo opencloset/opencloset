@@ -1,6 +1,8 @@
 package OpenCloset::Web::Controller::Agent;
 use Mojo::Base 'Mojolicious::Controller';
 
+use Text::CSV;
+
 use OpenCloset::Constants::Measurement ();
 
 has DB => sub { shift->app->DB };
@@ -132,6 +134,47 @@ sub delete {
 
     $agent->delete;
     $self->render( json => {} );
+}
+
+=head2 bulk_create
+
+    POST /orders/:id/agents
+
+=cut
+
+sub bulk_create {
+    my $self = shift;
+    my $id   = $self->param('id');
+
+    my $order = $self->DB->resultset('Order')->find( { id => $id } );
+    return $self->error( 404, { str => "Order not found: $id" } ) unless $order;
+    return $self->error(
+        400,
+        { str => "대리인 대여 주문서가 아닙니다." },
+        'error/bad_request'
+    ) unless $order->agent;
+
+    my $v = $self->validation;
+    $v = $self->validation;
+    $v->required('csv')->upload;
+    if ( $v->has_error ) {
+        my $failed = $v->failed;
+        return $self->error(
+            400,
+            { str => 'Parameter Validation Failed: ' . join( ', ', @$failed ) }
+        );
+    }
+
+    my $content = $v->param('csv');
+    my $whole   = $content->slurp;
+
+    my @lines = split /\n/, $whole;
+    use Data::Dump;
+    dd @lines;
+    $self->redirect_to;
+
+    # use Text::CSV;
+    # my $csv = Text::CSV->new;
 }
 
 1;

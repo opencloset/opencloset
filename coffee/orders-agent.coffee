@@ -17,3 +17,6 @@ $ ->
       error: (jqXHR, textStatus, errorThrown) ->
         $.growl.error({ message: jqXHR.responseJSON.error })
       complete: (jqXHR, textStatus) ->
+
+  $('#input-upload-csv').change (e) ->
+    console.log $(@).val()
