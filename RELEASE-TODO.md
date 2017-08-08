@@ -1,4 +1,5 @@
     $ closetpan OpenCloset::Schema    # 0.054
+    $ closetpan OpenCloset::API       # v0.0.4
     $ grunt
 
 v1.10.6
