@@ -13,118 +13,168 @@
   </h2>
 </div>
 
-<p>
+<p><%= $quantity %>명의 신체치수 정보를 각각 입력해주세요.</p>
+<p class="help-block">
   실제 착용자의 사이즈를 줄자로 측정하여 정확히 입력해 주세요. 일반적인 사이즈 호칭 (예&gt; <samp>95</samp>, <samp>100</samp> 이나 <samp>55</samp>, <samp>66</samp>)으로 의류를 대여하는 경우 착용시 의류의 사이즈가 맞지 않을 가능성이 상당히 높습니다. 특히 면접, 결혼식과 같이 중요한 일정을 앞두고 계신 분이거나 체형이 특별한 경우에는 반드시 실제 착용자의 현재 사이즈를 새로 측정하여 입력해주세요.
 </p>
-<p><%= $quantity %>명의 신체치수 정보를 각각 입력해주세요.</p>
 
-<form action="<%= url_for('/orders/' . $order->id . '/agent') %>" method="POST">
-  % for my $i (1 .. $quantity) {
-    <div class="form-group">
-      <label class="radio-inline">
-        <input type="radio" name="gender" value="male">
-        <i class="fa fa-male" aria-hidden="true"></i>
-        남성
-      </label>
+<form class="form-horizontal" action="<%= url_for('/orders/' . $order->id . '/agent') %>" method="POST">
 
-      <label class="radio-inline">
-        <input type="radio" name="gender" value="female">
-        <i class="fa fa-female" aria-hidden="true"></i>
-        여성
-      </label>
+  <div class="row">
+    <div class="col-sm-6">
+      <div class="form-group">
+        <label class="col-sm-2 control-label">이름</label>
+        <div class="col-sm-10">
+          <input type="text" name="label" class="form-control" placeholder="이름">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="col-sm-2 control-label">성별</label>
+        <div class="col-sm-10">
+          <label class="radio-inline">
+            <input type="radio" name="gender" value="male">
+            <i class="fa fa-male" aria-hidden="true"></i>
+            남성
+          </label>
+
+          <label class="radio-inline">
+            <input type="radio" name="gender" value="female">
+            <i class="fa fa-female" aria-hidden="true"></i>
+            여성
+          </label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="col-sm-2 control-label">대여품목</label>
+        <div class="col-sm-10">
+          % my $pre_category = $order->pre_category || '';
+          % my @categories = split /,/, $pre_category;
+          <select multiple class="form-control chosen-select" name="pre_category" data-placeholder="대여품목">
+            <option value=""></option>
+            % for my $c ($JACKET, $PANTS, $SHIRT, $TIE, $SHOES, $BELT, $SKIRT, $BLOUSE) {
+              % my $selected = "@categories" =~ m/$c/;
+              <option value="<%= $c %>"<%= $selected ? ' selected' : '' %>><%= $OpenCloset::Constants::Category::LABEL_MAP{$c} %></option>
+            % }
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="col-sm-2 control-label">키</label>
+        <div class="col-sm-10">
+          <input type="text" name="height" class="form-control" placeholder="키 cm">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="col-sm-2 control-label">몸무게</label>
+        <div class="col-sm-10">
+          <input type="text" name="weight" class="form-control" placeholder="몸무게 kg">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="col-sm-2 control-label">가슴둘레</label>
+        <div class="col-sm-10">
+          <input type="text" name="bust" class="form-control" placeholder="가슴둘레 cm">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="col-sm-2 control-label">허리둘레</label>
+        <div class="col-sm-10">
+          <input type="text" name="waist" class="form-control" placeholder="허리둘레 cm">
+        </div>
+      </div>
+
+      <div class="form-group gender-size male-only">
+        <label class="col-sm-2 control-label">허벅지둘레</label>
+        <div class="col-sm-10">
+          <input type="text" name="thigh" class="form-control" placeholder="허벅지둘레 cm">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="col-sm-2 control-label">배꼽둘레</label>
+        <div class="col-sm-10">
+          <input type="text" name="belly" class="form-control" placeholder="배꼽둘레 cm">
+        </div>
+      </div>
+
+      <div class="form-group gender-size female-only">
+        <label class="col-sm-2 control-label">엉덩이둘레</label>
+        <div class="col-sm-10">
+          <input type="text" name="hip" class="form-control" placeholder="엉덩이둘레 cm">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="col-sm-2 control-label">구두사이즈</label>
+        <div class="col-sm-10">
+          <input type="text" name="foot" class="form-control" placeholder="구두사이즈 mm">
+        </div>
+      </div>
     </div>
 
-    % my $pre_category = $order->pre_category || '';
-    % my @categories = split /,/, $pre_category;
-    <select multiple class="form-control chosen-select" name="pre_category" data-placeholder="대여품목">
-      <option value=""></option>
-      % for my $c ($JACKET, $PANTS, $SHIRT, $TIE, $SHOES, $BELT, $SKIRT, $BLOUSE) {
-        <option value="<%= $c %>"<%= "@categories" =~ m/$c/ ? ' selected' : '' %>><%= $OpenCloset::Constants::Category::LABEL_MAP{$c} %></option>
-      % }
-    </select>
+    <div class="col-sm-6">
+      <div class="form-group">
+        <label class="col-sm-2 control-label">목둘레</label>
+        <div class="col-sm-10">
+          <input type="text" name="neck" class="form-control" placeholder="목둘레 cm">
+        </div>
+      </div>
 
-    <div class="form-group">
-      <label>이름</label>
-      <input type="text" name="label" class="form-control" placeholder="이름">
+      <div class="form-group">
+        <label class="col-sm-2 control-label">윗배둘레</label>
+        <div class="col-sm-10">
+          <input type="text" name="topbelly" class="form-control" placeholder="윗배둘레 cm">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="col-sm-2 control-label">팔길이</label>
+        <div class="col-sm-10">
+          <input type="text" name="arm" class="form-control" placeholder="팔길이 cm">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="col-sm-2 control-label">다리길이</label>
+        <div class="col-sm-10">
+          <input type="text" name="leg" class="form-control" placeholder="다리길이 cm">
+        </div>
+      </div>
+
+      <div class="form-group gender-size female-only">
+        <label class="col-sm-2 control-label">무릎길이</label>
+        <div class="col-sm-10">
+          <input type="text" name="knee" class="form-control" placeholder="무릎길이 cm">
+        </div>
+      </div>
+
+      <div class="form-group gender-size male-only">
+        <label class="col-sm-2 control-label">바지길이</label>
+        <div class="col-sm-10">
+          <input type="text" name="pants" class="form-control" placeholder="바지길이 cm">
+        </div>
+      </div>
+
+      <div class="form-group gender-size female-only">
+        <label class="col-sm-2 control-label">스커트길이</label>
+        <div class="col-sm-10">
+          <input type="text" name="skirt" class="form-control" placeholder="스커트길이 cm">
+        </div>
+      </div>
     </div>
+  </div>
 
-    <div class="form-group">
-      <label>키</label>
-      <input type="text" name="height" class="form-control" placeholder="키 cm">
+  <hr>
+
+  <div class="form-group">
+    <div class="col-sm-offset-1 col-sm-11">
+      <button type="submit" class="btn btn-success">완료</button>
     </div>
-
-    <div class="form-group">
-      <label>몸무게</label>
-      <input type="text" name="weight" class="form-control" placeholder="몸무게 kg">
-    </div>
-
-    <div class="form-group">
-      <label>목둘레</label>
-      <input type="text" name="neck" class="form-control" placeholder="목둘레 cm">
-    </div>
-
-    <div class="form-group">
-      <label>가슴둘레</label>
-      <input type="text" name="bust" class="form-control" placeholder="가슴둘레 cm">
-    </div>
-
-    <div class="form-group">
-      <label>허리둘레</label>
-      <input type="text" name="waist" class="form-control" placeholder="허리둘레 cm">
-    </div>
-
-    <div class="form-group">
-      <label>엉덩이둘레</label>
-      <input type="text" name="hip" class="form-control" placeholder="엉덩이둘레 cm">
-    </div>
-
-    <div class="form-group">
-      <label>윗배둘레</label>
-      <input type="text" name="topbelly" class="form-control" placeholder="윗배둘레 cm">
-    </div>
-
-    <div class="form-group">
-      <label>배꼽둘레</label>
-      <input type="text" name="belly" class="form-control" placeholder="배꼽둘레 cm">
-    </div>
-
-    <div class="form-group">
-      <label>허벅지둘레</label>
-      <input type="text" name="thigh" class="form-control" placeholder="허벅지둘레 cm">
-    </div>
-
-    <div class="form-group">
-      <label>팔길이</label>
-      <input type="text" name="arm" class="form-control" placeholder="팔길이 cm">
-    </div>
-
-    <div class="form-group">
-      <label>다리길이</label>
-      <input type="text" name="leg" class="form-control" placeholder="다리길이 cm">
-    </div>
-
-    <div class="form-group">
-      <label>무릎길이</label>
-      <input type="text" name="knee" class="form-control" placeholder="무릎길이 cm">
-    </div>
-
-    <div class="form-group">
-      <label>구두사이즈</label>
-      <input type="text" name="foot" class="form-control" placeholder="구두사이즈 cm">
-    </div>
-
-    <div class="form-group">
-      <label>바지길이</label>
-      <input type="text" name="pants" class="form-control" placeholder="바지길이 cm">
-    </div>
-
-    <div class="form-group">
-      <label>스커트둘레</label>
-      <input type="text" name="skirt" class="form-control" placeholder="스커트둘레 cm">
-    </div>
-
-    <hr>
-  % }
-
-  <button type="submit" class="btn btn-primary">완료</button>
+  </div>
 </form>
