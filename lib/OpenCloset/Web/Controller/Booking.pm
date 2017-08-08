@@ -347,6 +347,7 @@ sub visit {
                             booking_id => $booking,
                             coupon_id  => $coupon_id,
                             agent      => $agent,
+                            ignore     => $agent ? 1 : undef,
                         }
                     );
 
