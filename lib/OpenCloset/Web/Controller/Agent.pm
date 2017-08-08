@@ -1,9 +1,12 @@
 package OpenCloset::Web::Controller::Agent;
 use Mojo::Base 'Mojolicious::Controller';
 
+use Encode qw/decode_utf8/;
 use Text::CSV;
+use Try::Tiny;
 
 use OpenCloset::Constants::Measurement ();
+use OpenCloset::Constants::Category    ();
 
 has DB => sub { shift->app->DB };
 
@@ -161,20 +164,67 @@ sub bulk_create {
         my $failed = $v->failed;
         return $self->error(
             400,
-            { str => 'Parameter Validation Failed: ' . join( ', ', @$failed ) }
+            { str => 'Parameter Validation Failed: ' . join( ', ', @$failed ) },
+            'error/bad_request'
         );
     }
 
     my $content = $v->param('csv');
-    my $whole   = $content->slurp;
+    my $whole   = decode_utf8( $content->slurp );
+    my @lines   = split /\n/, $whole;
+    shift @lines;
 
-    my @lines = split /\n/, $whole;
-    use Data::Dump;
-    dd @lines;
-    $self->redirect_to;
+    if (@lines) {
+        $order->order_agents->delete_all;
+    }
 
-    # use Text::CSV;
-    # my $csv = Text::CSV->new;
+    our %GENDER_MAP = ( '남성' => 'male', '여성' => 'female' );
+
+    my $csv = Text::CSV->new;
+    my @rows;
+    push @rows,
+        [
+        qw/order_id label gender pre_category height weight neck bust waist hip topbelly belly thigh arm leg knee foot pants skirt/
+        ];
+
+    for my $line (@lines) {
+        $csv->parse($line);
+        my @columns = $csv->fields();
+        my (
+            $name,  $gender, $category, $height,   $weight, $bust, $waist, $belly, $hip,
+            $thigh, $foot,   $neck,     $topbelly, $arm,    $leg,  $knee,  $pants, $skirt
+        ) = $csv->fields();
+
+        $category =~ s/ //g;
+        my @temp = split /,/, $category;
+        my @categories = map { $OpenCloset::Constants::Category::REVERSE_MAP{$_} } @temp;
+
+        push @rows, [
+            $order->id,
+            $name,
+            $GENDER_MAP{$gender},
+            join( ',', @categories ),
+            $height   || 0,
+            $weight   || 0,
+            $neck     || 0,
+            $bust     || 0,
+            $waist    || 0,
+            $hip      || 0,
+            $topbelly || 0,
+            $belly    || 0,
+            $thigh    || 0,
+            $arm      || 0,
+            $leg      || 0,
+            $knee     || 0,
+            $foot     || 0,
+            $pants    || 0,
+            $skirt    || 0,
+        ];
+    }
+
+    $self->DB->resultset('OrderAgent')->populate( \@rows );
+    $self->flash( alert_info => "반영 되었습니다." );
+    $self->redirect_to("/orders/$id/agent");
 }
 
 1;

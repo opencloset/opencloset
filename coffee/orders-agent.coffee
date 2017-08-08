@@ -19,4 +19,4 @@ $ ->
       complete: (jqXHR, textStatus) ->
 
   $('#input-upload-csv').change (e) ->
-    console.log $(@).val()
+    $(@).closest('form').submit()
