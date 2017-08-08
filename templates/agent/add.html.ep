@@ -75,7 +75,19 @@
 
 <p><%= $quantity %>명의 신체치수 정보를 각각 입력해주세요.</p>
 <p class="help-block">
+  <i class="fa fa-info-circle" aria-hidden="true"></i>
   실제 착용자의 사이즈를 줄자로 측정하여 정확히 입력해 주세요. 일반적인 사이즈 호칭 (예&gt; <samp>95</samp>, <samp>100</samp> 이나 <samp>55</samp>, <samp>66</samp>)으로 의류를 대여하는 경우 착용시 의류의 사이즈가 맞지 않을 가능성이 상당히 높습니다. 특히 면접, 결혼식과 같이 중요한 일정을 앞두고 계신 분이거나 체형이 특별한 경우에는 반드시 실제 착용자의 현재 사이즈를 새로 측정하여 입력해주세요.
+</p>
+<p class="help-block">
+  <i class="fa fa-info-circle" aria-hidden="true"></i>
+  대리인 수가 많다면
+  <a href="<%= url_for %>.csv" download="열린옷장-대리인-신체치수.csv">
+    <i class="fa fa-file-o" aria-hidden="true"></i>
+    csv 파일
+  </a>
+  을 작성해서
+  <button class="btn btn-success btn-xs" type="button">업로드</button>
+  해주세요.
 </p>
 
 <form class="form-horizontal" action="<%= url_for('/orders/' . $order->id . '/agent') %>" method="POST">
