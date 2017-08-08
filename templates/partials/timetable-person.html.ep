@@ -45,9 +45,12 @@
 % my %EVENT_NAME_MAP = (seoul => '취업날개', gwanak => '관악고용', '10bob' => '십시일밥', 'seoul-2017' => '취업날개', 'seoul-2017-2' => '취업날개');
 <div class="people-box" data-target="<%= $alert_target %>" data-order-id="<%= $order->id %>" data-ymd="<%= $dt_start->ymd %>">
   <div class="widget-box">
-    <div class="widget-header">
+    <div class="widget-header<%= $order->agent ? ' agent' : '' %>">
       <h4>
         <a tabindex="-1" href="<%= url_for( '/user/' . $order->user->id ) %>">
+          % if ($order->agent) {
+            <i class="fa fa-exchange" aria-hidden="true" title="대리인대여"></i>
+          % }
           <%= $order->user->name %> <%= $revisited ? $revisited . '회 방문' : q{} %>
           % if ($return_memo) {
             <i class="icon-warning-sign" title="<%= $return_memo %>"></i>
