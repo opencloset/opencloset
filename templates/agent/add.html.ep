@@ -150,7 +150,9 @@
       <div class="form-group">
         <label class="col-sm-2 control-label">대여품목</label>
         <div class="col-sm-10">
-          % my $pre_category = $order->pre_category || '';
+          % my $user = $order->user;
+          % my $user_info = $user->user_info;
+          % my $pre_category = $user_info->pre_category || '';
           % my @categories = split /,/, $pre_category;
           <select multiple class="form-control chosen-select" name="pre_category" data-placeholder="대여품목">
             <option value=""></option>
