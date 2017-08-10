@@ -403,7 +403,7 @@
         % if ($order->agent and $agents->count) {
           <tr>
             <th colspan="2">
-              <a href="<%= url_for('/orders/' . $order->id . '/agent') %>" target="_blank">
+              <a href="https://visit.theopencloset.net/orders/<%= $order->id %>/agent" target="_blank">
                 대리인 대여
                 <i class="fa fa-external-link" aria-hidden="true"></i>
               </a>

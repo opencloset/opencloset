@@ -290,6 +290,7 @@
   <div class="form-group">
     <div class="col-sm-offset-1 col-sm-11">
       <button type="submit" class="btn btn-success">추가</button>
+      <a class="btn btn-default" href="https://visit.theopencloset.net">완료</a>
     </div>
   </div>
 </form>
