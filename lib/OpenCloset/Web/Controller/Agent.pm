@@ -81,7 +81,7 @@ sub create {
         my @names =
             map { $OpenCloset::Constants::Measurement::LABEL_MAP{$_} || $ERROR_MAP{$_} }
             @$failed;
-        $self->flash( alert_error => "잘못된 입력 값이 있습니다: @names" );
+        $self->flash( alert_error => "모두 올바르게 입력해주세요: @names" );
         return $self->redirect_to;
     }
 
