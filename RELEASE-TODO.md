@@ -1,3 +1,5 @@
+v1.10.7
+
     $ mysql < db/alter/131-agent.sql
     $ closetpan OpenCloset::Schema    # 0.054
     $ closetpan OpenCloset::API       # v0.0.4
