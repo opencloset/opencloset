@@ -111,7 +111,12 @@ sub create {
     );
 
     my $agents = $order->order_agents;
-    $self->_notify($order) if $agents->count >= 10;
+    if ( $agents->count >= 10 ) {
+        $self->_notify($order);
+        $self->flash( alert_info =>
+                '10벌 이상 단체대여일 경우 신청하기전에 반드시 02-6929-1020 으로 연락주세요.'
+        );
+    }
 
     return $self->redirect_to( $self->url_for );
 }
@@ -250,9 +255,15 @@ sub bulk_create {
     }
 
     $self->DB->resultset('OrderAgent')->populate( \@rows );
-    my $agents = $order->order_agents;
-    $self->_notify($order) if $agents->count >= 10;
     $self->flash( alert_info => "반영 되었습니다." );
+    my $agents = $order->order_agents;
+    if ( $agents->count >= 10 ) {
+        $self->_notify($order);
+        $self->flash( alert_info =>
+                '10벌 이상 단체대여일 경우 신청하기전에 반드시 02-6929-1020 으로 연락주세요.'
+        );
+    }
+
     $self->redirect_to("/orders/$id/agent");
 }
 
