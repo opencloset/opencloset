@@ -53,6 +53,25 @@
 
                           <label class="block clearfix">
                             <div class="control-group">
+                              <label class="control-label">대여하는 의류를 본인이 입으십니까?</label>
+                              <select class="width-100 chosen-select" id="select-agent" name="agent">
+                                <option value="0" selected>제가 입을 의류입니다.</option>
+                                <option value="1">아니오 다른 사람이 입을 의류입니다.</option>
+                              </select>
+                            </div>
+                          </label>
+
+                          <label id="block-agent-quantity" class="clearfix hidden">
+                            <select class="width-100 chosen-select" id="select-agent-quantity" name="agent-quantity">
+                              <option value="">몇명의 의류를 대여하실 건가요?</option>
+                              % for my $i (1 .. 10) {
+                                <option value="<%= $i %>"><%= $i %>명</option>
+                              % }
+                            </select>
+                          </label>
+
+                          <label class="block clearfix">
+                            <div class="control-group">
                               <label class="control-label bolder">성별</label>
 
                               <div class="radio">

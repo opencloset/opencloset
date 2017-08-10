@@ -1,0 +1,29 @@
+% use OpenCloset::Constants::Category ();
+% use Text::CSV;
+% my $csv = Text::CSV->new;
+% my %GENDER_MAP = (male => '남성', female => '여성');
+이름,성별,대여품목,키,몸무게,가슴둘레,허리둘레,배꼽둘레,엉덩이둘레,허벅지둘레,구두사이즈,목둘레,윗배둘레,팔길이,다리길이,무릎길이,바지길이,스커트길이
+% while (my $agent = $agents->next) {
+  % my $name = $agent->label || '';
+  % my $gender = $agent->gender;
+  % my @temp = split /,/, $agent->pre_category;
+  % my @categories = map { $OpenCloset::Constants::Category::LABEL_MAP{$_} } @temp;
+  % my $pre_category = join(',', @categories);
+  % my $height   = $agent->height   || '';
+  % my $weight   = $agent->weight   || '';
+  % my $bust     = $agent->bust     || '';
+  % my $waist    = $agent->waist    || '';
+  % my $belly    = $agent->belly    || '';
+  % my $hip      = $agent->hip      || '';
+  % my $thigh    = $agent->thigh    || '';
+  % my $foot     = $agent->foot     || '';
+  % my $neck     = $agent->neck     || '';
+  % my $topbelly = $agent->topbelly || '';
+  % my $arm      = $agent->arm      || '';
+  % my $leg      = $agent->leg      || '';
+  % my $knee     = $agent->knee     || '';
+  % my $pants    = $agent->pants    || '';
+  % my $skirt    = $agent->skirt    || '';
+  % $csv->combine($name, $GENDER_MAP{$gender}, $pre_category, $height, $weight, $bust, $waist, $belly, $hip, $thigh, $foot, $neck, $topbelly, $arm, $leg, $knee, $pants, $skirt);
+%== $csv->string()
+% }

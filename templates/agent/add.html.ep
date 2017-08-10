@@ -1,0 +1,295 @@
+% layout 'common';
+% title '대리인 정보를 입력해주세요', jses => [
+%   '/components/chosen/chosen.jquery.js',
+%   '/components/growl/javascripts/jquery.growl.js',
+%   '/js/orders-agent.js'
+% ], csses => [
+%   '/components/chosen/chosen.css',
+%   '/components/growl/stylesheets/jquery.growl.css'
+% ];
+% use OpenCloset::Constants::Category;
+
+<div class="page-header">
+  <h2>
+    <i class="fa fa-archive text-primary" aria-hidden="true"></i>
+    <a href="<%= url_for('/visit') %>">열린옷장</a>
+    <small><%= title %></small>
+  </h2>
+</div>
+
+% if (my $error = flash('alert_error')) {
+  <div class="alert alert-danger" role="alert">
+    %= $error
+  </div>
+% }
+
+% if (my $info = flash('alert_info')) {
+  <div class="alert alert-success" role="alert">
+    %= $info
+  </div>
+% }
+
+% if ($agents->count) {
+  <table class="table">
+    <thead>
+      <tr>
+        <th>이름</th>
+        <th>성별</th>
+        <th>대여품목</th>
+        <th>키</th>
+        <th>몸무게</th>
+        <th>가슴</th>
+        <th>허리</th>
+        <th>배꼽</th>
+        <th>엉덩이</th>
+        <th>허벅지</th>
+        <th>구두사이즈</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      % while (my $agent = $agents->next) {
+        <tr>
+          <td><%= $agent->label || '' %></td>
+          <td>
+            % my $gender = $agent->gender;
+            <i class="fa fa-<%= $gender %>" aria-hidden="true"></i>
+          </td>
+          <td>
+            % my @temp = split /,/, $agent->pre_category;
+            % my @categories = map { $OpenCloset::Constants::Category::LABEL_MAP{$_} } @temp;
+            <small>
+              %= join(', ', @categories)
+            </small>
+          </td>
+          <td><samp><%= $agent->height || '-' %></samp></td>
+          <td><samp><%= $agent->weight || '-' %></samp></td>
+          <td><samp><%= $agent->bust || '-' %></samp></td>
+          <td><samp><%= $agent->waist || '-' %></samp></td>
+          <td><samp><%= $agent->belly || '-' %></samp></td>
+          <td><samp><%= $agent->hip || '-' %></samp></td>
+          <td><samp><%= $agent->thigh || '-' %></samp></td>
+          <td><samp><%= $agent->foot || '-' %></samp></td>
+          <td>
+            <button class="btn btn-xs btn-danger btn-remove" type="button" data-id="<%= $agent->id %>">삭제</button>
+          </td>
+        </tr>
+      % }
+    </tbody>
+  </table>
+% }
+
+<p><%= $quantity %>명의 신체치수 정보를 각각 입력해주세요.</p>
+
+<form action="<%= url_for('/orders/' . $order->id . '/agents') %>" method="POST" enctype="multipart/form-data">
+
+  <ul class="fa-ul help-block">
+    <li>
+      <i class="fa-li fa fa-info-circle"></i>
+      실제 착용자의 사이즈를 줄자로 측정하여 정확히 입력해 주세요. 일반적인 사이즈 호칭 (예&gt; <samp>95</samp>, <samp>100</samp> 이나 <samp>55</samp>, <samp>66</samp>)으로 의류를 대여하는 경우 착용시 의류의 사이즈가 맞지 않을 가능성이 상당히 높습니다. 특히 면접, 결혼식과 같이 중요한 일정을 앞두고 계신 분이거나 체형이 특별한 경우에는 반드시 실제 착용자의 현재 사이즈를 새로 측정하여 입력해주세요.
+    </li>
+    <li>
+      <i class="fa-li fa fa-info-circle"></i>
+      대리인 수가 많다면
+      <a href="<%= url_for %>.csv" class="btn btn-default btn-xs" download="열린옷장-대리인-신체치수.csv">
+        <i class="fa fa-download" aria-hidden="true"></i>
+        csv 파일
+      </a>
+      을 작성해서
+      <label class="btn btn-default btn-success btn-xs btn-file">
+        <i class="fa fa-upload" aria-hidden="true"></i>
+        업로드 <input id="input-upload-csv" type="file" name="csv" style="display: none;">
+      </label>
+      해주세요.
+    </li>
+    <li>
+      <small>
+        대여품목은
+        % for my $c ($JACKET, $PANTS, $SHIRT, $TIE, $SHOES, $BELT, $SKIRT, $BLOUSE) {
+          <u><%= $OpenCloset::Constants::Category::LABEL_MAP{$c} %></u>
+        % }
+        만 허용되고 <kbd>,</kbd> 를 사용해서 구분합니다.
+      </small>
+    </li>
+    <li>
+      <small>
+        예) 남성 전품목 대여의 경우: 자켓,팬츠,셔츠,타이,구두,벨트
+      </small>
+    </li>
+  </ul>
+</form>
+
+<form class="form-horizontal" action="<%= url_for('/orders/' . $order->id . '/agent') %>" method="POST">
+
+  <div class="row">
+    <div class="col-sm-6">
+      <div class="form-group">
+        <label class="col-sm-2 control-label">이름</label>
+        <div class="col-sm-10">
+          <input type="text" name="label" class="form-control" placeholder="이름">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="col-sm-2 control-label">성별</label>
+        <div class="col-sm-10">
+          <label class="radio-inline">
+            <input type="radio" name="gender" value="male">
+            <i class="fa fa-male" aria-hidden="true"></i>
+            남성
+          </label>
+
+          <label class="radio-inline">
+            <input type="radio" name="gender" value="female">
+            <i class="fa fa-female" aria-hidden="true"></i>
+            여성
+          </label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="col-sm-2 control-label">대여품목</label>
+        <div class="col-sm-10">
+          % my $user = $order->user;
+          % my $user_info = $user->user_info;
+          % my $pre_category = $user_info->pre_category || '';
+          % my @categories = split /,/, $pre_category;
+          <select multiple class="form-control chosen-select" name="pre_category" data-placeholder="대여품목">
+            <option value=""></option>
+            % for my $c ($JACKET, $PANTS, $SHIRT, $TIE, $SHOES, $BELT, $SKIRT, $BLOUSE) {
+              % my $selected = "@categories" =~ m/$c/;
+              <option value="<%= $c %>"<%= $selected ? ' selected' : '' %>><%= $OpenCloset::Constants::Category::LABEL_MAP{$c} %></option>
+            % }
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="col-sm-2 control-label">키</label>
+        <div class="col-sm-10">
+          <input type="text" name="height" class="form-control" placeholder="키 cm">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="col-sm-2 control-label">몸무게</label>
+        <div class="col-sm-10">
+          <input type="text" name="weight" class="form-control" placeholder="몸무게 kg">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="col-sm-2 control-label">가슴둘레</label>
+        <div class="col-sm-10">
+          <input type="text" name="bust" class="form-control" placeholder="가슴둘레 cm">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="col-sm-2 control-label">허리둘레</label>
+        <div class="col-sm-10">
+          <input type="text" name="waist" class="form-control" placeholder="허리둘레 cm">
+        </div>
+      </div>
+
+      <div class="form-group gender-size male-only">
+        <label class="col-sm-2 control-label">허벅지둘레</label>
+        <div class="col-sm-10">
+          <input type="text" name="thigh" class="form-control" placeholder="허벅지둘레 cm">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="col-sm-2 control-label">배꼽둘레</label>
+        <div class="col-sm-10">
+          <input type="text" name="belly" class="form-control" placeholder="배꼽둘레 cm">
+        </div>
+      </div>
+
+      <div class="form-group gender-size female-only">
+        <label class="col-sm-2 control-label">엉덩이둘레</label>
+        <div class="col-sm-10">
+          <input type="text" name="hip" class="form-control" placeholder="엉덩이둘레 cm">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="col-sm-2 control-label">구두사이즈</label>
+        <div class="col-sm-10">
+          <input type="text" name="foot" class="form-control" placeholder="구두사이즈 mm">
+        </div>
+      </div>
+    </div>
+
+    <div class="col-sm-6">
+      <div class="help-size help-size-height hidden">
+        <h4>키 cm</h4>
+      </div>
+
+      <div class="help-size help-size-weight hidden">
+        <h4>몸무게 kg</h4>
+      </div>
+
+      <div class="help-size help-size-bust hidden">
+        <h4>가슴둘레 cm</h4>
+        <p>
+          <i class="fa fa-male" aria-hidden="true"></i>
+          양팔을 들어올려 줄자를 겨드랑이 가장 윗부분에 끼운 후 양팔을 내려 수평 둘레를 측정합니다.
+        </p>
+        <p>
+          <i class="fa fa-female" aria-hidden="true"></i>
+          가슴의 가장 두꺼운 부분의 둘레를 수평으로 측정합니다.
+        </p>
+
+        <div class="thumbnail preview-img">
+          <img src="<%= url_for('/imgs/agents/bust.jpg') %>" alt="가슴둘레">
+        </div>
+      </div>
+
+      <div class="help-size help-size-waist hidden">
+        <h4>허리둘레 cm</h4>
+        <p>골반의 위치를 확인한 후 골반 바로 윗 부분의 둘레를 측정합니다.</p>
+        <div class="thumbnail preview-img">
+          <img src="<%= url_for('/imgs/agents/waist.jpg') %>" alt="허리둘레">
+        </div>
+      </div>
+
+      <div class="help-size help-size-thigh hidden">
+        <h4>허벅지둘레 cm</h4>
+        <p>가랑이 가장 위까지 줄자를 올린 후 수평으로 둘레를 측정합니다.</p>
+        <div class="thumbnail preview-img">
+          <img src="<%= url_for('/imgs/agents/thigh.jpg') %>" alt="허벅지둘레">
+        </div>
+      </div>
+
+      <div class="help-size help-size-belly hidden">
+        <h4>배꼽둘레 cm</h4>
+        <p>배꼽 위치에서 둘레를 수평으로 측정합니다.</p>
+        <div class="thumbnail preview-img">
+          <img src="<%= url_for('/imgs/agents/belly.jpg') %>" alt="배꼽둘레">
+        </div>
+      </div>
+
+      <div class="help-size help-size-hip hidden">
+        <h4>엉덩이둘레 cm</h4>
+        <p>엉덩이의 가장 튀어나온 부분을 수평으로 측정합니다.</p>
+        <div class="thumbnail preview-img">
+          <img src="<%= url_for('/imgs/agents/hip.jpg') %>" alt="엉덩이둘레">
+        </div>
+      </div>
+
+      <div class="help-size help-size-foot hidden">
+        <h4>구두사이즈 cm</h4>
+        <p>본인의 구두사이즈를 알고 있지 않을 경우, 평소 신는 운동화 사이즈보다 5mm 작게 기입합니다.</p>
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <div class="form-group">
+    <div class="col-sm-offset-1 col-sm-11">
+      <button type="submit" class="btn btn-success">추가</button>
+    </div>
+  </div>
+</form>

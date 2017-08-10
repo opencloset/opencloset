@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Added
 - 반납희망일과 반납예정일이 비어있는 주문서를 찾기 위한 debug 로그 추가
+- 대리/단체 대여를 위한 프로세스 추가 (#1066)
 
 ### Changed
 - 취업날개 예약시간 변경 api 호출 실패시 retry x 3

@@ -395,5 +395,9 @@ my %BOOKING_SLOT = (
     dressfree => {
         username => $ENV{OPENCLOSET_DRESSFREE_USERNAME} || '',
         password => $ENV{OPENCLOSET_DRESSFREE_PASSWORD} || '',
-    }
+    },
+    email_notify => {
+        from => $ENV{OPENCLOSET_EMAIL_NOTIFY_FROM} || 'info@theopencloset.net',
+        to   => $ENV{OPENCLOSET_EMAIL_NOTIFY_TO} || 'info@theopencloset.net',
+    },
 };
