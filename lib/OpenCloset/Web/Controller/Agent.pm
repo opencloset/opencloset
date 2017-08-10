@@ -196,8 +196,28 @@ sub bulk_create {
         ) = $csv->fields();
 
         $category =~ s/ //g;
+        ## 쟈켓, 재킷, 상의
+        $category =~ s/쟈켓/$OpenCloset::Constants::Category::LABEL_JACKET/;
+        $category =~ s/재킷/$OpenCloset::Constants::Category::LABEL_JACKET/;
+        $category =~ s/상의/$OpenCloset::Constants::Category::LABEL_JACKET/;
+        ## 팬트, 하의, 바지
+        $category =~ s/팬츠/$OpenCloset::Constants::Category::LABEL_PANTS/;
+        $category =~ s/하의/$OpenCloset::Constants::Category::LABEL_PANTS/;
+        $category =~ s/바지/$OpenCloset::Constants::Category::LABEL_PANTS/;
+        ## 허리띠
+        $category =~ s/허리띠/$OpenCloset::Constants::Category::LABEL_BELT/;
+        ## 와이셔츠
+        $category =~ s/와이셔츠/$OpenCloset::Constants::Category::LABEL_SHIRT/;
+        ## 신발
+        $category =~ s/신발/$OpenCloset::Constants::Category::LABEL_SHOES/;
+        ## 넥타이
+        $category =~ s/넥타이/$OpenCloset::Constants::Category::LABEL_TIE/;
+        ## 브라우스
+        $category =~ s/브라우스/$OpenCloset::Constants::Category::LABEL_BLOUSE/;
+
         my @temp = split /,/, $category;
         my @categories = map { $OpenCloset::Constants::Category::REVERSE_MAP{$_} } @temp;
+        @categories = grep { defined $_ } @categories; # ignore wrong values
 
         push @rows, [
             $order->id,
