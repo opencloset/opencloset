@@ -4,6 +4,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Fixed
+- 대리인대여 링크 수정
+
+### Added
+- 대리인 추가 정보에 완료 버튼 추가
+
 ## [v1.10.7] - Thu, 10 Aug 2017 17:16:56 +0900
 
 ### Added
