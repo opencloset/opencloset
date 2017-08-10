@@ -55,11 +55,11 @@ sub create {
     ) unless $order->agent;
 
     my $v = $self->validation;
-    $v->optional('label');
-    $v->optional('gender')->in(qw/male female/);
-    $v->optional('pre_category');
-    $v->optional('height')->size( 3, 3 );
-    $v->optional('weight')->size( 2, 3 );
+    $v->required('label');
+    $v->required('gender')->in(qw/male female/);
+    $v->required('pre_category');
+    $v->required('height')->size( 3, 3 );
+    $v->required('weight')->size( 2, 3 );
     $v->optional('neck')->size( 2, 2 );
     $v->optional('bust')->size( 2, 3 );
     $v->optional('waist')->size( 2, 3 );
@@ -71,8 +71,8 @@ sub create {
     $v->optional('leg')->size( 2, 3 );
     $v->optional('knee')->size( 2, 3 );
     $v->optional('foot')->size( 3, 3 );
-    $v->optional('pants')->size( 3, 3 );
-    $v->optional('skirt')->size( 3, 3 );
+    $v->optional('pants')->size( 2, 3 );
+    $v->optional('skirt')->size( 2, 3 );
 
     if ( $v->has_error ) {
         my $failed = $v->failed;
