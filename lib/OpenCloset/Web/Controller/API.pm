@@ -605,6 +605,11 @@ sub api_update_order {
     }
     elsif ( $status_id and $status_id == $PAYMENT ) {
         $self->app->api->boxed2payment($order);
+        $self->log->debug("Called boxed2payment: $order_params{id}");
+        my $target_date      = $order->target_date      || 'NULL';
+        my $user_target_date = $order->user_target_date || 'NULL';
+        $self->log->debug("$order_params{id} target_date: $target_date");
+        $self->log->debug("$order_params{id} user_target_date: $user_target_date");
     }
     else {
         $order = $self->update_order( \%order_params, \%order_detail_params );

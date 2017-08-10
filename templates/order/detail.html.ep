@@ -1,4 +1,5 @@
 % use OpenCloset::Constants::Status qw/$RENTAL $PAYMENT $BOXED/;
+% use OpenCloset::Constants::Category;
 % my $_id = 'order-detail';
 % layout 'default',
 %   page_id     => $_id,
@@ -398,33 +399,94 @@
             </p>
           </td>
         </tr>
-        <tr>
-          <th>주문 신체 치수</th>
-          <td>
-            <div>
-              <div class="btn-group btn-group-xs">
-                <button type="button" class="btn btn-success" title="height"><%= $order->height || '-' %></button>
-                <button type="button" class="btn btn-success" title="weight"><%= $order->weight || '-' %></button>
-              </div>
-            </div>
-            
-            <div>
-              <div class="btn-group btn-group-xs">
-                % for my $part (qw/bust waist hip topbelly belly/) {
-                  <button type="button" class="btn btn-info" title="<%= $part %>"><%= $order->$part || '-' %></button>
-                % }
-              </div>
-            </div>
+        % my $agents = $order->order_agents;
+        % if ($order->agent and $agents->count) {
+          <tr>
+            <th colspan="2">
+              <a href="<%= url_for('/orders/' . $order->id . '/agent') %>" target="_blank">
+                대리인 대여
+                <i class="fa fa-external-link" aria-hidden="true"></i>
+              </a>
+            </th>
+          </tr>
+          <tr>
+            <td colspan="2">
+              <ul class="list-inline">
+                % while (my $agent = $agents->next) {
+                  <li>
+                    <div>
+                      <p>
+                        <i class="fa fa-<%= $agent->gender %>" aria-hidden="true"></i>
+                        <%= $agent->label || '-' %>
+                      </p>
+                    </div>
 
-            <div>
-              <div class="btn-group btn-group-xs">
-                % for my $part (qw/thigh arm leg knee foot/) {
-                  <button type="button" class="btn btn-warning" title="<%= $part %>"><%= $order->$part || '-' %></button>
+                    <div>
+                      <p>
+                        % my @temp = split /,/, $agent->pre_category;
+                        % my @categories = map { $OpenCloset::Constants::Category::LABEL_MAP{$_} } @temp;
+                        <small>
+                          %= join(', ', @categories)
+                        </small>
+                      </p>
+                    </div>
+
+                    <div>
+                      <div class="btn-group btn-group-xs">
+                        <button type="button" class="btn btn-success" title="height"><%= $agent->height || '-' %></button>
+                        <button type="button" class="btn btn-success" title="weight"><%= $agent->weight || '-' %></button>
+                      </div>
+                    </div>
+
+                    <div>
+                      <div class="btn-group btn-group-xs">
+                        % for my $part (qw/bust waist hip topbelly belly/) {
+                          <button type="button" class="btn btn-info" title="<%= $part %>"><%= $agent->$part || '-' %></button>
+                        % }
+                      </div>
+                    </div>
+
+                    <div>
+                      <div class="btn-group btn-group-xs">
+                        % for my $part (qw/thigh arm leg knee foot/) {
+                          <button type="button" class="btn btn-warning" title="<%= $part %>"><%= $agent->$part || '-' %></button>
+                        % }
+                      </div>
+                    </div>
+                  </li>
                 % }
+              </ul>
+            </td>
+          </tr>
+        % } else {
+          <tr>
+            <th>주문 신체 치수</th>
+            <td>
+              <div>
+                <div class="btn-group btn-group-xs">
+                  <button type="button" class="btn btn-success" title="height"><%= $order->height || '-' %></button>
+                  <button type="button" class="btn btn-success" title="weight"><%= $order->weight || '-' %></button>
+                </div>
               </div>
-            </div>
-          </td>
-        </tr>
+
+              <div>
+                <div class="btn-group btn-group-xs">
+                  % for my $part (qw/bust waist hip topbelly belly/) {
+                    <button type="button" class="btn btn-info" title="<%= $part %>"><%= $order->$part || '-' %></button>
+                  % }
+                </div>
+              </div>
+
+              <div>
+                <div class="btn-group btn-group-xs">
+                  % for my $part (qw/thigh arm leg knee foot/) {
+                    <button type="button" class="btn btn-warning" title="<%= $part %>"><%= $order->$part || '-' %></button>
+                  % }
+                </div>
+              </div>
+            </td>
+          </tr>
+        % }
       </tbody>
     </table>
   </div>
