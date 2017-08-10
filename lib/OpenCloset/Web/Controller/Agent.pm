@@ -76,7 +76,10 @@ sub create {
 
     if ( $v->has_error ) {
         my $failed = $v->failed;
-        my @names = map { $OpenCloset::Constants::Measurement::LABEL_MAP{$_} } @$failed;
+        my %ERROR_MAP = ( label => '이름', pre_category => '대여품목' );
+        my @names =
+            map { $OpenCloset::Constants::Measurement::LABEL_MAP{$_} || $ERROR_MAP{$_} }
+            @$failed;
         $self->flash( alert_error => "잘못된 입력 값이 있습니다: @names" );
         return $self->redirect_to;
     }
