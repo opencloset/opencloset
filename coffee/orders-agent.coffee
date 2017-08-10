@@ -20,3 +20,8 @@ $ ->
 
   $('#input-upload-csv').change (e) ->
     $(@).closest('form').submit()
+
+  $('input:text').focus (e) ->
+    name = $(@).prop('name')
+    $('.help-size').addClass('hidden')
+    $(".help-size.help-size-#{name}").removeClass('hidden')
