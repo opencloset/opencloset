@@ -181,9 +181,18 @@ sub bulk_create {
         );
     }
 
-    my $content = $v->param('csv');
-    my $whole   = decode_utf8( $content->slurp );
-    my @lines   = split /\n/, $whole;
+    my $file = $v->param('csv');
+
+    if ( $file->filename !~ m/\.csv$/ ) {
+        return $self->error(
+            400,
+            { str => 'csv 파일만 업로드 가능합니다.' },
+            'error/bad_request'
+        );
+    }
+
+    my $content = decode_utf8( $file->slurp );
+    my @lines = split /\n/, $content;
     shift @lines;
 
     if (@lines) {
