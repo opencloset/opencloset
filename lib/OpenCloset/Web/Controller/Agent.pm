@@ -199,7 +199,11 @@ sub bulk_create {
         $order->order_agents->delete_all;
     }
 
-    our %GENDER_MAP = ( '남성' => 'male', '여성' => 'female' );
+    our %GENDER_MAP = (
+        '남'    => 'male', '여'    => 'female',
+        '남성' => 'male', '여성' => 'female',
+        '남자' => 'male', '여자' => 'female'
+    );
 
     my $csv = Text::CSV->new;
     my @rows;
