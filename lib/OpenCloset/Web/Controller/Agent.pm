@@ -1,7 +1,8 @@
 package OpenCloset::Web::Controller::Agent;
 use Mojo::Base 'Mojolicious::Controller';
 
-use Encode qw/decode_utf8/;
+use Email::Simple;
+use Encode qw/decode_utf8 encode_utf8/;
 use Text::CSV;
 use Try::Tiny;
 
@@ -108,6 +109,9 @@ sub create {
             skirt        => $self->param('skirt') || 0,
         }
     );
+
+    my $agents = $order->order_agents;
+    $self->_notify($order) if $agents->count >= 10;
 
     return $self->redirect_to( $self->url_for );
 }
@@ -246,8 +250,35 @@ sub bulk_create {
     }
 
     $self->DB->resultset('OrderAgent')->populate( \@rows );
+    my $agents = $order->order_agents;
+    $self->_notify($order) if $agents->count >= 10;
     $self->flash( alert_info => "반영 되었습니다." );
     $self->redirect_to("/orders/$id/agent");
+}
+
+sub _notify {
+    my $self  = shift;
+    my $order = shift;
+    return unless $order;
+
+    my $booking_datetime;
+    if ( my $booking = $order->booking ) {
+        $booking_datetime = $booking->date->strftime('%Y-%m-%d %H:%M');
+    }
+    else {
+        $booking_datetime = 'Unknown';
+    }
+
+    my $msg = Email::Simple->create(
+        header => [
+            From    => $self->config->{email_notify}{from},
+            To      => $self->config->{email_notify}{to},
+            Subject => "[열린옷장] 단체대여 예약 $booking_datetime",
+        ],
+        body => $self->url_for( '/orders/' . $order->id . '/agent' )->to_abs,
+    );
+
+    $self->send_mail( encode_utf8( $msg->as_string ) );
 }
 
 1;
