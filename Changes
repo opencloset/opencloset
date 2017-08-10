@@ -4,6 +4,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [v1.10.8] - Thu, 10 Aug 2017 17:52:06 +0900
+
 ### Fixed
 - 대리인대여 링크 수정
 

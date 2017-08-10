@@ -1,3 +1,5 @@
+v1.10.8
+
 v1.10.7
 
     $ mysql < db/alter/131-agent.sql
