@@ -71,7 +71,7 @@
           <td><samp><%= $agent->thigh || '-' %></samp></td>
           <td><samp><%= $agent->foot || '-' %></samp></td>
           <td>
-            <button class="btn btn-xs btn-danger btn-remove" type="button" data-id="<%= $agent->id %>">다시입력</button>
+            <button class="btn btn-xs btn-danger btn-remove" type="button" data-id="<%= $agent->id %>">삭제</button>
           </td>
         </tr>
       % }
