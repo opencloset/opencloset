@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## [v1.10.8] - Thu, 10 Aug 2017 17:52:06 +0900
 
+### Added
+- 지난의류 대여 기록을 선택할 수 있도록 함 (#1067)
+
 ### Fixed
 - 대리인대여 링크 수정
 

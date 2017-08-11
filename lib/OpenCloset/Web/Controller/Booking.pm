@@ -114,6 +114,7 @@ sub visit {
     my $pre_color     = $self->param('pre_color');
     my $agent         = $self->param('agent') || 0;
     my $agent_qty     = $self->param('agent-quantity') || 1;
+    my $past_order    = $self->param('past-order') || '';
 
     $self->app->log->debug("type: $type");
     $self->app->log->debug("name: $name");
@@ -139,6 +140,7 @@ sub visit {
     $self->app->log->debug("pre_color: $pre_color");
     $self->app->log->debug("agent: $agent");
     $self->app->log->debug("agent-quantity: $agent_qty");
+    $self->app->log->debug("past-order: $past_order");
 
     #
     # validate name
@@ -340,6 +342,17 @@ sub visit {
                         $coupon_id = $coupon->id if $self->transfer_order($coupon);
                     }
 
+                    my $misc;
+                    if ($past_order) {
+                        my $po = $self->DB->resultset('Order')->find( { id => $past_order } );
+                        if ( $po and $po->rental_date ) {
+                            $misc = sprintf(
+                                "%s 대여했던 의류를 다시 대여하고 싶습니다.",
+                                $po->rental_date->ymd
+                            );
+                        }
+                    }
+
                     my $order_obj = $user->create_related(
                         'orders',
                         {
@@ -348,6 +361,7 @@ sub visit {
                             coupon_id  => $coupon_id,
                             agent      => $agent,
                             ignore     => $agent ? 1 : undef,
+                            misc       => $misc,
                         }
                     );
 
@@ -488,8 +502,16 @@ sub visit {
         $self->stash( unpaid_msg => $unpaid_msg );
     }
 
+    my $orders = $user->orders(
+        { rental_date => { '!='  => undef } },
+        { order_by    => { -desc => 'id' } }
+    );
+
     $self->stash(
-        load     => $self->config->{visit_load}, type => $type, user => $user,
+        load     => $self->config->{visit_load},
+        type     => $type,
+        user     => $user,
+        orders   => $orders,
         authcode => $authcode,
     );
 }

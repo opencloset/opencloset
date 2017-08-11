@@ -1,5 +1,6 @@
 % use utf8;
 % use DateTime;
+% use OpenCloset::Constants::Category ();
 % my $booking;
 % $booking = $order->booking if $order;
 % my $now = DateTime->now( time_zone => $timezone );
@@ -185,6 +186,29 @@
                               <i class="icon-calendar"></i>
                             </span>
                           </label>
+
+                          % if ($orders->count) {
+                            <label class="block clearfix">
+                              <div class="control-group">
+                                <label class="control-label">예전 대여의류를 원하시면 날짜를 선택해주세요. 의류준비에 도움이 됩니다.</label>
+                                <select class="width-100 chosen-select" id="select-past-orders" name="past-order" data-placeholder="지난대여기록">
+                                  <option value=""></option>
+                                  % while (my $order = $orders->next) {
+                                    % my $rental_date  = $order->rental_date;
+                                    % my $pre_category = $order->pre_category;
+                                    % next unless $rental_date;
+                                    % next unless $pre_category;
+                                    % my @temp = split /,/, $order->pre_category;
+                                    % my @categories = map { $OpenCloset::Constants::Category::LABEL_MAP{$_} } @temp;
+                                    <option value="<%= $order->id %>">
+                                      %= $rental_date->ymd
+                                      %= join(', ', @categories)
+                                    </option>
+                                  % }
+                                </select>
+                              </div>
+                            </label>
+                          % }
 
                           <label class="block clearfix">
                             <input type="hidden" name="pre_category" value="<%= ( $order || $load ) ? $user->user_info->pre_category : q{} %>">
