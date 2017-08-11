@@ -571,3 +571,7 @@ $ ->
       $('#block-agent-quantity').removeClass('hidden')
     else
       $('#block-agent-quantity').addClass('hidden')
+
+  $("#select-past-orders").chosen
+    width: "100%"
+    disable_search_threshold: 20
