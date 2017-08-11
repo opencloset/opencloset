@@ -4,6 +4,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [v1.10.9] - Fri, 11 Aug 2017 16:46:19 +0900
+
+### Added
+- 지난의류 대여 기록을 선택할 수 있도록 함 (#1067)
+
 ## [v1.10.8] - Thu, 10 Aug 2017 17:52:06 +0900
 
 ### Fixed
