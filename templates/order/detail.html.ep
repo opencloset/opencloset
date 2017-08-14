@@ -13,6 +13,7 @@
 %     '/components/growl/javascripts/jquery.growl.js',
 %     '/components/jquery-timeago/jquery.timeago.js',
 %     '/components/jquery-timeago/locales/jquery.timeago.ko.js',
+%     '/components/moment/moment.js',
 %     '/components/bootstrap-toggle/js/bootstrap-toggle.min.js'
 %   ],
 %   csses => [

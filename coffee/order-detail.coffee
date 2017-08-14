@@ -213,11 +213,17 @@ $ ->
       success: (data, textStatus, jqXHR) ->
         $.growl.notice({ title: "연장신청 되었습니다.", message: "취업날개 서비스에서 연장횟수를 확인해주세요." })
 
-        n = parseInt($this.data('qty'))
-        $('#datepicker-user-target-date').datepicker('setDate', "+#{n * 4}d")
+        qty = parseInt($this.data('qty'))
+        n   = qty * 4
+
+        user_target_date_str = $('#datepicker-user-target-date').datepicker('getFormattedDate')
+        date = moment(user_target_date_str);
+        date.add(n, 'd')
+
+        $('#datepicker-user-target-date').datepicker('setDate', date.toDate())
 
         if $('#datepicker-target-date').length
-          $('#datepicker-target-date').datepicker('setDate', "+#{n * 4}d")
+          $('#datepicker-target-date').datepicker('setDate', date.toDate())
         else
           order_id = $.trim($('#order-id').text())
           user_target_date = $('#datepicker-user-target-date').datepicker('getFormattedDate')
