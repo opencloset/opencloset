@@ -4,6 +4,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Changed
+- 결제대기 상태에서만 주문확정이 가능하도록 함 (#1301)
+
 ## [v1.10.10] - Mon, 14 Aug 2017 18:13:43 +0900
 
 ### Fixed
