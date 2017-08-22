@@ -4,6 +4,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [v1.10.11] - Tue, 22 Aug 2017 17:13:58 +0900
+
 ### Fixed
 - 미납/불납 라벨을 올바르게 표시 (#1302)
 
