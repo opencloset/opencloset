@@ -656,10 +656,12 @@
         정장 반납 안내 출력
       </a>
 
-      <button type="submit" class="btn btn-success">
-        <i class="fa fa-check" aria-hidden="true"></i>
-        주문 확정
-      </button>
+      % if ($status_id == $PAYMENT) {
+        <button type="submit" class="btn btn-success">
+          <i class="fa fa-check" aria-hidden="true"></i>
+          주문 확정
+        </button>
+      % }
 
       <button id="btn-rental-reset" type="submit" class="btn btn-default">
         새로 주문
