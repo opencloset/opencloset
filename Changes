@@ -4,6 +4,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Fixed
+- 미납/불납 라벨을 올바르게 표시 (#1302)
+
 ### Changed
 - 결제대기 상태에서만 주문확정이 가능하도록 함 (#1301)
 
