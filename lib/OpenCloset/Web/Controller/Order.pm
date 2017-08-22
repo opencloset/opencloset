@@ -447,14 +447,14 @@ sub detail {
     my ( $unpaid, $nonpaid );
     my $orders = $user->orders;
     while ( my $row = $orders->next ) {
-        my $late_fee_pay_with     = $order->late_fee_pay_with     || '';
-        my $compensation_pay_with = $order->compensation_pay_with || '';
+        my $late_fee_pay_with     = $row->late_fee_pay_with     || '';
+        my $compensation_pay_with = $row->compensation_pay_with || '';
 
         if ( $late_fee_pay_with =~ /미납/ || $compensation_pay_with =~ /미납/ ) {
             $unpaid = 1;
         }
 
-        $nonpaid = is_nonpaid($row);
+        $nonpaid = is_nonpaid($row) unless $nonpaid;
         last if $unpaid and $nonpaid;
     }
 
