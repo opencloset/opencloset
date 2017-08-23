@@ -452,11 +452,13 @@ sub visit {
             my $late_fee    = $calc->late_fee($unpaid_order);
             my $rental_date = $unpaid_order->rental_date;
             my $user_info   = $user->user_info;
+            my $today       = DateTime->today( time_zone => $self->config->{timezone} );
+            my $vbank_due   = $today->clone->add( days => 4 );
             my $params      = {
                 merchant_uid =>
                     OpenCloset::Common::Unpaid::merchant_uid( "staff-%d-", $unpaid_order->id ),
                 amount       => $late_fee,
-                vbank_due    => time + 86400 * 3,                            # 3days
+                vbank_due    => $vbank_due->epoch,
                 vbank_holder => '열린옷장-' . $user->name,
                 vbank_code   => '04',                                        # 국민은행
                 name         => sprintf( "미납금#%d", $unpaid_order->id ),

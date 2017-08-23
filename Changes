@@ -4,6 +4,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Changed
+- 가상계좌 입금기한을 시간이 아닌 날짜기준 +3일로 변경 (#1237)
+
 ### Fixed
 - 미납/불납 라벨을 올바르게 표시 (#1302)
 
