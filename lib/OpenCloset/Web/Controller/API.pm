@@ -3147,10 +3147,12 @@ sub api_send_vbank_sms {
 
     my $user      = $order->user;
     my $user_info = $user->user_info;
+    my $today     = DateTime->today( time_zone => $self->config->{timezone} );
+    my $vbank_due = $today->clone->add( days => 4 );
     my $params    = {
         merchant_uid => OpenCloset::Common::Unpaid::merchant_uid( "staff-%d-", $id ),
         amount       => $late_fee,
-        vbank_due    => time + 86400 * 3,              # 3days
+        vbank_due    => $vbank_due->epoch,             # 3일뒤 자정
         vbank_holder => '열린옷장-' . $user->name,
         vbank_code   => '04',                          # 국민은행
         name         => sprintf( "미납금#%d", $id ),
