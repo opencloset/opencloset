@@ -4,6 +4,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [v1.10.13] - Thu, 31 Aug 2017 14:23:06 +0900
+
+### Changed
+
+- 문자메세지 기본 발신번호를 변경 (#1122)
+
 ## [v1.10.12] - Thu, 24 Aug 2017 10:13:14 +0900
 
 ### Changed
