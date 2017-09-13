@@ -9,6 +9,9 @@ use DateTime::Format::MySQL;
 use DateTime::Format::Strptime;
 
 use OpenCloset::Events::EmploymentWing;
+use OpenCloset::Constants::Category ();
+use OpenCloset::Constants::Status
+    qw/$RENTABLE $RENTAL $RENTALESS $RESERVATION $CLEANING $REPAIR $RETURNED $PARTIAL_RETURNED $MEASUREMENT $SELECT $BOX $PAYMENT/;
 
 has DB    => sub { shift->app->DB };
 has CACHE => sub { shift->app->CACHE };
@@ -44,16 +47,71 @@ sub bestfit {
 sub clothes_amount {
     my $self = shift;
 
+    my $q = $self->every_param('q') || [];
+
+    our @DEFAULT_GENDER   = ( 'male', 'female' );
+    our @DEFAULT_CATEGORY = @OpenCloset::Constants::Category::ALL;
+    our @DEFAULT_STATUS   = (
+        $RENTABLE, $RENTAL, $RENTALESS, $RESERVATION, $CLEANING, $REPAIR, $RETURNED,
+        $PARTIAL_RETURNED, $MEASUREMENT, $SELECT, $BOX, $PAYMENT
+    );
+
+    my %query_qty;
+    my ( @gender, @category, @status );
+    if (@$q) {
+        for my $query (@$q) {
+            my ( $name, $value ) = split /\|/, $query;
+            push @gender,   $value if $name eq 'gender';
+            push @category, $value if $name eq 'category';
+            push @status,   $value if $name eq 'status';
+        }
+
+        @status = @DEFAULT_STATUS unless @status;
+
+        for my $category (@category) {
+            my $rs = $self->DB->resultset('Clothes')->search(
+                {
+                    category  => $category,
+                    gender    => \@gender,
+                    status_id => \@status,
+                },
+                {
+                    select => [
+                        'category',
+                        'gender',
+                        'status_id',
+                        { count => '*' }
+                    ],
+                    as       => [qw/category gender status_id qty/],
+                    group_by => [qw/category gender status_id/],
+                }
+            );
+
+            while ( my $row = $rs->next ) {
+                my $category  = $row->get_column('category');
+                my $gender    = $row->get_column('gender');
+                my $status_id = $row->get_column('status_id');
+                my $qty       = $row->get_column('qty');
+
+                $query_qty{$gender}{$category}{$status_id} = $qty;
+            }
+
+            for my $gender (@gender) {
+                map { $query_qty{$gender}{$category}{$_} ||= 0 } @status;
+            }
+        }
+    }
+
     my $rs = $self->DB->resultset('Clothes')
         ->search( undef, { columns => [qw/ category /], group_by => 'category' } );
 
     my @available_status_ids = (
-        1, # 대여가능
-        2, # 대여중
-        3, # 대여불가
-        5, # 세탁
-        6, # 수선
-        9, # 반납
+        $RENTABLE,  # 대여가능
+        $RENTAL,    # 대여중
+        $RENTALESS, # 대여불가
+        $CLEANING,  # 세탁
+        $REPAIR,    # 수선
+        $RETURNED   # 반납
     );
 
     my @amount;
@@ -72,14 +130,14 @@ sub clothes_amount {
             {
                 category  => $category,
                 gender    => 'male',
-                status_id => 2,        # 대여중
+                status_id => $RENTAL,  # 대여중
             }
         );
         my $f_rental = $self->DB->resultset('Clothes')->search(
             {
                 category  => $category,
                 gender    => 'female',
-                status_id => 2,        # 대여중
+                status_id => $RENTAL,  # 대여중
             }
         );
 
@@ -95,7 +153,13 @@ sub clothes_amount {
         );
     }
 
-    $self->stash( amount => \@amount );
+    $self->stash(
+        amount => \@amount,
+        query  => {
+            quantity => \%query_qty,
+            status   => \@status,
+        },
+    );
 }
 
 =head2 clothes_amount_category_gender
@@ -1413,9 +1477,9 @@ sub create_event {
             my $desc = $coupon->desc || 'unknown';
             my ( $event, $rent_num, $mbersn ) = split( /\|/, $desc );
 
-            my $n      = $visited_male + $visited_female;
+            my $n         = $visited_male + $visited_female;
             my $dressfree = $self->config->{dressfree};
-            my $client = OpenCloset::Events::EmploymentWing->new(
+            my $client    = OpenCloset::Events::EmploymentWing->new(
                 username => $dressfree->{username},
                 password => $dressfree->{password},
             );
