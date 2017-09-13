@@ -1,0 +1,61 @@
+% my $_id = 'stat-clothes-amount';
+% layout 'default',
+%   page_id   => $_id,
+%   active_id => $_id,
+%   breadcrumbs => [
+%     { text => meta_text('stat') },
+%     { text => meta_text($_id)   },
+%   ];
+% title meta_text($_id);
+
+<div class="row">
+  <h2>가용 수량은 대여가능, 대여중, 대여불가, 세탁, 수선, 반납 상태를 의미합니다.</h2>
+</div>
+
+<div class="space-8"></div>
+
+<div class="row amount">
+  <div class="col-md-12">
+    <table class="table table-striped table-bordered table-hover">
+      <thead>
+        <tr>
+          <th>품목</th>
+          <th>가용 수량</th>
+          <th>대여중</th>
+          <th>가용 수량(남성)</th>
+          <th>대여중(남성)</th>
+          <th>가용 수량(여성)</th>
+          <th>대여중(여성)</th>
+        </tr>
+      </thead>
+      <tbody>
+        % for my $item (@$amount) {
+          % my $category = $item->{category};
+          <tr>
+            <td>
+              %= $config->{category}{$category}{str} || $category
+            </td>
+            <td>
+              %= $item->{quantity}
+            </td>
+            <td>
+              %= $item->{rental}
+            </td>
+            <td>
+              <a href="<%= url_for('/stat/clothes/amount/category/' . $category . '/gender/male') %>"><%= $item->{male}{quantity} %></a>
+            </td>
+            <td>
+              <a href="<%= url_for('/stat/clothes/amount/category/' . $category . '/gender/male') %>"><%= $item->{male}{rental} %></a>
+            </td>
+            <td>
+              <a href="<%= url_for('/stat/clothes/amount/category/' . $category . '/gender/female') %>"><%= $item->{female}{quantity} %></a>
+            </td>
+            <td>
+              <a href="<%= url_for('/stat/clothes/amount/category/' . $category . '/gender/female') %>"><%= $item->{female}{rental} %></a>
+            </td>
+          </tr>
+        % }
+      </tbody>
+    </table>
+  </div>
+</div>
