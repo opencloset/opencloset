@@ -7,6 +7,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ### Added
 
 - 테스트용 주문서 생성 스크립트 추가 (bin/generate_order.pl)
+- 의류 수량에 성별,품목,상태별 필터를 추가 (#1270)
 
 ## [v1.10.13] - Thu, 31 Aug 2017 14:23:06 +0900
 
