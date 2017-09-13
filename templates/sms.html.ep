@@ -43,26 +43,77 @@
 
 <div class="row">
   <div class="col-xs-12">
+    % if ($vbank) {
+      <form class="form-horizontal" method="POST" action="<%= url_for('/api/vbank') %>" role="form">
+        <div class="form-group">
+          <h4 class="col-sm-3 control-label no-padding-right">가상계좌</h4>
+        </div>
+        <div class="form-group">
+          <label class="col-sm-3 control-label no-padding-right" for="name">계좌명</label>
+          <div class="col-sm-9">
+            <input class="col-xs-10 col-sm-5" name="name" type="text" placeholder="열린옷장-홍길동" value="">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="col-sm-3 control-label no-padding-right" for="amount">금액</label>
+          <div class="col-sm-9">
+            <input class="col-xs-10 col-sm-5" name="amount" type="text" placeholder="10000" value="">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="col-sm-3 control-label no-padding-right" for="phone">연락처</label>
+          <div class="col-sm-9">
+            <input class="col-xs-10 col-sm-5" name="phone" type="text" placeholder="01012345678" value="">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="col-sm-3 control-label no-padding-right" for="vbank_code">은행코드</label>
+
+          <div class="col-sm-9">
+            <input class="col-xs-10 col-sm-5" name="vbank_code" type="text" value="04" readonly>
+            <p class="help-block">
+              <samp>04</samp>: 국민은행
+            </p>
+            <p class="help-block">
+              입금되면 잔디에 알람이 옵니다.
+            </p>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <div class="col-sm-offset-3 col-sm-9">
+            <button id="btn-vbank" class="btn btn-success" type="button">
+              <i class="fa fa-money" aria-hidden="true"></i>
+              가상계좌 생성
+            </button>
+          </div>
+        </div>
+      </form>
+    % }
+
     <form class="form-horizontal" role="form">
       <div class="form-group">
-        <label class="col-sm-3 control-label no-padding-right" for="to"> 받는 사람</label>
+        <label class="col-sm-3 control-label no-padding-right" for="to">받는 사람</label>
         <div class="col-sm-9">
           <input class="col-xs-10 col-sm-5" name="to" type="text" placeholder="휴대 전화 번호 / 주문서 번호(#1234)" value="<%= $to %>">
         </div>
       </div>
 
       <div class="form-group">
-        <label class="col-sm-3 control-label no-padding-right" for="from"> 발신번호</label>
+        <label class="col-sm-3 control-label no-padding-right" for="from">발신번호</label>
         <div class="col-sm-9">
           <input class="col-xs-10 col-sm-5" name="from" type="text" value="<%= $sms_from %>">
         </div>
       </div>
 
       <div class="form-group">
-        <label class="col-sm-3 control-label no-padding-right" for="macro"> 매크로</label>
+        <label class="col-sm-3 control-label no-padding-right" for="macro">매크로</label>
         <div class="col-sm-9">
           <select class="col-xs-10 col-sm-5" name="macro" data-placeholder="전송할 메시지의 종류를 선택하세요.">
-            <option value="" data-from="<%= $sms_from %>"> 직접입력</option>
+            <option value="" data-from="<%= $sms_from %>">직접입력</option>
             % while (my $macro = $macros->next) {
               <option value="<%= $macro->text %>" data-from="<%= $macro->from %>">
                 %= $macro->name
