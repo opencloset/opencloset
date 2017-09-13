@@ -3190,4 +3190,63 @@ sub api_send_vbank_sms {
     $self->render( json => {} );
 }
 
+=head2 create_vbank
+
+    POST /api/vbank
+
+=cut
+
+sub api_create_vbank {
+    my $self = shift;
+    my $v    = $self->validation;
+
+    $v->required('name');
+    $v->required('amount')->like(qr/^\d+$/);
+    $v->required('phone')->like(qr/^01[0-9]\-?\d{3,4}\-?\d{4}$/);
+    $v->required('vbank_code');
+
+    if ( $v->has_error ) {
+        my $failed = $v->failed;
+        return $self->error(
+            400,
+            { str => 'Parameter Validation Failed: ' . join( ', ', @$failed ) }
+        );
+    }
+
+    my $name       = $v->param('name');
+    my $amount     = $v->param('amount');
+    my $phone      = $v->param('phone');
+    my $vbank_code = $v->param('vbank_code');
+
+    $phone =~ s/\-//g;
+    my $tail = substr( $phone, 7 ); # 뒷자리 4개
+    $name =~ s/열린옷장//;
+    $name =~ s/[-# ]//;
+
+    my $today = DateTime->today( time_zone => $self->config->{timezone} );
+    my $vbank_due = $today->clone->add( days => 4 );
+    my $params = {
+        merchant_uid => OpenCloset::Common::Unpaid::merchant_uid( "staff-%d-", $tail ),
+        amount       => $amount,
+        vbank_due    => $vbank_due->epoch,                # 3일뒤 자정
+        vbank_holder => '열린옷장-' . $name,
+        vbank_code   => $vbank_code,
+        name         => sprintf( "%s#%s", $name, $phone ),
+        buyer_name   => $name,
+        buyer_tel    => $phone,
+        'notice_url[]' => $self->url_for("/webhooks/iamport/unpaid")->to_abs->to_string,
+    };
+
+    # my ( $log, $error ) =
+    #     OpenCloset::Common::Unpaid::create_vbank( $self->app->iamport, $order, $params );
+    # return $self->error( 500, { str => $error } ) unless $log;
+
+    # my $data         = decode_json( $log->detail );
+    # my $vbank_name   = $data->{response}{vbank_name};
+    # my $vbank_num    = $data->{response}{vbank_num};
+    # my $vbank_holder = $data->{response}{vbank_holder};
+
+    $self->render( json => {} );
+}
+
 1;

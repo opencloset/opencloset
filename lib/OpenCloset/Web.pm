@@ -262,6 +262,7 @@ sub _private_routes {
     $api->get('/order-list')->to('API#api_order_list');
     $api->get('/order/:id/search/clothes')->to('API#api_search_clothes_order');
     $api->put('/order/:id/send-vbank-sms')->to('API#api_send_vbank_sms');
+    $api->post('/vbank')->to('API#api_create_vbank');
 
     ## prevent deep recursion with create_order_detail helper
     $api->post('/order_detail')->to('API#api_create_order_detail');
