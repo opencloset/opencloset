@@ -1,0 +1,102 @@
+% use utf8;
+% my $_id = 'sms';
+% layout 'default',
+%   page_id => $_id,
+%   jses    => [
+%     '/lib/jquery/js/jquery.mask.min.js',
+%   ];
+% title meta_text($_id);
+
+% my $sms_from = q{};
+% if ( $config->{sms} ) {
+%   if ( $config->{sms}{driver} ) {
+%     $sms_from = $config->{sms}{ $config->{sms}{driver} }{_from};
+%   }
+% }
+
+<div class="row">
+  <div class="col-xs-12">
+    <p>
+      <a href="<%= url_for('/sms/macros') %>">매크로목록</a> 에서 sms 매크로를 관리하세요.
+    </p>
+  </div>
+</div>
+
+<div class="row">
+  <hr>
+  <div class="clearfix">
+    <div class="grid2">
+      <span class="bigger-175 blue"><%= commify($balance->{cash}) %></span>
+      <br>
+      캐쉬
+    </div>
+    <div class="grid2">
+      <span class="bigger-175 blue"><%= commify($balance->{point}) %></span>
+      <br>
+      포인트
+    </div>
+  </div>
+  <hr>
+</div>
+
+<div class="space-6"></div>
+
+<div class="row">
+  <div class="col-xs-12">
+    <form class="form-horizontal" role="form">
+      <div class="form-group">
+        <label class="col-sm-3 control-label no-padding-right" for="to"> 받는 사람</label>
+        <div class="col-sm-9">
+          <input class="col-xs-10 col-sm-5" name="to" type="text" placeholder="휴대 전화 번호 / 주문서 번호(#1234)" value="<%= $to %>">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="col-sm-3 control-label no-padding-right" for="from"> 발신번호</label>
+        <div class="col-sm-9">
+          <input class="col-xs-10 col-sm-5" name="from" type="text" value="<%= $sms_from %>">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="col-sm-3 control-label no-padding-right" for="macro"> 매크로</label>
+        <div class="col-sm-9">
+          <select class="col-xs-10 col-sm-5" name="macro" data-placeholder="전송할 메시지의 종류를 선택하세요.">
+            <option value="" data-from="<%= $sms_from %>"> 직접입력</option>
+            % while (my $macro = $macros->next) {
+              <option value="<%= $macro->text %>" data-from="<%= $macro->from %>">
+                %= $macro->name
+              </option>
+            % }
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="col-sm-3 control-label no-padding-right" for="msg">
+          메시지
+          <br>
+          <span>
+            <span class="msg-screen-width">0</span> / 80
+          </span>
+        </label>
+        <div class="col-sm-9">
+          <textarea class="col-xs-10 col-sm-8" name="msg" rows="25" placeholder="한글 기준 40자가 넘지 않을 경우 SMS로, 넘을 경우 LMS로 전송합니다."><%= $msg %></textarea>
+        </div>
+      </div>
+
+      <div class="form-actions clearfix">
+        <div class="col-md-offset-3 col-md-9">
+          <button id="btn-sms-send" class="btn btn-info" type="button">
+            <i class="ace-icon icon-check bigger-110"></i>
+            전송
+          </button>
+          <button class="btn btn-danger" type="reset">
+            <i class="ace-icon icon-undo bigger-110"></i>
+            다시 쓰기
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
