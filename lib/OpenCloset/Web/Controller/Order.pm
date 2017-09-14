@@ -1426,7 +1426,6 @@ sub iamport_withoutorder_hook {
     my $buyer_name   = $data->{response}{buyer_name};
     my $buyer_tel    = $data->{response}{buyer_tel};
     my $paid_at      = $data->{response}{paid_at};
-    my $receipt_url  = $data->{response}{receipt_url};
 
     my $paid_dt = DateTime->from_epoch(
         epoch     => $paid_at,
@@ -1453,10 +1452,6 @@ sub iamport_withoutorder_hook {
             {
                 title       => '결제시간',
                 description => $paid_dt->strftime('%F %T'),
-            },
-            {
-                title       => '영수증',
-                description => $receipt_url,
             },
             {
                 title       => '계좌번호',
