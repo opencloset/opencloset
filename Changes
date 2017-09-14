@@ -4,6 +4,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Changed
+
+- 가상계좌의 미납금을 수정하능하도록 변경 (#1308)
+
 ## [v1.10.15] - Thu, 14 Sep 2017 12:34:25 +0900
 
 ### Fixed
