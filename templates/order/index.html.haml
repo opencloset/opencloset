@@ -12,6 +12,22 @@
 - my $list_name = param('status') || '';
 - my $user = current_user;
 
+#vbank-modal.modal{:role => "dialog", :tabindex => "-1"}
+  .modal-dialog{:role => "document"}
+    .modal-content
+      .modal-header
+        %button.close{"aria-label" => "Close", "data-dismiss" => "modal", :type => "button"}
+          %span{"aria-hidden" => "true"} ×
+        %h4.modal-title 가상계좌
+      .modal-body
+        %p
+          아래 금액으로 전용 가상계좌를 발송하시겠습니까?
+        %input{:name => 'amount', :type => 'text'}
+        %input{:name => 'order_id', :type => 'hidden'}
+      .modal-footer
+        %button.btn.btn-default.btn-sm{"data-dismiss" => "modal", :type => "button"} 닫기
+        %button.btn.btn-success.btn-sm{:type => "button"} SMS 를 보냅니다
+
 #unpaid-done-pay-with{:style => 'display: none'}
   %h3
     미납금 - 완납
@@ -181,7 +197,7 @@
                 %br
                 %a{ :href => "#{ url_for('/sms')->query( to => $order->user->user_info->phone, msg => $sms_str ) }" }= $sms_label
                 %br
-                %a.send-vbank-sms.label.label-success{:href => "#"} 가상계좌 문자전송
+                %button.send-vbank-sms.btn.btn-xs.btn-success{:type => "button", :data-amount => "#{$order->get_column('sum_final_price')}", :data-order-id => "#{$order->id}"} 가상계좌 문자전송
                 - if (my $tracking_url = tracking_url($order)) {
                   %a{ :href => "#{ $tracking_url }", :target => '_blank', :title => '배송조회' }
                     %span.glyphicon.glyphicon-link
