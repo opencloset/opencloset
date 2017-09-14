@@ -9,6 +9,7 @@ use DateTime;
 use HTTP::Tiny;
 use List::MoreUtils;
 use Try::Tiny;
+use WebService::Jandi::WebHook;
 
 use OpenCloset::Calculator::LateFee;
 use OpenCloset::Common::Unpaid
@@ -1381,6 +1382,93 @@ sub iamport_unpaid_hook {
                 detail => $json,
             },
         );
+    }
+
+    $self->render( text => "OK" );
+}
+
+=head2 iamport_withoutorder_hook
+
+iamport로 부터 전달받는 주문서 정보없는 가상계좌의 hook
+
+    POST /webhooks/iamport/withoutorder
+
+=cut
+
+sub iamport_withoutorder_hook {
+    my $self = shift;
+
+    my $v = $self->validation;
+    $v->required("imp_uid");
+    $v->required("merchant_uid");
+    $v->required("status");
+
+    if ( $v->has_error ) {
+        my $failed = $v->failed;
+        $self->log->error('Missing required parameter from iamport');
+        $self->log->error( 'Parameter Validation Failed: ' . join( ', ', @$failed ) );
+        return $self->render( text => "NOT OK" );
+    }
+
+    my $imp_uid      = $v->param("imp_uid");
+    my $merchant_uid = $v->param("merchant_uid");
+    my $status       = $v->param("status");
+
+    return $self->render( text => "NOT OK" ) if $status ne 'paid';
+
+    my $iamport      = $self->app->iamport;
+    my $json         = $iamport->payment($imp_uid);
+    my $data         = decode_json($json);
+    my $amount       = $data->{response}{amount};
+    my $vbank_name   = $data->{response}{vbank_name};
+    my $vbank_holder = $data->{response}{vbank_holder};
+    my $vbank_num    = $data->{response}{vbank_num};
+    my $buyer_name   = $data->{response}{buyer_name};
+    my $buyer_tel    = $data->{response}{buyer_tel};
+    my $paid_at      = $data->{response}{paid_at};
+    my $receipt_url  = $data->{response}{receipt_url};
+
+    my $paid_dt = DateTime->from_epoch(
+        epoch     => $paid_at,
+        time_zone => $self->config->{timezone}
+    );
+
+    my $jandi = WebService::Jandi::WebHook->new($self->config->{jandi}{hook});
+    return $self->render(text => 'OK') unless $jandi;
+
+    my $msg = {
+        body => sprintf(
+            "[[결제완료]](https://admin.iamport.kr/payments) %s님", $buyer_name
+        ),
+        connectColor => '#FAC11B',
+        connectInfo  => [
+            {
+                title       => '전화번호',
+                description => $buyer_tel,
+            },
+            {
+                title       => '금액',
+                description => $self->commify($amount),
+            },
+            {
+                title       => '결제시간',
+                description => $paid_dt->strftime('%F %T'),
+            },
+            {
+                title       => '영수증',
+                description => $receipt_url,
+            },
+            {
+                title       => '계좌번호',
+                description => $vbank_num,
+            },
+        ]
+    };
+
+    my $res = $jandi->request($msg);
+    unless ( $res->{success} ) {
+        $self->log->error("Failed to post jandi message");
+        $self->log->error("$res->{status}: $res->{reason}");
     }
 
     $self->render( text => "OK" );

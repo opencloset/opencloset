@@ -599,7 +599,7 @@
         <td>
           <i class="fa fa-mobile" aria-hidden="true"></i>
           <samp>
-            <a href="<%= url_for('/sms')->query(to => $user_info->phone) %>" target="_blank">
+            <a href="<%= url_for('/sms')->query(to => $user_info->phone, vbank => 1) %>" target="_blank">
               %= $user_info->phone
             </a>
           </samp>

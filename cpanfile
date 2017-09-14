@@ -39,6 +39,7 @@ requires 'Text::Haml', '0.990114';
 requires 'Try::Tiny';
 requires 'Unicode::GCString';
 requires 'Version::Next';
+requires 'WebService::Jandi::WebHook';
 requires 'experimental';
 
 # from opencloset cpan

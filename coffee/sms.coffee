@@ -61,3 +61,18 @@ $ ->
     $('input[name=to]').prop('value', '')
     $('input[name=msg]').prop('value', '')
     OpenCloset.alert 'success', '문자 메시지를 전송했습니다.'
+
+  $('#form-vbank').submit (e) ->
+    e.preventDefault()
+    action = $(@).attr('action')
+    $.ajax action,
+      type: 'POST'
+      data: $(@).serialize()
+      dataType: 'json'
+      success: (data, textStatus, jqXHR) ->
+        $('#paragraph-vbank-response').text(data.text)
+        $('input[name="to"]').val($('input[name=phone]').val())
+        $('textarea[name=msg]').val(data.text)
+      error: (jqXHR, textStatus, errorThrown) ->
+        OpenCloset.alert('danger', jqXHR.responseJSON.error.str)
+      complete: (jqXHR, textStatus) ->

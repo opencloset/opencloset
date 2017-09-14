@@ -3190,4 +3190,77 @@ sub api_send_vbank_sms {
     $self->render( json => {} );
 }
 
+=head2 create_vbank
+
+    POST /api/vbank
+
+=cut
+
+sub api_create_vbank {
+    my $self = shift;
+    my $v    = $self->validation;
+
+    $v->required('name');
+    $v->required('amount')->like(qr/^\d+$/);
+    $v->required('phone')->like(qr/^01[0-9]\-?\d{3,4}\-?\d{4}$/);
+    $v->required('vbank_code');
+
+    if ( $v->has_error ) {
+        my $failed = $v->failed;
+        return $self->error(
+            400,
+            { str => 'Parameter Validation Failed: ' . join( ', ', @$failed ) }
+        );
+    }
+
+    my $name       = $v->param('name');
+    my $amount     = $v->param('amount');
+    my $phone      = $v->param('phone');
+    my $vbank_code = $v->param('vbank_code');
+
+    $phone =~ s/\-//g;
+    my $tail = substr( $phone, 7 ); # 뒷자리 4개
+    $name =~ s/열린옷장//;
+    $name =~ s/[-# ]//;
+
+    my $today = DateTime->today( time_zone => $self->config->{timezone} );
+    my $vbank_due = $today->clone->add( days => 4 );
+    my $merchant_uid = OpenCloset::Common::Unpaid::merchant_uid( "staff-%s-", $tail );
+    my $params = {
+        merchant_uid => $merchant_uid,
+        amount       => $amount,
+        vbank_due    => $vbank_due->epoch,                # 3일뒤 자정
+        vbank_holder => '열린옷장-' . $name,
+        vbank_code   => $vbank_code,
+        name         => sprintf( "%s#%s", $name, $phone ),
+        buyer_name   => $name,
+        buyer_tel    => $phone,
+        'notice_url[]' =>
+            $self->url_for("/webhooks/iamport/withoutorder")->to_abs->to_string,
+    };
+
+    my $iamport = $self->app->iamport;
+    my $json = $iamport->create_prepare( $merchant_uid, $amount );
+    return $self->error( 500, { str => 'The payment agency failed to process' } )
+        unless $json;
+
+    $json = $iamport->create_vbank($params);
+    return $self->error( 500, { str => 'Failed to create a new vbank account' } )
+        unless $json;
+
+    my $data = decode_json($json);
+    return $self->error( 500, { str => $data->{message} } )
+        if $data->{code} ne '0';
+
+    my $vbank_name   = $data->{response}{vbank_name};
+    my $vbank_holder = $data->{response}{vbank_holder};
+    my $vbank_num    = $data->{response}{vbank_num};
+    my $text         = sprintf(
+        "[열린옷장] %s님 %s %s %s %s 원 입금해주세요.", $name, $vbank_name,
+        $vbank_num, $vbank_holder, $self->commify( $data->{response}{amount} )
+    );
+
+    $self->render( json => { text => $text } );
+}
+
 1;
