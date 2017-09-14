@@ -192,6 +192,7 @@ sub _public_routes_staff {
     $r->get('/order/:order_id/extension/success')->to('order#order_extension_success');
     $r->get('/order/:order_id/rental/paper/pdf')->to('order#rental_paper_pdf');
     $r->post('/webhooks/iamport/unpaid')->to('order#iamport_unpaid_hook');
+    $r->post('/webhooks/iamport/withoutorder')->to('order#iamport_withoutorder_hook');
 }
 
 =head2 _public_routes_visit

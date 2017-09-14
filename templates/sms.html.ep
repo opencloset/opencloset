@@ -44,14 +44,14 @@
 <div class="row">
   <div class="col-xs-12">
     % if ($vbank) {
-      <form class="form-horizontal" method="POST" action="<%= url_for('/api/vbank') %>" role="form">
+      <form id="form-vbank" class="form-horizontal" method="POST" action="<%= url_for('/api/vbank') %>" role="form">
         <div class="form-group">
           <h4 class="col-sm-3 control-label no-padding-right">가상계좌</h4>
         </div>
         <div class="form-group">
-          <label class="col-sm-3 control-label no-padding-right" for="name">계좌명</label>
+          <label class="col-sm-3 control-label no-padding-right" for="name">이름</label>
           <div class="col-sm-9">
-            <input class="col-xs-10 col-sm-5" name="name" type="text" placeholder="열린옷장-홍길동" value="">
+            <input class="col-xs-10 col-sm-5" name="name" type="text" placeholder="홍길동" value="">
           </div>
         </div>
 
@@ -74,10 +74,12 @@
 
           <div class="col-sm-9">
             <input class="col-xs-10 col-sm-5" name="vbank_code" type="text" value="04" readonly>
+            <div class="clearfix"></div>
             <p class="help-block">
               <samp>04</samp>: 국민은행
             </p>
             <p class="help-block">
+              <i class="fa fa-info-circle" aria-hidden="true"></i>
               입금되면 잔디에 알람이 옵니다.
             </p>
           </div>
@@ -85,13 +87,23 @@
 
         <div class="form-group">
           <div class="col-sm-offset-3 col-sm-9">
-            <button id="btn-vbank" class="btn btn-success" type="button">
+            <button id="btn-vbank" class="btn btn-success" type="submit">
               <i class="fa fa-money" aria-hidden="true"></i>
               가상계좌 생성
             </button>
           </div>
         </div>
+
+        <div class="form-group">
+          <div class="col-sm-offset-3 col-sm-9">
+            <p id="paragraph-vbank-response">
+              홍길동님 국민은행 1234567 로 10000 원 입금해주세요.
+            </p>
+          </div>
+        </div>
       </form>
+
+      <hr>
     % }
 
     <form class="form-horizontal" role="form">
