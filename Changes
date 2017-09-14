@@ -4,6 +4,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [v1.10.14] - Thu, 14 Sep 2017 12:09:14 +0900
+
 ### Added
 
 - 테스트용 주문서 생성 스크립트 추가 (bin/generate_order.pl)
