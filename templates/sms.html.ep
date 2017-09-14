@@ -96,9 +96,7 @@
 
         <div class="form-group">
           <div class="col-sm-offset-3 col-sm-9">
-            <p id="paragraph-vbank-response">
-              홍길동님 국민은행 1234567 로 10000 원 입금해주세요.
-            </p>
+            <p id="paragraph-vbank-response"></p>
           </div>
         </div>
       </form>
