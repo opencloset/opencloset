@@ -1,7 +1,7 @@
 package OpenCloset::Web;
 use Mojo::Base 'Mojolicious';
 
-use version; our $VERSION = qv("v1.10.13");
+use version; our $VERSION = qv("v1.10.14");
 
 use CHI;
 use DateTime;
@@ -192,6 +192,7 @@ sub _public_routes_staff {
     $r->get('/order/:order_id/extension/success')->to('order#order_extension_success');
     $r->get('/order/:order_id/rental/paper/pdf')->to('order#rental_paper_pdf');
     $r->post('/webhooks/iamport/unpaid')->to('order#iamport_unpaid_hook');
+    $r->post('/webhooks/iamport/withoutorder')->to('order#iamport_withoutorder_hook');
 }
 
 =head2 _public_routes_visit
@@ -262,6 +263,7 @@ sub _private_routes {
     $api->get('/order-list')->to('API#api_order_list');
     $api->get('/order/:id/search/clothes')->to('API#api_search_clothes_order');
     $api->put('/order/:id/send-vbank-sms')->to('API#api_send_vbank_sms');
+    $api->post('/vbank')->to('API#api_create_vbank');
 
     ## prevent deep recursion with create_order_detail helper
     $api->post('/order_detail')->to('API#api_create_order_detail');

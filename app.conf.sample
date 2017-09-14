@@ -400,4 +400,7 @@ my %BOOKING_SLOT = (
         from => $ENV{OPENCLOSET_EMAIL_NOTIFY_FROM} || 'info@theopencloset.net',
         to   => $ENV{OPENCLOSET_EMAIL_NOTIFY_TO} || 'info@theopencloset.net',
     },
+    jandi => {
+        hook => $ENV{OPENCLOSET_JANDI_WEBHOOK_URL} || '',
+    },
 };

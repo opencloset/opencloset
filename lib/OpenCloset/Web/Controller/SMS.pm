@@ -17,6 +17,7 @@ sub index {
     my $self = shift;
 
     my %params = $self->get_params(qw/ to msg /);
+    my $vbank  = $self->param('vbank');
 
     my $sender = SMS::Send->new(
         $self->config->{sms}{driver},
@@ -34,7 +35,8 @@ sub index {
         to  => $params{to}  || q{},
         msg => $params{msg} || q{},
         balance => $balance->{success} ? $balance->{detail} : { cash => 0, point => 0 },
-        macros => $macros,
+        macros  => $macros,
+        vbank   => $vbank,
     );
 }
 

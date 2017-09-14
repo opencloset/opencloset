@@ -1,3 +1,10 @@
+v1.10.14
+
+    $ grunt
+    $ cpanm WebService::Jandi::WebHook
+    # app.conf
+    jandi => { hook => $ENV{OPENCLOSET_JANDI_WEBHOOK_URL} }
+
 v1.10.13
 
     $ closetpan OpenCloset::API             # v0.0.5

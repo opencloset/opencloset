@@ -1,0 +1,118 @@
+% my $_id = 'stat-clothes-amount';
+% layout 'default',
+%   page_id   => $_id,
+%   active_id => $_id,
+%   breadcrumbs => [
+%     { text => meta_text('stat') },
+%     { text => meta_text($_id)   },
+%   ];
+% title meta_text($_id);
+
+% use OpenCloset::Constants::Category ();
+% use OpenCloset::Constants::Status qw/$RENTABLE $RENTAL $RENTALESS $RESERVATION $CLEANING $REPAIR $RETURNED $PARTIAL_RETURNED $MEASUREMENT $SELECT $BOX $PAYMENT/;
+
+<div class="search">
+  <form class="form-inline" method="GET" action="<%= url_for() %>">
+    <div class="input-group" style="width: 300px;">
+      <select class="chosen-select" name="q" multiple data-placeholder="검색필터를 선택해주세요">
+        <optgroup label="성별">
+          <option value="gender|male">남성</option>
+          <option value="gender|female">여성</option>
+        </optgroup>
+        <optgroup label="종류">
+          % for my $c (@OpenCloset::Constants::Category::ALL) {
+            <option value="category|<%= $c %>"><%= $OpenCloset::Constants::Category::LABEL_MAP{$c} %></option>
+          % }
+        </optgroup>
+        <optgroup label="상태">
+          % for my $s ($RENTABLE, $RENTAL, $RENTALESS, $RESERVATION, $CLEANING, $REPAIR, $RETURNED, $PARTIAL_RETURNED, $MEASUREMENT, $SELECT, $BOX, $PAYMENT) {
+            <option value="status|<%= $s %>"><%= $OpenCloset::Constants::Status::LABEL_MAP{$s} %></option>
+          % }
+        </optgroup>
+      </select>
+    </div>
+    <button type="submit" class="btn btn-sm btn-default">검색</button>
+  </form>
+</div>
+
+<div class="row">
+  <h2>가용 수량은 대여가능, 대여중, 대여불가, 세탁, 수선, 반납 상태를 의미합니다.</h2>
+</div>
+
+<div class="space-8"></div>
+
+<div class="row">
+  <div class="col-md-12">
+    <table class="table table-striped table-bordered table-hover">
+      <thead>
+        <tr>
+          <th>성별</th>
+          <th>품목</th>
+          % for my $status (@{ $query->{status} }) {
+            <th><%= $OpenCloset::Constants::Status::LABEL_MAP{$status} %></th>
+          % }
+        </tr>
+      </thead>
+      <tbody>
+        % our %GENDER_MAP = (male => '남성', female => '여성');
+        % for my $gender (keys %{ $query->{quantity} }) {
+          <tr>
+            <td><%= $GENDER_MAP{$gender} %></td>
+            % for my $category (keys %{ $query->{quantity}{$gender} }) {
+              <td><%= $OpenCloset::Constants::Category::LABEL_MAP{$category} %></td>
+              % for my $status_id (sort { $a <=> $b } keys %{ $query->{quantity}{$gender}{$category} }) {
+                <td><%= $query->{quantity}{$gender}{$category}{$status_id} %></td>
+              % }
+            % }
+          </tr>
+        % }
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="row amount">
+  <div class="col-md-12">
+    <table class="table table-striped table-bordered table-hover">
+      <thead>
+        <tr>
+          <th>품목</th>
+          <th>가용 수량</th>
+          <th>대여중</th>
+          <th>가용 수량(남성)</th>
+          <th>대여중(남성)</th>
+          <th>가용 수량(여성)</th>
+          <th>대여중(여성)</th>
+        </tr>
+      </thead>
+      <tbody>
+        % for my $item (@$amount) {
+          % my $category = $item->{category};
+          <tr>
+            <td>
+              %= $config->{category}{$category}{str} || $category
+            </td>
+            <td>
+              %= $item->{quantity}
+            </td>
+            <td>
+              %= $item->{rental}
+            </td>
+            <td>
+              <a href="<%= url_for('/stat/clothes/amount/category/' . $category . '/gender/male') %>"><%= $item->{male}{quantity} %></a>
+            </td>
+            <td>
+              <a href="<%= url_for('/stat/clothes/amount/category/' . $category . '/gender/male') %>"><%= $item->{male}{rental} %></a>
+            </td>
+            <td>
+              <a href="<%= url_for('/stat/clothes/amount/category/' . $category . '/gender/female') %>"><%= $item->{female}{quantity} %></a>
+            </td>
+            <td>
+              <a href="<%= url_for('/stat/clothes/amount/category/' . $category . '/gender/female') %>"><%= $item->{female}{rental} %></a>
+            </td>
+          </tr>
+        % }
+      </tbody>
+    </table>
+  </div>
+</div>
