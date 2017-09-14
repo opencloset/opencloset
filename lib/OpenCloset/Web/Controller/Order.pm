@@ -1,7 +1,7 @@
 package OpenCloset::Web::Controller::Order;
 use Mojo::Base 'Mojolicious::Controller';
 
-use Mojo::JSON;
+use Mojo::JSON qw/decode_json/;
 
 use Data::Pageset;
 use DateTime::Format::Strptime;
@@ -1433,8 +1433,8 @@ sub iamport_withoutorder_hook {
         time_zone => $self->config->{timezone}
     );
 
-    my $jandi = WebService::Jandi::WebHook->new($self->config->{jandi}{hook});
-    return $self->render(text => 'OK') unless $jandi;
+    my $jandi = WebService::Jandi::WebHook->new( $self->config->{jandi}{hook} );
+    return $self->render( text => 'OK' ) unless $jandi;
 
     my $msg = {
         body => sprintf(
