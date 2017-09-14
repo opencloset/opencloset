@@ -1382,6 +1382,57 @@ sub iamport_unpaid_hook {
                 detail => $json,
             },
         );
+
+        my $data       = decode_json($json);
+        my $amount     = $data->{response}{amount};
+        my $vbank_num  = $data->{response}{vbank_num};
+        my $buyer_name = $data->{response}{buyer_name};
+        my $buyer_tel  = $data->{response}{buyer_tel};
+        my $paid_at    = $data->{response}{paid_at};
+
+        my $paid_dt = DateTime->from_epoch(
+            epoch     => $paid_at,
+            time_zone => $self->config->{timezone}
+        );
+
+        my $jandi = WebService::Jandi::WebHook->new( $self->config->{jandi}{hook} );
+        return $self->render( text => 'OK' ) unless $jandi;
+
+        my $msg = {
+            body => sprintf(
+                "[[결제완료]](%s) %s님", $self->url_for( '/orders/' . $order->id )->to_abs,
+                $buyer_name
+            ),
+            connectColor => '#FAC11B',
+            connectInfo  => [
+                {
+                    title       => '주문서 번호',
+                    description => $order->id,
+                },
+                {
+                    title       => '전화번호',
+                    description => $buyer_tel,
+                },
+                {
+                    title       => '금액',
+                    description => $self->commify($amount),
+                },
+                {
+                    title       => '결제시간',
+                    description => $paid_dt->strftime('%F %T'),
+                },
+                {
+                    title       => '계좌번호',
+                    description => $vbank_num,
+                },
+            ]
+        };
+
+        my $res = $jandi->request($msg);
+        unless ( $res->{success} ) {
+            $self->log->error("Failed to post jandi message");
+            $self->log->error("$res->{status}: $res->{reason}");
+        }
     }
 
     $self->render( text => "OK" );
@@ -1416,17 +1467,14 @@ sub iamport_withoutorder_hook {
 
     return $self->render( text => "NOT OK" ) if $status ne 'paid';
 
-    my $iamport      = $self->app->iamport;
-    my $json         = $iamport->payment($imp_uid);
-    my $data         = decode_json($json);
-    my $amount       = $data->{response}{amount};
-    my $vbank_name   = $data->{response}{vbank_name};
-    my $vbank_holder = $data->{response}{vbank_holder};
-    my $vbank_num    = $data->{response}{vbank_num};
-    my $buyer_name   = $data->{response}{buyer_name};
-    my $buyer_tel    = $data->{response}{buyer_tel};
-    my $paid_at      = $data->{response}{paid_at};
-    my $receipt_url  = $data->{response}{receipt_url};
+    my $iamport    = $self->app->iamport;
+    my $json       = $iamport->payment($imp_uid);
+    my $data       = decode_json($json);
+    my $amount     = $data->{response}{amount};
+    my $vbank_num  = $data->{response}{vbank_num};
+    my $buyer_name = $data->{response}{buyer_name};
+    my $buyer_tel  = $data->{response}{buyer_tel};
+    my $paid_at    = $data->{response}{paid_at};
 
     my $paid_dt = DateTime->from_epoch(
         epoch     => $paid_at,
@@ -1453,10 +1501,6 @@ sub iamport_withoutorder_hook {
             {
                 title       => '결제시간',
                 description => $paid_dt->strftime('%F %T'),
-            },
-            {
-                title       => '영수증',
-                description => $receipt_url,
             },
             {
                 title       => '계좌번호',

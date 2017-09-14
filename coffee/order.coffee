@@ -119,15 +119,23 @@ $ ->
       error: (jqXHR, textStatus) ->
         OpenCloset.alert('danger', "오류가 발생했습니다: #{jqXHR.responseJSON.error.str}")
 
-  $('.send-vbank-sms').on 'click', (e) ->
-    e.preventDefault()
-    return unless confirm '전용 가상계좌를 발송하시겠습니까?'
-    $tr      = $(@).closest('tr')
-    order_id = $tr.find('td:first a').text()
+  $('.send-vbank-sms').click (e) ->
+    amount   = $(@).data('amount')
+    order_id = $(@).data('order-id')
+    $('#vbank-modal .modal-body input[name=amount]').val(amount)
+    $('#vbank-modal .modal-body input[name=order_id]').val(order_id)
+    $('#vbank-modal').modal('show')
+
+  $('#vbank-modal').on 'shown.bs.modal', (e) ->
+    $(@).find('.modal-body input').focus()
+
+  $('#vbank-modal').on 'click', '.btn-success', (e) ->
+    amount   = $('#vbank-modal .modal-body input[name=amount]').val()
+    order_id = $('#vbank-modal .modal-body input[name=order_id]').val()
+    $('#vbank-modal').modal('hide')
     $.ajax "/api/order/#{order_id}/send-vbank-sms.json",
       type: 'PUT'
-      data:
-        price: 0
+      data: { price: amount }
       success: (data) ->
         OpenCloset.alert('success', "전용계좌 발송이 처리되었습니다")
       error: (jqXHR, textStatus) ->

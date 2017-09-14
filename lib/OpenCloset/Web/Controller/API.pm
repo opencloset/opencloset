@@ -3141,8 +3141,9 @@ sub api_send_vbank_sms {
     return $self->error( 400, { str => "Wrong order status($status_id)" } )
         if $status_id != $RETURNED;
 
+    my $price    = $self->param('price');
     my $calc     = OpenCloset::Calculator::LateFee->new;
-    my $late_fee = $calc->late_fee($order);
+    my $late_fee = $price || $calc->late_fee($order);
     return $self->error( 400, { str => "There is no latefee." } ) unless $late_fee;
 
     my $user      = $order->user;
