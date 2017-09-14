@@ -4,6 +4,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [v1.10.15] - Thu, 14 Sep 2017 12:34:25 +0900
+
 ### Fixed
 
 - Fix undefined subroutine error for anonymous vbank (#1308)
