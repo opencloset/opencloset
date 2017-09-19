@@ -4,6 +4,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Changed
+
+- 가상계좌 문자전송 링크 추가 (#1308)
+
 ## [v1.10.16] - Thu, 14 Sep 2017 14:33:26 +0900
 
 ### Changed
