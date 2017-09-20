@@ -202,12 +202,16 @@ sub visit {
                     #
                     # 이미 예약 정보가 저장되어 있는 경우 - 예약 변경 상황
                     #
+                    my %extra = (
+                        agent  => $agent,
+                        ignore => $agent ? 1 : undef,
+                    );
+
                     my $order_obj = $self->DB->resultset('Order')->find($order);
                     if ($order_obj) {
-                        my $coupon = $order_obj->coupon;
-                        unless ($coupon) {
+                        unless ( $order_obj->coupon_id ) {
                             if ( my $code = delete $self->session->{coupon_code} ) {
-                                $coupon = $self->DB->resultset('Coupon')->find( { code => $code } );
+                                $extra{coupon} = $self->DB->resultset('Coupon')->find( { code => $code } );
                             }
                         }
 
@@ -215,7 +219,7 @@ sub visit {
                         $self->app->api->update_reservated(
                             $order_obj,
                             $booking_obj->date,
-                            coupon => $coupon,
+                            %extra,
                         );
                     }
                 }
@@ -234,8 +238,7 @@ sub visit {
                     }
 
                     my $booking_obj = $self->DB->resultset('Booking')->find( { id => $booking } );
-                    my $order_obj =
-                        $self->app->api->reservated( $user, booking => $booking_obj->date, %extra );
+                    my $order_obj = $self->app->api->reservated( $user, $booking_obj->date, %extra );
 
                     #
                     # 대리인을 통한 대여일때는 대리인의 신체치수 입력화면으로 이동
