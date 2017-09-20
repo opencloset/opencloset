@@ -487,7 +487,7 @@ sub visit2 {
             # 예약 취소
             #
             my $order_obj = $self->DB->resultset('Order')->find($order);
-            $order_obj->delete if $order_obj;
+            $self->app->api->cancel($order_obj);
         }
         else {
             $user = $self->update_user( \%user_params, \%user_info_params );
@@ -496,33 +496,34 @@ sub visit2 {
                     #
                     # 이미 예약 정보가 저장되어 있는 경우 - 예약 변경 상황
                     #
+                    my %extra = ( online => $online );
                     my $order_obj = $self->DB->resultset('Order')->find($order);
                     if ($order_obj) {
-                        if ( $booking != $booking_saved ) {
-                            #
-                            # 변경한 예약 정보가 기존 정보와 다를 경우 갱신함
-                            #
-                            $order_obj->update(
-                                {
-                                    booking_id => $booking,
-                                    online     => $online,
-                                }
-                            );
+                        unless ( $order_obj->coupon_id ) {
+                            if ( my $code = delete $self->session->{coupon_code} ) {
+                                $extra{coupon} = $self->DB->resultset('Coupon')->find( { code => $code } );
+                            }
                         }
+
+                        my $booking_obj = $self->DB->resultset('Booking')->find( { id => $booking } );
+                        $self->app->api->update_reservated(
+                            $order_obj,
+                            $booking_obj->date,
+                            %extra,
+                        );
                     }
                 }
                 else {
                     #
                     # 예약 정보가 없는 경우 - 신규 예약 신청 상황
                     #
-                    my $order_obj = $user->create_related(
-                        'orders',
-                        {
-                            status_id  => 14,      # 방문예약: status 테이블 참조
-                            booking_id => $booking,
-                            online     => $online,
-                        }
-                    );
+                    my %extra = ( online => $online );
+                    if ( my $code = delete $self->session->{coupon_code} ) {
+                        $extra{coupon} = $self->DB->resultset('Coupon')->find( { code => $code } );
+                    }
+
+                    my $booking_obj = $self->DB->resultset('Booking')->find( { id => $booking } );
+                    my $order_obj = $self->app->api->reservated( $user, $booking_obj->date, %extra );
                 }
             }
             else {
