@@ -8,7 +8,6 @@ use Mojo::JSON qw/decode_json/;
 
 use OpenCloset::Calculator::LateFee;
 use OpenCloset::Common::Unpaid ();
-use OpenCloset::Events::EmploymentWing;
 use OpenCloset::Constants::Status qw/$RESERVATED/;
 
 has DB => sub { shift->app->DB };
@@ -26,59 +25,6 @@ sub index {
 
     my $dt_today = DateTime->now( time_zone => $self->config->{timezone} );
     $self->redirect_to( $self->url_for( '/booking/' . $dt_today->ymd ) );
-}
-
-#
-# GH #1244
-#
-#   서울시청 일자리정책에 신규 예약 시스템과 연동
-#   http://dressfree.net/theopencloset/api_rentRcv.php
-#   rent_num - 예약코드
-#   rent_date - 예약일(yyyy-mm-dd)
-#   rent_time - 예약시간(HH:MM)
-#
-sub _update_inetpia {
-    my ( $self, $order ) = @_;
-    if ( my $coupon = $order->coupon ) {
-        my $desc = $coupon->desc || '';
-        if ( $desc =~ m/^(seoul-2017-2)\|(\d{12}-\d{3})\|(.*)$/ ) {
-            my $coupon_type = $1;
-            my $rent_num    = $2;
-            my $mbersn      = $3;
-
-            if ( $order->booking ) {
-                my $dt = $order->booking->date;
-                $dt->set_time_zone( $self->config->{timezone} );
-                my $ymd = $dt->ymd;
-                my $hms = $dt->hms;
-
-                my $retry     = 0;
-                my $MAX_RETRY = 3;
-                my $http      = HTTP::Tiny->new( timeout => 1 );
-                while ( $retry++ < $MAX_RETRY ) {
-                    my $res = $http->post_form(
-                        "https://dressfree.net/theopencloset/api_rentRcv.php",
-                        {
-                            rent_num  => $rent_num,
-                            rent_date => $ymd,
-                            rent_time => $hms,
-                        },
-                    );
-                    if ( $res->{success} ) {
-                        my $msg =
-                            "api call to dressfree.net success: rent_num($rent_num), rent_date($ymd), rent_time($hms)";
-                        $self->app->log->info($msg);
-                        last;
-                    }
-                    else {
-                        my $msg =
-                            "api call to dressfree.net failed: rent_num($rent_num), rent_date($ymd), rent_time($hms)";
-                        $self->app->log->warn($msg);
-                    }
-                }
-            }
-        }
-    }
 }
 
 =head2 visit
@@ -247,23 +193,7 @@ sub visit {
             # 예약 취소
             #
             my $order_obj = $self->DB->resultset('Order')->find($order);
-            if ($order_obj) {
-                my $msg = $self->render_to_string(
-                    "sms/booking-cancel",
-                    format   => 'txt',
-                    name     => $user->name,
-                    datetime => $order_obj->booking->date->strftime('%m월 %d일 %H시 %M분'),
-                );
-                $self->DB->resultset('SMS')->create(
-                    {
-                        to   => $user->user_info->phone,
-                        from => $self->config->{sms}{ $self->config->{sms}{driver} }{_from},
-                        text => $msg,
-                    }
-                ) or $self->app->log->warn("failed to create a new sms: $msg");
-
-                $order_obj->delete;
-            }
+            $self->app->api->cancel($order_obj);
         }
         else {
             $user = $self->update_user( \%user_params, \%user_info_params );
@@ -272,142 +202,43 @@ sub visit {
                     #
                     # 이미 예약 정보가 저장되어 있는 경우 - 예약 변경 상황
                     #
+                    my %extra = (
+                        agent  => $agent,
+                        ignore => $agent ? 1 : undef,
+                    );
+
                     my $order_obj = $self->DB->resultset('Order')->find($order);
                     if ($order_obj) {
-                        #
-                        # 쿠폰없이 예약했다가, 쿠폰을 사용해서 다시 예약을 했을때
-                        #
-                        my $coupon_id = $order_obj->coupon_id;
-                        unless ($coupon_id) {
+                        unless ( $order_obj->coupon_id ) {
                             if ( my $code = delete $self->session->{coupon_code} ) {
-                                my $coupon = $self->DB->resultset('Coupon')->find( { code => $code } );
-                                $self->transfer_order( $coupon, $order_obj );
+                                $extra{coupon} = $self->DB->resultset('Coupon')->find( { code => $code } );
                             }
                         }
 
-                        if ( $booking != $booking_saved ) {
-                            #
-                            # 변경한 예약 정보가 기존 정보와 다를 경우 갱신함
-                            #
-                            $order_obj->update( { booking_id => $booking } );
-
-                            if ( my $coupon = $order->coupon ) {
-                                #
-                                # https://github.com/opencloset/opencloset/issues/1256
-                                # 예약일시가 변경되면 취업날개 서비스에 반영해준다
-                                #
-                                my $desc = $coupon->desc;
-                                my ( $name, $rent_num, $mbersn ) = split /\|/, $desc;
-                                if ( $name eq 'seoul-2017-2' ) {
-                                    my $client   = OpenCloset::Events::EmploymentWing->new;
-                                    my $datetime = $self->DB->resultset('Booking')->find( { id => $booking } )->date;
-                                    my $success  = $client->update_booking_datetime( $rent_num, $datetime );
-                                    unless ($success) {
-                                        my $order_id = $order->id;
-                                        $self->log->error(
-                                            sprintf(
-                                                "Failed to update booking_datetime to seoul-2017 event: rent_num(%s), order_id(%d), datetime(%s)",
-                                                $rent_num, $order->id, $datetime->datetime
-                                            )
-                                        );
-                                    }
-                                }
-                            }
-                        }
-
-                        my $msg = $self->render_to_string(
-                            "sms/booking-datetime-update",
-                            format   => 'txt',
-                            name     => $user->name,
-                            datetime => $order_obj->booking->date->strftime('%m월 %d일 %H시 %M분'),
+                        my $booking_obj = $self->DB->resultset('Booking')->find( { id => $booking } );
+                        $self->app->api->update_reservated(
+                            $order_obj,
+                            $booking_obj->date,
+                            %extra,
                         );
-                        $self->DB->resultset('SMS')->create(
-                            {
-                                to   => $user->user_info->phone,
-                                from => $self->config->{sms}{ $self->config->{sms}{driver} }{_from},
-                                text => $msg,
-                            }
-                        ) or $self->app->log->warn("failed to create a new sms: $msg");
-
-                        $self->_update_inetpia($order_obj);
                     }
                 }
                 else {
                     #
                     # 예약 정보가 없는 경우 - 신규 예약 신청 상황
                     #
-                    my $coupon_id;
-                    if ( my $code = delete $self->session->{coupon_code} ) {
-                        my $coupon = $self->DB->resultset('Coupon')->find( { code => $code } );
-                        $coupon_id = $coupon->id if $self->transfer_order($coupon);
-                    }
-
-                    my $misc;
-                    if ($past_order) {
-                        my $po = $self->DB->resultset('Order')->find( { id => $past_order } );
-                        if ( $po and $po->rental_date ) {
-                            $misc = sprintf(
-                                "%s 대여했던 의류를 다시 대여하고 싶습니다.",
-                                $po->rental_date->ymd
-                            );
-                        }
-                    }
-
-                    my $order_obj = $user->create_related(
-                        'orders',
-                        {
-                            status_id  => $RESERVATED,
-                            booking_id => $booking,
-                            coupon_id  => $coupon_id,
-                            agent      => $agent,
-                            ignore     => $agent ? 1 : undef,
-                            misc       => $misc,
-                        }
+                    my %extra = (
+                        past_order => $past_order,
+                        agent      => $agent,
+                        ignore     => $agent ? 1 : undef,
                     );
 
-                    if ($order_obj) {
-                        my $user_info = $user->user_info;
-                        my $msg       = $self->render_to_string(
-                            'sms/order-reserved-1',
-                            format   => 'txt',
-                            name     => $user->name,
-                            datetime => $order_obj->booking->date->strftime('%m월 %d일 %H시 %M분'),
-                            edit_url => $self->url_for( '/order/' . $order_obj->id . '/booking/edit' )
-                                ->query( phone => substr( $user_info->phone, -4 ) )->to_abs
-                        );
-
-                        my $from = $self->config->{sms}{ $self->config->{sms}{driver} }{_from};
-                        $self->DB->resultset('SMS')->create(
-                            {
-                                to   => $user->user_info->phone,
-                                from => $from,
-                                text => $msg,
-                            }
-                        ) or $self->app->log->warn("failed to create a new sms: $msg");
-
-                        #
-                        # 취업날개 예약시 신분증 관련한 문자 메세지를 보냄 (#1061)
-                        #
-                        if ( my $coupon = $order_obj->coupon ) {
-                            my $desc = $coupon->desc || '';
-                            if ( $desc =~ m/^seoul/ ) {
-                                my $msg = $self->render_to_string(
-                                    'sms/employment-wing',
-                                    format => 'txt',
-                                );
-
-                                $self->DB->resultset('SMS')->create(
-                                    {
-                                        to   => $user->user_info->phone,
-                                        from => $from,
-                                        text => $msg,
-                                    }
-                                ) or $self->app->log->warn("failed to create a new sms: $msg");
-                            }
-                        }
+                    if ( my $code = delete $self->session->{coupon_code} ) {
+                        $extra{coupon} = $self->DB->resultset('Coupon')->find( { code => $code } );
                     }
 
-                    $self->_update_inetpia($order_obj);
+                    my $booking_obj = $self->DB->resultset('Booking')->find( { id => $booking } );
+                    my $order_obj = $self->app->api->reservated( $user, $booking_obj->date, %extra );
 
                     #
                     # 대리인을 통한 대여일때는 대리인의 신체치수 입력화면으로 이동
@@ -656,7 +487,7 @@ sub visit2 {
             # 예약 취소
             #
             my $order_obj = $self->DB->resultset('Order')->find($order);
-            $order_obj->delete if $order_obj;
+            $self->app->api->cancel($order_obj);
         }
         else {
             $user = $self->update_user( \%user_params, \%user_info_params );
@@ -665,33 +496,34 @@ sub visit2 {
                     #
                     # 이미 예약 정보가 저장되어 있는 경우 - 예약 변경 상황
                     #
+                    my %extra = ( online => $online );
                     my $order_obj = $self->DB->resultset('Order')->find($order);
                     if ($order_obj) {
-                        if ( $booking != $booking_saved ) {
-                            #
-                            # 변경한 예약 정보가 기존 정보와 다를 경우 갱신함
-                            #
-                            $order_obj->update(
-                                {
-                                    booking_id => $booking,
-                                    online     => $online,
-                                }
-                            );
+                        unless ( $order_obj->coupon_id ) {
+                            if ( my $code = delete $self->session->{coupon_code} ) {
+                                $extra{coupon} = $self->DB->resultset('Coupon')->find( { code => $code } );
+                            }
                         }
+
+                        my $booking_obj = $self->DB->resultset('Booking')->find( { id => $booking } );
+                        $self->app->api->update_reservated(
+                            $order_obj,
+                            $booking_obj->date,
+                            %extra,
+                        );
                     }
                 }
                 else {
                     #
                     # 예약 정보가 없는 경우 - 신규 예약 신청 상황
                     #
-                    my $order_obj = $user->create_related(
-                        'orders',
-                        {
-                            status_id  => 14,      # 방문예약: status 테이블 참조
-                            booking_id => $booking,
-                            online     => $online,
-                        }
-                    );
+                    my %extra = ( online => $online );
+                    if ( my $code = delete $self->session->{coupon_code} ) {
+                        $extra{coupon} = $self->DB->resultset('Coupon')->find( { code => $code } );
+                    }
+
+                    my $booking_obj = $self->DB->resultset('Booking')->find( { id => $booking } );
+                    my $order_obj = $self->app->api->reservated( $user, $booking_obj->date, %extra );
                 }
             }
             else {
