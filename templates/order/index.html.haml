@@ -180,7 +180,8 @@
               - }
               - else {
               -   my $dt_today = DateTime->now( time_zone => $timezone );
-              -   if ( $overdue && $order->status->name eq '대여중' && $dt_today > $order->user_target_date ) {
+              -   my $order_status = $order->status;
+              -   if ( $overdue && $order_status && $order_status->name eq '대여중' && $dt_today > $order->user_target_date ) {
               -     $sms_label = '연체 문자 전송';
               -     $sms_str   = sprintf(
               -       qq{[열린옷장] %s님 열린옷장에서 대여하신 의류의 반납이 %d일 연체되었습니다.
