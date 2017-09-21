@@ -197,7 +197,7 @@
                 %br
                 %a{ :href => "#{ url_for('/sms')->query( to => $order->user->user_info->phone, msg => $sms_str ) }" }= $sms_label
                 %br
-                %button.send-vbank-sms.btn.btn-xs.btn-success{:type => "button", :data-amount => "#{$order->get_column('sum_final_price')}", :data-order-id => "#{$order->id}"} 가상계좌 문자전송
+                %button.send-vbank-sms.btn.btn-xs.btn-success{:type => "button", :data-amount => "#{calc_late_fee($order)}", :data-order-id => "#{$order->id}"} 가상계좌 문자전송
                 - if (my $tracking_url = tracking_url($order)) {
                   %a{ :href => "#{ $tracking_url }", :target => '_blank', :title => '배송조회' }
                     %span.glyphicon.glyphicon-link
