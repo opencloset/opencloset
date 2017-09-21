@@ -4,6 +4,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [v1.11.0] - Thu, 21 Sep 2017 12:28:35 +0900
+
 ### Fixed
 - 연체중 주문서 목록 오류 수정
 
