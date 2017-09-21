@@ -4,6 +4,15 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [v1.11.0] - Thu, 21 Sep 2017 12:28:35 +0900
+
+### Fixed
+- 연체중 주문서 목록 오류 수정
+
+### Changed
+- 가상계좌 문자전송 링크 추가 (#1308)
+- 방문예약 및 방문예약 변경에 API 모듈을 활용
+
 ## [v1.10.16] - Thu, 14 Sep 2017 14:33:26 +0900
 
 ### Changed

@@ -16,9 +16,18 @@
 
 <div class="row">
   <div class="col-xs-12">
-    <p>
-      <a href="<%= url_for('/sms/macros') %>">매크로목록</a> 에서 sms 매크로를 관리하세요.
-    </p>
+    <ul>
+      <li>
+        <a href="<%= url_for('/sms/macros') %>">매크로목록</a> 에서 sms 매크로를 관리하세요.
+      </li>
+      <li>
+        % if (param('vbank')) {
+          <a href="<%= url_for() %>">일반 문자전송</a>
+        % } else {
+          <a href="<%= url_for()->query(vbank => 1) %>">가상계좌 문자전송</a>
+        % }
+      </li>
+    </ul>
   </div>
 </div>
 
