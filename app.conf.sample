@@ -9,7 +9,9 @@ use warnings;
 use Mojo::JSON;
 use POSIX qw( ceil );
 
-my $PORT     = 8001;
+my $APP_TYPE = $ENV{OPENCLOSET_APP_TYPE} || 'all';       # all/staff/visit
+my $MODE     = $ENV{MOJO_MODE}           || 'production';
+my $PORT     = $ENV{PORT} || $MODE eq 'production' ? 8001 : 5000;
 my %SMS_FROM = (
     official => '0269291020',
     online   => '0269291029',
@@ -67,8 +69,8 @@ my %BOOKING_SLOT = (
     # for Mojolicious hypnotoad server
     #
     hypnotoad => {
-        listen   => [ "http://*:$PORT" ],
-        workers  => 6,
+        listen   => ["http://*:$PORT"],
+        workers  => $MODE eq 'production' ? 10 : 2,
         pid_file => 'hypnotoad.pid',
     },
 
@@ -97,7 +99,7 @@ my %BOOKING_SLOT = (
     # 사이트 유형 설정
     #   all/staff/visit
     #
-    site_type => 'all',
+    site_type => $APP_TYPE,
 
     #
     # 방문 예약 페이지에서 기존 정보로 채워줌 여무
@@ -107,8 +109,8 @@ my %BOOKING_SLOT = (
     #
     # cookies
     #
-    secrets       => [$ENV{OPENCLOSET_SECRET}],
-    cookie_domain => $ENV{OPENCLOSET_DOMAIN} || 'localhost' || '.theopencloset.net',
+    secrets       => [ $ENV{OPENCLOSET_SECRET} ],
+    cookie_domain => $ENV{OPENCLOSET_DOMAIN} || '.theopencloset.net',
 
     #
     # site UI
@@ -219,32 +221,32 @@ my %BOOKING_SLOT = (
         fake_sms   => 0,
         delay      => 10,
         send_delay => 1,
-        base_url   => "http://localhost:$PORT/api",
-        email      => q{},
-        password   => q{},
+        base_url   => "http://127.0.0.1:$PORT/api",
+        email      => $ENV{OPENCLOSET_SMS_NOTIFIER_EMAIL} || q{},
+        password   => $ENV{OPENCLOSET_SMS_NOTIFIER_PASSWORD} || q{},
         sms        => \%SMS,
     },
 
     'opencloset-cron-sms.pl' => {
-        port  => 8004,
+        port => $ENV{OPENCLOSET_CRON_SMS_PORT} || 8004,
         delay => 10,
         aelog => 'filter=debug:log=stderr',
     },
 
     'opencloset-cron-unpaid.pl' => {
-        port  => 8005,
+        port => $ENV{OPENCLOSET_CRON_UNPAID_PORT} || 8014,
         delay => 10,
         aelog => 'filter=debug:log=stderr',
     },
 
     'opencloset-cron-visitor.pl' => {
-        port  => 8006,
+        port => $ENV{OPENCLOSET_CRON_VISITOR_PORT} || 8015,
         delay => 10,
         aelog => 'filter=debug:log=stderr',
     },
 
     'opencloset-cron-event.pl' => {
-        port  => 8007,
+        port => $ENV{OPENCLOSET_CRON_EVENT_PORT} || 8017,
         delay => 10,
         aelog => 'filter=debug:log=stderr',
     },
@@ -279,7 +281,7 @@ my %BOOKING_SLOT = (
     # cache
     #
     cache => {
-        dir => './cache',
+        dir => app->home->child('cache'), # need to test
     },
 
     #
@@ -306,20 +308,20 @@ my %BOOKING_SLOT = (
     #
     # monitor
     #
-    monitor_uri => 'http://localhost:5000',
+    monitor_uri => $MODE eq 'production' ? 'https://monitor.theopencloset.net' : 'http://127.0.0.1:5001',
 
     #
     # bodykit
     #
     bodykit => {
-        accessKey => q{},
-        secret    => q{},
+        accessKey => $ENV{OPENCLOSET_BODYKIT_ACCESSKEY} || q{},
+        secret    => $ENV{OPENCLOSET_BODYKIT_SECRET}    || q{},
     },
 
     #
     # volunteer
     #
-    volunteer_uri => 'http://localhost:5000',
+    volunteer_uri => $MODE eq 'production' ? 'https://volunteer.theopencloset.net' : 'http://127.0.0.1:5002',
 
     #
     # search clothes
@@ -368,7 +370,7 @@ my %BOOKING_SLOT = (
     },
     events => {
         seoul => {
-            key => $ENV{OPENCLOSET_EVENT_SEOUL_KEY},
+            key => $ENV{OPENCLOSET_EVENT_SEOUL_KEY} || '',
             notification => {
                 from => '',
                 to   => [],
