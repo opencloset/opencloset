@@ -9,9 +9,8 @@ use warnings;
 use Mojo::JSON;
 use POSIX qw( ceil );
 
-my $APP_TYPE = $ENV{OPENCLOSET_APP_TYPE} || 'all';       # all/staff/visit
-my $MODE     = $ENV{MOJO_MODE}           || 'production';
-my $PORT     = $ENV{PORT} || $MODE eq 'production' ? 8001 : 5000;
+my $PORT = $ENV{PORT} || 5000;
+
 my %SMS_FROM = (
     official => '0269291020',
     online   => '0269291029',
@@ -70,7 +69,7 @@ my %BOOKING_SLOT = (
     #
     hypnotoad => {
         listen   => ["http://*:$PORT"],
-        workers  => $MODE eq 'production' ? 10 : 2,
+        workers  => 2,
         pid_file => 'hypnotoad.pid',
     },
 
@@ -99,7 +98,7 @@ my %BOOKING_SLOT = (
     # 사이트 유형 설정
     #   all/staff/visit
     #
-    site_type => $APP_TYPE,
+    site_type => $ENV{OPENCLOSET_APP_TYPE} || 'all',
 
     #
     # 방문 예약 페이지에서 기존 정보로 채워줌 여무
@@ -308,7 +307,7 @@ my %BOOKING_SLOT = (
     #
     # monitor
     #
-    monitor_uri => $MODE eq 'production' ? 'https://monitor.theopencloset.net' : 'http://127.0.0.1:5001',
+    monitor_uri => $ENV{OPENCLOSET_MONITOR_URI} || 'https://monitor.theopencloset.net',
 
     #
     # bodykit
@@ -321,7 +320,7 @@ my %BOOKING_SLOT = (
     #
     # volunteer
     #
-    volunteer_uri => $MODE eq 'production' ? 'https://volunteer.theopencloset.net' : 'http://127.0.0.1:5002',
+    volunteer_uri => $ENV{OPENCLOSET_VOLUNTEER_URI} || 'https://volunteer.theopencloset.net',
 
     #
     # search clothes
