@@ -41,6 +41,7 @@ USER opencloset
 ENV MOJO_HOME=/home/opencloset/service/staff.theopencloset.net
 ENV MOJO_CONFIG=app.conf
 
-ENTRYPOINT ["hypnotoad", "-f", "script/web"]
+ENTRYPOINT ["./docker-entrypoint.sh"]
+CMD ["hypnotoad"]
 
 EXPOSE 5000
