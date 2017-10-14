@@ -280,7 +280,7 @@ my %BOOKING_SLOT = (
     # cache
     #
     cache => {
-        dir => app->home->child('cache'), # need to test
+        dir => './cache'
     },
 
     #
