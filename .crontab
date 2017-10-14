@@ -1,0 +1,3 @@
+0 2 * * * . /home/opencloset/.env.sh; cd /home/opencloset/service/staff.theopencloset.net; ./bin/opencloset-stat-visitor-cache.pl ./app.conf > /dev/null 2>&1
+10 2 * * * . /home/opencloset/.env.sh; cd /home/opencloset/service/staff.theopencloset.net; ./bin/opencloset-stat-clothes-rent-cache.pl ./app.conf > /dev/null 2>&1
+20 2 * * * . /home/opencloset/.env.sh; cd /home/opencloset/service/staff.theopencloset.net; ./bin/opencloset-stat-status-cache.pl ./app.conf > /dev/null 2>&1
