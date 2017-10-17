@@ -1806,8 +1806,8 @@ sub redis {
     my $self = shift;
 
     $self->stash->{redis} ||= do {
-        my $log   = $self->app->log;
-        my $redis = Mojo::Redis2->new; # just use `redis://localhost:6379`
+        my $log = $self->app->log;
+        my $redis = Mojo::Redis2->new( url => $self->config->{redis_url} );
         $redis->on(
             error => sub {
                 $log->error("[REDIS ERROR] $_[1]");

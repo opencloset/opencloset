@@ -404,4 +404,5 @@ my %BOOKING_SLOT = (
     jandi => {
         hook => $ENV{OPENCLOSET_JANDI_WEBHOOK_URL} || '',
     },
+    redis_url => $ENV{OPENCLOSET_REDIS_URL} || 'redis://localhost:6379',
 };
