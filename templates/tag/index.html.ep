@@ -1,0 +1,67 @@
+<%
+my $_id = 'tag';
+layout 'default',
+  page_id     => $_id,
+  breadcrumbs => [ { text => meta_text($_id) } ],
+  jses  => [ '/lib/bootstrap3-editable/js/bootstrap-editable.min.js' ],
+  csses => [ '/lib/bootstrap3-editable/css/bootstrap-editable.css'   ],
+  ;
+title meta_text($_id);
+%>
+
+<div id="tag-data" data-base-url="<%= url_for('/api/tag') %>"></div>
+
+<div class="tag-add">
+  <form id="add-form" action="">
+    <div class="input-group">
+      <input id="query" class="form-control" name="" type="text" value="" placeholder="등록할 태그를 입력하세요.">
+      <span class="input-group-btn">
+        <button id="btn-tag-add" class="btn btn-sm btn-default" type="button">
+          <i class="icon-plus bigger-110"></i> 추가
+        </button>
+      </span>
+    </div>
+  </form>
+</div>
+
+<div class="space-8"></div>
+
+<div id="tag-table">
+  <h2>전체 태그 목록입니다.</h2>
+  <div class="space-4"></div>
+  <table class="table table-striped table-bordered table-hover">
+    <thead>
+      <tr>
+        <th>태그 이름</th>
+        <th>설명</th>
+      </tr>
+    </thead>
+    <tbody>
+      % while ( my $tag = $tag_rs->next ) {
+        <tr class="tag-id-<%= $tag->id %>">
+          <td>
+            <span class="tag-action">
+              <button class="btn btn-xs btn-danger btn-tag-remove" data-tag-id="<%= $tag->id %>">제거</button>
+            </span>
+            <span class="editable" id="tag-id-<%= $tag->id %>" data-pk="<%= $tag->id %>" data-name="name" data-value="<%= $tag->name %>"></span>
+          </td>
+          <td>
+            <span class="editable" data-pk="<%= $tag->id %>" data-name="desc" data-value="<%= $tag->desc || '' %>"></span>
+          </td>
+        </tr>
+      % }
+    </tbody>
+  </table>
+</div>
+
+<script id="tpl-tag" type="text/html">
+  <tr class="tag-id-<%%= id %>">
+    <td>
+      <span class="tag-action">
+        <button class="btn btn-xs btn-danger" data-tag-id="<%%= id %>">제거</button>
+      </span>
+      <span class="editable" id="tag-id-<%%= id %>" data-pk="<%%= id %>" data-name="name" data-value="<%%= name %>">
+      </span>
+    </td>
+  </tr>
+</script>
