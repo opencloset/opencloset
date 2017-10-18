@@ -1,0 +1,61 @@
+<%
+my $_id = 'clothes';
+layout 'default',
+  page_id     => $_id,
+  breadcrumbs => [ { text => meta_text($_id) } ]
+  ;
+title meta_text($_id);
+
+use OpenCloset::Constants::Status ();
+%>
+
+<div>
+  <span>
+    <a href="<%= url_for('/clothes') %>">
+      전체보기
+      <small>(<%= $condition->{all} %>)</small>
+    </a>
+  </span>
+  % for my $i (1,2,3,4,5,6,7,8,9,11,41,42) {
+    |
+    <span>
+      <a href="<%= url_for('/clothes')->query(status => $i) %>">
+        %= $OpenCloset::Constants::Status::LABEL_MAP{$i}
+        <small>(<%= $condition->{$i} %>)</small>
+      </a>
+    </span>
+  % }
+
+  <div>
+    % my $tag_count = 0;
+    % while ( my $tag = $tag_list->next ) {
+        <span><%= $tag_count++ ? q{|} : q{} %></span>
+        <a href="<%= url_for( '/clothes' )->query( tag => $tag->id ) %>" class="text-muted">
+          %= $tag->name
+          <small>(<%= $tag->clothes->count %>)</small>
+        </a>
+    % }
+  </div>
+</div>
+
+<hr>
+
+<div id="clothes-list-table" class="dataTables_wrapper">
+  <table class="table table-striped table-bordered table-hover">
+    <thead>
+      <tr>
+        <th>옷</th>
+        <th>상태</th>
+        <th>종류</th>
+        <th>기타</th>
+      </tr>
+    </thead>
+    <tbody>
+      % while ( my $clothes = $clothes_list->next ) {
+        %= include 'partials/clothes', clothes => $clothes
+      % }
+    </tbody>
+  </table>
+
+  %= include 'partials/pagination'
+</div>
