@@ -1,0 +1,37 @@
+<!DOCTYPE HTML>
+<html lang="ko">
+  <head>
+    <title><%= title %> - <%= $site->{name} %></title>
+    %= include 'layouts/default/meta';
+    %= include 'layouts/default/before-css';
+    %= include 'layouts/default/before-js';
+    %= include 'layouts/default/theme';
+    %= include 'layouts/default/after-css';
+    %= include 'layouts/default/after-js';
+  </head>
+  <body>
+    %= include 'layouts/default/navbar';
+    <div id="main-container" class="main-container">
+      <div class="main-container-inner">
+        <a id="menu-toggler" class="menu-toggler" href="#">
+          <span class="menu-text"></span>
+        </a>
+        %= include 'layouts/default/sidebar';
+        <div class="main-content">
+          %= include 'layouts/default/breadcrumbs';
+          <div class="page-content">
+            <div class="row">
+              <div class="col-xs-12">
+                <!-- PAGE CONTENT BEGINS -->
+                %= content
+                <!-- PAGE CONTENT ENDS -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    %= include 'layouts/default/body-js';
+    %= include 'layouts/default/body-js-theme';
+  </body>
+</html>
