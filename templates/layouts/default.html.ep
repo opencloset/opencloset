@@ -1,0 +1,54 @@
+<!DOCTYPE HTML>
+<html lang="ko">
+  <head>
+    <title><%= title %> - <%= $site->{name} %></title>
+    %= include 'layouts/default/meta';
+    %= include 'layouts/default/before-css';
+    %= include 'layouts/default/before-js';
+    %= include 'layouts/default/theme';
+    %= include 'layouts/default/css-page';
+    %= include 'layouts/default/after-css';
+    %= include 'layouts/default/after-js';
+  </head>
+  <body>
+    %= include 'layouts/default/navbar';
+    <div id="main-container" class="main-container">
+      <div class="main-container-inner">
+        <a id="menu-toggler" class="menu-toggler" href="#">
+          <span class="menu-text"></span>
+        </a>
+        %= include 'layouts/default/sidebar';
+        <div class="main-content">
+          % if ( my $alert = flash 'alert' ) {
+            <div class="alert alert-<%= $alert->{type} %>">
+              <button class="close" type="button" data-dismiss="alert">&times;</button>
+              %= $alert->{msg}
+            </div>
+          % }
+          %= include 'layouts/default/breadcrumbs';
+          <div class="page-content">
+            <div class="page-header">
+              <h1>
+                %= $sidebar->{meta}{$page_id}{text} // q{}
+                <small>
+                  <i class="icon-double-angle-right"></i>
+                  %= $sidebar->{meta}{$page_id}{desc} // q{}
+                </small>
+              </h1>
+            </div>
+            <div class="row" id="<%= $page_id %>">
+              <div class="col-xs-12">
+                <!-- PAGE CONTENT BEGINS -->
+                %= content
+                <!-- PAGE CONTENT ENDS -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    %= include 'layouts/default/body-js';
+    %= include 'layouts/default/body-js-theme';
+    %= include 'layouts/default/body-js-page';
+  </body>
+</html>
