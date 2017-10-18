@@ -17,6 +17,8 @@ csses => [
 ],
 ;
 title meta_text($_id) . q{: } . $user->name . q{님};
+
+use OpenCloset::Constants::Measurement qw/$HEIGHT $WEIGHT $NECK $BUST $WAIST $HIP $TOPBELLY $BELLY $THIGH $ARM $LEG $KNEE $FOOT $PANTS/;
 %>
 
 <div>
@@ -194,16 +196,127 @@ title meta_text($_id) . q{: } . $user->name . q{님};
               </div>
               
               <div class="profile-info-row">
-                <div class="profile-info-name"></div>
+                <div class="profile-info-name">성별</div>
                 <div class="profile-info-value">
-                  <span id="user-" class="editable" data-name=""><%= $user-> %></span>
+                  <span id="user-gender" class="editable" data-name="gender" data-type="select" data-value="<%= $user_info->gender %>"></span>
                 </div>
               </div>
+
+              <div class="profile-info-row">
+                <div class="profile-info-name">태어난 해</div>
+                <div class="profile-info-value">
+                  <span id="user-birth" class="editable" data-name="birth"><%= $user_info->birth %></span>
+                </div>
+              </div>
+
+              <div class="profile-info-row">
+                <div class="profile-info-name">대여 목적</div>
+                <div class="profile-info-value">
+                  <span id="user-purpose" class="editable" data-name="purpose" data-value="<%= $user_info->purpose %>"></span>
+                </div>
+              </div>
+
+              <div class="profile-info-row">
+                <div class="profile-info-name">상세 대여 목적</div>
+                <div class="profile-info-value">
+                  <span id="user-purpose2" class="editable" data-name="purpose2" data-value="<%= $user_info->purpose2 %>"></span>
+                </div>
+              </div>
+
+              <div class="profile-info-row">
+                <div class="profile-info-name">대여 희망 색상</div>
+                <div class="profile-info-value">
+                  <span id="user-pre_color" class="editable" data-name="pre_color" data-value="<%= $user_info->pre_color %>"></span>
+                </div>
+              </div>
+
+              <div class="profile-info-row">
+                <div class="profile-info-name">착용 날짜</div>
+                <div class="profile-info-value">
+                  <span id="user-wearon_date" class="editable" data-name="wearon_date" data-value="<%= $user_info->wearon_date ? $user_info->wearon_date->ymd : q{} %>"></span>
+                </div>
+              </div>
+
+              <div class="profile-info-row">
+                <div class="profile-info-name">대여 희망 품목</div>
+                <div class="profile-info-value">
+                  <span id="user-pre_category" class="editable" data-name="pre_category" data-value="<%= $user_info->pre_category %>"></span>
+                </div>
+              </div>
+
+              % if ($does_wear) {
+                <div class="profile-info-row">
+                  <div class="profile-info-name">착용 여부</div>
+                  <div class="profile-info-value">
+                    <span id="order-does_wear" class="editable" data-name="does_wear" data-type="select" data-value="<%= $does_wear->does_wear %>" data-order-id="<%= $does_wear->id %>"></span>
+                  </div>
+                </div>
+              % }
               
+              <div class="profile-info-row">
+                <div class="profile-info-name">설명</div>
+                <div class="profile-info-value">
+                  <div class="profile-info-user-comment">
+                    <%
+                    my @additional_comments = (
+                      { class => "primary", value => "라운드 반팔 블라우스", },
+                      { class => "info",    value => "라운드 민소매 블라우스", },
+                      { class => "success", value => "탑 블라우스", },
+                      { class => "warning", value => "셔츠 블라우스", },
+                      { class => "danger",  value => "승무원 블라우스", },
+                    );
+                    %>
+                    % for my $ac (@additional_comments) {
+                      % my $class = $ac->{class};
+                      % my $value = $ac->{value};
+                      <button class="btn btn-xs btn-<%= $class %>" data-name="<%= $value %>"><%= $value %></button>
+                    % }
+                  </div>
+                  <span id="user-comment" class="editable" data-name="comment"><%= $user_info->comment || '' %></span>
+                </div>
+              </div>
+
+              % for my $part ($HEIGHT, $WEIGHT) {
+                <div class="profile-info-row">
+                  <div class="profile-info-name"><%= $OpenCloset::Constants::Measurement::LABEL_MAP{$part} %></div>
+                  <div class="profile-info-value">
+                    <span id="user-<%= $part %>" class="editable" data-name="<%= $part %>"><%= $user_info->$part %></span>
+                  </div>
+                </div>
+              % }
+
+              % for my $part ($NECK, $BUST, $WAIST, $TOPBELLY, $BELLY, $ARM, $LEG, $KNEE, $THIGH, $HIP, $FOOT) {
+                <div class="profile-info-row">
+                  <div class="profile-info-name"><%= $OpenCloset::Constants::Measurement::LABEL_MAP{$part} %></div>
+                  <div class="profile-info-value">
+                    <span id="user-<%= $part %>" class="editable" data-name="<%= $part %>"><%= $user_info->$part %></span>
+                    <span class="diff"><%= $diff->{$part} || '' %></span>
+                    <span class="avg"><%= $avg->{$part} || '' %></span>
+                    <span class="avg2"><%= $avg2->{$part} || '' %></span>
+                  </div>
+                </div>
+              % }
+
+              % for my $part ($PANTS) {
+                <div class="profile-info-row">
+                  <div class="profile-info-name"><%= $OpenCloset::Constants::Measurement::LABEL_MAP{$part} %></div>
+                  <div class="profile-info-value">
+                    <span id="user-<%= $part %>" class="editable" data-name="<%= $part %>"><%= $user_info->$part %></span>
+                  </div>
+                </div>
+              % }
             </div>
           </div>
         </div>
       </div>
+      <div class="space-20"></div>
+      <%
+      my @search_params = (
+        { 'parent_id' => undef },
+        { order_by    => { -desc => 'rental_date' } },
+      );
+      %>
+      %= include 'partials/recent-orders', user => $user, orders => [ $user->orders(@search_params) ];
     </div>
   </div>
 </div>
