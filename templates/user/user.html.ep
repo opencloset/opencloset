@@ -1,0 +1,209 @@
+<%
+my $_id   = 'user-id';
+layout 'default',
+page_id     => $_id,
+active_id   => 'user',
+breadcrumbs => [
+  { text => meta_text('user'), link => url_for( meta_link('user') ) },
+  { text => meta_text($_id)   },
+],
+jses  => [
+  '/components/moment/min/moment-with-locales.min.js',
+  '/lib/bootstrap3-editable/js/bootstrap-editable.min.js',
+  '//cdn.poesis.kr/post/search.min.js',
+],
+csses => [ 
+  '/lib/bootstrap3-editable/css/bootstrap-editable.css',
+],
+;
+title meta_text($_id) . q{: } . $user->name . q{님};
+%>
+
+<div>
+  <div id="user-profile-1" class="user-profile row">
+    <!-- left -->
+    <div class="col-xs-12 col-sm-3 center">
+      <div>
+        <span class="profile-picture">
+          <img class="avatar img-responsive" alt="" src="<%= get_gravatar( $user, 180, https => 1 ) %>">
+        </span>
+        <div class="space-4"></div>
+        <div class="width-80 label label-info label-xlg arrowed-in arrowed-in-right">
+          <div class="inline position-relative">
+            <span class="white user-name"><%= $user->name %></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="space-6"></div>
+
+      <div class="profile-contact-info">
+        <div class="profile-contact-links align-left">
+          <a class="btn btn-link" href="<%= url_for('/sms')->query( to => $user_info->phone ) %>">
+            <i class="icon-phone bigger-120 green"></i>
+            SMS 보내기
+          </a>
+          <a class="btn btn-link" href="<%= url_for('/sms')->query( to => $user_info->phone, msg => measurement2text($user) ) %>">
+            <i class="icon-envelope bigger-120 green"></i>
+            신체 사이즈 전송
+          </a>
+          <a class="btn btn-link" href="<%= url_for('/user/' . $user->id . '/search/clothes/') %>">
+            <i class="icon-search bigger-120 green"></i>
+            의류검색
+          </a>
+        </div>
+      </div>
+
+      <div class="hr hr12 dotted"></div>
+
+      <div class="clearfix">
+        <div class="grid2">
+          <span class="bigger-175 blue"><%= $donated_clothes_count %></span>
+          <br>
+          <a class="btn btn-link" href="<%= url_for('/donation')->query(q => $user->email) %>">기증한 옷</a>
+        </div>
+
+        <div class="grid2">
+          <span class="bigger-175 blue"><%= $rented_clothes_count %></span>
+          <br>
+          빌렸던 옷
+        </div>
+      </div>
+
+      <div class="hr hr16 dotted"></div>
+      <div class="space-6"></div>
+      <div class="profile-donation-info">
+        <div>
+          기증 물품:
+          <ul class="list-group">
+            % for my $k ( sort keys %$donated_items ) {
+              % my $v = $donated_items->{$k};
+              <li class="list-group-item">
+                <span class="badge"><%= $v %></span>
+                <span class="label label-primary"><%= $k %></span>
+              </li>
+            % }
+          </ul>
+        </div>
+        <div>
+          대여된 주문서 횟수:
+          <span><%= $rented_order_count %></span>
+        </div>
+        <div class="space-6"></div>
+        <div>
+          품목별 대여된 횟수:
+          <span><%= $rented_category_count_all %></span>
+          <ul class="list-group">
+            % for my $k ( sort keys %$rented_category_count ) {
+              % my $v = $rented_category_count->{$k};
+              <li class="list-group-item">
+                <span class="badge"><%= $v %></span>
+                <span class="label label-primary"><%= $k %></span>
+              </li>
+            % }
+          </ul>
+        </div>
+      </div>
+    </div>
+    <!-- right -->
+    <div class="col-xs-12 col-sm-9">
+      <div class="widget-box transparent">
+        <!-- header -->
+        <div class="widget-header widget-header-small">
+          <h4 class="blue smaller">
+            <i class="icon-user orange"></i>
+            사용자 정보
+          </h4>
+        </div>
+
+        <!-- body -->
+        <div class="widget-body">
+          <div class="widget-main padding-8">
+            <div class="profile-user-info profile-user-info-striped">
+              <div id="profile-user-info-data" data-pk="<%= $user->id %>" data-url="<%= url_for( '/api/user/'. $user->id . '.json' ) %>"></div>
+              <div class="profile-info-row">
+                <div class="profile-info-name">이름</div>
+                <div class="profile-info-value">
+                  <span id="user-name" class="editable" data-name="name"><%= $user->name %></span>
+                </div>
+              </div>
+              % if (!$user_info->staff && $password) {
+                % my $klass = $password->{is_valid} ? 'btn-success' : 'btn-danger';
+                % my $desc  = $password->{is_valid} ? '사용가능' : '만료됨';
+                <div class="profile-info-row">
+                  <div class="profile-info-name">인증번호</div>
+                  <div class="profile-info-value">
+                    <span><%= $password->{code} %></span>
+                    <button id="btn-reset-expires" class="btn btn-xs <%= $klass %>">
+                      <i class="icon-refresh"></i>
+                      <span><%= $desc %></span>
+                    </button>
+                  </div>
+                </div>
+              % }
+
+              <div class="profile-info-row">
+                <div class="profile-info-name">분류</div>
+                <div class="profile-info-value">
+                  <span id="user-staff" class="editable" data-name="staff" data-type="select" data-value="<%= $user_info->staff %>"></span>
+                </div>
+              </div>
+
+              <div class="profile-info-row">
+                <div class="profile-info-name">전자우편</div>
+                <div class="profile-info-value">
+                  <span id="user-email" class="editable" data-name="email"><%= $user->email %></span>
+                </div>
+              </div>
+
+              <div class="profile-info-row">
+                <div class="profile-info-name">휴대전화</div>
+                <div class="profile-info-value">
+                  <span id="user-phone" class="editable" data-name="phone"><%= $user_info->phone %></span>
+                </div>
+              </div>
+
+              % if ( $user->id == current_user->id ) {
+                <div class="profile-info-row">
+                  <div class="profile-info-name">비밀번호</div>
+                  <div class="profile-info-value">
+                    <span id="user-password" class="editable" data-name="password"></span>
+                  </div>
+                </div>
+              % }
+              
+              
+              <div class="profile-info-row">
+                <div class="profile-info-name">주소</div>
+                <div class="profile-info-value">
+                  <i class="icon-map-marker light-orange bigger-110"></i>
+                  <span id="user-address" class="editable" data-name="address"><%= $user_info->address2 %></span>
+                </div>
+
+                <input class="postcodify_building_id" name="address1" type="hidden" value="<%= $user_info->address1 %>">
+                <input class="postcodify_address" name="address2" type="hidden" value="<%= $user_info->address2 %>">
+                <input class="postcodify_jibeon_address" name="address3" type="hidden" value="<%= $user_info->address3 %>">
+              </div>
+              
+              <div class="profile-info-row">
+                <div class="profile-info-name">상세주소</div>
+                <div class="profile-info-value">
+                  <i class="icon-map-marker light-orange bigger-110"></i>
+                  <span id="user-detail-address" class="editable" data-name="address4"><%= $user_info->address4 %></span>
+                </div>
+              </div>
+              
+              <div class="profile-info-row">
+                <div class="profile-info-name"></div>
+                <div class="profile-info-value">
+                  <span id="user-" class="editable" data-name=""><%= $user-> %></span>
+                </div>
+              </div>
+              
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
