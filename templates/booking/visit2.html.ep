@@ -1,0 +1,17 @@
+<%
+my $_id = 'visit2';
+layout 'notlogin',
+  page_id => $_id,
+  jses  => [
+    '/components/moment/min/moment-with-locales.min.js',
+    '/lib/jquery/js/jquery.mask.min.js',
+    '//cdn.poesis.kr/post/search.min.js',
+  ];
+title meta_text($_id);
+%>
+
+% if ( $type eq 'visit-info' ) {
+  %= include 'visit2-info-box'
+% } else {
+  %= include 'visit2-box'
+% }
