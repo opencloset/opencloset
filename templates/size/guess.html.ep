@@ -291,7 +291,7 @@
     </thead>
     <tbody>
       % if ($height && $weight) {
-        % while ( my $order = $bestfit_3x3_order_rs->next ) {
+        % for my $order ($bestfit_3x3_order_rs->all) {
           <%
           my $class = ( int($order->weight) == int($weight) && int($order->height) == int($height) ) ? "success" : q{};
           my $jacket;
