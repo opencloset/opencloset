@@ -1,0 +1,66 @@
+<%
+my $_id   = 'stat-clothes-amount';
+layout 'default',
+page_id     => $_id,
+active_id   => $_id,
+breadcrumbs => [
+  { text => meta_text('stat') },
+  { text => meta_text($_id)   },
+],
+;
+title "$category · " . meta_text($_id);
+
+use OpenCloset::Constants::Status qw/$RENTAL $RENTALESS $REPAIR $CLEANING $LOST $DISCARD/;
+%>
+
+<h2>
+  %= $config->{category}{$category}{str} || $category
+  <small><%= "$available_quantity / $quantity" %></small>
+  <small><%= $gender eq 'male' ? '남성용' : $gender eq 'female' ? '여성용' : 'N/A' %></small>
+</h2>
+
+<div class="space-6"></div>
+
+<div class="row amount-category">
+  <div class="col-md-12">
+    <table class="table table-striped table-bordered table-hover">
+      <thead>
+        <tr>
+          <th>사이즈 <small><%= $criterion %></small></th>
+          <th>수량</th>
+          <th>가용 수량</th>
+          % for my $status ($RENTAL, $RENTALESS, $REPAIR, $CLEANING, $LOST, $DISCARD) {
+            <th><%= $OpenCloset::Constants::Status::LABEL_MAP{$status} %></th>
+          % }
+        </tr>
+      </thead>
+      <tbody>
+        <%
+        my %STATUS_ITEM_MAP = (
+          $RENTAL    => 'rental',
+          $RENTALESS => 'cant_rental',
+          $REPAIR    => 'repair',
+          $CLEANING  => 'cleaning',
+          $LOST      => 'lost',
+          $DISCARD   => 'disused'
+        );
+        %>
+        % for my $item (@$items) {
+          % my %query_params = (category => $category, gender => $gender, criterion => $item->{size});
+          <tr>
+            <td><%= $item->{size} || '사이즈 기준 항목 없음' %></td>
+            <td>
+              <a href="<%= url_for( '/clothes' )->query( %query_params ) %>"><%= $item->{qty} %></a>
+            </td>
+            <td><%= $item->{available_qty} %></td>
+            % for my $status ($RENTAL, $RENTALESS, $REPAIR, $CLEANING, $LOST, $DISCARD) {
+              <td>
+                <a href="<%= url_for( '/clothes' )->query( %query_params, status => $status ) %>"><%= $item->{$STATUS_ITEM_MAP{$status}} %></a>
+              </td>
+            % }
+          </tr>
+        % }
+      </tbody>
+    </table>
+  </div>
+</div>
