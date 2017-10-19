@@ -77,6 +77,7 @@ sub _search_cond_attr {
         rows     => $entries_per_page
     };
 
+    return ( undef, $attr ) unless $q;
     return ( undef, $attr ) unless length $q > 1;
 
     my @or;
