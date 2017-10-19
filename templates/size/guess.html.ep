@@ -1,0 +1,356 @@
+% my $_id = 'size-guess';
+% layout 'default', page_id => $_id;
+% title meta_text($_id);
+% my %gender_str = ( male => '남성', female => '여성' );
+% use OpenCloset::Constants::Measurement qw/$BELLY $TOPBELLY $BUST $ARM $HIP $THIGH $WAIST $KNEE $LEG $FOOT/;
+
+<div class="search">
+  % my $action_url = url_for("/size/guess");
+  <form id="form-size-guess" class="form-horizontal" action="<%= $action_url %>" role="form" method="POST">
+    <div class="form-group">
+      <label class="col-sm-3 control-label no-padding-right" for="height">키</label>
+      <div class="col-sm-9">
+        <input class="form-control" name="height" type="text" value="<%= $height %>">
+      </div>
+      <label class="col-sm-3 control-label no-padding-right" for="weight">몸무게</label>
+      <div class="col-sm-9">
+        <input class="form-control" name="weight" type="text" value="<%= $weight %>">
+      </div>
+      <label class="col-sm-3 control-label no-padding-right" for="gender">성별</label>
+      <div class="col-sm-9">
+        <select class="col-xs-10 col-sm-5" id="" name="gender" type="hidden">
+          <option value=""></option>
+          % use feature qw( switch );
+          % use experimental qw( smartmatch );
+          % given ($gender) {
+            % when ('male') {
+              <option value="male" selected>남성</option>
+              <option value="female">여성</option>
+            % }
+            % when ('female') {
+              <option value="male">남성</option>
+              <option value="female" selected>여성</option>
+            % }
+            % default {
+              <option value="male">남성</option>
+              <option value="female">여성</option>
+            % }
+          % }
+        </select>
+      </div>
+    </div>
+
+    <div class="form-group form-actions clearfix">
+      <div class="col-md-offset-3 col-md-9">
+        <button id="btn-size-guess" class="btn btn-info pull-right">
+          <i class="ace-icon icon-search bigger-110"></i>
+          치수 검색
+        </button>
+        <button id="btn-clear" class="btn btn-danger pull-right" type="button">
+          <i class="ace-icon icon-undo bigger-110"></i>
+          다시 쓰기
+        </button>
+      </div>
+    </div>
+  </form>
+</div>
+
+<div class="space-4"></div>
+
+% if ( $gender && $gender =~ m/^(male|female)$/ && $height && $weight ) {
+  % $osg_db->gender($gender);
+  <table class="table table-bordered table-condensed table-striped">
+    <thead>
+      <tr>
+        <th rowspan="2"></th>
+        <th class="center" colspan="10"><%= int($height) - 1 %></th>
+        <th class="center" colspan="10"><%= int($height) %></th>
+        <th class="center" colspan="10"><%= int($height) + 1 %></th>
+      </tr>
+      <tr>
+        <td class="center">배꼽</td>
+        <td class="center">윗배</td>
+        <td class="center">가슴</td>
+        <td class="center">팔</td>
+        <td class="center">엉덩이</td>
+        <td class="center">허벅지</td>
+        <td class="center">허리</td>
+        <td class="center">무릎</td>
+        <td class="center">다리</td>
+        <td class="center">발</td>
+
+        <td class="center">배꼽</td>
+        <td class="center">윗배</td>
+        <td class="center">가슴</td>
+        <td class="center">팔</td>
+        <td class="center">엉덩이</td>
+        <td class="center">허벅지</td>
+        <td class="center">허리</td>
+        <td class="center">무릎</td>
+        <td class="center">다리</td>
+        <td class="center">발</td>
+
+        <td class="center">배꼽</td>
+        <td class="center">윗배</td>
+        <td class="center">가슴</td>
+        <td class="center">팔</td>
+        <td class="center">엉덩이</td>
+        <td class="center">허벅지</td>
+        <td class="center">허리</td>
+        <td class="center">무릎</td>
+        <td class="center">다리</td>
+        <td class="center">발</td>
+      </tr>
+    </thead>
+    <tbody>
+      % for my $w ( $weight - 1 .. $weight + 1 ) {
+        <tr>
+          <th class="text-right"><%= $w %></th>
+          % for my $h ( $height - 1 .. $height + 1 ) {
+            <%
+            $osg_db->height( int $h );
+            $osg_db->weight( int $w );
+            my $r = $osg_db->guess;
+            for ( qw/ belly topbelly bust arm thigh waist knee hip leg foot / ) {
+              $r->{$_} = $r->{$_} ? sprintf('%.1f', $r->{$_}) : 'N/A';
+            }
+            my $class = ( int($w) == int($weight) && int($h) == int($height) ) ? "success" : q{};
+            %>
+            <td class="text-right <%= $class %>"><%= $r->{belly} %></td>
+            <td class="text-right <%= $class %>"><%= $r->{topbelly} %></td>
+            <td class="text-right <%= $class %>"><%= $r->{bust} %></td>
+            <td class="text-right <%= $class %>"><%= $r->{arm} %></td>
+            <td class="text-right <%= $class %>"><%= $r->{hip} %></td>
+            <td class="text-right <%= $class %>"><%= $r->{thigh} %></td>
+            <td class="text-right <%= $class %>"><%= $r->{waist} %></td>
+            <td class="text-right <%= $class %>"><%= $r->{knee} %></td>
+            <td class="text-right <%= $class %>"><%= $r->{leg} %></td>
+            <td class="text-right <%= $class %>"><%= $r->{foot} %></td>
+          % }
+        </tr>
+      % }
+    </tbody>
+  </table>
+% }
+
+<div class="space-4"></div>
+
+% if ( $gender && $gender =~ m/^(male|female)$/ && $height && $weight ) {
+  <%
+  $osg_db->gender($gender);
+  $osg_db->height( int $height );
+  $osg_db->weight( int $weight );
+  $osg_bodykit->gender($gender);
+  $osg_bodykit->height( int $height );
+  $osg_bodykit->weight( int $weight );
+  my $ret1 = $osg_db->guess;
+  my $ret2 = $osg_bodykit->guess;
+  for my $r ( $ret1, $ret2 ) {
+    for ( qw/ belly topbelly bust arm thigh waist knee hip leg foot / ) {
+      $r->{$_} = $r->{$_} ? sprintf('%.1f', $r->{$_}) : 'N/A';
+    }
+  }
+  %>
+  <table class="table table-bordered table-condensed">
+    <thead>
+      <tr>
+        <th>
+          %= sprintf( '%s / %s / %s', int($height), int($weight), $gender_str{$gender} )
+        </th>
+        % for my $part ($BELLY, $TOPBELLY, $BUST, $ARM, $HIP, $THIGH, $WAIST, $KNEE, $LEG, $FOOT) {
+          <th class="text-right"><%= $OpenCloset::Constants::Measurement::LABEL_MAP{$part} %></th>
+        % }
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th><%= sprintf( 'DB (%d)', $ret1->{count}{total} ) %></th>
+        % for my $part ($BELLY, $TOPBELLY, $BUST, $ARM, $HIP, $THIGH, $WAIST, $KNEE, $LEG, $FOOT) {
+        <td class="text-right">
+          %= $ret1->{$part}
+          <small>(<%= $ret1->{count}{$part} %>)</small>
+        </td>
+        % }
+      </tr>
+      <tr>
+        <th>BodyKit</th>
+        % for my $part ($BELLY, $TOPBELLY, $BUST, $ARM, $HIP, $THIGH, $WAIST, $KNEE, $LEG, $FOOT) {
+          <td class="text-right"><%= $ret2->{$part} %></td>
+        % }
+      </tr>
+    </tbody>
+  </table>
+% }
+
+<div id="bestfit-1-table">
+  <h2>어울렸던 의류 정보</h2>
+  <div class="space-4"></div>
+  <table class="table table-striped table-bordered table-hover">
+    <thead>
+      <tr>
+        <th>주문서</th>
+        <th>키</th>
+        <th>몸무게</th>
+        <th><strong>상의</strong></th>
+        <th>가슴</th>
+        <th>윗배</th>
+        <th>배꼽</th>
+        <th>팔</th>
+        <th><strong>하의</strong></th>
+        <th>허리</th>
+        <th>엉덩이</th>
+        <th>허벅지</th>
+        <th>길이</th>
+      </tr>
+    </thead>
+    <tbody>
+      % if ($height && $weight) {
+        % while ( my $order = $bestfit_1_order_rs->next ) {
+          <%
+          my $jacket;
+          my $pants;
+          my $skirt;
+          for my $clothes ( $order->clothes ) {
+            use experimental qw( smartmatch );
+            given ( $clothes->category ) {
+              $jacket = $clothes when 'jacket';
+              $pants  = $clothes when 'pants';
+              $skirt  = $clothes when 'skirt';
+            }
+          }
+          %>
+          <tr data-order-id="<%= $order->id %>">
+            <td class="center">
+              <a href="<%= url_for('/orders/' . $order->id) %>"><%= $order->id %></a>
+            </td>
+            <td><%= $order->height %></td>
+            <td><%= $order->weight %></td>
+            % if ($jacket) {
+              % my $c = $jacket;
+              <td>
+                <strong>
+                  <a href="<%= url_for('/clothes/ . $c->code') %>"><%= trim_clothes_code($c) %></a>
+                </strong>
+              </td>
+              <td><%= $c->bust     || '' %></td>
+              <td><%= $c->topbelly || '' %></td>
+              <td><%= $c->belly    || '' %></td>
+              <td><%= $c->arm      || '' %></td>
+            % } else {
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+            % }
+            % if ($pants || $skirt) {
+              % my $c = $pants ? $pants : $skirt;
+              <td>
+                <strong>
+                  <a href="<%= url_for('/clothes/ . $c->code') %>"><%= trim_clothes_code($c) %></a>
+                </strong>
+              </td>
+              <td><%= $c->waist  || '' %></td>
+              <td><%= $c->hip    || '' %></td>
+              <td><%= $c->thigh  || '' %></td>
+              <td><%= $c->length || '' %></td>
+            % } else {
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+            % }
+          </tr>
+        % }
+      % }
+    </tbody>
+  </table>
+</div>
+
+<div id="bestfit-3x3-table">
+  <h2>어울렸던 유사 의류 정보</h2>
+  <div class="space-4"></div>
+  <table class="table table-striped table-bordered table-hover">
+    <thead>
+      <tr>
+        <th>주문서</th>
+        <th>키</th>
+        <th>몸무게</th>
+        <th><strong>상의</strong></th>
+        <th>가슴</th>
+        <th>윗배</th>
+        <th>배꼽</th>
+        <th>팔</th>
+        <th><strong>하의</strong></th>
+        <th>허리</th>
+        <th>엉덩이</th>
+        <th>허벅지</th>
+        <th>길이</th>
+      </tr>
+    </thead>
+    <tbody>
+      % if ($height && $weight) {
+        % while ( my $order = $bestfit_3x3_order_rs->next ) {
+          <%
+          my $class = ( int($order->weight) == int($weight) && int($order->height) == int($height) ) ? "success" : q{};
+          my $jacket;
+          my $pants;
+          my $skirt;
+          for my $clothes ( $order->clothes ) {
+            use experimental qw( smartmatch );
+            given ( $clothes->category ) {
+              $jacket = $clothes when 'jacket';
+              $pants  = $clothes when 'pants';
+              $skirt  = $clothes when 'skirt';
+            }
+          }
+          %>
+          <tr class="<%= $class %>" data-order-id="<%= $order->id %>">
+            <td class="center">
+              <a href="<%= url_for('/orders/' . $order->id) %>"><%= $order->id %></a>
+            </td>
+            <td><%= $order->height %></td>
+            <td><%= $order->weight %></td>
+            % if ($jacket) {
+              % my $c = $jacket;
+              <td>
+                <strong>
+                  <a href="<%= url_for('/clothes/ . $c->code') %>"><%= trim_clothes_code($c) %></a>
+                </strong>
+              </td>
+              <td><%= $c->bust     || '-' %></td>
+              <td><%= $c->topbelly || '-' %></td>
+              <td><%= $c->belly    || '-' %></td>
+              <td><%= $c->arm      || '-' %></td>
+            % } else {
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+            % }
+            % if ($pants || $skirt) {
+              % my $c = $pants ? $pants : $skirt;
+              <td>
+                <strong>
+                  <a href="<%= url_for('/clothes/ . $c->code') %>"><%= trim_clothes_code($c) %></a>
+                </strong>
+              </td>
+              <td><%= $c->waist  || '-' %></td>
+              <td><%= $c->hip    || '-' %></td>
+              <td><%= $c->thigh  || '-' %></td>
+              <td><%= $c->length || '-' %></td>
+            % } else {
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+            % }
+          </tr>
+        % }
+      % }
+    </tbody>
+  </table>
+</div>
