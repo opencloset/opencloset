@@ -15,7 +15,7 @@ my %bestfit_count;
 my @orders;
 my %order_clothes;
 my %clothes_mean;
-while ( my $order = $order_rs->next ) {
+for my $order ($order_rs->all ) {
   push @orders, $order;
   for my $order_detail ( $order->order_details ) {
     my $clothes = $order_detail->clothes;
