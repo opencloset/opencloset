@@ -408,12 +408,4 @@ sub clothes_pdf {
     );
 }
 
-=head2 add
-
-    GET /new-clothes
-
-=cut
-
-sub add { }
-
 1;

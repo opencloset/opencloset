@@ -318,7 +318,6 @@ sub _private_routes {
     ## for prevent deep recusion with helper 'search_clothes'
     $r->get('/user/:id/search/clothes')->to('user#user_search_clothes');
 
-    $r->get('/new-clothes')->to('clothes#add');
     $r->get('/clothes')->to('clothes#index');
     $r->get('/clothes/:code')->to('clothes#clothes');
     $r->get('/clothes/:code/pdf')->to('clothes#clothes_pdf');

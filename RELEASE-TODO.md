@@ -1,6 +1,8 @@
     # add below to app.conf
     redis_url => $ENV{OPENCLOSET_REDIS_URL} || 'redis://localhost:6379',
 
+    # remove 'new-clothes' config at app.conf
+
 v1.11.0
 
     $ closetpan OpenCloset::API    # v0.1.0
