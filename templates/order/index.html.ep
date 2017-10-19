@@ -1,0 +1,281 @@
+<%
+my $_id = 'order';
+layout 'default',
+page_id     => $_id,
+breadcrumbs => [ { text => meta_text($_id) } ],
+jses  => [
+  '/lib/reconnectingWebsocket/reconnecting-websocket.js',
+];
+title meta_text($_id);
+
+use DateTime;
+use OpenCloset::Constants::Status qw/$RETURNED $RESERVATED $RETURN_RESERVATED $BOX $BOXED $PAYMENT $PAYBACK $NOT_RENTAL $NO_SIZE/;
+my $list_name = param('status') || '';
+my $user = current_user;
+%>
+
+<div id="vbank-modal" class="modal" role="dialog" tabindex="-1">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button class="close" aria-label="Close" data-dismiss="modal" type="button">
+          <span aria-hidden="true">×</span>
+        </button>
+        <h4 class="modal-title">가상계좌</h4>
+      </div>
+      <div class="modal-body">
+        <p>아래 금액으로 전용 가상계좌를 발송하시겠습니까?</p>
+        <input name="amount" type="text" value="">
+        <input name="order_id" type="hidden" value="">
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-default btn-sm" data-dismiss="modal" type="button">닫기</button>
+        <button class="btn btn-success btn-sm" type="button">SMS 를 보냅니다</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="unpaid-done-pay-with" style="display: none">
+  <h3>
+    미납금 - 완납
+    <small>결제방법을 선택해주세요</small>
+  </h3>
+  <p class="unpaid">
+    <span class="username"></span>
+    <code class="unpaid"></code>
+  </p>
+  <hr>
+  <form class="form-inline" action="">
+    <div class="form-group">
+      <label for="">받은 금액</label>
+      <input class="form-control" name="price" type="text" value="">
+    </div>
+  </form>
+  <hr>
+  <ul class="list-inline">
+    <li>
+      <a class="unpaid-pay-with label label-default" href="#">현금</a>
+      <a class="unpaid-pay-with label label-default" href="#">카드</a>
+      <a class="unpaid-pay-with label label-default" href="#">계좌이체</a>
+    </li>
+  </ul>
+</div>
+
+<div class="search">
+  <form id="search-form" action="">
+    <div class="input-group">
+      <input id="booking-ymd" class="form-control" name="" type="text" value="" placeholder="방문 예약 날짜를 고르세요" data-date-format="yyyy-mm-dd">
+    </div>
+  </form>
+</div>
+
+<div class="space-8"></div>
+
+<ul class="list-inline">
+  <li>
+    <a href="<%= url_for->query(p => 1, status => 'all') %>">전체보기</a>
+  </li>
+  <li>|</li>
+  <li>
+    <a href="<%= url_for->query(status => 'rental-late') %>">대여중</a>
+  </li>
+  <li>|</li>
+  <li>
+    <a href="<%= url_for->query(booking_ymd => 'all', status => 'late') %>">연체중</a>
+  </li>
+  <li>|</li>
+  <li>
+    <a href="<%= url_for->query(status => 'extension') %>">연장중</a>
+  </li>
+  <li>|</li>
+  <li>
+    <a href="<%= url_for->query(status => 'undef') %>">상태없음</a>
+  </li>
+  <li>|</li>
+  <li>
+    <a href="<%= url_for->query(booking_ymd => 'all', status => 'unpaid') %>">미납</a>
+  </li>
+  <li>|</li>
+  <li>
+    <a href="<%= url_for->query(booking_ymd => 'all', status => 'nonpaid') %>">불납</a>
+  </li>
+  % for my $status ($RETURNED, $RESERVATED, $RETURN_RESERVATED, $BOX, $BOXED, $PAYMENT, $PAYBACK, $NOT_RENTAL, $NO_SIZE) {
+    <li>|</li>
+    <li>
+      <a href="<%= url_for->query(status => $status) %>"><%= $OpenCloset::Constants::Status::LABEL_MAP{$status} %></a>
+    </li>
+  % }
+</ul>
+
+<div class="space-4"></div>
+
+<div id="order-table">
+  <table class="table table-striped table-bordered table-hover">
+    <thead>
+      <tr>
+        <th class="center">#</th>
+        <th>상태</th>
+        <th>대여일</th>
+        <th><%= $list_name eq 'late' ? '반납 희망일' : '반납 예정일' %></th>
+        <th>대여자</th>
+        <th>담당자</th>
+        <th>대여 품목</th>
+        <th>비고</th>
+      </tr>
+    </thead>
+    <tbody>
+      % while ( my $order = $order_list->next ) {
+        <%
+        my $overdue  = calc_overdue($order);
+        my $late_fee = calc_late_fee($order);
+        my $status = '';
+        if ( $order->status ) {
+          $status = $order->status->name;
+          if ( $status eq '대여중' ) {
+            $status .= '(연장) ' . commify($late_fee) . '원' if $overdue;
+          }
+          elsif ( $search_status eq 'unpaid' && $status eq '반납' ) {
+            my $unpaid = $order->get_column('sum_final_price');
+            $status .= '(미납) ' . commify($unpaid) . '원' if $unpaid;
+          }
+        }
+        %>
+        <tr>
+          <td class="center">
+            % if ($order->get_column('online')) {
+              <i class="icon-circle text-success" title="online"></i>
+            % }
+            <a href="<%= url_for('/orders/' . $order->id) %>"><%= $order->id %></a>
+          </td>
+          <td>
+            % if ($status eq '포장완료' && $order->does_wear) {
+              <p>입고감</p>
+            % }
+            <a href="<%= url_for('/orders/' . $order->id) %>">
+              <span class="label order-status" data-order-status="<%= $status %>"><%= $status || '상태없음' %></span>
+            </a>
+            % if ($status eq '포장완료') {
+              % my $staff_id = $user->id;
+              <span>
+                <span class="text-primary glyphicon glyphicon-arrow-right" aria-hidden="true"></span>
+              </span>
+              <span class="status-update label order-status" data-order-status="결제대기" data-order-id="<%= $order->id %>" data-status-to="<%= $PAYMENT %>" data-staff-id="<%= $staff_id %>">결제대기</span>
+            % }
+            % elsif ($search_status eq 'nonpaid') {
+              <a class="nonpaid2full label label-warning" href="#">
+                불납
+                <i class="icon-arrow-right"></i>
+                완납
+              </a>
+            % }
+            <%
+            my $sms_label;
+            my $sms_str;
+            my $is_unpaid;
+            if ( $search_status eq 'unpaid' && $order->status->name eq '반납' ) {
+              my $unpaid = $order->get_column('sum_final_price');
+              if ($unpaid) {
+                my $user = $order->user;
+                $is_unpaid = 1;
+                $sms_label = '미납 문자 전송';
+                $sms_str   = sprintf(
+                  '[열린옷장] %s님, %d일 연장, %d일 연체로 추가 금액 %s원이 발생하였습니다. 금일 중으로 국민은행 205737-04-003013 (예금주 : 사단법인열린옷장)으로 입금해주세요. 입금자명과 %s님의 이름이 동일해야 확인이 가능합니다. 반드시 %s님 이름으로 입금해 주세요.',
+                  $user->name,
+                  calc_extension_days($order),
+                  calc_overdue_days($order),
+                  commify($unpaid),
+                  $user->name,
+                  $user->name,
+                );
+                $sms_str =~ s/, 0일 연장//;
+                $sms_str =~ s/, 0일 연체/으/;
+              }
+            }
+            else {
+              my $dt_today = DateTime->now( time_zone => $timezone );
+              my $order_status = $order->status;
+              if ( $overdue && $order_status && $order_status->name eq '대여중' && $dt_today > $order->user_target_date ) {
+                $sms_label = '연체 문자 전송';
+                $sms_str   = sprintf(
+                  qq{[열린옷장] %s님 열린옷장에서 대여하신 의류의 반납이 %d일 연체되었습니다.
+                    내일까지 대여품목의 반납이 이루어지지 않거나 반납에 대한 명시적인 전화연락이 없는 경우 %s님의 반납의사가 없다고 판단하여 열린옷장은 민법 제395조에 따라 이행에 갈음한 손해배상청구를 할 수 있으며,
+                    또한 열린옷장의 소유인 물품의 반납기한이 도래한 바 이를 반환하여야 함에도 불구하고 고의로 그 반환을 거부하는 경우에는 횡령죄가 성립되는 것이므로 귀 단체는 반납을 강제하기 위하여 형법 제355조 제1항에 따라 횡령죄로 형사고소를 진행할 것임을 미리 안내드립니다.
+                    문자 안내 이후, 본 내용을 증명하기 위하여 내용증명서를 발송한 뒤 거주 관할 경찰서에 정식으로 고소장을 제출하여 법적절차를 진행할 예정입니다. 감사합니다.},
+                  $order->user->name,
+                  $overdue,
+                  $order->user->name,
+                );
+              }
+            }
+            %>
+            % if ( $sms_label && $sms_str ) {
+              <br>
+              <a href="<%= url_for('/sms')->query( to => $order->user->user_info->phone, msg => $sms_str ) %>"><%= $sms_label %></a>
+              <br>
+              <button class="send-vbank-sms btn btn-xs btn-success" type="button" data-amount="<%= calc_late_fee($order) %>" data-order-id="<%= $order->id %>">가상계좌 문자전송</button>
+              % if (my $tracking_url = tracking_url($order)) {
+                <a href="<%= $tracking_url %>" target="_blank" title="배송조회">
+                  <span class="glyphicon glyphicon-link"></span>
+                </a>
+              % }
+              % if ( $is_unpaid ) {
+                <br>
+                <a class="unpaid-done label label-success" href="#unpaid-done-pay-with" rel="facebox">완납</a>
+                <a class="unpaid-deny label label-danger" href="#">불납</a>
+              % }
+            % }
+          </td>
+          <td>
+            %= $order->rental_date ? $order->rental_date->ymd : q{}
+            % if ($list_name eq 'late') {
+              % if (my $user_target_date = $order->user_target_date) {
+                % my $today = DateTime->today;
+                % my $dur = $user_target_date->delta_days($today);
+                <small><%= $dur->in_units('days') . '일 연체' %></small>
+              % }
+            % }
+          </td>
+          <td>
+            % if ($list_name eq 'late') {
+              % my $dt = $order->user_target_date;
+              %= $dt ? $dt->ymd : q{}
+            % } else {
+              % my $dt = $order->target_date;
+              %= $dt ? $dt->ymd : q{}
+            % }
+          </td>
+          <td>
+            % if ( $order->user ) {
+              <a href="<%= url_for('/user/' . $order->user->id) %>"><%= $order->user->name %></a>
+            % }
+          </td>
+          <td>
+            % if ( $order->staff ) {
+              <a href="<%= url_for('/user/' . $order->staff->id) %>"><%= $order->staff->name %></a>
+            % }
+          </td>
+          <td>
+            % my $count = 0;
+            % for my $detail ( $order->order_details ) {
+              % next unless $detail->clothes;
+              % ++$count;
+              <span>
+                <a class="clothes-category" href="<%= url_for('/clothes/' . trim_clothes_code($detail->clothes)) %>"><%= $detail->clothes->category %></a>
+              </span>
+            % }
+          </td>
+          <td>
+            <span>
+              % if ( $status =~ m/^포장완료|결제대기$/ ) {
+                <a class="btn btn-xs btn-info" href="<%= url_for('/order/' . $order->id . '/rental/paper/pdf') %>" type="button" target="_blank">정장 반납 안내 출력</a>
+              % }
+            </span>
+            <span><%= $order->return_memo || '' %></span>
+          </td>
+        </tr>
+      % }
+    </tbody>
+  </table>
+  %= include 'partials/pagination'
+</div>
