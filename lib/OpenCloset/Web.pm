@@ -77,7 +77,6 @@ sub startup {
     );
 
     $self->plugin('validator');
-    $self->plugin('haml_renderer');
     $self->plugin('OpenCloset::Plugin::Helpers');
     $self->plugin('OpenCloset::Web::Plugin::Helpers');
 
