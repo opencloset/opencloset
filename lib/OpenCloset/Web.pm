@@ -332,7 +332,6 @@ sub _private_routes {
 
     $r->get('/order')->to('order#index');
     $r->post('/order')->to('order#create');
-    $r->get('/order/:id')->to('order#order');
     $r->post('/order/:id/update')->to('order#update');
     $r->post('/order/:id/coupon')->to('order#create_coupon');
 
