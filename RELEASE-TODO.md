@@ -3,6 +3,8 @@
 
     # remove 'new-clothes' config at app.conf
 
+    $ closetpan OpenCloset::API    # v0.1.1
+
 v1.11.0
 
     $ closetpan OpenCloset::API    # v0.1.0

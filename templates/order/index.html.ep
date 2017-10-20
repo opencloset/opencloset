@@ -154,77 +154,77 @@ my $user = current_user;
             % }
             <a href="<%= url_for('/orders/' . $order->id) %>">
               <span class="label order-status" data-order-status="<%= $status %>"><%= $status || '상태없음' %></span>
-            </a>
-            % if ($status eq '포장완료') {
-              % my $staff_id = $user->id;
-              <span>
-                <span class="text-primary glyphicon glyphicon-arrow-right" aria-hidden="true"></span>
-              </span>
-              <span class="status-update label order-status" data-order-status="결제대기" data-order-id="<%= $order->id %>" data-status-to="<%= $PAYMENT %>" data-staff-id="<%= $staff_id %>">결제대기</span>
-            % }
-            % elsif ($search_status eq 'nonpaid') {
-              <a class="nonpaid2full label label-warning" href="#">
-                불납
-                <i class="icon-arrow-right"></i>
-                완납
-              </a>
-            % }
-            <%
-            my $sms_label;
-            my $sms_str;
-            my $is_unpaid;
-            if ( $search_status eq 'unpaid' && $order->status->name eq '반납' ) {
-              my $unpaid = $order->get_column('sum_final_price');
-              if ($unpaid) {
-                my $user = $order->user;
-                $is_unpaid = 1;
-                $sms_label = '미납 문자 전송';
-                $sms_str   = sprintf(
-                  '[열린옷장] %s님, %d일 연장, %d일 연체로 추가 금액 %s원이 발생하였습니다. 금일 중으로 국민은행 205737-04-003013 (예금주 : 사단법인열린옷장)으로 입금해주세요. 입금자명과 %s님의 이름이 동일해야 확인이 가능합니다. 반드시 %s님 이름으로 입금해 주세요.',
-                  $user->name,
-                  calc_extension_days($order),
-                  calc_overdue_days($order),
-                  commify($unpaid),
-                  $user->name,
-                  $user->name,
-                );
-                $sms_str =~ s/, 0일 연장//;
-                $sms_str =~ s/, 0일 연체/으/;
-              }
-            }
-            else {
-              my $dt_today = DateTime->now( time_zone => $timezone );
-              my $order_status = $order->status;
-              if ( $overdue && $order_status && $order_status->name eq '대여중' && $dt_today > $order->user_target_date ) {
-                $sms_label = '연체 문자 전송';
-                $sms_str   = sprintf(
-                  qq{[열린옷장] %s님 열린옷장에서 대여하신 의류의 반납이 %d일 연체되었습니다.
-                    내일까지 대여품목의 반납이 이루어지지 않거나 반납에 대한 명시적인 전화연락이 없는 경우 %s님의 반납의사가 없다고 판단하여 열린옷장은 민법 제395조에 따라 이행에 갈음한 손해배상청구를 할 수 있으며,
-                    또한 열린옷장의 소유인 물품의 반납기한이 도래한 바 이를 반환하여야 함에도 불구하고 고의로 그 반환을 거부하는 경우에는 횡령죄가 성립되는 것이므로 귀 단체는 반납을 강제하기 위하여 형법 제355조 제1항에 따라 횡령죄로 형사고소를 진행할 것임을 미리 안내드립니다.
-                    문자 안내 이후, 본 내용을 증명하기 위하여 내용증명서를 발송한 뒤 거주 관할 경찰서에 정식으로 고소장을 제출하여 법적절차를 진행할 예정입니다. 감사합니다.},
-                  $order->user->name,
-                  $overdue,
-                  $order->user->name,
-                );
-              }
-            }
-            %>
-            % if ( $sms_label && $sms_str ) {
-              <br>
-              <a href="<%= url_for('/sms')->query( to => $order->user->user_info->phone, msg => $sms_str ) %>"><%= $sms_label %></a>
-              <br>
-              <button class="send-vbank-sms btn btn-xs btn-success" type="button" data-amount="<%= calc_late_fee($order) %>" data-order-id="<%= $order->id %>">가상계좌 문자전송</button>
-              % if (my $tracking_url = tracking_url($order)) {
-                <a href="<%= $tracking_url %>" target="_blank" title="배송조회">
-                  <span class="glyphicon glyphicon-link"></span>
+              % if ($status eq '포장완료') {
+                % my $staff_id = $user->id;
+                <span>
+                  <span class="text-primary glyphicon glyphicon-arrow-right" aria-hidden="true"></span>
+                </span>
+                <span class="status-update label order-status" data-order-status="결제대기" data-order-id="<%= $order->id %>" data-status-to="<%= $PAYMENT %>" data-staff-id="<%= $staff_id %>">결제대기</span>
+              % }
+              % elsif ($search_status eq 'nonpaid') {
+                <a class="nonpaid2full label label-warning" href="#">
+                  불납
+                  <i class="icon-arrow-right"></i>
+                  완납
                 </a>
               % }
-              % if ( $is_unpaid ) {
+              <%
+              my $sms_label;
+              my $sms_str;
+              my $is_unpaid;
+              if ( $search_status eq 'unpaid' && $order->status->name eq '반납' ) {
+                my $unpaid = $order->get_column('sum_final_price');
+                if ($unpaid) {
+                  my $user = $order->user;
+                  $is_unpaid = 1;
+                  $sms_label = '미납 문자 전송';
+                  $sms_str   = sprintf(
+                    '[열린옷장] %s님, %d일 연장, %d일 연체로 추가 금액 %s원이 발생하였습니다. 금일 중으로 국민은행 205737-04-003013 (예금주 : 사단법인열린옷장)으로 입금해주세요. 입금자명과 %s님의 이름이 동일해야 확인이 가능합니다. 반드시 %s님 이름으로 입금해 주세요.',
+                    $user->name,
+                    calc_extension_days($order),
+                    calc_overdue_days($order),
+                    commify($unpaid),
+                    $user->name,
+                    $user->name,
+                  );
+                  $sms_str =~ s/, 0일 연장//;
+                  $sms_str =~ s/, 0일 연체/으/;
+                }
+              }
+              else {
+                my $dt_today = DateTime->now( time_zone => $timezone );
+                my $order_status = $order->status;
+                if ( $overdue && $order_status && $order_status->name eq '대여중' && $dt_today > $order->user_target_date ) {
+                  $sms_label = '연체 문자 전송';
+                  $sms_str   = sprintf(
+                    qq{[열린옷장] %s님 열린옷장에서 대여하신 의류의 반납이 %d일 연체되었습니다.
+                      내일까지 대여품목의 반납이 이루어지지 않거나 반납에 대한 명시적인 전화연락이 없는 경우 %s님의 반납의사가 없다고 판단하여 열린옷장은 민법 제395조에 따라 이행에 갈음한 손해배상청구를 할 수 있으며,
+                      또한 열린옷장의 소유인 물품의 반납기한이 도래한 바 이를 반환하여야 함에도 불구하고 고의로 그 반환을 거부하는 경우에는 횡령죄가 성립되는 것이므로 귀 단체는 반납을 강제하기 위하여 형법 제355조 제1항에 따라 횡령죄로 형사고소를 진행할 것임을 미리 안내드립니다.
+                      문자 안내 이후, 본 내용을 증명하기 위하여 내용증명서를 발송한 뒤 거주 관할 경찰서에 정식으로 고소장을 제출하여 법적절차를 진행할 예정입니다. 감사합니다.},
+                    $order->user->name,
+                    $overdue,
+                    $order->user->name,
+                  );
+                }
+              }
+              %>
+              % if ( $sms_label && $sms_str ) {
                 <br>
-                <a class="unpaid-done label label-success" href="#unpaid-done-pay-with" rel="facebox">완납</a>
-                <a class="unpaid-deny label label-danger" href="#">불납</a>
+                <a href="<%= url_for('/sms')->query( to => $order->user->user_info->phone, msg => $sms_str ) %>"><%= $sms_label %></a>
+                <br>
+                <button class="send-vbank-sms btn btn-xs btn-success" type="button" data-amount="<%= calc_late_fee($order) %>" data-order-id="<%= $order->id %>">가상계좌 문자전송</button>
+                % if (my $tracking_url = tracking_url($order)) {
+                  <a href="<%= $tracking_url %>" target="_blank" title="배송조회">
+                    <span class="glyphicon glyphicon-link"></span>
+                  </a>
+                % }
+                % if ( $is_unpaid ) {
+                  <br>
+                  <a class="unpaid-done label label-success" href="#unpaid-done-pay-with" rel="facebox">완납</a>
+                  <a class="unpaid-deny label label-danger" href="#">불납</a>
+                % }
               % }
-            % }
+            </a>
           </td>
           <td>
             %= $order->rental_date ? $order->rental_date->ymd : q{}
