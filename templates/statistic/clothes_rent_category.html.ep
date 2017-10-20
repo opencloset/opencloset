@@ -1,0 +1,214 @@
+<%
+my $_id   = 'stat-clothes-rent';
+layout 'default',
+page_id     => $_id,
+active_id   => 'stat-clothes-rent',
+breadcrumbs => [
+  { text => meta_text('stat') },
+  { text => meta_text($_id)   },
+],
+jses  => [
+  '/lib/chosen/js/chosen.jquery.min.js',
+],
+csses => [
+  '/lib/chosen/css/chosen.min.css',
+],
+;
+title meta_text($_id);
+
+use OpenCloset::Constants::Category qw/$JACKET $PANTS $SKIRT $SHIRT $BLOUSE $SHOES $TIE $BAG $BELT $COAT $ONEPIECE $WAISTCOAT $MISC/;
+use OpenCloset::Constants::Status qw/$RENTABLE $RENTAL $RENTALESS $RESERVATION $CLEANING $REPAIR $RETURNED $PARTIAL_RETURNED $RETURNING $MEASUREMENT $SELECT $BOX $PAYMENT/;
+use OpenCloset::Constants::Measurement qw/$BUST $TOPBELLY $ARM $WAIST $THIGH $LENGTH $HIP/;
+%>
+
+<div class="search">
+  <form class="form-horizontal" action="" role="form">
+    <div class="form-group">
+      <label class="col-sm-3 control-label no-padding-right" for="category">종류</label>
+      <div class="col-sm-9">
+        <select class="col-xs-10 col-sm-5" id="" name="category" type="hidden">
+          % for my $k ($JACKET, $PANTS, $SKIRT, $SHIRT, $BLOUSE, $SHOES, $TIE, $BAG, $BELT, $COAT, $ONEPIECE, $WAISTCOAT, $MISC) {
+            % if ( $k eq $category ) {
+              <option value="<%= $k %>" selected><%= $OpenCloset::Constants::Category::LABEL_MAP{$k} %></option>
+            % } else {
+              <option value="<%= $k %>"><%= $OpenCloset::Constants::Category::LABEL_MAP{$k} %></option>
+            % }
+          % }
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="col-sm-3 control-label no-padding-right" for="gender">성별</label>
+      <div class="col-sm-9">
+        <select class="col-xs-10 col-sm-5" id="" name="gender" type="hidden">
+          % use feature qw( switch );
+          % use experimental qw( smartmatch );
+          % given ($gender) {
+            % when ('male') {
+              <option value="male" selected>남성</option>
+              <option value="female">여성</option>
+            % }
+            % when ('female') {
+              <option value="male">남성</option>
+              <option value="female" selected>여성</option>
+            % }
+            % default {
+              <option value="male">남성</option>
+              <option value="female">여성</option>
+            % }
+          % }
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="col-sm-3 control-label no-padding-right" for="limit">TOP (개수)</label>
+      <div class="col-sm-9">
+        <input id="limit" class="form-control" name="limit" type="text" value="<%= $limit %>" placeholder="10">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="col-sm-3 control-label no-padding-right" for="sort">회전율 정렬</label>
+      <div class="col-sm-9">
+        <select class="col-xs-10 col-sm-5" id="" name="sort" type="hidden">
+          % use feature qw( switch );
+          % use experimental qw( smartmatch );
+          % given ($sort) {
+            % when ('asc') {
+              <option value="asc" selected>낮은 순서</option>
+              <option value="desc">높은 순서</option>
+            % }
+            % when ('desc') {
+              <option value="asc">낮은 순서</option>
+              <option value="desc" selected>높은 순서</option>
+            % }
+            % default {
+              <option value="asc" selected>낮은 순서</option>
+              <option value="desc">높은 순서</option>
+            % }
+          % }
+        </select>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="col-sm-3 control-label no-padding-right" for="status_ids">상태</label>
+      <div class="col-sm-9">
+        <select id="status" class="chosen-select tag-input-style" id="" name="status_ids" data-placeholder="열람할 의류 상태를 선택하세요" multiple>
+          % for my $status ($RENTABLE, $RENTAL, $RENTALESS, $RESERVATION, $CLEANING, $REPAIR, $RETURNED, $PARTIAL_RETURNED, $RETURNING, $MEASUREMENT, $SELECT, $BOX, $PAYMENT) {
+            % use experimental qw( smartmatch );
+            % if ( $status ~~ $status_ids ) {
+              <option value="<%= $status %>" selected><%= $OpenCloset::Constants::Status::LABEL_MAP{$status} %></option>
+            % } else {
+              <option value="<%= $status %>"><%= $OpenCloset::Constants::Status::LABEL_MAP{$status} %></option>
+            % }
+          % }
+        </select>
+      </div>
+    </div>
+
+    <div class="form-actions clearfix">
+      <div class="col-md-offset-3 col-md-9">
+        <button id="btn-hit-search" class="btn btn-info pull-right" type="button">
+          <i class="ace-icon icon-search bigger-110"></i>
+          검색
+        </button>
+        <button class="btn btn-danger pull-right" type="reset">
+          <i class="ace-icon icon-undo bigger-110"></i>
+          다시 쓰기
+        </button>
+      </div>
+    </div>
+  </form>
+</div>
+
+<div class="space-4"></div>
+
+<div id="clothes-rent">
+  <h2>의류 회전율: <span class="category" data-category="<%= $category %>"><%= $category %></span></h2>
+  <div class="space-4"></div>
+  <table class="table table-striped table-bordered table-hover">
+    <thead>
+      <tr>
+        <th rowspan="2">#</th>
+        <th rowspan="2">코드</th>
+        <th rowspan="2">기증자</th>
+        <th rowspan="2">색상</th>
+        <th rowspan="2">대여일</th>
+        <th rowspan="2">대여 가능일</th>
+        <th rowspan="2">회전율</th>
+        <th class="center" colspan="8">사이즈</th>
+      </tr>
+      <tr>
+        % use feature qw( switch );
+        % use experimental qw( smartmatch );
+        % given ($category) {
+          % when ($JACKET) {
+            <th><%= $OpenCloset::Constants::Measurement::LABEL_MAP{$BUST} %></th>
+            <th><%= $OpenCloset::Constants::Measurement::LABEL_MAP{$TOPBELLY} %></th>
+            <th><%= $OpenCloset::Constants::Measurement::LABEL_MAP{$ARM} %></th>
+          % }
+          % when ($PANTS) {
+            <th><%= $OpenCloset::Constants::Measurement::LABEL_MAP{$WAIST} %></th>
+            <th><%= $OpenCloset::Constants::Measurement::LABEL_MAP{$THIGH} %></th>
+            <th><%= $OpenCloset::Constants::Measurement::LABEL_MAP{$LENGTH} %></th>
+          % }
+          % when ($SKIRT) {
+            <th><%= $OpenCloset::Constants::Measurement::LABEL_MAP{$WAIST} %></th>
+            <th><%= $OpenCloset::Constants::Measurement::LABEL_MAP{$HIP} %></th>
+            <th><%= $OpenCloset::Constants::Measurement::LABEL_MAP{$LENGTH} %></th>
+          % }
+          % default {
+            <th><%= $OpenCloset::Constants::Measurement::LABEL_MAP{$LENGTH} %></th>
+            <th>-</th>
+            <th>-</th>
+          % }
+        % }
+      </tr>
+    </thead>
+    <tbody>
+      % my $count = $start_idx;
+      % for my $data ( @$cached_page ) {
+        % my $clothes = $clothes_rs->find( { code => $data->{code} } );
+        <tr>
+          <td><%= ++$count %></td>
+          <td><%= clothes2link($clothes, { with_status => 1 }) %></td>
+          <td>
+            <a href="<%= url_for( '/user/' . $clothes->donation->user->id ) %>"><%= $clothes->donation->user->name %></a>
+          </td>
+          <td>
+            <span class="color" data-color="<%= $clothes->color %>"><%= $clothes->color %></span>
+          </td>
+          <td><%= $data->{rented} %></td>
+          <td><%= $data->{rentable} %></td>
+          <td><%= sprintf "%.2f", $data->{ratio} %></td>
+          % use feature qw( switch );
+          % use experimental qw( smartmatch );
+          % given ($category) {
+            % when ($JACKET) {
+              <td><%= $clothes->$BUST %></td>
+              <td><%= $clothes->$TOPBELLY %></td>
+              <td><%= $clothes->$ARM %></td>
+            % }
+            % when ($PANTS) {
+              <td><%= $clothes->$WAIST %></td>
+              <td><%= $clothes->$THIGH %></td>
+              <td><%= $clothes->$LENGTH %></td>
+            % }
+            % when ($SKIRT) {
+              <td><%= $clothes->$WAIST %></td>
+              <td><%= $clothes->$HIP %></td>
+              <td><%= $clothes->$LENGTH %></td>
+            % }
+            % default {
+              <td><%= $clothes->$LENGTH %></td>
+              <td>-</td>
+              <td>-</td>
+            % }
+          % }
+        </tr>
+      % }
+    </tbody>
+  </table>
+  %= include 'partials/pagination'
+</div>

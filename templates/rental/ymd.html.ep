@@ -1,0 +1,335 @@
+<%
+my $_id   = 'rental';
+layout 'default',
+page_id     => $_id,
+breadcrumbs => [ { text => meta_text($_id) } ],
+jses => [
+  '/lib/reconnectingWebsocket/reconnecting-websocket.js',
+  '/lib/bootstrap3-editable/js/bootstrap-editable.min.js',
+  '/components/typeahead.js/dist/typeahead.bundle.min.js',
+  '/components/handlebars/handlebars.runtime.min.js',
+  '/js/templates.js'
+], csses => [
+  '/lib/bootstrap3-editable/css/bootstrap-editable.css'
+];
+title meta_text($_id);
+use OpenCloset::Constants::Category;
+%>
+
+<h3>탈의/수선 상태의 주문서</h3>
+<div class="space-4"></div>
+
+<div class="row">
+  <div class="col-md-2">
+    <ul id="list-fitting-room-repair">
+      % while (my $order = $room_repairs->next) {
+        % my $user      = $order->user;
+        % my $user_info = $user->user_info;
+        % my $gender    = $user_info->gender;
+        <li data-order-id="<%= $order->id %>">
+          <i class="icon-fixed-width icon-<%= $gender %> <%= $gender %>"></i>
+          %= $user->name
+          <a class="btn btn-success btn-xs btn-update-status" href="<%= url_for('/api/order/' . $order->id) %>">
+            %= $order->status->name
+            <i class="icon-arrow-right"></i>
+            포장
+          </a>
+        </li>
+      % }
+    </ul>
+  </div>
+
+  <div class="col-md-10">
+    <div class="form-group">
+      <input id="query" class="typeahead form-control" name="q" type="text" value="" placeholder="이름, 전화번호, 이메일" autocomplete="off">
+      <div id="selected" class="text-muted"></div>
+    </div>
+  </div>
+</div>
+
+<hr>
+
+<div class="search">
+  <form id="search-form" action="">
+    <div class="input-group">
+      <input id="clothes-id" class="form-control" name="" type="text" value="" placeholder="의류 코드" style="ime-mode:disabled">
+      <span class="input-group-btn">
+        <button id="btn-search" class="btn btn-sm btn-default">
+          <i class="icon-search bigger-110"></i>
+          검색
+        </button>
+      </span>
+      <span class="input-group-btn">
+        <button id="btn-clear" class="btn btn-sm btn-default">
+          <i class="icon-eraser bigger-110"></i>
+          지우기
+        </button>
+      </span>
+    </div>
+  </form>
+</div>
+
+<div class="space-8"></div>
+
+<form id="order-form" action="<%= url_for('/order') %>" method="post">
+  <div id="clothes-table">
+    <h2>대여할 옷을 선택해 주세요.</h2>
+    <div class="space-4"></div>
+    <table class="table table-striped table-bordered table-hover">
+      <thead>
+        <tr>
+          <th class="center">
+            <label for="">
+              <input id="input-check-all" class="ace" name="" type="checkbox" value="">
+              <span class="lbl"></span>
+            </label>
+          </th>
+          <th>#</th>
+          <th>옷</th>
+          <th>상태</th>
+          <th>종류</th>
+          <th>대여 가격</th>
+          <th>기타</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <button id="action-buttons" class="btn btn-sm btn-primary" type="button" style="display: none;">선택한 항목을 대여합니다.</button>
+  </div>
+
+  <div class="space-8"></div>
+
+  <div id="order-table">
+    <h2>대여할 주문서를 선택해 주세요.</h2>
+    <div class="space-4"></div>
+    <table class="table table-striped table-bordered table-hover">
+      <thead>
+        <tr>
+          <th></th>
+          <th>이름</th>
+          <th>연락처</th>
+          <th>착용여부</th>
+          <th>바지길이</th>
+          <th>대여 희망 품목</th>
+        </tr>
+      </thead>
+      <tbody>
+        % for my $order ( $order_rs->all ) {
+          % my $user = $order->user;
+          % my $user_info = $user->user_info;
+          % my $order_id = $order->id;
+          % my $pre_category = $user_info->pre_category;
+          <tr data-order-id="<%= $order->id %>">
+            <td class="center">
+              <label for="">
+                <input class="ace" name="id" type="radio" value="<%= $order->id %>">
+                <span class="lbl"></span>
+              </label>
+            </td>
+            <td>
+              <a href="<%= url_for('/user/' . $user->id) %>"><%= $user->name %></a>
+              % if ("@$repairs" =~ m/\b$order_id\b/) {
+                <span class="label label-info">수선됨</span>
+              % }
+              % if ($order->get_column('online')) {
+                <i class="icon-circle text-success" title="online"></i>
+              % }
+            </td>
+            <td>
+              <i class="icon-envelope"></i>
+              <a href="mailto:<%= $user->email %>"><%= $user->email %></a>
+              <br>
+              <i class="icon-phone"></i>
+              %= $user_info->phone
+            </td>
+            <td>
+              % if ($order->does_wear) {
+                <button class="btn btn-success btn-wearing btn-sm" type="button">입고감</button>
+              % } else {
+                <button class="btn btn-default btn-wearing btn-sm" type="button">안입고감</button>
+              % }
+            </td>
+            <td>
+              <span id="pants" class="editable" data-name="pants" data-user-id="<%= $user->id %>" data-order-id="<%= $order->id %>"><%= $order->pants || '' %></span>
+            </td>
+            <td class="pre_category" data-pre-category="<%= $pre_category || '' %>" data-user-id="<%= $user->id %>">
+              <%
+              my %categories;
+              my @categories = split /,/, $pre_category;
+              map { $categories{$_} = 1 } @categories;
+              my $gender = $user_info->gender;
+              if ($gender eq 'female') {
+                if (not $categories{$SKIRT} and not $categories{$BLOUSE}) {
+                  map { $categories{$_} //= undef } ($JACKET, $PANTS, $SKIRT, $SHIRT, $BLOUSE, $SHOES, $BELT, $TIE);
+                } else {
+                  map { $categories{$_} //= undef } ($JACKET, $SKIRT, $BLOUSE, $SHOES);
+                }
+              } else {
+                map { $categories{$_} //= undef } ($JACKET, $PANTS, $SHIRT, $SHOES, $TIE, $BELT);
+              }
+              %>
+              % for my $c (sort keys %categories) {
+                % if ($categories{$c}) {
+                <span class="label label-success label-category" data-category="<%= $c %>"><%= $OpenCloset::Constants::Category::LABEL_MAP{$c} %></span>
+                % } else {
+                <span class="label label-default label-category" data-category="<%= $c %>"><%= $OpenCloset::Constants::Category::LABEL_MAP{$c} %></span>
+                % }
+              % }
+              % my $cnt = grep { defined $categories{$_} ? $categories{$_} == 1 : undef } keys %categories;
+              <span class="badge category-cnt"><%= $cnt %></span>
+            </td>
+          </tr>
+        % }
+      </tbody>
+    </table>
+  </div>
+</form>
+
+<script id="tpl-row-checkbox-disabled-with-order" type="text/html">
+  <tr data-clothes-code="<%%= code %>" data-order-id="<%%= order.id %>">
+    <td class="center">
+      <label>
+        <input class="ace" type="checkbox" disabled>
+        <span class="lbl"></span>
+      </label>
+    </td>
+    <td> <%%= count %> </td> <!-- 넘버링 -->
+    <td> <a href="/clothes/<%%= code %>"> <%%= code %> </a> </td> <!-- 옷 -->
+    <td>
+      <span class="order-status label">
+        <%%= status %>
+        <span class="late-fee"><%%= order.late_fee ? order.late_fee + '원' : '' %></span>
+      </span>
+    </td> <!-- 상태 -->
+    <td>
+      <span><%%= categoryStr %></span>
+    </td> <!-- 종류 -->
+    <td>
+      <span><%%= OpenCloset.commify(price) %>원</span>
+    </td> <!-- 대여 가격 -->
+    <td>
+      <a href="/order/<%%= order.id %>"><span class="label label-info arrowed-right arrowed-in">
+        <strong>주문서</strong>
+        <time class="js-relative-date" datetime="<%%= order.rental_date.raw %>" title="<%%= order.rental_date.ymd %>"><%%= order.rental_date.md %></time>
+        ~
+        <time class="js-relative-date" datetime="<%%= order.target_date.raw %>" title="<%%= order.target_date.ymd %>"><%%= order.target_date.md %></time>
+      </span></a>
+    </td> <!-- 기타 -->
+  </tr>
+</script>
+
+<script id="tpl-row-checkbox-disabled-without-order" type="text/html">
+  <tr class="row-checkbox" data-clothes-code="<%%= code %>">
+    <td class="center">
+      <label>
+        <input class="ace" type="checkbox" disabled>
+        <span class="lbl"></span>
+      </label>
+    </td>
+    <td> <%%= count %> </td> <!-- 넘버링 -->
+    <td> <a href="/clothes/<%%= code %>"> <%%= code %> </a> </td> <!-- 옷 -->
+    <td> <span class="order-status label"><%%= status %></span> </td> <!-- 상태 -->
+    <td>
+      <span><%%= categoryStr %></span>
+    </td> <!-- 종류 -->
+    <td>
+      <span><%%= OpenCloset.commify(price) %>원</span>
+    </td> <!-- 대여 가격 -->
+    <td>
+    </td> <!-- 기타 -->
+  </tr>
+</script>
+
+<script id="tpl-row-checkbox-readonly-without-order" type="text/html">
+  <tr class="row-checkbox" data-clothes-code="<%%= code %>" data-category="<%%= category %>">
+    <td class="center">
+      <label>
+        <input class="ace" type="checkbox" readonly="readonly">
+        <span class="lbl"></span>
+      </label>
+    </td>
+    <td> <%%= count %> </td> <!-- 넘버링 -->
+    <td> <a href="/clothes/<%%= code %>"> <%%= code %> </a> </td> <!-- 옷 -->
+    <td> <span class="order-status label"><%%= status %></span> </td> <!-- 상태 -->
+    <td>
+      <span><%%= categoryStr %></span>
+    </td> <!-- 종류 -->
+    <td>
+      <span><%%= OpenCloset.commify(price) %>원</span>
+    </td> <!-- 대여 가격 -->
+    <td>
+    </td> <!-- 기타 -->
+  </tr>
+</script>
+
+<script id="tpl-row-checkbox-enabled" type="text/html">
+  <tr class="row-checkbox" data-clothes-code="<%%= code %>">
+    <td class="center">
+      <label>
+        <input class="ace" type="checkbox" name="clothes_code" value="<%%= code %>" data-clothes-code="<%%= code %>" data-category="<%%= category %>" checked="checked">
+        <span class="lbl"></span>
+      </label>
+    </td>
+    <td> <%%= count %> </td> <!-- 넘버링 -->
+    <td> <a href="/clothes/<%%= code %>"> <%%= code %> </a> </td> <!-- 옷 -->
+    <td> <span class="order-status label"><%%= status %></span> </td> <!-- 상태 -->
+    <td>
+      <span><%%= categoryStr %></span>
+    </td> <!-- 종류 -->
+    <td>
+      <span><%%= OpenCloset.commify(price) %>원</span>
+    </td> <!-- 대여 가격 -->
+    <td>
+    </td> <!-- 기타 -->
+  </tr>
+</script>
+
+<script id="tpl-overdue-paragraph" type="text/html">
+  <span>
+    연장료 <%%= OpenCloset.commify(order.late_fee) %>원 = <%%= OpenCloset.commify(order.clothes_price) %>원 x <%%= order.overdue %>일 x 20%
+  </span>
+</script>
+
+<div id="modal-rental" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="rentalModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title" id="rentalModalLabel">
+          대여 희망 항목과 포장 항목 확인
+        </h4>
+      </div>
+      <div class="modal-body" style="height: 300px; overflow-y: auto;">
+        <div>
+          <strong>대여 희망 항목과 포장 항목을 다시 한 번 확인합니다.</strong>
+        </div>
+        <div class="space-4"></div>
+        <div>
+          대여 희망 항목:
+          <span class="pre_category"></span>
+        </div>
+        <div>
+          포장 항목:
+          <span class="post_category"></span>
+        </div>
+        <div class="space-4"></div>
+        <div class="rental-caution">
+          대여 희망 항목과 포장 항목이 서로 다릅니다!
+        </div>
+        <div class="rental-unmatch">
+          <p class="rental-emphasis">
+            대여를 계속 진행할까요?
+          </p>
+          <p>
+            ※ 한 번 더 포장 항목을 확인한 후 정확하다면 <strong>대여 진행</strong> 버튼을 눌러 대여를 계속 진행해주세요.
+            포장에 문제가 있다면 <strong>대여 취소</strong> 버튼을 눌러 다시 대여 항목과 대여자를 확인하신 후 대여를 진행해주세요.
+          </p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="btn-rental-modal-cancel" type="button" class="btn btn-danger" >대여 취소</button>
+        <button id="btn-rental-modal-ok"     type="button" class="btn btn-primary">대여 진행</button>
+      </div>
+    </div>
+  </div>
+</div>

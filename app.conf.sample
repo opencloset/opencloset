@@ -121,7 +121,6 @@ my %BOOKING_SLOT = (
         meta => {
             'home'                => { text => '첫 화면',               icon => 'home',      desc => '열린옷장 재고 관리 시스템입니다.', link => '/',          shortcut => '1' },
             'rental'              => { text => '대여',                  icon => 'share',     desc => '어떤 옷을 빌려가나요?',                                  shortcut => '9' },
-            'new-clothes'         => { text => '새 옷',                 icon => 'gift',      desc => '새 옷을 기증 받으셨나요?',                               shortcut => '2' },
             'order'               => { text => '주문서',                icon => 'file',      desc => '지금까지 대여해간 주문서 목록입니다.', link => '/order', shortcut => '8' },
             'order-id'            => { text => '주문 내역',             icon => q{},         desc => '주문서 내역입니다.',        link => '#' },
             'order-detail'        => { text => '주문 내역',             icon => q{},         desc => '주문서 내역입니다.',        link => '#' },
@@ -154,7 +153,6 @@ my %BOOKING_SLOT = (
         },
         items => [
             { id => 'home'        },
-            { id => 'new-clothes' },
             { id => 'clothes'     },
             { id => 'user'        },
             {
@@ -404,4 +402,5 @@ my %BOOKING_SLOT = (
     jandi => {
         hook => $ENV{OPENCLOSET_JANDI_WEBHOOK_URL} || '',
     },
+    redis_url => $ENV{OPENCLOSET_REDIS_URL} || 'redis://localhost:6379',
 };

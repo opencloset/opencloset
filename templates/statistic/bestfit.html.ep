@@ -1,0 +1,150 @@
+<%
+my $_id   = 'stat-bestfit';
+layout 'default',
+page_id     => $_id,
+active_id   => 'stat-bestfit',
+breadcrumbs => [
+  { text => meta_text('stat') },
+  { text => meta_text($_id)   },
+],
+;
+title meta_text($_id);
+use Statistics::Basic;
+
+my %bestfit_count;
+my @orders;
+my %order_clothes;
+my %clothes_mean;
+for my $order ($order_rs->all ) {
+  push @orders, $order;
+  for my $order_detail ( $order->order_details ) {
+    my $clothes = $order_detail->clothes;
+    next unless $clothes;
+    next unless $clothes->category =~ m/^(jacket|skirt|pants)$/;
+    my $clothes_code = trim_clothes_code($clothes);
+    push @{ $order_clothes{ $order->id } }, $clothes;
+    push @{ $clothes_mean{$clothes_code}{$_} }, $order->$_ for qw( height weight bust waist topbelly belly arm leg knee thigh hip foot );
+    ++$bestfit_count{ trim_clothes_code($clothes) };
+  }
+}
+
+$order_rs->reset;
+%>
+
+% for my $order (@orders) {
+  <div class="widget-box">
+    <div class="widget-header widget-header-flat widget-header-small">
+      <h5 class="widget-title">
+        <i class="ace-icon icon-pushpin"></i>
+        <span>주문서:</span>
+        <span>
+          <a href="<%= url_for('/order/' . $order->id) %>"><%= $order->id %></a>
+        </span>
+      </h5>
+      <div class="widget-toolbar no-border"></div>
+    </div>
+    <div class="widget-body">
+      <div class="widget-main">
+        <div class="row">
+          <div class="col-sm-12">
+            <div class="desc">대여 의류 정보:</div>
+            <div class="clothes-table">
+              <table class="table table-striped table-bordered table-hover">
+                <thead>
+                  <tr>
+                    <th>품번</th>
+                    <th>종류</th>
+                    <th>어울림 횟수</th>
+                    <th>기증자</th>
+                    <th>가슴</th>
+                    <th>허리</th>
+                    <th>엉덩이</th>
+                    <th>윗배</th>
+                    <th>배꼽</th>
+                    <th>허벅지</th>
+                    <th>팔</th>
+                    <th>길이</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  % for my $clothes ( @{ $order_clothes{ $order->id } } ) {
+                    % my $clothes_code = trim_clothes_code($clothes);
+                    <tr>
+                      <td>
+                        <a href="<%= url_for('/clothes/' . $clothes_code) %>"><%= $clothes_code %></a>
+                      </td>
+                      <td>
+                        <span class="category" data-category="<%= $clothes->category %>"><%= $clothes->category %></span>
+                      </td>
+                      <td><%= $bestfit_count{$clothes_code} %></td>
+                      <td>
+                        <a href="<%= url_for('/user/' . $clothes->donation->user->id) %>"><%= $clothes->donation->user->name %></a>
+                      </td>
+                      <td><%= $clothes->bust %></td>
+                      <td><%= $clothes->waist %></td>
+                      <td><%= $clothes->hip %></td>
+                      <td><%= $clothes->topbelly %></td>
+                      <td><%= $clothes->belly %></td>
+                      <td><%= $clothes->thigh %></td>
+                      <td><%= $clothes->arm %></td>
+                      <td><%= $clothes->length %></td>
+                    </tr>
+                  % }
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-sm-12">
+            <div class="desc">대여자 평균 신체 치수:</div>
+            <div class="customer-table">
+              <table class="table table-striped table-bordered table-hover">
+                <thead>
+                  <tr>
+                    <th>품번</th>
+                    <th>키</th>
+                    <th>몸무게</th>
+                    <th>가슴</th>
+                    <th>허리</th>
+                    <th>윗배</th>
+                    <th>배꼽</th>
+                    <th>팔</th>
+                    <th>다리</th>
+                    <th>무릎</th>
+                    <th>허벅지</th>
+                    <th>엉덩이</th>
+                    <th>발</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  % for my $clothes ( @{ $order_clothes{ $order->id } } ) {
+                    % my $clothes_code = trim_clothes_code($clothes);
+                    <tr>
+                      <td>
+                        <a href="<%= url_for('/clothes/' . $clothes_code) %>"><%= $clothes_code %></a>
+                      </td>
+                      <td><%= sprintf '%.1f', Statistics::Basic::mean( @{ $clothes_mean{$clothes_code}{height}   } )->query %></td>
+                      <td><%= sprintf '%.1f', Statistics::Basic::mean( @{ $clothes_mean{$clothes_code}{weight}   } )->query %></td>
+                      <td><%= sprintf '%.1f', Statistics::Basic::mean( @{ $clothes_mean{$clothes_code}{bust}   } )->query %></td>
+                      <td><%= sprintf '%.1f', Statistics::Basic::mean( @{ $clothes_mean{$clothes_code}{waist}   } )->query %></td>
+                      <td><%= sprintf '%.1f', Statistics::Basic::mean( @{ $clothes_mean{$clothes_code}{topbelly}   } )->query %></td>
+                      <td><%= sprintf '%.1f', Statistics::Basic::mean( @{ $clothes_mean{$clothes_code}{belly}   } )->query %></td>
+                      <td><%= sprintf '%.1f', Statistics::Basic::mean( @{ $clothes_mean{$clothes_code}{arm}   } )->query %></td>
+                      <td><%= sprintf '%.1f', Statistics::Basic::mean( @{ $clothes_mean{$clothes_code}{leg}   } )->query %></td>
+                      <td><%= sprintf '%.1f', Statistics::Basic::mean( @{ $clothes_mean{$clothes_code}{knee}   } )->query %></td>
+                      <td><%= sprintf '%.1f', Statistics::Basic::mean( @{ $clothes_mean{$clothes_code}{thigh}   } )->query %></td>
+                      <td><%= sprintf '%.1f', Statistics::Basic::mean( @{ $clothes_mean{$clothes_code}{hip}   } )->query %></td>
+                      <td><%= sprintf '%.1f', Statistics::Basic::mean( @{ $clothes_mean{$clothes_code}{foot}   } )->query %></td>
+                    </tr>
+                  % }
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="space-6"></div>
+% }

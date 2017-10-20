@@ -20,7 +20,6 @@ requires 'List::Util';
 requires 'Mojo::Redis2';
 requires 'Mojolicious','5.48';
 requires 'Mojolicious::Plugin::Authentication';
-requires 'Mojolicious::Plugin::HamlRenderer';
 requires 'Mojolicious::Plugin::Validator';
 requires 'Parcel::Track', '0.005';
 requires 'Parcel::Track::KR::CJKorea';

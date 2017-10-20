@@ -1,0 +1,417 @@
+<%
+my $_id = 'clothes-code';
+layout 'default',
+page_id     => $_id,
+active_id   => 'clothes',
+breadcrumbs => [
+  { text => meta_text('clothes'), link => url_for( meta_link('clothes') ) },
+  { text => meta_text($_id)      },
+],
+jses  => [
+  '/lib/bootstrap3-editable/js/bootstrap-editable.min.js',
+  '/lib/chosen/js/chosen.jquery.min.js',
+  '/components/dropzone/dist/min/dropzone.min.js',
+],
+csses => [
+  '/lib/bootstrap3-editable/css/bootstrap-editable.css',
+  '/lib/chosen/css/chosen.min.css',
+  '/components/dropzone/dist/min/dropzone.min.css',
+],
+;
+use OpenCloset::Constants::Measurement qw/$HEIGHT $WEIGHT $TOPBELLY $BUST $ARM $BELLY $THIGH $HIP $WAIST $LEG $KNEE $FOOT $NECK $LENGTH $CUFF/;
+my $clothes_code = trim_clothes_code($clothes);
+title meta_text($_id) . qq{: $clothes_code};
+use OpenCloset::Constants::Status qw/$DISCARD/;
+use DateTime;
+my $status_id = $clothes->status->id;
+my $now_dt          = DateTime->now( time_zone =>  $config->{timezone});
+my $system_start_dt = DateTime->new( %{ $config->{start_date} }, time_zone => $config->{timezone} );
+%>
+
+<div>
+  <div id="user-profile-1" class="user-profile row">
+    <!-- left -->
+    <div class="col-xs-12 col-sm-3 center">
+      <div>
+        %= include 'partials/dropzone', name => 'photo', action => url_for('/api/photos'), id => 'clothes-dropzone', thumbnail => oavatar_url($clothes_code, size => 120)
+        <div class="space-4"></div>
+        <div class="width-80 label label-info label-xlg arrowed-in arrowed-in-right">
+          <div class="inline position-relative">
+            <span class="white clothes-code">
+              <a href="<%= oavatar_url($clothes_code) . '/images/' %>" target="_blank">
+                <i class="icon-external-link"></i>
+                %= $clothes_code
+              </a>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="space-6"></div>
+      <div class="hr hr12 dotted"></div>
+      <div class="clearfix">
+        <div class="grid2">
+          <span class="bigger-175 blue">
+            <a href="<%= url_for('/user/' . $clothes->donation->user->id) %>"><%= $clothes->donation->user->name %></a>
+          </span>
+          <br>
+          기증자
+        </div>
+
+        <div class="grid2">
+          <span class="bigger-175 blue"><%= $rented_count %></span>
+          <br>
+          빌린 횟수
+        </div>
+
+        <div class="grid2">
+          <span class="bigger-175 blue"><%= $clothes->rentable_duration($now_dt, $system_start_dt) %></span>
+          <br>
+          대여가능 일
+        </div>
+
+        <div class="grid2">
+          <span class="bigger-175 blue"><%= $clothes->rented_duration() %></span>
+          <br>
+          대여율
+        </div>
+      </div>
+      <div class="hr hr16 dotted"></div>
+      <div>
+        <a href="<%= url_for('/clothes/' . $clothes_code . '/pdf') %>" target="_blank">의류 태그 출력</a>
+      </div>
+      <div class="hr hr16 dotted"></div>
+      % if (my ($first) = $clothes_code =~ /^(J|P|K)/) {
+        <h2>상하의 셋트</h2>
+        % if ($suit) {
+          % my $set = $first eq 'J' ? $suit->code_bottom : $suit->code_top;
+          % my $set_code = trim_clothes_code($set);
+          <h4><a href="<%= url_for('/clothes/' . $set_code) %>"><%= $set_code %></a></h4>
+          <div class="not-suit">
+            <a class="btn btn-danger btn-xs btn-not-suit" href="<%= url_for('/api/suit/' . $set_code) %>">셋트아님</a>
+          </div>
+        % } else {
+          <form id="form-suit" class="form-inline" action="<%= url_for('/api/suit') %>" method="POST">
+            <input name="<%= $first eq 'J' ? 'code_top' : 'code_bottom' %>" type="hidden" value="<%= $clothes_code %>">
+            <span class="input-group-btn">
+              <button class="btn btn-sm btn-default" type="submit">등록</button>
+            </span>
+          </form>
+        % }
+        <hr>
+      % }
+      <h3>함께 기증된 의류</h3>
+      <ul id="list-clothes-group" class="text-left">
+        % for my $c (@$clothes_group) {
+          % my $c_code = trim_clothes_code($c);
+          <li class="clothes-group-item">
+            % if (my ($first) = $clothes_code =~ /^(J|P|K)/) {
+              % unless ($suit) {
+                % if ($first eq 'J' && $c_code =~ /^(P|K)/) {
+                  % if (my $s = $c->suit_code_bottom) {
+                    % my $top = $s->code_top;
+                    <a href="<%= url_for('/clothes/' . $c_code) %>"><%= $c_code %></a>
+                    %= '- ' . $c->category
+                    <a href="<%= url_for('/clothes/' . $top->code) %>"><%= $top->code %></a>
+                  % } else {
+                    <div class="checkbox">
+                      <input name="" type="checkbox" value="">
+                      <a href="<%= url_for('/clothes/' . $c_code) %>"><%= $c_code %></a>
+                      %= '- ' . $c->category
+                    </div>
+                  % }
+                % } elsif ($first =~ /P|K/ && $c_code =~ /^J/) {
+                % if (my $s = $c->suit_code_top) {
+                  % my $bottom = $s->code_bottom;
+                  <a href="<%= url_for('/clothes/' . $c_code) %>"><%= $c_code %></a>
+                  %= '- ' . $c->category
+                  <a href="<%= url_for('/clothes/' . $bottom->code) %>"><%= $bottom->code %></a>
+                % } else {
+                  <div class="checkbox">
+                    <input name="" type="checkbox" value="">
+                    <a href="<%= url_for('/clothes/' . $c_code) %>"><%= $c_code %></a>
+                    %= '- ' . $c->category
+                  </div>
+                % }
+              % } else {
+                <a href="<%= url_for('/clothes/' . $c_code) %>"><%= $c_code %></a>
+                %= '- ' . $c->category
+              % }
+            % } else {
+              <a href="<%= url_for('/clothes/' . $c_code) %>"><%= $c_code %></a>
+              %= '- ' . $c->category
+            % }
+        % } else {
+            <a href="<%= url_for('/clothes/' . $c_code) %>"><%= $c_code %></a>
+            %= '- ' . $c->category
+        % }
+          </li>
+        % }
+      </ul>
+      <hr>
+    </div>
+    <!-- right -->
+    <div class="col-xs-12 col-sm-9">
+      <div class="widget-box transparent">
+        <!-- header -->
+        <div class="widget-header widget-header-small">
+          <h4 class="blue smaller">
+            <i class="icon-bar-chart orange"></i>
+            의류 정보
+          </h4>
+        </div>
+        <!-- body -->
+        <div class="widget-body">
+          <div class="widget-main padding-8">
+            <table class="table table-striped table-bordered">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>BF</th>
+                  <th>키</th>
+                  <th>몸무게</th>
+                  <th>윗배</th>
+                  <th>가슴</th>
+                  <th>팔</th>
+                  <th>배꼽</th>
+                  <th>허벅지</th>
+                  <th>엉덩이</th>
+                  <th>허리</th>
+                  <th>다리</th>
+                  <th>무릎</th>
+                  <th>발</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  % map { $average_size->{$_} = sprintf "%.1f", $average_size->{$_} } keys %$average_size;
+                  <td>
+                    <span>Avg.</span>
+                  </td>
+                  <td></td>
+                  <%
+                  my %PART_LABEL_MAP = (
+                    $HEIGHT => 'label-success',
+                    $WEIGHT => 'label-success',
+                    $TOPBELLY => 'label-info',
+                    $BUST => 'label-info',
+                    $ARM => 'label-info',
+                    $BELLY => 'label-info',
+                    $THIGH => 'label-warning',
+                    $HIP => 'label-warning',
+                    $WAIST => 'label-warning',
+                    $LEG => 'label-warning',
+                    $KNEE => 'label-warning',
+                    $FOOT => 'label-warning',
+                  );
+                  %>
+                  % for my $part ($HEIGHT, $WEIGHT, $TOPBELLY, $BUST, $ARM, $BELLY, $THIGH, $HIP, $WAIST, $LEG, $KNEE, $FOOT) {
+                    <td>
+                      <span class="label label-success <%= $PART_LABEL_MAP{$part} %>"><%= $average_size->{$part} || '' %></span>
+                    </td>
+                  % }
+                </tr>
+                % my $recent_sizes_count = 0;
+                % for my $size (@$recent_sizes) {
+                  <tr>
+                    <td>
+                      <span><%= ++$recent_sizes_count %></span>
+                    </td>
+                    <td>
+                      <span><%= $size->{bestfit} ? 'v' : q{} %></span>
+                    </td>
+                    % for my $part ($HEIGHT, $WEIGHT, $TOPBELLY, $BUST, $ARM, $BELLY, $THIGH, $HIP, $WAIST, $LEG, $KNEE, $FOOT) {
+                      <td>
+                        <span class="label <%= $PART_LABEL_MAP{$part} %>" title="<%= $part %>"><%= $size->{$part} || q{} %></span>
+                      </td>
+                    % }
+                  </tr>
+                % }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="widget-box transparent">
+        <!-- header -->
+        <div class="widget-header widget-header-small">
+          <h4 class="blue smaller">
+            <i class="icon-ok orange"></i>
+            어울림 정보
+          </h4>
+        </div>
+        <!-- body -->
+        <div class="widget-body">
+          <div class="widget-main padding-8">
+            <table class="table table-striped table-bordered">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>주문서</th>
+                  <th>키</th>
+                  <th>몸무게</th>
+                  <th>윗배</th>
+                  <th>가슴</th>
+                  <th>팔</th>
+                  <th>배꼽</th>
+                  <th>허벅지</th>
+                  <th>엉덩이</th>
+                  <th>허리</th>
+                  <th>다리</th>
+                  <th>무릎</th>
+                  <th>발</th>
+                </tr>
+              </thead>
+              <tbody>
+                % my $bestfit_sizes_count = 0;
+                % for my $size (@$bestfit_sizes) {
+                  <tr>
+                    <td>
+                      <span><%= ++$bestfit_sizes_count %></span>
+                    </td>
+                    <td>
+                      <span>
+                        <a href="<%= url_for('/order/' , $size->{order_id}) %>"><%= $size->{order_id} %></a>
+                      </span>
+                    </td>
+                    % for my $part ($HEIGHT, $WEIGHT, $TOPBELLY, $BUST, $ARM, $BELLY, $THIGH, $HIP, $WAIST, $LEG, $KNEE, $FOOT) {
+                      <td>
+                        <span class="label <%= $PART_LABEL_MAP{$part} %>" title="<%= $part %>"><%= $size->{$part} || q{} %></span>
+                      </td>
+                    % }
+                  </tr>
+                % }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="widget-box transparent">
+        <!-- header -->
+        <div class="widget-header widget-header-small">
+          <h4 class="blue smaller">
+            <i class="icon-female orange"></i>
+            의류 정보
+          </h4>
+        </div>
+        <!-- body -->
+        <div class="widget-body">
+          <div class="widget-main padding-8">
+            <div class="profile-user-info profile-user-info-striped">
+              <div id="profile-clothes-info-data" data-pk="<%= $clothes_code %>" data-url="<%= url_for( '/api/clothes/'. $clothes_code . '.json' ) %>">
+                <div class="profile-info-row">
+                  <div class="profile-info-name">품번</div>
+                  <div class="profile-info-value">
+                    <span id="clothes-code" class="clothes-code"><%= $clothes_code %></span>
+                  </div>
+                </div>
+
+                <div class="profile-info-row">
+                  <div class="profile-info-name">상태</div>
+                  <div class="profile-info-value">
+                    <span id="clothes-status_id"><%= $clothes->status->name %></span>
+                  </div>
+                </div>
+
+                % if ($status_id == $DISCARD) {
+                  % my $dc = $clothes->discard_clothes;
+                  % my $discard_to = $dc ? $dc->discard_to : '';
+                  % my $comment    = $dc ? $dc->comment : '';
+                  <div class="profile-info-row">
+                    <div class="profile-info-name">폐기장소</div>
+                    <div class="profile-info-value">
+                      <span id="clothes-discard-to" class="editable" data-name="discard_to" data-value="<%= $discard_to %>" data-clothes-code="<%= $clothes_code %>"></span>
+                    </div>
+                  </div>
+
+                  <div class="profile-info-row">
+                    <div class="profile-info-name">폐기사유</div>
+                    <div class="profile-info-value">
+                      <span id="clothes-discard-comment" class="editable" data-name="comment" data-value="<%= $comment %>" data-clothes-code="<%= $clothes_code %>"></span>
+                    </div>
+                  </div>
+                % }
+
+                <div class="profile-info-row">
+                  <div class="profile-info-name">종류</div>
+                  <div class="profile-info-value">
+                    <span id="clothes-category" class="editable" data-name="category" data-value="<%= $clothes->category %>"></span>
+                  </div>
+                </div>
+
+                <div class="profile-info-row">
+                  <div class="profile-info-name">성별</div>
+                  <div class="profile-info-value">
+                    <span id="clothes-gender" class="editable" data-name="gender" data-value="<%= $clothes->gender %>"></span>
+                  </div>
+                </div>
+
+                <div class="profile-info-row">
+                  <div class="profile-info-name">색상</div>
+                  <div class="profile-info-value">
+                    <span id="clothes-color" class="editable" data-name="color" data-value="<%= $clothes->color %>"></span>
+                  </div>
+                </div>
+
+                <div class="profile-info-row">
+                  <div class="profile-info-name">설명</div>
+                  <div class="profile-info-value">
+                    <span id="clothes-comment" class="editable" data-name="comment" data-value="<%= $clothes->comment %>"></span>
+                  </div>
+                </div>
+
+                % for my $part ($NECK, $BUST, $WAIST, $HIP, $TOPBELLY, $BELLY, $THIGH, $ARM, $LENGTH, $CUFF) {
+                  <div class="profile-info-row">
+                    <div class="profile-info-name"><%= $OpenCloset::Constants::Measurement::LABEL_MAP{$part} %></div>
+                    <div class="profile-info-value">
+                      <span id="clothes-<%= $part %>" class="editable" data-name="<%= $part %>" data-value="<%= $clothes->$part %>"></span>
+                    </div>
+                  </div>
+                % }
+
+                <div class="profile-info-row">
+                  <div class="profile-info-name">태그</div>
+                  <div class="profile-info-value">
+                    <select id="clothes-tag" class="chosen-select tag-input-style" name="" data-placeholder="태그를 선택하세요" data-clothes-code="<%= trim_clothes_code($clothes) %>" data-base-url="<%= url_for('/api') %>" multiple>
+                      % no warnings 'experimental';
+                      % my $clothes_tag_ids = [ map { $_->id } $clothes->tags ];
+                      % while ( my $tag = $tag_rs->next ) {
+                        % if ( $tag->id ~~ $clothes_tag_ids ) {
+                          <option value="<%= $tag->id %>" selected><%= $tag->name %></option>
+                        % } else {
+                          <option value="<%= $tag->id %>"><%= $tag->name %></option>
+                        % }
+                      % }
+                    </select>
+                  </div>
+                </div>
+
+                <div class="profile-info-row">
+                  <div class="profile-info-name">액션</div>
+                  <div class="profile-info-value">
+                    <button id="btn-delete" class="btn btn-danger">삭제</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="space-20"></div>
+      <%
+      my @search_params = (
+        {
+          'order.parent_id' => undef,
+        },
+        {
+          join     => [qw/ order /],
+          order_by => { -desc => 'order.rental_date' },
+        },
+      );
+      %>
+      %= include 'partials/recent-orders', user => undef, orders => [ map { $_->order } $clothes->order_details(@search_params) ]
+    </div>
+  </div>
+</div>

@@ -4,6 +4,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Changed
+- haml template 을 ep 로 변경
+
+### Removed
+- 의류등록 route 및 리소스 삭제
+
 ## [v1.11.0] - Thu, 21 Sep 2017 12:28:35 +0900
 
 ### Fixed
