@@ -215,12 +215,12 @@ my %BOOKING_SLOT = (
     },
 
     'opencloset-sms-notifier.pl' => {
-        fake_sms   => 0,
-        delay      => 10,
-        send_delay => 1,
-        base_url   => "http://127.0.0.1:$PORT/api",
-        email      => $ENV{OPENCLOSET_SMS_NOTIFIER_EMAIL} || q{},
-        password   => $ENV{OPENCLOSET_SMS_NOTIFIER_PASSWORD} || q{},
+        fake_sms   => $ENV{OPENCLOSET_SMS_NOTIFIER_FAKE_SMS}   // 0,
+        delay      => $ENV{OPENCLOSET_SMS_NOTIFIER_DELAY}      || 10,
+        send_delay => $ENV{OPENCLOSET_SMS_NOTIFIER_SEND_DELAY} || 1,
+        base_url   => $ENV{OPENCLOSET_SMS_NOTIFIER_BASE_URL}   || "http://127.0.0.1:$PORT/api",
+        email      => $ENV{OPENCLOSET_SMS_NOTIFIER_EMAIL}      || q{},
+        password   => $ENV{OPENCLOSET_SMS_NOTIFIER_PASSWORD}   || q{},
         sms        => \%SMS,
     },
 

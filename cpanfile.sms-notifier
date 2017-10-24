@@ -1,0 +1,12 @@
+requires 'FindBin';
+requires 'HTTP::Tiny';
+requires 'JSON';
+requires 'Mojolicious'; # Mojo::JSON
+requires 'SMS::Send';
+requires 'SMS::Send::KR::APIStore';
+requires 'SMS::Send::KR::CoolSMS';
+requires 'Unicode::GCString';
+requires 'Unicode::Normalize';
+
+# cpan.theopencloset.net
+requires 'OpenCloset::Config';
