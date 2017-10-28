@@ -84,6 +84,7 @@ sub startup {
     $self->_public_routes;
     $self->_private_routes;
     $self->_2depth_private_routes;
+    $self->_hooks;
 
     $self->secrets( $self->defaults->{secrets} );
     $self->sessions->cookie_domain( $self->defaults->{cookie_domain} );
@@ -389,6 +390,23 @@ sub _2depth_private_routes {
     $income->get('/')->to('Income#today');
     $income->get('/logout')->to('Income#logout');
     $income->get('/:ymd')->to('Income#ymd')->name('income.ymd');
+}
+
+sub _hooks {
+    my $self = shift;
+
+    ## Emitted right before the static file server and router start their work.
+    ## Very useful for rewriting incoming requests and other preprocessing tasks.
+    $self->hook(
+        before_dispatch => sub {
+            my $c   = shift;
+            my $app = $c->app;
+
+            my $domain = $app->config->{cookie_domain};
+            my ($host) = split /:/, $c->req->headers->host;
+            $app->sessions->cookie_domain( $host =~ m/$domain/ ? $domain : $host );
+        }
+    );
 }
 
 1;
