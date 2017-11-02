@@ -1,0 +1,159 @@
+<%
+my $_id = 'booking';
+layout 'default',
+page_id     => $_id,
+jses  => [
+  '/components/moment/min/moment-with-locales.min.js',
+  '/lib/bootstrap3-editable/js/bootstrap-editable.min.js',
+],
+csses => [ '/lib/bootstrap3-editable/css/bootstrap-editable.css'   ],
+;
+title meta_text($_id);
+
+my @times = qw(
+  10:00
+  10:30
+  11:00
+  11:30
+  12:00
+  12:30
+  13:00
+  13:30
+  14:00
+  14:30
+  15:00
+  15:30
+  16:00
+  16:30
+  17:00
+  17:30
+  18:00
+  18:30
+  19:00
+  19:30
+  20:00
+  20:30
+  21:00
+  21:30
+  22:00
+);
+my %booking_times;
+while ( my $booking = $booking_rs->next ) {
+  my $hm = sprintf '%02d:%02d', $booking->date->hour, $booking->date->minute;
+  $booking_times{$hm}{$booking->gender}{booking} = $booking;
+  my @users = $booking->users;
+  for my $user (@users) {
+    my $gender = $user->user_info->gender;
+    $booking_times{$hm}{$gender}{users} = [] unless $booking_times{$hm}{$gender}{users};
+    push @{ $booking_times{$hm}{$gender}{users} }, $user;
+  }
+}
+%>
+
+<div class="search">
+  <form id="search-form" action="">
+    <div class="input-group">
+      <input id="query" class="form-control" name="" type="text" value="" placeholder="날짜를 고르세요" data-date-format="yyyy-mm-dd">
+    </div>
+  </form>
+</div>
+
+<div class="space-8"></div>
+
+<div id="booking-table">
+  <h2><%= $dt_start->ymd %> 예약 현황</h2>
+  <div class="space-4"></div>
+  <button id="btn-slot-open" class="btn btn btn-sm btn-success" type="button" data-date-ymd="<%= $dt_start->ymd %>">
+    <i class="bigger-110"></i>
+    예약 활성화
+  </button>
+  <div class="space-4"></div>
+  <div id="booking-data" data-url="<%= url_for('/api/gui/booking') %>"></div>
+  <table class="table table-striped table-bordered table-hover">
+    <thead>
+      <tr>
+        <th rowspan="2">시간</th>
+        <th colspan="2">남자</th>
+        <th colspan="2">여자</th>
+      </tr>
+      <tr>
+        <th class="slot">제한</th>
+        <th class="name">이름</th>
+        <th class="slot">제한</th>
+        <th class="name">이름</th>
+      </tr>
+    </thead>
+    <tbody>
+      % for my $time (@times) {
+        <tr>
+          <td><%= $time %></td>
+          % my $male   = $booking_times{$time}{male};
+          % my $female = $booking_times{$time}{female};
+          % for my $data ( $booking_times{$time}{male}, $booking_times{$time}{female} ) {
+            % my $booking = $data->{booking};
+            % my $users   = $data->{users};
+            <td>
+              % if ($booking) {
+                <span class="editable" data-pk="<%= $booking->id %>" data-name="slot" data-value="<%= $booking->slot %>"></span>
+              % } else {
+                <span class="label label-warning">CLOSED</span>
+              % }
+            </td>
+            <td>
+              % if ($users) {
+                % for my $u (@$users) {
+                  % my $order = $booking->orders({ user_id => $u->id })->first;
+                  % next unless $order;
+                  % my $user_info = $u->user_info;
+                  % my $booking_date = $booking->date;
+                  % my $msg = sprintf("[열린옷장] %s님 %s 방문 예약이 취소되었습니다. 감사합니다.", $u->name, $booking_date->strftime('%m월 %d일 %H시 %M분'));
+                  % my $url = url_for( sprintf("/api/order/%d/booking.json", $order->id) );
+                  <span class="dropdown" data-gender="<%= $user_info->gender %>" data-ymd="<%= $dt_start->ymd %>" data-url="<%= $url %>" data-user-name="<%= $u->name %>" data-current-booking-id="<%= $booking->id %>">
+                    <a href="#" data-toggle="dropdown"><%= $u->name %></a>
+                    <ul class="dropdown-menu">
+                      <li class="dropdown-header"><%= $u->name %></li>
+                      <li class="divider" role="separator"></li>
+                      <li>
+                        <a href="<%= url_for( '/user/' . $u->id ) %>">사용자 정보</a>
+                      </li>
+                      <li>
+                        <a class="order-cancel" href="<%= url_for('/api/order/' . $order->id . '/booking.json') %>" title="msg" data-phone="<%= $user_info->phone %>" data-name="<%= $u->name %>">
+                          <i class="icon-warning-sign red"></i>
+                          예약 취소
+                        </a>
+                      </li>
+                      <li class="divider" role="separator"></li>
+                      <li class="dropdown-header change-booking">예약 시간 변경</li>
+                    </ul>
+                  </span>
+                % }
+              % }
+            </td>
+          % }
+        </tr>
+      % }
+    </tbody>
+  </table>
+</div>
+
+<div id="modal-booking" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="bookingModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title" id="bookingModalLabel">
+          예약 시간 변경
+        </h4>
+      </div>
+      <div class="modal-body">
+        <div class="space-8"></div>
+        <div>
+          <span id="modal-user-name">user_name</span>님
+          <span id="modal-booking-date">booking_date</span>로 예약이 변경되었습니다.
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="btn-booking-modal-ok" type="button" class="btn btn-primary">확인</button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,167 @@
+<%
+my $_id = 'stat-visitor';
+layout 'default',
+  page_id     => $_id,
+  jses  => [ '/lib/bootstrap3-editable/js/bootstrap-editable.min.js' ],
+  csses => [ '/lib/bootstrap3-editable/css/bootstrap-editable.css'   ],
+  ;
+title meta_text($_id);
+%>
+
+<div>
+  <a href="<%= url_for('/stat/visitor/online') %>">온라인 대여자 통계</a>
+</div>
+
+<div class="search">
+  <form id="search-form" action="">
+    <div class="input-group">
+      <input id="query" class="form-control" name="" type="text" value="" placeholder="날짜를 고르세요" data-date-format="yyyy-mm-dd">
+    </div>
+  </form>
+</div>
+
+<div class="space-8"></div>
+
+<div id="status-day">
+  <h2>일별</h2>
+  <div class="space-8"></div>
+  <table class="table table-striped table-bordered table-hover">
+    <thead>
+      <tr>
+        <th rowspan="2">일</th>
+        <th colspan="3">예약자</th>
+        <th colspan="3">방문자</th>
+        <th colspan="3">미방문자</th>
+        <th colspan="3">Bestfit</th>
+        <th colspan="3">대여자</th>
+      </tr>
+      <tr>
+        <th>합</th>
+        <th>남</th>
+        <th>녀</th>
+        <th>합</th>
+        <th>남</th>
+        <th>녀</th>
+        <th>합</th>
+        <th>남</th>
+        <th>녀</th>
+        <th>합</th>
+        <th>남</th>
+        <th>녀</th>
+        <th>합</th>
+        <th>남</th>
+        <th>녀</th>
+      </tr>
+    </thead>
+    <tbody>
+      % for my $row ( @{ $visitor->{daily} } ) {
+        <tr>
+          <td>
+            <span>
+              <a href="<%= url_for( '/order' )->query( 'booking_ymd' => $row->{label} ) %>"><%= $row->{label} %></a>
+            </span>
+          </td>
+          % for my $item (qw/reserved visited unvisited bestfit rented/) {
+            % for my $gender ('', '_male', '_female') {
+              <td><%= $row->{$item . $gender} %></td>
+            % }
+          % }
+        </tr>
+      % }
+    </tbody>
+  </table>
+</div>
+
+<div id="status-week">
+  <h2>주별 방문자</h2>
+  <div class="space-8"></div>
+
+  <table class="table table-striped table-bordered table-hover">
+    <thead>
+      <tr>
+        <th rowspan="2">주차(시작일 ~ 종료일)</th>
+        <th colspan="3">예약자</th>
+        <th colspan="3">방문자</th>
+        <th colspan="3">미방문자</th>
+        <th colspan="3">Bestfit</th>
+        <th colspan="3">대여자</th>
+      </tr>
+      <tr>
+        <th>합</th>
+        <th>남</th>
+        <th>녀</th>
+        <th>합</th>
+        <th>남</th>
+        <th>녀</th>
+        <th>합</th>
+        <th>남</th>
+        <th>녀</th>
+        <th>합</th>
+        <th>남</th>
+        <th>녀</th>
+        <th>합</th>
+        <th>남</th>
+        <th>녀</th>
+      </tr>
+    </thead>
+    <tbody>
+      % for my $row ( reverse @{ $visitor->{weekly} } ) {
+        <tr>
+          <td><%= $row->{label} || 0 %></td>
+          % for my $item (qw/reserved visited unvisited bestfit rented/) {
+            % for my $gender ('', '_male', '_female') {
+              <td><%= $row->{'total_' . $item . $gender} || 0 %></td>
+            % }
+          % }
+        </tr>
+      % }
+    </tbody>
+  </table>
+</div>
+
+<div id="status-month">
+  <h2>월별 방문자</h2>
+  <div class="space-8"></div>
+
+  <table class="table table-striped table-bordered table-hover">
+    <thead>
+      <tr>
+        <th rowspan="2">연월</th>
+        <th colspan="3">예약자</th>
+        <th colspan="3">방문자</th>
+        <th colspan="3">미방문자</th>
+        <th colspan="3">Bestfit</th>
+        <th colspan="3">대여자</th>
+      </tr>
+      <tr>
+        <th>합</th>
+        <th>남</th>
+        <th>녀</th>
+        <th>합</th>
+        <th>남</th>
+        <th>녀</th>
+        <th>합</th>
+        <th>남</th>
+        <th>녀</th>
+        <th>합</th>
+        <th>남</th>
+        <th>녀</th>
+        <th>합</th>
+        <th>남</th>
+        <th>녀</th>
+      </tr>
+    </thead>
+    <tbody>
+      % for my $row ( @{ $visitor->{monthly} } ) {
+        <tr>
+          <td><%= $row->{ym} %></td>
+          % for my $item (qw/reserved visited unvisited bestfit rented/) {
+            % for my $gender ('', '_male', '_female') {
+              <td><%= $row->{'total_' . $item . $gender} || 0 %></td>
+            % }
+          % }
+        </tr>
+      % }
+    </tbody>
+  </table>
+</div>

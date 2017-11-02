@@ -20,7 +20,6 @@ requires 'List::Util';
 requires 'Mojo::Redis2';
 requires 'Mojolicious','5.48';
 requires 'Mojolicious::Plugin::Authentication';
-requires 'Mojolicious::Plugin::HamlRenderer';
 requires 'Mojolicious::Plugin::Validator';
 requires 'Parcel::Track', '0.005';
 requires 'Parcel::Track::KR::CJKorea';
@@ -44,7 +43,7 @@ requires 'experimental';
 
 # from opencloset cpan
 requires 'Iamport::REST::Client';
-requires 'OpenCloset::API',                     'v0.1.0';
+requires 'OpenCloset::API',                     'v0.1.1';
 requires 'OpenCloset::Calculator::LateFee',     'v0.3.0';
 requires 'OpenCloset::Common',                  'v0.1.0';
 requires 'OpenCloset::Config',                  '0.002';

@@ -1,7 +1,7 @@
 package OpenCloset::Web;
 use Mojo::Base 'Mojolicious';
 
-use version; our $VERSION = qv("v1.11.0");
+use version; our $VERSION = qv("v1.12.0");
 
 use CHI;
 use DateTime;
@@ -77,7 +77,6 @@ sub startup {
     );
 
     $self->plugin('validator');
-    $self->plugin('haml_renderer');
     $self->plugin('OpenCloset::Plugin::Helpers');
     $self->plugin('OpenCloset::Web::Plugin::Helpers');
 
@@ -85,6 +84,7 @@ sub startup {
     $self->_public_routes;
     $self->_private_routes;
     $self->_2depth_private_routes;
+    $self->_hooks;
 
     $self->secrets( $self->defaults->{secrets} );
     $self->sessions->cookie_domain( $self->defaults->{cookie_domain} );
@@ -318,7 +318,6 @@ sub _private_routes {
     ## for prevent deep recusion with helper 'search_clothes'
     $r->get('/user/:id/search/clothes')->to('user#user_search_clothes');
 
-    $r->get('/new-clothes')->to('clothes#add');
     $r->get('/clothes')->to('clothes#index');
     $r->get('/clothes/:code')->to('clothes#clothes');
     $r->get('/clothes/:code/pdf')->to('clothes#clothes_pdf');
@@ -333,7 +332,6 @@ sub _private_routes {
 
     $r->get('/order')->to('order#index');
     $r->post('/order')->to('order#create');
-    $r->get('/order/:id')->to('order#order');
     $r->post('/order/:id/update')->to('order#update');
     $r->post('/order/:id/coupon')->to('order#create_coupon');
 
@@ -392,6 +390,23 @@ sub _2depth_private_routes {
     $income->get('/')->to('Income#today');
     $income->get('/logout')->to('Income#logout');
     $income->get('/:ymd')->to('Income#ymd')->name('income.ymd');
+}
+
+sub _hooks {
+    my $self = shift;
+
+    ## Emitted right before the static file server and router start their work.
+    ## Very useful for rewriting incoming requests and other preprocessing tasks.
+    $self->hook(
+        before_dispatch => sub {
+            my $c   = shift;
+            my $app = $c->app;
+
+            my $domain = $app->config->{cookie_domain};
+            my ($host) = split /:/, $c->req->headers->host;
+            $app->sessions->cookie_domain( $host =~ m/$domain/ ? $domain : $host );
+        }
+    );
 }
 
 1;

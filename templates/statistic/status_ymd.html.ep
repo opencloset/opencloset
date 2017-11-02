@@ -1,0 +1,296 @@
+<%
+my $_id = 'stat-status';
+layout 'default',
+page_id     => $_id,
+jses  => [ '/lib/bootstrap3-editable/js/bootstrap-editable.min.js' ],
+csses => [ '/lib/bootstrap3-editable/css/bootstrap-editable.css'   ],
+;
+title meta_text($_id);
+
+use List::Util;
+use Statistics::Basic;
+
+my @status_names = (qw/대기 치수측정 의류준비 탈의 수선 포장 결제/);
+my %status;
+while ( my $order = $order_rs->next ) {
+  my %analyze = $order->analyze_order_status_logs;
+  my $booking_date = $order->booking->date->ymd;
+  push @{ $status{$booking_date} } , { order => $order, analyze => \%analyze };
+}
+%>
+
+<div class="search">
+  <form id="search-form" action="">
+    <div class="input-group">
+      <input id="query" class="form-control" name="" type="text" value="" placeholder="날짜를 고르세요" data-date-format="yyyy-mm-dd">
+    </div>
+  </form>
+</div>
+
+<div class="space-8"></div>
+
+<div id="status-day">
+  <div class="widget-box stat">
+    <div class="widget-header widget-header-flat widget-header-small">
+      <h3 class="widget-title">
+        <i class="ace-icon icon-time"></i>
+        <span>일별 평균 처리 시간</span>
+      </h3>
+      <div class="widget-toolbar no-border">
+        <a href="#" data-action="collapse">
+          <i class="icon-chevron-down"></i>
+        </a>
+      </div>
+      <div class="widget-body">
+        <div class="widget-main">
+          <table class="table table-striped table-bordered table-hover">
+            <thead>
+              <tr>
+                <th rowspan="2">날짜</th>
+                <th class="center" colspan="7">평균 처리시간</th>
+                <th rowspan="2">Total</th>
+              </tr>
+              <tr>
+                <th>대기</th>
+                <th>치수측정</th>
+                <th>의류준비</th>
+                <th>탈의</th>
+                <th>수선</th>
+                <th>포장</th>
+                <th>결제</th>
+              </tr>
+            </thead>
+            <tbody>
+              % for ( my $i = 0 ; $i <  @{ $count->{day} } ; $i++ ) {
+                % my $label = $count->{day}[$i]{label};
+                % my $ymd   = $dt->ymd;
+                <tr>
+                  <td>
+                    % if ( $label =~ m/^$ymd/ ) {
+                      <span class="date">
+                        <a href="<%= url_for( '/order' )->query( 'booking_ymd' => $label ) %>"><%= $label %></a>
+                      </span>
+                    % } else {
+                      <span>
+                        <a href="<%= url_for( '/order' )->query( 'booking_ymd' => $label ) %>"><%= $label %></a>
+                      </span>
+                    % }
+                  </td>
+                  % if ( $count->{day}[$i] ) {
+                    <td><%= convert_sec_to_hms( $count->{day}[$i]{'대기'} ) %></td>
+                    <td><%= convert_sec_to_hms( $count->{day}[$i]{'치수측정'} ) %></td>
+                    <td><%= convert_sec_to_hms( $count->{day}[$i]{'의류준비'} ) %></td>
+                    <td><%= convert_sec_to_hms( $count->{day}[$i]{'탈의'} ) %></td>
+                    <td><%= convert_sec_to_hms( $count->{day}[$i]{'수선'} ) %></td>
+                    <td><%= convert_sec_to_hms( $count->{day}[$i]{'포장'} ) %></td>
+                    <td><%= convert_sec_to_hms( $count->{day}[$i]{'결제'} ) %></td>
+                  % } else {
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                  % }
+                  <td><%= convert_sec_to_hms( $count->{day}[$i]{'total'} ) %></td>
+                </tr>
+              % }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="status-day-detail">
+  <div class="widget-box collapsed stat">
+    <div class="widget-header widget-header-flat widget-header-small">
+      <h3 class="widget-title">
+        <i class="ace-icon icon-time"></i>
+        <span>일별 처리 시간(상세)</span>
+      </h3>
+      <div class="widget-toolbar no-border">
+        <a href="#" data-action="collapse">
+          <i class="icon-chevron-down"></i>
+        </a>
+      </div>
+      <div class="widget-body">
+        <div class="widget-main">
+          <table class="table table-striped table-bordered table-hover">
+            <thead>
+              <tr>
+                <th rowspan="2">#</th>
+                <th rowspan="2">주문번호</th>
+                <th rowspan="2">방문자명</th>
+                <th class="center" colspan="7">처리시간</th>
+                <th rowspan="2">Total</th>
+              </tr>
+              <tr>
+                <th>대기</th>
+                <th>치수측정</th>
+                <th>의류준비</th>
+                <th>탈의</th>
+                <th>수선</th>
+                <th>포장</th>
+                <th>결제</th>
+              </tr>
+            </thead>
+            <tbody>
+              % my $cnt = 0;
+              % for my $log ( @{ $status{$dt->ymd} }) {
+                % my $order = $log->{order};
+                % my %elapsed_time = %{ $log->{analyze}->{elapsed_time} };
+                % my $total = List::Util::sum0 grep { defined } @elapsed_time{@status_names};
+                % next unless $total;
+                <tr>
+                  <td><%= ++$cnt %></td>
+                  <td>
+                    <a href="<%= url_for( '/order/' . $order->id ) %>"><%= $order->id %></a>
+                  </td>
+                  <td>
+                    <a href="<%= url_for( '/user/' . $order->user->id ) %>"><%= $order->user->name %></a>
+                  </td>
+                  % for my $status_name (@status_names) {
+                    % my $taken_sec = $elapsed_time{$status_name};
+                    <td><%= $taken_sec ? convert_sec_to_hms($taken_sec) : q{} %></td>
+                  % }
+                  <td><%= convert_sec_to_hms($total) %></td>
+                </tr>
+              % }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="status-week">
+  <div class="widget-box collapsed stat">
+    <div class="widget-header widget-header-flat widget-header-small">
+      <h3 class="widget-title">
+        <i class="ace-icon icon-time"></i>
+        <span>주별 평균 처리 시간</span>
+      </h3>
+      <div class="widget-toolbar no-border">
+        <a href="#" data-action="collapse">
+          <i class="icon-chevron-down"></i>
+        </a>
+      </div>
+      <div class="widget-body">
+        <div class="widget-main">
+          <table class="table table-striped table-bordered table-hover">
+            <thead>
+              <tr>
+                <th rowspan="2">주차(시작일 ~ 종료일)</th>
+                <th class="center" colspan="7">평균 처리시간</th>
+                <th rowspan="2">Total</th>
+              </tr>
+              <tr>
+                <th>대기</th>
+                <th>치수측정</th>
+                <th>의류준비</th>
+                <th>탈의</th>
+                <th>수선</th>
+                <th>포장</th>
+                <th>결제</th>
+              </tr>
+            </thead>
+            <tbody>
+              % for ( my $i = 0 ; $i <  @{ $count->{week} } ; $i++ ) {
+                % if ( $count->{week}[$i] ) {
+                  <td><%= $count->{week}[$i]{label} %></td>
+                  <td><%= convert_sec_to_hms( $count->{week}[$i]{'대기'} ) %></td>
+                  <td><%= convert_sec_to_hms( $count->{week}[$i]{'치수측정'} ) %></td>
+                  <td><%= convert_sec_to_hms( $count->{week}[$i]{'의류준비'} ) %></td>
+                  <td><%= convert_sec_to_hms( $count->{week}[$i]{'탈의'} ) %></td>
+                  <td><%= convert_sec_to_hms( $count->{week}[$i]{'수선'} ) %></td>
+                  <td><%= convert_sec_to_hms( $count->{week}[$i]{'포장'} ) %></td>
+                  <td><%= convert_sec_to_hms( $count->{week}[$i]{'결제'} ) %></td>
+                  <td><%= convert_sec_to_hms( $count->{week}[$i]{total} ) %></td>
+                % } else {
+                  <td>N/A</td>
+                  <td>N/A</td>
+                  <td>N/A</td>
+                  <td>N/A</td>
+                  <td>N/A</td>
+                  <td>N/A</td>
+                  <td>N/A</td>
+                  <td>N/A</td>
+                  <td>N/A</td>
+                % }
+              % }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="status-month">
+  <div class="widget-box stat">
+    <div class="widget-header widget-header-flat widget-header-small">
+      <h3 class="widget-title">
+        <i class="ace-icon icon-time"></i>
+        <span>월별 평균 처리 시간</span>
+      </h3>
+      <div class="widget-toolbar no-border">
+        <a href="#" data-action="collapse">
+          <i class="icon-chevron-down"></i>
+        </a>
+      </div>
+      <div class="widget-body">
+        <div class="widget-main">
+          <table class="table table-striped table-bordered table-hover">
+            <thead>
+              <tr>
+                <th rowspan="2">연월</th>
+                <th class="center" colspan="7">평균 처리시간</th>
+                <th rowspan="2">Total</th>
+              </tr>
+              <tr>
+                <th>대기</th>
+                <th>치수측정</th>
+                <th>의류준비</th>
+                <th>탈의</th>
+                <th>수선</th>
+                <th>포장</th>
+                <th>결제</th>
+              </tr>
+            </thead>
+            <tbody>
+              % for ( my $i = 0 ; $i <  @{ $count->{month} } ; $i++ ) {
+                <tr>
+                  % if ( $count->{month}[$i] ) {
+                    <td><%= $count->{month}[$i]{label} %></td>
+                    <td><%= convert_sec_to_hms( $count->{month}[$i]{'대기'} ) %></td>
+                    <td><%= convert_sec_to_hms( $count->{month}[$i]{'치수측정'} ) %></td>
+                    <td><%= convert_sec_to_hms( $count->{month}[$i]{'의류준비'} ) %></td>
+                    <td><%= convert_sec_to_hms( $count->{month}[$i]{'탈의'} ) %></td>
+                    <td><%= convert_sec_to_hms( $count->{month}[$i]{'수선'} ) %></td>
+                    <td><%= convert_sec_to_hms( $count->{month}[$i]{'포장'} ) %></td>
+                    <td><%= convert_sec_to_hms( $count->{month}[$i]{'결제'} ) %></td>
+                    <td><%= convert_sec_to_hms( $count->{month}[$i]{total} ) %></td>
+                  % } else {
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                  % }
+                </tr>
+              % }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

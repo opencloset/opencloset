@@ -1,0 +1,189 @@
+% my $_id = 'home';
+% layout 'default', page_id => $_id;
+% title meta_text($_id);
+
+<div class="search">
+  <form id="clothes-search-form" action="">
+    <div class="input-group">
+      <input id="clothes-id" class="form-control" name="" type="text" value="" placeholder="의류 코드" style="ime-mode:disabled">
+      <span class="input-group-btn">
+        <button id="btn-clothes-search" class="btn btn-sm btn-default" type="button">
+          <i class="icon-search bigger-110"></i> 검색
+        </button>
+      </span>
+      <span class="input-group-btn">
+        <button id="btn-clothes-clear" class="btn btn-sm btn-default" type="button">
+          <i class="icon-eraser bigger-110"></i> 지우기
+        </button>
+      </span>
+    </div>
+  </form>
+</div>
+
+<div class="space-8"></div>
+
+<div>
+  <span>
+    <a id="clothes-status-all">전체보기</a>
+  </span>
+  <span>|</span>
+  <span>
+    <a id="clothes-status-1">대여가능</a>
+  </span>
+  <span>|</span>
+  <span>
+    <a id="clothes-status-2">대여중</a>
+  </span>
+  <span>|</span>
+  <span>
+    <a id="clothes-status-3">대여불가</a>
+  </span>
+  <span>|</span>
+  <span>
+    <a id="clothes-status-4">예약</a>
+  </span>
+  <span>|</span>
+  <span>
+    <a id="clothes-status-5">세탁</a>
+  </span>
+  <span>|</span>
+  <span>
+    <a id="clothes-status-6">수선</a>
+  </span>
+  <span>|</span>
+  <span>
+    <a id="clothes-status-7">분실</a>
+  </span>
+  <span>|</span>
+  <span>
+    <a id="clothes-status-8">폐기</a>
+  </span>
+  <span>|</span>
+  <span>
+    <a id="clothes-status-9">반납</a>
+  </span>
+  <span>|</span>
+  <span>
+    <a id="clothes-status-11">반납배송중</a>
+  </span>
+  <span>|</span>
+  <span>
+    <a id="clothes-status-41">포장취소</a>
+  </span>
+  <span>|</span>
+  <span>
+    <a id="clothes-status-42">환불</a>
+  </span>
+</div>
+
+<div class="space-4"></div>
+
+<div id="clothes-table">
+  <table class="table table-striped table-bordered table-hover">
+    <thead>
+      <tr>
+        <th class="center">
+          <label>
+            <input id="input-check-all" class="ace" type="checkbox">
+            <span class="lbl"></span>
+          </label>
+        </th>
+        <th>#</th>
+        <th>옷</th>
+        <th>상태</th>
+        <th>묶음</th>
+        <th>태그</th>
+        <th>기타</th>
+      </tr>
+    </thead>
+    <tbody>
+    </tbody>
+  </table>
+
+  <div id="action-buttons" class="btn-group">
+    <button class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
+      선택한 항목을 변경할 상태를 선택하세요.
+      <i class="icon-angle-down icon-on-right"></i>
+    </button>
+    <ul class="dropdown-menu">
+      % for my $status (qw/세탁 대여가능/) {
+        <li>
+          <a href="#"><%= $status %></a>
+        </li>
+      % }
+      <li class="divider"></li>
+      % for my $status (qw/대여불가 예약 수선 분실 폐기/) {
+        <li>
+          <a href="#"><%= $status %></a>
+        </li>
+      % }
+    </ul>
+  </div>
+</div>
+
+<script id="tpl-row-checkbox-clothes-with-order" type="text/html">
+  <tr class="clothes-status clothes-status-<%%= statusCode %>" data-order-id="<%%= order.id %>">
+    <td class="center">
+      <label>
+        <input class="ace" type="checkbox" disabled>
+        <span class="lbl"></span>
+      </label>
+    </td>
+    <td> <%%= count %> </td> <!-- 넘버링 -->
+    <td> <a href="/clothes/<%%= code %>"> <%%= code %> </a> </td> <!-- 옷 -->
+    <td>
+      <span class="order-status label">
+        <%%= status %>
+        <span class="late-fee"><%%= order.late_fee ? order.late_fee + '원' : '' %></span>
+      </span>
+    </td> <!-- 상태 -->
+    <td>
+      <%% _.each(order.clothes, function(c) { c = c.replace(/^0/, ''); %> <a href="/clothes/<%%= c %>"><%%= c %></a><%% }); %>
+    </td> <!-- 묶음 -->
+    <td>
+      <%% _.each(tags, function(tag) { %>
+        <span class="label label-default"><%%= tag.name %></span>
+      <%% }); %>
+    </td> <!-- 태그 -->
+    <td>
+      <a href="/orders/<%%= order.id %>"><span class="label label-info arrowed-right arrowed-in">
+        <strong>주문서</strong>
+        <time class="js-relative-date" datetime="<%%= order.rental_date.raw %>" title="<%%= order.rental_date.ymd %>"><%%= order.rental_date.md %></time>
+        ~
+        <time class="js-relative-date" datetime="<%%= order.target_date.raw %>" title="<%%= order.target_date.ymd %>"><%%= order.target_date.md %></time>
+      </span></a>
+    </td> <!-- 기타 -->
+  </tr>
+</script>
+
+<script id="tpl-row-checkbox-clothes" type="text/html">
+  <tr class="row-checkbox clothes-status clothes-status-<%%= statusCode %>" data-clothes-code="<%%= code %>">
+    <td class="center">
+      <label>
+        <input class="ace" type="checkbox" <%%= status == '대여중' ? 'disabled' : '' %> data-clothes-code="<%%= code %>">
+        <span class="lbl"></span>
+      </label>
+    </td>
+    <td> <%%= count %> </td> <!-- 넘버링 -->
+    <td> <a href="/clothes/<%%= code %>"> <%%= code %> </a> </td> <!-- 옷 -->
+    <td> <span class="order-status label"><%%= status %></span> </td> <!-- 상태 -->
+    <td> </td> <!-- 묶음 -->
+    <td>
+      <%% _.each(tags, function(tag) { %>
+        <span class="label label-default"><%%= tag.name %></span>
+      <%% }); %>
+    </td> <!-- 태그 -->
+    <td> </td> <!-- 기타 -->
+  </tr>
+</script>
+
+<script id="tpl-overdue-paragraph" type="text/html">
+  <strong>
+    <%%= OpenCloset.commify(order.late_fee) %>원
+  </strong>
+  <small>
+    연장료 <%%= OpenCloset.commify(order.extension_fee) %>원 = <%%= OpenCloset.commify(order.clothes_price) %>원 x <%%= order.extension_days %>일 x 20%
+    ,
+    연체료 <%%= OpenCloset.commify(order.overdue_fee) %>원 = <%%= OpenCloset.commify(order.clothes_price) %>원 x <%%= order.overdue_days %>일 x 30%
+  </small>
+</script>
