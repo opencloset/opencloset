@@ -1,3 +1,5 @@
+v1.12.0
+
     # add below to app.conf
     redis_url => $ENV{OPENCLOSET_REDIS_URL} || 'redis://localhost:6379',
 

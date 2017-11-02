@@ -4,10 +4,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [v1.12.0] - Thu, 02 Nov 2017 16:37:53 +0900
+
 ### Added
 - opencloset/staff/sms-notifier 이미지 build 를 위한 Dockerfile.sms-notifier 추가
 - Add hook - before_dispatch
   - docker container 간 통신을 위해 dynamic cookie domain 기능을 추가
+- dockerize
 
 ### Fixed
 - 결제대기 상태의 주문서에 쿠폰을 사용해서 다시 예약 했을때 쿠폰이 적용되지 않던 버그 수정 (#1320)
