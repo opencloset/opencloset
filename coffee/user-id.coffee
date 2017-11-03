@@ -52,7 +52,7 @@ $ ->
         else
           OpenCloset.alert('warning', "키, 몸무게, 성별의 오류로 변동 평균값을 구할 수 없습니다.")
           for i in [ 'bust', 'waist', 'topbelly', 'belly', 'thigh', 'hip' ]
-            $(".#{i} .avg").html( 'N/A' )
+            $(".#{i} .avg2").html( 'N/A' )
       error: (jqXHR, textStatus, errorThrown) ->
         type = jqXHR.status is 404 ? 'warning' : 'danger'
         OpenCloset.alert(type, "개별 평균값을 구할 수 없습니다: #{jqXHR.status}")
