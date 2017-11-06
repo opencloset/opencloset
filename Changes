@@ -4,6 +4,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Fixed
+
+- 목둘레의 평균값이 나타나지 않음 (#1326)
+
 ## [v1.12.0] - Thu, 02 Nov 2017 16:37:53 +0900
 
 ### Added
