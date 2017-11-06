@@ -275,3 +275,16 @@ $ ->
         OpenCloset.alert textStatus
       complete: (jqXHR, textStatus) ->
         $this.removeClass('disabled')
+
+  $("#btn-avg-all").on "click", (e) ->
+    for i in [ 'neck', 'belly', 'topbelly', 'bust', 'arm', 'thigh', 'waist', 'hip', 'leg', 'foot', 'knee' ]
+      userValue = $("#user-#{i}").editable "getValue", true
+      console.log "userValue: [#{userValue}]"
+      unless userValue
+        val = $(".#{i} .avg").text()
+        filteredVal = val
+        filteredVal = filteredVal.replace /^\s+|\s+$/, ""
+        filteredVal = filteredVal.replace /[^.0-9]/g, ""
+        if filteredVal
+          $("#user-#{i}").editable "setValue", Math.round( parseInt(filteredVal) )
+          $("#user-#{i}").editable "submit"

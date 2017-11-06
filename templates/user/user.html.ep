@@ -285,6 +285,16 @@ use OpenCloset::Constants::Measurement qw/$HEIGHT $WEIGHT $NECK $BUST $WAIST $HI
                 </div>
               % }
 
+              <div class="profile-info-row">
+                <div class="profile-info-name"></div>
+                <div class="profile-info-value">
+                  <button id="btn-avg-all" class="btn btn-xs btn-warning">
+                    <span>평균의 반올림값 입력</span>
+                  </button>
+                  <small>비어있는 목둘레 ~ 엉덩이둘레에 평균의 반올림값을 자동 입력합니다.</small>
+                </div>
+              </div>
+
               % for my $part ($NECK, $BUST, $WAIST, $TOPBELLY, $BELLY, $ARM, $LEG, $KNEE, $THIGH, $HIP, $FOOT) {
                 <div class="profile-info-row <%= $part %>">
                   <div class="profile-info-name"><%= $OpenCloset::Constants::Measurement::LABEL_MAP{$part} %></div>
