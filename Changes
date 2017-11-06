@@ -4,6 +4,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Added
+
+- 신체치수 입력란에 평균값을 전부 한번에 넣을 수 있는 버튼의 생성 (#1328)
+
 ### Fixed
 
 - 사용자 정보의 신체 치수의 평균 값이 동적으로 변하지 않음 (#1334)
