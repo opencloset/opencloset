@@ -286,7 +286,7 @@ use OpenCloset::Constants::Measurement qw/$HEIGHT $WEIGHT $NECK $BUST $WAIST $HI
               % }
 
               % for my $part ($NECK, $BUST, $WAIST, $TOPBELLY, $BELLY, $ARM, $LEG, $KNEE, $THIGH, $HIP, $FOOT) {
-                <div class="profile-info-row">
+                <div class="profile-info-row <%= $part %>">
                   <div class="profile-info-name"><%= $OpenCloset::Constants::Measurement::LABEL_MAP{$part} %></div>
                   <div class="profile-info-value">
                     <span id="user-<%= $part %>" class="editable" data-name="<%= $part %>"><%= $user_info->$part %></span>
