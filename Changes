@@ -4,6 +4,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Changed
+
+- 취업날개 쿠폰을 통해 예약을 하는 대여자는 입사 면접만 목적으로 선택할 수 있도록 함 (#1324)
+
 ### Fixed
 
 - 편의점 택배 이름 수정 CSVnet -> CVSnet (#1337)

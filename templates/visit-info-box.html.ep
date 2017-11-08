@@ -146,24 +146,34 @@
                           <label class="block clearfix">
                             <select class="width-100 chosen-select" name="purpose" data-placeholder="대여 목적을 선택해주세요." data-purpose="<%= ( $order || $load ) ? $user->user_info->purpose : q{} %>">
                               <option value="">대여 목적을 선택해주세요.</option>
-                              <option value="입사면접">입사면접</option>
-                              <option value="결혼식">결혼식</option>
-                              <option value="상견례">상견례</option>
-                              <option value="대학(원)면접">대학(원)면접</option>
-                              <option value="모의면접">모의면접</option>
-                              <option value="인턴면접">인턴면접</option>
-                              <option value="장례식">장례식</option>
-                              <option value="사진촬영">사진촬영</option>
-                              <option value="세미나">세미나</option>
-                              <option value="발표">발표</option>
-                              <option value="공연(연주회)">공연(연주회)</option>
-                              <option value="축제(행사)">축제(행사)</option>
-                              <option value="OT">OT</option>
-                              <option value="아르바이트">아르바이트</option>
-                              <option value="졸업식">졸업식</option>
-                              <option value="입학식">입학식</option>
-                              <option value="기타">기타</option>
+                              % if ( $coupon && $coupon->desc =~ m/^seoul-/ ) {
+                                <option value="입사면접">입사면접</option>
+                              % }
+                              % else {
+                                <option value="입사면접">입사면접</option>
+                                <option value="결혼식">결혼식</option>
+                                <option value="상견례">상견례</option>
+                                <option value="대학(원)면접">대학(원)면접</option>
+                                <option value="모의면접">모의면접</option>
+                                <option value="인턴면접">인턴면접</option>
+                                <option value="장례식">장례식</option>
+                                <option value="사진촬영">사진촬영</option>
+                                <option value="세미나">세미나</option>
+                                <option value="발표">발표</option>
+                                <option value="공연(연주회)">공연(연주회)</option>
+                                <option value="축제(행사)">축제(행사)</option>
+                                <option value="OT">OT</option>
+                                <option value="아르바이트">아르바이트</option>
+                                <option value="졸업식">졸업식</option>
+                                <option value="입학식">입학식</option>
+                                <option value="기타">기타</option>
+                              % }
                             </select>
+                            % if ( $coupon && $coupon->desc =~ m/^seoul-/ ) {
+                              <p>
+                                서울시 취업날개는 규정상 입사면접 용도로만 이용할 수 있습니다. 다른 용도로 이용해야 한다면 서울시에 문의해주세요.
+                              </p>
+                            % }
                           </label>
 
                           <label class="block clearfix">
