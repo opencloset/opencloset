@@ -169,6 +169,11 @@
                                 <option value="기타">기타</option>
                               % }
                             </select>
+                            % if ( $coupon && $coupon->desc =~ m/^seoul-/ ) {
+                              <p>
+                                서울시 취업날개는 규정상 입사면접 용도로만 이용할 수 있습니다. 다른 용도로 이용해야 한다면 서울시에 문의해주세요.
+                              </p>
+                            % }
                           </label>
 
                           <label class="block clearfix">
