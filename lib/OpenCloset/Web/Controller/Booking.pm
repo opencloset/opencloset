@@ -130,6 +130,7 @@ sub visit {
     }
 
     $self->stash( order => $self->get_nearest_booked_order($user) );
+    $self->stash( coupon => undef );
     if ( $type eq 'visit' ) {
         #
         # GH #253
@@ -330,6 +331,11 @@ sub visit {
             else {
                 $self->log->error("Failed to create vbank: $error");
             }
+        }
+
+        if ( $self->session->{coupon_code} ) {
+            my $coupon = $self->DB->resultset("Coupon")->find( { code => $self->session->{coupon_code} } );
+            $self->stash( coupon => $coupon );
         }
 
         $self->stash( unpaid_msg => $unpaid_msg );
