@@ -32,7 +32,7 @@
     <select class="form-control" id="parcel" name="parcel" required>
       <option value=""></option>
       <option value="CJ대한통운">CJ대한통운</option>
-      <option value="CSVnet편의점">CSVnet 편의점</option>
+      <option value="CVSnet편의점">CVSnet 편의점</option>
       <option value="KGB">KGB</option>
       <option value="동부">동부</option>
       <option value="로젠">로젠</option>
