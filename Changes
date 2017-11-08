@@ -4,6 +4,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [v1.12.1] - Wed, 08 Nov 2017 13:54:38 +0900
+
 ### Added
 
 - 신체치수 입력란에 평균값을 전부 한번에 넣을 수 있는 버튼의 생성 (#1328)

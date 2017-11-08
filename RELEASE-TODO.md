@@ -1,3 +1,5 @@
+v1.12.1
+
     $ grunt
     $ closetpan OpenCloset::Size::Guess::DB    # 0.008
 
