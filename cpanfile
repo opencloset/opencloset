@@ -53,6 +53,6 @@ requires 'OpenCloset::Plugin::Helpers',         'v0.0.23';
 requires 'OpenCloset::Schema',                  '0.054';
 requires 'OpenCloset::Size::Guess',             '0.003';
 requires 'OpenCloset::Size::Guess::BodyKit',    '0.001';
-requires 'OpenCloset::Size::Guess::DB',         '0.005';
+requires 'OpenCloset::Size::Guess::DB',         '0.008';
 requires 'OpenCloset::Size::Guess::OpenCPU::RandomForest',      '0.008';
 requires 'Postcodify', 'v0.3.0';

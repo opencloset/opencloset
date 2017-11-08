@@ -3,7 +3,7 @@ opencloset
 
 ## Version ##
 
-v1.12.0
+v1.12.1
 
 ## Requirements ##
 
@@ -148,6 +148,12 @@ less 파일이나 coffeescript 파일이 추가 되었거나 변경되었다면,
 `grunt` 명령어를 이용해서 less 파일을 css 파일로 컴파일합니다.
 
     $ grunt dist-css
+
+### Build docker images ###
+
+    $ docker build -f Dockerfile -t opencloset/staff .
+    $ docker build -f Dockerfile.cron -t opencloset/staff/cron .
+    $ docker build -f Dockerfile.sms-notifier -t opencloset/staff/sms-notifier .
 
 ### 이슈, 제안이나 의견
 

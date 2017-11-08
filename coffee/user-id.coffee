@@ -52,7 +52,7 @@ $ ->
         else
           OpenCloset.alert('warning', "키, 몸무게, 성별의 오류로 변동 평균값을 구할 수 없습니다.")
           for i in [ 'bust', 'waist', 'topbelly', 'belly', 'thigh', 'hip' ]
-            $(".#{i} .avg").html( 'N/A' )
+            $(".#{i} .avg2").html( 'N/A' )
       error: (jqXHR, textStatus, errorThrown) ->
         type = jqXHR.status is 404 ? 'warning' : 'danger'
         OpenCloset.alert(type, "개별 평균값을 구할 수 없습니다: #{jqXHR.status}")
@@ -275,3 +275,16 @@ $ ->
         OpenCloset.alert textStatus
       complete: (jqXHR, textStatus) ->
         $this.removeClass('disabled')
+
+  $("#btn-avg-all").on "click", (e) ->
+    for i in [ 'neck', 'belly', 'topbelly', 'bust', 'arm', 'thigh', 'waist', 'hip', 'leg', 'foot', 'knee' ]
+      userValue = $("#user-#{i}").editable "getValue", true
+      console.log "userValue: [#{userValue}]"
+      unless userValue
+        val = $(".#{i} .avg").text()
+        filteredVal = val
+        filteredVal = filteredVal.replace /^\s+|\s+$/, ""
+        filteredVal = filteredVal.replace /[^.0-9]/g, ""
+        if filteredVal
+          $("#user-#{i}").editable "setValue", Math.round( parseInt(filteredVal) )
+          $("#user-#{i}").editable "submit"
