@@ -35,7 +35,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 - 결제대기 상태의 주문서에 쿠폰을 사용해서 다시 예약 했을때 쿠폰이 적용되지 않던 버그 수정 (#1320)
 
 ### Changed
-- haml template 을 ep 로 변경
+- 템플릿 언어를 EPRenderer 형식으로 변경 (#927)
 
 ### Removed
 - 의류등록 route 및 리소스 삭제
