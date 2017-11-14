@@ -360,26 +360,27 @@ sub detail {
 
     my $details = $order->order_details;
 
-    my ( $top, $bottom, $suit );
-    while ( my $detail = $details->next ) {
-        my $clothes = $detail->clothes;
-        next unless $clothes;
+    my @set_clothes;
+    {
+        use experimental qw( smartmatch );
 
-        my $category = $clothes->category;
-        if ( $category eq $JACKET ) {
-            $top = $clothes;
+        my @tops;
+        my @bottoms;
+        while ( my $detail = $details->next ) {
+            my $clothes = $detail->clothes;
+            next unless $clothes;
+            push @tops, $clothes if $clothes->category eq $JACKET;
+            push @bottoms, $clothes if $clothes->category ~~ [ $PANTS, $SKIRT ];
         }
-        elsif ( "$PANTS $SKIRT" =~ m/\b$category\b/ ) {
-            $bottom = $clothes;
+        $details->reset;
+
+        for my $top (@tops) {
+            my $suit = $top->suit_code_top;
+            next unless $suit;
+            next unless $suit->code_bottom;
+            next unless $suit->code_bottom->code ~~ [ map $_->code, @bottoms ];
+            push @set_clothes, $top, $suit->code_bottom;
         }
-
-        last if $top and $bottom;
-    }
-    $details->reset;
-
-    if ( $top and $bottom ) {
-        $suit->{top}    = $top;
-        $suit->{bottom} = $bottom;
     }
 
     $self->render(
@@ -391,7 +392,7 @@ sub detail {
         price          => $price,
         visited        => $visited,
         details        => $details,
-        suit           => $suit,
+        set_clothes    => \@set_clothes,
         overdue_days   => $overdue_days,
         overdue_fee    => $overdue_fee,
         extension_days => $extension_days,
