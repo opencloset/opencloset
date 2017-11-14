@@ -10,7 +10,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Fixed
 
-- 셋트 대여가 아닌데 셋트 대여로 표시됨 (#1332)
+- 세트 대여가 아닌데 세트 대여로 표시됨 (#1332)
 - 편의점 택배 이름 수정 CSVnet -> CVSnet (#1337)
 
 ## [v1.12.1] - Wed, 08 Nov 2017 13:54:38 +0900
