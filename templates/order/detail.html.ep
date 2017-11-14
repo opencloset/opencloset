@@ -696,12 +696,13 @@
 
 <hr>
 
-% if ($suit) {
+% if (@$set_clothes) {
   <p class="help-block">
     <i class="fa fa-info-circle" aria-hidden="true"></i>
     셋트 대여입니다.
-    %= clothes2link($suit->{top},    { with_status => 1 })
-    %= clothes2link($suit->{bottom}, { with_status => 1 })
+    % for my $clothes (@$set_clothes) {
+      %= clothes2link( $clothes, { with_status => 1 } )
+    % }
   </p>
 % }
 
