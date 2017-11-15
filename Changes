@@ -4,6 +4,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Fixed
+
+- 의류 착용일과 예약 방문일 간 차이가 클 경우 대여자에게 경고함 (#1065)
+
 ### Changed
 
 - 취업날개 쿠폰을 통해 예약을 하는 대여자는 입사 면접만 목적으로 선택할 수 있도록 함 (#1324)
