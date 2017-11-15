@@ -473,6 +473,13 @@ $ ->
       $("#modal-booking .modal-body").scrollTop(0)
       $("#modal-booking").modal('hide')
       refreshExpectedFee()
+      warnClothesReservation()
+
+  #
+  # 착용 날짜 변경
+  #
+  $("input[name=wearon_date]").change ->
+    warnClothesReservation()
 
   #
   # 성별 변경시 방문 일자를 다시 선택하게 함
@@ -534,6 +541,31 @@ $ ->
         <samp>#{OpenCloset.commify(expectedCost)}원</samp>
         <small class="text-muted">총대여비</small>
       """
+
+  diffDaysBookingYmdAndWearonYmd = ->
+    booking = $("input[type='radio'][name='booking_id']:checked")
+    return unless booking
+
+    bookingYmd = booking.data("ymd")
+    wearonYmd  = $("input[name=wearon_date]").val()
+    return unless bookingYmd
+    return unless wearonYmd
+
+    bookingDt = moment(bookingYmd)
+    wearonDt  = moment(wearonYmd)
+    diffDays  = wearonDt.diff(bookingDt, "days")
+    return diffDays
+
+  #
+  # 의류 착용일과 예약 방문일 간 차이가 클 경우 대여자에게 경고
+  #
+  warnClothesReservation = ->
+    $(".diff-days").html("")
+    diffDays = diffDaysBookingYmdAndWearonYmd()
+    return unless diffDays
+    return if diffDays < 4
+    $(".diff-days").html(diffDays)
+    $("#modal-warn").modal()
 
   #
   # 이메일 중복체크

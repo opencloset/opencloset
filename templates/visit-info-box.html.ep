@@ -381,6 +381,40 @@
                   </div>
                 </div>
 
+                <div id="modal-warn" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="warnModalLabel" aria-hidden="true">
+                  <div class="modal-dialog">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title" id="warnModalLabel">
+                          미리 오지 마세요.
+                        </h4>
+                      </div>
+                      <div class="modal-body" style="height: 250px; overflow-y: auto;">
+                        <div class="notice">
+                          <h3>예약일에 대여하지 않고 사전 방문 하는 경우, 아래 유의사항을 꼭 확인해주세요.</h3>
+
+                          <p>
+                            방문 예약일과 의류 착용일이 4일 이상(<span class="diff-days"></span>일) 차이가 납니다.
+                          </p>
+
+                          <p>
+                            의류 예약(찜)은 불가능하며 당일 대여를 원칙으로 합니다.
+                            그럼에도 불구하고 스타일/사이즈 확인을 위해 미리 방문해야 한다면 예약을 완료해주세요.
+                            하지만 실제 대여하고자 하는 날에 해당 의류가 대여 된 상태라면,
+                            같은 옷은 대여할 수 없으므로 미리 방문하는 것은 권장하지 않습니다.
+                            대여일에 가장 잘 맞는 옷으로 대여하세요!
+                          </p>
+
+                        </div>
+                      </div>
+                      <div class="modal-footer">
+                        <button id="btn-warn-modal-confirm" type="button" class="btn btn-primary" data-dismiss="modal">확인</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
                 <script id="tpl-booking" type="text/html">
                   <tr>
                     <%% moment.locale("ko"); %>
