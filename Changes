@@ -11,6 +11,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ### Changed
 
 - 취업날개 쿠폰을 통해 예약을 하는 대여자는 입사 면접만 목적으로 선택할 수 있도록 함 (#1324)
+- 대여중인 주문서에서도 정장 반납안내 pdf 링크를 표시 (#1349)
 
 ### Fixed
 
