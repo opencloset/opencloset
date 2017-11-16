@@ -156,6 +156,12 @@ $ ->
     $('#late-fee').html(OpenCloset.commify(late_fee))
     $('#form-returned input[name=late_fee_discount]').val(discount)
 
+  $('#compensation-price-discount input').on 'change', (e) ->
+    price    = $('#compensation-price-discount input[name=compensation_price]').val() or 0
+    discount = $('#compensation-price-discount input[name=compensation_discount]').val() or 0
+    $('#form-returned input[name=compensation_price]').val(price)
+    $('#form-returned input[name=compensation_discount]').val(discount)
+
   $('#form-coupon-code').on 'submit', (e) ->
     e.preventDefault()
     $form = $(@)

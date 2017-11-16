@@ -4,6 +4,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Added
+- 주문서에 배상비를 입력할 수 있도록 함 (#1347)
+
 ### Fixed
 
 - 의류 착용일과 예약 방문일 간 차이가 클 경우 대여자에게 경고함 (#1065)
