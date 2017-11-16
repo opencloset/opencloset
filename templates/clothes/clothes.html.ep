@@ -73,6 +73,12 @@ my $system_start_dt = DateTime->new( %{ $config->{start_date} }, time_zone => $c
         <div class="grid2">
           <span class="bigger-175 blue"><%= $clothes->rented_duration() %></span>
           <br>
+          대여일
+        </div>
+
+        <div class="grid2">
+          <span class="bigger-175 blue"><%= sprintf("%.1f%%",$clothes->rent_ratio($now_dt, $system_start_dt) * 100) %></span>
+          <br>
           대여율
         </div>
       </div>
