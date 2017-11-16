@@ -146,24 +146,34 @@
                           <label class="block clearfix">
                             <select class="width-100 chosen-select" name="purpose" data-placeholder="대여 목적을 선택해주세요." data-purpose="<%= ( $order || $load ) ? $user->user_info->purpose : q{} %>">
                               <option value="">대여 목적을 선택해주세요.</option>
-                              <option value="입사면접">입사면접</option>
-                              <option value="결혼식">결혼식</option>
-                              <option value="상견례">상견례</option>
-                              <option value="대학(원)면접">대학(원)면접</option>
-                              <option value="모의면접">모의면접</option>
-                              <option value="인턴면접">인턴면접</option>
-                              <option value="장례식">장례식</option>
-                              <option value="사진촬영">사진촬영</option>
-                              <option value="세미나">세미나</option>
-                              <option value="발표">발표</option>
-                              <option value="공연(연주회)">공연(연주회)</option>
-                              <option value="축제(행사)">축제(행사)</option>
-                              <option value="OT">OT</option>
-                              <option value="아르바이트">아르바이트</option>
-                              <option value="졸업식">졸업식</option>
-                              <option value="입학식">입학식</option>
-                              <option value="기타">기타</option>
+                              % if ( $coupon && $coupon->desc =~ m/^seoul-/ ) {
+                                <option value="입사면접">입사면접</option>
+                              % }
+                              % else {
+                                <option value="입사면접">입사면접</option>
+                                <option value="결혼식">결혼식</option>
+                                <option value="상견례">상견례</option>
+                                <option value="대학(원)면접">대학(원)면접</option>
+                                <option value="모의면접">모의면접</option>
+                                <option value="인턴면접">인턴면접</option>
+                                <option value="장례식">장례식</option>
+                                <option value="사진촬영">사진촬영</option>
+                                <option value="세미나">세미나</option>
+                                <option value="발표">발표</option>
+                                <option value="공연(연주회)">공연(연주회)</option>
+                                <option value="축제(행사)">축제(행사)</option>
+                                <option value="OT">OT</option>
+                                <option value="아르바이트">아르바이트</option>
+                                <option value="졸업식">졸업식</option>
+                                <option value="입학식">입학식</option>
+                                <option value="기타">기타</option>
+                              % }
                             </select>
+                            % if ( $coupon && $coupon->desc =~ m/^seoul-/ ) {
+                              <p>
+                                서울시 취업날개는 규정상 입사면접 용도로만 이용할 수 있습니다. 다른 용도로 이용해야 한다면 서울시에 문의해주세요.
+                              </p>
+                            % }
                           </label>
 
                           <label class="block clearfix">
@@ -366,6 +376,40 @@
                       <div class="modal-footer">
                         <button id="btn-confirm-modal-cancel"  type="button" class="btn btn-danger" >취소</button>
                         <button id="btn-confirm-modal-ok"     type="button" class="btn btn-primary">확인</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div id="modal-warn" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="warnModalLabel" aria-hidden="true">
+                  <div class="modal-dialog">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title" id="warnModalLabel">
+                          미리 오지 마세요.
+                        </h4>
+                      </div>
+                      <div class="modal-body" style="height: 250px; overflow-y: auto;">
+                        <div class="notice">
+                          <h3>예약일에 대여하지 않고 사전 방문 하는 경우, 아래 유의사항을 꼭 확인해주세요.</h3>
+
+                          <p>
+                            방문 예약일과 의류 착용일이 4일 이상(<span class="diff-days"></span>일) 차이가 납니다.
+                          </p>
+
+                          <p>
+                            의류 예약(찜)은 불가능하며 당일 대여를 원칙으로 합니다.
+                            그럼에도 불구하고 스타일/사이즈 확인을 위해 미리 방문해야 한다면 예약을 완료해주세요.
+                            하지만 실제 대여하고자 하는 날에 해당 의류가 대여 된 상태라면,
+                            같은 옷은 대여할 수 없으므로 미리 방문하는 것은 권장하지 않습니다.
+                            대여일에 가장 잘 맞는 옷으로 대여하세요!
+                          </p>
+
+                        </div>
+                      </div>
+                      <div class="modal-footer">
+                        <button id="btn-warn-modal-confirm" type="button" class="btn btn-primary" data-dismiss="modal">확인</button>
                       </div>
                     </div>
                   </div>

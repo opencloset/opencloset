@@ -279,7 +279,7 @@
             <select name="return_method" class="chosen-select" data-placeholder="반납방법" data-update-url="<%= url_for('/api/order/' . $order->id) %>">
               <option value=""></option>
               % my $return_method = $order->return_method || '';
-              % for my $method (qw/방문반납 CJ대한통운 CSVnet편의점 KGB 동부 로젠 롯데 옐로우캡 우체국 한진 기타/) {
+              % for my $method (qw/방문반납 CJ대한통운 CVSnet편의점 KGB 동부 로젠 롯데 옐로우캡 우체국 한진 기타/) {
                 <option value="<%= $method %>"<%= $return_method =~ m/$method/ ? ' selected' : '' %>>
                   %= $method
                 </option>
@@ -337,6 +337,31 @@
             % }
           </td>
         </tr>
+        <!-- 배상비 -->
+        <tr>
+          <th>배상비 및 에누리</th>
+          <td>
+            <div id="compensation-price-discount" class="form-inline">
+              <input type="text" name="compensation_price" class="form-control" placeholder="배상비">
+              <input type="text" name="compensation_discount" class="form-control" placeholder="배상비 에누리">
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <th>배상비 결제방법</th>
+          <td>
+            % my $compensation_pay_with = $order->compensation_pay_with || '';
+            <select name="compensation_pay_with" class="chosen-select" data-placeholder="배상비 결제 방법" data-update-url="<%= url_for('/api/order/' . $order->id) %>">
+              <option value=""></option>
+              % for my $pay_with (qw/현금 카드 계좌이체 현금영수증 세금계산서 미납/) {
+                <option value="<%= $pay_with %>"<%= $compensation_pay_with eq $pay_with ? ' selected' : '' %>>
+                  %= $pay_with
+                </option>
+              % }
+            </select>
+          </td>
+        </tr>
+        <!-- End of 배상비 -->
         <tr>
           <th>택배발송/반납일</th>
           <td>
@@ -674,6 +699,8 @@
       <input name="return_date" type="hidden" value="">
       <input name="late_fee_discount" type="hidden" value="">
       <input name="ignore_sms" type="hidden" value="1">
+      <input name="compensation_price" type="hidden" value="">
+      <input name="compensation_discount" type="hidden" value="">
     </form>
 
     <h4>
@@ -690,18 +717,23 @@
       <button id="btn-return-all" class="btn btn-success btn-sm disabled" type="button">전체반납</button>
       <button id="btn-return-partial" class="btn btn-warning btn-sm disabled" type="button">부분반납</button>
       <button id="btn-refund" class="btn btn-default btn-sm pull-right" type="button" data-toggle="modal" data-target="#modal-refund">환불</button>
+      <a class="btn btn-info btn-sm pull-right" href="<%= url_for('/order/' . $order->id . '/rental/paper/pdf') %>" target="_blank">
+        <i class="fa fa-file-pdf-o" aria-hidden="true"></i>
+        정장 반납 안내 출력
+      </a>
     </form>
   % }
 </div>
 
 <hr>
 
-% if ($suit) {
+% if (@$set_clothes) {
   <p class="help-block">
     <i class="fa fa-info-circle" aria-hidden="true"></i>
     셋트 대여입니다.
-    %= clothes2link($suit->{top},    { with_status => 1 })
-    %= clothes2link($suit->{bottom}, { with_status => 1 })
+    % for my $clothes (@$set_clothes) {
+      %= clothes2link( $clothes, { with_status => 1 } )
+    % }
   </p>
 % }
 
