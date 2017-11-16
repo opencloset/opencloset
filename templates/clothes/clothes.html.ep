@@ -92,10 +92,13 @@ my $system_start_dt = DateTime->new( %{ $config->{start_date} }, time_zone => $c
           </div>
         % } else {
           <form id="form-suit" class="form-inline" action="<%= url_for('/api/suit') %>" method="POST">
-            <input name="<%= $first eq 'J' ? 'code_top' : 'code_bottom' %>" type="hidden" value="<%= $clothes_code %>">
-            <span class="input-group-btn">
-              <button class="btn btn-sm btn-default" type="submit">등록</button>
-            </span>
+            <input name="<%= $first eq "J" ? "code_top" : "code_bottom" %>" type="hidden" value="<%= $clothes_code %>">
+            <div class="input-group">
+              <input name="<%= $first eq "J" ? "code_bottom" : "code_top" %>" class="form-control" type="text" placeholder="code">
+              <span class="input-group-btn">
+                <button class="btn btn-sm btn-default" type="submit">등록</button>
+              </span>
+            </div>
           </form>
         % }
         <hr>
