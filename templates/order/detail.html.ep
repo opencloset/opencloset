@@ -690,6 +690,10 @@
       <button id="btn-return-all" class="btn btn-success btn-sm disabled" type="button">전체반납</button>
       <button id="btn-return-partial" class="btn btn-warning btn-sm disabled" type="button">부분반납</button>
       <button id="btn-refund" class="btn btn-default btn-sm pull-right" type="button" data-toggle="modal" data-target="#modal-refund">환불</button>
+      <a class="btn btn-info btn-sm pull-right" href="<%= url_for('/order/' . $order->id . '/rental/paper/pdf') %>" target="_blank">
+        <i class="fa fa-file-pdf-o" aria-hidden="true"></i>
+        정장 반납 안내 출력
+      </a>
     </form>
   % }
 </div>
