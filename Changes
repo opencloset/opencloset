@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Fixed
 
+- 의류 정보에서 상하의 셋트를 입력하기 위한 바코드 입력 양식이 보이지 않음 (#1345)
 - 의류 착용일과 예약 방문일 간 차이가 클 경우 대여자에게 경고함 (#1065)
 
 ### Changed
