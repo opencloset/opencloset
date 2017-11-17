@@ -1,6 +1,7 @@
 package OpenCloset::Web::Controller::API;
 use Mojo::Base 'Mojolicious::Controller';
 use Mojo::JSON;
+use Mojo::Util;
 
 use DateTime;
 use Encode qw/decode_utf8/;
@@ -2776,7 +2777,7 @@ sub api_gui_update_booking {
     #
     # fetch params
     #
-    my %params = $self->get_params(qw/ id date slot gender /);
+    my %params = $self->get_params(qw/ id date slot gender desc /);
 
     #
     # validate params
@@ -2822,8 +2823,8 @@ sub api_gui_update_booking {
     #
     my $log_str = sprintf(
         "%s -> %s",
-        Mojo::JSON::encode_json($old_data),
-        Mojo::JSON::encode_json($data),
+        Mojo::Util::decode( "UTF-8", Mojo::JSON::encode_json($old_data) ),
+        Mojo::Util::decode( "UTF-8", Mojo::JSON::encode_json($data) ),
     );
     $self->app->log->info($log_str);
 
