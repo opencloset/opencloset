@@ -85,11 +85,11 @@ while ( my $booking = $booking_rs->next ) {
     </thead>
     <tbody>
       % for my $time (@times) {
+        % my $male   = $booking_times{$time}{male};
+        % my $female = $booking_times{$time}{female};
         <tr>
           <td rowspan="2"><%= $time %></td>
-          % my $male   = $booking_times{$time}{male};
-          % my $female = $booking_times{$time}{female};
-          % for my $data ( $booking_times{$time}{male}, $booking_times{$time}{female} ) {
+          % for my $data ( $male, $female ) {
             % my $booking = $data->{booking};
             % my $users   = $data->{users};
             <td rowspan="2" class="slot">
@@ -135,12 +135,12 @@ while ( my $booking = $booking_rs->next ) {
           % }
         </tr>
         <tr>
-          <td>
-            xxx
-          </td>
-          <td>
-            yyy
-          </td>
+          % for my $data ( $male, $female ) {
+            % my $booking = $data->{booking};
+            <td class="desc">
+              <span class="editable" data-pk="<%= $booking->id %>" data-name="desc" data-value="<%= $booking->desc %>"></span>
+            </td>
+          % }
         </tr>
       % }
     </tbody>
