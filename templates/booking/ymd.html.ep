@@ -78,21 +78,21 @@ while ( my $booking = $booking_rs->next ) {
       </tr>
       <tr>
         <th class="slot">제한</th>
-        <th class="name">이름</th>
+        <th class="name">이름 / 설명</th>
         <th class="slot">제한</th>
-        <th class="name">이름</th>
+        <th class="name">이름 / 설명</th>
       </tr>
     </thead>
     <tbody>
       % for my $time (@times) {
         <tr>
-          <td><%= $time %></td>
+          <td rowspan="2"><%= $time %></td>
           % my $male   = $booking_times{$time}{male};
           % my $female = $booking_times{$time}{female};
           % for my $data ( $booking_times{$time}{male}, $booking_times{$time}{female} ) {
             % my $booking = $data->{booking};
             % my $users   = $data->{users};
-            <td>
+            <td rowspan="2" class="slot">
               % if ($booking) {
                 <span class="editable" data-pk="<%= $booking->id %>" data-name="slot" data-value="<%= $booking->slot %>"></span>
               % } else {
@@ -128,8 +128,19 @@ while ( my $booking = $booking_rs->next ) {
                   </span>
                 % }
               % }
+              % else {
+                &nbsp;
+              % }
             </td>
           % }
+        </tr>
+        <tr>
+          <td>
+            xxx
+          </td>
+          <td>
+            yyy
+          </td>
         </tr>
       % }
     </tbody>
