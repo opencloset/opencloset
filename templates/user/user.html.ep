@@ -299,6 +299,7 @@ use OpenCloset::Constants::Measurement qw/$HEIGHT $WEIGHT $NECK $BUST $WAIST $HI
                 <div class="profile-info-row <%= $part %>">
                   <div class="profile-info-name"><%= $OpenCloset::Constants::Measurement::LABEL_MAP{$part} %></div>
                   <div class="profile-info-value">
+                    <span class="parameter"><%= $avg->{count}{$part} || '' %></span>
                     <span id="user-<%= $part %>" class="editable" data-name="<%= $part %>"><%= $user_info->$part %></span>
                     <span class="diff"><%= $diff->{$part} || '' %></span>
                     <span class="avg"><%= $avg->{$part} || '' %></span>
