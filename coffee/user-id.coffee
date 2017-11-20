@@ -33,11 +33,13 @@ $ ->
           for i in [ 'neck', 'belly', 'topbelly', 'bust', 'arm', 'thigh', 'waist', 'hip', 'leg', 'foot', 'knee' ]
             $(".#{i} .diff").html( data.diff[i] )
             $(".#{i} .avg").html( data.avg[i] )
+            $(".#{i} .parameter").html( data.avg.count[i] )
         else
           OpenCloset.alert('warning', "키, 몸무게, 성별의 오류로 평균값을 구할 수 없습니다.")
           for i in [ 'neck', 'belly', 'topbelly', 'bust', 'arm', 'thigh', 'waist', 'hip', 'leg', 'foot', 'knee' ]
             $(".#{i} .diff").html( '-' )
             $(".#{i} .avg").html( 'N/A' )
+            $(".#{i} .parameter").html( 'N/A' )
       error: (jqXHR, textStatus, errorThrown) ->
         type = jqXHR.status is 404 ? 'warning' : 'danger'
         OpenCloset.alert(type, "평균값을 구할 수 없습니다: #{jqXHR.status}")
