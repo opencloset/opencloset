@@ -138,7 +138,12 @@ while ( my $booking = $booking_rs->next ) {
           % for my $data ( $male, $female ) {
             % my $booking = $data->{booking};
             <td class="desc">
-              <span class="editable" data-pk="<%= $booking->id %>" data-name="desc" data-value="<%= $booking->desc %>"></span>
+              % if ($booking) {
+                <span class="editable" data-pk="<%= $booking->id %>" data-name="desc" data-value="<%= $booking->desc %>"></span>
+              % }
+              % else {
+                &nbsp;
+              % }
             </td>
           % }
         </tr>
