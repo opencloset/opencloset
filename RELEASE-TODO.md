@@ -1,3 +1,9 @@
+v1.12.3
+
+    $ grunt
+    $ mysql < db/alter/134-booking-desc.sql # already finished
+    $ closetpan OpenCloset::Schema # 0.055  # already finished
+
 v1.12.2
 
     $ grunt
