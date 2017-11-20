@@ -476,6 +476,20 @@
                 text-decoration: none;
             }
         }
+        .profile-info-value > span + span.editable::before {
+            content: "";
+        }
+        .profile-info-value > span + span.editable.editable-click {
+            width: 100px;
+            display: inline-block;
+        }
+        .profile-info-value > span.parameter,
+        .profile-info-value > span + span.diff,
+        .profile-info-value > span + span.avg,
+        .profile-info-value > span + span.avg2 {
+            width: 50px;
+            display: inline-block;
+        }
         .profile-info-value > span + span.diff::before {
             border-bottom: 1px solid #fff;
             color: #666;
@@ -497,6 +511,22 @@
             display: inline;
             margin-left: 1px;
             margin-right: 30px;
+        }
+        .profile-info-value > span.parameter::before {
+            border-bottom: 1px solid #fff;
+            color: #666;
+            content: "[";
+            display: inline;
+            margin-left: 1px;
+            margin-right: 2px;
+        }
+        .profile-info-value > span.parameter::after {
+            border-bottom: 1px solid #fff;
+            color: #666;
+            content: "]";
+            display: inline;
+            margin-left: 1px;
+            margin-right: 2px;
         }
         .profile-info-user-comment {
             line-height: 2em;
