@@ -4,6 +4,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Added
+
+- 사용자 정보에서 신체 치수 입력 시 평균의 모집단 수가 표시되도록 함 (#1346)
+
 ### Fixed
 
 - 예약 활성화가 되지 않은 예약일에는 예약 현황이 뜨지 않고 502 오류가 발생 (#1355)
