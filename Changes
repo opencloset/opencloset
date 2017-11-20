@@ -4,6 +4,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [v1.12.4] - Tue, 21 Nov 2017 01:11:03 +0900
+
 ### Added
 
 - 사용자 정보에서 신체 치수 입력 시 평균의 모집단 수가 표시되도록 함 (#1346)
