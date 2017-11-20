@@ -4,6 +4,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Fixed
+
+- 예약 활성화가 되지 않은 예약일에는 예약 현황이 뜨지 않고 502 오류가 발생 (#1355)
+
 ## [v1.12.3] - Mon, 20 Nov 2017 11:45:48 +0900
 
 ### Added
