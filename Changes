@@ -4,6 +4,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Added
+
+- 서울시 쿠폰(seoul-2017-2)의 방문 예약을 마감함 (#1366)
+
 ## [v1.12.4] - Tue, 21 Nov 2017 01:11:03 +0900
 
 ### Added
