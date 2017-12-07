@@ -367,11 +367,19 @@ my %BOOKING_SLOT = (
     },
     events => {
         seoul => {
-            key => $ENV{OPENCLOSET_EVENT_SEOUL_KEY} || '',
+            key => $ENV{OPENCLOSET_EVENT_SEOUL_KEY} || q{},
             notification => {
-                from => '',
+                from => q{},
                 to   => [],
-            }
+            },
+        },
+        "seoul-2017-2" => {
+            key => $ENV{OPENCLOSET_EVENT_SEOUL_KEY} || q{},
+            notification => {
+                from => q{},
+                to   => [],
+            },
+            booking_expires => "2017-12-13T23:59:59",
         },
     },
     income => {
