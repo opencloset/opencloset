@@ -2913,6 +2913,37 @@ sub api_gui_booking_list {
         }
     }
 
+    #
+    # [GH 1366] 서울시 쿠폰 유효기간의 수정
+    #
+    if ( $self->session->{coupon_code} ) {
+        my $coupon = $self->DB->resultset("Coupon")
+            ->find( { code => $self->session->{coupon_code} } );
+        if ($coupon) {
+            my ( $event_name ) = split /\|/, $coupon->desc;
+            if (   $self->config->{events}{$event_name}
+                && $self->config->{events}{$event_name}{booking_expires} )
+            {
+                $self->config->{events}{$event_name}{booking_expires} =~ m/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})$/;
+                $to = DateTime->new(
+                    time_zone => $self->config->{timezone},
+                    year      => $1,
+                    month     => $2,
+                    day       => $3,
+                    hour      => $4,
+                    minute    => $5,
+                    second    => $6,
+                );
+                unless ($to) {
+                    my $msg = "cannot create end datetime object";
+                    $self->app->log->warn($msg);
+                    $self->error( 500, { str => $msg, data => {}, } );
+                    return;
+                }
+            }
+        }
+    }
+
     my @booking_list = $self->booking_list( $params{gender}, $from, $to );
     return unless @booking_list;
 
