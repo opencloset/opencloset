@@ -683,8 +683,10 @@ sub update_user {
         # [GH #1371] 신체 사이즈 수치를 지워도 NULL이 아닌 0이 저장됨
         #
         my %_user_info_params = %$user_info_params;
+        my %_old_user_info;
         for my $k ( keys %_user_info_params ) {
             $_user_info_params{$k} = undef if $_user_info_params{$k} eq q{};
+            $_old_user_info{$k} = $user->user_info->get_column($k);
         }
 
         $user->update( \%_user_params )
@@ -697,6 +699,19 @@ sub update_user {
             );
 
         $guard->commit;
+
+        #
+        # [GH #1390] 신체 치수 변경 시 디버그를 위한 로그를 표시
+        #
+        $self->log->debug(
+            sprintf(
+                "update user_info: user.id(%d), user_info.id(%d), %s -> %s",
+                $user->id,
+                $user->user_info->id,
+                Mojo::Util::decode( "UTF-8", Mojo::JSON::encode_json( \%_old_user_info ) ),
+                Mojo::Util::decode( "UTF-8", Mojo::JSON::encode_json( \%_user_info_params ) ),
+            )
+        );
 
         #
         # event posting to opencloset/monitor
