@@ -679,10 +679,18 @@ sub update_user {
             );
         }
 
+        #
+        # [GH #1371] 신체 사이즈 수치를 지워도 NULL이 아닌 0이 저장됨
+        #
+        my %_user_info_params = %$user_info_params;
+        for my $k ( keys %_user_info_params ) {
+            $_user_info_params{$k} = undef if $_user_info_params{$k} eq q{};
+        }
+
         $user->update( \%_user_params )
             or return $self->error( 500, { str => 'failed to update a user', data => {}, } );
 
-        $user->user_info->update( { %$user_info_params, user_id => $user->id, } )
+        $user->user_info->update( { %_user_info_params, user_id => $user->id, } )
             or return $self->error(
             500,
             { str => 'failed to update a user info', data => {}, }
