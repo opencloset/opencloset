@@ -4,6 +4,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [v1.12.7] - Wed, 03 Jan 2018 12:38:23 +0900
+
 ### Changed
 
 - 신체 사이즈 수치를 지워도 NULL이 아닌 0이 저장됨 (#1371)
