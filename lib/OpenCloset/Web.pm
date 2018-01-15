@@ -1,7 +1,7 @@
 package OpenCloset::Web;
 use Mojo::Base 'Mojolicious';
 
-use version; our $VERSION = qv("v1.12.7");
+use version; our $VERSION = qv("v1.12.8");
 
 use CHI;
 use DateTime;
