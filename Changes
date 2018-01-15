@@ -4,6 +4,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [v1.12.8] - Mon, 15 Jan 2018 17:04:08 +0900
+
+### Fixed
+
+- 방문 예약에서 지난 대여 이력을 선택 시 온라인 주문 내역을 열람할 수 없음 (#1392)
+
 ## [v1.12.7] - Wed, 03 Jan 2018 12:38:23 +0900
 
 ### Changed

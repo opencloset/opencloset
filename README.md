@@ -3,7 +3,7 @@ opencloset
 
 ## Version ##
 
-v1.12.7
+v1.12.8
 
 ## Requirements ##
 

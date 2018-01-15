@@ -1,5 +1,6 @@
 % use utf8;
 % use DateTime;
+% use List::Util;
 % use OpenCloset::Constants::Category ();
 % my $booking;
 % $booking = $order->booking if $order;
@@ -205,14 +206,17 @@
                                   <option value=""></option>
                                   % while (my $order = $orders->next) {
                                     % my $rental_date  = $order->rental_date;
-                                    % my $pre_category = $order->pre_category;
+                                    % next if     $order->parent_id;
                                     % next unless $rental_date;
-                                    % next unless $pre_category;
-                                    % my @temp = split /,/, $order->pre_category;
-                                    % my @categories = map { $OpenCloset::Constants::Category::LABEL_MAP{$_} } @temp;
+                                    % my @category_list;
+                                    % my $rs = $order->clothes;
+                                    % while ( my $c = $rs->next ) {
+                                    %   push @category_list, $OpenCloset::Constants::Category::LABEL_MAP{ $c->category };
+                                    % }
+                                    % my @sorted_uniq_category_list = sort { $a cmp $b } List::Util::uniq @category_list;
                                     <option value="<%= $order->id %>">
                                       %= $rental_date->ymd
-                                      %= join(', ', @categories)
+                                      %= join(', ', @sorted_uniq_category_list)
                                     </option>
                                   % }
                                 </select>
