@@ -4,6 +4,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Changed
+
+- 주문서 목록에서 가상계좌 문자 전송시 아임포트 서버 통신 오류가 발생함 (#1407)
+
 ## [v1.12.8] - Mon, 15 Jan 2018 17:04:08 +0900
 
 ### Fixed
