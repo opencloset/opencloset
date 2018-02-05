@@ -3,6 +3,7 @@ use Mojo::Base 'Mojolicious::Controller';
 use Mojo::JSON;
 use Mojo::Util;
 
+use Capture::Tiny;
 use DateTime;
 use Encode qw/decode_utf8/;
 use HTTP::Body::Builder::MultiPart;
@@ -3196,9 +3197,22 @@ sub api_send_vbank_sms {
         'notice_url[]' => $self->url_for("/webhooks/iamport/unpaid")->to_abs->to_string,
     };
 
-    my ( $log, $error ) =
-        OpenCloset::Common::Unpaid::create_vbank( $self->app->iamport, $order, $params );
-    return $self->error( 500, { str => $error } ) unless $log;
+    my ( $stderr, @result_create_vbank ) = Capture::Tiny::capture_stderr {
+        return OpenCloset::Common::Unpaid::create_vbank( $self->app->iamport, $order, $params );
+    };
+    my ( $log, $error ) = @result_create_vbank;
+    unless ($log) {
+        $self->error( 500, { str => "아임포트 서버 오류: $error: $stderr" } );
+
+        my $log_str = sprintf(
+            "order.id(%d) -> %s",
+            $order->id,
+            Mojo::Util::decode( "UTF-8", Mojo::JSON::encode_json($params) ),
+        );
+        $self->app->log->warn($log_str);
+
+        return;
+    }
 
     my $data         = decode_json( $log->detail );
     my $vbank_name   = $data->{response}{vbank_name};
