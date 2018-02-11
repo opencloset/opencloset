@@ -4,6 +4,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [v1.12.9] - Mon, 12 Feb 2018 04:47:58 +0900
+
 ### Changed
 
 - 쿠폰 별 발급 개수와 별개로 제한 개수를 설정함 (#1408)
