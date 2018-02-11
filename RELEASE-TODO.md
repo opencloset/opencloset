@@ -1,3 +1,6 @@
+    $ closetpan OpenCloset::API    # v0.1.2 # already finished
+    $ closetpan OpenCloset::Schema # 0.056  # already finished
+
 v1.12.8
 
 v1.12.7
