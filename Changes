@@ -4,6 +4,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [v1.12.9] - Mon, 12 Feb 2018 04:47:58 +0900
+
+### Changed
+
+- 쿠폰 별 발급 개수와 별개로 제한 개수를 설정함 (#1408)
+- 주문서 목록에서 가상계좌 문자 전송시 아임포트 서버 통신 오류가 발생함 (#1407)
+
 ## [v1.12.8] - Mon, 15 Jan 2018 17:04:08 +0900
 
 ### Fixed
