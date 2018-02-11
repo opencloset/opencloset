@@ -1,5 +1,6 @@
-    $ closetpan OpenCloset::API    # v0.1.2 # already finished
-    $ closetpan OpenCloset::Schema # 0.056  # already finished
+    $ mysql < db/alter/136-coupon-limit.sql
+    $ closetpan OpenCloset::API    # v0.1.2
+    $ closetpan OpenCloset::Schema # 0.056
 
 v1.12.8
 
