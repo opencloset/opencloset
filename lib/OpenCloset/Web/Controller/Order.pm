@@ -504,6 +504,39 @@ sub update {
         if ( $name eq 'status_id' ) {
             my $guard = $self->DB->txn_scope_guard;
             try {
+                #
+                # 쿠폰의 상태를 변경
+                #
+                #   결제방식이 쿠폰(+현금|+카드)?
+                #
+                if ( my $coupon = $order->coupon ) {
+                    if ( $order->price_pay_with =~ m/쿠폰/ ) {
+                        my $coupon_limit = $self->DB->resultset('CouponLimit')->find({ cid => $coupon->desc });
+                        if ($coupon_limit) {
+                            my $coupon_count = $self->DB->resultset('Coupon')->search(
+                                {
+                                    desc   => $coupon->desc,
+                                    status => 'used',
+                                },
+                            )->count;
+
+                            my $log_str = sprintf(
+                                "coupon: code(%s), limit(%d), count(%s)",
+                                $order->coupon->code,
+                                $coupon_limit->limit,
+                                $coupon_count,
+                            );
+                            if ( $coupon_limit->limit == -1 || $coupon_count < $coupon_limit->limit ) {
+                                $self->log->debug($log_str);
+                            }
+                            else {
+                                die "coupon limit reached: $log_str\n";
+                            }
+                        }
+                        $coupon->update( { status => 'used' } );
+                    }
+                }
+
                 unless ( $order->status_id == $value ) {
                     #
                     # update order.status_id
@@ -630,17 +663,6 @@ sub update {
                             else {
                                 $self->log->info( "no donation message to send SMS for order: " . $order->id );
                             }
-                        }
-                    }
-
-                    #
-                    # 쿠폰의 상태를 변경
-                    #
-                    #   결제방식이 쿠폰(+현금|+카드)?
-                    #
-                    if ( my $coupon = $order->coupon ) {
-                        if ( $order->price_pay_with =~ m/쿠폰/ ) {
-                            $coupon->update( { status => 'used' } );
                         }
                     }
                 }
