@@ -43,14 +43,14 @@ requires 'experimental';
 
 # from opencloset cpan
 requires 'Iamport::REST::Client';
-requires 'OpenCloset::API',                     'v0.1.1';
+requires 'OpenCloset::API',                     'v0.1.2';
 requires 'OpenCloset::Calculator::LateFee',     'v0.3.0';
 requires 'OpenCloset::Common',                  'v0.1.0';
 requires 'OpenCloset::Config',                  '0.002';
 requires 'OpenCloset::DB::Plugin::Order::Sale', '0.002';
 requires 'OpenCloset::Events::EmploymentWing',  'v0.0.4';
 requires 'OpenCloset::Plugin::Helpers',         'v0.0.23';
-requires 'OpenCloset::Schema',                  '0.055';
+requires 'OpenCloset::Schema',                  '0.056';
 requires 'OpenCloset::Size::Guess',             '0.003';
 requires 'OpenCloset::Size::Guess::BodyKit',    '0.001';
 requires 'OpenCloset::Size::Guess::DB',         '0.008';

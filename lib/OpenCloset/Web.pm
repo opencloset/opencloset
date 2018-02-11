@@ -46,7 +46,13 @@ has iamport => sub {
 
 has api => sub {
     my $self = shift;
-    return OpenCloset::API::Order->new( schema => $self->DB );
+
+    my $obj = OpenCloset::API::Order->new(
+        schema      => $self->DB,
+        monitor_uri => $self->config->{monitor_uri},
+    );
+
+    return $obj;
 };
 
 has detail_api => sub {

@@ -1,6 +1,7 @@
 package OpenCloset::Web::Controller::Rental;
 use Mojo::Base 'Mojolicious::Controller';
 
+use Capture::Tiny;
 use DateTime;
 use DateTime::Format::Strptime;
 use Try::Tiny;
@@ -287,7 +288,7 @@ sub payment2rental {
         $order->update( { staff_id => $user->id } ) if $user_info->staff;
     }
 
-    my ( $success, $method, $redirect );
+    my ( $success, $method, $redirect, $inner_log );
     my $api = $self->app->api;
     if ($reset) {
         $method   = 'payment2box';
@@ -302,16 +303,33 @@ sub payment2rental {
         }
 
         $method  = 'payment2rental';
-        $success = $api->payment2rental($order);
+        my ( $stderr ) = Capture::Tiny::capture_stderr {
+            $success = $api->payment2rental($order);
+        };
+        if ($stderr) {
+            my @lines = split "\n", $stderr;
+            chomp @lines;
+
+            my @log_lines;
+            for my $line (@lines) {
+                if ( $line =~ m/DBIx::Class::Storage::TxnScopeGuard::DESTROY/ ) {
+                    $self->log->warn($line);
+                    next;
+                }
+                push @log_lines, $line;
+            }
+            $inner_log = join q{ }, @log_lines;
+        }
     }
 
-    unless ($success) {
-        my $err = "$method failed: order_id($id)";
-        $self->log->error($err);
-        $self->flash( error => $err );
+    if ($success) {
+        $self->log->debug($inner_log) if $inner_log;
+        $self->flash( success => '정상적으로 처리되었습니다.' );
     }
     else {
-        $self->flash( success => '정상적으로 처리되었습니다.' );
+        my $err = $inner_log ? $inner_log : "$method failed: order_id($id)";
+        $self->log->error($err);
+        $self->flash( error => $err );
     }
 
     $self->redirect_to($redirect);
