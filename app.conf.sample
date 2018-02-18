@@ -381,6 +381,14 @@ my %BOOKING_SLOT = (
             },
             booking_expires => "2017-12-13T23:59:59",
         },
+        "seoul-2018-1" => {
+            key => $ENV{OPENCLOSET_EVENT_SEOUL_KEY} || q{},
+            notification => {
+                from => q{},
+                to   => [],
+            },
+            booking_expires => "2018-12-13T23:59:59",
+        },
     },
     income => {
         opencloset => '25ab86bed149ca6ca9c1c0d5db7c9a91388ddeab',    # s3cr3t
