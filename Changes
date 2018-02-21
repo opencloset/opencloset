@@ -7,6 +7,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ### Fixed
 - 관리자가 예약취소했을때 정상적인 취소안내 문자메세지를 전송 (#1444)
 
+### Changed
+- 취업날개 "연장하기" 통계 주소가 변경됨 (#1405)
+
 ## [v1.12.10] - Fri, 04 May 2018 20:58:17 +0900
 
 ### Fixed
