@@ -1,3 +1,5 @@
+    $ grunt
+
 v1.12.9
 
     $ mysql < db/alter/136-coupon-limit.sql

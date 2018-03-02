@@ -36,8 +36,10 @@
 % }
 
 % if (my $memo = $order->return_memo) {
-  <p>반납 확인 메모 4F</p>
-  <pre><%= $memo %></pre>
+  <div class="order-return-memo-emphasis">
+    <p>반납 확인 메모 4F</p>
+    <pre class="bg-info"><%= $memo %></pre>
+  </div>
 % }
 
 <div class="row">
