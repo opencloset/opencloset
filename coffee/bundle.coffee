@@ -66,6 +66,10 @@ $ ->
       '탈의09':     { id: 28, css: 'label-inverse'   }
       '탈의10':     { id: 29, css: 'label-inverse'   }
       '탈의11':     { id: 30, css: 'label-inverse'   }
+      '탈의12':     { id: 31, css: 'label-inverse'   }
+      '탈의13':     { id: 32, css: 'label-inverse'   }
+      '탈의14':     { id: 33, css: 'label-inverse'   }
+      '탈의15':     { id: 34, css: 'label-inverse'   }
       '대여안함':   { id: 40, css: 'label-inverse'   }
       '포장취소':   { id: 41, css: 'label-inverse'   }
       '환불':       { id: 42, css: 'label-inverse'   }

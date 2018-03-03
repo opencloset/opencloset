@@ -157,6 +157,10 @@ $ ->
       '탈의09',
       '탈의10',
       '탈의11',
+      '탈의12',
+      '탈의13',
+      '탈의14',
+      '탈의15',
       '수선',
       '포장',
     ]
@@ -237,6 +241,10 @@ $ ->
           when 28 then status_id = 18 # 탈의09   -> 포장
           when 29 then status_id = 18 # 탈의10   -> 포장
           when 30 then status_id = 18 # 탈의11   -> 포장
+          when 31 then status_id = 18 # 탈의12   -> 포장
+          when 32 then status_id = 18 # 탈의13   -> 포장
+          when 33 then status_id = 18 # 탈의14   -> 포장
+          when 34 then status_id = 18 # 탈의15   -> 포장
           when  6 then status_id = 18 # 수선     -> 포장
           else return
         success_cb = () ->
