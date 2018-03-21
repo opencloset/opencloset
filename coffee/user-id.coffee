@@ -146,7 +146,9 @@ $ ->
         params.type   = 'select'
         params.source = [
           { value: '0', text: '안입고감' },
-          { value: '1', text: '입고감' }
+          { value: '1', text: '입고감' },
+          { value: '2', text: '기록요망' },
+          { value: '3', text: '입고감+기록요망' }
         ]
         params.display = (value) ->
           if typeof value == 'number'
@@ -154,6 +156,8 @@ $ ->
           switch value
             when '0' then value_str = '안입고감'
             when '1' then value_str = '입고감'
+            when '2' then value_str = '기록요망'
+            when '3' then value_str = '입고감+기록요망'
             else          value_str = ''
           $(this).html value_str
         params.url = (params) ->
