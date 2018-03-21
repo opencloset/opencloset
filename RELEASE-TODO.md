@@ -1,4 +1,5 @@
     $ grunt
+    $ closetpan OpenCloset::Common # v0.1.6
 
 v1.12.9
 

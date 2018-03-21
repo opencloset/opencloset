@@ -172,11 +172,13 @@ $ ->
   #
   # 착용 버튼 토글
   #
+  DOES_WEAR_MAP = { 0: '안입고감', 1: '입고감', 2: '기록요망', 3: '입고감+기록요망' }
   $('#order-table').on 'click', '.btn-wearing:not(.disabled)', (e) ->
     $this = $(@)
     $this.addClass('disabled')
 
-    does_wear = if $this.hasClass('btn-success') then 0 else 1
+    does_wear = parseInt($this.data('does-wear')) + 1
+    does_wear = 0 if does_wear > 3
     order_id = $this.closest('tr').data('order-id')
 
     $.ajax "/api/order/#{order_id}.json",
@@ -185,10 +187,7 @@ $ ->
         id: order_id
         does_wear: does_wear
       success: (data, textStatus, jqXHR) ->
-        if $this.hasClass('btn-success')
-          $this.removeClass('btn-success').addClass('btn-default').html('안입고감')
-        else
-          $this.removeClass('btn-default').addClass('btn-success').html('입고감')
+        $this.data('does-wear', does_wear).html(DOES_WEAR_MAP[does_wear])
       error: (jqXHR, textStatus, errorThrown) ->
         OpenCloset.alert('danger', "착용여부 변경에 실패했습니다: #{jqXHR.responseJSON.error.str}")
       complete: (jqXHR, textStatus) ->
@@ -234,7 +233,8 @@ $ ->
           type: 'GET'
           dataType: 'json'
           success: (data, textStatus, jqXHR) ->
-            data.order.does_wear = parseInt(data.order.does_wear)
+            data.order.does_wear     = parseInt(data.order.does_wear)
+            data.order.does_wear_str = DOES_WEAR_MAP[data.order.does_wear]
             template = JST['rental/order-table-item']
             html     = template(data)
             $('#order-table tbody').append(html)

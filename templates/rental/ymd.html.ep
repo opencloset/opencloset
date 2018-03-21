@@ -13,6 +13,7 @@ jses => [
   '/lib/bootstrap3-editable/css/bootstrap-editable.css'
 ];
 title meta_text($_id);
+use OpenCloset::Constants qw/%DOES_WEAR_MAP/;
 use OpenCloset::Constants::Category;
 %>
 
@@ -144,11 +145,7 @@ use OpenCloset::Constants::Category;
               %= $user_info->phone
             </td>
             <td>
-              % if ($order->does_wear) {
-                <button class="btn btn-success btn-wearing btn-sm" type="button">입고감</button>
-              % } else {
-                <button class="btn btn-default btn-wearing btn-sm" type="button">안입고감</button>
-              % }
+              <button class="btn btn-default btn-wearing btn-sm" type="button" data-does-wear="<%= $order->does_wear || 0 %>"><%= $DOES_WEAR_MAP{$order->does_wear || ''} %></button>
             </td>
             <td>
               <span id="pants" class="editable" data-name="pants" data-user-id="<%= $user->id %>" data-order-id="<%= $order->id %>"><%= $order->pants || '' %></span>

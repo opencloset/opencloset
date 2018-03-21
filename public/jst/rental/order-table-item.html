@@ -19,11 +19,7 @@
     {{user_info.phone}}
   </td>
   <td>
-    {{#if order.does_wear}}
-    <button class="btn btn-success btn-sm btn-wearing" type="button">입고감</button>
-    {{else}}
-    <button class="btn btn-default btn-sm btn-wearing" type="button">안입고감</button>
-    {{/if}}
+    <button class="btn btn-default btn-wearing btn-sm" type="button" data-does-wear="{{#if order.does_wear}}{{order.does_wear}}{{else}}0{{/if}}">{{order.does_wear_str}}</button>
   </td>
   <td>
     <span id="pants" class="editable" data-name="pants" data-user-id="{{user.id}}" data-order-id="{{order.id}}">{{order.pants}}</span>
