@@ -13,7 +13,7 @@ use WebService::Jandi::WebHook;
 
 use OpenCloset::Calculator::LateFee;
 use OpenCloset::Common::Unpaid
-    qw/unpaid_cond unpaid_attr is_nonpaid unpaid2fullpaid/;
+    qw/unpaid_cond unpaid_attr is_unpaid is_nonpaid unpaid2fullpaid/;
 use OpenCloset::Constants qw/%PAY_METHOD_MAP/;
 use OpenCloset::Constants::Category;
 use OpenCloset::Constants::Status
@@ -329,13 +329,7 @@ sub detail {
     my ( $unpaid, $nonpaid );
     my $orders = $user->orders;
     while ( my $row = $orders->next ) {
-        my $late_fee_pay_with     = $row->late_fee_pay_with     || '';
-        my $compensation_pay_with = $row->compensation_pay_with || '';
-
-        if ( $late_fee_pay_with =~ /미납/ || $compensation_pay_with =~ /미납/ ) {
-            $unpaid = 1;
-        }
-
+        $unpaid  = is_unpaid($row)  unless $unpaid;
         $nonpaid = is_nonpaid($row) unless $nonpaid;
         last if $unpaid and $nonpaid;
     }
