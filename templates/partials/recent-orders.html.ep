@@ -44,7 +44,7 @@
                 <span class="order-status-str"><%= $order->status->name %></span>
                 <span class="late-fee"><%= $order->status->name eq '대여중' && $late_fee ? commify($late_fee) . q{원} : q{} %></span>
               </span>
-              % if (($order->late_fee_pay_with && $order->late_fee_pay_with =~ /미납/) || ($order->compensation_pay_with && $order->compensation_pay_with =~ /미납/)) {
+              % if (is_unpaid($order)) {
                 <span class="label label-danger">
                   <i class="icon-warning-sign"></i>
                   미납
