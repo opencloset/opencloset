@@ -566,10 +566,11 @@
       <tr>
         <th>착용 날짜</th>
         <td>
+          % if (my $wearon_date = $order->wearon_date) {
+            <samp title="주문서의 의류착용일"><%= $wearon_date->ymd %></samp>
+          % }
           % if (my $wearon_date = $user_info->wearon_date) {
-            <samp>
-              %= $wearon_date->ymd
-            </samp>
+            <samp title="사용자정보의 의류착용일" class="text-muted"><small><%= $wearon_date->ymd %></small></samp>
           % }
         </td>
       </tr>
