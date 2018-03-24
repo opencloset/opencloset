@@ -505,7 +505,8 @@ sub update {
                 #
                 if ( my $coupon = $order->coupon ) {
                     if ( $order->price_pay_with =~ m/쿠폰/ ) {
-                        my $coupon_limit = $self->DB->resultset('CouponLimit')->find({ cid => $coupon->desc });
+                        my $coupon_limit =
+                            $self->DB->resultset('CouponLimit')->find( { cid => $coupon->desc } );
                         if ($coupon_limit) {
                             my $coupon_count = $self->DB->resultset('Coupon')->search(
                                 {
