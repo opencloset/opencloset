@@ -1,4 +1,4 @@
-FROM opencloset/perl:latest
+FROM registry.theopencloset.net/opencloset/perl:latest
 
 RUN groupadd opencloset && useradd -g opencloset opencloset
 
