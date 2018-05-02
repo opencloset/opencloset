@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Changed
 
+- travis-ci 에서 docker image 를 build 하도록 함
 - 이벤트 통계의 목록을 갱신 (#1439, #1441)
 - 사용자 정보의 착용 여부 선택 항목을 입고감/기록요망으로 변경 (#1398)
   - does_wear(입고감) 컬럼을 기록요망 용도로 확장해서 사용
