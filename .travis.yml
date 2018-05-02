@@ -1,0 +1,35 @@
+if: tag IS present
+
+sudo: required
+
+language: perl
+
+services:
+  - docker
+
+install:
+  - echo "Skip install"
+
+script:
+  - echo "Skip test"
+
+after_success:
+  - docker --version
+  - docker build -f Dockerfile              -t opencloset/staff:$TRAVIS_TAG .
+  - docker build -f Dockerfile.cron         -t opencloset/staff/cron:$TRAVIS_TAG .
+  - docker build -f Dockerfile.sms-notifier -t opencloset/staff/sms-notifier:$TRAVIS_TAG .
+  - docker tag opencloset/staff:$TRAVIS_TAG              registry.theopencloset.net/opencloset/staff:$TRAVIS_TAG
+  - docker tag opencloset/staff/cron:$TRAVIS_TAG         registry.theopencloset.net/opencloset/staff/cron:$TRAVIS_TAG
+  - docker tag opencloset/staff/sms-notifier:$TRAVIS_TAG registry.theopencloset.net/opencloset/staff/sms-notifier:$TRAVIS_TAG
+  - docker push registry.theopencloset.net/opencloset/staff:$TRAVIS_TAG
+  - docker push registry.theopencloset.net/opencloset/staff/cron:$TRAVIS_TAG
+  - docker push registry.theopencloset.net/opencloset/staff/sms-notifier:$TRAVIS_TAG
+
+notifications:
+  email:
+    recipients:
+      - staff@silex.kr
+    on_success: always # default: change
+    on_failure: always # default: always
+  ## irc 는 동작하지않음
+  ## https://github.com/aanoaa/fake-pause/blob/develop/.travis.yml 참고
