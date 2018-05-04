@@ -77,6 +77,7 @@ sub register {
     $app->helper( user_avg_diff            => \&user_avg_diff );
     $app->helper( user_avg2                => \&user_avg2 );
     $app->helper( count_visitor            => \&count_visitor );
+    $app->helper( is_unpaid                => \&is_unpaid );
     $app->helper( is_nonpaid               => \&is_nonpaid );
     $app->helper( coupon2label             => \&coupon2label );
     $app->helper( measurement2text         => \&measurement2text );
@@ -1680,6 +1681,19 @@ sub count_visitor {
     $count{visited}{female} = $count{all}{female} - $count{notvisited}{female};
 
     return \%count;
+}
+
+=head2 is_unpaid( $order )
+
+C<order> 에 대해 미납의 이력이 있는지 확인
+미납이면 order_detail 에 대한 C<$resultset> 아니면 C<undef> 를 return
+
+=cut
+
+sub is_unpaid {
+    my ( $self, $order ) = @_;
+    return unless $order;
+    return OpenCloset::Common::Unpaid::is_unpaid($order);
 }
 
 =head2 is_nonpaid( $order )

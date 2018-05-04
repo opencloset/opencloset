@@ -9,6 +9,7 @@ jses  => [
 title meta_text($_id);
 
 use DateTime;
+use OpenCloset::Constants qw/%DOES_WEAR_MAP/;
 use OpenCloset::Constants::Status qw/$RETURNED $RESERVATED $RETURN_RESERVATED $BOX $BOXED $PAYMENT $PAYBACK $NOT_RENTAL $NO_SIZE/;
 my $list_name = param('status') || '';
 my $user = current_user;
@@ -86,7 +87,7 @@ my $user = current_user;
   </li>
   <li>|</li>
   <li>
-    <a href="<%= url_for->query(status => 'extension') %>">연장중</a>
+    <a href="<%= url_for->query(booking_ymd => 'all', status => 'extension') %>">연장중</a>
   </li>
   <li>|</li>
   <li>
@@ -150,7 +151,9 @@ my $user = current_user;
           </td>
           <td>
             % if ($status eq '포장완료' && $order->does_wear) {
-              <p>입고감</p>
+              <p>
+                <mark><%= $DOES_WEAR_MAP{$order->does_wear} %></mark>
+              </p>
             % }
             <a href="<%= url_for('/orders/' . $order->id) %>">
               <span class="label order-status" data-order-status="<%= $status %>"><%= $status || '상태없음' %></span>

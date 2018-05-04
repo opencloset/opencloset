@@ -1,4 +1,4 @@
-FROM opencloset/node:latest as builder
+FROM registry.theopencloset.net/opencloset/node:latest as builder
 MAINTAINER Hyungsuk Hong <aanoaa@gmail.com>
 
 WORKDIR /build
@@ -20,7 +20,7 @@ RUN grunt
 
 
 # https://docs.docker.com/engine/userguide/eng-image/multistage-build/
-FROM opencloset/perl:latest
+FROM registry.theopencloset.net/opencloset/perl:latest
 
 RUN groupadd opencloset && useradd -g opencloset opencloset
 
@@ -36,6 +36,7 @@ WORKDIR /home/opencloset/service/staff.theopencloset.net
 COPY --from=builder /build .
 COPY . .
 RUN chown -R opencloset:opencloset .
+RUN mv app.conf.sample app.conf
 
 USER opencloset
 ENV MOJO_HOME=/home/opencloset/service/staff.theopencloset.net

@@ -1,4 +1,4 @@
-FROM opencloset/perl:latest
+FROM registry.theopencloset.net/opencloset/perl:latest
 
 RUN groupadd opencloset && useradd -g opencloset opencloset
 
@@ -15,6 +15,7 @@ RUN cpanm --notest \
 WORKDIR /home/opencloset/service/staff.theopencloset.net
 COPY . .
 RUN chown -R opencloset:opencloset .
+RUN mv app.conf.sample app.conf
 
 # set env
 ENV MOJO_HOME=/home/opencloset/service/staff.theopencloset.net

@@ -18,7 +18,23 @@
     <div class="container">
       <div id="content">
 
-        <h1>이벤트 통계</h1>
+        <h1>
+          이벤트 통계
+          % if (my $user = current_user) {
+            % if ($user->user_info->staff) {
+              <div class="btn-group">
+                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  이벤트 통계 <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu">
+                  % for my $e (qw/seoul-2018 gwanak 10bob happybean incheonjob anyangyouth hanshin_univ gunpo gwangju201801 samsunglife201801/) {
+                    <li><a href="<%= url_for(event => $e) %>"><%= $e %></a></li>
+                  % }
+                </ul>
+              </div>
+            % }
+          % }
+        </h1>
         <div class="monthly-stat">
           <h2>
             월간 방문 인원
