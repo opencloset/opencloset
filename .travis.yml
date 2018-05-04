@@ -19,11 +19,17 @@ after_success:
   - docker build -f Dockerfile.cron         -t opencloset/staff/cron:$TRAVIS_TAG .
   - docker build -f Dockerfile.sms-notifier -t opencloset/staff/sms-notifier:$TRAVIS_TAG .
   - docker tag opencloset/staff:$TRAVIS_TAG              registry.theopencloset.net/opencloset/staff:$TRAVIS_TAG
+  - docker tag opencloset/staff:$TRAVIS_TAG              registry.theopencloset.net/opencloset/staff:latest
   - docker tag opencloset/staff/cron:$TRAVIS_TAG         registry.theopencloset.net/opencloset/staff/cron:$TRAVIS_TAG
+  - docker tag opencloset/staff/cron:$TRAVIS_TAG         registry.theopencloset.net/opencloset/staff/cron:latest
   - docker tag opencloset/staff/sms-notifier:$TRAVIS_TAG registry.theopencloset.net/opencloset/staff/sms-notifier:$TRAVIS_TAG
+  - docker tag opencloset/staff/sms-notifier:$TRAVIS_TAG registry.theopencloset.net/opencloset/staff/sms-notifier:latest
   - docker push registry.theopencloset.net/opencloset/staff:$TRAVIS_TAG
+  - docker push registry.theopencloset.net/opencloset/staff:latest
   - docker push registry.theopencloset.net/opencloset/staff/cron:$TRAVIS_TAG
+  - docker push registry.theopencloset.net/opencloset/staff/cron:latest
   - docker push registry.theopencloset.net/opencloset/staff/sms-notifier:$TRAVIS_TAG
+  - docker push registry.theopencloset.net/opencloset/staff/sms-notifier:latest
 
 notifications:
   email:
