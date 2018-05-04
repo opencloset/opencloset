@@ -36,6 +36,7 @@ WORKDIR /home/opencloset/service/staff.theopencloset.net
 COPY --from=builder /build .
 COPY . .
 RUN chown -R opencloset:opencloset .
+RUN mv app.conf.sample app.conf
 
 USER opencloset
 ENV MOJO_HOME=/home/opencloset/service/staff.theopencloset.net

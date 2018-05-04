@@ -12,7 +12,7 @@ RUN cpanm --notest \
 # Everything up to cached.
 WORKDIR /home/opencloset/service/staff.theopencloset.net
 COPY ./bin/opencloset-sms-notifier.pl ./bin/opencloset-sms-notifier.pl
-COPY ./app.conf ./app.conf
+COPY ./app.conf.sample ./app.conf
 RUN chown -R opencloset:opencloset .
 
 USER opencloset

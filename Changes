@@ -4,6 +4,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Fixed
+- 도커 이미지 안에 기본 설정파일을 제공
+
 ### Changed
 
 - travis-ci 에서 docker image 를 build 하도록 함
