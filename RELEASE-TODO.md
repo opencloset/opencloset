@@ -1,3 +1,5 @@
+v1.12.10
+
     $ grunt
     $ closetpan OpenCloset::Common # v0.1.7
     $ closetpan OpenCloset::API    # v0.1.5
