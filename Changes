@@ -4,6 +4,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Fixed
+- 관리자가 예약취소했을때 정상적인 취소안내 문자메세지를 전송 (#1444)
+
 ## [v1.12.10] - Fri, 04 May 2018 20:58:17 +0900
 
 ### Fixed
