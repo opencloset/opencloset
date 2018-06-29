@@ -5,11 +5,18 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ## [Unreleased]
 
 ### Fixed
+
 - 관리자가 예약취소했을때 정상적인 취소안내 문자메세지를 전송 (#1444)
+
+### Changed
+
+- 2018년 서울시 쿠폰 오픈 준비 (#1405)
+  - 취업날개 "연장하기" 통계 주소가 변경됨
 
 ## [v1.12.10] - Fri, 04 May 2018 20:58:17 +0900
 
 ### Fixed
+
 - 도커 이미지 안에 기본 설정파일을 제공
 
 ### Changed
