@@ -66,7 +66,7 @@
       % @err = @{ $error->{user_target_date} || [] };
       <div class="form-group<%= @err ? ' has-error' : '' %>">
         <label for="user-target-date">반납예정일</label>
-        <input type="text" name="user-target-date" class="form-control" id="user-target-date" placeholder="yyyy-mm-dd 형식으로 입력" required>
+        <input type="text" name="user-target-date" class="form-control" id="user-target-date" placeholder="yyyy-mm-dd 형식으로 입력" data-date-end-date="+<%= $MAX_EXTENSION_DAYS - $extension->{days} %>d" required>
         <div class="help-block with-errors">
           % if (@err) {
             <ul class="list-unstyled">

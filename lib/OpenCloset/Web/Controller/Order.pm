@@ -890,6 +890,27 @@ sub create_order_extension {
         );
     }
 
+    my $strp = DateTime::Format::Strptime->new(
+        pattern   => '%Y-%m-%d',
+        time_zone => $self->config->{timezone},
+        on_error  => 'undef',
+    );
+
+    my $today        = DateTime->today( time_zone => $self->config->{timezone} );
+    my $dt           = $strp->parse_datetime($target_date);
+    my $dur          = $dt->delta_days($today);
+    my ($delta_days) = $dur->in_units('days');
+    if ( $delta_days + $extension_days > $MAX_EXTENSION_DAYS ) {
+        return $self->error(
+            400,
+            {
+                str =>
+                    "최대연장기간($MAX_EXTENSION_DAYS 일) 이상 연장할 수 없습니다"
+            },
+            'error/bad_request'
+        );
+    }
+
     $self->update_order( { id => $order_id, user_target_date => $target_date } );
     $self->redirect_to( $self->url_for("/order/$order_id/extension/success") );
 }

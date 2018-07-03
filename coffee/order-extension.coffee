@@ -3,7 +3,6 @@ $ ->
   $('input[name=user-target-date]').datepicker
     format: 'yyyy-mm-dd'
     startDate: new Date()
-    endDate: '+26d'
     todayHighlight: true
     autoclose: true
     language: 'kr'
