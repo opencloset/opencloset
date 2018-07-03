@@ -14,7 +14,7 @@ use WebService::Jandi::WebHook;
 use OpenCloset::Calculator::LateFee;
 use OpenCloset::Common::Unpaid
     qw/unpaid_cond unpaid_attr is_unpaid is_nonpaid unpaid2fullpaid/;
-use OpenCloset::Constants qw/%PAY_METHOD_MAP/;
+use OpenCloset::Constants qw/%PAY_METHOD_MAP $MAX_EXTENSION_DAYS/;
 use OpenCloset::Constants::Category;
 use OpenCloset::Constants::Status
     qw/$RENTAL $RETURNED $PARTIAL_RETURNED $RETURNING $NOT_VISITED $PAYMENT $NOT_RENTAL $PAYBACK $NO_SIZE $BOX $BOXED/;
@@ -816,8 +816,17 @@ sub order_extension {
     my $order = $self->get_order( { id => $order_id } );
     return unless $order;
 
+    my $calc           = OpenCloset::Calculator::LateFee->new;
+    my $overdue_days   = $calc->overdue_days($order);
+    my $extension_days = $calc->extension_days($order);
+
     my $error = $self->flash('error');
-    $self->render( order => $order, error => $error );
+    $self->render(
+        order     => $order,
+        error     => $error,
+        overdue   => { days => $overdue_days },
+        extension => { days => $extension_days },
+    );
 }
 
 =head2 create_order_extension
@@ -858,6 +867,27 @@ sub create_order_extension {
             }
         );
         return $self->redirect_to( $self->url_for );
+    }
+
+    my $calc           = OpenCloset::Calculator::LateFee->new;
+    my $overdue_days   = $calc->overdue_days($order);
+    my $extension_days = $calc->extension_days($order);
+    if ($overdue_days) {
+        return $self->error(
+            400,
+            { str => '연체중에는 연장을 할 수 없습니다.' }, 'error/bad_request'
+        );
+    }
+
+    if ( $extension_days >= $MAX_EXTENSION_DAYS ) {
+        return $self->error(
+            400,
+            {
+                str =>
+                    "최대연장기간($MAX_EXTENSION_DAYS 일) 이상 연장할 수 없습니다"
+            },
+            'error/bad_request'
+        );
     }
 
     $self->update_order( { id => $order_id, user_target_date => $target_date } );
