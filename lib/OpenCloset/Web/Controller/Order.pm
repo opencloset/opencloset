@@ -1154,7 +1154,7 @@ sub delete_cors {
         unless $origin =~ m/theopencloset\.net/;
 
     $self->res->headers->header( 'Access-Control-Allow-Origin'  => $origin );
-    $self->res->headers->header( 'Access-Control-Allow-Methods' => 'DELETE' );
+    $self->res->headers->header( 'Access-Control-Allow-Methods' => 'OPTIONS, DELETE' );
     $self->respond_to( any => { data => '', status => 200 } );
 }
 
@@ -1169,6 +1169,10 @@ sub delete {
     my $order = $self->stash('order');
 
     $self->app->api->cancel($order);
+
+    my $origin = $self->req->headers->header('origin');
+    $self->res->headers->header( 'Access-Control-Allow-Origin' => $origin );
+
     $self->render( json => {} );
 }
 
