@@ -1154,7 +1154,7 @@ sub delete_cors {
         unless $origin =~ m/theopencloset\.net/;
 
     $self->res->headers->header( 'Access-Control-Allow-Origin'  => $origin );
-    $self->res->headers->header( 'Access-Control-Allow-Methods' => $method );
+    $self->res->headers->header( 'Access-Control-Allow-Methods' => 'DELETE' );
     $self->respond_to( any => { data => '', status => 200 } );
 }
 
