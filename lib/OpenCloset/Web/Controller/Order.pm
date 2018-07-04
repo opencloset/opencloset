@@ -14,7 +14,8 @@ use WebService::Jandi::WebHook;
 use OpenCloset::Calculator::LateFee;
 use OpenCloset::Common::Unpaid
     qw/unpaid_cond unpaid_attr is_unpaid is_nonpaid unpaid2fullpaid/;
-use OpenCloset::Constants qw/%PAY_METHOD_MAP $MAX_EXTENSION_DAYS/;
+use OpenCloset::Constants
+    qw/%PAY_METHOD_MAP $MAX_EXTENSION_DAYS $DEFAULT_RENTAL_PERIOD/;
 use OpenCloset::Constants::Category;
 use OpenCloset::Constants::Status
     qw/$RENTAL $RETURNED $PARTIAL_RETURNED $RETURNING $NOT_VISITED $PAYMENT $NOT_RENTAL $PAYBACK $NO_SIZE $BOX $BOXED/;
@@ -814,11 +815,23 @@ sub order_extension {
 
     my $order_id = $self->param('order_id');
     my $order = $self->get_order( { id => $order_id } );
-    return unless $order;
+    return $self->error( 404, { str => 'Order not found' }, 'error/not_found' )
+        unless $order;
 
     my $calc           = OpenCloset::Calculator::LateFee->new;
     my $overdue_days   = $calc->overdue_days($order);
     my $extension_days = $calc->extension_days($order);
+    my $rental_date    = $order->rental_date;
+    return $self->error( 400, { str => 'Missing rental_date' }, 'error/bad_request' )
+        unless $rental_date;
+
+    my $today = DateTime->today( time_zone => $self->config->{timezone} );
+    ## $DEFAULT_RENTAL_PERIOD: 3 인데 3박 4일 대여라서 +1
+    my $end_date =
+        $rental_date->clone->add(
+        days => $DEFAULT_RENTAL_PERIOD + $MAX_EXTENSION_DAYS + 1 );
+    my $dur = $end_date->delta_days($today);
+    my ($delta_days) = $dur->in_units('days');
 
     my $error = $self->flash('error');
     $self->render(
@@ -826,6 +839,7 @@ sub order_extension {
         error     => $error,
         overdue   => { days => $overdue_days },
         extension => { days => $extension_days },
+        end_days  => $delta_days,
     );
 }
 
@@ -839,7 +853,12 @@ sub create_order_extension {
     my $self     = shift;
     my $order_id = $self->param('order_id');
     my $order    = $self->get_order( { id => $order_id } );
-    return unless $order;
+    return $self->error( 404, { str => 'Order not found' }, 'error/not_found' )
+        unless $order;
+
+    my $rental_date = $order->rental_date;
+    return $self->error( 400, { str => 'Missing rental_date' }, 'error/bad_request' )
+        unless $rental_date;
 
     ## parameters validation
     my $v = $self->validation;
@@ -896,17 +915,16 @@ sub create_order_extension {
         on_error  => 'undef',
     );
 
-    my $today        = DateTime->today( time_zone => $self->config->{timezone} );
-    my $dt           = $strp->parse_datetime($target_date);
-    my $dur          = $dt->delta_days($today);
-    my ($delta_days) = $dur->in_units('days');
-    if ( $delta_days + $extension_days > $MAX_EXTENSION_DAYS ) {
+    my $today = DateTime->today( time_zone => $self->config->{timezone} );
+    my $dt = $strp->parse_datetime($target_date);
+    my $max_date =
+        $rental_date->clone->add(
+        days => $DEFAULT_RENTAL_PERIOD + $MAX_EXTENSION_DAYS + 1 );
+
+    if ( $dt > $max_date ) {
         return $self->error(
             400,
-            {
-                str =>
-                    "최대연장기간($MAX_EXTENSION_DAYS 일) 이상 연장할 수 없습니다"
-            },
+            { str => "최대연장기간 이상 연장할 수 없습니다" },
             'error/bad_request'
         );
     }
