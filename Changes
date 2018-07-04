@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 - 관리자가 예약취소했을때 정상적인 취소안내 문자메세지를 전송 (#1444)
 - 예약취소 링크를 올바르게 수정(#1465)
+- theopencloset.net 도메인에 대해 CORS 헤더를 허용(#1465)
 
 ### Changed
 

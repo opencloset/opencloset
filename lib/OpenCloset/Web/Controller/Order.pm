@@ -1138,6 +1138,26 @@ sub cancel_form {
     $self->render( day_of_week => $DOW_MAP{$dow} );
 }
 
+=head2 delete_cors
+
+    OPTIONS /order/:id
+
+=cut
+
+sub delete_cors {
+    my $self = shift;
+
+    my $origin = $self->req->headers->header('origin');
+    my $method = $self->req->headers->header('access-control-request-method');
+
+    return $self->error( 400, "Not Allowed Origin: $origin" )
+        unless $origin =~ m/theopencloset\.net/;
+
+    $self->res->headers->header( 'Access-Control-Allow-Origin'  => $origin );
+    $self->res->headers->header( 'Access-Control-Allow-Methods' => $method );
+    $self->respond_to( any => { data => '', status => 200 } );
+}
+
 =head2 delete
 
     DELETE /order/:id?phone=xxxx
