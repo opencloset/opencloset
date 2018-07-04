@@ -116,7 +116,14 @@ while ( my $booking = $booking_rs->next ) {
                         <a href="<%= url_for( '/user/' . $u->id ) %>">사용자 정보</a>
                       </li>
                       <li>
-                        <a class="order-cancel" href="<%= url_for('/order/' . $order->id)->query(phone => substr($user_info->phone, -4)) %>" data-name="<%= $u->name %>">
+                        <!--
+                             예약 취소는 visit.theopencloset.net 에서 이루어집니다. #1465
+                             개발환경에서의 편의를 위해서 요청 host 가 staff.theopencloset.net 일 때에만 visit.theopencloset.net 로 변경합니다.
+                        -->
+                        % my $req = $self->req;
+                        % my $cancel_url = url_for('/order/' . $order->id)->query(phone => substr($user_info->phone, -4));
+                        % $cancel_url->host('visit.theopencloset.net') if $req->url->to_abs->host =~ m/staff\.theopencloset\.net/;
+                        <a class="order-cancel" href="<%= $cancel_url %>" data-name="<%= $u->name %>">
                           <i class="icon-warning-sign red"></i>
                           예약 취소
                         </a>
