@@ -137,39 +137,46 @@ $ ->
   #
   # 시간표내 각각의 주문서 상태 변경
   #
+  available_status = [
+    '방문예약',
+    '방문안함',
+    '대여안함',
+    '사이즈없음',
+    '방문',
+    '치수측정',
+    '의류준비',
+    '탈의01',
+    '탈의02',
+    '탈의03',
+    '탈의04',
+    '탈의05',
+    '탈의06',
+    '탈의07',
+    '탈의08',
+    '탈의09',
+    '탈의10',
+    '탈의11',
+    '탈의12',
+    '탈의13',
+    '탈의14',
+    '탈의15',
+    '수선',
+    '포장',
+  ]
+  defaultSource = ( { value: OpenCloset.status[i]['id'], text: i } for i in available_status )
+
   $('.editable.order-status').each (i, el) ->
-    available_status = [
-      '방문예약',
-      '방문안함',
-      '대여안함',
-      '사이즈없음',
-      '방문',
-      '치수측정',
-      '의류준비',
-      '탈의01',
-      '탈의02',
-      '탈의03',
-      '탈의04',
-      '탈의05',
-      '탈의06',
-      '탈의07',
-      '탈의08',
-      '탈의09',
-      '탈의10',
-      '탈의11',
-      '탈의12',
-      '탈의13',
-      '탈의14',
-      '탈의15',
-      '수선',
-      '포장',
-    ]
+    $(el).on 'click', (e) ->
+      ## url 이 변경되지 않으면 한번만 요청한다.
+      ## https://github.com/vitalets/x-editable/issues/75
+      $(el).editable('option', 'source', '/api/status-list?available' + '&' + Math.random())
+
     $(el).editable(
       mode:        'inline'
       showbuttons: 'true'
       emptytext:   '상태없음'
       type:        'select'
-      source:      ( { value: OpenCloset.status[i]['id'], text: i } for i in available_status )
+      source:      defaultSource
       url: (params) ->
         storage      = $(el).closest('.people-box')
         order_id     = storage.data('order-id')

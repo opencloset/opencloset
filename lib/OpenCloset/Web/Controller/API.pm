@@ -19,7 +19,7 @@ use Mojo::JSON qw/decode_json/;
 use OpenCloset::Calculator::LateFee;
 use OpenCloset::Common::Unpaid ();
 use OpenCloset::Constants::Status
-    qw/$LOST $DISCARD $RETURNED $PAYMENT $FITTING_ROOM1 $FITTING_ROOM20/;
+    qw/$RESERVATED $NOT_VISITED $NOT_RENTAL $NO_SIZE $VISITED $MEASUREMENT $SELECT $FITTING_ROOM1 $FITTING_ROOM2 $FITTING_ROOM3 $FITTING_ROOM4 $FITTING_ROOM5 $FITTING_ROOM6 $FITTING_ROOM7 $FITTING_ROOM8 $FITTING_ROOM9 $FITTING_ROOM10 $FITTING_ROOM11 $FITTING_ROOM12 $FITTING_ROOM13 $FITTING_ROOM14 $FITTING_ROOM15 $REPAIR $BOX $LOST $DISCARD $RETURNED $PAYMENT $FITTING_ROOM20/;
 
 has DB => sub { shift->app->DB };
 
@@ -3324,6 +3324,67 @@ sub api_create_vbank {
     );
 
     $self->render( json => { text => $text } );
+}
+
+=head2 api_status_list
+
+    GET /api/status-list?avaiable
+
+C<available> param 이 있으면 사용중인 탈의실을 제외하고 응답.
+그 외에는 모든 상태목록을 응답.
+
+=cut
+
+our @AVAILABLE_STATUS = (
+    $RESERVATED,
+    $NOT_VISITED,
+    $NOT_RENTAL,
+    $NO_SIZE,
+    $VISITED,
+    $MEASUREMENT,
+    $SELECT,
+    $FITTING_ROOM1,
+    $FITTING_ROOM2,
+    $FITTING_ROOM3,
+    $FITTING_ROOM4,
+    $FITTING_ROOM5,
+    $FITTING_ROOM6,
+    $FITTING_ROOM7,
+    $FITTING_ROOM8,
+    $FITTING_ROOM9,
+    $FITTING_ROOM10,
+    $FITTING_ROOM11,
+    $FITTING_ROOM12,
+    $FITTING_ROOM13,
+    $FITTING_ROOM14,
+    $FITTING_ROOM15,
+    $REPAIR,
+    $BOX
+);
+
+sub api_status_list {
+    my $self      = shift;
+    my $available = defined $self->param('available');
+
+    my %except;
+    if ($available) {
+        my $orders = $self->DB->resultset('Order')->search(
+            { status_id => { -in => [ $FITTING_ROOM1 .. $FITTING_ROOM15 ] } },
+            undef
+        );
+
+        while ( my $order = $orders->next ) {
+            $except{ $order->status_id }++;
+        }
+    }
+
+    my @status;
+    for my $s (@AVAILABLE_STATUS) {
+        next if $except{$s};
+        push @status, { value => $s, text => $OpenCloset::Constants::Status::LABEL_MAP{$s} };
+    }
+
+    $self->render( json => \@status );
 }
 
 1;
