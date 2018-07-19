@@ -316,6 +316,8 @@ sub _private_routes {
 
     $api->post('/photos')->to('API#api_upload_photo');
 
+    $api->get('/status-list')->to('API#api_status_list');
+
     $r->get('/')->to('root#index');
 
     $r->get('/tag')->to('tag#index');
