@@ -169,7 +169,7 @@ $ ->
     $(el).on 'click', (e) ->
       ## url 이 변경되지 않으면 한번만 요청한다.
       ## https://github.com/vitalets/x-editable/issues/75
-      $(el).editable('option', 'source', '/api/status-list?available' + '&' + Math.random())
+      $(el).editable('option', 'source', "#{CONFIG.monitor_uri}/api/status?available" + '&' + Math.random())
 
     $(el).editable(
       mode:        'inline'
