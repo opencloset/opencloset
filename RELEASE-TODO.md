@@ -1,3 +1,5 @@
+v1.12.11
+
     $ closetpan OpenCloset::Cron::Event            # v0.1.2
     $ closetpan OpenCloset::Events::EmploymentWing # v0.1.0
     $ closetpan OpenCloset::Common                 # v0.1.8

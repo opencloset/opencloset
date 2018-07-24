@@ -1,11 +1,11 @@
 opencloset
 ==========
 
-[![Build Status](https://travis-ci.org/opencloset/opencloset.svg?branch=v1.12.10)](https://travis-ci.org/opencloset/opencloset)
+[![Build Status](https://travis-ci.org/opencloset/opencloset.svg?branch=v1.12.11)](https://travis-ci.org/opencloset/opencloset)
 
 ## Version ##
 
-v1.12.10
+v1.12.11
 
 ## Requirements ##
 
