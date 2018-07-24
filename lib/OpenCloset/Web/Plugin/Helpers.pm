@@ -1723,7 +1723,8 @@ my %COUPON_EVENT_NAME_MAP = (
     gwanak         => '관악고용',
     '10bob'        => '십시일밥',
     'seoul-2017'   => '취업날개',
-    'seoul-2017-2' => '취업날개'
+    'seoul-2017-2' => '취업날개',
+    'seoul-2018-1' => '취업날개',
 );
 
 our %COUPON_STATUS_MAP = (

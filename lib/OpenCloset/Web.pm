@@ -1,7 +1,7 @@
 package OpenCloset::Web;
 use Mojo::Base 'Mojolicious';
 
-use version; our $VERSION = qv("v1.12.10");
+use version; our $VERSION = qv("v1.12.11");
 
 use CHI;
 use DateTime;
@@ -226,6 +226,7 @@ sub _public_routes_visit {
     ## easy cancel order and update booking.date
     my $auth = $r->under('/order/:id')->to('order#auth');
     $auth->get('/cancel')->to('order#cancel_form');
+    $auth->options('/')->to('order#delete_cors');
     $auth->delete('/')->to('order#delete');
     $auth->get('/booking/edit')->to('order#booking');
     $auth->put('/booking')->to('order#update_booking');

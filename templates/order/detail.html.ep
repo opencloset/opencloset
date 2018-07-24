@@ -205,7 +205,7 @@
           <td>
             % if (my $coupon = $order->coupon) {
               %= coupon2label($coupon)
-              % if ($coupon->desc =~ m/^seoul-2017/) {
+              % if ($coupon->desc =~ m/^seoul-2018/) {
                 <div class="dropdown dropdown-inline jobwing-actions">
                   <button class="btn btn-default btn-xs dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
                     연장하기
@@ -214,7 +214,7 @@
                   <ul class="dropdown-menu">
                     % my $age = int(age($user_info->birth) / 10) * 10;
                     % for my $n (1 .. 5) {
-                      % my $url = url_for('/stat/events/extra-seoul-2017')->query(order_id => $order->id, date => $today->ymd, online => $order->online, 'visited_' . $user_info->gender => $n);
+                      % my $url = url_for('/stat/events/extra-seoul-2018')->query(order_id => $order->id, date => $today->ymd, online => $order->online, 'visited_' . $user_info->gender => $n);
                       % if ($age >= 10 and $age <= 30) {
                         % $url = $url->query([ 'visited_age_' . $age => $n ]);
                       % }
@@ -224,7 +224,7 @@
                     % }
                     <li role="separator" class="divider"></li>
                     <li>
-                      <a href="<%= url_for('/stat/events/extra-seoul-2017') %>" target="_blank">통계보기</a>
+                      <a href="<%= url_for('/stat/events/extra-seoul-2018') %>" target="_blank">통계보기</a>
                     </li>
                   </ul>
                 </div>

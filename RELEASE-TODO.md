@@ -1,3 +1,11 @@
+v1.12.11
+
+    $ closetpan OpenCloset::Cron::Event            # v0.1.2
+    $ closetpan OpenCloset::Events::EmploymentWing # v0.1.0
+    $ closetpan OpenCloset::Common                 # v0.1.8
+    $ grunt
+    # monitor 의 새로운 버전이 배포된 후에 배포
+
 v1.12.10
 
     $ grunt

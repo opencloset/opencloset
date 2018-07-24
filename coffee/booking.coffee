@@ -89,9 +89,7 @@ $ ->
     return unless confirm "취소하시겠습니까?"
 
     $this = $(@)
-    to   = $this.data('phone')
     name = $this.data('name')
-    msg  = $this.attr('title')
     url  = $this.attr('href')
 
     $.ajax url,
@@ -99,7 +97,6 @@ $ ->
       success: (data, textStatus, jqXHR) ->
         $this.closest('span.dropdown').remove()
         OpenCloset.alert 'info', "#{name}님 예약이 취소되었습니다"
-        OpenCloset.sendSMS to, msg
       error: (jqXHR, textStatus, errorThrown) ->
         OpenCloset.alert 'warning', jqXHR.responseJSON.error.str
       complete: (jqXHR, textStatus) ->

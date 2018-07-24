@@ -18,7 +18,8 @@ use Mojo::JSON qw/decode_json/;
 
 use OpenCloset::Calculator::LateFee;
 use OpenCloset::Common::Unpaid ();
-use OpenCloset::Constants::Status qw/$LOST $DISCARD $RETURNED $PAYMENT/;
+use OpenCloset::Constants::Status
+    qw/$RESERVATED $NOT_VISITED $NOT_RENTAL $NO_SIZE $VISITED $MEASUREMENT $SELECT $REPAIR $BOX $LOST $DISCARD $RETURNED $PAYMENT $FITTING_ROOM1 $FITTING_ROOM20/;
 
 has DB => sub { shift->app->DB };
 
@@ -612,6 +613,21 @@ sub api_update_order {
         my $user_target_date = $order->user_target_date || 'NULL';
         $self->log->debug("$order_params{id} target_date: $target_date");
         $self->log->debug("$order_params{id} user_target_date: $user_target_date");
+    }
+    elsif ( $status_id and grep( /^$status_id$/, $FITTING_ROOM1 .. $FITTING_ROOM20 ) ) {
+        ## [GH 1466] 중복된 탈의실로 배정못하게 함
+        my $exist =
+            $self->DB->resultset('Order')->search( { status_id => $status_id } )->next;
+        if ($exist) {
+            my $room_no = $status_id - 19;
+            return $self->error(
+                400,
+                { str => sprintf( "%d번 탈의실은 사용 중 입니다.", $room_no ) }
+            );
+        }
+        else {
+            $order = $self->update_order( \%order_params, \%order_detail_params );
+        }
     }
     else {
         $order = $self->update_order( \%order_params, \%order_detail_params );

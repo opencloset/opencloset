@@ -14,7 +14,8 @@ use WebService::Jandi::WebHook;
 use OpenCloset::Calculator::LateFee;
 use OpenCloset::Common::Unpaid
     qw/unpaid_cond unpaid_attr is_unpaid is_nonpaid unpaid2fullpaid/;
-use OpenCloset::Constants qw/%PAY_METHOD_MAP/;
+use OpenCloset::Constants
+    qw/%PAY_METHOD_MAP $MAX_EXTENSION_DAYS $DEFAULT_RENTAL_PERIOD/;
 use OpenCloset::Constants::Category;
 use OpenCloset::Constants::Status
     qw/$RENTAL $RETURNED $PARTIAL_RETURNED $RETURNING $NOT_VISITED $PAYMENT $NOT_RENTAL $PAYBACK $NO_SIZE $BOX $BOXED/;
@@ -814,10 +815,32 @@ sub order_extension {
 
     my $order_id = $self->param('order_id');
     my $order = $self->get_order( { id => $order_id } );
-    return unless $order;
+    return $self->error( 404, { str => 'Order not found' }, 'error/not_found' )
+        unless $order;
+
+    my $calc           = OpenCloset::Calculator::LateFee->new;
+    my $overdue_days   = $calc->overdue_days($order);
+    my $extension_days = $calc->extension_days($order);
+    my $rental_date    = $order->rental_date;
+    return $self->error( 400, { str => 'Missing rental_date' }, 'error/bad_request' )
+        unless $rental_date;
+
+    my $today = DateTime->today( time_zone => $self->config->{timezone} );
+    ## $DEFAULT_RENTAL_PERIOD: 3 인데 3박 4일 대여라서 +1
+    my $end_date =
+        $rental_date->clone->add(
+        days => $DEFAULT_RENTAL_PERIOD + $MAX_EXTENSION_DAYS + 1 );
+    my $dur = $end_date->delta_days($today);
+    my ($delta_days) = $dur->in_units('days');
 
     my $error = $self->flash('error');
-    $self->render( order => $order, error => $error );
+    $self->render(
+        order     => $order,
+        error     => $error,
+        overdue   => { days => $overdue_days },
+        extension => { days => $extension_days },
+        end_days  => $delta_days,
+    );
 }
 
 =head2 create_order_extension
@@ -830,7 +853,12 @@ sub create_order_extension {
     my $self     = shift;
     my $order_id = $self->param('order_id');
     my $order    = $self->get_order( { id => $order_id } );
-    return unless $order;
+    return $self->error( 404, { str => 'Order not found' }, 'error/not_found' )
+        unless $order;
+
+    my $rental_date = $order->rental_date;
+    return $self->error( 400, { str => 'Missing rental_date' }, 'error/bad_request' )
+        unless $rental_date;
 
     ## parameters validation
     my $v = $self->validation;
@@ -858,6 +886,47 @@ sub create_order_extension {
             }
         );
         return $self->redirect_to( $self->url_for );
+    }
+
+    my $calc           = OpenCloset::Calculator::LateFee->new;
+    my $overdue_days   = $calc->overdue_days($order);
+    my $extension_days = $calc->extension_days($order);
+    if ($overdue_days) {
+        return $self->error(
+            400,
+            { str => '연체중에는 연장을 할 수 없습니다.' }, 'error/bad_request'
+        );
+    }
+
+    if ( $extension_days >= $MAX_EXTENSION_DAYS ) {
+        return $self->error(
+            400,
+            {
+                str =>
+                    "최대연장기간($MAX_EXTENSION_DAYS 일) 이상 연장할 수 없습니다"
+            },
+            'error/bad_request'
+        );
+    }
+
+    my $strp = DateTime::Format::Strptime->new(
+        pattern   => '%Y-%m-%d',
+        time_zone => $self->config->{timezone},
+        on_error  => 'undef',
+    );
+
+    my $today = DateTime->today( time_zone => $self->config->{timezone} );
+    my $dt = $strp->parse_datetime($target_date);
+    my $max_date =
+        $rental_date->clone->add(
+        days => $DEFAULT_RENTAL_PERIOD + $MAX_EXTENSION_DAYS + 1 );
+
+    if ( $dt > $max_date ) {
+        return $self->error(
+            400,
+            { str => "최대연장기간 이상 연장할 수 없습니다" },
+            'error/bad_request'
+        );
     }
 
     $self->update_order( { id => $order_id, user_target_date => $target_date } );
@@ -1069,6 +1138,26 @@ sub cancel_form {
     $self->render( day_of_week => $DOW_MAP{$dow} );
 }
 
+=head2 delete_cors
+
+    OPTIONS /order/:id
+
+=cut
+
+sub delete_cors {
+    my $self = shift;
+
+    my $origin = $self->req->headers->header('origin');
+    my $method = $self->req->headers->header('access-control-request-method');
+
+    return $self->error( 400, "Not Allowed Origin: $origin" )
+        unless $origin =~ m/theopencloset\.net/;
+
+    $self->res->headers->header( 'Access-Control-Allow-Origin'  => $origin );
+    $self->res->headers->header( 'Access-Control-Allow-Methods' => 'OPTIONS, DELETE' );
+    $self->respond_to( any => { data => '', status => 200 } );
+}
+
 =head2 delete
 
     DELETE /order/:id?phone=xxxx
@@ -1080,6 +1169,10 @@ sub delete {
     my $order = $self->stash('order');
 
     $self->app->api->cancel($order);
+
+    my $origin = $self->req->headers->header('origin');
+    $self->res->headers->header( 'Access-Control-Allow-Origin' => $origin );
+
     $self->render( json => {} );
 }
 
