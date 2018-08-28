@@ -27,7 +27,7 @@
                   이벤트 통계 <span class="caret"></span>
                 </button>
                 <ul class="dropdown-menu">
-                  % for my $e (qw/seoul-2018 gwanak 10bob happybean incheonjob anyangyouth hanshin_univ gunpo gwangju201801 samsunglife201801/) {
+                  % for my $e (qw/seoul-2018 gwanak 10bob happybean incheonjob anyangyouth hanshin_univ gunpo gwangju201801 samsunglife201801 goyang201801 yongin201801/) {
                     <li><a href="<%= url_for(event => $e) %>"><%= $e %></a></li>
                   % }
                 </ul>
