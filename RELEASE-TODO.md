@@ -1,3 +1,5 @@
+    $ closetpan -n OpenCloset::API    # v0.1.6
+
 v1.12.11
 
     $ closetpan OpenCloset::Cron::Event            # v0.1.2
