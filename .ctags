@@ -10,6 +10,7 @@
 --exclude=pdfmake
 --exclude=templates
 --exclude=node_modules
+--exclude=public
 --totals=yes
 --tag-relative=yes
 --regex-perl=/with[ \t]+([^;]+)[ \t]*?;/\1/w,role,roles/
