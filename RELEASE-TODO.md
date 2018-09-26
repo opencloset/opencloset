@@ -1,4 +1,4 @@
-    $ closetpan -n OpenCloset::API    # v0.1.6
+    $ closetpan -n OpenCloset::API    # v0.1.7
 
 v1.12.11
 
