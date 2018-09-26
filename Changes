@@ -5,11 +5,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ## [Unreleased]
 
 ### Changed
-
 - 대여 시스템의 변화에 따라 주중 및 주말 예약 가능 인원을 늘림 (#1478)
 - 이벤트 통계의 목록을 갱신
   - 쿠폰: goyang201801 통계 페이지 (#1452)
   - 쿠폰: yongin201801 통계 페이지 (#1475)
+- 대여가 확정되었을때 대여목적등을 주문서에 복사 (#1473)
 
 ## [v1.12.11] - Tue, 24 Jul 2018 13:50:33 +0900
 
