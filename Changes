@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
   - 쿠폰: goyang201801 통계 페이지 (#1452)
   - 쿠폰: yongin201801 통계 페이지 (#1475)
 - 대여가 확정되었을때 대여목적등을 주문서에 복사 (#1473)
+- 방문예약시 취업날개와 관련된 오류 로그로 남김 (#1494)
 
 ## [v1.12.11] - Tue, 24 Jul 2018 13:50:33 +0900
 

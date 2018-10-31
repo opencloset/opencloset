@@ -1,6 +1,7 @@
 package OpenCloset::Web::Controller::Booking;
 use Mojo::Base 'Mojolicious::Controller';
 
+use Capture::Tiny;
 use DateTime;
 use HTTP::Tiny;
 use Try::Tiny;
@@ -239,7 +240,12 @@ sub visit {
                     }
 
                     my $booking_obj = $self->DB->resultset('Booking')->find( { id => $booking } );
-                    my $order_obj = $self->app->api->reservated( $user, $booking_obj->date, %extra );
+                    my $order_obj;
+                    my ($stderr) = Capture::Tiny::capture_stderr {
+                        $order_obj = $self->app->api->reservated( $user, $booking_obj->date, %extra );
+                    };
+
+                    $self->log->warn("reservated error: $stderr");
 
                     #
                     # 대리인을 통한 대여일때는 대리인의 신체치수 입력화면으로 이동
@@ -529,7 +535,12 @@ sub visit2 {
                     }
 
                     my $booking_obj = $self->DB->resultset('Booking')->find( { id => $booking } );
-                    my $order_obj = $self->app->api->reservated( $user, $booking_obj->date, %extra );
+                    my $order_obj;
+                    my ($stderr) = Capture::Tiny::capture_stderr {
+                        $order_obj = $self->app->api->reservated( $user, $booking_obj->date, %extra );
+                    };
+
+                    $self->log->warn("reservated error: $stderr");
                 }
             }
             else {
