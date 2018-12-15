@@ -1409,7 +1409,17 @@ sub event {
         push @{ $visitor{daily} ||= [] }, \%columns;
     }
 
-    $self->render( visitor => \%visitor, rate => $is_rate );
+    my $events = $self->DB->resultset('Event')->search({
+        'event_type.domain' => 'rental'
+    }, {
+        join => ['event_type']
+    });
+
+    $self->render(
+        visitor => \%visitor,
+        rate    => $is_rate,
+        events  => $events
+    );
 }
 
 =head2 create_event
