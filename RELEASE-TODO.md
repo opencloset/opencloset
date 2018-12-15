@@ -1,4 +1,14 @@
     $ closetpan -n OpenCloset::API    # v0.1.7
+    $ cd /path/to/OpenCloset-Schema/
+    $ mysql < db/alter/142-event-type.sql
+
+    # 아래는 이슈에서 별도록 설명함
+    # https://github.com/opencloset/opencloset/issues/1517#issuecomment-447557950
+    # add events
+    # execute sql queries
+
+    $ closetpan OpenCloset::Schema             # 0.058
+    $ closetpan OpenCloset::Plugin::Helpers    # v0.0.28
 
 v1.12.11
 
