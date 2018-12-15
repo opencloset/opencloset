@@ -41,6 +41,7 @@
 % my $coupon      = $order->coupon;
 % my $return_memo = $order->return_memo;
 % my $event       = $coupon ? $coupon->desc : '';
+% my $event_name  = $coupon && $coupon->event ? $coupon->event->title : '';
 % ($event) = split(/\|/, $event) if $event;
 % my %EVENT_NAME_MAP = (seoul => '취업날개', gwanak => '관악고용', '10bob' => '십시일밥', 'seoul-2017' => '취업날개', 'seoul-2017-2' => '취업날개');
 <div class="people-box" data-target="<%= $alert_target %>" data-order-id="<%= $order->id %>" data-ymd="<%= $dt_start->ymd %>">
@@ -59,7 +60,7 @@
         % if ($coupon) {
           <small>
             <i class="icon-ticket"></i>
-            %= $EVENT_NAME_MAP{$event} || "$event (쿠폰)"
+            %= $event_name || $EVENT_NAME_MAP{$event} || "$event (쿠폰)"
           </small>
         % }
       </h4>

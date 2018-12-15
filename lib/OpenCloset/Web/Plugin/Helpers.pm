@@ -1746,6 +1746,9 @@ sub coupon2label {
     my $desc   = $coupon->desc || 'unknown';
     my ( $event, $rent_num, $mbersn ) = split( /\|/, $desc );
     $event = $COUPON_EVENT_NAME_MAP{$event} || $event;
+    if (my $e = $coupon->event) {
+        $event = $e->title;
+    }
 
     my $klass = 'label-info';
     $klass = 'label-danger' if $status =~ /(us|discard)ed/;
