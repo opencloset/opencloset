@@ -2938,10 +2938,33 @@ sub api_gui_booking_list {
             ->find( { code => $self->session->{coupon_code} } );
         if ($coupon) {
             my ( $event_name ) = split /\|/, $coupon->desc;
-            if (   $self->config->{events}{$event_name}
-                && $self->config->{events}{$event_name}{booking_expires} )
-            {
-                $self->config->{events}{$event_name}{booking_expires} =~ m/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})$/;
+
+            #
+            # [GH 1517] 쿠폰 시스템의 개선
+            #
+            my $event = $coupon->event;
+            unless ($event) {
+                $event = $self->DB->resultset('Event')->search({ name => $event_name })->next;
+            }
+
+            if ($event && $event->event_type) {
+                my $event_type = $event->event_type;
+                my $type = $event_type->type;
+                my ($start_type, $end_type) = split /\|/, $type;
+                if ($end_type eq 'rental') {
+                    ## 쿠폰의 expires_date 는 보통 null 일 테지만, 설정을 했다면 이유가 있으므로
+                    ## 이벤트 종료일보다 높은 우선순위를 둔다.
+                    $to = $coupon->expires_date || $event->end_date;
+                } elsif($end_type eq 'reserve') {
+                    ## reserve 타입은 쿠폰코드를 입력하는 시점에 유효성 검사를 함
+                    ## 쿠폰 유효성 체크를 통과했다면 이후에는 일반 대여와 같다.
+                } else {
+                    $self->log->error("Unknown event_type.type: $type");
+                }
+            } elsif (  $self->config->{events}{$event_name}
+                    && $self->config->{events}{$event_name}{booking_expires} ) {
+                $self->config->{events}{$event_name}{booking_expires}
+                    =~ m/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})$/;
                 $to = DateTime->new(
                     time_zone => $self->config->{timezone},
                     year      => $1,
