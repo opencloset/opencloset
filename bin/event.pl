@@ -1,17 +1,20 @@
 use utf8;
 use strict;
 use warnings;
+
+use Algorithm::CouponCode qw(cc_generate cc_validate);
 use DateTime;
 use Encode qw/decode_utf8/;
 use Getopt::Long;
 use Pod::Usage;
+use Path::Tiny;
 
 use OpenCloset::Schema;
 
 binmode STDOUT, ':encoding(UTF-8)';
 binmode STDERR, ':encoding(UTF-8)';
 
-my $config = require 'app.conf' or die "Not found config: $!";
+my $config = require './app.conf' or die "Not found config: $!";
 my $db = $config->{database};
 
 my $schema = OpenCloset::Schema->connect(
@@ -49,7 +52,7 @@ GetOptions(
 run( \%options, @ARGV );
 
 sub run {
-    my ( $opts ) = @_;
+    my ( $opts, @args ) = @_;
     pod2usage(0) if $opts->{help};
     pod2usage(0) unless $opts->{name};
     pod2usage(0) unless $opts->{title};
@@ -118,7 +121,49 @@ EOL
 
     print "\n[OK] a new event created\n\n";
     print "$event\n";
+
+    issue_coupon($opts, @args) if $opts->{'coupon-type'};
 };
+
+sub issue_coupon {
+    my ($opts, @args) = @_;
+
+    my $type  = $opts->{'coupon-type'};
+    my $cnt   = $opts->{'coupon-count'};
+    my $limit = $opts->{'coupon-limit'};
+    my $out   = $opts->{'coupont-out'};
+
+    pod2usage(0) unless $type;
+    if ($type !~ m/^(suit|price|rate)$/) {
+        warn "Unknown coupon type: $type\n";
+        pod2usage(0);
+    }
+
+    my $fh = <STDOUT>;
+    if ($out) {
+        $out = path($out);
+        $fh = $out->filehandle('openw');
+    }
+
+    for ( 1 .. $cnt ) {
+        my $code = cc_generate( parts => 3 );
+        my $coupon = $schema->resultset('Coupon')->create(
+            {
+                code => $code,
+                type => $type,
+            }
+        );
+
+        unless ($coupon) {
+            print STDERR "Couldn't create a new Coupon\n";
+            next;
+        }
+
+        print $fh "$code\n";
+    }
+
+    ## TODO: error 체크하고 에러 없으면 limit 설정
+}
 
 __END__
 
