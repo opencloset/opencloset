@@ -54,6 +54,20 @@ run( \%options, @ARGV );
 sub run {
     my ( $opts, @args ) = @_;
     pod2usage(0) if $opts->{help};
+
+    my $event_id = $opts->{'event-id'};
+    unless ($event_id) {
+        $event_id = create_event($opts, @args) unless $event_id;
+    }
+
+    if ($opts->{'coupon_type'}) {
+        issue_coupon($opts, $event_id, @args);
+    }
+};
+
+sub create_event {
+    my ($opts, @args) = @_;
+
     pod2usage(0) unless $opts->{name};
     pod2usage(0) unless $opts->{title};
 
@@ -121,23 +135,25 @@ EOL
 
     print "\n[OK] a new event created\n\n";
     print "$event\n";
-
-    issue_coupon($opts, @args) if $opts->{'coupon-type'};
-};
+    return $event->id;
+}
 
 sub issue_coupon {
-    my ($opts, @args) = @_;
+    my ($opts, $event_id, @args) = @_;
 
     my $type  = $opts->{'coupon-type'};
     my $cnt   = $opts->{'coupon-count'};
     my $limit = $opts->{'coupon-limit'};
-    my $out   = $opts->{'coupont-out'};
+    my $out   = $opts->{'coupon-out'};
 
     pod2usage(0) unless $type;
     if ($type !~ m/^(suit|price|rate)$/) {
         warn "Unknown coupon type: $type\n";
         pod2usage(0);
     }
+
+    my $event = $schema->resultset('Event')->find({ id => $event_id });
+    die "Not found event: $event_id" unless $event;
 
     my $fh = <STDOUT>;
     if ($out) {
@@ -149,8 +165,9 @@ sub issue_coupon {
         my $code = cc_generate( parts => 3 );
         my $coupon = $schema->resultset('Coupon')->create(
             {
-                code => $code,
-                type => $type,
+                event_id => $event_id,
+                code     => $code,
+                type     => $type,
             }
         );
 
@@ -162,7 +179,15 @@ sub issue_coupon {
         print $fh "$code\n";
     }
 
-    ## TODO: error 체크하고 에러 없으면 limit 설정
+    if ($limit) {
+        my $event = $schema->resultset('Event')->find({ id => $event_id });
+        $schema->resultset('CouponLimit')->create(
+            {
+                cid   => $event->name,
+                limit => $limit
+            }
+        );
+    }
 }
 
 __END__
@@ -193,5 +218,11 @@ event.pl - Create a new event.
         --freeshipping|f  free_shipping flag
         --start_date|S    if not present, today. TZ: Asia/Seoul
         --end_date|E
+
+        --event-id        exists event id to use.
+        --coupon-type     suit|price|rate - 'suit' is default.
+        --coupon-count
+        --coupon-limit
+        --coupon-out      filename to save coupon numbers.
 
 =cut
