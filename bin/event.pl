@@ -1,17 +1,20 @@
 use utf8;
 use strict;
 use warnings;
+
+use Algorithm::CouponCode qw(cc_generate cc_validate);
 use DateTime;
 use Encode qw/decode_utf8/;
 use Getopt::Long;
 use Pod::Usage;
+use Path::Tiny;
 
 use OpenCloset::Schema;
 
 binmode STDOUT, ':encoding(UTF-8)';
 binmode STDERR, ':encoding(UTF-8)';
 
-my $config = require 'app.conf' or die "Not found config: $!";
+my $config = require './app.conf' or die "Not found config: $!";
 my $db = $config->{database};
 
 my $schema = OpenCloset::Schema->connect(
@@ -25,9 +28,9 @@ my $schema = OpenCloset::Schema->connect(
 
 our %TYPE_MAP = (
     'reserve|reserve' => 1,
-    'reserve|rental'   => 2,
-    'rental|reserve'   => 3,
-    'rental|rental'    => 4,
+    'reserve|rental'  => 2,
+    'rental|reserve'  => 3,
+    'rental|rental'   => 4,
 );
 
 my %options;
@@ -43,14 +46,34 @@ GetOptions(
     "--nth=i",
     "--freeshipping|f",
     "--start_date|S=s",
-    "--end_date|E=s"
+    "--end_date|E=s",
+
+    "--event-id=i",
+    "--coupon-type=s",
+    "--coupon-count=i",
+    "--coupon-limit=i",
+    "--coupon-price=i",
+    "--coupon-out=s"    # default is STDOUT
 );
 
 run( \%options, @ARGV );
 
 sub run {
-    my ( $opts ) = @_;
+    my ( $opts, @args ) = @_;
     pod2usage(0) if $opts->{help};
+
+    my $event_id = $opts->{'event-id'};
+    $event_id = create_event($opts, @args) unless $event_id;
+    die "Something wrong.." unless $event_id;
+
+    if ($opts->{'coupon-type'}) {
+        issue_coupon($opts, $event_id, @args);
+    }
+};
+
+sub create_event {
+    my ($opts, @args) = @_;
+
     pod2usage(0) unless $opts->{name};
     pod2usage(0) unless $opts->{title};
 
@@ -118,7 +141,96 @@ EOL
 
     print "\n[OK] a new event created\n\n";
     print "$event\n";
-};
+    return $event->id;
+}
+
+sub issue_coupon {
+    my ($opts, $event_id, @args) = @_;
+
+    my $type  = $opts->{'coupon-type'};
+    my $cnt   = $opts->{'coupon-count'} || 0;
+    my $limit = $opts->{'coupon-limit'} || 0;
+    my $price = $opts->{'coupon-price'} || 0;
+    my $out   = $opts->{'coupon-out'};
+
+    pod2usage(0) unless $type;
+    if ($type !~ m/^(suit|price|rate)$/) {
+        warn "Unknown coupon type: $type\n";
+        pod2usage(0);
+    }
+
+    if ($type eq 'price' and !$price) {
+        warn "coupon-price is required for price type coupon";
+        pod2usage(0);
+    }
+
+    my $event = $schema->resultset('Event')->find({ id => $event_id });
+    die "Not found event: $event_id" unless $event;
+
+    printf(<<EOL, $event->year, $event->title, $type, $cnt, $limit, $price, $out || 'STDOUT');
+# Create coupon with below params:
+event    : %d %s
+type     : %s
+count    : %d
+limit    : %d
+price    : %d
+filename : %s
+
+EOL
+
+    print "Continue? [Y/n] ";
+    my $answer = <STDIN>;
+    chomp $answer;
+    $answer = 'y' if $answer eq '';
+    unless ($answer =~ m/y/i) {
+        print "aborted\n";
+        exit;
+    }
+
+    my $fh;
+    if ($out) {
+        $out = path($out);
+        $fh = $out->filehandle('>');
+    } else {
+        $fh = *STDOUT;
+    }
+
+    for ( 1 .. $cnt ) {
+        my $code = cc_generate( parts => 3 );
+        my $coupon = $schema->resultset('Coupon')->create(
+            {
+                event_id => $event_id,
+                code     => $code,
+                type     => $type,
+            }
+        );
+
+        unless ($coupon) {
+            print STDERR "Couldn't create a new Coupon\n";
+            next;
+        }
+
+        print $fh "$code\n";
+    }
+
+    if ($limit) {
+        my $coupon_limit = $schema->resultset('CouponLimit')->find({
+            cid => $event->name
+        });
+
+        if ($coupon_limit) {
+            printf("%s limit is already exist: %d\n", $event->name, $coupon_limit->limit);
+            return;
+        }
+
+        $schema->resultset('CouponLimit')->create(
+            {
+                cid   => $event->name,
+                limit => $limit
+            }
+        );
+    }
+}
 
 __END__
 
@@ -148,5 +260,12 @@ event.pl - Create a new event.
         --freeshipping|f  free_shipping flag
         --start_date|S    if not present, today. TZ: Asia/Seoul
         --end_date|E
+
+        --event-id        exists event id to use.
+        --coupon-type     suit|price|rate - 'suit' is default.
+        --coupon-count
+        --coupon-limit
+        --coupon-price    price of coupon if coupon-type is price.
+        --coupon-out      filename to save coupon numbers. default is STDOUT.
 
 =cut
