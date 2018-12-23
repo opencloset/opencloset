@@ -28,9 +28,9 @@ my $schema = OpenCloset::Schema->connect(
 
 our %TYPE_MAP = (
     'reserve|reserve' => 1,
-    'reserve|rental'   => 2,
-    'rental|reserve'   => 3,
-    'rental|rental'    => 4,
+    'reserve|rental'  => 2,
+    'rental|reserve'  => 3,
+    'rental|rental'   => 4,
 );
 
 my %options;
@@ -46,7 +46,14 @@ GetOptions(
     "--nth=i",
     "--freeshipping|f",
     "--start_date|S=s",
-    "--end_date|E=s"
+    "--end_date|E=s",
+
+    "--event-id=i",
+    "--coupon-type=s",
+    "--coupon-count=i",
+    "--coupon-limit=i",
+    "--coupon-price=i",
+    "--coupon-out=s"    # default is STDOUT
 );
 
 run( \%options, @ARGV );
@@ -56,11 +63,10 @@ sub run {
     pod2usage(0) if $opts->{help};
 
     my $event_id = $opts->{'event-id'};
-    unless ($event_id) {
-        $event_id = create_event($opts, @args) unless $event_id;
-    }
+    $event_id = create_event($opts, @args) unless $event_id;
+    die "Something wrong.." unless $event_id;
 
-    if ($opts->{'coupon_type'}) {
+    if ($opts->{'coupon-type'}) {
         issue_coupon($opts, $event_id, @args);
     }
 };
@@ -142,8 +148,9 @@ sub issue_coupon {
     my ($opts, $event_id, @args) = @_;
 
     my $type  = $opts->{'coupon-type'};
-    my $cnt   = $opts->{'coupon-count'};
-    my $limit = $opts->{'coupon-limit'};
+    my $cnt   = $opts->{'coupon-count'} || 0;
+    my $limit = $opts->{'coupon-limit'} || 0;
+    my $price = $opts->{'coupon-price'} || 0;
     my $out   = $opts->{'coupon-out'};
 
     pod2usage(0) unless $type;
@@ -152,13 +159,40 @@ sub issue_coupon {
         pod2usage(0);
     }
 
+    if ($type eq 'price' and !$price) {
+        warn "coupon-price is required for price type coupon";
+        pod2usage(0);
+    }
+
     my $event = $schema->resultset('Event')->find({ id => $event_id });
     die "Not found event: $event_id" unless $event;
 
-    my $fh = <STDOUT>;
+    printf(<<EOL, $event->year, $event->title, $type, $cnt, $limit, $price, $out || 'STDOUT');
+# Create coupon with below params:
+event    : %d %s
+type     : %s
+count    : %d
+limit    : %d
+price    : %d
+filename : %s
+
+EOL
+
+    print "Continue? [Y/n] ";
+    my $answer = <STDIN>;
+    chomp $answer;
+    $answer = 'y' if $answer eq '';
+    unless ($answer =~ m/y/i) {
+        print "aborted\n";
+        exit;
+    }
+
+    my $fh;
     if ($out) {
         $out = path($out);
-        $fh = $out->filehandle('openw');
+        $fh = $out->filehandle('>');
+    } else {
+        $fh = *STDOUT;
     }
 
     for ( 1 .. $cnt ) {
@@ -180,7 +214,15 @@ sub issue_coupon {
     }
 
     if ($limit) {
-        my $event = $schema->resultset('Event')->find({ id => $event_id });
+        my $coupon_limit = $schema->resultset('CouponLimit')->find({
+            cid => $event->name
+        });
+
+        if ($coupon_limit) {
+            printf("%s limit is already exist: %d\n", $event->name, $coupon_limit->limit);
+            return;
+        }
+
         $schema->resultset('CouponLimit')->create(
             {
                 cid   => $event->name,
@@ -223,6 +265,7 @@ event.pl - Create a new event.
         --coupon-type     suit|price|rate - 'suit' is default.
         --coupon-count
         --coupon-limit
-        --coupon-out      filename to save coupon numbers.
+        --coupon-price    price of coupon if coupon-type is price.
+        --coupon-out      filename to save coupon numbers. default is STDOUT.
 
 =cut
