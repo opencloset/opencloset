@@ -10,6 +10,8 @@
     $ closetpan OpenCloset::Schema             # 0.058
     $ closetpan OpenCloset::Plugin::Helpers    # v0.0.28
 
+    $ grunt # 1539
+
 v1.12.11
 
     $ closetpan OpenCloset::Cron::Event            # v0.1.2

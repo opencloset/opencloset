@@ -109,20 +109,22 @@
 
                       % unless (my $code = session('coupon_code')) {
                         <hr>
-                        <div class="clearfix well-sm event-wings">
-                          <p>서울시와 열린옷장이 함께 하는</p>
-                          <h4 class="text-center">
-                            정장무료대여 - 취업날개서비스
-                          </h4>
-                          <ul>
-                            <li>
-                              대상: 고등학교 졸업예정자 ~ 만 34세 주소지가 서울인 청년
-                            </li>
-                            <li>
-                              혜택: 1인 10회 무료대여 가능
-                            </li>
-                          </ul>
-                          <a href="http://job.seoul.go.kr/www/add_service/openChothesChest.do?method=selectOpenChothesChest" class="btn btn-success btn-sm btn-block" target="_blank">취업날개 서비스 예약하러 가기</a>
+                        <div class="clearfix well-sm event">
+                          <a href="http://dressfree.net/main/main.php" target="_blank">
+                            <span class="event-seoul event-link text-center">
+                              서울시 정장 무료대여 서비스<br/>
+                              "취업날개" 예약하기<br/>
+                              (입사면접만 이용가능)
+                            </span>
+                          </a>
+                        </div>
+                        <div class="clearfix well-sm event">
+                          <a href="https://theopencloset.net/%ea%b2%bd%ea%b8%b0%ec%a7%80%ec%97%ad-%eb%ac%b4%eb%a3%8c%eb%8c%80%ec%97%ac-%ed%94%84%eb%a1%9c%ea%b7%b8%eb%9e%a8-%ec%95%88%eb%82%b4/" target="_blank">
+                            <span class="event-gyeonggi event-link text-center">
+                              경기지역 정장 무료대여<br/>
+                              안내정보 보러가기
+                            </span>
+                          </a>
                         </div>
                       % }
 
