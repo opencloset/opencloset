@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Changed
 
+- 정장 반납 안내 출력시 택배 반납 문구 제거 (#1562)
 - 방문예약 창에 무료대여 안내 정보 추가 (#1539)
 - 개인 정보 취급 방침 수정 (#1555)
 - 대여 시스템의 변화에 따라 주중 및 주말 예약 가능 인원을 늘림 (#1478)
