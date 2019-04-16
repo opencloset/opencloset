@@ -10,7 +10,7 @@
     $ closetpan OpenCloset::Schema             # 0.058
     $ closetpan OpenCloset::Plugin::Helpers    # v0.0.28
 
-    $ grunt # 1539
+    $ grunt # 1539, 1562
 
 v1.12.11
 
