@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 ## [Unreleased]
 
 ### Changed
+
+- 방문예약 창에 무료대여 안내 정보 추가 (#1539)
 - 개인 정보 취급 방침 수정 (#1555)
 - 대여 시스템의 변화에 따라 주중 및 주말 예약 가능 인원을 늘림 (#1478)
 - 이벤트 통계의 목록을 갱신
