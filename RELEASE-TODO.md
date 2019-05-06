@@ -11,6 +11,7 @@
     $ closetpan OpenCloset::Plugin::Helpers    # v0.0.28
 
     $ grunt # 1539, 1562
+    $ ubic reload opencloset.visit
 
 v1.12.11
 
