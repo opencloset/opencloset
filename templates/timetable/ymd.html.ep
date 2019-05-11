@@ -106,6 +106,7 @@ title meta_text($_id);
     <%
     use List::MoreUtils;
     my @times = qw(
+      09:30
       10:00
       10:30
       11:00

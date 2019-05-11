@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Changed
 
+- 평일 및 주말 09:30 예약 슬롯 활성화 (#1569)
 - 방문예약 페이지 문구 수정 (#1566)
 - 정장 반납 안내 출력시 택배 반납 문구 제거 (#1562)
 - 방문예약 창에 무료대여 안내 정보 추가 (#1539)
