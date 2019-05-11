@@ -1,3 +1,6 @@
+    $ closetpan OpenCloset::Common    # v0.1.10
+    $ grunt
+
     $ closetpan -n OpenCloset::API    # v0.1.7
     $ cd /path/to/OpenCloset-Schema/
     $ mysql < db/alter/142-event-type.sql

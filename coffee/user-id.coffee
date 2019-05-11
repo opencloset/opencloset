@@ -148,7 +148,8 @@ $ ->
           { value: '0', text: '안입고감' },
           { value: '1', text: '입고감' },
           { value: '2', text: '기록요망' },
-          { value: '3', text: '입고감+기록요망' }
+          { value: '3', text: '입고감+기록요망' },
+          { value: '4', text: '온라인예정' }
         ]
         params.display = (value) ->
           if typeof value == 'number'
@@ -158,6 +159,7 @@ $ ->
             when '1' then value_str = '입고감'
             when '2' then value_str = '기록요망'
             when '3' then value_str = '입고감+기록요망'
+            when '4' then value_str = '온라인예정'
             else          value_str = ''
           $(this).html value_str
         params.url = (params) ->
