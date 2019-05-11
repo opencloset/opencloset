@@ -172,7 +172,7 @@ $ ->
   #
   # 착용 버튼 토글
   #
-  DOES_WEAR_MAP = { 0: '안입고감', 1: '입고감', 2: '기록요망', 3: '입고감+기록요망' }
+  DOES_WEAR_MAP = { 0: '안입고감', 1: '입고감', 2: '기록요망', 3: '입고감+기록요망', 4: '온라인예정' }
   $('#order-table').on 'click', '.btn-wearing:not(.disabled)', (e) ->
     $this = $(@)
     $this.addClass('disabled')
