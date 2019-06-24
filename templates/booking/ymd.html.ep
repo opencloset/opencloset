@@ -11,6 +11,7 @@ csses => [ '/lib/bootstrap3-editable/css/bootstrap-editable.css'   ],
 title meta_text($_id);
 
 my @times = qw(
+  09:00
   09:30
   10:00
   10:30
