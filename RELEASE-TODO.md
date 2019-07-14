@@ -13,9 +13,7 @@
     $ closetpan OpenCloset::Schema             # 0.058
     $ closetpan OpenCloset::Plugin::Helpers    # v0.0.28
 
-    # app.conf 의 %BOOKING_SLOT 의
-    # weekday.male, weekday.female, weekend.male, weekend.female 항목에
-    # '09:30' => X 추가
+    # app.conf 의 %BOOKING_SLOT 을 app.conf.sample 과 동일하게 설정
 
     $ grunt # 1539, 1562
     $ ubic reload opencloset.visit
