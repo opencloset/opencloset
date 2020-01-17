@@ -1725,6 +1725,8 @@ my %COUPON_EVENT_NAME_MAP = (
     'seoul-2017'   => '취업날개',
     'seoul-2017-2' => '취업날개',
     'seoul-2018-1' => '취업날개',
+    'seoul-2019-1' => '취업날개',
+    'seoul-2020-1' => '취업날개',
 );
 
 our %COUPON_STATUS_MAP = (
