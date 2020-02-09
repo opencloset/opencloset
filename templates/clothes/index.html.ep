@@ -7,25 +7,51 @@ layout 'default',
 title meta_text($_id);
 
 use OpenCloset::Constants::Status ();
+use OpenCloset::Constants::Category qw/%LABEL_MAP/;
 %>
 
 <div>
-  <span>
-    <a href="<%= url_for('/clothes') %>">
-      전체보기
-      <small>(<%= $condition->{all} %>)</small>
-    </a>
-  </span>
-  % my $statusParam = param 'status';
-  % for my $i (1,2,3,4,5,6,7,8,9,11,41,42) {
-    |
+  <div>
+    % my $genderParam = param 'gender';
+    % my %GENDER_MAP = (male => '남성', female => '여성');
+    % for my $gender (qw/male female/) {
+      <a href="<%= url_with("/clothes")->query({ gender => $gender }) %>" class="<%= $genderParam && $genderParam eq $gender ? 'bg-primary' : '' %>">
+        <i class="fa fa-<%= $gender %>" aria-hidden="true"></i>
+        %= $GENDER_MAP{$gender}
+      </a>
+    % }
+  </div>
+
+  <div>
+    % my $categoryParam = param 'category';
+    % for my $category (keys %LABEL_MAP) {
+      <a href="<%= url_with("/clothes")->query({ category => $category }) %>" class="<%= $categoryParam && $categoryParam eq $category ? 'bg-primary' : '' %>">
+        %= $LABEL_MAP{$category}
+      </a>
+      |
+    % }
+  </div>
+
+  <hr>
+
+  <div>
     <span>
-      <a href="<%= url_with('/clothes')->query({ status => $i }) %>" class="<%= $statusParam && $statusParam == $i ? 'bg-primary' : '' %>">
-        %= $OpenCloset::Constants::Status::LABEL_MAP{$i}
-        <small>(<%= $condition->{$i} %>)</small>
+      <a href="<%= url_for('/clothes') %>">
+        전체보기
+        <small>(<%= $condition->{all} %>)</small>
       </a>
     </span>
-  % }
+    % my $statusParam = param 'status';
+    % for my $i (1,2,3,4,5,6,7,8,9,11,41,42) {
+      |
+      <span>
+        <a href="<%= url_with('/clothes')->query({ status => $i }) %>" class="<%= $statusParam && $statusParam == $i ? 'bg-primary' : '' %>">
+          %= $OpenCloset::Constants::Status::LABEL_MAP{$i}
+          <small>(<%= $condition->{$i} %>)</small>
+        </a>
+      </span>
+    % }
+  </div>
 
   <div>
     % my $tag_count = 0;
