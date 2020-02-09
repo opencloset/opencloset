@@ -16,10 +16,11 @@ use OpenCloset::Constants::Status ();
       <small>(<%= $condition->{all} %>)</small>
     </a>
   </span>
+  % my $statusParam = param 'status';
   % for my $i (1,2,3,4,5,6,7,8,9,11,41,42) {
     |
     <span>
-      <a href="<%= url_for('/clothes')->query(status => $i) %>">
+      <a href="<%= url_with('/clothes')->query({ status => $i }) %>" class="<%= $statusParam && $statusParam == $i ? 'bg-primary' : '' %>">
         %= $OpenCloset::Constants::Status::LABEL_MAP{$i}
         <small>(<%= $condition->{$i} %>)</small>
       </a>
@@ -33,7 +34,7 @@ use OpenCloset::Constants::Status ();
         <span><%= $tag_count++ ? q{|} : q{} %></span>
         % if ($selected) {
           % my @exceptMe = grep { $tag->id != $_ } @$current_tags;
-          <a href="<%= url_with( '/clothes' )->query(tag => \@exceptMe) %>" class="bg-primary">
+          <a href="<%= url_with( '/clothes' )->query({ tag => \@exceptMe }) %>" class="bg-primary">
             %= $tag->name
             <small>(<%= $tag->clothes->count %>)</small>
           </a>
