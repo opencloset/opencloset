@@ -29,11 +29,20 @@ use OpenCloset::Constants::Status ();
   <div>
     % my $tag_count = 0;
     % while ( my $tag = $tag_list->next ) {
+      % my $selected = grep { $tag->id == $_ } @$current_tags;
         <span><%= $tag_count++ ? q{|} : q{} %></span>
-        <a href="<%= url_for( '/clothes' )->query( tag => $tag->id ) %>" class="text-muted">
-          %= $tag->name
-          <small>(<%= $tag->clothes->count %>)</small>
-        </a>
+        % if ($selected) {
+          % my @exceptMe = grep { $tag->id != $_ } @$current_tags;
+          <a href="<%= url_with( '/clothes' )->query(tag => \@exceptMe) %>" class="bg-primary">
+            %= $tag->name
+            <small>(<%= $tag->clothes->count %>)</small>
+          </a>
+        % } else {
+          <a href="<%= url_with( '/clothes' )->query([ tag => $tag->id ]) %>" class="text-muted">
+            %= $tag->name
+            <small>(<%= $tag->clothes->count %>)</small>
+          </a>
+        % }
     % }
   </div>
 </div>

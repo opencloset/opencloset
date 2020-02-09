@@ -132,6 +132,26 @@ sub index {
     my $attrs = { order_by => { -asc => 'id' }, page => $p, rows => $s, };
     $attrs->{join} = 'clothes_tags';
 
+    ## https://github.com/opencloset/opencloset/issues/1593
+    ## 여러개의 tag 의 AND 검색
+    my $tags = $self->every_param('tag');
+    if (@$tags > 1) {
+        my $cnt = 1;
+        my $table = 'clothes_tags';
+        my $relationColumn = 'tag_id';
+        for my $tag (@$tags) {
+            ## DBIx::Class::Manual::Joining - Joining to the same table twice
+            ## clothes_tags.tag_id or clothes_tags_2.tag_id or clothes_tags_n.tag_id ..
+            my $tblPostfix = $cnt == 1 ? '' : '_' . $cnt;
+            my $target = $table . $tblPostfix . '.' . $relationColumn;
+            $cond->{$target} = $tag;
+            $cnt++;
+        }
+
+        $attrs->{join} = [];
+        map { push @{ $attrs->{join} }, 'clothes_tags' } @$tags;
+    }
+
     my $rs = $self->DB->resultset('Clothes')->search( $cond, $attrs );
     my $pageset = Data::Pageset->new(
         {
@@ -150,8 +170,11 @@ sub index {
     # response
     #
     $self->stash(
-        condition => \%status, clothes_list => $rs, tag_list => $tag_rs,
-        pageset   => $pageset,
+        condition    => \%status,
+        clothes_list => $rs,
+        tag_list     => $tag_rs,
+        pageset      => $pageset,
+        current_tags => $tags,
     );
 }
 
