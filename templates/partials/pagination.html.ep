@@ -10,7 +10,7 @@
         <!-- first page -->
         % if ( $pageset->current_page != $pageset->first_page ) {
           <li class="paginate_button previous">
-            <a href="<%= url_with->query([p => $pageset->first_page]) %>">
+            <a href="<%= url_with->query({ p => $pageset->first_page }) %>">
               <i class="icon-fast-backward"></i>
             </a>
           </li>
@@ -24,7 +24,7 @@
         <!-- previous page -->
         % if ($pageset->previous_page) {
           <li class="paginate_button previous">
-            <a href="<%= url_with->query([p => $pageset->previous_page]) %>">
+            <a href="<%= url_with->query({ p => $pageset->previous_page }) %>">
               <i class="icon-backward"></i>
             </a>
           </li>
@@ -43,14 +43,14 @@
             </li>
           % } else {
             <li class="paginate_button">
-              <a href="<%= url_with->query([p => $p]) %>"><%= $p %></a>
+              <a href="<%= url_with->query({ p => $p }) %>"><%= $p %></a>
             </li>
           % }
         % }
         <!-- next page -->
         % if ($pageset->next_page) {
           <li class="paginate_button next">
-            <a href="<%= url_with->query([p => $pageset->next_page]) %>">
+            <a href="<%= url_with->query({ p => $pageset->next_page }) %>">
               <i class="icon-forward"></i>
             </a>
           </li>
@@ -64,7 +64,7 @@
         <!-- last page -->
         % if ( $pageset->current_page != $pageset->last_page ) {
           <li class="paginate_button next">
-            <a href="<%= url_with->query([p => $pageset->last_page]) %>">
+            <a href="<%= url_with->query({ p => $pageset->last_page }) %>">
               <i class="icon-fast-forward"></i>
             </a>
           </li>
