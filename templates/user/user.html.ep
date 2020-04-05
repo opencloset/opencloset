@@ -12,7 +12,7 @@ jses  => [
   '/lib/bootstrap3-editable/js/bootstrap-editable.min.js',
   '//cdn.poesis.kr/post/search.min.js',
 ],
-csses => [ 
+csses => [
   '/lib/bootstrap3-editable/css/bootstrap-editable.css',
 ],
 ;
@@ -173,8 +173,8 @@ use OpenCloset::Constants::Measurement qw/$HEIGHT $WEIGHT $NECK $BUST $WAIST $HI
                   </div>
                 </div>
               % }
-              
-              
+
+
               <div class="profile-info-row">
                 <div class="profile-info-name">주소</div>
                 <div class="profile-info-value">
@@ -186,7 +186,7 @@ use OpenCloset::Constants::Measurement qw/$HEIGHT $WEIGHT $NECK $BUST $WAIST $HI
                 <input class="postcodify_address" name="address2" type="hidden" value="<%= $user_info->address2 %>">
                 <input class="postcodify_jibeon_address" name="address3" type="hidden" value="<%= $user_info->address3 %>">
               </div>
-              
+
               <div class="profile-info-row">
                 <div class="profile-info-name">상세주소</div>
                 <div class="profile-info-value">
@@ -194,7 +194,7 @@ use OpenCloset::Constants::Measurement qw/$HEIGHT $WEIGHT $NECK $BUST $WAIST $HI
                   <span id="user-detail-address" class="editable" data-name="address4"><%= $user_info->address4 %></span>
                 </div>
               </div>
-              
+
               <div class="profile-info-row">
                 <div class="profile-info-name">성별</div>
                 <div class="profile-info-value">
@@ -252,25 +252,30 @@ use OpenCloset::Constants::Measurement qw/$HEIGHT $WEIGHT $NECK $BUST $WAIST $HI
                   </div>
                 </div>
               % }
-              
+
               <div class="profile-info-row">
                 <div class="profile-info-name">설명</div>
                 <div class="profile-info-value">
                   <div class="profile-info-user-comment">
                     <%
-                    my @additional_comments = (
-                      { class => "primary", value => "라운드 반팔 블라우스", },
-                      { class => "info",    value => "라운드 민소매 블라우스", },
-                      { class => "success", value => "탑 블라우스", },
-                      { class => "warning", value => "셔츠 블라우스", },
-                      { class => "danger",  value => "승무원 블라우스", },
-                    );
+                      my $ready_to_wear_size = ready_to_wear_size({
+                        gender   => $user_info->gender,
+                        height   => $user_info->height,
+                        weight   => $user_info->weight,
+                        waist    => $avg->{waist},
+                        topbelly => $avg->{topbelly},
+                        bust     => $user_info->bust || $avg->{bust},
+                        hip      => $avg->{hip},
+                      });
                     %>
-                    % for my $ac (@additional_comments) {
-                      % my $class = $ac->{class};
-                      % my $value = $ac->{value};
-                      <button class="btn btn-xs btn-<%= $class %>" data-name="<%= $value %>"><%= $value %></button>
-                    % }
+                    <% if ($ready_to_wear_size) { %>
+                      <span class="label label-info">
+                        %= $ready_to_wear_size->{top}
+                      </span>
+                      <span class="label label-info">
+                        %= $ready_to_wear_size->{bot}
+                      </span>
+                    <% } %>
                   </div>
                   <span id="user-comment" class="editable" data-name="comment"><%= $user_info->comment || '' %></span>
                 </div>

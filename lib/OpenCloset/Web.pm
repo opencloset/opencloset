@@ -84,6 +84,7 @@ sub startup {
 
     $self->plugin('validator');
     $self->plugin('OpenCloset::Plugin::Helpers');
+    $self->plugin('OpenCloset::Plugin::Private::Helpers');
     $self->plugin('OpenCloset::Web::Plugin::Helpers');
 
     $self->_authentication;
