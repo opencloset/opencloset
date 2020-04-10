@@ -262,10 +262,11 @@ use OpenCloset::Constants::Measurement qw/$HEIGHT $WEIGHT $NECK $BUST $WAIST $HI
                         gender   => $user_info->gender,
                         height   => $user_info->height,
                         weight   => $user_info->weight,
-                        waist    => $avg->{waist},
-                        topbelly => $avg->{topbelly},
-                        bust     => $user_info->bust || $avg->{bust},
-                        hip      => $avg->{hip},
+                        waist    => $user_info->waist    || $avg->{waist},
+                        topbelly => $user_info->topbelly || $avg->{topbelly},
+                        bust     => $user_info->bust     || $avg->{bust},
+                        hip      => $user_info->hip      || $avg->{hip},
+                        thigh    => $user_info->thigh    || $avg->{thigh}
                       });
                     %>
                     <% if ($ready_to_wear_size) { %>
