@@ -1,4 +1,4 @@
-    $ closetpan -n OpenCloset::API    # v0.1.13
+    $ closetpan -n OpenCloset::API    # v0.1.15
 
     $ closetpan OpenCloset::Common    # v0.1.10
     $ grunt
@@ -6,13 +6,14 @@
     $ closetpan -n OpenCloset::API    # v0.1.7
     $ cd /path/to/OpenCloset-Schema/
     $ mysql < db/alter/142-event-type.sql
+    $ mysql < db/alter/143-order-tag.sql
 
     # 아래는 이슈에서 별도록 설명함
     # https://github.com/opencloset/opencloset/issues/1517#issuecomment-447557950
     # add events
     # execute sql queries
 
-    $ closetpan OpenCloset::Schema             # 0.058
+    $ closetpan OpenCloset::Schema             # 0.060
     $ closetpan OpenCloset::Plugin::Helpers    # v0.0.28
 
     # app.conf 의 %BOOKING_SLOT 을 app.conf.sample 과 동일하게 설정
