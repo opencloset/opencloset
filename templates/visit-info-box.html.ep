@@ -5,6 +5,13 @@
 % my $booking;
 % $booking = $order->booking if $order;
 % my $now = DateTime->now( time_zone => $timezone );
+
+% my $interview_type = q{};
+% if ( $order && $user->user_info->purpose && $user->user_info->purpose eq "입사면접" ) {
+%   my $online_order_tag = $order->order_tags->search( { tag_id => $online_interview_tag->id } )->next;
+%   $interview_type = $online_order_tag ? "online" : "offline";
+% }
+
 <!-- VISIT-INFO-BOX -->
                 <div id="visit-info-box" class="visit-info-box visible widget-box no-border">
                   <div class="widget-body">
@@ -176,6 +183,19 @@
                               </p>
                             % }
                           </label>
+
+                          <div class="interview-type">
+                          <label class="block clearfix">
+                            <select class="width-100 chosen-select" name="interview_type" data-placeholder="면접 유형을 선택해주세요." data-interview-type="<%= ( $order || $load ) ? $interview_type : q{} %>">
+                              <option value="">면접 유형을 선택해주세요.</option>
+                                <option value="offline">대면면접</option>
+                                <option value="online">화상면접</option>
+                            </select>
+                            <p>
+                              면접의 종류에 따라 적절한 스타일링을 제공하기 위해 화상면접 여부를 선택해주세요.
+                            </p>
+                          </label>
+                          </div>
 
                           <label class="block clearfix">
                             <span class="block input-icon input-icon-right">
