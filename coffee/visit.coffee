@@ -48,11 +48,28 @@ $ ->
   ).on 'changeDate', (e) ->
     refreshExpectedFee()
 
+  updatePurposeInterviewType = (purpose) ->
+    if purpose == "입사면접"
+      $(".interview-type").show()
+    else
+      $(".interview-type").hide()
+
   #
   # 대여 목적
   #
   purpose = $("select[name=purpose]").data('purpose')
+  updatePurposeInterviewType(purpose)
+  $("select[name=purpose]").on "change", (e, params) ->
+    if params && params.selected
+      updatePurposeInterviewType(params.selected)
+
   $("select[name=purpose]").chosen({ width: "100%" }).val(purpose).trigger("chosen:updated")
+
+  #
+  # 면접 유형
+  #
+  interview_type = $("select[name=interview_type]").data("interview-type")
+  $("select[name=interview_type]").chosen({ width: "100%" }).val(interview_type).trigger("chosen:updated")
 
   #
   # 사용자 약관
@@ -234,13 +251,14 @@ $ ->
     phone   = $("input[name=phone]").val()
     sms     = $("input[name=sms]").val()
 
-    gender      = $("input[name=gender]:checked").val()
-    email       = $("input[name=email]").val()
-    address2    = $("input[name=address2]").val()
-    birth       = $("input[name=birth]").val()
-    booking     = $("input[name=booking]").val()
-    wearon_date = $("input[name=wearon_date]").val()
-    purpose     = $("select[name=purpose]").val()
+    gender         = $("input[name=gender]:checked").val()
+    email          = $("input[name=email]").val()
+    address2       = $("input[name=address2]").val()
+    birth          = $("input[name=birth]").val()
+    booking        = $("input[name=booking]").val()
+    wearon_date    = $("input[name=wearon_date]").val()
+    purpose        = $("select[name=purpose]").val()
+    interview_type = $("select[name=interview_type]").val()
 
     pre_category_temp = $("select[name=pre_category_temp]").val()
     pre_color1        = $("select[name=pre_color1]").val()
@@ -326,6 +344,14 @@ $ ->
     unless purpose
       OpenCloset.alert 'danger', '대여 목적을 입력해주세요.', '#visit-alert'
       return
+
+    #
+    # 면접 유형 점검
+    #
+    if purpose == "입사면접"
+      unless interview_type
+        OpenCloset.alert 'danger', '면접 유형을 입력해주세요.', '#visit-alert'
+        return
 
     #
     # 대여할 옷의 종류 점검

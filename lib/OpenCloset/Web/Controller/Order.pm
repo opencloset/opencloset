@@ -301,6 +301,13 @@ sub detail {
     my $user      = $order->user;
     my $user_info = $user->user_info;
 
+    my $interview_type = q{};
+    if ( $user_info->purpose && $user_info->purpose eq "입사면접" ) {
+        my $tag = $self->DB->resultset("Tag")->find_or_create( { name => "화상면접" } );
+        my $order_tag = $order->order_tags->search( { tag_id => $tag->id } )->next;
+        $interview_type = $tag->name if $order_tag;
+    }
+
     my $today = DateTime->today( time_zone => $self->config->{timezone} );
     my @staff = $self->DB->resultset('User')->search(
         { 'user_info.staff' => 1 },
@@ -395,6 +402,7 @@ sub detail {
         late_fee       => $overdue_fee + $extension_fee,
         unpaid         => $unpaid,
         nonpaid        => $nonpaid,
+        interview_type => $interview_type,
     );
 }
 

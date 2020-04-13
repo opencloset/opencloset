@@ -577,7 +577,8 @@
       <tr>
         <th>대여 목적</th>
         <td>
-          %= $user_info->purpose || ''
+          %= $user_info->purpose || q{}
+          %= $interview_type ? " - $interview_type" : q{}
         </td>
       </tr>
       <tr>

@@ -44,24 +44,25 @@ sub visit {
     my $privacy  = $self->param('privacy');
     my $authcode = $self->param('sms');
 
-    my $email         = $self->param('email');
-    my $gender        = $self->param('gender');
-    my $address1      = $self->param('address1');
-    my $address2      = $self->param('address2');
-    my $address3      = $self->param('address3');
-    my $address4      = $self->param('address4');
-    my $birth         = $self->param('birth');
-    my $order         = $self->param('order');
-    my $booking       = $self->param('booking');
-    my $booking_saved = $self->param('booking-saved');
-    my $wearon_date   = $self->param('wearon_date');
-    my $purpose       = $self->param('purpose');
-    my $purpose2      = $self->param('purpose2');
-    my $pre_category  = $self->param('pre_category');
-    my $pre_color     = $self->param('pre_color');
-    my $agent         = $self->param('agent') || 0;
-    my $agent_qty     = $self->param('agent-quantity') || 1;
-    my $past_order    = $self->param('past-order') || '';
+    my $email          = $self->param('email');
+    my $gender         = $self->param('gender');
+    my $address1       = $self->param('address1');
+    my $address2       = $self->param('address2');
+    my $address3       = $self->param('address3');
+    my $address4       = $self->param('address4');
+    my $birth          = $self->param('birth');
+    my $order          = $self->param('order');
+    my $booking        = $self->param('booking');
+    my $booking_saved  = $self->param('booking-saved');
+    my $wearon_date    = $self->param('wearon_date');
+    my $purpose        = $self->param('purpose');
+    my $purpose2       = $self->param('purpose2');
+    my $pre_category   = $self->param('pre_category');
+    my $pre_color      = $self->param('pre_color');
+    my $agent          = $self->param('agent') || 0;
+    my $agent_qty      = $self->param('agent-quantity') || 1;
+    my $past_order     = $self->param('past-order') || '';
+    my $interview_type = $self->param('interview_type');
 
     $self->app->log->debug("type: $type");
     $self->app->log->debug("name: $name");
@@ -82,6 +83,7 @@ sub visit {
     $self->app->log->debug("booking-saved: $booking_saved");
     $self->app->log->debug("wearon_date: $wearon_date");
     $self->app->log->debug("purpose: $purpose");
+    $self->app->log->debug("interview_type: $interview_type");
     $self->app->log->debug("purpose2: $purpose2");
     $self->app->log->debug("pre_category: $pre_category");
     $self->app->log->debug("pre_color: $pre_color");
@@ -129,6 +131,12 @@ sub visit {
         $self->stash( alert => '인증코드가 유효하지 않습니다.' );
         return;
     }
+
+    #
+    # online interview tag
+    #
+    my $online_interview_tag = $self->DB->resultset("Tag")->find_or_create({ name => "화상면접" });
+    $self->stash( online_interview_tag => $online_interview_tag );
 
     $self->stash( order => $self->get_nearest_booked_order($user) );
     $self->stash( coupon => undef );
@@ -205,8 +213,9 @@ sub visit {
                     # 이미 예약 정보가 저장되어 있는 경우 - 예약 변경 상황
                     #
                     my %extra = (
-                        agent  => $agent,
-                        ignore => $agent ? 1 : undef,
+                        agent     => $agent,
+                        ignore    => $agent ? 1 : undef,
+                        interview => $purpose && $purpose eq "입사면접" ? $interview_type : q{},
                     );
 
                     my $order_obj = $self->DB->resultset('Order')->find($order);
@@ -233,6 +242,7 @@ sub visit {
                         past_order => $past_order,
                         agent      => $agent,
                         ignore     => $agent ? 1 : undef,
+                        interview  => $purpose && $purpose eq "입사면접" ? $interview_type : q{},
                     );
 
                     if ( my $code = delete $self->session->{coupon_code} ) {
