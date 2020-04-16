@@ -48,7 +48,7 @@ $ ->
   ).on 'changeDate', (e) ->
     refreshExpectedFee()
 
-  updatePurposeInterviewType = (purpose) ->
+  updateInterviewType = (purpose) ->
     if purpose == "입사면접"
       $(".interview-type").show()
     else
@@ -58,10 +58,10 @@ $ ->
   # 대여 목적
   #
   purpose = $("select[name=purpose]").data('purpose')
-  updatePurposeInterviewType(purpose)
+  updateInterviewType(purpose)
   $("select[name=purpose]").on "change", (e, params) ->
-    if params && params.selected
-      updatePurposeInterviewType(params.selected)
+    if "selected" of params
+      updateInterviewType(params.selected)
 
   $("select[name=purpose]").chosen({ width: "100%" }).val(purpose).trigger("chosen:updated")
 
