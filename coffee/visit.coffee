@@ -60,7 +60,7 @@ $ ->
   purpose = $("select[name=purpose]").data('purpose')
   updatePurposeInterviewType(purpose)
   $("select[name=purpose]").on "change", (e, params) ->
-    if params && params.selected
+    if "selected" of params
       updatePurposeInterviewType(params.selected)
 
   $("select[name=purpose]").chosen({ width: "100%" }).val(purpose).trigger("chosen:updated")
