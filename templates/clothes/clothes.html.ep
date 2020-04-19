@@ -410,17 +410,15 @@ my $system_start_dt = DateTime->new( %{ $config->{start_date} }, time_zone => $c
       </div>
       <div class="space-20"></div>
       <%
-      my @search_params = (
-        {
-          'order.parent_id' => undef,
-        },
-        {
-          join     => [qw/ order /],
-          order_by => { -desc => 'order.rental_date' },
-        },
+      my %cond = (
+        "order.parent_id" => undef,
+      );
+      my %attr = (
+        join     => [ { "order" => "booking" } ],
+        order_by => { -desc => "order.rental_date" },
       );
       %>
-      %= include 'partials/recent-orders', user => undef, orders => [ map { $_->order } $clothes->order_details(@search_params) ]
+      %= include "partials/recent-orders", user => undef, orders => [ map { $_->order } $clothes->order_details( \%cond, \%attr ) ]
     </div>
   </div>
 </div>

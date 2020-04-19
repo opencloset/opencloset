@@ -328,12 +328,15 @@ use OpenCloset::Constants::Measurement qw/$HEIGHT $WEIGHT $NECK $BUST $WAIST $HI
       </div>
       <div class="space-20"></div>
       <%
-      my @search_params = (
-        { 'parent_id' => undef },
-        { order_by    => { -desc => 'rental_date' } },
+      my %cond = (
+        "orders.parent_id" => undef,
+      );
+      my %attr = (
+        join     => [ "orders", "booking" ],
+        order_by => { -desc => "booking.date" },
       );
       %>
-      %= include 'partials/recent-orders', user => $user, orders => [ $user->orders(@search_params) ];
+      %= include "partials/recent-orders", user => $user, orders => [ $user->orders( \%cond, \%attr ) ];
     </div>
   </div>
 </div>

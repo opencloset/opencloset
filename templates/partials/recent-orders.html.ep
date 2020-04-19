@@ -70,6 +70,10 @@
                 <span class="rental-fit btn btn-sm btn-danger disabled" data-order-weight="<%= $order->weight %>">대여 부적합</span>
               % }
             % }
+            % my $is_online_interview = $order->tags( { "tag.name" => "화상면접" } )->count;
+            % if ($is_online_interview) {
+            <span class="label label-danger">화상면접</span>
+            % }
             <div class="time">
               <i class="icon-time bigger-110"></i>
               %= $order->create_date->ymd . q{ } . $order->create_date->hms
