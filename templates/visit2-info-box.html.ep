@@ -189,15 +189,16 @@
                           <label class="block clearfix">
                             <input type="hidden" name="pre_category" value="<%= ( $order || $load ) ? $user->user_info->pre_category : q{} %>">
                             <select class="width-100 chosen-select" name="pre_category_temp" multiple data-placeholder="대여할 옷의 종류를 선택하세요.">
-                              <option value=""     >           </option>
-                              <option value="jacket"> 자켓     </option>
-                              <option value="pants" > 팬츠     </option>
-                              <option value="shirt" > 셔츠     </option>
-                              <option value="tie"   > 타이     </option>
-                              <option value="shoes" > 구두     </option>
-                              <option value="belt"  > 벨트     </option>
-                              <option value="skirt" > 스커트   </option>
-                              <option value="blouse"> 블라우스 </option>
+                              <option value=""        >          </option>
+                              <option value="jacket"  > 자켓     </option>
+                              <option value="pants"   > 팬츠     </option>
+                              <option value="shirt"   > 셔츠     </option>
+                              <option value="tie"     > 타이     </option>
+                              <option value="shoes"   > 구두     </option>
+                              <option value="belt"    > 벨트     </option>
+                              <option value="skirt"   > 스커트   </option>
+                              <option value="blouse"  > 블라우스 </option>
+                              <option value="onepiece"> 원피스   </option>
                             </select>
                             <p> 대여를 원하는 옷의 종류를 모두 선택해주세요. </p>
                           </label>
