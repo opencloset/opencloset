@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Changed
 
+- 사용자 정보 화면에서 원피스 추가 및 삭제가 동작하지 않음 (#1725)
 - 방문 예약시 대여 항목에서 원피스를 추가해 고를 수 있도록 함 (#1718)
 - 평일 및 주말 예약 슬롯 변경 (#1586)
 - 평일 및 주말 09:00 예약 슬롯 활성화 (#1580)

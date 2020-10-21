@@ -172,7 +172,7 @@ $ ->
         params.type = 'textarea'
       when 'user-pre_category'
         params.type    = 'select2'
-        params.source  = ( { id: i, text: OpenCloset.category[i].str } for i in [ 'jacket', 'pants', 'shirt', 'tie', 'shoes', 'belt', 'skirt', 'blouse' ] )
+        params.source  = ( { id: i, text: OpenCloset.category[i].str } for i in Object.keys(OpenCloset.category) )
         params.select2 =
           width:       250
           placeholder: '희망 항목을 모두 선택해주세요.'
