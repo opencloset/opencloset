@@ -6,8 +6,10 @@
 % $booking = $order->booking if $order;
 % my $now = DateTime->now( time_zone => $timezone );
 
+% my $purpose = $user->user_info->purpose || '';
 % my $interview_type = q{};
-% if ( $order && $user->user_info->purpose && $user->user_info->purpose eq "입사면접" ) {
+% my $wedding_type = q{};
+% if ( $order && $purpose eq "입사면접" ) {
 %   my $online_order_tag = $order->order_tags->search( { tag_id => $online_interview_tag->id } )->next;
 %   $interview_type = $online_order_tag ? "online" : "offline";
 % }
@@ -160,20 +162,13 @@
                               % else {
                                 <option value="입사면접">입사면접</option>
                                 <option value="결혼식">결혼식</option>
-                                <option value="상견례">상견례</option>
                                 <option value="대학(원)면접">대학(원)면접</option>
                                 <option value="모의면접">모의면접</option>
-                                <option value="인턴면접">인턴면접</option>
                                 <option value="장례식">장례식</option>
+                                <option value="졸업/입학식">졸업/입학식</option>
+                                <option value="세미나/발표">세미나/발표</option>
+                                <option value="공연/축제">공연/축제</option>
                                 <option value="사진촬영">사진촬영</option>
-                                <option value="세미나">세미나</option>
-                                <option value="발표">발표</option>
-                                <option value="공연(연주회)">공연(연주회)</option>
-                                <option value="축제(행사)">축제(행사)</option>
-                                <option value="OT">OT</option>
-                                <option value="아르바이트">아르바이트</option>
-                                <option value="졸업식">졸업식</option>
-                                <option value="입학식">입학식</option>
                                 <option value="기타">기타</option>
                               % }
                             </select>
@@ -185,16 +180,28 @@
                           </label>
 
                           <div class="interview-type">
-                          <label class="block clearfix">
-                            <select class="width-100 chosen-select" name="interview_type" data-placeholder="면접 유형을 선택해주세요." data-interview-type="<%= ( $order || $load ) ? $interview_type : q{} %>">
-                              <option value="">면접 유형을 선택해주세요.</option>
+                            <label class="block clearfix">
+                              <select class="width-100 chosen-select" name="interview_type" data-placeholder="면접 유형을 선택해주세요." data-interview-type="<%= ( $order || $load ) ? $interview_type : q{} %>">
+                                <option value="">면접 유형을 선택해주세요.</option>
                                 <option value="offline">대면면접</option>
                                 <option value="online">화상면접</option>
-                            </select>
-                            <p>
-                              면접의 종류에 따라 적절한 스타일링을 제공하기 위해 화상면접 여부를 선택해주세요.
-                            </p>
-                          </label>
+                              </select>
+                              <p>
+                                면접의 종류에 따라 적절한 스타일링을 제공하기 위해 화상면접 여부를 선택해주세요.
+                              </p>
+                            </label>
+                          </div>
+
+                          <div class="wedding-type">
+                            <label class="block clearfix">
+                              <select class="width-100 chosen-select" name="wedding_type" data-placeholder="상세목적을 선택해주세요." data-wedding-type="<%= ( $order || $load ) ? $wedding_type : q{} %>">
+                                <option value="">상세목적을 선택해주세요.</option>
+                                <option value="하객">하객</option>
+                                <option value="혼주">혼주</option>
+                                <option value="웨딩촬영">웨딩촬영</option>
+                                <option value="본식">본식</option>
+                              </select>
+                            </label>
                           </div>
 
                           <label class="block clearfix">

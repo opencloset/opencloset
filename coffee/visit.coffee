@@ -54,14 +54,22 @@ $ ->
     else
       $(".interview-type").hide()
 
+  updateWeddingType = (purpose) ->
+    if purpose == "결혼식"
+      $(".wedding-type").show()
+    else
+      $(".wedding-type").hide()
+
   #
   # 대여 목적
   #
   purpose = $("select[name=purpose]").data('purpose')
   updateInterviewType(purpose)
+  updateWeddingType(purpose)
   $("select[name=purpose]").on "change", (e, params) ->
     if "selected" of params
       updateInterviewType(params.selected)
+      updateWeddingType(params.selected)
 
   $("select[name=purpose]").chosen({ width: "100%" }).val(purpose).trigger("chosen:updated")
 
@@ -70,6 +78,13 @@ $ ->
   #
   interview_type = $("select[name=interview_type]").data("interview-type")
   $("select[name=interview_type]").chosen({ width: "100%" }).val(interview_type).trigger("chosen:updated")
+
+  #
+  # 결혼식 유형
+  #
+  wedding_type = $("select[name=wedding_type]").data("wedding-type")
+  $("select[name=wedding_type]").chosen({ width: "100%" }).val(wedding_type).trigger("chosen:updated")
+
 
   #
   # 사용자 약관
@@ -259,6 +274,7 @@ $ ->
     wearon_date    = $("input[name=wearon_date]").val()
     purpose        = $("select[name=purpose]").val()
     interview_type = $("select[name=interview_type]").val()
+    wedding_type = $("select[name=wedding_type]").val()
 
     pre_category_temp = $("select[name=pre_category_temp]").val()
     pre_color1        = $("select[name=pre_color1]").val()
@@ -351,6 +367,14 @@ $ ->
     if purpose == "입사면접"
       unless interview_type
         OpenCloset.alert 'danger', '면접 유형을 입력해주세요.', '#visit-alert'
+        return
+
+    #
+    # 결혼식 유형 점검
+    #
+    if purpose == "결혼식"
+      unless wedding_type
+        OpenCloset.alert 'danger', '결혼식 상세정보를 입력해주세요.', '#visit-alert'
         return
 
     #

@@ -62,7 +62,8 @@ sub visit {
     my $agent          = $self->param('agent') || 0;
     my $agent_qty      = $self->param('agent-quantity') || 1;
     my $past_order     = $self->param('past-order') || '';
-    my $interview_type = $self->param('interview_type');
+    my $interview_type = $self->param('interview_type') || '';
+    my $wedding_type   = $self->param('wedding_type') || '';
 
     $self->app->log->debug("type: $type");
     $self->app->log->debug("name: $name");
@@ -90,6 +91,8 @@ sub visit {
     $self->app->log->debug("agent: $agent");
     $self->app->log->debug("agent-quantity: $agent_qty");
     $self->app->log->debug("past-order: $past_order");
+    $self->app->log->debug("interview_type: $interview_type");
+    $self->app->log->debug("wedding_type: $wedding_type");
 
     #
     # validate name
@@ -216,6 +219,7 @@ sub visit {
                         agent     => $agent,
                         ignore    => $agent ? 1 : undef,
                         interview => $purpose && $purpose eq "입사면접" ? $interview_type : q{},
+                        wedding   => $purpose && $purpose eq "결혼식"   ? $wedding_type   : q{},
                     );
 
                     my $order_obj = $self->DB->resultset('Order')->find($order);
@@ -243,6 +247,8 @@ sub visit {
                         agent      => $agent,
                         ignore     => $agent ? 1 : undef,
                         interview  => $purpose && $purpose eq "입사면접" ? $interview_type : q{},
+                        wedding    => $purpose && $purpose eq "결혼식"   ? $wedding_type   : q{},
+
                     );
 
                     if ( my $code = delete $self->session->{coupon_code} ) {
