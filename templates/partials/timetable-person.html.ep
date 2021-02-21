@@ -42,6 +42,12 @@
 % my $return_memo = $order->return_memo;
 % my $event       = $coupon ? $coupon->desc : '';
 % my $event_name  = $coupon && $coupon->event ? $coupon->event->title : '';
+% my $wedding_type = '';
+% # 주문서가 대여되기 전에는 대여목적이 사용자 정보에 있음
+% if ($user_info->purpose eq '결혼식') {
+%   my $ot = $order->order_tags->next;
+%   $wedding_type = $ot->tag->name if $ot;
+% }
 % ($event) = split(/\|/, $event) if $event;
 % my %EVENT_NAME_MAP = (seoul => '취업날개', gwanak => '관악고용', '10bob' => '십시일밥', 'seoul-2017' => '취업날개', 'seoul-2017-2' => '취업날개');
 <div class="people-box" data-target="<%= $alert_target %>" data-order-id="<%= $order->id %>" data-ymd="<%= $dt_start->ymd %>">
@@ -62,6 +68,9 @@
             <i class="icon-ticket"></i>
             %= $event_name || $EVENT_NAME_MAP{$event} || "$event (쿠폰)"
           </small>
+        % }
+        % if ($wedding_type) {
+          <small><%= $wedding_type %></small>
         % }
       </h4>
     </div>

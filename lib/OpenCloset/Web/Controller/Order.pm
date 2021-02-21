@@ -302,10 +302,23 @@ sub detail {
     my $user_info = $user->user_info;
 
     my $interview_type = q{};
-    if ( $user_info->purpose && $user_info->purpose eq "입사면접" ) {
+    my $purpose = $user_info->purpose || "";
+    if ( $purpose eq "입사면접" ) {
         my $tag = $self->DB->resultset("Tag")->find_or_create( { name => "화상면접" } );
         my $order_tag = $order->order_tags->search( { tag_id => $tag->id } )->next;
         $interview_type = $tag->name if $order_tag;
+    }
+
+    # https://github.com/opencloset/opencloset/issues/1768
+    my $wedding_type = q{};
+    if ( $purpose eq "결혼식" ) {
+        my $tags = $self->DB->resultset("Tag")->search( { name => {-in => ["웨딩촬영", "본식"]} } );
+        my @tags_id;
+        while (my $tag = $tags->next) {
+            push @tags_id, $tag->id;
+        }
+        my $order_tag = $order->order_tags->search( { tag_id => { -in => \@tags_id} } )->next;
+        $wedding_type = $order_tag->tag->name if $order_tag;
     }
 
     my $today = DateTime->today( time_zone => $self->config->{timezone} );
@@ -403,6 +416,7 @@ sub detail {
         unpaid         => $unpaid,
         nonpaid        => $nonpaid,
         interview_type => $interview_type,
+        wedding_type   => $wedding_type,
     );
 }
 

@@ -74,6 +74,11 @@
             % if ($is_online_interview) {
             <span class="label label-danger">화상면접</span>
             % }
+            % my $has_wedding_type = $order->tags( { "tag.name" => { -in => ["웨딩촬영", "본식"] } } )->count;
+            % if ($has_wedding_type) {
+              % my $ot = $order->order_tags->next;
+            <span class="label label-danger"><%= $ot->tag->name %></span>
+            % }
             <div class="time">
               <i class="icon-time bigger-110"></i>
               %= $order->create_date->ymd . q{ } . $order->create_date->hms
