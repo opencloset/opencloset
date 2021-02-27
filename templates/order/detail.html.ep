@@ -579,6 +579,7 @@
         <td>
           %= $user_info->purpose || q{}
           %= $interview_type ? " - $interview_type" : q{}
+          %= $wedding_type ? " - $wedding_type" : q{}
         </td>
       </tr>
       <tr>
@@ -651,7 +652,7 @@
               <button type="button" class="btn btn-success" title="weight"><%= $user_info->weight || '-' %></button>
             </div>
           </div>
-          
+
           <div>
             <div class="btn-group btn-group-xs">
               % for my $part (qw/bust waist hip topbelly belly/) {
