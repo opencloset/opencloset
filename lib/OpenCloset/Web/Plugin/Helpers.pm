@@ -1643,12 +1643,14 @@ sub count_visitor {
         notvisited => { total => 0, male => 0, female => 0 },
         bestfit    => { total => 0, male => 0, female => 0 },
         loanee     => { total => 0, male => 0, female => 0 },
+        wedding    => { total => 0, male => 0, female => 0 },
     );
     while ( my $booking = $booking_rs->next ) {
         for my $order ( $booking->orders ) {
-            next unless $order->user->user_info;
+            my $user_info = $order->user->user_info;
+            next unless $user_info;
 
-            my $gender = $order->user->user_info->gender;
+            my $gender = $user_info->gender;
             next unless $gender;
 
             ++$count{all}{total};
@@ -1662,6 +1664,12 @@ sub count_visitor {
             if ( $order->bestfit ) {
                 ++$count{bestfit}{total};
                 ++$count{bestfit}{$gender};
+            }
+
+            my $purpose = $user_info->purpose || "";
+            if ( $purpose eq '결혼식' ) {
+                ++$count{wedding}{total};
+                ++$count{wedding}{$gender};
             }
 
             use feature qw( switch );
