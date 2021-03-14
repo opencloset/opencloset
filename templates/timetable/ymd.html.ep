@@ -104,11 +104,11 @@ title meta_text($_id);
         </div>
         <div class="infobox-data">
           <span class="infobox-data-number">
-            <span class="count-bestfit-total"><%= $count->{bestfit}{total} %></span>
+            <span class="count-wedding-total"><%= $count->{wedding}{total} %></span>
             <span>-</span>
-            <span class="count-bestfit-male"><%= $count->{bestfit}{male} %></span>
+            <span class="count-wedding-male"><%= $count->{wedding}{male} %></span>
             <span>/</span>
-            <span class="count-bestfit-male"><%= $count->{bestfit}{female} %></span>
+            <span class="count-wedding-female"><%= $count->{wedding}{female} %></span>
           </span>
           <div class="infobox-content">
             웨딩대여 수 - 남 / 여
