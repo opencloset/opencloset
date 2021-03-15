@@ -366,7 +366,6 @@
                       </div>
                       <div class="modal-body" style="height: 250px; overflow-y: auto;">
                         <div class="notice">
-                          <h3>"미리 오지 마세요."</h3>
 
                           <p>
                             열린옷장의 <strong>정장 대여 기간은 3박 4일</strong>입니다.
@@ -420,17 +419,11 @@
                       <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
                         <h4 class="modal-title" id="warnModalLabel">
-                          미리 오지 마세요.
+                          기본 대여기간 3박 4일
                         </h4>
                       </div>
                       <div class="modal-body" style="height: 250px; overflow-y: auto;">
                         <div class="notice">
-                          <h3>예약일에 대여하지 않고 사전 방문 하는 경우, 아래 유의사항을 꼭 확인해주세요.</h3>
-
-                          <p>
-                            방문 예약일과 의류 착용일이 4일 이상(<span class="diff-days"></span>일) 차이가 납니다.
-                          </p>
-
                           <p>
                             실제 대여일보다 4일 이상 미리 방문하는 경우 기간 연장료나 의류 보관료가 발생할 수 있습니다.
                             고려하여 방문일을 예약해주세요.
