@@ -21,7 +21,7 @@
 
     # app.conf 의 %BOOKING_SLOT 을 app.conf.sample 과 동일하게 설정
 
-    $ grunt # 1539, 1562, 1718, 1725
+    $ grunt # 1539, 1562, 1718, 1725, 1776
     $ ubic reload opencloset.visit
 
 v1.12.11
