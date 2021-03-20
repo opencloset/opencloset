@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Changed
 
+- 대여목적에 따라 시간표의 웨딩대여수 계산방식을 변경 (#1768)
 - "미리 오지 마세요" 팝업문구 수정 (#1775)
 - 시간표에서 웨딩대여 수 현황을 표기 (#1768)
 - 대여목적이 결혼식일때에 주문서 태그를 통해 추가 식별 (#1768)
