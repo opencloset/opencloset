@@ -1668,8 +1668,14 @@ sub count_visitor {
 
             my $purpose = $user_info->purpose || "";
             if ( $purpose eq '결혼식' ) {
-                ++$count{wedding}{total};
-                ++$count{wedding}{$gender};
+                ## https://github.com/opencloset/opencloset/issues/1768
+                ## 웨딩촬영, 본식인 경우에만 표시
+                my @tags_id = (508, 509);  # 508: 웨딩촬영, 509: 본식
+                my $tag_count = $order->order_tags->search({ tag_id => { -in => \@tags_id } })->count;
+                if ($tag_count) {
+                    ++$count{wedding}{total};
+                    ++$count{wedding}{$gender};
+                }
             }
 
             use feature qw( switch );
