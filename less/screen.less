@@ -1270,6 +1270,7 @@ input#clothes-id,#input-coupon-code,#input-code {
 
 @event-color-seoul:    #55aaab;
 @event-color-gyeonggi: #f6ba36;
+@event-color-coupon:   #f6ba36;
 #visit-box {
     .event {
         padding: 0;
@@ -1281,6 +1282,9 @@ input#clothes-id,#input-coupon-code,#input-code {
                 .event-gyeonggi {
                     background-color: @event-color-gyeonggi;
                 }
+                .event-coupon {
+                    background-color: @event-color-coupon;
+                }
                 text-decoration: none;
                 span {
                     color: #ffffff;
@@ -1291,6 +1295,9 @@ input#clothes-id,#input-coupon-code,#input-code {
             }
             .event-gyeonggi {
                 background-color: darken(@event-color-gyeonggi, 5%);
+            }
+            .event-coupon {
+                background-color: darken(@event-color-coupon, 5%);
             }
             span {
                 color: #eeeeee;

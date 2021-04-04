@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Changed
 
+- 방문예약 페이지 하단 배너를 쿠폰 입력 링크로 교체 (#1785)
 - 대여목적에 따라 시간표의 웨딩대여수 계산방식을 변경 (#1768)
 - "미리 오지 마세요" 팝업문구 수정 (#1775)
 - 시간표에서 웨딩대여 수 현황을 표기 (#1768)
