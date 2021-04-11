@@ -31,6 +31,7 @@ requires 'Parcel::Track::KR::Yellowcap';
 requires 'Path::Tiny';
 requires 'SMS::Send::KR::APIStore', '0.002';
 requires 'SMS::Send::KR::CoolSMS', '1.003';
+requires 'SMS::Send::KR::Aligo', '0.005';
 requires 'Scalar::Util';
 requires 'Statistics::Basic';
 requires 'Text::CSV';

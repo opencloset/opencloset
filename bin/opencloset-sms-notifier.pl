@@ -149,8 +149,10 @@ sub send_sms {
     );
 
     my $sent = $sender->send_sms(
-        to   => $sms->{to},
-        text => $sms->{text},
+        to       => $sms->{to},
+        text     => $sms->{text},
+        _type    => $type,
+        _subject => "[열린옷장]",
     );
 
     return $sent;
