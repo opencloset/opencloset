@@ -1,3 +1,5 @@
+    $ cpanm SMS::Send::KR::Aligo      # 0.005
+
     $ closetpan -n OpenCloset::API    # v0.1.17
     $ grunt
 
