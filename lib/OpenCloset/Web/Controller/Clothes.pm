@@ -397,6 +397,10 @@ sub clothes_pdf {
             $background_type .= "-winter";
             $type_str        .= " - 동복";
         }
+        elsif ( "추동복" ~~ @tags ) {
+            $background_type .= "-fall_winter";
+            $type_str        .= " - 추동복";
+        }
     }
 
     #
