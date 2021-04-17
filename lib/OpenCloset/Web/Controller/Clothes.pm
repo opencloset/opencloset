@@ -378,17 +378,7 @@ sub clothes_pdf {
     {
         use experimental qw( smartmatch );
 
-        if ( "온라인" ~~ @tags ) {
-            if ( $clothes->gender eq "male" ) {
-                $background_type = "online-male";
-                $type_str        = "온라인 - 남성";
-            }
-            elsif ( $clothes->gender eq "female" ) {
-                $background_type = "online-female";
-                $type_str        = "온라인 - 여성";
-            }
-        }
-        else {
+        unless ( "온라인" ~~ @tags ) {
             if ( $clothes->gender eq "male" ) {
                 $background_type = "offline-male";
                 $type_str        = "오프라인 - 남성";
