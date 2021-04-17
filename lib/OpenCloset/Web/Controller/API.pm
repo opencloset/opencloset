@@ -1776,13 +1776,14 @@ sub api_create_tag {
     #
     # fetch params
     #
-    my %params = $self->get_params(qw/ name /);
+    my %params = $self->get_params(qw/ name label /);
 
     #
     # validate params
     #
     my $v = $self->create_validator;
     $v->field('name')->required(1)->regexp(qr/^.+$/);
+    $v->field('label')->regexp(qr/^.+$/);
     unless ( $self->validate( $v, \%params ) ) {
         my @error_str;
         while ( my ( $k, $v ) = each %{ $v->errors } ) {

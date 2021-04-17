@@ -15,7 +15,7 @@ $ ->
     base_url = $('#tag-data').data('base-url')
     $.ajax "#{ base_url }.json",
       type: 'POST'
-      data: { name: query }
+      data: { name: query, label: query }
       success: (data, textStatus, jqXHR) ->
         compiled = _.template($('#tpl-tag').html())
         html = $(compiled(data))
