@@ -4,6 +4,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Fixed
+
+- [쿠폰 발행] 열린옷장 정장대여쿠폰 번호 발행 (#1794)
+  - `bin/event.pl` 쿠폰 생성기가 쿠폰 유형이 `price`일 경우 금액을 지정하지
+     않는 오류 수정
+
 ### Changed
 
 - 추동복일 경우 출력용 의류 태그를 녹색으로 표현 (#1787)
