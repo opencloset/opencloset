@@ -197,14 +197,14 @@ EOL
 
     for ( 1 .. $cnt ) {
         my $code = cc_generate( parts => 3 );
-        my $coupon = $schema->resultset('Coupon')->create(
-            {
+        my %coupon_params = (
                 event_id => $event_id,
                 code     => $code,
                 type     => $type,
-            }
+                price    => $price,
         );
-
+        delete $coupon_params{price} unless $type eq 'price' && $price;
+        my $coupon = $schema->resultset('Coupon')->create(\%coupon_params);
         unless ($coupon) {
             print STDERR "Couldn't create a new Coupon\n";
             next;
