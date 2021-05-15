@@ -53,6 +53,7 @@ GetOptions(
     "--coupon-count=i",
     "--coupon-limit=i",
     "--coupon-price=i",
+    "--coupon-rate=i",
     "--coupon-out=s"    # default is STDOUT
 );
 
@@ -151,6 +152,7 @@ sub issue_coupon {
     my $cnt   = $opts->{'coupon-count'} || 0;
     my $limit = $opts->{'coupon-limit'} || 0;
     my $price = $opts->{'coupon-price'} || 0;
+    my $rate  = $opts->{'coupon-rate'}  || 0;
     my $out   = $opts->{'coupon-out'};
 
     pod2usage(0) unless $type;
@@ -164,16 +166,27 @@ sub issue_coupon {
         pod2usage(0);
     }
 
+    if ($type eq 'rate') {
+        if (!$rate) {
+            warn "coupon-rate is required for rate type coupon";
+            pod2usage(0);
+        } elsif ($rate <= 0 or $rate >= 100) {
+            warn "coupon-rate should between 0 and 100";
+            pod2usage(0);
+        }
+    }
+
     my $event = $schema->resultset('Event')->find({ id => $event_id });
     die "Not found event: $event_id" unless $event;
 
-    printf(<<EOL, $event->year, $event->title, $type, $cnt, $limit, $price, $out || 'STDOUT');
+    printf(<<EOL, $event->year, $event->title, $type, $cnt, $limit, $price, $rate, $out || 'STDOUT');
 # Create coupon with below params:
 event    : %d %s
 type     : %s
 count    : %d
 limit    : %d
 price    : %d
+rate     : %d
 filename : %s
 
 EOL
@@ -204,6 +217,8 @@ EOL
                 price    => $price,
         );
         delete $coupon_params{price} unless $type eq 'price' && $price;
+        $coupon_params{price} = $rate if $type eq 'rate';
+
         my $coupon = $schema->resultset('Coupon')->create(\%coupon_params);
         unless ($coupon) {
             print STDERR "Couldn't create a new Coupon\n";
@@ -266,6 +281,7 @@ event.pl - Create a new event.
         --coupon-count
         --coupon-limit
         --coupon-price    price of coupon if coupon-type is price.
+        --coupon-rate     rate of coupon if coupon-type is rate.
         --coupon-out      filename to save coupon numbers. default is STDOUT.
 
 =cut

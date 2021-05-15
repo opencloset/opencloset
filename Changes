@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Changed
 
+- 이벤트/쿠폰 생성 스크립트에서 비율쿠폰의 비율 옵션 추가 (#1798)
 - 추동복일 경우 출력용 의류 태그를 녹색으로 표현 (#1787)
 - SMS 발송 스크립트에서 LMS 타입일 경우 `[열린옷장]` 타이틀 추가
 - 방문예약 페이지 하단 배너를 쿠폰 입력 링크로 교체 (#1785)
