@@ -46,7 +46,7 @@ requires 'experimental';
 requires 'Iamport::REST::Client';
 requires 'OpenCloset::API',                     'v0.1.17';
 requires 'OpenCloset::Calculator::LateFee',     'v0.3.0';
-requires 'OpenCloset::Common',                  'v0.1.10';
+requires 'OpenCloset::Common',                  'v0.1.12';
 requires 'OpenCloset::Config',                  '0.002';
 requires 'OpenCloset::DB::Plugin::Order::Sale', '0.002';
 requires 'OpenCloset::Events::EmploymentWing',  'v0.1.0';
