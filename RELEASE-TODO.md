@@ -5,7 +5,7 @@
 
     $ closetpan -n OpenCloset::API    # v0.1.15
 
-    $ closetpan OpenCloset::Common    # v0.1.10
+    $ closetpan OpenCloset::Common    # v0.1.12
     $ grunt
 
     $ closetpan -n OpenCloset::API    # v0.1.7
@@ -23,7 +23,7 @@
 
     # app.conf 의 %BOOKING_SLOT 을 app.conf.sample 과 동일하게 설정
 
-    $ grunt # 1539, 1562, 1718, 1725, 1776, 1785, 1787
+    $ grunt # 1539, 1562, 1718, 1725, 1776, 1785, 1787, 1796
     $ ubic reload opencloset.visit
 
 v1.12.11
