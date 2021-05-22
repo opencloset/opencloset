@@ -111,17 +111,16 @@
                         <div class="clearfix well-sm event">
                           <a href="http://dressfree.net/main/main.php" target="_blank">
                             <span class="event-seoul event-link text-center">
-                              서울시 정장 무료대여 서비스<br/>
-                              "취업날개" 예약하기<br/>
-                              (입사면접만 이용가능)
+                              서울시 무료대여 서비스<br/>
+                              [취업날개 바로가기]
                             </span>
                           </a>
                         </div>
                         <div class="clearfix well-sm event">
                           <a href="<%= url_for('/coupon') %>" target="_blank">
                             <span class="event-coupon event-link text-center">
-                              쿠폰번호로 무료대여하기<br/>
-                              (쿠폰번호 입력)
+                              쿠폰번호로 대여하기<br />
+                              [번호입력 바로가기]
                             </span>
                           </a>
                         </div>
