@@ -109,7 +109,7 @@ use OpenCloset::Constants::Measurement qw/$BUST $TOPBELLY $ARM $WAIST $THIGH $LE
 
     <div class="form-actions clearfix">
       <div class="col-md-offset-3 col-md-9">
-        <button id="btn-hit-search" class="btn btn-info pull-right" type="button">
+        <button id="btn-rent-search" class="btn btn-info pull-right" type="button">
           <i class="ace-icon icon-search bigger-110"></i>
           검색
         </button>
