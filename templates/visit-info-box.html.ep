@@ -267,6 +267,8 @@
                               <option value="skirt"   > 스커트   </option>
                               <option value="blouse"  > 블라우스 </option>
                               <option value="onepiece"> 원피스   </option>
+                              <option value="coat"    > 코트     </option>
+                              <option value="bag"     > 가방     </option>
                             </select>
                             <p> 대여를 원하는 옷의 종류를 모두 선택해주세요. </p>
                             % if (my $code = session('coupon_code')) {
