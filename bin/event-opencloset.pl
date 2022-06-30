@@ -131,7 +131,7 @@ sub publish {
         month => $self->{month},
         time_zone => "Asia/Seoul",
     );
-    my $dt_end = $dt_start->clone->add( months => 1, seconds => -1 );
+    my $dt_end = $dt_start->clone->add( years => 1, months => 1, seconds => -1 );
 
     my $name         = sprintf( "opencloset%d-%04d%02d", $self->{price}, $self->{year}, $self->{month} );
     my $title        = "열린옷장 ${price_10k}만원 쿠폰";
