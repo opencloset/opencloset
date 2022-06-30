@@ -4,7 +4,6 @@ package
     App::OpenCloset::Coupon::Publish::script;
 
 use common::sense;
-use experimental qw( signatures );
 
 use DateTime;
 use Getopt::Long ();
@@ -30,7 +29,9 @@ sub new {
     $self;
 }
 
-sub parse_options ( $self, @argv ) {
+sub parse_options {
+    my ( $self, @argv ) = @_;
+
     local @ARGV = @{$self->{argv}};
     push @ARGV, grep length, split /\s+/, $self->env('OPT');
     push @ARGV, @argv;
@@ -47,11 +48,13 @@ sub parse_options ( $self, @argv ) {
     $self->{argv} = \@ARGV;
 }
 
-sub env ( $self, $key ) {
+sub env {
+    my ( $self, $key ) = @_;
     $ENV{"PERL_EVENT_OPENCLOSET_" . $key};
 }
 
-sub doit ($self) {
+sub doit {
+    my $self = shift;
     return $self->run;
 }
 
@@ -118,7 +121,9 @@ END_HELP
     return 1;
 }
 
-sub publish ($self) {
+sub publish {
+    my $self = shift;
+
     my $price_10k = $self->{price} / 10000;
 
     my $dt_start = DateTime->new(
@@ -167,7 +172,6 @@ END_CLI
 package main;
 
 use common::sense;
-use experimental qw( signatures );
 
 unless (caller) {
     my $app = App::OpenCloset::Coupon::Publish::script->new;
