@@ -287,6 +287,11 @@
                 </option>
               % }
             </select>
+            % if (my @rm = split/,/, $return_method) {
+              % if (scalar @rm >= 2) {
+                %= $rm[1]
+              % }
+            % }
           </td>
         </tr>
         <tr>
