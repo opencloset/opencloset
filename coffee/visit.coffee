@@ -458,7 +458,6 @@ $ ->
 
     name = $("input[name=name]").val()
     msg  = "<p>#{name}님, <strong>#{booking}</strong>에 열린옷장으로 방문하시겠습니까?</p>"
-    msg  += '<p>열린옷장 방문시 <strong>정시</strong>에 대여자 <strong>본인만</strong> 방문 부탁드립니다. :)</p>'
     msg  += '<p>'
     msg  += ' 방문 예약이 정상적으로 완료된 경우 방문시간 안내가 포함된 문자가 발송됩니다.'
     msg  += ' 문자가 발송되지 않은 경우 예약이 완료된 것이 아니니 다시 한번 예약을 진행해주시고,'
